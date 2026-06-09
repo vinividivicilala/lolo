@@ -23,9 +23,10 @@ export default function HomePage(): React.JSX.Element {
   const [isHovering, setIsHovering] = useState(false);
   
   // State untuk Hover Panel
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [panelPosition, setPanelPosition] = useState({ left: 0, top: 0, width: 0 });
-  const navRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [hoveredNav, setHoveredNav] = useState<string>("Note");
+  const [showPanel, setShowPanel] = useState(false);
+  const noteRef = useRef<HTMLDivElement>(null);
+  const panelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Hover Panel (konten berbeda setiap navbar)
+  // Data untuk Hover Panel (konten berbeda sesuai navbar)
   const navPanelData = {
     Note: {
       title: "Note Features",
@@ -55,8 +56,7 @@ export default function HomePage(): React.JSX.Element {
         { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
         { name: "💧 Catatan Minum", desc: "Pantau konsumsi air harian" },
         { name: "🏃 Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
-        { name: "😴 Catatan Tidur", desc: "Monitor pola dan kualitas tidur" },
-        { name: "📅 Catatan Kegiatan", desc: "Jadwalkan dan catat kegiatan" }
+        { name: "😴 Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
       ]
     },
     Community: {
@@ -66,8 +66,7 @@ export default function HomePage(): React.JSX.Element {
         { name: "👥 Grup Belajar", desc: "Belajar bersama dalam grup" },
         { name: "🤝 Kolaborasi", desc: "Kerjasama proyek dan ide" },
         { name: "📢 Event & Meetup", desc: "Informasi acara dan pertemuan" },
-        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" },
-        { name: "🏆 Kompetisi", desc: "Ikuti kompetisi seru" }
+        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
       ]
     },
     Donation: {
@@ -77,8 +76,7 @@ export default function HomePage(): React.JSX.Element {
         { name: "🍚 Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
         { name: "📚 Donasi Buku", desc: "Donasi buku untuk pendidikan" },
         { name: "👕 Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
-        { name: "🏥 Donasi Kesehatan", desc: "Donasi untuk kesehatan" },
-        { name: "🎓 Donasi Pendidikan", desc: "Bantu pendidikan anak bangsa" }
+        { name: "🏥 Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
       ]
     },
     Blog: {
@@ -88,8 +86,7 @@ export default function HomePage(): React.JSX.Element {
         { name: "📖 Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
         { name: "🎯 Tips & Trik", desc: "Tips berguna untuk keseharian" },
         { name: "📰 Berita", desc: "Update berita terbaru" },
-        { name: "🎬 Video Content", desc: "Konten video menarik" },
-        { name: "📊 Infografis", desc: "Informasi visual yang informatif" }
+        { name: "🎬 Video Content", desc: "Konten video menarik" }
       ]
     }
   };
@@ -135,7 +132,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee dengan GSAP (tetap menggunakan CSS keyframes)
+  // Efek untuk animasi marquee - hanya 1 baris tanpa duplikat, seamless
   useEffect(() => {
     if (isLoading) return;
     
@@ -158,7 +155,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to([content, clone], {
         x: `-=${originalWidth}`,
-        duration: 25,
+        duration: 30,
         ease: "none",
         repeat: -1,
         modifiers: {
@@ -484,23 +481,39 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover panel
-  const handleNavMouseEnter = (navName: string) => {
-    const navElement = navRefs.current[navName];
-    if (navElement) {
-      const rect = navElement.getBoundingClientRect();
-      setPanelPosition({
+  // Handler untuk hover panel - hanya 1 tempat di Note
+  const handleNavHover = (navName: string) => {
+    if (panelTimeoutRef.current) {
+      clearTimeout(panelTimeoutRef.current);
+    }
+    setHoveredNav(navName);
+    setShowPanel(true);
+  };
+
+  const handleNavLeave = () => {
+    panelTimeoutRef.current = setTimeout(() => {
+      setShowPanel(false);
+    }, 100);
+  };
+
+  const handlePanelLeave = () => {
+    setShowPanel(false);
+  };
+
+  // Get panel position based on Note element
+  const getPanelPosition = () => {
+    if (noteRef.current) {
+      const rect = noteRef.current.getBoundingClientRect();
+      return {
         left: rect.left,
         top: rect.bottom + 15,
         width: 500
-      });
+      };
     }
-    setHoveredNav(navName);
+    return { left: 0, top: 0, width: 500 };
   };
 
-  const handleNavMouseLeave = () => {
-    setHoveredNav(null);
-  };
+  const panelPosition = getPanelPosition();
 
   return (
     <>
@@ -747,37 +760,98 @@ export default function HomePage(): React.JSX.Element {
                     gap: '48px'
                   }}
                 >
-                  {["Note", "Community", "Donation", "Blog"].map((item) => (
-                    <div
-                      key={item}
-                      ref={(el) => { navRefs.current[item] = el; }}
+                  {/* Note - dengan ref untuk posisi panel */}
+                  <div
+                    ref={noteRef}
+                    style={{ position: 'relative', cursor: 'pointer' }}
+                    onMouseEnter={() => handleNavHover("Note")}
+                    onMouseLeave={handleNavLeave}
+                  >
+                    <span
                       style={{
-                        position: 'relative',
-                        cursor: 'pointer'
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '32px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        transition: 'opacity 0.2s ease'
                       }}
-                      onMouseEnter={() => handleNavMouseEnter(item)}
-                      onMouseLeave={handleNavMouseLeave}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                     >
-                      <span
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '32px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          letterSpacing: '-0.01em',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {item}
-                      </span>
-                    </div>
-                  ))}
+                      Note
+                    </span>
+                  </div>
+
+                  {/* Community - hover mengubah konten panel */}
+                  <div
+                    style={{ position: 'relative', cursor: 'pointer' }}
+                    onMouseEnter={() => handleNavHover("Community")}
+                    onMouseLeave={handleNavLeave}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '32px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        transition: 'opacity 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      Community
+                    </span>
+                  </div>
+
+                  {/* Donation - hover mengubah konten panel */}
+                  <div
+                    style={{ position: 'relative', cursor: 'pointer' }}
+                    onMouseEnter={() => handleNavHover("Donation")}
+                    onMouseLeave={handleNavLeave}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '32px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        transition: 'opacity 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      Donation
+                    </span>
+                  </div>
+
+                  {/* Blog - hover mengubah konten panel */}
+                  <div
+                    style={{ position: 'relative', cursor: 'pointer' }}
+                    onMouseEnter={() => handleNavHover("Blog")}
+                    onMouseLeave={handleNavLeave}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '32px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        transition: 'opacity 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      Blog
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* MARQUEE SECTION - Pakai kode yang Anda berikan */}
+              {/* MARQUEE SECTION - Teks berjalan 1 baris tanpa terputus */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -796,74 +870,65 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     whiteSpace: 'nowrap',
-                    animation: 'marqueeScroll 25s linear infinite',
-                    width: 'fit-content'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.animationPlayState = 'paused';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.animationPlayState = 'running';
+                    willChange: 'transform'
                   }}
                 >
-                  {[...Array(6)].map((_, idx) => (
-                    <div
-                      key={idx}
+                  {/* Hanya 1 baris teks berjalan, tanpa duplikat visual */}
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '50px',
+                      marginRight: '60px',
+                      flexShrink: 0
+                    }}
+                  >
+                    <span
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '50px',
-                        marginRight: '60px',
-                        flexShrink: 0
+                        fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                        fontWeight: '700',
+                        fontSize: '180px',
+                        color: '#000000',
+                        letterSpacing: '-0.03em',
+                        textTransform: 'uppercase',
+                        lineHeight: '1',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <span
-                        style={{
-                          fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                          fontWeight: '700',
-                          fontSize: '180px',
-                          color: '#000000',
-                          letterSpacing: '-0.03em',
-                          textTransform: 'uppercase',
-                          lineHeight: '1',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        SUBSCRIBE
-                      </span>
-                      
-                      <div
-                        style={{
-                          width: '140px',
-                          height: '200px',
-                          backgroundColor: '#e0e0e0',
-                          borderRadius: '16px',
-                          overflow: 'hidden',
-                          position: 'relative',
-                          flexShrink: 0,
-                          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <Image
-                          src="/images/5.jpg"
-                          alt="Subscribe"
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                      
-                      <svg 
-                        width="45" 
-                        height="45" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        xmlns="http://www.w3.org/2000/svg"
-                        style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
-                      >
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      SUBSCRIBE
+                    </span>
+                    
+                    <div
+                      style={{
+                        width: '140px',
+                        height: '200px',
+                        backgroundColor: '#e0e0e0',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        flexShrink: 0,
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <Image
+                        src="/images/5.jpg"
+                        alt="Subscribe"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
                     </div>
-                  ))}
+                    
+                    <svg 
+                      width="45" 
+                      height="45" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
+                    >
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1127,14 +1192,18 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL - Ukuran besar, hitam, horizontal grid 3 kolom */}
-      {hoveredNav && (
+      {/* HOVER PANEL - Hanya 1 tempat di bawah Note, konten berubah sesuai hover */}
+      {showPanel && (
         <div
           className="hover-panel"
+          onMouseEnter={() => {
+            if (panelTimeoutRef.current) clearTimeout(panelTimeoutRef.current);
+          }}
+          onMouseLeave={handlePanelLeave}
           style={{
             left: panelPosition.left,
             top: panelPosition.top,
-            width: 560,
+            width: 520,
           }}
         >
           <div
