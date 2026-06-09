@@ -611,7 +611,7 @@ export default function HomePage(): React.JSX.Element {
                 height: '100vh',
                 backgroundColor: 'transparent',
                 zIndex: 10,
-                paddingBottom: '100px'
+                paddingBottom: '150px' // Added padding bottom agar floating button tidak menutupi konten
               }}
             >
               <div
@@ -641,7 +641,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (font 300px) */}
+                {/* MARQUEE SECTION - Teks berjalan 1 baris ke samping */}
                 <div
                   ref={marqueeContainerRef}
                   style={{
@@ -668,7 +668,8 @@ export default function HomePage(): React.JSX.Element {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '50px',
-                          marginRight: '80px'
+                          marginRight: '80px',
+                          flexShrink: 0
                         }}
                       >
                         <span
@@ -725,7 +726,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SECTION 1 - MENURU.STUDIO */}
+            {/* SECTION 1 - MENURU.STUDIO - Ditambah padding bottom agar tidak tertutup floating button */}
             <div
               ref={studioContainerRef}
               style={{
@@ -735,6 +736,7 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 minHeight: '100vh',
                 paddingRight: '80px',
+                paddingBottom: '120px', // Added padding bottom
                 position: 'relative',
               }}
             >
@@ -766,7 +768,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* ABOUT SECTION */}
+              {/* ABOUT SECTION dengan tombol profile */}
               <div
                 style={{
                   position: 'absolute',
@@ -774,6 +776,7 @@ export default function HomePage(): React.JSX.Element {
                   right: '80px',
                   textAlign: 'left',
                   maxWidth: '800px',
+                  marginBottom: '60px' // Added margin bottom untuk profile button
                 }}
               >
                 <div
@@ -819,6 +822,7 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
+                    {/* TOMBOL PROFILE */}
                     <Link href="/profile">
                       <div
                         style={{
