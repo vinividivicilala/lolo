@@ -22,9 +22,10 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   
-  // State untuk Hover Preview Panel (seperti Vercel)
+  // State untuk Hover Panel
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
+  const [panelPosition, setPanelPosition] = useState({ left: 0, top: 0, width: 0 });
+  const navRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -45,31 +46,47 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Hover Preview Panel (seperti Vercel)
-  const navPreviewData = {
+  // Data untuk Hover Panel
+  const navPanelData = {
     Note: {
       title: "Note",
-      description: "Catat semua aktivitas harianmu dengan mudah",
-      features: ["📝 Catatan Harian", "🍽️ Catatan Makanan", "💧 Catatan Minum", "🏃 Catatan Olahraga", "😴 Catatan Tidur"],
-      cta: "Explore Note →"
+      items: [
+        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari" },
+        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan" },
+        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air" },
+        { name: "🏃 Catatan Olahraga", desc: "Track olahraga rutin" },
+        { name: "😴 Catatan Tidur", desc: "Monitor pola tidur" }
+      ]
     },
     Community: {
       title: "Community",
-      description: "Bergabung dan terhubung dengan komunitas",
-      features: ["💬 Diskusi Umum", "👥 Grup Belajar", "🤝 Kolaborasi Proyek", "📢 Event & Meetup", "⭐ Feedback & Saran"],
-      cta: "Join Community →"
+      items: [
+        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan anggota" },
+        { name: "👥 Grup Belajar", desc: "Belajar bersama" },
+        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek" },
+        { name: "📢 Event & Meetup", desc: "Informasi acara" },
+        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran" }
+      ]
     },
     Donation: {
       title: "Donation",
-      description: "Donasi untuk membantu sesama",
-      features: ["💰 Donasi Uang", "🍚 Donasi Makanan", "📚 Donasi Buku", "👕 Donasi Pakaian", "🏥 Donasi Kesehatan"],
-      cta: "Donate Now →"
+      items: [
+        { name: "💰 Donasi Uang", desc: "Donasi finansial" },
+        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan" },
+        { name: "📚 Donasi Buku", desc: "Donasi buku" },
+        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
+        { name: "🏥 Donasi Kesehatan", desc: "Donasi kesehatan" }
+      ]
     },
     Blog: {
       title: "Blog",
-      description: "Artikel dan tutorial terbaru setiap hari",
-      features: ["✍️ Artikel Terbaru", "📖 Tutorial Lengkap", "🎯 Tips & Trik", "📰 Berita Terkini", "🎬 Video Content"],
-      cta: "Read Blog →"
+      items: [
+        { name: "✍️ Artikel Terbaru", desc: "Artikel terkini" },
+        { name: "📖 Tutorial", desc: "Panduan lengkap" },
+        { name: "🎯 Tips & Trik", desc: "Tips berguna" },
+        { name: "📰 Berita", desc: "Update berita" },
+        { name: "🎬 Video Content", desc: "Konten video" }
+      ]
     }
   };
 
@@ -463,16 +480,18 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover preview panel (seperti Vercel)
-  const handleNavMouseEnter = (navName: string, event: React.MouseEvent) => {
-    setHoveredNav(navName);
-    setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 120 });
-  };
-
-  const handleNavMouseMove = (event: React.MouseEvent) => {
-    if (hoveredNav) {
-      setPreviewPosition({ x: event.clientX + 20, y: event.clientY - 120 });
+  // Handler untuk hover panel
+  const handleNavMouseEnter = (navName: string) => {
+    const navElement = navRefs.current[navName];
+    if (navElement) {
+      const rect = navElement.getBoundingClientRect();
+      setPanelPosition({
+        left: rect.left,
+        top: rect.bottom + 10,
+        width: Math.max(400, rect.width * 1.5)
+      });
     }
+    setHoveredNav(navName);
   };
 
   const handleNavMouseLeave = () => {
@@ -497,7 +516,7 @@ export default function HomePage(): React.JSX.Element {
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(-10px);
           }
           to {
             opacity: 1;
@@ -572,17 +591,16 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        .preview-panel {
+        .hover-panel {
           position: fixed;
-          background: rgba(10, 10, 10, 0.98);
-          backdropFilter: blur(16px);
-          border-radius: 24px;
-          padding: 28px 32px;
+          background: rgba(0, 0, 0, 0.95);
+          backdropFilter: blur(12px);
+          border-radius: 20px;
+          padding: 20px 24px;
           z-index: 100000;
-          min-width: 320px;
-          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-          border: 1px solid rgba(255,255,255,0.1);
-          animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.08);
+          animation: fadeInUp 0.2s ease;
         }
       `}</style>
 
@@ -717,23 +735,23 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR SEJAJAR DI SEBELAH KANAN - Note, Community, Donation, Blog */}
+                {/* NAVBAR SEJAJAR DI SEBELAH KANAN */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '32px'
+                    gap: '40px'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
                     <div
                       key={item}
+                      ref={(el) => { navRefs.current[item] = el; }}
                       style={{
                         position: 'relative',
                         cursor: 'pointer'
                       }}
-                      onMouseEnter={(e) => handleNavMouseEnter(item, e)}
-                      onMouseMove={handleNavMouseMove}
+                      onMouseEnter={() => handleNavMouseEnter(item)}
                       onMouseLeave={handleNavMouseLeave}
                     >
                       <span
@@ -755,7 +773,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* MARQUEE SECTION - FULL WIDTH */}
+              {/* MARQUEE SECTION - FULL WIDTH 1 BARIS */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -1061,16 +1079,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <img
-                        src="/images/lkhh.jpg"
-                        alt="Menuru Brand"
-                        style={{
-                          width: '60px',
-                          height: '60px',
-                          borderRadius: '16px',
-                          objectFit: 'cover',
-                        }}
-                      />
+                      <img src="/images/lkhh.jpg" alt="Menuru Brand" style={{ width: '60px', height: '60px', borderRadius: '16px', objectFit: 'cover' }} />
                       <div>
                         <div style={{ color: '#fff', fontSize: '48px', lineHeight: '1', fontWeight: 600, fontFamily: 'Questrial, sans-serif', letterSpacing: '-0.02em' }}>MENURU</div>
                         <div style={{ color: '#8a8a8a', marginTop: '8px', fontSize: '14px', fontFamily: 'Questrial, sans-serif' }}>Creative Digital Studio</div>
@@ -1107,30 +1116,62 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PREVIEW PANEL - Seperti Vercel */}
+      {/* HOVER PANEL - Horizontal, posisi tetap di bawah teks navbar */}
       {hoveredNav && (
         <div
-          className="preview-panel"
+          className="hover-panel"
           style={{
-            left: previewPosition.x,
-            top: previewPosition.y,
+            left: panelPosition.left,
+            top: panelPosition.top,
+            width: panelPosition.width,
           }}
         >
-          <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '26px', fontWeight: '600', color: '#ffffff', marginBottom: '8px' }}>
-            {navPreviewData[hoveredNav as keyof typeof navPreviewData].title}
-          </div>
-          <div style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#888888', marginBottom: '20px', lineHeight: '1.4' }}>
-            {navPreviewData[hoveredNav as keyof typeof navPreviewData].description}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
-            {navPreviewData[hoveredNav as keyof typeof navPreviewData].features.map((feature, idx) => (
-              <div key={idx} style={{ fontFamily: "'Questrial', sans-serif", fontSize: '13px', color: '#cccccc', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'color 0.2s ease', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'} onMouseLeave={(e) => e.currentTarget.style.color = '#cccccc'}>
-                {feature}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '16px'
+            }}
+          >
+            {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                  background: 'rgba(255,255,255,0.03)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    marginBottom: '4px'
+                  }}
+                >
+                  {item.name}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Questrial', sans-serif",
+                    fontSize: '12px',
+                    color: '#888888'
+                  }}
+                >
+                  {item.desc}
+                </div>
               </div>
             ))}
-          </div>
-          <div style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '14px', fontWeight: '500', color: '#ffffff', marginTop: '8px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-            {navPreviewData[hoveredNav as keyof typeof navPreviewData].cta}
           </div>
         </div>
       )}
