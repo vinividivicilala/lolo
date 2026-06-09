@@ -17,13 +17,11 @@ if (typeof window !== 'undefined') {
 export default function HomePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(true);
-  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
   const headerSectionRef = useRef<HTMLDivElement>(null);
   const scrollDownRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const menuruTopTextRef = useRef<HTMLDivElement>(null);
@@ -91,7 +89,7 @@ export default function HomePage(): React.JSX.Element {
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Efek untuk animasi scroll header MENURU
+  // Efek untuk animasi scroll header MENURU (300px → 60px)
   useEffect(() => {
     if (isLoading) return;
     
@@ -520,7 +518,7 @@ export default function HomePage(): React.JSX.Element {
                   padding: '40px 0 0 40px'
                 }}
               >
-                {/* Teks MENURU besar */}
+                {/* Teks MENURU besar - 300px */}
                 <div
                   ref={headerTextRef}
                   style={{
@@ -538,13 +536,13 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri */}
+                {/* MARQUEE SECTION - Teks berjalan dari kanan ke kiri (jarak 80px dari judul) */}
                 <div
                   ref={marqueeContainerRef}
                   style={{
                     position: 'relative',
                     width: '100%',
-                    marginTop: '30px',
+                    marginTop: '80px',
                     marginBottom: '0px',
                     overflow: 'hidden',
                     backgroundColor: 'transparent'
@@ -583,6 +581,7 @@ export default function HomePage(): React.JSX.Element {
                           SUBSCRIBE
                         </span>
                         
+                        {/* Foto vertikal */}
                         <div
                           style={{
                             width: '60px',
@@ -603,6 +602,7 @@ export default function HomePage(): React.JSX.Element {
                           />
                         </div>
                         
+                        {/* Panah dekorasi */}
                         <svg 
                           width="30" 
                           height="30" 
@@ -714,6 +714,7 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
+                    {/* TOMBOL PROFILE DI TENGAH - TIDAK DIHILANGKAN */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -760,7 +761,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SCROLL DOWN - Teks yang mengikuti cursor */}
+            {/* SCROLL DOWN - Teks yang mengikuti cursor (TIDAK DIHILANGKAN) */}
             {showScrollDown && !isLoading && (
               <div
                 ref={scrollDownRef}
