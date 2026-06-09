@@ -17,7 +17,11 @@ if (typeof window !== 'undefined') {
 export default function HomePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(true);
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const textRef = useRef(null);
+  const [isHovering, setIsHovering] = useState(false);
+
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
   const headerSectionRef = useRef<HTMLDivElement>(null);
@@ -30,11 +34,24 @@ export default function HomePage(): React.JSX.Element {
   const studioTextRef = useRef<HTMLDivElement>(null);
   const studioContainerRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
+  const smootherRef = useRef<any>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
+
+  // Rotating texts untuk floating button
+  const rotatingTexts = [
+    "Open this",
+    "Hey there",
+    "Welcome back",
+    "Good to see you",
+    "Explore now",
+    "Join the journey",
+    "Stay inspired",
+    "Click to begin"
+  ];
 
   // Efek untuk scroll down mengikuti cursor
   useEffect(() => {
@@ -306,8 +323,8 @@ export default function HomePage(): React.JSX.Element {
   // ScrollSmoother init
   useEffect(() => {
     const initSmoother = () => {
-      if (typeof window !== 'undefined') {
-        ScrollSmoother.create({
+      if (typeof window !== 'undefined' && !smootherRef.current) {
+        smootherRef.current = ScrollSmoother.create({
           wrapper: "#smooth-wrapper",
           content: "#smooth-content",
           smooth: 1.2,
@@ -325,6 +342,10 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       clearTimeout(timer);
+      if (smootherRef.current) {
+        smootherRef.current.kill();
+        smootherRef.current = null;
+      }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
@@ -354,6 +375,61 @@ export default function HomePage(): React.JSX.Element {
       lenis.destroy();
     };
   }, [isLoading]);
+
+  // Efek GSAP untuk pergantian teks floating button
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    const changeText = () => {
+      if (!textRef.current) return;
+      
+      gsap.to(textRef.current, {
+        y: 20,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          setCurrentTextIndex((prev) => (prev + 1) % rotatingTexts.length);
+          gsap.fromTo(textRef.current, 
+            { y: -20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
+          );
+        }
+      });
+    };
+    
+    if (!isHovering) {
+      intervalId = setInterval(changeText, 8000);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isHovering, rotatingTexts.length]);
+
+  const handleTextHover = () => {
+    setIsHovering(true);
+    if (!textRef.current) return;
+    
+    gsap.to(textRef.current, {
+      y: 20,
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        const randomIndex = Math.floor(Math.random() * rotatingTexts.length);
+        setCurrentTextIndex(randomIndex);
+        gsap.fromTo(textRef.current,
+          { y: -20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
+        );
+      }
+    });
+    
+    setTimeout(() => {
+      setIsHovering(false);
+    }, 3000);
+  };
 
   return (
     <>
@@ -535,7 +611,7 @@ export default function HomePage(): React.JSX.Element {
                 height: '100vh',
                 backgroundColor: 'transparent',
                 zIndex: 10,
-                paddingBottom: '0px'
+                paddingBottom: '100px'
               }}
             >
               <div
@@ -646,67 +722,6 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* NAVBAR TENGAH - Home, Features, Community, Donation, Blog, Book Call */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 100,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '30px',
-                textAlign: 'center'
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '60px',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center'
-                }}
-              >
-                <Link href="/" style={{ textDecoration: 'none' }}>
-                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Home</span>
-                </Link>
-                <Link href="#features" style={{ textDecoration: 'none' }}>
-                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Features</span>
-                </Link>
-                <Link href="#community" style={{ textDecoration: 'none' }}>
-                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Community</span>
-                </Link>
-                <Link href="#donation" style={{ textDecoration: 'none' }}>
-                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Donation</span>
-                </Link>
-                <Link href="#blog" style={{ textDecoration: 'none' }}>
-                  <span style={{ fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif", fontSize: '24px', fontWeight: '400', color: '#000000', cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>Blog</span>
-                </Link>
-                <button
-                  onClick={() => console.log('Book Call clicked')}
-                  style={{
-                    background: '#000000',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '60px',
-                    padding: '12px 32px',
-                    fontSize: '18px',
-                    fontFamily: "'Questrial', sans-serif",
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.backgroundColor = '#333333'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.backgroundColor = '#000000'; }}
-                >
-                  Book Call
-                </button>
               </div>
             </div>
 
@@ -850,7 +865,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SCROLL DOWN - Teks yang mengikuti cursor (bisa digerakkan) */}
+            {/* SCROLL DOWN - Teks yang mengikuti cursor */}
             {showScrollDown && !isLoading && (
               <div
                 ref={scrollDownRef}
@@ -888,6 +903,219 @@ export default function HomePage(): React.JSX.Element {
                 </svg>
               </div>
             )}
+
+            {/* FLOATING BUTTON */}
+            <div
+              style={{
+                position: 'fixed',
+                bottom: '30px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 99999,
+              }}
+            >
+              <div
+                style={{
+                  background: '#050505',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: isMenuOpen ? '28px' : '999px',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+                  width: '1000px',
+                  maxWidth: '92vw',
+                  transition: 'all .7s cubic-bezier(.16,1,.3,1)',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* KONTEN MENU - Bagian Atas (muncul saat expand) */}
+                <div
+                  style={{
+                    maxHeight: isMenuOpen ? '800px' : '0',
+                    opacity: isMenuOpen ? 1 : 0,
+                    visibility: isMenuOpen ? 'visible' : 'hidden',
+                    transition: 'max-height .7s cubic-bezier(.16,1,.3,1), opacity .45s ease .15s, visibility .45s ease .15s',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* HEADER DENGAN FOTO DAN NAMA WEBSITE BESAR */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '30px',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                      <img
+                        src="/images/lkhh.jpg"
+                        alt="Menuru Brand"
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '16px',
+                          objectFit: 'cover',
+                        }}
+                      />
+                      <div>
+                        <div
+                          style={{
+                            color: '#fff',
+                            fontSize: '48px',
+                            lineHeight: '1',
+                            fontWeight: 600,
+                            fontFamily: 'Questrial, sans-serif',
+                            letterSpacing: '-0.02em',
+                          }}
+                        >
+                          MENURU
+                        </div>
+                        <div
+                          style={{
+                            color: '#8a8a8a',
+                            marginTop: '8px',
+                            fontSize: '14px',
+                            fontFamily: 'Questrial, sans-serif',
+                          }}
+                        >
+                          Creative Digital Studio
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        background: '#fff',
+                        color: '#000',
+                        padding: '10px 24px',
+                        borderRadius: '999px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Let's Talk
+                    </div>
+                  </div>
+
+                  {/* MENU LIST */}
+                  {[
+                    { name: 'Homepage', link: '/' },
+                    { name: 'Studios', link: '/studios' },
+                    { name: 'Recognition', link: '/recognition' },
+                    { name: 'Work', link: '/work' },
+                    { name: 'Blog', link: '/blog' },
+                    { name: 'Contact', link: '/contact' },
+                  ].map((item, index) => (
+                    <Link href={item.link} key={index} style={{ textDecoration: 'none' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '22px 30px',
+                          borderBottom: index !== 5 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                          cursor: 'pointer',
+                          transition: 'all .3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: '#fff',
+                            fontSize: '28px',
+                            fontWeight: 400,
+                            fontFamily: 'Questrial, sans-serif',
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                        <span
+                          style={{
+                            color: '#777',
+                            fontSize: '14px',
+                            fontFamily: 'Questrial, sans-serif',
+                          }}
+                        >
+                          View
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* TOMBOL BAWAH - Bagian Bawah yang SELALU TERLIHAT */}
+                <div
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 24px',
+                    height: '68px',
+                    cursor: 'pointer',
+                    borderTop: isMenuOpen ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                    background: '#050505',
+                  }}
+                >
+                  {/* TEKS KIRI - BERUBAH DENGAN GSAP */}
+                  <div
+                    ref={textRef}
+                    onMouseEnter={handleTextHover}
+                    style={{
+                      color: '#fff',
+                      fontSize: '18px',
+                      fontFamily: 'Questrial, sans-serif',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {rotatingTexts[currentTextIndex]}
+                  </div>
+
+                  {/* BAGIAN KANAN - HOMEPAGE + TANDA + */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                    }}
+                  >
+                    <Link href="/" style={{ textDecoration: 'none' }}>
+                      <div
+                        style={{
+                          background: '#fff',
+                          color: '#000',
+                          borderRadius: '999px',
+                          padding: '8px 24px',
+                          fontSize: '16px',
+                          fontWeight: 500,
+                          fontFamily: 'Questrial, sans-serif',
+                        }}
+                      >
+                        Homepage
+                      </div>
+                    </Link>
+                    <span
+                      style={{
+                        color: '#fff',
+                        fontSize: '28px',
+                        fontWeight: 300,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isMenuOpen ? '−' : '+'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
