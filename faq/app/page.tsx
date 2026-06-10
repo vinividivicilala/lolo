@@ -803,7 +803,7 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
-        /* Meet the team button - arrow always visible */
+        /* Meet the team button - Arrow selalu terlihat dengan warna kontras */
         .meet-team-btn {
           display: inline-flex;
           align-items: center;
@@ -842,7 +842,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         .meet-team-icon svg {
-          stroke: #ffffff;
+          stroke: #c5e800;
           width: 22px;
           height: 22px;
         }
@@ -1196,12 +1196,12 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </Link>
 
-                    {/* MEET THE TEAM BUTTON - Arrow selalu terlihat tanpa hover */}
+                    {/* MEET THE TEAM BUTTON - Arrow berwarna hijau stabilo (#c5e800) agar kontras dengan background hitam */}
                     <div className="meet-team-btn">
                       <span className="meet-team-text">Meet the team</span>
                       <div className="meet-team-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#c5e800" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                     </div>
