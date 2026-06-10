@@ -51,7 +51,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Preview Card seperti di foto
+  // Data untuk Preview Card
   const previewData = {
     Note: {
       title: "Web Design",
@@ -534,7 +534,7 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover panel
+  // Handler untuk hover panel - TAMPILKAN PANEL DENGAN BG
   const handleNavHover = (navName: string) => {
     if (panelTimeoutRef.current) {
       clearTimeout(panelTimeoutRef.current);
@@ -659,7 +659,7 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* PREVIEW CARD - SEPERTI DI FOTO */
+        /* PREVIEW CARD - DENGAN BACKGROUND PUTIH */
         .preview-card {
           position: fixed;
           background: #ffffff;
@@ -667,10 +667,11 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           border: 1px solid #eaeaea;
           animation: fadeInUp 0.2s ease;
-          width: 480px;
+          width: 500px;
           cursor: pointer;
           transition: all 0.2s ease;
           overflow: hidden;
+          z-index: 100000;
         }
         
         .preview-card:hover {
@@ -678,26 +679,25 @@ export default function HomePage(): React.JSX.Element {
           box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
         }
         
-        /* LAYOUT DUA KOLOM: KIRI + KANAN */
         .preview-card-inner {
           display: flex;
           padding: 28px;
           gap: 24px;
         }
         
-        /* SISI KIRI - JUDUL BESAR + DESKRIPSI */
+        /* SISI KIRI */
         .preview-left {
           flex: 1.2;
         }
         
         .preview-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 36px;
+          font-size: 32px;
           font-weight: 700;
           color: #000000;
           letter-spacing: -0.02em;
           line-height: 1.2;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
         
         .preview-description {
@@ -708,11 +708,10 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 24px;
         }
         
-        /* LIST ITEMS DI SISI KIRI */
         .preview-items {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
         
         .preview-item {
@@ -752,15 +751,15 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1;
         }
         
-        /* SISI KANAN - FOTO */
+        /* SISI KANAN */
         .preview-right {
-          width: 140px;
+          width: 130px;
           flex-shrink: 0;
         }
         
         .preview-image {
           width: 100%;
-          height: 140px;
+          height: 130px;
           background-color: #f5f5f5;
           border-radius: 16px;
           overflow: hidden;
@@ -768,7 +767,6 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 16px;
         }
         
-        /* VIEW ALL BUTTON DI BAWAH FOTO */
         .preview-view-all {
           display: flex;
           align-items: center;
@@ -921,7 +919,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR */}
+                {/* NAVBAR - HOVER AKAN MUNCULKAN PREVIEW CARD */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -1243,7 +1241,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - SEPERTI DI FOTO (KIRI: JUDUL+LIST, KANAN: FOTO+VIEW ALL) */}
+      {/* PREVIEW CARD - MUNCUL SAAT HOVER NAVBAR DENGAN BACKGROUND PUTIH */}
       {showPanel && (
         <div
           className="preview-card"
