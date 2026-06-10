@@ -51,7 +51,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Preview Card - Bahasa Inggris, tanpa emoticon
+  // Data untuk Preview Card
   const previewData = {
     Note: {
       title: "Note Features",
@@ -802,6 +802,54 @@ export default function HomePage(): React.JSX.Element {
           background-color: #333333;
           transform: scale(1.02);
         }
+
+        /* Meet the team button */
+        .meet-team-btn {
+          display: inline-flex;
+          align-items: center;
+          background-color: #c5e800;
+          border-radius: 60px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          margin-left: 20px;
+        }
+        
+        .meet-team-btn:hover {
+          transform: translateX(4px);
+          opacity: 0.9;
+        }
+        
+        .meet-team-text {
+          padding: 12px 20px 12px 24px;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 18px;
+          font-weight: 500;
+          color: #000000;
+          letter-spacing: -0.01em;
+        }
+        
+        .meet-team-icon {
+          width: 48px;
+          height: 48px;
+          background-color: #000000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 4px;
+          transition: all 0.3s ease;
+        }
+        
+        .meet-team-icon svg {
+          stroke: #ffffff;
+          width: 22px;
+          height: 22px;
+        }
+        
+        .meet-team-btn:hover .meet-team-icon {
+          transform: rotate(45deg);
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1051,23 +1099,23 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* ABOUT SECTION */}
+              {/* ABOUT SECTION dengan tombol Profile dan Meet the team */}
               <div
                 style={{
                   position: 'absolute',
                   bottom: '5%',
                   right: '80px',
                   textAlign: 'left',
-                  maxWidth: '800px',
+                  maxWidth: '900px',
                   marginBottom: '60px'
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'baseline',
-                    gap: '24px',
+                    alignItems: 'center',
                     flexWrap: 'wrap',
+                    gap: '16px'
                   }}
                 >
                   <div
@@ -1094,7 +1142,7 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: 'Questrial, sans-serif',
                       flex: 1,
                       display: 'flex',
-                      alignItems: 'baseline',
+                      alignItems: 'center',
                       flexWrap: 'wrap',
                       gap: '12px',
                     }}
@@ -1105,6 +1153,7 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
+                    {/* TOMBOL PROFILE */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -1146,6 +1195,16 @@ export default function HomePage(): React.JSX.Element {
                         </svg>
                       </div>
                     </Link>
+
+                    {/* MEET THE TEAM BUTTON - Hijau stabilo, border radius menyambung, panah dalam lingkaran */}
+                    <div className="meet-team-btn">
+                      <span className="meet-team-text">Meet the team</span>
+                      <div className="meet-team-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1268,7 +1327,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - HOVER BG */}
+      {/* PREVIEW CARD */}
       {showPanel && (
         <div
           className="preview-card"
