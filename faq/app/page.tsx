@@ -30,6 +30,7 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
+  const [navbarTransform, setNavbarTransform] = useState(0);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,7 @@ export default function HomePage(): React.JSX.Element {
   const studioContainerRef = useRef<HTMLDivElement>(null);
   const bottomLeftTextRef = useRef<HTMLDivElement>(null);
   const smootherRef = useRef<any>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
@@ -134,7 +136,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - 1 baris, foto tidak terpotong
+  // Efek untuk animasi marquee - diperbanyak konten agar seamless
   useEffect(() => {
     if (isLoading) return;
     
@@ -146,51 +148,54 @@ export default function HomePage(): React.JSX.Element {
       
       content.innerHTML = '';
       
-      const marqueeItem = document.createElement('div');
-      marqueeItem.style.display = 'inline-flex';
-      marqueeItem.style.alignItems = 'center';
-      marqueeItem.style.gap = '60px';
-      marqueeItem.style.marginRight = '80px';
-      marqueeItem.style.flexShrink = '0';
+      // Buat 8 item agar tidak terputus
+      for (let i = 0; i < 8; i++) {
+        const marqueeItem = document.createElement('div');
+        marqueeItem.style.display = 'inline-flex';
+        marqueeItem.style.alignItems = 'center';
+        marqueeItem.style.gap = '60px';
+        marqueeItem.style.marginRight = '80px';
+        marqueeItem.style.flexShrink = '0';
+        
+        // Teks SUBSCRIBE
+        const leftText = document.createElement('span');
+        leftText.style.fontFamily = "'Inter', 'Helvetica Neue', sans-serif";
+        leftText.style.fontWeight = '700';
+        leftText.style.fontSize = '140px';
+        leftText.style.color = '#000000';
+        leftText.style.letterSpacing = '-0.03em';
+        leftText.style.textTransform = 'uppercase';
+        leftText.style.lineHeight = '1';
+        leftText.style.whiteSpace = 'nowrap';
+        leftText.textContent = 'SUBSCRIBE';
+        
+        // Foto horizontal
+        const imageContainer = document.createElement('div');
+        imageContainer.style.width = '280px';
+        imageContainer.style.height = '160px';
+        imageContainer.style.backgroundColor = '#e0e0e0';
+        imageContainer.style.borderRadius = '16px';
+        imageContainer.style.overflow = 'hidden';
+        imageContainer.style.position = 'relative';
+        imageContainer.style.flexShrink = '0';
+        imageContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+        
+        const img = document.createElement('img');
+        img.src = '/images/ai.jpg';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        imageContainer.appendChild(img);
+        
+        marqueeItem.appendChild(leftText);
+        marqueeItem.appendChild(imageContainer);
+        
+        content.appendChild(marqueeItem);
+      }
       
-      // Teks SUBSCRIBE
-      const leftText = document.createElement('span');
-      leftText.style.fontFamily = "'Inter', 'Helvetica Neue', sans-serif";
-      leftText.style.fontWeight = '700';
-      leftText.style.fontSize = '140px';
-      leftText.style.color = '#000000';
-      leftText.style.letterSpacing = '-0.03em';
-      leftText.style.textTransform = 'uppercase';
-      leftText.style.lineHeight = '1';
-      leftText.style.whiteSpace = 'nowrap';
-      leftText.textContent = 'SUBSCRIBE';
-      
-      // Foto horizontal
-      const imageContainer = document.createElement('div');
-      imageContainer.style.width = '280px';
-      imageContainer.style.height = '160px';
-      imageContainer.style.backgroundColor = '#e0e0e0';
-      imageContainer.style.borderRadius = '16px';
-      imageContainer.style.overflow = 'hidden';
-      imageContainer.style.position = 'relative';
-      imageContainer.style.flexShrink = '0';
-      imageContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-      
-      const img = document.createElement('img');
-      img.src = '/images/ai.jpg';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'cover';
-      imageContainer.appendChild(img);
-      
-      marqueeItem.appendChild(leftText);
-      marqueeItem.appendChild(imageContainer);
-      
-      content.appendChild(marqueeItem);
-      
-      // Clone untuk seamless loop
-      const clone = marqueeItem.cloneNode(true);
-      content.appendChild(clone);
+      // Clone lagi untuk seamless loop
+      const cloneContent = content.cloneNode(true);
+      content.appendChild(cloneContent);
       
       const contentWidth = content.scrollWidth / 2;
       
@@ -198,7 +203,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to(content, {
         x: -contentWidth,
-        duration: 25,
+        duration: 40,
         ease: "none",
         repeat: -1
       });
@@ -240,6 +245,13 @@ export default function HomePage(): React.JSX.Element {
             const newFontSize = Math.max(60, fontSize);
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
+          
+          // Animasi navbar pindah ke samping kanan judul
+          if (navbarRef.current) {
+            const translateX = progress * 380;
+            setNavbarTransform(translateX);
+            navbarRef.current.style.transform = `translateX(${translateX}px)`;
+          }
         }
       });
     });
@@ -247,7 +259,7 @@ export default function HomePage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // Scroll handler untuk navbar dan scroll down
+  // Scroll handler untuk scroll down dan navbar
   useEffect(() => {
     if (isLoading) return;
     
@@ -653,7 +665,7 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 24px;
           padding: 28px 32px;
           z-index: 100000;
-          boxShadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
           border: 1px solid rgba(255,255,255,0.1);
           animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           width: 560px;
@@ -769,8 +781,8 @@ export default function HomePage(): React.JSX.Element {
                   padding: '40px 40px 0 40px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap'
+                  flexWrap: 'wrap',
+                  gap: '40px'
                 }}
               >
                 {/* Teks MENURU besar - 300px */}
@@ -791,12 +803,14 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR KANAN - Awal */}
+                {/* NAVBAR - Posisi awal di kanan, saat scroll bergerak ke samping kanan judul */}
                 <div
+                  ref={navbarRef}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '48px'
+                    gap: '48px',
+                    transition: 'transform 0.1s linear'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
@@ -826,42 +840,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* NAVBAR KIRI - Saat scroll, navbar pindah ke sisi kiri (bukan duplikat) */}
-              {isScrolled && (
-                <div
-                  style={{
-                    position: 'fixed',
-                    top: '30px',
-                    left: '40px',
-                    zIndex: 100,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '48px',
-                    animation: 'fadeInUp 0.3s ease'
-                  }}
-                >
-                  {["Note", "Community", "Donation", "Blog"].map((item) => (
-                    <span
-                      key={item}
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '20px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        cursor: 'pointer',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* MARQUEE SECTION */}
+              {/* MARQUEE SECTION - diperbanyak 8 item agar seamless */}
               <div
                 ref={marqueeContainerRef}
                 style={{
