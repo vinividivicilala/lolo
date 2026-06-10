@@ -51,54 +51,54 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Preview Card - KONTEN NOTE SESUAI KONTEKS
+  // Data untuk Preview Card - Bahasa Inggris, tanpa emoticon
   const previewData = {
     Note: {
       title: "Note Features",
-      description: "Catat semua aktivitas harianmu dengan mudah",
+      description: "Capture all your daily activities with ease",
       image: "/images/ai.jpg",
       items: [
-        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari dengan detail" },
-        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
-        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air harianmu" },
-        { name: "🏃 Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
-        { name: "😴 Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
+        { name: "Daily Notes", desc: "Record your daily activities in detail" },
+        { name: "Food Log", desc: "Track your food intake and nutrition" },
+        { name: "Water Tracker", desc: "Monitor your daily water consumption" },
+        { name: "Exercise Log", desc: "Track your workouts and physical activities" },
+        { name: "Sleep Tracker", desc: "Monitor your sleep patterns and quality" }
       ]
     },
     Community: {
       title: "Community Features",
-      description: "Bergabung dan terhubung dengan komunitas",
+      description: "Connect and grow with your community",
       image: "/images/lkhh.jpg",
       items: [
-        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
-        { name: "👥 Grup Belajar", desc: "Belajar bersama dalam grup" },
-        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek dan ide" },
-        { name: "📢 Event & Meetup", desc: "Informasi acara dan pertemuan" },
-        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
+        { name: "General Discussion", desc: "Communicate with fellow members" },
+        { name: "Study Groups", desc: "Learn together in groups" },
+        { name: "Collaboration", desc: "Work together on projects and ideas" },
+        { name: "Events & Meetups", desc: "Event information and gatherings" },
+        { name: "Feedback & Suggestions", desc: "Criticism and suggestions for progress" }
       ]
     },
     Donation: {
       title: "Donation Features",
-      description: "Donasi untuk membantu sesama",
+      description: "Donate to help others in need",
       image: "/images/5.jpg",
       items: [
-        { name: "💰 Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
-        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
-        { name: "📚 Donasi Buku", desc: "Donasi buku untuk pendidikan" },
-        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
-        { name: "🏥 Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
+        { name: "Monetary Donation", desc: "Financial donation for those in need" },
+        { name: "Food Donation", desc: "Share meals with others" },
+        { name: "Book Donation", desc: "Donate books for education" },
+        { name: "Clothing Donation", desc: "Donate wearable clothes" },
+        { name: "Health Donation", desc: "Donation for health services" }
       ]
     },
     Blog: {
       title: "Blog Features",
-      description: "Artikel dan tutorial terbaru setiap hari",
+      description: "Latest articles and tutorials every day",
       image: "/images/ai.jpg",
       items: [
-        { name: "✍️ Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
-        { name: "📖 Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
-        { name: "🎯 Tips & Trik", desc: "Tips berguna untuk keseharian" },
-        { name: "📰 Berita", desc: "Update berita terbaru" },
-        { name: "🎬 Video Content", desc: "Konten video menarik" }
+        { name: "Latest Articles", desc: "Read the latest articles daily" },
+        { name: "Tutorials", desc: "Complete and easy-to-follow guides" },
+        { name: "Tips & Tricks", desc: "Useful tips for daily life" },
+        { name: "News", desc: "Latest news updates" },
+        { name: "Video Content", desc: "Interesting video content" }
       ]
     }
   };
@@ -1268,7 +1268,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - HOVER BG SAMA SEPERTI SEBELUMNYA */}
+      {/* PREVIEW CARD - HOVER BG */}
       {showPanel && (
         <div
           className="preview-card"
