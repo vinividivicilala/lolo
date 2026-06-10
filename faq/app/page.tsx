@@ -30,7 +30,6 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
-  const [navbarOpacity, setNavbarOpacity] = useState(1);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -135,7 +134,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - 1 BARIS
+  // Efek untuk animasi marquee - 1 BARIS TIDAK TERPUTUS
   useEffect(() => {
     if (isLoading) return;
     
@@ -145,22 +144,32 @@ export default function HomePage(): React.JSX.Element {
       
       if (!container || !content) return;
       
-      // Hapus semua child kecuali satu baris
-      const items = content.children;
-      if (items.length > 1) {
-        for (let i = 1; i < items.length; i++) {
-          content.removeChild(items[i]);
-        }
-      }
+      // Bersihkan dan buat satu baris konten
+      content.innerHTML = '';
+      
+      const marqueeItem = document.createElement('div');
+      marqueeItem.style.display = 'inline-flex';
+      marqueeItem.style.alignItems = 'center';
+      marqueeItem.style.gap = '60px';
+      marqueeItem.style.marginRight = '80px';
+      marqueeItem.style.flexShrink = '0';
+      marqueeItem.innerHTML = `
+        <span style="font-family: 'Inter', 'Helvetica Neue', sans-serif; font-weight: 700; font-size: 140px; color: #000000; letter-spacing: -0.03em; text-transform: uppercase; line-height: 1; white-space: nowrap;">SUBSCRIBE</span>
+        <div style="width: 100px; height: 140px; background-color: #e0e0e0; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></div>
+        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="stroke: #000000; stroke-width: 1.5; flex-shrink: 0;"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      `;
+      content.appendChild(marqueeItem);
       
       // Clone untuk seamless loop
-      const originalContent = content.innerHTML;
-      content.innerHTML = originalContent + originalContent;
+      const clone = marqueeItem.cloneNode(true);
+      content.appendChild(clone);
+      
+      const contentWidth = content.scrollWidth / 2;
       
       gsap.set(content, { x: 0 });
       
       const animation = gsap.to(content, {
-        x: -content.scrollWidth / 2,
+        x: -contentWidth,
         duration: 20,
         ease: "none",
         repeat: -1
@@ -220,10 +229,8 @@ export default function HomePage(): React.JSX.Element {
       // Navbar transisi saat scroll
       if (scrollY > 50) {
         setIsScrolled(true);
-        setNavbarOpacity(Math.min(1, scrollY / 100));
       } else {
         setIsScrolled(false);
-        setNavbarOpacity(1);
       }
       
       // Scroll down hilang setelah scroll > 50px
@@ -758,15 +765,12 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR KANAN - Awal */}
+                {/* NAVBAR - Selalu di kanan, ikut alur scroll */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '48px',
-                    opacity: isScrolled ? 0 : 1,
-                    visibility: isScrolled ? 'hidden' : 'visible',
-                    transition: 'all 0.3s ease'
+                    gap: '48px'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
@@ -796,63 +800,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* NAVBAR KIRI - Saat scroll muncul di samping judul */}
-              <div
-                style={{
-                  position: 'fixed',
-                  top: '30px',
-                  left: '40px',
-                  zIndex: 100,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '30px',
-                  opacity: isScrolled ? 1 : 0,
-                  visibility: isScrolled ? 'visible' : 'hidden',
-                  transform: isScrolled ? 'translateY(0)' : 'translateY(-20px)',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                    fontWeight: '400',
-                    fontSize: '28px',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  MENURU
-                </span>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '32px'
-                  }}
-                >
-                  {["Note", "Community", "Donation", "Blog"].map((item) => (
-                    <span
-                      key={item}
-                      style={{
-                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                        fontSize: '18px',
-                        fontWeight: '400',
-                        color: '#000000',
-                        letterSpacing: '-0.01em',
-                        cursor: 'pointer',
-                        transition: 'opacity 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* MARQUEE SECTION - 1 BARIS */}
+              {/* MARQUEE SECTION - 1 BARIS TIDAK TERPUTUS */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -875,62 +823,7 @@ export default function HomePage(): React.JSX.Element {
                     width: 'fit-content'
                   }}
                 >
-                  {/* Hanya 1 baris konten marquee */}
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '60px',
-                      marginRight: '80px',
-                      flexShrink: 0
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                        fontWeight: '700',
-                        fontSize: '140px',
-                        color: '#000000',
-                        letterSpacing: '-0.03em',
-                        textTransform: 'uppercase',
-                        lineHeight: '1',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      SUBSCRIBE
-                    </span>
-                    
-                    <div
-                      style={{
-                        width: '100px',
-                        height: '140px',
-                        backgroundColor: '#e0e0e0',
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        position: 'relative',
-                        flexShrink: 0,
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      <Image
-                        src="/images/5.jpg"
-                        alt="Subscribe"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    
-                    <svg 
-                      width="35" 
-                      height="35" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{ stroke: '#000000', strokeWidth: '1.5', flexShrink: 0 }}
-                    >
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  {/* Konten akan diisi oleh useEffect */}
                 </div>
               </div>
             </div>
