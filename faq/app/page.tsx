@@ -54,52 +54,52 @@ export default function HomePage(): React.JSX.Element {
   // Data untuk Preview Card
   const previewData = {
     Note: {
-      title: "Web Design",
-      description: "Deliver your business to a wider audience",
+      title: "View all Services",
+      description: "We don't stop there, check out all the services we offer here at Shape",
       image: "/images/ai.jpg",
       items: [
+        { name: "Web Design", desc: "Deliver your business to a wider audience" },
         { name: "Craft CMS", desc: "The most reliable way to build a website" },
         { name: "Branding", desc: "Creating brands you're proud of" },
         { name: "SEO", desc: "Get your brand seen online" },
         { name: "Shopify", desc: "Custom Shopify store in 4 weeks" }
-      ],
-      viewAll: "View all Services"
+      ]
     },
     Community: {
-      title: "Community Hub",
-      description: "Connect and grow with your community",
+      title: "View all Community",
+      description: "Explore all community features and connect with others",
       image: "/images/lkhh.jpg",
       items: [
         { name: "Discussion Forum", desc: "Engage with community members" },
         { name: "Events", desc: "Join meetups and events" },
         { name: "Groups", desc: "Create interest groups" },
-        { name: "Resources", desc: "Share knowledge and tools" }
-      ],
-      viewAll: "Explore All Communities"
+        { name: "Resources", desc: "Share knowledge and tools" },
+        { name: "Mentorship", desc: "Learn from experts" }
+      ]
     },
     Donation: {
-      title: "Donation Center",
-      description: "Make a difference today",
+      title: "View all Donations",
+      description: "Make a difference today with various donation options",
       image: "/images/5.jpg",
       items: [
         { name: "Monetary Donation", desc: "Support financially" },
         { name: "Food Donation", desc: "Share meals with others" },
         { name: "Books Donation", desc: "Donate books for education" },
-        { name: "Clothing Donation", desc: "Give clothes to those in need" }
-      ],
-      viewAll: "View All Donations"
+        { name: "Clothing Donation", desc: "Give clothes to those in need" },
+        { name: "Medical Donation", desc: "Help with healthcare costs" }
+      ]
     },
     Blog: {
-      title: "Blog & Articles",
-      description: "Latest insights and tutorials",
+      title: "View all Blogs",
+      description: "Read all articles, tutorials, and latest insights",
       image: "/images/ai.jpg",
       items: [
         { name: "Latest Posts", desc: "Read our newest articles" },
         { name: "Tutorials", desc: "Step-by-step guides" },
         { name: "Case Studies", desc: "Real success stories" },
-        { name: "News", desc: "Stay updated with trends" }
-      ],
-      viewAll: "Read All Blogs"
+        { name: "News", desc: "Stay updated with trends" },
+        { name: "Interviews", desc: "Expert conversations" }
+      ]
     }
   };
 
@@ -534,7 +534,7 @@ export default function HomePage(): React.JSX.Element {
     }, 3000);
   };
 
-  // Handler untuk hover panel - TAMPILKAN PANEL DENGAN BG
+  // Handler untuk hover panel
   const handleNavHover = (navName: string) => {
     if (panelTimeoutRef.current) {
       clearTimeout(panelTimeoutRef.current);
@@ -659,15 +659,15 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* PREVIEW CARD - DENGAN BACKGROUND PUTIH */
+        /* PREVIEW CARD - DIPERBESAR */
         .preview-card {
           position: fixed;
           background: #ffffff;
-          border-radius: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          border-radius: 28px;
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
           border: 1px solid #eaeaea;
           animation: fadeInUp 0.2s ease;
-          width: 500px;
+          width: 650px;
           cursor: pointer;
           transition: all 0.2s ease;
           overflow: hidden;
@@ -676,115 +676,122 @@ export default function HomePage(): React.JSX.Element {
         
         .preview-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.35);
         }
         
         .preview-card-inner {
           display: flex;
-          padding: 28px;
-          gap: 24px;
+          padding: 32px;
+          gap: 32px;
         }
         
-        /* SISI KIRI */
+        /* SISI KIRI - LIST ITEMS */
         .preview-left {
-          flex: 1.2;
-        }
-        
-        .preview-title {
-          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 32px;
-          font-weight: 700;
-          color: #000000;
-          letter-spacing: -0.02em;
-          line-height: 1.2;
-          margin-bottom: 10px;
-        }
-        
-        .preview-description {
-          font-family: 'Questrial', sans-serif;
-          font-size: 14px;
-          color: #666666;
-          line-height: 1.4;
-          margin-bottom: 24px;
+          flex: 1.5;
         }
         
         .preview-items {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 16px;
         }
         
         .preview-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 0;
+          padding: 12px 0;
           border-bottom: 1px solid #f0f0f0;
           cursor: pointer;
           transition: all 0.2s ease;
         }
         
         .preview-item:hover {
-          transform: translateX(6px);
+          transform: translateX(8px);
         }
         
         .preview-item-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 500;
           color: #000000;
         }
         
         .preview-item-desc {
           font-family: 'Questrial', sans-serif;
-          font-size: 12px;
-          color: #999999;
-          margin-top: 2px;
+          font-size: 13px;
+          color: #666666;
+          margin-top: 4px;
         }
         
         .preview-item-arrow {
           opacity: 0;
           transition: opacity 0.2s ease;
+          color: #000000;
         }
         
         .preview-item:hover .preview-item-arrow {
           opacity: 1;
         }
         
-        /* SISI KANAN */
+        /* SISI KANAN - DENGAN BORDER DI SISI KANAN */
         .preview-right {
-          width: 130px;
+          width: 240px;
           flex-shrink: 0;
+          background: #fafafa;
+          border-radius: 20px;
+          padding: 20px;
+          border: 1px solid #e0e0e0;
+        }
+        
+        .preview-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 40px;
+          font-weight: 700;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1.2;
+          margin-bottom: 16px;
+        }
+        
+        .preview-description {
+          font-family: 'Questrial', sans-serif;
+          font-size: 15px;
+          color: #333333;
+          line-height: 1.5;
+          margin-bottom: 24px;
         }
         
         .preview-image {
           width: 100%;
-          height: 130px;
-          background-color: #f5f5f5;
+          height: 160px;
+          background-color: #e0e0e0;
           border-radius: 16px;
           overflow: hidden;
           position: relative;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
         
         .preview-view-all {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
-          padding: 10px 12px;
-          background-color: #f8f8f8;
-          border-radius: 40px;
+          gap: 12px;
+          padding: 14px 18px;
+          background-color: #000000;
+          border-radius: 60px;
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 12px;
+          font-size: 15px;
           font-weight: 500;
-          color: #000000;
+          color: #ffffff;
           cursor: pointer;
           transition: all 0.2s ease;
+          margin-top: 8px;
         }
         
         .preview-view-all:hover {
-          background-color: #f0f0f0;
+          background-color: #333333;
+          transform: scale(1.02);
         }
       `}</style>
 
@@ -919,7 +926,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - HOVER AKAN MUNCULKAN PREVIEW CARD */}
+                {/* NAVBAR */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -1241,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - MUNCUL SAAT HOVER NAVBAR DENGAN BACKGROUND PUTIH */}
+      {/* PREVIEW CARD - DIPERBESAR, JUDUL 40px, BORDER DI SISI KANAN */}
       {showPanel && (
         <div
           className="preview-card"
@@ -1255,14 +1262,8 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           <div className="preview-card-inner">
-            {/* SISI KIRI */}
+            {/* SISI KIRI - LIST ITEMS */}
             <div className="preview-left">
-              <div className="preview-title">
-                {previewData[hoveredNav as keyof typeof previewData].title}
-              </div>
-              <div className="preview-description">
-                {previewData[hoveredNav as keyof typeof previewData].description}
-              </div>
               <div className="preview-items">
                 {previewData[hoveredNav as keyof typeof previewData].items.map((item, idx) => (
                   <div key={idx} className="preview-item">
@@ -1271,7 +1272,7 @@ export default function HomePage(): React.JSX.Element {
                       <div className="preview-item-desc">{item.desc}</div>
                     </div>
                     <div className="preview-item-arrow">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
@@ -1280,8 +1281,14 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SISI KANAN */}
+            {/* SISI KANAN - DENGAN BORDER, JUDUL 40px, DESKRIPSI, FOTO, VIEW ALL */}
             <div className="preview-right">
+              <div className="preview-title">
+                {previewData[hoveredNav as keyof typeof previewData].title}
+              </div>
+              <div className="preview-description">
+                {previewData[hoveredNav as keyof typeof previewData].description}
+              </div>
               <div className="preview-image">
                 <Image
                   src={previewData[hoveredNav as keyof typeof previewData].image}
@@ -1291,8 +1298,8 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
               <div className="preview-view-all">
-                <span>{previewData[hoveredNav as keyof typeof previewData].viewAll}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <span>Explore Now</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
