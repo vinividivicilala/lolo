@@ -51,18 +51,18 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Preview Card (sesuai Note)
+  // Data untuk Preview Card - KONTEN NOTE SESUAI KONTEKS
   const previewData = {
     Note: {
       title: "Note Features",
       description: "Catat semua aktivitas harianmu dengan mudah",
       image: "/images/ai.jpg",
       items: [
-        { name: "Catatan Harian", desc: "Catat aktivitas sehari-hari dengan detail" },
-        { name: "Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
-        { name: "Catatan Minum", desc: "Pantau konsumsi air harianmu" },
-        { name: "Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
-        { name: "Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
+        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari dengan detail" },
+        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
+        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air harianmu" },
+        { name: "🏃 Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
+        { name: "😴 Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
       ]
     },
     Community: {
@@ -70,11 +70,11 @@ export default function HomePage(): React.JSX.Element {
       description: "Bergabung dan terhubung dengan komunitas",
       image: "/images/lkhh.jpg",
       items: [
-        { name: "Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
-        { name: "Grup Belajar", desc: "Belajar bersama dalam grup" },
-        { name: "Kolaborasi", desc: "Kerjasama proyek dan ide" },
-        { name: "Event & Meetup", desc: "Informasi acara dan pertemuan" },
-        { name: "Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
+        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
+        { name: "👥 Grup Belajar", desc: "Belajar bersama dalam grup" },
+        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek dan ide" },
+        { name: "📢 Event & Meetup", desc: "Informasi acara dan pertemuan" },
+        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
       ]
     },
     Donation: {
@@ -82,11 +82,11 @@ export default function HomePage(): React.JSX.Element {
       description: "Donasi untuk membantu sesama",
       image: "/images/5.jpg",
       items: [
-        { name: "Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
-        { name: "Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
-        { name: "Donasi Buku", desc: "Donasi buku untuk pendidikan" },
-        { name: "Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
-        { name: "Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
+        { name: "💰 Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
+        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
+        { name: "📚 Donasi Buku", desc: "Donasi buku untuk pendidikan" },
+        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
+        { name: "🏥 Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
       ]
     },
     Blog: {
@@ -94,21 +94,21 @@ export default function HomePage(): React.JSX.Element {
       description: "Artikel dan tutorial terbaru setiap hari",
       image: "/images/ai.jpg",
       items: [
-        { name: "Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
-        { name: "Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
-        { name: "Tips & Trik", desc: "Tips berguna untuk keseharian" },
-        { name: "Berita", desc: "Update berita terbaru" },
-        { name: "Video Content", desc: "Konten video menarik" }
+        { name: "✍️ Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
+        { name: "📖 Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
+        { name: "🎯 Tips & Trik", desc: "Tips berguna untuk keseharian" },
+        { name: "📰 Berita", desc: "Update berita terbaru" },
+        { name: "🎬 Video Content", desc: "Konten video menarik" }
       ]
     }
   };
 
-  // Notifikasi count untuk setiap navbar
+  // Notifikasi count dengan gaya superscript
   const notificationCounts = {
-    Note: 5,
-    Community: 8,
-    Donation: 3,
-    Blog: 12
+    Note: "5",
+    Community: "8",
+    Donation: "3",
+    Blog: "12"
   };
 
   const rotatingTexts = [
@@ -935,7 +935,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Dengan angka notifikasi sederhana */}
+                {/* NAVBAR - Dengan angka superscript */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -949,7 +949,7 @@ export default function HomePage(): React.JSX.Element {
                     <div
                       key={item}
                       ref={item === "Note" ? noteRef : null}
-                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                       onMouseEnter={() => handleNavHover(item)}
                       onMouseLeave={handleNavLeave}
                     >
@@ -967,23 +967,17 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {item}
                       </span>
-                      <span
+                      <sup
                         style={{
                           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
                           fontSize: '16px',
                           fontWeight: '600',
-                          color: '#ffffff',
-                          backgroundColor: '#ED1B3C',
-                          padding: '2px 10px',
-                          borderRadius: '60px',
-                          display: 'inline-block',
-                          lineHeight: '1.4',
-                          minWidth: '28px',
-                          textAlign: 'center'
+                          color: '#ED1B3C',
+                          marginLeft: '2px'
                         }}
                       >
                         {notificationCounts[item as keyof typeof notificationCounts]}
-                      </span>
+                      </sup>
                     </div>
                   ))}
                 </div>
@@ -1274,7 +1268,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - Konten sesuai Note */}
+      {/* PREVIEW CARD - HOVER BG SAMA SEPERTI SEBELUMNYA */}
       {showPanel && (
         <div
           className="preview-card"
