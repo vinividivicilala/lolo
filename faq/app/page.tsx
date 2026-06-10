@@ -30,7 +30,6 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
-  const [navbarTransform, setNavbarTransform] = useState(0);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -52,8 +51,8 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk Hover Panel
-  const navPanelData = {
+  // Data untuk Preview Card seperti di foto
+  const previewData = {
     Note: {
       title: "Web Design",
       description: "Deliver your business to a wider audience",
@@ -71,12 +70,12 @@ export default function HomePage(): React.JSX.Element {
       description: "Connect and grow with your community",
       image: "/images/lkhh.jpg",
       items: [
-        { name: "Discussion Forum", desc: "Engage with members" },
+        { name: "Discussion Forum", desc: "Engage with community members" },
         { name: "Events", desc: "Join meetups and events" },
         { name: "Groups", desc: "Create interest groups" },
         { name: "Resources", desc: "Share knowledge and tools" }
       ],
-      viewAll: "Explore Community"
+      viewAll: "Explore All Communities"
     },
     Donation: {
       title: "Donation Center",
@@ -252,7 +251,6 @@ export default function HomePage(): React.JSX.Element {
           
           if (navbarRef.current) {
             const translateX = progress * 380;
-            setNavbarTransform(translateX);
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
           }
         }
@@ -661,75 +659,63 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* HOVER PANEL CARD STYLE - SEPERTI GAMBAR */
-        .hover-panel-card {
+        /* PREVIEW CARD - SEPERTI DI FOTO */
+        .preview-card {
           position: fixed;
           background: #ffffff;
           border-radius: 24px;
-          padding: 28px;
-          z-index: 100000;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           border: 1px solid #eaeaea;
           animation: fadeInUp 0.2s ease;
-          width: 420px;
+          width: 480px;
           cursor: pointer;
           transition: all 0.2s ease;
+          overflow: hidden;
         }
         
-        .hover-panel-card:hover {
+        .preview-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
         }
         
-        /* HEADER CARD: JUDUL + FOTO DI KANAN */
-        .card-header {
+        /* LAYOUT DUA KOLOM: KIRI + KANAN */
+        .preview-card-inner {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 20px;
-          margin-bottom: 24px;
+          padding: 28px;
+          gap: 24px;
         }
         
-        .card-header-left {
-          flex: 1;
+        /* SISI KIRI - JUDUL BESAR + DESKRIPSI */
+        .preview-left {
+          flex: 1.2;
         }
         
-        .card-title {
+        .preview-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 28px;
+          font-size: 36px;
           font-weight: 700;
           color: #000000;
           letter-spacing: -0.02em;
           line-height: 1.2;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
         }
         
-        .card-description {
+        .preview-description {
           font-family: 'Questrial', sans-serif;
           font-size: 14px;
           color: #666666;
           line-height: 1.4;
-        }
-        
-        .card-image {
-          width: 80px;
-          height: 80px;
-          background-color: #f5f5f5;
-          border-radius: 16px;
-          overflow: hidden;
-          position: relative;
-          flex-shrink: 0;
-        }
-        
-        /* LIST ITEMS */
-        .card-items {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
           margin-bottom: 24px;
         }
         
-        .card-item {
+        /* LIST ITEMS DI SISI KIRI */
+        .preview-items {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        
+        .preview-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -739,56 +725,68 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.2s ease;
         }
         
-        .card-item:hover {
-          transform: translateX(4px);
+        .preview-item:hover {
+          transform: translateX(6px);
         }
         
-        .card-item-left {
-          flex: 1;
-        }
-        
-        .card-item-title {
+        .preview-item-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
           font-size: 16px;
           font-weight: 500;
           color: #000000;
-          margin-bottom: 4px;
         }
         
-        .card-item-desc {
+        .preview-item-desc {
           font-family: 'Questrial', sans-serif;
           font-size: 12px;
           color: #999999;
+          margin-top: 2px;
         }
         
-        .card-item-arrow {
+        .preview-item-arrow {
           opacity: 0;
           transition: opacity 0.2s ease;
-          color: #000000;
         }
         
-        .card-item:hover .card-item-arrow {
+        .preview-item:hover .preview-item-arrow {
           opacity: 1;
         }
         
-        /* VIEW ALL BUTTON */
-        .card-view-all {
+        /* SISI KANAN - FOTO */
+        .preview-right {
+          width: 140px;
+          flex-shrink: 0;
+        }
+        
+        .preview-image {
+          width: 100%;
+          height: 140px;
+          background-color: #f5f5f5;
+          border-radius: 16px;
+          overflow: hidden;
+          position: relative;
+          margin-bottom: 16px;
+        }
+        
+        /* VIEW ALL BUTTON DI BAWAH FOTO */
+        .preview-view-all {
           display: flex;
-          justify-content: flex-end;
           align-items: center;
+          justify-content: space-between;
           gap: 8px;
-          padding-top: 12px;
-          border-top: 1px solid #f0f0f0;
+          padding: 10px 12px;
+          background-color: #f8f8f8;
+          border-radius: 40px;
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 500;
           color: #000000;
           cursor: pointer;
-          transition: opacity 0.2s ease;
+          transition: all 0.2s ease;
         }
         
-        .card-view-all:hover {
-          opacity: 0.6;
+        .preview-view-all:hover {
+          background-color: #f0f0f0;
         }
       `}</style>
 
@@ -1245,10 +1243,10 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL CARD - SEPERTI GAMBAR (KIRI: JUDUL+DESKRIPSI, KANAN: FOTO, BAWAH: LIST ITEM + VIEW ALL) */}
+      {/* PREVIEW CARD - SEPERTI DI FOTO (KIRI: JUDUL+LIST, KANAN: FOTO+VIEW ALL) */}
       {showPanel && (
         <div
-          className="hover-panel-card"
+          className="preview-card"
           onMouseEnter={() => {
             if (panelTimeoutRef.current) clearTimeout(panelTimeoutRef.current);
           }}
@@ -1258,49 +1256,49 @@ export default function HomePage(): React.JSX.Element {
             top: panelPosition.top,
           }}
         >
-          {/* HEADER: JUDUL DI KIRI, FOTO DI KANAN */}
-          <div className="card-header">
-            <div className="card-header-left">
-              <div className="card-title">
-                {navPanelData[hoveredNav as keyof typeof navPanelData].title}
+          <div className="preview-card-inner">
+            {/* SISI KIRI */}
+            <div className="preview-left">
+              <div className="preview-title">
+                {previewData[hoveredNav as keyof typeof previewData].title}
               </div>
-              <div className="card-description">
-                {navPanelData[hoveredNav as keyof typeof navPanelData].description}
+              <div className="preview-description">
+                {previewData[hoveredNav as keyof typeof previewData].description}
+              </div>
+              <div className="preview-items">
+                {previewData[hoveredNav as keyof typeof previewData].items.map((item, idx) => (
+                  <div key={idx} className="preview-item">
+                    <div>
+                      <div className="preview-item-name">{item.name}</div>
+                      <div className="preview-item-desc">{item.desc}</div>
+                    </div>
+                    <div className="preview-item-arrow">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="card-image">
-              <Image
-                src={navPanelData[hoveredNav as keyof typeof navPanelData].image}
-                alt={hoveredNav}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-          </div>
 
-          {/* LIST ITEMS */}
-          <div className="card-items">
-            {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
-              <div key={idx} className="card-item">
-                <div className="card-item-left">
-                  <div className="card-item-title">{item.name}</div>
-                  <div className="card-item-desc">{item.desc}</div>
-                </div>
-                <div className="card-item-arrow">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+            {/* SISI KANAN */}
+            <div className="preview-right">
+              <div className="preview-image">
+                <Image
+                  src={previewData[hoveredNav as keyof typeof previewData].image}
+                  alt={hoveredNav}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
-            ))}
-          </div>
-
-          {/* VIEW ALL BUTTON */}
-          <div className="card-view-all">
-            <span>{navPanelData[hoveredNav as keyof typeof navPanelData].viewAll}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+              <div className="preview-view-all">
+                <span>{previewData[hoveredNav as keyof typeof previewData].viewAll}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       )}
