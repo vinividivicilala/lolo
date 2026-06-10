@@ -566,6 +566,10 @@ export default function HomePage(): React.JSX.Element {
 
   const panelPosition = getPanelPosition();
 
+  // Angka otomatis untuk navbar (1-4)
+  const navNumbers = ["01", "02", "03", "04"];
+  const navNames = ["Note", "Community", "Donation", "Blog"];
+
   return (
     <>
       <style jsx global>{`
@@ -659,13 +663,12 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        /* PREVIEW CARD - DIPERBESAR */
+        /* PREVIEW CARD */
         .preview-card {
           position: fixed;
           background: #ffffff;
           border-radius: 28px;
           box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
-          border: 1px solid #eaeaea;
           animation: fadeInUp 0.2s ease;
           width: 650px;
           cursor: pointer;
@@ -685,7 +688,6 @@ export default function HomePage(): React.JSX.Element {
           gap: 32px;
         }
         
-        /* SISI KIRI - LIST ITEMS */
         .preview-left {
           flex: 1.5;
         }
@@ -701,7 +703,6 @@ export default function HomePage(): React.JSX.Element {
           justify-content: space-between;
           align-items: center;
           padding: 12px 0;
-          border-bottom: 1px solid #f0f0f0;
           cursor: pointer;
           transition: all 0.2s ease;
         }
@@ -734,14 +735,12 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1;
         }
         
-        /* SISI KANAN - DENGAN BORDER DI SISI KANAN */
         .preview-right {
           width: 240px;
           flex-shrink: 0;
           background: #fafafa;
           border-radius: 20px;
           padding: 20px;
-          border: 1px solid #e0e0e0;
         }
         
         .preview-title {
@@ -926,7 +925,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR */}
+                {/* NAVBAR - Dengan angka otomatis + bg hijau stabilo */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -936,14 +935,28 @@ export default function HomePage(): React.JSX.Element {
                     transition: 'transform 0.1s linear'
                   }}
                 >
-                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                  {navNames.map((item, idx) => (
                     <div
                       key={item}
                       ref={item === "Note" ? noteRef : null}
-                      style={{ position: 'relative', cursor: 'pointer' }}
+                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
                       onMouseEnter={() => handleNavHover(item)}
                       onMouseLeave={handleNavLeave}
                     >
+                      <span
+                        style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '20px',
+                          fontWeight: '600',
+                          color: '#000000',
+                          backgroundColor: '#c5e800',
+                          padding: '4px 10px',
+                          borderRadius: '60px',
+                          display: 'inline-block'
+                        }}
+                      >
+                        {navNumbers[idx]}
+                      </span>
                       <span
                         style={{
                           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
@@ -1248,7 +1261,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - DIPERBESAR, JUDUL 40px, BORDER DI SISI KANAN */}
+      {/* PREVIEW CARD - TANPA BORDER LINE BAWAH */}
       {showPanel && (
         <div
           className="preview-card"
@@ -1281,7 +1294,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SISI KANAN - DENGAN BORDER, JUDUL 40px, DESKRIPSI, FOTO, VIEW ALL */}
+            {/* SISI KANAN */}
             <div className="preview-right">
               <div className="preview-title">
                 {previewData[hoveredNav as keyof typeof previewData].title}
