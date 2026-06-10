@@ -153,11 +153,78 @@ export default function HomePage(): React.JSX.Element {
       marqueeItem.style.gap = '60px';
       marqueeItem.style.marginRight = '80px';
       marqueeItem.style.flexShrink = '0';
-      marqueeItem.innerHTML = `
-        <span style="font-family: 'Inter', 'Helvetica Neue', sans-serif; font-weight: 700; font-size: 140px; color: #000000; letter-spacing: -0.03em; text-transform: uppercase; line-height: 1; white-space: nowrap;">SUBSCRIBE</span>
-        <div style="width: 100px; height: 140px; background-color: #e0e0e0; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></div>
-        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="stroke: #000000; stroke-width: 1.5; flex-shrink: 0;"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      `;
+      
+      // Bagian kiri - teks SUBSCRIBE
+      const leftText = document.createElement('span');
+      leftText.style.fontFamily = "'Inter', 'Helvetica Neue', sans-serif";
+      leftText.style.fontWeight = '700';
+      leftText.style.fontSize = '140px';
+      leftText.style.color = '#000000';
+      leftText.style.letterSpacing = '-0.03em';
+      leftText.style.textTransform = 'uppercase';
+      leftText.style.lineHeight = '1';
+      leftText.style.whiteSpace = 'nowrap';
+      leftText.textContent = 'SUBSCRIBE';
+      
+      // Bagian tengah - foto horizontal lebar (ai.jpg)
+      const centerImage = document.createElement('div');
+      centerImage.style.width = '300px';
+      centerImage.style.height = '160px';
+      centerImage.style.backgroundColor = '#e0e0e0';
+      centerImage.style.borderRadius = '16px';
+      centerImage.style.overflow = 'hidden';
+      centerImage.style.position = 'relative';
+      centerImage.style.flexShrink = '0';
+      centerImage.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+      
+      const img = document.createElement('img');
+      img.src = '/images/ai.jpg';
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      centerImage.appendChild(img);
+      
+      // Bagian kanan - bg hitam + teks + border radius
+      const rightBox = document.createElement('div');
+      rightBox.style.backgroundColor = '#000000';
+      rightBox.style.borderRadius = '16px';
+      rightBox.style.padding = '20px 30px';
+      rightBox.style.display = 'inline-flex';
+      rightBox.style.alignItems = 'center';
+      rightBox.style.gap = '20px';
+      rightBox.style.flexShrink = '0';
+      rightBox.style.height = '160px';
+      rightBox.style.boxSizing = 'border-box';
+      
+      const rightText = document.createElement('span');
+      rightText.style.fontFamily = "'Aeonik-Regular', Helvetica, Arial, sans-serif";
+      rightText.style.fontSize = '28px';
+      rightText.style.fontWeight = '600';
+      rightText.style.color = '#ffffff';
+      rightText.style.letterSpacing = '-0.01em';
+      rightText.textContent = 'GET ACCESS';
+      
+      const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      rightArrow.setAttribute('width', '35');
+      rightArrow.setAttribute('height', '35');
+      rightArrow.setAttribute('viewBox', '0 0 24 24');
+      rightArrow.setAttribute('fill', 'none');
+      rightArrow.style.stroke = '#ffffff';
+      rightArrow.style.strokeWidth = '1.5';
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M7 17L17 7M17 7H7M17 7V17');
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      rightArrow.appendChild(path);
+      
+      rightBox.appendChild(rightText);
+      rightBox.appendChild(rightArrow);
+      
+      marqueeItem.appendChild(leftText);
+      marqueeItem.appendChild(centerImage);
+      marqueeItem.appendChild(rightBox);
+      
       content.appendChild(marqueeItem);
       
       // Clone untuk seamless loop
@@ -170,7 +237,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to(content, {
         x: -contentWidth,
-        duration: 20,
+        duration: 25,
         ease: "none",
         repeat: -1
       });
@@ -226,14 +293,12 @@ export default function HomePage(): React.JSX.Element {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
-      // Navbar transisi saat scroll
       if (scrollY > 50) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
       }
       
-      // Scroll down hilang setelah scroll > 50px
       if (scrollY > 50 && showScrollDown) {
         setShowScrollDown(false);
       } else if (scrollY <= 10 && !showScrollDown) {
@@ -520,10 +585,10 @@ export default function HomePage(): React.JSX.Element {
       return {
         left: rect.left,
         top: rect.bottom + 15,
-        width: 500
+        width: 520
       };
     }
-    return { left: 0, top: 0, width: 500 };
+    return { left: 0, top: 0, width: 520 };
   };
 
   const panelPosition = getPanelPosition();
@@ -626,11 +691,12 @@ export default function HomePage(): React.JSX.Element {
           background: rgba(0, 0, 0, 0.98);
           backdropFilter: blur(16px);
           border-radius: 24px;
-          padding: 24px 28px;
+          padding: 28px 32px;
           z-index: 100000;
           box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
           border: 1px solid rgba(255,255,255,0.1);
           animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          width: 560px;
         }
       `}</style>
 
@@ -765,7 +831,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Selalu di kanan, ikut alur scroll */}
+                {/* NAVBAR */}
                 <div
                   style={{
                     display: 'flex',
@@ -800,7 +866,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* MARQUEE SECTION - 1 BARIS TIDAK TERPUTUS */}
+              {/* MARQUEE SECTION */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -822,9 +888,7 @@ export default function HomePage(): React.JSX.Element {
                     willChange: 'transform',
                     width: 'fit-content'
                   }}
-                >
-                  {/* Konten akan diisi oleh useEffect */}
-                </div>
+                />
               </div>
             </div>
 
@@ -1087,7 +1151,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL */}
+      {/* HOVER PANEL - Lebar dan besar */}
       {showPanel && (
         <div
           className="hover-panel"
@@ -1098,36 +1162,56 @@ export default function HomePage(): React.JSX.Element {
           style={{
             left: panelPosition.left,
             top: panelPosition.top,
-            width: 520,
           }}
         >
           <div
             style={{
-              fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '20px',
-              paddingBottom: '12px',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              letterSpacing: '-0.01em'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px',
+              paddingBottom: '16px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            {navPanelData[hoveredNav as keyof typeof navPanelData].title}
+            <div
+              style={{
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '24px',
+                fontWeight: '600',
+                color: '#ffffff',
+                letterSpacing: '-0.01em'
+              }}
+            >
+              {navPanelData[hoveredNav as keyof typeof navPanelData].title}
+            </div>
+            <div
+              style={{
+                fontFamily: "'Questrial', sans-serif",
+                fontSize: '13px',
+                color: '#888888',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#888888'}
+            >
+              View All →
+            </div>
           </div>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px'
+              gap: '16px'
             }}
           >
             {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
               <div
                 key={idx}
                 style={{
-                  padding: '14px 16px',
-                  borderRadius: '14px',
+                  padding: '16px 18px',
+                  borderRadius: '16px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   background: 'rgba(255,255,255,0.03)',
@@ -1135,20 +1219,22 @@ export default function HomePage(): React.JSX.Element {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-                  e.currentTarget.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.transform = 'translateX(6px)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                   e.currentTarget.style.transform = 'translateX(0)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
                 }}
               >
                 <div
                   style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '15px',
+                    fontSize: '16px',
                     fontWeight: '500',
                     color: '#ffffff',
-                    marginBottom: '6px'
+                    marginBottom: '8px'
                   }}
                 >
                   {item.name}
@@ -1156,15 +1242,48 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '12px',
+                    fontSize: '13px',
                     color: '#999999',
-                    lineHeight: '1.3'
+                    lineHeight: '1.4'
                   }}
                 >
                   {item.desc}
                 </div>
               </div>
             ))}
+          </div>
+          <div
+            style={{
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#ffffff',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                padding: '8px 16px',
+                borderRadius: '60px',
+                background: 'rgba(255,255,255,0.05)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <span>Explore {hoveredNav}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </div>
         </div>
       )}
