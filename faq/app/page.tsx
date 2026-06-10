@@ -134,7 +134,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - 1 BARIS TIDAK TERPUTUS
+  // Efek untuk animasi marquee - 1 baris, foto tidak terpotong
   useEffect(() => {
     if (isLoading) return;
     
@@ -144,7 +144,6 @@ export default function HomePage(): React.JSX.Element {
       
       if (!container || !content) return;
       
-      // Bersihkan dan buat satu baris konten
       content.innerHTML = '';
       
       const marqueeItem = document.createElement('div');
@@ -154,7 +153,7 @@ export default function HomePage(): React.JSX.Element {
       marqueeItem.style.marginRight = '80px';
       marqueeItem.style.flexShrink = '0';
       
-      // Bagian kiri - teks SUBSCRIBE
+      // Teks SUBSCRIBE
       const leftText = document.createElement('span');
       leftText.style.fontFamily = "'Inter', 'Helvetica Neue', sans-serif";
       leftText.style.fontWeight = '700';
@@ -166,32 +165,32 @@ export default function HomePage(): React.JSX.Element {
       leftText.style.whiteSpace = 'nowrap';
       leftText.textContent = 'SUBSCRIBE';
       
-      // Bagian tengah - foto horizontal lebar (ai.jpg)
-      const centerImage = document.createElement('div');
-      centerImage.style.width = '300px';
-      centerImage.style.height = '160px';
-      centerImage.style.backgroundColor = '#e0e0e0';
-      centerImage.style.borderRadius = '16px';
-      centerImage.style.overflow = 'hidden';
-      centerImage.style.position = 'relative';
-      centerImage.style.flexShrink = '0';
-      centerImage.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+      // Foto horizontal (hanya 1 foto)
+      const imageContainer = document.createElement('div');
+      imageContainer.style.width = '280px';
+      imageContainer.style.height = '160px';
+      imageContainer.style.backgroundColor = '#e0e0e0';
+      imageContainer.style.borderRadius = '16px';
+      imageContainer.style.overflow = 'hidden';
+      imageContainer.style.position = 'relative';
+      imageContainer.style.flexShrink = '0';
+      imageContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
       
       const img = document.createElement('img');
       img.src = '/images/ai.jpg';
       img.style.width = '100%';
       img.style.height = '100%';
       img.style.objectFit = 'cover';
-      centerImage.appendChild(img);
+      imageContainer.appendChild(img);
       
       // Bagian kanan - bg hitam + teks + border radius
       const rightBox = document.createElement('div');
       rightBox.style.backgroundColor = '#000000';
-      rightBox.style.borderRadius = '16px';
-      rightBox.style.padding = '20px 30px';
+      rightBox.style.borderRadius = '60px';
+      rightBox.style.padding = '20px 36px';
       rightBox.style.display = 'inline-flex';
       rightBox.style.alignItems = 'center';
-      rightBox.style.gap = '20px';
+      rightBox.style.gap = '16px';
       rightBox.style.flexShrink = '0';
       rightBox.style.height = '160px';
       rightBox.style.boxSizing = 'border-box';
@@ -205,8 +204,8 @@ export default function HomePage(): React.JSX.Element {
       rightText.textContent = 'GET ACCESS';
       
       const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      rightArrow.setAttribute('width', '35');
-      rightArrow.setAttribute('height', '35');
+      rightArrow.setAttribute('width', '32');
+      rightArrow.setAttribute('height', '32');
       rightArrow.setAttribute('viewBox', '0 0 24 24');
       rightArrow.setAttribute('fill', 'none');
       rightArrow.style.stroke = '#ffffff';
@@ -222,7 +221,7 @@ export default function HomePage(): React.JSX.Element {
       rightBox.appendChild(rightArrow);
       
       marqueeItem.appendChild(leftText);
-      marqueeItem.appendChild(centerImage);
+      marqueeItem.appendChild(imageContainer);
       marqueeItem.appendChild(rightBox);
       
       content.appendChild(marqueeItem);
@@ -293,7 +292,7 @@ export default function HomePage(): React.JSX.Element {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
-      if (scrollY > 50) {
+      if (scrollY > 100) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -585,10 +584,9 @@ export default function HomePage(): React.JSX.Element {
       return {
         left: rect.left,
         top: rect.bottom + 15,
-        width: 520
       };
     }
-    return { left: 0, top: 0, width: 520 };
+    return { left: 0, top: 0 };
   };
 
   const panelPosition = getPanelPosition();
@@ -831,12 +829,15 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR */}
+                {/* NAVBAR KANAN - Awal */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '48px'
+                    gap: '48px',
+                    opacity: isScrolled ? 0 : 1,
+                    visibility: isScrolled ? 'hidden' : 'visible',
+                    transition: 'opacity 0.3s ease, visibility 0.3s ease'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
@@ -865,6 +866,61 @@ export default function HomePage(): React.JSX.Element {
                   ))}
                 </div>
               </div>
+
+              {/* NAVBAR KIRI - Saat scroll muncul di samping kanan judul */}
+              {isScrolled && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: '30px',
+                    left: '40px',
+                    zIndex: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px',
+                    animation: 'fadeInUp 0.3s ease'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
+                      fontWeight: '400',
+                      fontSize: '28px',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    MENURU
+                  </span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '32px'
+                    }}
+                  >
+                    {["Note", "Community", "Donation", "Blog"].map((item) => (
+                      <span
+                        key={item}
+                        style={{
+                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                          fontSize: '18px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          letterSpacing: '-0.01em',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* MARQUEE SECTION */}
               <div
@@ -1151,7 +1207,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL - Lebar dan besar */}
+      {/* HOVER PANEL */}
       {showPanel && (
         <div
           className="hover-panel"
