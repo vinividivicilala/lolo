@@ -55,41 +55,41 @@ export default function HomePage(): React.JSX.Element {
     Note: {
       title: "Note Features",
       items: [
-        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari dengan mudah" },
-        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
-        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air harian" },
-        { name: "🏃 Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
-        { name: "😴 Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
+        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari" },
+        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan" },
+        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air" },
+        { name: "🏃 Catatan Olahraga", desc: "Track olahraga" },
+        { name: "😴 Catatan Tidur", desc: "Monitor pola tidur" }
       ]
     },
     Community: {
       title: "Community Features",
       items: [
-        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
-        { name: "👥 Grup Belajar", desc: "Belajar bersama dalam grup" },
-        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek dan ide" },
-        { name: "📢 Event & Meetup", desc: "Informasi acara dan pertemuan" },
-        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
+        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan anggota" },
+        { name: "👥 Grup Belajar", desc: "Belajar bersama" },
+        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek" },
+        { name: "📢 Event & Meetup", desc: "Informasi acara" },
+        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran" }
       ]
     },
     Donation: {
       title: "Donation Features",
       items: [
-        { name: "💰 Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
-        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
-        { name: "📚 Donasi Buku", desc: "Donasi buku untuk pendidikan" },
-        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
-        { name: "🏥 Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
+        { name: "💰 Donasi Uang", desc: "Donasi finansial" },
+        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan" },
+        { name: "📚 Donasi Buku", desc: "Donasi buku" },
+        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian" },
+        { name: "🏥 Donasi Kesehatan", desc: "Donasi kesehatan" }
       ]
     },
     Blog: {
       title: "Blog Features",
       items: [
-        { name: "✍️ Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
-        { name: "📖 Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
-        { name: "🎯 Tips & Trik", desc: "Tips berguna untuk keseharian" },
-        { name: "📰 Berita", desc: "Update berita terbaru" },
-        { name: "🎬 Video Content", desc: "Konten video menarik" }
+        { name: "✍️ Artikel Terbaru", desc: "Artikel terkini" },
+        { name: "📖 Tutorial", desc: "Panduan lengkap" },
+        { name: "🎯 Tips & Trik", desc: "Tips berguna" },
+        { name: "📰 Berita", desc: "Update berita" },
+        { name: "🎬 Video Content", desc: "Konten video" }
       ]
     }
   };
@@ -165,7 +165,7 @@ export default function HomePage(): React.JSX.Element {
       leftText.style.whiteSpace = 'nowrap';
       leftText.textContent = 'SUBSCRIBE';
       
-      // Foto horizontal (hanya 1 foto)
+      // Foto horizontal
       const imageContainer = document.createElement('div');
       imageContainer.style.width = '280px';
       imageContainer.style.height = '160px';
@@ -183,46 +183,8 @@ export default function HomePage(): React.JSX.Element {
       img.style.objectFit = 'cover';
       imageContainer.appendChild(img);
       
-      // Bagian kanan - bg hitam + teks + border radius
-      const rightBox = document.createElement('div');
-      rightBox.style.backgroundColor = '#000000';
-      rightBox.style.borderRadius = '60px';
-      rightBox.style.padding = '20px 36px';
-      rightBox.style.display = 'inline-flex';
-      rightBox.style.alignItems = 'center';
-      rightBox.style.gap = '16px';
-      rightBox.style.flexShrink = '0';
-      rightBox.style.height = '160px';
-      rightBox.style.boxSizing = 'border-box';
-      
-      const rightText = document.createElement('span');
-      rightText.style.fontFamily = "'Aeonik-Regular', Helvetica, Arial, sans-serif";
-      rightText.style.fontSize = '28px';
-      rightText.style.fontWeight = '600';
-      rightText.style.color = '#ffffff';
-      rightText.style.letterSpacing = '-0.01em';
-      rightText.textContent = 'GET ACCESS';
-      
-      const rightArrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      rightArrow.setAttribute('width', '32');
-      rightArrow.setAttribute('height', '32');
-      rightArrow.setAttribute('viewBox', '0 0 24 24');
-      rightArrow.setAttribute('fill', 'none');
-      rightArrow.style.stroke = '#ffffff';
-      rightArrow.style.strokeWidth = '1.5';
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M7 17L17 7M17 7H7M17 7V17');
-      path.setAttribute('stroke', 'currentColor');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('stroke-linejoin', 'round');
-      rightArrow.appendChild(path);
-      
-      rightBox.appendChild(rightText);
-      rightBox.appendChild(rightArrow);
-      
       marqueeItem.appendChild(leftText);
       marqueeItem.appendChild(imageContainer);
-      marqueeItem.appendChild(rightBox);
       
       content.appendChild(marqueeItem);
       
@@ -691,7 +653,7 @@ export default function HomePage(): React.JSX.Element {
           border-radius: 24px;
           padding: 28px 32px;
           z-index: 100000;
-          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+          boxShadow: 0 25px 50px -12px rgba(0,0,0,0.5);
           border: 1px solid rgba(255,255,255,0.1);
           animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           width: 560px;
@@ -834,10 +796,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '48px',
-                    opacity: isScrolled ? 0 : 1,
-                    visibility: isScrolled ? 'hidden' : 'visible',
-                    transition: 'opacity 0.3s ease, visibility 0.3s ease'
+                    gap: '48px'
                   }}
                 >
                   {["Note", "Community", "Donation", "Blog"].map((item) => (
@@ -867,7 +826,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* NAVBAR KIRI - Saat scroll muncul di samping kanan judul */}
+              {/* NAVBAR KIRI - Saat scroll, navbar pindah ke sisi kiri (bukan duplikat) */}
               {isScrolled && (
                 <div
                   style={{
@@ -877,48 +836,28 @@ export default function HomePage(): React.JSX.Element {
                     zIndex: 100,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '30px',
+                    gap: '48px',
                     animation: 'fadeInUp 0.3s ease'
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'Inter, "Helvetica Neue", sans-serif',
-                      fontWeight: '400',
-                      fontSize: '28px',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    MENURU
-                  </span>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '32px'
-                    }}
-                  >
-                    {["Note", "Community", "Donation", "Blog"].map((item) => (
-                      <span
-                        key={item}
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          letterSpacing: '-0.01em',
-                          cursor: 'pointer',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
+                  {["Note", "Community", "Donation", "Blog"].map((item) => (
+                    <span
+                      key={item}
+                      style={{
+                        fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                        fontSize: '20px',
+                        fontWeight: '400',
+                        color: '#000000',
+                        letterSpacing: '-0.01em',
+                        cursor: 'pointer',
+                        transition: 'opacity 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
               )}
 
