@@ -803,7 +803,7 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
-        /* Meet the team button */
+        /* Meet the team button - arrow always visible */
         .meet-team-btn {
           display: inline-flex;
           align-items: center;
@@ -1196,7 +1196,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </Link>
 
-                    {/* MEET THE TEAM BUTTON - Hijau stabilo, border radius menyambung, panah dalam lingkaran */}
+                    {/* MEET THE TEAM BUTTON - Arrow selalu terlihat tanpa hover */}
                     <div className="meet-team-btn">
                       <span className="meet-team-text">Meet the team</span>
                       <div className="meet-team-icon">
