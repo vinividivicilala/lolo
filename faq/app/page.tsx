@@ -55,43 +55,43 @@ export default function HomePage(): React.JSX.Element {
   // Data untuk Hover Panel
   const navPanelData = {
     Note: {
-      title: "Note Features",
+      title: "Note",
       items: [
-        { name: "📝 Catatan Harian", desc: "Catat aktivitas sehari-hari" },
-        { name: "🍽️ Catatan Makanan", desc: "Rekam asupan makanan" },
-        { name: "💧 Catatan Minum", desc: "Pantau konsumsi air" },
-        { name: "🏃 Catatan Olahraga", desc: "Track olahraga" },
-        { name: "😴 Catatan Tidur", desc: "Monitor pola tidur" }
+        { name: "Catatan Harian", desc: "Catat aktivitas sehari-hari dengan mudah" },
+        { name: "Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
+        { name: "Catatan Minum", desc: "Pantau konsumsi air harian" },
+        { name: "Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
+        { name: "Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
       ]
     },
     Community: {
-      title: "Community Features",
+      title: "Community",
       items: [
-        { name: "💬 Diskusi Umum", desc: "Berkomunikasi dengan anggota" },
-        { name: "👥 Grup Belajar", desc: "Belajar bersama" },
-        { name: "🤝 Kolaborasi", desc: "Kerjasama proyek" },
-        { name: "📢 Event & Meetup", desc: "Informasi acara" },
-        { name: "⭐ Feedback & Saran", desc: "Kritik dan saran" }
+        { name: "Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
+        { name: "Grup Belajar", desc: "Belajar bersama dalam grup" },
+        { name: "Kolaborasi", desc: "Kerjasama proyek dan ide" },
+        { name: "Event & Meetup", desc: "Informasi acara dan pertemuan" },
+        { name: "Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
       ]
     },
     Donation: {
-      title: "Donation Features",
+      title: "Donation",
       items: [
-        { name: "💰 Donasi Uang", desc: "Donasi finansial" },
-        { name: "🍚 Donasi Makanan", desc: "Berbagi makanan" },
-        { name: "📚 Donasi Buku", desc: "Donasi buku" },
-        { name: "👕 Donasi Pakaian", desc: "Donasi pakaian" },
-        { name: "🏥 Donasi Kesehatan", desc: "Donasi kesehatan" }
+        { name: "Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
+        { name: "Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
+        { name: "Donasi Buku", desc: "Donasi buku untuk pendidikan" },
+        { name: "Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
+        { name: "Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
       ]
     },
     Blog: {
-      title: "Blog Features",
+      title: "Blog",
       items: [
-        { name: "✍️ Artikel Terbaru", desc: "Artikel terkini" },
-        { name: "📖 Tutorial", desc: "Panduan lengkap" },
-        { name: "🎯 Tips & Trik", desc: "Tips berguna" },
-        { name: "📰 Berita", desc: "Update berita" },
-        { name: "🎬 Video Content", desc: "Konten video" }
+        { name: "Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
+        { name: "Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
+        { name: "Tips & Trik", desc: "Tips berguna untuk keseharian" },
+        { name: "Berita", desc: "Update berita terbaru" },
+        { name: "Video Content", desc: "Konten video menarik" }
       ]
     }
   };
@@ -148,8 +148,8 @@ export default function HomePage(): React.JSX.Element {
       
       content.innerHTML = '';
       
-      // Buat 8 item agar tidak terputus
-      for (let i = 0; i < 8; i++) {
+      // Buat 10 item agar tidak terputus
+      for (let i = 0; i < 10; i++) {
         const marqueeItem = document.createElement('div');
         marqueeItem.style.display = 'inline-flex';
         marqueeItem.style.alignItems = 'center';
@@ -203,7 +203,7 @@ export default function HomePage(): React.JSX.Element {
       
       const animation = gsap.to(content, {
         x: -contentWidth,
-        duration: 40,
+        duration: 45,
         ease: "none",
         repeat: -1
       });
@@ -660,15 +660,22 @@ export default function HomePage(): React.JSX.Element {
 
         .hover-panel {
           position: fixed;
-          background: rgba(0, 0, 0, 0.98);
-          backdropFilter: blur(16px);
-          border-radius: 24px;
-          padding: 28px 32px;
+          background: linear-gradient(135deg, #a2ea13 0%, #7bc400 100%);
+          backdropFilter: blur(0px);
+          border-radius: 32px;
+          padding: 32px 36px;
           z-index: 100000;
-          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+          border: none;
           animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          width: 560px;
+          width: 700px;
+          cursor: pointer;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .hover-panel:hover {
+          transform: scale(1.02);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.4);
         }
       `}</style>
 
@@ -840,7 +847,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* MARQUEE SECTION - diperbanyak 8 item agar seamless */}
+              {/* MARQUEE SECTION */}
               <div
                 ref={marqueeContainerRef}
                 style={{
@@ -1125,7 +1132,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL */}
+      {/* HOVER PANEL - BG HIJAU STABILO, BORDER RADIUS BESAR, JUDUL + DESKRIPSI + FOTO */}
       {showPanel && (
         <div
           className="hover-panel"
@@ -1143,72 +1150,69 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '24px',
-              paddingBottom: '16px',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
+              marginBottom: '28px'
             }}
           >
             <div
               style={{
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '24px',
-                fontWeight: '600',
-                color: '#ffffff',
-                letterSpacing: '-0.01em'
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#000000',
+                letterSpacing: '-0.02em'
               }}
             >
               {navPanelData[hoveredNav as keyof typeof navPanelData].title}
             </div>
             <div
               style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '13px',
-                color: '#888888',
-                cursor: 'pointer',
-                transition: 'color 0.2s ease'
+                width: '80px',
+                height: '80px',
+                backgroundColor: '#ffffff',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                position: 'relative',
+                boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#888888'}
             >
-              View All →
+              <Image
+                src="/images/ai.jpg"
+                alt={hoveredNav}
+                fill
+                style={{ objectFit: 'cover' }}
+              />
             </div>
           </div>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px'
+              gap: '20px'
             }}
           >
             {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
               <div
                 key={idx}
                 style={{
-                  padding: '16px 18px',
-                  borderRadius: '16px',
+                  padding: '16px 0',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.05)'
+                  borderBottom: '1px solid rgba(0,0,0,0.05)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-                  e.currentTarget.style.transform = 'translateX(6px)';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.currentTarget.style.transform = 'translateX(8px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                   e.currentTarget.style.transform = 'translateX(0)';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
                 }}
               >
                 <div
                   style={{
                     fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    marginBottom: '8px'
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    marginBottom: '6px'
                   }}
                 >
                   {item.name}
@@ -1216,8 +1220,8 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   style={{
                     fontFamily: "'Questrial', sans-serif",
-                    fontSize: '13px',
-                    color: '#999999',
+                    fontSize: '14px',
+                    color: '#333333',
                     lineHeight: '1.4'
                   }}
                 >
@@ -1228,9 +1232,9 @@ export default function HomePage(): React.JSX.Element {
           </div>
           <div
             style={{
-              marginTop: '24px',
-              paddingTop: '16px',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
+              marginTop: '28px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(0,0,0,0.1)',
               display: 'flex',
               justifyContent: 'flex-end'
             }}
@@ -1241,20 +1245,20 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 gap: '12px',
                 fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '500',
-                color: '#ffffff',
+                color: '#000000',
                 cursor: 'pointer',
                 transition: 'opacity 0.2s ease',
-                padding: '8px 16px',
+                padding: '10px 20px',
                 borderRadius: '60px',
-                background: 'rgba(255,255,255,0.05)'
+                background: 'rgba(0,0,0,0.05)'
               }}
               onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
               onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
               <span>Explore {hoveredNav}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
