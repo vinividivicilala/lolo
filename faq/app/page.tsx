@@ -31,6 +31,14 @@ export default function HomePage(): React.JSX.Element {
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // State untuk notifikasi (angka otomatis)
+  const [notificationCounts, setNotificationCounts] = useState({
+    Note: 3,
+    Community: 7,
+    Donation: 2,
+    Blog: 5
+  });
+
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
   const headerSectionRef = useRef<HTMLDivElement>(null);
@@ -566,8 +574,6 @@ export default function HomePage(): React.JSX.Element {
 
   const panelPosition = getPanelPosition();
 
-  // Angka otomatis untuk navbar (1-4)
-  const navNumbers = ["01", "02", "03", "04"];
   const navNames = ["Note", "Community", "Donation", "Blog"];
 
   return (
@@ -925,7 +931,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Dengan angka otomatis + bg hijau stabilo */}
+                {/* NAVBAR - Dengan angka notifikasi di ATAS teks */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -935,27 +941,29 @@ export default function HomePage(): React.JSX.Element {
                     transition: 'transform 0.1s linear'
                   }}
                 >
-                  {navNames.map((item, idx) => (
+                  {navNames.map((item) => (
                     <div
                       key={item}
                       ref={item === "Note" ? noteRef : null}
-                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
                       onMouseEnter={() => handleNavHover(item)}
                       onMouseLeave={handleNavLeave}
                     >
+                      {/* Angka notifikasi di ATAS teks navbar */}
                       <span
                         style={{
                           fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '20px',
+                          fontSize: '14px',
                           fontWeight: '600',
                           color: '#000000',
                           backgroundColor: '#c5e800',
-                          padding: '4px 10px',
+                          padding: '2px 10px',
                           borderRadius: '60px',
-                          display: 'inline-block'
+                          display: 'inline-block',
+                          lineHeight: '1.4'
                         }}
                       >
-                        {navNumbers[idx]}
+                        {notificationCounts[item as keyof typeof notificationCounts]}
                       </span>
                       <span
                         style={{
@@ -1261,7 +1269,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* PREVIEW CARD - TANPA BORDER LINE BAWAH */}
+      {/* PREVIEW CARD */}
       {showPanel && (
         <div
           className="preview-card"
@@ -1275,7 +1283,6 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           <div className="preview-card-inner">
-            {/* SISI KIRI - LIST ITEMS */}
             <div className="preview-left">
               <div className="preview-items">
                 {previewData[hoveredNav as keyof typeof previewData].items.map((item, idx) => (
@@ -1293,8 +1300,6 @@ export default function HomePage(): React.JSX.Element {
                 ))}
               </div>
             </div>
-
-            {/* SISI KANAN */}
             <div className="preview-right">
               <div className="preview-title">
                 {previewData[hoveredNav as keyof typeof previewData].title}
