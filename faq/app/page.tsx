@@ -56,42 +56,50 @@ export default function HomePage(): React.JSX.Element {
   const navPanelData = {
     Note: {
       title: "Note",
+      description: "Catat semua aktivitas harianmu dengan mudah",
+      image: "/images/5.jpg",
       items: [
-        { name: "Catatan Harian", desc: "Catat aktivitas sehari-hari dengan mudah" },
-        { name: "Catatan Makanan", desc: "Rekam asupan makanan dan nutrisi" },
-        { name: "Catatan Minum", desc: "Pantau konsumsi air harian" },
-        { name: "Catatan Olahraga", desc: "Track olahraga dan aktivitas fisik" },
-        { name: "Catatan Tidur", desc: "Monitor pola dan kualitas tidur" }
+        { name: "Catatan Harian", desc: "Catat aktivitas sehari-hari" },
+        { name: "Catatan Makanan", desc: "Rekam asupan makanan" },
+        { name: "Catatan Minum", desc: "Pantau konsumsi air" },
+        { name: "Catatan Olahraga", desc: "Track olahraga" },
+        { name: "Catatan Tidur", desc: "Monitor pola tidur" }
       ]
     },
     Community: {
       title: "Community",
+      description: "Bergabung dan terhubung dengan komunitas",
+      image: "/images/ai.jpg",
       items: [
-        { name: "Diskusi Umum", desc: "Berkomunikasi dengan sesama anggota" },
-        { name: "Grup Belajar", desc: "Belajar bersama dalam grup" },
-        { name: "Kolaborasi", desc: "Kerjasama proyek dan ide" },
-        { name: "Event & Meetup", desc: "Informasi acara dan pertemuan" },
-        { name: "Feedback & Saran", desc: "Kritik dan saran untuk kemajuan" }
+        { name: "Diskusi Umum", desc: "Berkomunikasi dengan anggota" },
+        { name: "Grup Belajar", desc: "Belajar bersama" },
+        { name: "Kolaborasi", desc: "Kerjasama proyek" },
+        { name: "Event & Meetup", desc: "Informasi acara" },
+        { name: "Feedback & Saran", desc: "Kritik dan saran" }
       ]
     },
     Donation: {
       title: "Donation",
+      description: "Donasi untuk membantu sesama",
+      image: "/images/lkhh.jpg",
       items: [
-        { name: "Donasi Uang", desc: "Donasi finansial untuk yang membutuhkan" },
-        { name: "Donasi Makanan", desc: "Berbagi makanan dengan sesama" },
-        { name: "Donasi Buku", desc: "Donasi buku untuk pendidikan" },
-        { name: "Donasi Pakaian", desc: "Donasi pakaian layak pakai" },
-        { name: "Donasi Kesehatan", desc: "Donasi untuk kesehatan" }
+        { name: "Donasi Uang", desc: "Donasi finansial" },
+        { name: "Donasi Makanan", desc: "Berbagi makanan" },
+        { name: "Donasi Buku", desc: "Donasi buku" },
+        { name: "Donasi Pakaian", desc: "Donasi pakaian" },
+        { name: "Donasi Kesehatan", desc: "Donasi kesehatan" }
       ]
     },
     Blog: {
       title: "Blog",
+      description: "Artikel dan tutorial terbaru setiap hari",
+      image: "/images/5.jpg",
       items: [
-        { name: "Artikel Terbaru", desc: "Baca artikel terkini setiap hari" },
-        { name: "Tutorial", desc: "Panduan lengkap dan mudah diikuti" },
-        { name: "Tips & Trik", desc: "Tips berguna untuk keseharian" },
-        { name: "Berita", desc: "Update berita terbaru" },
-        { name: "Video Content", desc: "Konten video menarik" }
+        { name: "Artikel Terbaru", desc: "Baca artikel terkini" },
+        { name: "Tutorial", desc: "Panduan lengkap" },
+        { name: "Tips & Trik", desc: "Tips berguna" },
+        { name: "Berita", desc: "Update berita" },
+        { name: "Video Content", desc: "Konten video" }
       ]
     }
   };
@@ -136,7 +144,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading, showScrollDown]);
 
-  // Efek untuk animasi marquee - diperbanyak konten agar seamless
+  // Efek untuk animasi marquee
   useEffect(() => {
     if (isLoading) return;
     
@@ -148,7 +156,6 @@ export default function HomePage(): React.JSX.Element {
       
       content.innerHTML = '';
       
-      // Buat 10 item agar tidak terputus
       for (let i = 0; i < 10; i++) {
         const marqueeItem = document.createElement('div');
         marqueeItem.style.display = 'inline-flex';
@@ -157,7 +164,6 @@ export default function HomePage(): React.JSX.Element {
         marqueeItem.style.marginRight = '80px';
         marqueeItem.style.flexShrink = '0';
         
-        // Teks SUBSCRIBE
         const leftText = document.createElement('span');
         leftText.style.fontFamily = "'Inter', 'Helvetica Neue', sans-serif";
         leftText.style.fontWeight = '700';
@@ -169,7 +175,6 @@ export default function HomePage(): React.JSX.Element {
         leftText.style.whiteSpace = 'nowrap';
         leftText.textContent = 'SUBSCRIBE';
         
-        // Foto horizontal
         const imageContainer = document.createElement('div');
         imageContainer.style.width = '280px';
         imageContainer.style.height = '160px';
@@ -193,7 +198,6 @@ export default function HomePage(): React.JSX.Element {
         content.appendChild(marqueeItem);
       }
       
-      // Clone lagi untuk seamless loop
       const cloneContent = content.cloneNode(true);
       content.appendChild(cloneContent);
       
@@ -224,7 +228,7 @@ export default function HomePage(): React.JSX.Element {
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Efek untuk animasi scroll header MENURU (300px → 60px)
+  // Efek untuk animasi scroll header MENURU
   useEffect(() => {
     if (isLoading) return;
     
@@ -246,7 +250,6 @@ export default function HomePage(): React.JSX.Element {
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
           
-          // Animasi navbar pindah ke samping kanan judul
           if (navbarRef.current) {
             const translateX = progress * 380;
             setNavbarTransform(translateX);
@@ -259,7 +262,7 @@ export default function HomePage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // Scroll handler untuk scroll down dan navbar
+  // Scroll handler
   useEffect(() => {
     if (isLoading) return;
     
@@ -660,22 +663,117 @@ export default function HomePage(): React.JSX.Element {
 
         .hover-panel {
           position: fixed;
-          background: linear-gradient(135deg, #a2ea13 0%, #7bc400 100%);
-          backdropFilter: blur(0px);
-          border-radius: 32px;
-          padding: 32px 36px;
+          background: #ffffff;
+          border-radius: 28px;
+          padding: 32px;
           z-index: 100000;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-          border: none;
+          box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+          border: 1px solid rgba(0,0,0,0.05);
           animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          width: 700px;
+          width: 480px;
           cursor: pointer;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         
         .hover-panel:hover {
-          transform: scale(1.02);
-          box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+          transform: translateY(-4px);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+        }
+        
+        .panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 24px;
+        }
+        
+        .panel-title {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 32px;
+          font-weight: 700;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1.2;
+        }
+        
+        .panel-desc {
+          font-family: 'Questrial', sans-serif;
+          font-size: 15px;
+          color: #666666;
+          margin-top: 8px;
+          line-height: 1.4;
+        }
+        
+        .panel-image {
+          width: 100px;
+          height: 100px;
+          background-color: #f0f0f0;
+          border-radius: 20px;
+          overflow: hidden;
+          position: relative;
+          flex-shrink: 0;
+        }
+        
+        .panel-items {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-top: 20px;
+        }
+        
+        .panel-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 0;
+          border-bottom: 1px solid #f0f0f0;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .panel-item:hover {
+          transform: translateX(6px);
+        }
+        
+        .item-name {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 18px;
+          font-weight: 500;
+          color: #000000;
+        }
+        
+        .item-arrow {
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        
+        .panel-item:hover .item-arrow {
+          opacity: 1;
+        }
+        
+        .view-all {
+          margin-top: 20px;
+          padding-top: 16px;
+          border-top: 1px solid #f0f0f0;
+          display: flex;
+          justify-content: flex-end;
+        }
+        
+        .view-all-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+          color: #000000;
+          cursor: pointer;
+          transition: opacity 0.2s ease;
+          padding: 8px 0;
+        }
+        
+        .view-all-btn:hover {
+          opacity: 0.6;
         }
       `}</style>
 
@@ -810,7 +908,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Posisi awal di kanan, saat scroll bergerak ke samping kanan judul */}
+                {/* NAVBAR */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -1132,7 +1230,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL - BG HIJAU STABILO, BORDER RADIUS BESAR, JUDUL + DESKRIPSI + FOTO */}
+      {/* HOVER PANEL - Seperti desain gambar */}
       {showPanel && (
         <div
           className="hover-panel"
@@ -1145,120 +1243,45 @@ export default function HomePage(): React.JSX.Element {
             top: panelPosition.top,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '28px'
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#000000',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              {navPanelData[hoveredNav as keyof typeof navPanelData].title}
+          {/* Header dengan judul, deskripsi, dan foto */}
+          <div className="panel-header">
+            <div>
+              <div className="panel-title">
+                {navPanelData[hoveredNav as keyof typeof navPanelData].title}
+              </div>
+              <div className="panel-desc">
+                {navPanelData[hoveredNav as keyof typeof navPanelData].description}
+              </div>
             </div>
-            <div
-              style={{
-                width: '80px',
-                height: '80px',
-                backgroundColor: '#ffffff',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                position: 'relative',
-                boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
-              }}
-            >
+            <div className="panel-image">
               <Image
-                src="/images/ai.jpg"
+                src={navPanelData[hoveredNav as keyof typeof navPanelData].image}
                 alt={hoveredNav}
                 fill
                 style={{ objectFit: 'cover' }}
               />
             </div>
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '20px'
-            }}
-          >
+
+          {/* List items */}
+          <div className="panel-items">
             {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  padding: '16px 0',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  borderBottom: '1px solid rgba(0,0,0,0.05)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateX(8px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '6px'
-                  }}
-                >
-                  {item.name}
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'Questrial', sans-serif",
-                    fontSize: '14px',
-                    color: '#333333',
-                    lineHeight: '1.4'
-                  }}
-                >
-                  {item.desc}
-                </div>
+              <div key={idx} className="panel-item">
+                <span className="item-name">{item.name}</span>
+                <span className="item-arrow">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
               </div>
             ))}
           </div>
-          <div
-            style={{
-              marginTop: '28px',
-              paddingTop: '20px',
-              borderTop: '1px solid rgba(0,0,0,0.1)',
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}
-          >
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#000000',
-                cursor: 'pointer',
-                transition: 'opacity 0.2s ease',
-                padding: '10px 20px',
-                borderRadius: '60px',
-                background: 'rgba(0,0,0,0.05)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              <span>Explore {hoveredNav}</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+
+          {/* View All */}
+          <div className="view-all">
+            <div className="view-all-btn">
+              <span>View All Services</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
