@@ -55,52 +55,52 @@ export default function HomePage(): React.JSX.Element {
   // Data untuk Hover Panel
   const navPanelData = {
     Note: {
-      title: "Note",
-      description: "Catat semua aktivitas harianmu dengan mudah",
-      image: "/images/5.jpg",
-      items: [
-        { name: "Catatan Harian", desc: "Catat aktivitas sehari-hari" },
-        { name: "Catatan Makanan", desc: "Rekam asupan makanan" },
-        { name: "Catatan Minum", desc: "Pantau konsumsi air" },
-        { name: "Catatan Olahraga", desc: "Track olahraga" },
-        { name: "Catatan Tidur", desc: "Monitor pola tidur" }
-      ]
-    },
-    Community: {
-      title: "Community",
-      description: "Bergabung dan terhubung dengan komunitas",
+      title: "Web Design",
+      description: "Deliver your business to a wider audience",
       image: "/images/ai.jpg",
       items: [
-        { name: "Diskusi Umum", desc: "Berkomunikasi dengan anggota" },
-        { name: "Grup Belajar", desc: "Belajar bersama" },
-        { name: "Kolaborasi", desc: "Kerjasama proyek" },
-        { name: "Event & Meetup", desc: "Informasi acara" },
-        { name: "Feedback & Saran", desc: "Kritik dan saran" }
-      ]
+        { name: "Craft CMS", desc: "The most reliable way to build a website" },
+        { name: "Branding", desc: "Creating brands you're proud of" },
+        { name: "SEO", desc: "Get your brand seen online" },
+        { name: "Shopify", desc: "Custom Shopify store in 4 weeks" }
+      ],
+      viewAll: "View all Services"
     },
-    Donation: {
-      title: "Donation",
-      description: "Donasi untuk membantu sesama",
+    Community: {
+      title: "Community Hub",
+      description: "Connect and grow with your community",
       image: "/images/lkhh.jpg",
       items: [
-        { name: "Donasi Uang", desc: "Donasi finansial" },
-        { name: "Donasi Makanan", desc: "Berbagi makanan" },
-        { name: "Donasi Buku", desc: "Donasi buku" },
-        { name: "Donasi Pakaian", desc: "Donasi pakaian" },
-        { name: "Donasi Kesehatan", desc: "Donasi kesehatan" }
-      ]
+        { name: "Discussion Forum", desc: "Engage with members" },
+        { name: "Events", desc: "Join meetups and events" },
+        { name: "Groups", desc: "Create interest groups" },
+        { name: "Resources", desc: "Share knowledge and tools" }
+      ],
+      viewAll: "Explore Community"
     },
-    Blog: {
-      title: "Blog",
-      description: "Artikel dan tutorial terbaru setiap hari",
+    Donation: {
+      title: "Donation Center",
+      description: "Make a difference today",
       image: "/images/5.jpg",
       items: [
-        { name: "Artikel Terbaru", desc: "Baca artikel terkini" },
-        { name: "Tutorial", desc: "Panduan lengkap" },
-        { name: "Tips & Trik", desc: "Tips berguna" },
-        { name: "Berita", desc: "Update berita" },
-        { name: "Video Content", desc: "Konten video" }
-      ]
+        { name: "Monetary Donation", desc: "Support financially" },
+        { name: "Food Donation", desc: "Share meals with others" },
+        { name: "Books Donation", desc: "Donate books for education" },
+        { name: "Clothing Donation", desc: "Give clothes to those in need" }
+      ],
+      viewAll: "View All Donations"
+    },
+    Blog: {
+      title: "Blog & Articles",
+      description: "Latest insights and tutorials",
+      image: "/images/ai.jpg",
+      items: [
+        { name: "Latest Posts", desc: "Read our newest articles" },
+        { name: "Tutorials", desc: "Step-by-step guides" },
+        { name: "Case Studies", desc: "Real success stories" },
+        { name: "News", desc: "Stay updated with trends" }
+      ],
+      viewAll: "Read All Blogs"
     }
   };
 
@@ -661,118 +661,133 @@ export default function HomePage(): React.JSX.Element {
           line-height: 1.3;
         }
 
-        .hover-panel {
+        /* HOVER PANEL CARD STYLE - SEPERTI GAMBAR */
+        .hover-panel-card {
           position: fixed;
           background: #ffffff;
-          border-radius: 28px;
-          padding: 32px;
+          border-radius: 24px;
+          padding: 28px;
           z-index: 100000;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-          border: 1px solid rgba(0,0,0,0.05);
-          animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          width: 480px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          border: 1px solid #eaeaea;
+          animation: fadeInUp 0.2s ease;
+          width: 420px;
           cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          transition: all 0.2s ease;
         }
         
-        .hover-panel:hover {
+        .hover-panel-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
         }
         
-        .panel-header {
+        /* HEADER CARD: JUDUL + FOTO DI KANAN */
+        .card-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          gap: 20px;
           margin-bottom: 24px;
         }
         
-        .panel-title {
+        .card-header-left {
+          flex: 1;
+        }
+        
+        .card-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 32px;
+          font-size: 28px;
           font-weight: 700;
           color: #000000;
           letter-spacing: -0.02em;
           line-height: 1.2;
+          margin-bottom: 8px;
         }
         
-        .panel-desc {
+        .card-description {
           font-family: 'Questrial', sans-serif;
-          font-size: 15px;
+          font-size: 14px;
           color: #666666;
-          margin-top: 8px;
           line-height: 1.4;
         }
         
-        .panel-image {
-          width: 100px;
-          height: 100px;
-          background-color: #f0f0f0;
-          border-radius: 20px;
+        .card-image {
+          width: 80px;
+          height: 80px;
+          background-color: #f5f5f5;
+          border-radius: 16px;
           overflow: hidden;
           position: relative;
           flex-shrink: 0;
         }
         
-        .panel-items {
+        /* LIST ITEMS */
+        .card-items {
           display: flex;
           flex-direction: column;
           gap: 16px;
-          margin-top: 20px;
+          margin-bottom: 24px;
         }
         
-        .panel-item {
+        .card-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 0;
+          padding: 8px 0;
           border-bottom: 1px solid #f0f0f0;
           cursor: pointer;
           transition: all 0.2s ease;
         }
         
-        .panel-item:hover {
-          transform: translateX(6px);
+        .card-item:hover {
+          transform: translateX(4px);
         }
         
-        .item-name {
+        .card-item-left {
+          flex: 1;
+        }
+        
+        .card-item-title {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 500;
+          color: #000000;
+          margin-bottom: 4px;
+        }
+        
+        .card-item-desc {
+          font-family: 'Questrial', sans-serif;
+          font-size: 12px;
+          color: #999999;
+        }
+        
+        .card-item-arrow {
+          opacity: 0;
+          transition: opacity 0.2s ease;
           color: #000000;
         }
         
-        .item-arrow {
-          opacity: 0;
-          transition: opacity 0.2s ease;
-        }
-        
-        .panel-item:hover .item-arrow {
+        .card-item:hover .card-item-arrow {
           opacity: 1;
         }
         
-        .view-all {
-          margin-top: 20px;
-          padding-top: 16px;
-          border-top: 1px solid #f0f0f0;
+        /* VIEW ALL BUTTON */
+        .card-view-all {
           display: flex;
           justify-content: flex-end;
-        }
-        
-        .view-all-btn {
-          display: inline-flex;
           align-items: center;
           gap: 8px;
+          padding-top: 12px;
+          border-top: 1px solid #f0f0f0;
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 500;
           color: #000000;
           cursor: pointer;
           transition: opacity 0.2s ease;
-          padding: 8px 0;
         }
         
-        .view-all-btn:hover {
+        .card-view-all:hover {
           opacity: 0.6;
         }
       `}</style>
@@ -1230,10 +1245,10 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* HOVER PANEL - Seperti desain gambar */}
+      {/* HOVER PANEL CARD - SEPERTI GAMBAR (KIRI: JUDUL+DESKRIPSI, KANAN: FOTO, BAWAH: LIST ITEM + VIEW ALL) */}
       {showPanel && (
         <div
-          className="hover-panel"
+          className="hover-panel-card"
           onMouseEnter={() => {
             if (panelTimeoutRef.current) clearTimeout(panelTimeoutRef.current);
           }}
@@ -1243,17 +1258,17 @@ export default function HomePage(): React.JSX.Element {
             top: panelPosition.top,
           }}
         >
-          {/* Header dengan judul, deskripsi, dan foto */}
-          <div className="panel-header">
-            <div>
-              <div className="panel-title">
+          {/* HEADER: JUDUL DI KIRI, FOTO DI KANAN */}
+          <div className="card-header">
+            <div className="card-header-left">
+              <div className="card-title">
                 {navPanelData[hoveredNav as keyof typeof navPanelData].title}
               </div>
-              <div className="panel-desc">
+              <div className="card-description">
                 {navPanelData[hoveredNav as keyof typeof navPanelData].description}
               </div>
             </div>
-            <div className="panel-image">
+            <div className="card-image">
               <Image
                 src={navPanelData[hoveredNav as keyof typeof navPanelData].image}
                 alt={hoveredNav}
@@ -1263,28 +1278,29 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* List items */}
-          <div className="panel-items">
+          {/* LIST ITEMS */}
+          <div className="card-items">
             {navPanelData[hoveredNav as keyof typeof navPanelData].items.map((item, idx) => (
-              <div key={idx} className="panel-item">
-                <span className="item-name">{item.name}</span>
-                <span className="item-arrow">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <div key={idx} className="card-item">
+                <div className="card-item-left">
+                  <div className="card-item-title">{item.name}</div>
+                  <div className="card-item-desc">{item.desc}</div>
+                </div>
+                <div className="card-item-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </span>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* View All */}
-          <div className="view-all">
-            <div className="view-all-btn">
-              <span>View All Services</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+          {/* VIEW ALL BUTTON */}
+          <div className="card-view-all">
+            <span>{navPanelData[hoveredNav as keyof typeof navPanelData].viewAll}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
       )}
