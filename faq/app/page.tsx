@@ -265,7 +265,7 @@ export default function HomePage(): React.JSX.Element {
 
           if (startPlanRef.current) {
             const translateXStartPlan = progress * 380;
-            startPlanRef.current.style.transform = `translateX(${-translateXStartPlan}px)`;
+            startPlanRef.current.style.transform = `translateX(${translateXStartPlan}px)`;
           }
         }
       });
@@ -809,7 +809,7 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
-        /* Meet the team button - Arrow selalu terlihat dengan warna kontras */
+        /* Meet the team button */
         .meet-team-btn {
           display: inline-flex;
           align-items: center;
@@ -857,7 +857,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Start a Plan button - style seperti Meet the Team */
+        /* Start a Plan button - style seperti Meet the Team (tapi warna terbalik) */
         .start-plan-btn {
           display: inline-flex;
           align-items: center;
@@ -867,11 +867,11 @@ export default function HomePage(): React.JSX.Element {
           cursor: pointer;
           transition: all 0.3s ease;
           text-decoration: none;
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.15);
         }
         
         .start-plan-btn:hover {
-          transform: translateX(-4px);
+          transform: translateX(4px);
           opacity: 0.9;
         }
         
@@ -1021,17 +1021,7 @@ export default function HomePage(): React.JSX.Element {
                   gap: '40px'
                 }}
               >
-                {/* START A PLAN - Sisi Kanan (mengikuti scroll) */}
-                <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef}>
-                  <span className="start-plan-text">Start a Plan</span>
-                  <div className="start-plan-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                </Link>
-
-                {/* Teks MENURU besar - 300px */}
+                {/* Teks MENURU besar - Sisi Kiri */}
                 <div
                   ref={headerTextRef}
                   style={{
@@ -1049,7 +1039,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Dengan angka superscript */}
+                {/* NAVBAR - Tengah */}
                 <div
                   ref={navbarRef}
                   style={{
@@ -1095,6 +1085,16 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   ))}
                 </div>
+
+                {/* START A PLAN - Sisi Kanan */}
+                <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef}>
+                  <span className="start-plan-text">Start a Plan</span>
+                  <div className="start-plan-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </Link>
               </div>
 
               {/* MARQUEE SECTION */}
@@ -1262,7 +1262,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </Link>
 
-                    {/* MEET THE TEAM BUTTON - Arrow berwarna hijau stabilo (#c5e800) agar kontras dengan background hitam */}
+                    {/* MEET THE TEAM BUTTON */}
                     <div className="meet-team-btn">
                       <span className="meet-team-text">Meet the team</span>
                       <div className="meet-team-icon">
