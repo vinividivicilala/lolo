@@ -909,8 +909,8 @@ export default function HomePage(): React.JSX.Element {
         /* Left text styles */
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
-          font-weight: 300;
-          font-size: 120px;
+          font-weight: 400;
+          font-size: 200px;
           color: #000000;
           letter-spacing: -0.03em;
           line-height: 1;
@@ -926,6 +926,43 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.02em;
           line-height: 1.3;
           max-width: 1000px;
+          margin-bottom: 40px;
+        }
+
+        /* Color dots */
+        .dots-container {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          margin-top: 20px;
+        }
+
+        .dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          cursor: pointer;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .dot:hover {
+          transform: scale(1.3);
+        }
+
+        .dot-black {
+          background-color: #000000;
+        }
+
+        .dot-green {
+          background-color: #c5e800;
+        }
+
+        .dot-blue {
+          background-color: #3b82f6;
+        }
+
+        .dot-red {
+          background-color: #ef4444;
         }
       `}</style>
 
@@ -1162,6 +1199,14 @@ export default function HomePage(): React.JSX.Element {
                 </div>
                 <div className="left-subheadline">
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
+                </div>
+                
+                {/* COLOR DOTS */}
+                <div className="dots-container">
+                  <div className="dot dot-black" title="View All"></div>
+                  <div className="dot dot-green" title="Note"></div>
+                  <div className="dot dot-blue" title="Community"></div>
+                  <div className="dot dot-red" title="Blog"></div>
                 </div>
               </div>
             </div>
