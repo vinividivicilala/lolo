@@ -910,7 +910,7 @@ export default function HomePage(): React.JSX.Element {
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
           font-weight: 400;
-          font-size: 200px;
+          font-size: 120px;
           color: #000000;
           letter-spacing: -0.03em;
           line-height: 1;
@@ -983,6 +983,44 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #000000;
           letter-spacing: -0.01em;
+        }
+
+        /* Navigation arrows */
+        .nav-arrows {
+          position: absolute;
+          right: 40px;
+          bottom: 40px;
+          display: flex;
+          gap: 16px;
+          z-index: 20;
+        }
+
+        .arrow-btn {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background-color: #000000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .arrow-btn:hover {
+          transform: scale(1.05);
+          background-color: #333333;
+        }
+
+        .arrow-btn svg {
+          stroke: #ffffff;
+          width: 24px;
+          height: 24px;
+        }
+
+        .arrow-left svg {
+          transform: rotate(180deg);
         }
       `}</style>
 
@@ -1239,6 +1277,20 @@ export default function HomePage(): React.JSX.Element {
                     <div className="dot dot-red"></div>
                     <span className="dot-label">Blog</span>
                   </div>
+                </div>
+              </div>
+
+              {/* NAVIGATION ARROWS - Sisi Kanan */}
+              <div className="nav-arrows">
+                <div className="arrow-btn arrow-left">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="arrow-btn arrow-right">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
               </div>
             </div>
