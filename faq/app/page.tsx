@@ -47,20 +47,21 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const startPlanRef = useRef<HTMLDivElement>(null);
   const headerContainerRef = useRef<HTMLDivElement>(null);
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait
+  // Data untuk foto portrait (sama dengan foto di marquee)
   const portraitImages = [
-    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Alex Morgan" },
-    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Jamie Lee" },
-    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Taylor Swift" },
-    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "Jordan Smith" },
-    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "Casey Jones" },
-    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Riley Wong" },
+    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio" },
+    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art" },
+    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Brand Design" },
+    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "UX Research" },
+    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "UI Design" },
+    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Motion Graphics" },
   ];
 
   // Data untuk Preview Card
@@ -133,6 +134,17 @@ export default function HomePage(): React.JSX.Element {
     "Stay inspired",
     "Click to begin"
   ];
+
+  // Scroll gallery function
+  const scrollGallery = (direction: 'left' | 'right') => {
+    if (galleryScrollRef.current) {
+      const scrollAmount = 280;
+      galleryScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Efek untuk scroll down mengikuti cursor
   useEffect(() => {
@@ -947,6 +959,7 @@ export default function HomePage(): React.JSX.Element {
           flex-wrap: wrap;
           gap: 20px;
           margin-top: 20px;
+          margin-bottom: 60px;
         }
 
         /* Color dots with labels */
@@ -1004,61 +1017,44 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.01em;
         }
 
-        /* Navigation arrows */
+        /* Navigation arrows - Hijau stabilo dengan panah besar */
         .nav-arrows {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 20px;
         }
 
         .arrow-btn {
-          width: 48px;
-          height: 48px;
+          width: 64px;
+          height: 64px;
           border-radius: 50%;
-          background-color: #000000;
+          background-color: #c5e800;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           transition: all 0.3s ease;
-          border: 1px solid rgba(255,255,255,0.1);
         }
 
         .arrow-btn:hover {
-          transform: scale(1.05);
-          background-color: #333333;
+          transform: scale(1.1);
+          background-color: #a8c400;
         }
 
         .arrow-btn svg {
-          stroke: #ffffff;
-          width: 22px;
-          height: 22px;
+          stroke: #000000;
+          width: 32px;
+          height: 32px;
         }
 
         .arrow-left svg {
           transform: rotate(180deg);
         }
 
-        /* Gallery Section */
+        /* Gallery Section - di bawah dots */
         .gallery-section {
-          padding: 60px 40px 0 40px;
-          margin-top: 40px;
-        }
-
-        .gallery-title {
-          font-family: 'Questrial', sans-serif;
-          font-size: 24px;
-          font-weight: 400;
-          color: #000000;
-          margin-bottom: 30px;
-          letter-spacing: -0.01em;
-        }
-
-        .gallery-container {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          position: relative;
+          margin-top: 20px;
+          width: 100%;
         }
 
         .gallery-scroll {
@@ -1068,7 +1064,6 @@ export default function HomePage(): React.JSX.Element {
           scroll-behavior: smooth;
           scrollbar-width: none;
           -ms-overflow-style: none;
-          flex: 1;
         }
 
         .gallery-scroll::-webkit-scrollbar {
@@ -1077,7 +1072,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 240px;
+          width: 280px;
           cursor: pointer;
           transition: transform 0.3s ease;
         }
@@ -1088,7 +1083,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-image {
           width: 100%;
-          height: 320px;
+          height: 350px;
           background-color: #e0e0e0;
           border-radius: 24px;
           overflow: hidden;
@@ -1102,34 +1097,6 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 500;
           color: #000000;
           text-align: center;
-        }
-
-        .gallery-nav-btn {
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
-          background-color: #c5e800;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          flex-shrink: 0;
-        }
-
-        .gallery-nav-btn:hover {
-          transform: scale(1.1);
-          background-color: #a8c400;
-        }
-
-        .gallery-nav-btn svg {
-          stroke: #000000;
-          width: 28px;
-          height: 28px;
-        }
-
-        .gallery-nav-left svg {
-          transform: rotate(180deg);
         }
       `}</style>
 
@@ -1391,40 +1358,24 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* NAVIGATION ARROWS - Sejajar di sisi kanan */}
+                  {/* NAVIGATION ARROWS - Hijau stabilo dengan panah besar */}
                   <div className="nav-arrows">
-                    <div className="arrow-btn arrow-left">
+                    <div className="arrow-btn arrow-left" onClick={() => scrollGallery('left')}>
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <div className="arrow-btn arrow-right">
+                    <div className="arrow-btn arrow-right" onClick={() => scrollGallery('right')}>
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* GALLERY SECTION - 6 Portrait Photos */}
-              <div className="gallery-section">
-                <div className="gallery-title">Featured Works</div>
-                <div className="gallery-container">
-                  <div 
-                    className="gallery-nav-btn gallery-nav-left"
-                    onClick={() => {
-                      const scrollContainer = document.querySelector('.gallery-scroll');
-                      if (scrollContainer) {
-                        scrollContainer.scrollBy({ left: -280, behavior: 'smooth' });
-                      }
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  <div className="gallery-scroll">
+                {/* GALLERY SECTION - 6 Portrait Photos di bawah dots */}
+                <div className="gallery-section">
+                  <div className="gallery-scroll" ref={galleryScrollRef}>
                     {portraitImages.map((portrait) => (
                       <div key={portrait.id} className="portrait-card">
                         <div className="portrait-image">
@@ -1438,19 +1389,6 @@ export default function HomePage(): React.JSX.Element {
                         <div className="portrait-name">{portrait.name}</div>
                       </div>
                     ))}
-                  </div>
-                  <div 
-                    className="gallery-nav-btn gallery-nav-right"
-                    onClick={() => {
-                      const scrollContainer = document.querySelector('.gallery-scroll');
-                      if (scrollContainer) {
-                        scrollContainer.scrollBy({ left: 280, behavior: 'smooth' });
-                      }
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
                   </div>
                 </div>
               </div>
