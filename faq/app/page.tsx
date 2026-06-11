@@ -242,25 +242,6 @@ export default function HomePage(): React.JSX.Element {
     if (isLoading) return;
     
     const ctx = gsap.context(() => {
-      // Hitung lebar navbar dan start plan untuk animasi yang smooth
-      let navbarWidth = 0;
-      let startPlanWidth = 0;
-      let containerWidth = 0;
-      
-      if (navbarRef.current) {
-        navbarWidth = navbarRef.current.offsetWidth;
-      }
-      if (startPlanRef.current) {
-        startPlanWidth = startPlanRef.current.offsetWidth;
-      }
-      if (headerContainerRef.current) {
-        containerWidth = headerContainerRef.current.offsetWidth;
-      }
-      
-      // Jarak yang tersedia untuk bergeser
-      const availableSpace = containerWidth - 400; // Kurangi ruang untuk MENURU text
-      const maxNavbarShift = availableSpace / 2;
-      
       ScrollTrigger.create({
         trigger: headerSectionRef.current,
         start: "top top",
@@ -279,17 +260,15 @@ export default function HomePage(): React.JSX.Element {
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
           
-          // Navbar bergeser ke kiri
-          if (navbarRef.current) {
-            const translateX = -progress * 280;
+          // Navbar dan Start a Plan bergeser bersama
+          if (navbarRef.current && startPlanRef.current) {
+            // Geser ke kiri untuk navbar
+            const translateX = -progress * 300;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
-          }
-
-          // Start a Plan bergeser ke kanan (keluar dari layar sedikit untuk mentok)
-          if (startPlanRef.current) {
-            // Geser ke kanan agar posisinya mentok di sisi kanan layar
-            const translateXStartPlan = progress * 400;
-            startPlanRef.current.style.transform = `translateX(${translateXStartPlan}px)`;
+            
+            // Start a Plan ikut bergeser ke kiri dengan jarak yang sama
+            // agar tetap berada di samping kanan navbar
+            startPlanRef.current.style.transform = `translateX(${translateX}px)`;
           }
         }
       });
@@ -1066,62 +1045,65 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* NAVBAR - Tengah */}
-                <div
-                  ref={navbarRef}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '48px',
-                    transition: 'transform 0.1s linear'
-                  }}
-                >
-                  {navNames.map((item) => (
-                    <div
-                      key={item}
-                      ref={item === "Note" ? noteRef : null}
-                      style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      onMouseEnter={() => handleNavHover(item)}
-                      onMouseLeave={handleNavLeave}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '32px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          letterSpacing: '-0.01em',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                {/* Container untuk Navbar dan Start a Plan - agar bergerak bersama */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+                  {/* NAVBAR - Tengah */}
+                  <div
+                    ref={navbarRef}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '48px',
+                      transition: 'transform 0.1s linear'
+                    }}
+                  >
+                    {navNames.map((item) => (
+                      <div
+                        key={item}
+                        ref={item === "Note" ? noteRef : null}
+                        style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        onMouseEnter={() => handleNavHover(item)}
+                        onMouseLeave={handleNavLeave}
                       >
-                        {item}
-                      </span>
-                      <sup
-                        style={{
-                          fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#ED1B3C',
-                          marginLeft: '2px'
-                        }}
-                      >
-                        {notificationCounts[item as keyof typeof notificationCounts]}
-                      </sup>
-                    </div>
-                  ))}
-                </div>
-
-                {/* START A PLAN - Sisi Kanan */}
-                <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
-                  <span className="start-plan-text">Start a Plan</span>
-                  <div className="start-plan-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                        <span
+                          style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '32px',
+                            fontWeight: '400',
+                            color: '#000000',
+                            letterSpacing: '-0.01em',
+                            transition: 'opacity 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                        >
+                          {item}
+                        </span>
+                        <sup
+                          style={{
+                            fontFamily: "'Aeonik-Regular', Helvetica, Arial, sans-serif",
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            color: '#ED1B3C',
+                            marginLeft: '2px'
+                          }}
+                        >
+                          {notificationCounts[item as keyof typeof notificationCounts]}
+                        </sup>
+                      </div>
+                    ))}
                   </div>
-                </Link>
+
+                  {/* START A PLAN - Sisi Kanan dari navbar */}
+                  <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
+                    <span className="start-plan-text">Start a Plan</span>
+                    <div className="start-plan-icon">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </Link>
+                </div>
               </div>
 
               {/* MARQUEE SECTION */}
