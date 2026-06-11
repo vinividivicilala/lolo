@@ -138,7 +138,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 240;
+      const scrollAmount = 280;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -951,70 +951,79 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
-        /* Bottom row container - flex between dots and arrows */
-        .bottom-row {
+        /* Bottom row container - flex between gallery info and arrows */
+        .gallery-bottom-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
           gap: 20px;
-          margin-top: 20px;
+          margin-top: 30px;
           margin-bottom: 60px;
         }
 
-        /* Color dots with labels */
-        .dots-container {
+        /* Gallery info with text and color dots */
+        .gallery-info {
           display: flex;
           align-items: center;
-          gap: 32px;
+          gap: 30px;
           flex-wrap: wrap;
         }
 
-        .dot-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-        }
-
-        .dot-item:hover {
-          transform: translateX(4px);
-        }
-
-        .dot {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          transition: transform 0.2s ease;
-        }
-
-        .dot:hover {
-          transform: scale(1.2);
-        }
-
-        .dot-black {
-          background-color: #000000;
-        }
-
-        .dot-green {
-          background-color: #c5e800;
-        }
-
-        .dot-blue {
-          background-color: #3b82f6;
-        }
-
-        .dot-red {
-          background-color: #ef4444;
-        }
-
-        .dot-label {
+        .gallery-info-text {
           font-family: 'Questrial', sans-serif;
           font-size: 18px;
           font-weight: 400;
           color: #000000;
           letter-spacing: -0.01em;
+        }
+
+        /* Color dots for gallery */
+        .gallery-dots {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+        }
+
+        .gallery-dot-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+
+        .gallery-dot-item:hover {
+          transform: translateX(4px);
+        }
+
+        .gallery-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+
+        .gallery-dot-black {
+          background-color: #000000;
+        }
+
+        .gallery-dot-green {
+          background-color: #c5e800;
+        }
+
+        .gallery-dot-blue {
+          background-color: #3b82f6;
+        }
+
+        .gallery-dot-red {
+          background-color: #ef4444;
+        }
+
+        .gallery-dot-label {
+          font-family: 'Questrial', sans-serif;
+          font-size: 16px;
+          font-weight: 400;
+          color: #000000;
         }
 
         /* Navigation arrows - Hijau stabilo dengan panah besar */
@@ -1059,7 +1068,7 @@ export default function HomePage(): React.JSX.Element {
 
         .gallery-scroll {
           display: flex;
-          gap: 20px;
+          gap: 24px;
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
@@ -1072,12 +1081,12 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 220px;
+          width: 260px;
         }
 
         .portrait-image {
           width: 100%;
-          height: 330px;
+          height: 400px;
           background-color: #e0e0e0;
           border-radius: 20px;
           overflow: hidden;
@@ -1090,7 +1099,8 @@ export default function HomePage(): React.JSX.Element {
           font-size: 16px;
           font-weight: 500;
           color: #000000;
-          text-align: center;
+          text-align: left;
+          padding-left: 8px;
         }
       `}</style>
 
@@ -1332,7 +1342,7 @@ export default function HomePage(): React.JSX.Element {
                 
                 {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
                 <div className="bottom-row">
-                  {/* COLOR DOTS WITH LABELS */}
+                  {/* COLOR DOTS WITH LABELS - Sorted: View All, Note, Community, Blog */}
                   <div className="dots-container">
                     <div className="dot-item">
                       <div className="dot dot-black"></div>
@@ -1367,7 +1377,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - 6 Portrait Photos di bawah dots */}
+                {/* GALLERY SECTION - 6 Portrait Photos */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
                     {portraitImages.map((portrait) => (
@@ -1384,6 +1394,33 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* GALLERY BOTTOM ROW - Teks dan titik bulat di sisi kiri */}
+                <div className="gallery-bottom-row">
+                  <div className="gallery-info">
+                    <span className="gallery-info-text">Explore our latest works</span>
+                    <div className="gallery-dots">
+                      <div className="gallery-dot-item">
+                        <div className="gallery-dot gallery-dot-black"></div>
+                        <span className="gallery-dot-label">View All</span>
+                      </div>
+                      <div className="gallery-dot-item">
+                        <div className="gallery-dot gallery-dot-green"></div>
+                        <span className="gallery-dot-label">Note</span>
+                      </div>
+                      <div className="gallery-dot-item">
+                        <div className="gallery-dot gallery-dot-blue"></div>
+                        <span className="gallery-dot-label">Community</span>
+                      </div>
+                      <div className="gallery-dot-item">
+                        <div className="gallery-dot gallery-dot-red"></div>
+                        <span className="gallery-dot-label">Blog</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Empty div untuk menjaga keseimbangan dengan arrows di atas */}
+                  <div></div>
                 </div>
               </div>
             </div>
