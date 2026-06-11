@@ -47,6 +47,7 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const startPlanRef = useRef<HTMLDivElement>(null);
   const headerContainerRef = useRef<HTMLDivElement>(null);
+  const leftTextContainerRef = useRef<HTMLDivElement>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
@@ -262,13 +263,16 @@ export default function HomePage(): React.JSX.Element {
           
           // Navbar dan Start a Plan bergeser bersama
           if (navbarRef.current && startPlanRef.current) {
-            // Geser ke kiri untuk navbar
             const translateX = -progress * 300;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
-            
-            // Start a Plan ikut bergeser ke kiri dengan jarak yang sama
-            // agar tetap berada di samping kanan navbar
             startPlanRef.current.style.transform = `translateX(${translateX}px)`;
+          }
+
+          // Left text container fade out saat scroll
+          if (leftTextContainerRef.current) {
+            const opacity = 1 - (progress * 1.5);
+            leftTextContainerRef.current.style.opacity = `${Math.max(0, opacity)}`;
+            leftTextContainerRef.current.style.transform = `translateY(${progress * 50}px)`;
           }
         }
       });
@@ -909,6 +913,27 @@ export default function HomePage(): React.JSX.Element {
         .start-plan-btn:hover .start-plan-icon {
           transform: rotate(45deg);
         }
+
+        /* Left text styles */
+        .left-headline {
+          font-family: 'Inter', 'Helvetica Neue', sans-serif;
+          font-weight: 700;
+          font-size: 100px;
+          color: #000000;
+          letter-spacing: -0.03em;
+          line-height: 1.1;
+          margin-bottom: 24px;
+        }
+        
+        .left-subheadline {
+          font-family: 'Questrial', sans-serif;
+          font-weight: 400;
+          font-size: 40px;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1.4;
+          max-width: 800px;
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1113,7 +1138,7 @@ export default function HomePage(): React.JSX.Element {
                   position: 'relative',
                   width: '100%',
                   marginTop: '100px',
-                  marginBottom: '0px',
+                  marginBottom: '60px',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
                   marginLeft: '-40px',
@@ -1129,6 +1154,24 @@ export default function HomePage(): React.JSX.Element {
                     width: 'fit-content'
                   }}
                 />
+              </div>
+
+              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
+              <div
+                ref={leftTextContainerRef}
+                style={{
+                  position: 'relative',
+                  paddingLeft: '40px',
+                  marginTop: '0px',
+                  transition: 'opacity 0.3s ease, transform 0.3s ease'
+                }}
+              >
+                <div className="left-headline">
+                  Easy to &quot;get&quot; <br />and hard to forget.
+                </div>
+                <div className="left-subheadline">
+                  Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
+                </div>
               </div>
             </div>
 
