@@ -54,14 +54,14 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait
+  // Data untuk foto portrait (11.jpg sampai 16.jpg)
   const portraitImages = [
-    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio" },
-    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art" },
-    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Brand Design" },
-    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "UX Research" },
-    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "UI Design" },
-    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Motion Graphics" },
+    { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio" },
+    { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art" },
+    { id: 3, src: "/images/13.jpg", alt: "Portrait 3", name: "Brand Design" },
+    { id: 4, src: "/images/14.jpg", alt: "Portrait 4", name: "UX Research" },
+    { id: 5, src: "/images/15.jpg", alt: "Portrait 5", name: "UI Design" },
+    { id: 6, src: "/images/16.jpg", alt: "Portrait 6", name: "Motion Graphics" },
   ];
 
   // Data untuk Preview Card
@@ -1073,12 +1073,6 @@ export default function HomePage(): React.JSX.Element {
         .portrait-card {
           flex-shrink: 0;
           width: 220px;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-        }
-
-        .portrait-card:hover {
-          transform: translateY(-8px);
         }
 
         .portrait-image {
