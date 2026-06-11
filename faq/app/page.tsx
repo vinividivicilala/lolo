@@ -929,24 +929,36 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
-        /* Color dots */
+        /* Color dots with labels */
         .dots-container {
           display: flex;
           align-items: center;
-          gap: 20px;
+          gap: 32px;
           margin-top: 20px;
+          flex-wrap: wrap;
+        }
+
+        .dot-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+
+        .dot-item:hover {
+          transform: translateX(4px);
         }
 
         .dot {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          cursor: pointer;
-          transition: transform 0.2s ease, opacity 0.2s ease;
+          transition: transform 0.2s ease;
         }
 
         .dot:hover {
-          transform: scale(1.3);
+          transform: scale(1.2);
         }
 
         .dot-black {
@@ -963,6 +975,14 @@ export default function HomePage(): React.JSX.Element {
 
         .dot-red {
           background-color: #ef4444;
+        }
+
+        .dot-label {
+          font-family: 'Questrial', sans-serif;
+          font-size: 18px;
+          font-weight: 400;
+          color: #000000;
+          letter-spacing: -0.01em;
         }
       `}</style>
 
@@ -1201,12 +1221,24 @@ export default function HomePage(): React.JSX.Element {
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
                 </div>
                 
-                {/* COLOR DOTS */}
+                {/* COLOR DOTS WITH LABELS */}
                 <div className="dots-container">
-                  <div className="dot dot-black" title="View All"></div>
-                  <div className="dot dot-green" title="Note"></div>
-                  <div className="dot dot-blue" title="Community"></div>
-                  <div className="dot dot-red" title="Blog"></div>
+                  <div className="dot-item">
+                    <div className="dot dot-black"></div>
+                    <span className="dot-label">View All</span>
+                  </div>
+                  <div className="dot-item">
+                    <div className="dot dot-green"></div>
+                    <span className="dot-label">Note</span>
+                  </div>
+                  <div className="dot-item">
+                    <div className="dot dot-blue"></div>
+                    <span className="dot-label">Community</span>
+                  </div>
+                  <div className="dot-item">
+                    <div className="dot dot-red"></div>
+                    <span className="dot-label">Blog</span>
+                  </div>
                 </div>
               </div>
             </div>
