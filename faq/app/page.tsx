@@ -47,7 +47,6 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const startPlanRef = useRef<HTMLDivElement>(null);
   const headerContainerRef = useRef<HTMLDivElement>(null);
-  const leftTextContainerRef = useRef<HTMLDivElement>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
@@ -266,13 +265,6 @@ export default function HomePage(): React.JSX.Element {
             const translateX = -progress * 300;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
             startPlanRef.current.style.transform = `translateX(${translateX}px)`;
-          }
-
-          // Left text container fade out saat scroll
-          if (leftTextContainerRef.current) {
-            const opacity = 1 - (progress * 1.5);
-            leftTextContainerRef.current.style.opacity = `${Math.max(0, opacity)}`;
-            leftTextContainerRef.current.style.transform = `translateY(${progress * 50}px)`;
           }
         }
       });
@@ -914,15 +906,16 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Left text styles */
+        /* Left text styles - tidak tebal, 1 baris untuk headline */
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
-          font-weight: 700;
+          font-weight: 400;
           font-size: 100px;
           color: #000000;
           letter-spacing: -0.03em;
           line-height: 1.1;
           margin-bottom: 24px;
+          white-space: nowrap;
         }
         
         .left-subheadline {
@@ -932,7 +925,7 @@ export default function HomePage(): React.JSX.Element {
           color: #000000;
           letter-spacing: -0.02em;
           line-height: 1.4;
-          max-width: 800px;
+          max-width: 900px;
         }
       `}</style>
 
@@ -1156,18 +1149,16 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
+              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri, tidak hilang saat scroll */}
               <div
-                ref={leftTextContainerRef}
                 style={{
                   position: 'relative',
                   paddingLeft: '40px',
                   marginTop: '0px',
-                  transition: 'opacity 0.3s ease, transform 0.3s ease'
                 }}
               >
                 <div className="left-headline">
-                  Easy to &quot;get&quot; <br />and hard to forget.
+                  Easy to "get" and hard to forget.
                 </div>
                 <div className="left-subheadline">
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
