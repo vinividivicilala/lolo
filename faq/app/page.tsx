@@ -929,12 +929,21 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
+        /* Bottom row container - flex between dots and arrows */
+        .bottom-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 20px;
+          margin-top: 20px;
+        }
+
         /* Color dots with labels */
         .dots-container {
           display: flex;
           align-items: center;
           gap: 32px;
-          margin-top: 20px;
           flex-wrap: wrap;
         }
 
@@ -987,17 +996,14 @@ export default function HomePage(): React.JSX.Element {
 
         /* Navigation arrows */
         .nav-arrows {
-          position: absolute;
-          right: 40px;
-          bottom: 40px;
           display: flex;
+          align-items: center;
           gap: 16px;
-          z-index: 20;
         }
 
         .arrow-btn {
-          width: 56px;
-          height: 56px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           background-color: #000000;
           display: flex;
@@ -1015,8 +1021,8 @@ export default function HomePage(): React.JSX.Element {
 
         .arrow-btn svg {
           stroke: #ffffff;
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
         }
 
         .arrow-left svg {
@@ -1249,6 +1255,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   position: 'relative',
                   paddingLeft: '40px',
+                  paddingRight: '40px',
                   marginTop: '0px',
                 }}
               >
@@ -1259,38 +1266,41 @@ export default function HomePage(): React.JSX.Element {
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
                 </div>
                 
-                {/* COLOR DOTS WITH LABELS */}
-                <div className="dots-container">
-                  <div className="dot-item">
-                    <div className="dot dot-black"></div>
-                    <span className="dot-label">View All</span>
+                {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
+                <div className="bottom-row">
+                  {/* COLOR DOTS WITH LABELS */}
+                  <div className="dots-container">
+                    <div className="dot-item">
+                      <div className="dot dot-black"></div>
+                      <span className="dot-label">View All</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-green"></div>
+                      <span className="dot-label">Note</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-blue"></div>
+                      <span className="dot-label">Community</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-red"></div>
+                      <span className="dot-label">Blog</span>
+                    </div>
                   </div>
-                  <div className="dot-item">
-                    <div className="dot dot-green"></div>
-                    <span className="dot-label">Note</span>
-                  </div>
-                  <div className="dot-item">
-                    <div className="dot dot-blue"></div>
-                    <span className="dot-label">Community</span>
-                  </div>
-                  <div className="dot-item">
-                    <div className="dot dot-red"></div>
-                    <span className="dot-label">Blog</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* NAVIGATION ARROWS - Sisi Kanan */}
-              <div className="nav-arrows">
-                <div className="arrow-btn arrow-left">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="arrow-btn arrow-right">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  {/* NAVIGATION ARROWS - Sejajar di sisi kanan */}
+                  <div className="nav-arrows">
+                    <div className="arrow-btn arrow-left">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="arrow-btn arrow-right">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
