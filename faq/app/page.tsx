@@ -241,16 +241,26 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (isLoading) return;
     
-    // Dapatkan lebar container untuk perhitungan yang tepat
-    const getStartPlanDistance = () => {
-      if (typeof window !== 'undefined') {
-        // Jarak untuk membuat Start a Plan mentok ke kanan layar
-        return window.innerWidth - 200;
-      }
-      return 500;
-    };
-
     const ctx = gsap.context(() => {
+      // Hitung lebar navbar dan start plan untuk animasi yang smooth
+      let navbarWidth = 0;
+      let startPlanWidth = 0;
+      let containerWidth = 0;
+      
+      if (navbarRef.current) {
+        navbarWidth = navbarRef.current.offsetWidth;
+      }
+      if (startPlanRef.current) {
+        startPlanWidth = startPlanRef.current.offsetWidth;
+      }
+      if (headerContainerRef.current) {
+        containerWidth = headerContainerRef.current.offsetWidth;
+      }
+      
+      // Jarak yang tersedia untuk bergeser
+      const availableSpace = containerWidth - 400; // Kurangi ruang untuk MENURU text
+      const maxNavbarShift = availableSpace / 2;
+      
       ScrollTrigger.create({
         trigger: headerSectionRef.current,
         start: "top top",
@@ -271,14 +281,14 @@ export default function HomePage(): React.JSX.Element {
           
           // Navbar bergeser ke kiri
           if (navbarRef.current) {
-            const translateX = -progress * 350;
+            const translateX = -progress * 280;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
           }
 
-          // Start a Plan bergeser ke kanan sampai mentok layar
+          // Start a Plan bergeser ke kanan (keluar dari layar sedikit untuk mentok)
           if (startPlanRef.current) {
-            const maxTranslate = getStartPlanDistance();
-            const translateXStartPlan = progress * maxTranslate;
+            // Geser ke kanan agar posisinya mentok di sisi kanan layar
+            const translateXStartPlan = progress * 400;
             startPlanRef.current.style.transform = `translateX(${translateXStartPlan}px)`;
           }
         }
