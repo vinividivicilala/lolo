@@ -241,6 +241,15 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (isLoading) return;
     
+    // Dapatkan lebar container untuk perhitungan yang tepat
+    const getStartPlanDistance = () => {
+      if (typeof window !== 'undefined') {
+        // Jarak untuk membuat Start a Plan mentok ke kanan layar
+        return window.innerWidth - 200;
+      }
+      return 500;
+    };
+
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: headerSectionRef.current,
@@ -262,13 +271,14 @@ export default function HomePage(): React.JSX.Element {
           
           // Navbar bergeser ke kiri
           if (navbarRef.current) {
-            const translateX = -progress * 200;
+            const translateX = -progress * 350;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
           }
 
-          // Start a Plan bergeser ke kanan (mentok ke kanan)
+          // Start a Plan bergeser ke kanan sampai mentok layar
           if (startPlanRef.current) {
-            const translateXStartPlan = progress * 200;
+            const maxTranslate = getStartPlanDistance();
+            const translateXStartPlan = progress * maxTranslate;
             startPlanRef.current.style.transform = `translateX(${translateXStartPlan}px)`;
           }
         }
@@ -872,10 +882,11 @@ export default function HomePage(): React.JSX.Element {
           transition: all 0.3s ease;
           text-decoration: none;
           border: 1px solid rgba(255,255,255,0.15);
+          white-space: nowrap;
         }
         
         .start-plan-btn:hover {
-          transform: translateX(4px);
+          transform: translateX(4px) !important;
           opacity: 0.9;
         }
         
