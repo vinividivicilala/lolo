@@ -910,7 +910,7 @@ export default function HomePage(): React.JSX.Element {
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
           font-weight: 300;
-          font-size: 150px;
+          font-size: 120px;
           color: #000000;
           letter-spacing: -0.03em;
           line-height: 1;
