@@ -850,6 +850,46 @@ export default function HomePage(): React.JSX.Element {
         .meet-team-btn:hover .meet-team-icon {
           transform: rotate(45deg);
         }
+
+        /* Start a Plan button */
+        .start-plan-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-decoration: none;
+        }
+        
+        .start-plan-btn:hover {
+          opacity: 0.7;
+        }
+        
+        .start-plan-text {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 50px;
+          font-weight: 500;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1;
+        }
+        
+        .start-plan-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+        
+        .start-plan-icon svg {
+          stroke: #000000;
+          width: 42px;
+          height: 42px;
+        }
+        
+        .start-plan-btn:hover .start-plan-icon {
+          transform: rotate(45deg);
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -961,10 +1001,21 @@ export default function HomePage(): React.JSX.Element {
                   padding: '40px 40px 0 40px',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   flexWrap: 'wrap',
                   gap: '40px'
                 }}
               >
+                {/* START A PLAN - Sisi Kiri */}
+                <Link href="/start-plan" className="start-plan-btn">
+                  <span className="start-plan-text">Start a Plan</span>
+                  <div className="start-plan-icon">
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </Link>
+
                 {/* Teks MENURU besar - 300px */}
                 <div
                   ref={headerTextRef}
