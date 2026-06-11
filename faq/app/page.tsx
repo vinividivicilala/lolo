@@ -53,6 +53,16 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
+  // Data untuk foto portrait
+  const portraitImages = [
+    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Alex Morgan" },
+    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Jamie Lee" },
+    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Taylor Swift" },
+    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "Jordan Smith" },
+    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "Casey Jones" },
+    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Riley Wong" },
+  ];
+
   // Data untuk Preview Card
   const previewData = {
     Note: {
@@ -1028,6 +1038,99 @@ export default function HomePage(): React.JSX.Element {
         .arrow-left svg {
           transform: rotate(180deg);
         }
+
+        /* Gallery Section */
+        .gallery-section {
+          padding: 60px 40px 0 40px;
+          margin-top: 40px;
+        }
+
+        .gallery-title {
+          font-family: 'Questrial', sans-serif;
+          font-size: 24px;
+          font-weight: 400;
+          color: #000000;
+          margin-bottom: 30px;
+          letter-spacing: -0.01em;
+        }
+
+        .gallery-container {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          position: relative;
+        }
+
+        .gallery-scroll {
+          display: flex;
+          gap: 24px;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          flex: 1;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .portrait-card {
+          flex-shrink: 0;
+          width: 240px;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+
+        .portrait-card:hover {
+          transform: translateY(-8px);
+        }
+
+        .portrait-image {
+          width: 100%;
+          height: 320px;
+          background-color: #e0e0e0;
+          border-radius: 24px;
+          overflow: hidden;
+          position: relative;
+          margin-bottom: 16px;
+        }
+
+        .portrait-name {
+          font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
+          font-size: 18px;
+          font-weight: 500;
+          color: #000000;
+          text-align: center;
+        }
+
+        .gallery-nav-btn {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background-color: #c5e800;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+        }
+
+        .gallery-nav-btn:hover {
+          transform: scale(1.1);
+          background-color: #a8c400;
+        }
+
+        .gallery-nav-btn svg {
+          stroke: #000000;
+          width: 28px;
+          height: 28px;
+        }
+
+        .gallery-nav-left svg {
+          transform: rotate(180deg);
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1300,6 +1403,54 @@ export default function HomePage(): React.JSX.Element {
                         <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* GALLERY SECTION - 6 Portrait Photos */}
+              <div className="gallery-section">
+                <div className="gallery-title">Featured Works</div>
+                <div className="gallery-container">
+                  <div 
+                    className="gallery-nav-btn gallery-nav-left"
+                    onClick={() => {
+                      const scrollContainer = document.querySelector('.gallery-scroll');
+                      if (scrollContainer) {
+                        scrollContainer.scrollBy({ left: -280, behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div className="gallery-scroll">
+                    {portraitImages.map((portrait) => (
+                      <div key={portrait.id} className="portrait-card">
+                        <div className="portrait-image">
+                          <Image
+                            src={portrait.src}
+                            alt={portrait.alt}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
+                        <div className="portrait-name">{portrait.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div 
+                    className="gallery-nav-btn gallery-nav-right"
+                    onClick={() => {
+                      const scrollContainer = document.querySelector('.gallery-scroll');
+                      if (scrollContainer) {
+                        scrollContainer.scrollBy({ left: 280, behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 </div>
               </div>
