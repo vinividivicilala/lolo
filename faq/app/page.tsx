@@ -46,6 +46,7 @@ export default function HomePage(): React.JSX.Element {
   const smootherRef = useRef<any>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const startPlanRef = useRef<HTMLDivElement>(null);
+  const headerContainerRef = useRef<HTMLDivElement>(null);
   
   const [headerScrollProgress, setHeaderScrollProgress] = useState(0);
   
@@ -252,19 +253,22 @@ export default function HomePage(): React.JSX.Element {
           const progress = self.progress;
           setHeaderScrollProgress(progress);
           
+          // MENURU text mengecil
           if (headerTextRef.current) {
             const fontSize = 300 - (progress * 240);
             const newFontSize = Math.max(60, fontSize);
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
           
+          // Navbar bergeser ke kiri
           if (navbarRef.current) {
-            const translateX = progress * 380;
+            const translateX = -progress * 200;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
           }
 
+          // Start a Plan bergeser ke kanan (mentok ke kanan)
           if (startPlanRef.current) {
-            const translateXStartPlan = progress * 380;
+            const translateXStartPlan = progress * 200;
             startPlanRef.current.style.transform = `translateX(${translateXStartPlan}px)`;
           }
         }
@@ -857,7 +861,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Start a Plan button - style seperti Meet the Team (tapi warna terbalik) */
+        /* Start a Plan button */
         .start-plan-btn {
           display: inline-flex;
           align-items: center;
@@ -1008,6 +1012,7 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               <div
+                ref={headerContainerRef}
                 style={{
                   position: 'relative',
                   top: 0,
@@ -1033,7 +1038,8 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: '-0.02em',
                     textTransform: 'uppercase',
                     whiteSpace: 'nowrap',
-                    display: 'inline-block'
+                    display: 'inline-block',
+                    transition: 'font-size 0.1s linear'
                   }}
                 >
                   MENURU
@@ -1087,7 +1093,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
 
                 {/* START A PLAN - Sisi Kanan */}
-                <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef}>
+                <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
                   <span className="start-plan-text">Start a Plan</span>
                   <div className="start-plan-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
