@@ -906,15 +906,15 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Left text styles - tidak tebal, 1 baris untuk headline */
+        /* Left text styles */
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
           font-weight: 400;
-          font-size: 100px;
+          font-size: 200px;
           color: #000000;
           letter-spacing: -0.03em;
-          line-height: 1.1;
-          margin-bottom: 24px;
+          line-height: 1;
+          margin-bottom: 40px;
           white-space: nowrap;
         }
         
@@ -924,8 +924,8 @@ export default function HomePage(): React.JSX.Element {
           font-size: 40px;
           color: #000000;
           letter-spacing: -0.02em;
-          line-height: 1.4;
-          max-width: 900px;
+          line-height: 1.3;
+          max-width: 1000px;
         }
       `}</style>
 
@@ -1131,7 +1131,7 @@ export default function HomePage(): React.JSX.Element {
                   position: 'relative',
                   width: '100%',
                   marginTop: '100px',
-                  marginBottom: '60px',
+                  marginBottom: '80px',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
                   marginLeft: '-40px',
@@ -1149,7 +1149,7 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri, tidak hilang saat scroll */}
+              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
               <div
                 style={{
                   position: 'relative',
