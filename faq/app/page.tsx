@@ -54,7 +54,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait (sama dengan foto di marquee)
+  // Data untuk foto portrait
   const portraitImages = [
     { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio" },
     { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art" },
@@ -138,7 +138,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 280;
+      const scrollAmount = 240;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -1059,7 +1059,7 @@ export default function HomePage(): React.JSX.Element {
 
         .gallery-scroll {
           display: flex;
-          gap: 24px;
+          gap: 20px;
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
@@ -1072,7 +1072,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 280px;
+          width: 220px;
           cursor: pointer;
           transition: transform 0.3s ease;
         }
@@ -1083,9 +1083,9 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-image {
           width: 100%;
-          height: 350px;
+          height: 330px;
           background-color: #e0e0e0;
-          border-radius: 24px;
+          border-radius: 20px;
           overflow: hidden;
           position: relative;
           margin-bottom: 16px;
@@ -1093,7 +1093,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 500;
           color: #000000;
           text-align: center;
