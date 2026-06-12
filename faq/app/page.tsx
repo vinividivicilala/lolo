@@ -31,8 +31,8 @@ export default function HomePage(): React.JSX.Element {
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // State untuk filter foto
-  const [activeFilter, setActiveFilter] = useState<string>("View All");
+  // State untuk hover image pada portrait
+  const [hoveredPortraitId, setHoveredPortraitId] = useState<number | null>(null);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -57,25 +57,15 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait dengan kategori
+  // Data untuk foto portrait dengan 2 versi (default dan hover)
   const portraitImages = [
-    { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio", category: "Note" },
-    { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art", category: "Community" },
-    { id: 3, src: "/images/13.jpg", alt: "Portrait 3", name: "Brand Design", category: "Blog" },
-    { id: 4, src: "/images/14.jpg", alt: "Portrait 4", name: "UX Research", category: "Note" },
-    { id: 5, src: "/images/15.jpg", alt: "Portrait 5", name: "UI Design", category: "Community" },
-    { id: 6, src: "/images/16.jpg", alt: "Portrait 6", name: "Motion Graphics", category: "Blog" },
+    { id: 1, src: "/images/ai.jpg", hoverSrc: "/images/lkhh.jpg", alt: "Portrait 1", name: "Creative Studio" },
+    { id: 2, src: "/images/lkhh.jpg", hoverSrc: "/images/5.jpg", alt: "Portrait 2", name: "Digital Art" },
+    { id: 3, src: "/images/5.jpg", hoverSrc: "/images/ai.jpg", alt: "Portrait 3", name: "Brand Design" },
+    { id: 4, src: "/images/ai.jpg", hoverSrc: "/images/5.jpg", alt: "Portrait 4", name: "UX Research" },
+    { id: 5, src: "/images/lkhh.jpg", hoverSrc: "/images/ai.jpg", alt: "Portrait 5", name: "UI Design" },
+    { id: 6, src: "/images/5.jpg", hoverSrc: "/images/lkhh.jpg", alt: "Portrait 6", name: "Motion Graphics" },
   ];
-
-  // Filtered images based on active filter
-  const getFilteredImages = () => {
-    if (activeFilter === "View All") {
-      return portraitImages;
-    }
-    return portraitImages.filter(img => img.category === activeFilter);
-  };
-
-  const filteredImages = getFilteredImages();
 
   // Data untuk Preview Card
   const previewData = {
@@ -151,7 +141,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 280;
+      const scrollAmount = 240;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -614,14 +604,6 @@ export default function HomePage(): React.JSX.Element {
 
   const navNames = ["Note", "Community", "Donation", "Blog"];
 
-  // Filter options untuk gallery
-  const filterOptions = [
-    { label: "View All", color: "black" },
-    { label: "Note", color: "green" },
-    { label: "Community", color: "blue" },
-    { label: "Blog", color: "red" }
-  ];
-
   return (
     <>
       <style jsx global>{`
@@ -849,7 +831,6 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
-        /* Meet the team button */
         .meet-team-btn {
           display: inline-flex;
           align-items: center;
@@ -897,7 +878,6 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Start a Plan button */
         .start-plan-btn {
           display: inline-flex;
           align-items: center;
@@ -947,7 +927,6 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
-        /* Left text styles */
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
           font-weight: 400;
@@ -970,7 +949,6 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
-        /* Bottom row container - flex between dots and arrows */
         .bottom-row {
           display: flex;
           justify-content: space-between;
@@ -978,10 +956,9 @@ export default function HomePage(): React.JSX.Element {
           flex-wrap: wrap;
           gap: 20px;
           margin-top: 20px;
-          margin-bottom: 40px;
+          margin-bottom: 60px;
         }
 
-        /* Color dots with labels */
         .dots-container {
           display: flex;
           align-items: center;
@@ -1001,10 +978,6 @@ export default function HomePage(): React.JSX.Element {
           transform: translateX(4px);
         }
 
-        .dot-item.active .dot-label {
-          font-weight: 600;
-        }
-
         .dot {
           width: 16px;
           height: 16px;
@@ -1016,21 +989,10 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.2);
         }
 
-        .dot-black {
-          background-color: #000000;
-        }
-
-        .dot-green {
-          background-color: #c5e800;
-        }
-
-        .dot-blue {
-          background-color: #3b82f6;
-        }
-
-        .dot-red {
-          background-color: #ef4444;
-        }
+        .dot-black { background-color: #000000; }
+        .dot-green { background-color: #c5e800; }
+        .dot-blue { background-color: #3b82f6; }
+        .dot-red { background-color: #ef4444; }
 
         .dot-label {
           font-family: 'Questrial', sans-serif;
@@ -1038,10 +1000,8 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #000000;
           letter-spacing: -0.01em;
-          transition: font-weight 0.2s ease;
         }
 
-        /* Navigation arrows - Hijau stabilo dengan panah besar */
         .nav-arrows {
           display: flex;
           align-items: center;
@@ -1075,7 +1035,6 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(180deg);
         }
 
-        /* Gallery Section - di bawah dots */
         .gallery-section {
           margin-top: 20px;
           width: 100%;
@@ -1083,7 +1042,7 @@ export default function HomePage(): React.JSX.Element {
 
         .gallery-scroll {
           display: flex;
-          gap: 24px;
+          gap: 20px;
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
@@ -1096,65 +1055,40 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 280px;
+          width: 220px;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+
+        .portrait-card:hover {
+          transform: translateY(-8px);
         }
 
         .portrait-image {
           width: 100%;
-          height: 420px;
+          height: 380px;
           background-color: #e0e0e0;
           border-radius: 20px;
           overflow: hidden;
           position: relative;
           margin-bottom: 16px;
+          transition: all 0.3s ease;
         }
 
-        .portrait-info {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+        .portrait-image img {
+          transition: transform 0.3s ease;
+        }
+
+        .portrait-card:hover .portrait-image img {
+          transform: scale(1.05);
         }
 
         .portrait-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 500;
           color: #000000;
-        }
-
-        .portrait-dots {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .portrait-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-        }
-
-        .portrait-dot:hover {
-          transform: scale(1.3);
-        }
-
-        .portrait-dot-black {
-          background-color: #000000;
-        }
-
-        .portrait-dot-green {
-          background-color: #c5e800;
-        }
-
-        .portrait-dot-blue {
-          background-color: #3b82f6;
-        }
-
-        .portrait-dot-red {
-          background-color: #ef4444;
+          text-align: center;
         }
       `}</style>
 
@@ -1273,7 +1207,6 @@ export default function HomePage(): React.JSX.Element {
                   gap: '40px'
                 }}
               >
-                {/* Teks MENURU besar - Sisi Kiri */}
                 <div
                   ref={headerTextRef}
                   style={{
@@ -1292,9 +1225,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* Container untuk Navbar dan Start a Plan - agar bergerak bersama */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-                  {/* NAVBAR - Tengah */}
                   <div
                     ref={navbarRef}
                     style={{
@@ -1341,7 +1272,6 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
 
-                  {/* START A PLAN - Sisi Kanan dari navbar */}
                   <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
                     <span className="start-plan-text">Start a Plan</span>
                     <div className="start-plan-icon">
@@ -1378,7 +1308,7 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
+              {/* LEFT TEXT SECTION */}
               <div
                 style={{
                   position: 'relative',
@@ -1394,23 +1324,26 @@ export default function HomePage(): React.JSX.Element {
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
                 </div>
                 
-                {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
                 <div className="bottom-row">
-                  {/* COLOR DOTS WITH LABELS - Filter buttons */}
                   <div className="dots-container">
-                    {filterOptions.map((option) => (
-                      <div 
-                        key={option.label}
-                        className={`dot-item ${activeFilter === option.label ? 'active' : ''}`}
-                        onClick={() => setActiveFilter(option.label)}
-                      >
-                        <div className={`dot dot-${option.color === 'black' ? 'black' : option.color === 'green' ? 'green' : option.color === 'blue' ? 'blue' : 'red'}`}></div>
-                        <span className="dot-label">{option.label}</span>
-                      </div>
-                    ))}
+                    <div className="dot-item">
+                      <div className="dot dot-black"></div>
+                      <span className="dot-label">View All</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-green"></div>
+                      <span className="dot-label">Note</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-blue"></div>
+                      <span className="dot-label">Community</span>
+                    </div>
+                    <div className="dot-item">
+                      <div className="dot dot-red"></div>
+                      <span className="dot-label">Blog</span>
+                    </div>
                   </div>
 
-                  {/* NAVIGATION ARROWS - Hijau stabilo dengan panah besar */}
                   <div className="nav-arrows">
                     <div className="arrow-btn arrow-left" onClick={() => scrollGallery('left')}>
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1425,28 +1358,25 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - Portrait Photos dengan filter */}
+                {/* GALLERY SECTION - 6 Portrait Photos dengan hover effect */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
-                    {filteredImages.map((portrait) => (
-                      <div key={portrait.id} className="portrait-card">
+                    {portraitImages.map((portrait) => (
+                      <div 
+                        key={portrait.id} 
+                        className="portrait-card"
+                        onMouseEnter={() => setHoveredPortraitId(portrait.id)}
+                        onMouseLeave={() => setHoveredPortraitId(null)}
+                      >
                         <div className="portrait-image">
                           <Image
-                            src={portrait.src}
+                            src={hoveredPortraitId === portrait.id ? portrait.hoverSrc : portrait.src}
                             alt={portrait.alt}
                             fill
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'cover', transition: 'all 0.3s ease' }}
                           />
                         </div>
-                        <div className="portrait-info">
-                          <span className="portrait-name">{portrait.name}</span>
-                          <div className="portrait-dots">
-                            <div className="portrait-dot portrait-dot-black" title="View All"></div>
-                            <div className="portrait-dot portrait-dot-green" title="Note"></div>
-                            <div className="portrait-dot portrait-dot-blue" title="Community"></div>
-                            <div className="portrait-dot portrait-dot-red" title="Blog"></div>
-                          </div>
-                        </div>
+                        <div className="portrait-name">{portrait.name}</div>
                       </div>
                     ))}
                   </div>
@@ -1496,7 +1426,6 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* ABOUT SECTION dengan tombol Profile dan Meet the team */}
               <div
                 style={{
                   position: 'absolute',
@@ -1550,7 +1479,6 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
-                    {/* TOMBOL PROFILE */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -1593,7 +1521,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </Link>
 
-                    {/* MEET THE TEAM BUTTON */}
                     <div className="meet-team-btn">
                       <span className="meet-team-text">Meet the team</span>
                       <div className="meet-team-icon">
