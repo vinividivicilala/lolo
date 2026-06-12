@@ -30,6 +30,9 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // State untuk filter foto
+  const [activeFilter, setActiveFilter] = useState<string>("View All");
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -54,15 +57,25 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait
+  // Data untuk foto portrait dengan kategori
   const portraitImages = [
-    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio" },
-    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art" },
-    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Brand Design" },
-    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "UX Research" },
-    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "UI Design" },
-    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Motion Graphics" },
+    { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio", category: "Note" },
+    { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art", category: "Community" },
+    { id: 3, src: "/images/13.jpg", alt: "Portrait 3", name: "Brand Design", category: "Blog" },
+    { id: 4, src: "/images/14.jpg", alt: "Portrait 4", name: "UX Research", category: "Note" },
+    { id: 5, src: "/images/15.jpg", alt: "Portrait 5", name: "UI Design", category: "Community" },
+    { id: 6, src: "/images/16.jpg", alt: "Portrait 6", name: "Motion Graphics", category: "Blog" },
   ];
+
+  // Filtered images based on active filter
+  const getFilteredImages = () => {
+    if (activeFilter === "View All") {
+      return portraitImages;
+    }
+    return portraitImages.filter(img => img.category === activeFilter);
+  };
+
+  const filteredImages = getFilteredImages();
 
   // Data untuk Preview Card
   const previewData = {
@@ -138,7 +151,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 240;
+      const scrollAmount = 280;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -275,14 +288,12 @@ export default function HomePage(): React.JSX.Element {
           const progress = self.progress;
           setHeaderScrollProgress(progress);
           
-          // MENURU text mengecil
           if (headerTextRef.current) {
             const fontSize = 300 - (progress * 240);
             const newFontSize = Math.max(60, fontSize);
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
           
-          // Navbar dan Start a Plan bergeser bersama
           if (navbarRef.current && startPlanRef.current) {
             const translateX = -progress * 300;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
@@ -602,6 +613,14 @@ export default function HomePage(): React.JSX.Element {
   const panelPosition = getPanelPosition();
 
   const navNames = ["Note", "Community", "Donation", "Blog"];
+
+  // Filter options untuk gallery
+  const filterOptions = [
+    { label: "View All", color: "black" },
+    { label: "Note", color: "green" },
+    { label: "Community", color: "blue" },
+    { label: "Blog", color: "red" }
+  ];
 
   return (
     <>
@@ -959,7 +978,7 @@ export default function HomePage(): React.JSX.Element {
           flex-wrap: wrap;
           gap: 20px;
           margin-top: 20px;
-          margin-bottom: 60px;
+          margin-bottom: 40px;
         }
 
         /* Color dots with labels */
@@ -980,6 +999,10 @@ export default function HomePage(): React.JSX.Element {
 
         .dot-item:hover {
           transform: translateX(4px);
+        }
+
+        .dot-item.active .dot-label {
+          font-weight: 600;
         }
 
         .dot {
@@ -1015,6 +1038,7 @@ export default function HomePage(): React.JSX.Element {
           font-weight: 400;
           color: #000000;
           letter-spacing: -0.01em;
+          transition: font-weight 0.2s ease;
         }
 
         /* Navigation arrows - Hijau stabilo dengan panah besar */
@@ -1059,7 +1083,7 @@ export default function HomePage(): React.JSX.Element {
 
         .gallery-scroll {
           display: flex;
-          gap: 20px;
+          gap: 24px;
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
@@ -1072,18 +1096,12 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 220px;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-        }
-
-        .portrait-card:hover {
-          transform: translateY(-8px);
+          width: 280px;
         }
 
         .portrait-image {
           width: 100%;
-          height: 330px;
+          height: 420px;
           background-color: #e0e0e0;
           border-radius: 20px;
           overflow: hidden;
@@ -1091,12 +1109,52 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 16px;
         }
 
+        .portrait-info {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
         .portrait-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 500;
           color: #000000;
-          text-align: center;
+        }
+
+        .portrait-dots {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .portrait-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+
+        .portrait-dot:hover {
+          transform: scale(1.3);
+        }
+
+        .portrait-dot-black {
+          background-color: #000000;
+        }
+
+        .portrait-dot-green {
+          background-color: #c5e800;
+        }
+
+        .portrait-dot-blue {
+          background-color: #3b82f6;
+        }
+
+        .portrait-dot-red {
+          background-color: #ef4444;
         }
       `}</style>
 
@@ -1338,24 +1396,18 @@ export default function HomePage(): React.JSX.Element {
                 
                 {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
                 <div className="bottom-row">
-                  {/* COLOR DOTS WITH LABELS */}
+                  {/* COLOR DOTS WITH LABELS - Filter buttons */}
                   <div className="dots-container">
-                    <div className="dot-item">
-                      <div className="dot dot-black"></div>
-                      <span className="dot-label">View All</span>
-                    </div>
-                    <div className="dot-item">
-                      <div className="dot dot-green"></div>
-                      <span className="dot-label">Note</span>
-                    </div>
-                    <div className="dot-item">
-                      <div className="dot dot-blue"></div>
-                      <span className="dot-label">Community</span>
-                    </div>
-                    <div className="dot-item">
-                      <div className="dot dot-red"></div>
-                      <span className="dot-label">Blog</span>
-                    </div>
+                    {filterOptions.map((option) => (
+                      <div 
+                        key={option.label}
+                        className={`dot-item ${activeFilter === option.label ? 'active' : ''}`}
+                        onClick={() => setActiveFilter(option.label)}
+                      >
+                        <div className={`dot dot-${option.color === 'black' ? 'black' : option.color === 'green' ? 'green' : option.color === 'blue' ? 'blue' : 'red'}`}></div>
+                        <span className="dot-label">{option.label}</span>
+                      </div>
+                    ))}
                   </div>
 
                   {/* NAVIGATION ARROWS - Hijau stabilo dengan panah besar */}
@@ -1373,10 +1425,10 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - 6 Portrait Photos di bawah dots */}
+                {/* GALLERY SECTION - Portrait Photos dengan filter */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
-                    {portraitImages.map((portrait) => (
+                    {filteredImages.map((portrait) => (
                       <div key={portrait.id} className="portrait-card">
                         <div className="portrait-image">
                           <Image
@@ -1386,7 +1438,15 @@ export default function HomePage(): React.JSX.Element {
                             style={{ objectFit: 'cover' }}
                           />
                         </div>
-                        <div className="portrait-name">{portrait.name}</div>
+                        <div className="portrait-info">
+                          <span className="portrait-name">{portrait.name}</span>
+                          <div className="portrait-dots">
+                            <div className="portrait-dot portrait-dot-black" title="View All"></div>
+                            <div className="portrait-dot portrait-dot-green" title="Note"></div>
+                            <div className="portrait-dot portrait-dot-blue" title="Community"></div>
+                            <div className="portrait-dot portrait-dot-red" title="Blog"></div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
