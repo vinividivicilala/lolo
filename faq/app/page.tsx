@@ -30,19 +30,6 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  // State untuk rolling image
-  const [currentRollIndex, setCurrentRollIndex] = useState(0);
-  const rollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const rollingImages = [
-    "/images/11.jpg",
-    "/images/12.jpg",
-    "/images/13.jpg",
-    "/images/14.jpg",
-    "/images/15.jpg",
-    "/images/16.jpg",
-  ];
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -69,36 +56,13 @@ export default function HomePage(): React.JSX.Element {
 
   // Data untuk foto portrait
   const portraitImages = [
-    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio", rolling: true },
-    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art", rolling: false },
-    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Brand Design", rolling: false },
-    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "UX Research", rolling: false },
-    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "UI Design", rolling: false },
-    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Motion Graphics", rolling: false },
+    { id: 1, src: "/images/ai.jpg", alt: "Portrait 1", name: "Creative Studio" },
+    { id: 2, src: "/images/lkhh.jpg", alt: "Portrait 2", name: "Digital Art" },
+    { id: 3, src: "/images/5.jpg", alt: "Portrait 3", name: "Brand Design" },
+    { id: 4, src: "/images/ai.jpg", alt: "Portrait 4", name: "UX Research" },
+    { id: 5, src: "/images/lkhh.jpg", alt: "Portrait 5", name: "UI Design" },
+    { id: 6, src: "/images/5.jpg", alt: "Portrait 6", name: "Motion Graphics" },
   ];
-
-  // Fungsi untuk memulai rolling image
-  const startRolling = () => {
-    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
-    rollIntervalRef.current = setInterval(() => {
-      setCurrentRollIndex((prev) => (prev + 1) % rollingImages.length);
-    }, 200);
-  };
-
-  const stopRolling = () => {
-    if (rollIntervalRef.current) {
-      clearInterval(rollIntervalRef.current);
-      rollIntervalRef.current = null;
-    }
-    setCurrentRollIndex(0);
-  };
-
-  // Cleanup interval
-  useEffect(() => {
-    return () => {
-      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
-    };
-  }, []);
 
   // Data untuk Preview Card
   const previewData = {
@@ -1119,7 +1083,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-image {
           width: 100%;
-          height: 380px;
+          height: 330px;
           background-color: #e0e0e0;
           border-radius: 20px;
           overflow: hidden;
@@ -1413,15 +1377,10 @@ export default function HomePage(): React.JSX.Element {
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
                     {portraitImages.map((portrait) => (
-                      <div 
-                        key={portrait.id} 
-                        className="portrait-card"
-                        onMouseEnter={portrait.rolling ? startRolling : undefined}
-                        onMouseLeave={portrait.rolling ? stopRolling : undefined}
-                      >
+                      <div key={portrait.id} className="portrait-card">
                         <div className="portrait-image">
                           <Image
-                            src={portrait.rolling ? rollingImages[currentRollIndex] : portrait.src}
+                            src={portrait.src}
                             alt={portrait.alt}
                             fill
                             style={{ objectFit: 'cover' }}
