@@ -58,7 +58,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait dengan multiple images untuk rolling effect
+  // Data untuk foto portrait (sama seperti sebelumnya, dengan multiple images untuk rolling)
   const portraitImagesData = [
     { 
       id: 1, 
@@ -114,7 +114,7 @@ export default function HomePage(): React.JSX.Element {
         ...prev,
         [id]: images[currentIndex]
       }));
-    }, 300); // Ganti gambar setiap 300ms
+    }, 300);
   };
 
   // Fungsi untuk menghentikan rolling dan reset ke gambar pertama
@@ -1133,7 +1133,7 @@ export default function HomePage(): React.JSX.Element {
 
         .gallery-scroll {
           display: flex;
-          gap: 20px;
+          gap: 24px;
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
@@ -1146,7 +1146,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 240px;
+          width: 260px;
           cursor: pointer;
           transition: transform 0.3s ease;
         }
@@ -1157,9 +1157,9 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-image {
           width: 100%;
-          height: 400px;
+          height: 420px;
           background-color: #e0e0e0;
-          border-radius: 20px;
+          border-radius: 24px;
           overflow: hidden;
           position: relative;
           margin-bottom: 16px;
@@ -1167,7 +1167,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-name {
           font-family: 'Aeonik-Regular', Helvetica, Arial, sans-serif;
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 500;
           color: #000000;
           text-align: center;
