@@ -33,6 +33,11 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk filter foto
   const [activeFilter, setActiveFilter] = useState<string>("View All");
+  
+  // State untuk rolling image pada Creative Studio
+  const [currentCreativeImageIndex, setCurrentCreativeImageIndex] = useState(0);
+  const rollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const creativeImageRef = useRef<HTMLDivElement>(null);
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -57,22 +62,99 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait dengan kategori
+  // Data untuk foto portrait dengan kategori (diperbesar ukurannya)
   const portraitImages = [
-    { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio", category: "Note" },
-    { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art", category: "Community" },
-    { id: 3, src: "/images/13.jpg", alt: "Portrait 3", name: "Brand Design", category: "Blog" },
-    { id: 4, src: "/images/14.jpg", alt: "Portrait 4", name: "UX Research", category: "Note" },
-    { id: 5, src: "/images/15.jpg", alt: "Portrait 5", name: "UI Design", category: "Community" },
-    { id: 6, src: "/images/16.jpg", alt: "Portrait 6", name: "Motion Graphics", category: "Blog" },
+    { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio", category: "Note", rollingImages: ["/images/12.jpg", "/images/13.jpg", "/images/14.jpg", "/images/15.jpg", "/images/16.jpg"] },
+    { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art", category: "Community", rollingImages: [] },
+    { id: 3, src: "/images/13.jpg", alt: "Portrait 3", name: "Brand Design", category: "Blog", rollingImages: [] },
+    { id: 4, src: "/images/14.jpg", alt: "Portrait 4", name: "UX Research", category: "Note", rollingImages: [] },
+    { id: 5, src: "/images/15.jpg", alt: "Portrait 5", name: "UI Design", category: "Community", rollingImages: [] },
+    { id: 6, src: "/images/16.jpg", alt: "Portrait 6", name: "Motion Graphics", category: "Blog", rollingImages: [] },
   ];
+
+  // State untuk src foto yang sedang ditampilkan (untuk efek rolling)
+  const [imageSrcs, setImageSrcs] = useState(portraitImages.map(img => img.src));
+
+  // Fungsi untuk memulai rolling gambar pada Creative Studio
+  const startRollingImages = (index: number) => {
+    if (rollingIntervalRef.current) {
+      clearInterval(rollingIntervalRef.current);
+    }
+    
+    const creativeImage = portraitImages[index];
+    if (!creativeImage.rollingImages || creativeImage.rollingImages.length === 0) return;
+    
+    let rollIndex = 0;
+    
+    // Animasi fade out - change image - fade in dengan GSAP
+    const imgElement = document.getElementById(`portrait-img-${creativeImage.id}`);
+    if (imgElement) {
+      gsap.to(imgElement, {
+        opacity: 0,
+        duration: 0.2,
+        onComplete: () => {
+          rollingIntervalRef.current = setInterval(() => {
+            rollIndex = (rollIndex + 1) % creativeImage.rollingImages.length;
+            const newSrc = creativeImage.rollingImages[rollIndex];
+            
+            setImageSrcs(prev => {
+              const newSrcs = [...prev];
+              newSrcs[index] = newSrc;
+              return newSrcs;
+            });
+            
+            if (imgElement) {
+              gsap.to(imgElement, {
+                opacity: 1,
+                duration: 0.3,
+              });
+            }
+          }, 800);
+        }
+      });
+    }
+  };
+
+  // Fungsi untuk menghentikan rolling gambar dan mengembalikan ke gambar awal
+  const stopRollingImages = (index: number) => {
+    if (rollingIntervalRef.current) {
+      clearInterval(rollingIntervalRef.current);
+      rollingIntervalRef.current = null;
+    }
+    
+    const originalSrc = portraitImages[index].src;
+    const imgElement = document.getElementById(`portrait-img-${portraitImages[index].id}`);
+    
+    if (imgElement && imageSrcs[index] !== originalSrc) {
+      gsap.to(imgElement, {
+        opacity: 0,
+        duration: 0.2,
+        onComplete: () => {
+          setImageSrcs(prev => {
+            const newSrcs = [...prev];
+            newSrcs[index] = originalSrc;
+            return newSrcs;
+          });
+          gsap.to(imgElement, {
+            opacity: 1,
+            duration: 0.3,
+          });
+        }
+      });
+    }
+  };
 
   // Filtered images based on active filter
   const getFilteredImages = () => {
     if (activeFilter === "View All") {
-      return portraitImages;
+      return portraitImages.map((img, idx) => ({ ...img, currentSrc: imageSrcs[idx] }));
     }
-    return portraitImages.filter(img => img.category === activeFilter);
+    return portraitImages
+      .filter(img => img.category === activeFilter)
+      .map((img, idx) => {
+        const originalIndex = portraitImages.findIndex(p => p.id === img.id);
+        return { ...img, currentSrc: imageSrcs[originalIndex] };
+      });
   };
 
   const filteredImages = getFilteredImages();
@@ -151,13 +233,22 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 280;
+      const scrollAmount = 320;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
       });
     }
   };
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (rollingIntervalRef.current) {
+        clearInterval(rollingIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Efek untuk scroll down mengikuti cursor
   useEffect(() => {
@@ -1096,17 +1187,18 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 280px;
+          width: 300px;
         }
 
         .portrait-image {
           width: 100%;
-          height: 420px;
+          height: 450px;
           background-color: #e0e0e0;
-          border-radius: 20px;
+          border-radius: 24px;
           overflow: hidden;
           position: relative;
           margin-bottom: 16px;
+          cursor: pointer;
         }
 
         .portrait-info {
@@ -1425,30 +1517,41 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - Portrait Photos dengan filter */}
+                {/* GALLERY SECTION - Portrait Photos dengan filter dan efek rolling pada Creative Studio */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
-                    {filteredImages.map((portrait) => (
-                      <div key={portrait.id} className="portrait-card">
-                        <div className="portrait-image">
-                          <Image
-                            src={portrait.src}
-                            alt={portrait.alt}
-                            fill
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                        <div className="portrait-info">
-                          <span className="portrait-name">{portrait.name}</span>
-                          <div className="portrait-dots">
-                            <div className="portrait-dot portrait-dot-black" title="View All"></div>
-                            <div className="portrait-dot portrait-dot-green" title="Note"></div>
-                            <div className="portrait-dot portrait-dot-blue" title="Community"></div>
-                            <div className="portrait-dot portrait-dot-red" title="Blog"></div>
+                    {filteredImages.map((portrait, idx) => {
+                      const originalIndex = portraitImages.findIndex(p => p.id === portrait.id);
+                      const currentImageSrc = imageSrcs[originalIndex];
+                      const isCreativeStudio = portrait.name === "Creative Studio";
+                      
+                      return (
+                        <div key={portrait.id} className="portrait-card">
+                          <div 
+                            className="portrait-image"
+                            onMouseEnter={() => isCreativeStudio && startRollingImages(originalIndex)}
+                            onMouseLeave={() => isCreativeStudio && stopRollingImages(originalIndex)}
+                          >
+                            <Image
+                              id={`portrait-img-${portrait.id}`}
+                              src={currentImageSrc}
+                              alt={portrait.alt}
+                              fill
+                              style={{ objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div className="portrait-info">
+                            <span className="portrait-name">{portrait.name}</span>
+                            <div className="portrait-dots">
+                              <div className="portrait-dot portrait-dot-black" title="View All"></div>
+                              <div className="portrait-dot portrait-dot-green" title="Note"></div>
+                              <div className="portrait-dot portrait-dot-blue" title="Community"></div>
+                              <div className="portrait-dot portrait-dot-red" title="Blog"></div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
