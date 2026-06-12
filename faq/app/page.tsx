@@ -31,8 +31,9 @@ export default function HomePage(): React.JSX.Element {
   // State untuk scroll navbar
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // State untuk hover image pada portrait
-  const [hoveredPortraitId, setHoveredPortraitId] = useState<number | null>(null);
+  // State untuk gambar rolling
+  const [rollingImages, setRollingImages] = useState<{ [key: number]: string }>({});
+  const rollingIntervals = useRef<{ [key: number]: NodeJS.Timeout }>({});
 
   // Refs
   const headerTextRef = useRef<HTMLDivElement>(null);
@@ -57,15 +58,85 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait dengan 2 versi (default dan hover)
-  const portraitImages = [
-    { id: 1, src: "/images/ai.jpg", hoverSrc: "/images/lkhh.jpg", alt: "Portrait 1", name: "Creative Studio" },
-    { id: 2, src: "/images/lkhh.jpg", hoverSrc: "/images/5.jpg", alt: "Portrait 2", name: "Digital Art" },
-    { id: 3, src: "/images/5.jpg", hoverSrc: "/images/ai.jpg", alt: "Portrait 3", name: "Brand Design" },
-    { id: 4, src: "/images/ai.jpg", hoverSrc: "/images/5.jpg", alt: "Portrait 4", name: "UX Research" },
-    { id: 5, src: "/images/lkhh.jpg", hoverSrc: "/images/ai.jpg", alt: "Portrait 5", name: "UI Design" },
-    { id: 6, src: "/images/5.jpg", hoverSrc: "/images/lkhh.jpg", alt: "Portrait 6", name: "Motion Graphics" },
+  // Data untuk foto portrait dengan multiple images untuk rolling effect
+  const portraitImagesData = [
+    { 
+      id: 1, 
+      name: "Creative Studio",
+      images: ["/images/ai.jpg", "/images/11.jpg", "/images/12.jpg", "/images/13.jpg", "/images/ai.jpg"]
+    },
+    { 
+      id: 2, 
+      name: "Digital Art",
+      images: ["/images/lkhh.jpg", "/images/21.jpg", "/images/22.jpg", "/images/23.jpg", "/images/lkhh.jpg"]
+    },
+    { 
+      id: 3, 
+      name: "Brand Design",
+      images: ["/images/5.jpg", "/images/31.jpg", "/images/32.jpg", "/images/33.jpg", "/images/5.jpg"]
+    },
+    { 
+      id: 4, 
+      name: "UX Research",
+      images: ["/images/ai.jpg", "/images/41.jpg", "/images/42.jpg", "/images/43.jpg", "/images/ai.jpg"]
+    },
+    { 
+      id: 5, 
+      name: "UI Design",
+      images: ["/images/lkhh.jpg", "/images/51.jpg", "/images/52.jpg", "/images/53.jpg", "/images/lkhh.jpg"]
+    },
+    { 
+      id: 6, 
+      name: "Motion Graphics",
+      images: ["/images/5.jpg", "/images/61.jpg", "/images/62.jpg", "/images/63.jpg", "/images/5.jpg"]
+    },
   ];
+
+  // Inisialisasi gambar awal
+  useEffect(() => {
+    const initialImages: { [key: number]: string } = {};
+    portraitImagesData.forEach(item => {
+      initialImages[item.id] = item.images[0];
+    });
+    setRollingImages(initialImages);
+  }, []);
+
+  // Fungsi untuk memulai rolling gambar
+  const startRolling = (id: number, images: string[]) => {
+    if (rollingIntervals.current[id]) {
+      clearInterval(rollingIntervals.current[id]);
+    }
+    
+    let currentIndex = 0;
+    rollingIntervals.current[id] = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      setRollingImages(prev => ({
+        ...prev,
+        [id]: images[currentIndex]
+      }));
+    }, 300); // Ganti gambar setiap 300ms
+  };
+
+  // Fungsi untuk menghentikan rolling dan reset ke gambar pertama
+  const stopRolling = (id: number, images: string[]) => {
+    if (rollingIntervals.current[id]) {
+      clearInterval(rollingIntervals.current[id]);
+      delete rollingIntervals.current[id];
+    }
+    setRollingImages(prev => ({
+      ...prev,
+      [id]: images[0]
+    }));
+  };
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(rollingIntervals.current).forEach(interval => {
+        if (interval) clearInterval(interval);
+      });
+    };
+  }, []);
 
   // Data untuk Preview Card
   const previewData = {
@@ -141,7 +212,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 240;
+      const scrollAmount = 260;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -278,12 +349,14 @@ export default function HomePage(): React.JSX.Element {
           const progress = self.progress;
           setHeaderScrollProgress(progress);
           
+          // MENURU text mengecil
           if (headerTextRef.current) {
             const fontSize = 300 - (progress * 240);
             const newFontSize = Math.max(60, fontSize);
             headerTextRef.current.style.fontSize = `${newFontSize}px`;
           }
           
+          // Navbar dan Start a Plan bergeser bersama
           if (navbarRef.current && startPlanRef.current) {
             const translateX = -progress * 300;
             navbarRef.current.style.transform = `translateX(${translateX}px)`;
@@ -831,6 +904,7 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.02);
         }
 
+        /* Meet the team button */
         .meet-team-btn {
           display: inline-flex;
           align-items: center;
@@ -878,6 +952,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
+        /* Start a Plan button */
         .start-plan-btn {
           display: inline-flex;
           align-items: center;
@@ -927,6 +1002,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(45deg);
         }
 
+        /* Left text styles */
         .left-headline {
           font-family: 'Inter', 'Helvetica Neue', sans-serif;
           font-weight: 400;
@@ -949,6 +1025,7 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
+        /* Bottom row container - flex between dots and arrows */
         .bottom-row {
           display: flex;
           justify-content: space-between;
@@ -959,6 +1036,7 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 60px;
         }
 
+        /* Color dots with labels */
         .dots-container {
           display: flex;
           align-items: center;
@@ -989,10 +1067,21 @@ export default function HomePage(): React.JSX.Element {
           transform: scale(1.2);
         }
 
-        .dot-black { background-color: #000000; }
-        .dot-green { background-color: #c5e800; }
-        .dot-blue { background-color: #3b82f6; }
-        .dot-red { background-color: #ef4444; }
+        .dot-black {
+          background-color: #000000;
+        }
+
+        .dot-green {
+          background-color: #c5e800;
+        }
+
+        .dot-blue {
+          background-color: #3b82f6;
+        }
+
+        .dot-red {
+          background-color: #ef4444;
+        }
 
         .dot-label {
           font-family: 'Questrial', sans-serif;
@@ -1002,6 +1091,7 @@ export default function HomePage(): React.JSX.Element {
           letter-spacing: -0.01em;
         }
 
+        /* Navigation arrows - Hijau stabilo dengan panah besar */
         .nav-arrows {
           display: flex;
           align-items: center;
@@ -1035,6 +1125,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(180deg);
         }
 
+        /* Gallery Section - di bawah dots */
         .gallery-section {
           margin-top: 20px;
           width: 100%;
@@ -1055,7 +1146,7 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-card {
           flex-shrink: 0;
-          width: 220px;
+          width: 240px;
           cursor: pointer;
           transition: transform 0.3s ease;
         }
@@ -1066,21 +1157,12 @@ export default function HomePage(): React.JSX.Element {
 
         .portrait-image {
           width: 100%;
-          height: 380px;
+          height: 400px;
           background-color: #e0e0e0;
           border-radius: 20px;
           overflow: hidden;
           position: relative;
           margin-bottom: 16px;
-          transition: all 0.3s ease;
-        }
-
-        .portrait-image img {
-          transition: transform 0.3s ease;
-        }
-
-        .portrait-card:hover .portrait-image img {
-          transform: scale(1.05);
         }
 
         .portrait-name {
@@ -1207,6 +1289,7 @@ export default function HomePage(): React.JSX.Element {
                   gap: '40px'
                 }}
               >
+                {/* Teks MENURU besar - Sisi Kiri */}
                 <div
                   ref={headerTextRef}
                   style={{
@@ -1225,7 +1308,9 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
+                {/* Container untuk Navbar dan Start a Plan - agar bergerak bersama */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+                  {/* NAVBAR - Tengah */}
                   <div
                     ref={navbarRef}
                     style={{
@@ -1272,6 +1357,7 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
 
+                  {/* START A PLAN - Sisi Kanan dari navbar */}
                   <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
                     <span className="start-plan-text">Start a Plan</span>
                     <div className="start-plan-icon">
@@ -1308,7 +1394,7 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* LEFT TEXT SECTION */}
+              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
               <div
                 style={{
                   position: 'relative',
@@ -1324,7 +1410,9 @@ export default function HomePage(): React.JSX.Element {
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
                 </div>
                 
+                {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
                 <div className="bottom-row">
+                  {/* COLOR DOTS WITH LABELS */}
                   <div className="dots-container">
                     <div className="dot-item">
                       <div className="dot dot-black"></div>
@@ -1344,6 +1432,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
+                  {/* NAVIGATION ARROWS - Hijau stabilo dengan panah besar */}
                   <div className="nav-arrows">
                     <div className="arrow-btn arrow-left" onClick={() => scrollGallery('left')}>
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1358,22 +1447,22 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - 6 Portrait Photos dengan hover effect */}
+                {/* GALLERY SECTION - 6 Portrait Photos dengan rolling effect */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
-                    {portraitImages.map((portrait) => (
+                    {portraitImagesData.map((portrait) => (
                       <div 
                         key={portrait.id} 
                         className="portrait-card"
-                        onMouseEnter={() => setHoveredPortraitId(portrait.id)}
-                        onMouseLeave={() => setHoveredPortraitId(null)}
+                        onMouseEnter={() => startRolling(portrait.id, portrait.images)}
+                        onMouseLeave={() => stopRolling(portrait.id, portrait.images)}
                       >
                         <div className="portrait-image">
                           <Image
-                            src={hoveredPortraitId === portrait.id ? portrait.hoverSrc : portrait.src}
-                            alt={portrait.alt}
+                            src={rollingImages[portrait.id] || portrait.images[0]}
+                            alt={portrait.name}
                             fill
-                            style={{ objectFit: 'cover', transition: 'all 0.3s ease' }}
+                            style={{ objectFit: 'cover' }}
                           />
                         </div>
                         <div className="portrait-name">{portrait.name}</div>
@@ -1426,6 +1515,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
+              {/* ABOUT SECTION dengan tombol Profile dan Meet the team */}
               <div
                 style={{
                   position: 'absolute',
@@ -1479,6 +1569,7 @@ export default function HomePage(): React.JSX.Element {
                       and industry leaders such personal others to achieve this.
                     </span>
                     
+                    {/* TOMBOL PROFILE */}
                     <Link href="/profile">
                       <div
                         style={{
@@ -1521,6 +1612,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </Link>
 
+                    {/* MEET THE TEAM BUTTON */}
                     <div className="meet-team-btn">
                       <span className="meet-team-text">Meet the team</span>
                       <div className="meet-team-icon">
