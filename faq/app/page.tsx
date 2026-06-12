@@ -233,7 +233,7 @@ export default function HomePage(): React.JSX.Element {
   // Scroll gallery function
   const scrollGallery = (direction: 'left' | 'right') => {
     if (galleryScrollRef.current) {
-      const scrollAmount = 320;
+      const scrollAmount = 324;
       galleryScrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -1248,6 +1248,19 @@ export default function HomePage(): React.JSX.Element {
         .portrait-dot-red {
           background-color: #ef4444;
         }
+
+        /* Our plan text */
+        .our-plan-text {
+          font-family: 'Inter', 'Helvetica Neue', sans-serif;
+          font-weight: 400;
+          font-size: 200px;
+          color: #000000;
+          letter-spacing: -0.03em;
+          line-height: 1;
+          margin-top: 80px;
+          margin-bottom: 60px;
+          white-space: nowrap;
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1553,6 +1566,11 @@ export default function HomePage(): React.JSX.Element {
                       );
                     })}
                   </div>
+                </div>
+
+                {/* OUR PLAN TEXT - Di bawah gallery */}
+                <div className="our-plan-text">
+                  Our plan
                 </div>
               </div>
             </div>
