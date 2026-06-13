@@ -1291,15 +1291,15 @@ export default function HomePage(): React.JSX.Element {
 
         /* Projects description - sisi kanan, 2 baris, font 20px */
         .projects-description {
-          font-family: 'Questrial', sans-serif;
-          font-weight: 400;
-          font-size: 20px;
-          color: #000000;
-          letter-spacing: -0.01em;
-          line-height: 1.4;
-          text-align: right;
-          max-width: 500px;
-        }
+  font-family: 'Questrial', sans-serif;
+  font-weight: 400;
+  font-size: 40px;
+  color: #000000;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  text-align: left;
+  max-width: 900px;
+}
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1610,32 +1610,32 @@ export default function HomePage(): React.JSX.Element {
                   Our plan
                 </div>
 
-                {/* SECTION: View plan di kiri, Explore some di kanan, sejajar */}
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '40px',
-                  marginTop: '0px',
-                  marginBottom: '80px'
-                }}>
-                  {/* KIRI: View plan button */}
-                  <Link href="/plan" className="view-plan-button">
-                    <span className="view-plan-text">View plan</span>
-                    <div className="view-plan-icon">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </Link>
+               {/* SECTION: View plan di kiri, Explore some di kanan, sejajar */}
+<div style={{ 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'flex-start',
+  flexWrap: 'wrap',
+  gap: '40px',
+  marginTop: '0px',
+  marginBottom: '80px'
+}}>
+  {/* KIRI: View plan button */}
+  <Link href="/plan" className="view-plan-button">
+    <span className="view-plan-text">View plan</span>
+    <div className="view-plan-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  </Link>
 
-                  {/* KANAN: Explore some text - 2 BARIS, font 20px, rata kanan */}
-                  <div className="projects-description">
-                    Explore some of our recent projects,<br />
-                    showcasing work across diverse sectors and product ranges.
-                  </div>
-                </div>
+  {/* KANAN: Explore some text - 2 BARIS, font 40px, rata kiri, gaya Our work */}
+  <div className="projects-description">
+    Explore some of our recent projects,<br />
+    showcasing work across diverse sectors and product ranges.
+  </div>
+</div>
               </div>
             </div>
 
