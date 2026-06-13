@@ -1262,18 +1262,7 @@ export default function HomePage(): React.JSX.Element {
           white-space: nowrap;
         }
 
-        /* New styles for the section below Our plan */
-        .projects-description {
-          font-family: 'Questrial', sans-serif;
-          font-weight: 400;
-          font-size: 40px;
-          color: #000000;
-          letter-spacing: -0.02em;
-          line-height: 1.3;
-          max-width: 800px;
-          margin-bottom: 40px;
-        }
-        
+        /* View plan button - sisi kiri */
         .view-plan-button {
           display: inline-flex;
           align-items: center;
@@ -1282,11 +1271,11 @@ export default function HomePage(): React.JSX.Element {
           transition: opacity 0.2s ease;
           text-decoration: none;
         }
-        
+
         .view-plan-button:hover {
           opacity: 0.7;
         }
-        
+
         .view-plan-text {
           font-family: 'Questrial', sans-serif;
           font-size: 40px;
@@ -1294,17 +1283,22 @@ export default function HomePage(): React.JSX.Element {
           color: #000000;
           letter-spacing: -0.02em;
         }
-        
-        .view-plan-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
+
         .view-plan-icon svg {
           stroke: #000000;
           width: 48px;
           height: 48px;
+        }
+
+        /* Projects description - sisi kanan, 2 baris */
+        .projects-description {
+          font-family: 'Questrial', sans-serif;
+          font-weight: 400;
+          font-size: 40px;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1.3;
+          max-width: 800px;
         }
       `}</style>
 
@@ -1618,21 +1612,17 @@ export default function HomePage(): React.JSX.Element {
                   Our plan
                 </div>
 
-                {/* NEW SECTION: Projects description and View plan button */}
+                {/* NEW SECTION: View plan di kiri, Explore some di kanan, sejajar */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
-                  alignItems: 'flex-end',
+                  alignItems: 'flex-start',
                   flexWrap: 'wrap',
                   gap: '40px',
                   marginTop: '0px',
                   marginBottom: '80px'
                 }}>
-                  <div className="projects-description">
-                    Explore some of our recent projects,<br />
-                    showcasing work across diverse sectors<br />
-                    and product ranges.
-                  </div>
+                  {/* KIRI: View plan button */}
                   <Link href="/plan" className="view-plan-button">
                     <span className="view-plan-text">View plan</span>
                     <div className="view-plan-icon">
@@ -1641,6 +1631,13 @@ export default function HomePage(): React.JSX.Element {
                       </svg>
                     </div>
                   </Link>
+
+                  {/* KANAN: Explore some text 2 baris */}
+                  <div className="projects-description" style={{ textAlign: 'right' }}>
+                    Explore some of our recent projects,<br />
+                    showcasing work across diverse sectors<br />
+                    and product ranges.
+                  </div>
                 </div>
               </div>
             </div>
