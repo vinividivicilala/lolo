@@ -62,7 +62,7 @@ export default function HomePage(): React.JSX.Element {
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   const marqueeContentRef = useRef<HTMLDivElement>(null);
 
-  // Data untuk foto portrait dengan kategori (diperbesar ukurannya)
+  // Data untuk foto portrait dengan kategori
   const portraitImages = [
     { id: 1, src: "/images/11.jpg", alt: "Portrait 1", name: "Creative Studio", category: "Note", rollingImages: ["/images/12.jpg", "/images/13.jpg", "/images/14.jpg", "/images/15.jpg", "/images/16.jpg"] },
     { id: 2, src: "/images/12.jpg", alt: "Portrait 2", name: "Digital Art", category: "Community", rollingImages: [] },
@@ -86,7 +86,6 @@ export default function HomePage(): React.JSX.Element {
     
     let rollIndex = 0;
     
-    // Animasi fade out - change image - fade in dengan GSAP
     const imgElement = document.getElementById(`portrait-img-${creativeImage.id}`);
     if (imgElement) {
       gsap.to(imgElement, {
@@ -115,7 +114,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk menghentikan rolling gambar dan mengembalikan ke gambar awal
+  // Fungsi untuk menghentikan rolling gambar
   const stopRollingImages = (index: number) => {
     if (rollingIntervalRef.current) {
       clearInterval(rollingIntervalRef.current);
@@ -211,7 +210,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Notifikasi count dengan gaya superscript
+  // Notifikasi count
   const notificationCounts = {
     Note: "5",
     Community: "8",
@@ -1061,7 +1060,7 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 40px;
         }
 
-        /* Bottom row container - flex between dots and arrows */
+        /* Bottom row container */
         .bottom-row {
           display: flex;
           justify-content: space-between;
@@ -1132,7 +1131,7 @@ export default function HomePage(): React.JSX.Element {
           transition: font-weight 0.2s ease;
         }
 
-        /* Navigation arrows - Hijau stabilo dengan panah besar */
+        /* Navigation arrows */
         .nav-arrows {
           display: flex;
           align-items: center;
@@ -1166,7 +1165,7 @@ export default function HomePage(): React.JSX.Element {
           transform: rotate(180deg);
         }
 
-        /* Gallery Section - di bawah dots */
+        /* Gallery Section */
         .gallery-section {
           margin-top: 20px;
           width: 100%;
@@ -1290,15 +1289,16 @@ export default function HomePage(): React.JSX.Element {
           height: 48px;
         }
 
-        /* Projects description - sisi kanan, 2 baris */
+        /* Projects description - sisi kanan, 2 baris, font 20px */
         .projects-description {
           font-family: 'Questrial', sans-serif;
           font-weight: 400;
-          font-size: 40px;
+          font-size: 20px;
           color: #000000;
-          letter-spacing: -0.02em;
-          line-height: 1.3;
-          max-width: 800px;
+          letter-spacing: -0.01em;
+          line-height: 1.4;
+          text-align: right;
+          max-width: 500px;
         }
       `}</style>
 
@@ -1436,9 +1436,9 @@ export default function HomePage(): React.JSX.Element {
                   MENURU
                 </div>
 
-                {/* Container untuk Navbar dan Start a Plan - agar bergerak bersama */}
+                {/* Container untuk Navbar dan Start a Plan */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-                  {/* NAVBAR - Tengah */}
+                  {/* NAVBAR */}
                   <div
                     ref={navbarRef}
                     style={{
@@ -1485,7 +1485,7 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
 
-                  {/* START A PLAN - Sisi Kanan dari navbar */}
+                  {/* START A PLAN */}
                   <Link href="/start-plan" className="start-plan-btn" ref={startPlanRef} style={{ transition: 'transform 0.1s linear' }}>
                     <span className="start-plan-text">Start a Plan</span>
                     <div className="start-plan-icon">
@@ -1522,7 +1522,7 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* LEFT TEXT SECTION - Di bawah marquee sisi kiri */}
+              {/* LEFT TEXT SECTION */}
               <div
                 style={{
                   position: 'relative',
@@ -1538,9 +1538,8 @@ export default function HomePage(): React.JSX.Element {
                   Our work taps into cultural moments to create brands <br />that resonate in noisy spaces.
                 </div>
                 
-                {/* BOTTOM ROW - Dots di kiri, Arrows di kanan */}
+                {/* BOTTOM ROW - Dots dan Arrows */}
                 <div className="bottom-row">
-                  {/* COLOR DOTS WITH LABELS - Filter buttons */}
                   <div className="dots-container">
                     {filterOptions.map((option) => (
                       <div 
@@ -1554,7 +1553,6 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
 
-                  {/* NAVIGATION ARROWS - Hijau stabilo dengan panah besar */}
                   <div className="nav-arrows">
                     <div className="arrow-btn arrow-left" onClick={() => scrollGallery('left')}>
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1569,7 +1567,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* GALLERY SECTION - Portrait Photos dengan filter dan efek rolling pada Creative Studio */}
+                {/* GALLERY SECTION */}
                 <div className="gallery-section">
                   <div className="gallery-scroll" ref={galleryScrollRef}>
                     {filteredImages.map((portrait, idx) => {
@@ -1607,16 +1605,16 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* OUR PLAN TEXT - Di bawah gallery */}
+                {/* OUR PLAN TEXT */}
                 <div className="our-plan-text">
                   Our plan
                 </div>
 
-                {/* NEW SECTION: View plan di kiri, Explore some di kanan, sejajar */}
+                {/* SECTION: View plan di kiri, Explore some di kanan, sejajar */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   flexWrap: 'wrap',
                   gap: '40px',
                   marginTop: '0px',
@@ -1632,11 +1630,10 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </Link>
 
-                  {/* KANAN: Explore some text 2 baris */}
-                  <div className="projects-description" style={{ textAlign: 'right' }}>
+                  {/* KANAN: Explore some text - 2 BARIS, font 20px, rata kanan */}
+                  <div className="projects-description">
                     Explore some of our recent projects,<br />
-                    showcasing work across diverse sectors<br />
-                    and product ranges.
+                    showcasing work across diverse sectors and product ranges.
                   </div>
                 </div>
               </div>
@@ -1684,7 +1681,7 @@ export default function HomePage(): React.JSX.Element {
                 MN'RU© - 26'
               </div>
 
-              {/* ABOUT SECTION dengan tombol Profile dan Meet the team */}
+              {/* ABOUT SECTION */}
               <div
                 style={{
                   position: 'absolute',
