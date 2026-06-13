@@ -1261,6 +1261,51 @@ export default function HomePage(): React.JSX.Element {
           margin-bottom: 60px;
           white-space: nowrap;
         }
+
+        /* New styles for the section below Our plan */
+        .projects-description {
+          font-family: 'Questrial', sans-serif;
+          font-weight: 400;
+          font-size: 40px;
+          color: #000000;
+          letter-spacing: -0.02em;
+          line-height: 1.3;
+          max-width: 800px;
+          margin-bottom: 40px;
+        }
+        
+        .view-plan-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 16px;
+          cursor: pointer;
+          transition: opacity 0.2s ease;
+          text-decoration: none;
+        }
+        
+        .view-plan-button:hover {
+          opacity: 0.7;
+        }
+        
+        .view-plan-text {
+          font-family: 'Questrial', sans-serif;
+          font-size: 40px;
+          font-weight: 500;
+          color: #000000;
+          letter-spacing: -0.02em;
+        }
+        
+        .view-plan-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .view-plan-icon svg {
+          stroke: #000000;
+          width: 48px;
+          height: 48px;
+        }
       `}</style>
 
       {/* LOADING OVERLAY */}
@@ -1571,6 +1616,31 @@ export default function HomePage(): React.JSX.Element {
                 {/* OUR PLAN TEXT - Di bawah gallery */}
                 <div className="our-plan-text">
                   Our plan
+                </div>
+
+                {/* NEW SECTION: Projects description and View plan button */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-end',
+                  flexWrap: 'wrap',
+                  gap: '40px',
+                  marginTop: '0px',
+                  marginBottom: '80px'
+                }}>
+                  <div className="projects-description">
+                    Explore some of our recent projects,<br />
+                    showcasing work across diverse sectors<br />
+                    and product ranges.
+                  </div>
+                  <Link href="/plan" className="view-plan-button">
+                    <span className="view-plan-text">View plan</span>
+                    <div className="view-plan-icon">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
