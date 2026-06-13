@@ -1289,16 +1289,15 @@ export default function HomePage(): React.JSX.Element {
           height: 48px;
         }
 
-        /* Projects description - sisi kanan, 2 baris, font 20px */
         .projects-description {
   font-family: 'Questrial', sans-serif;
   font-weight: 400;
-  font-size: 40px;
-  color: #000000;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+  font-size: 30px;
+  color: #000;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   text-align: left;
-  max-width: 900px;
+  max-width: 760px;
 }
       `}</style>
 
@@ -1631,10 +1630,10 @@ export default function HomePage(): React.JSX.Element {
   </Link>
 
   {/* KANAN: Explore some text - 2 BARIS, font 40px, rata kiri, gaya Our work */}
-  <div className="projects-description">
-    Explore some of our recent projects,<br />
-    showcasing work across diverse sectors and product ranges.
-  </div>
+ <div className="projects-description">
+  Explore some of our recent projects, showcasing work
+  across diverse sectors and product ranges.
+</div>
 </div>
               </div>
             </div>
