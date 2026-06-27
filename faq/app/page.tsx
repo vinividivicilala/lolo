@@ -1,39 +1,46 @@
 'use client';
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 export default function HomePage(): React.JSX.Element {
-  const textRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
+  const [charElements, setCharElements] = useState<HTMLElement[]>([]);
+
+  const text = "• perfectionis • aesthetics • minimalis •";
 
   useEffect(() => {
-    const textElement = textRef.current;
+    // Kumpulkan semua elemen karakter
+    const container = containerRef.current;
+    if (!container) return;
+
+    const chars = container.querySelectorAll('.char');
+    setCharElements(Array.from(chars) as HTMLElement[]);
+  }, []);
+
+  useEffect(() => {
     const imageElement = imageRef.current;
-    
-    if (!textElement || !imageElement) return;
+    if (!imageElement || charElements.length === 0) return;
 
     const checkPosition = () => {
-      const textRect = textElement.getBoundingClientRect();
       const imageRect = imageElement.getBoundingClientRect();
       
-      // Cek apakah teks berada di atas foto
-      const textLeft = textRect.left;
-      const textRight = textRect.right;
-      const imageLeft = imageRect.left;
-      const imageRight = imageRect.right;
-      
-      // Jika teks overlap dengan foto, warna putih, jika tidak hitam
-      if (textLeft < imageRight && textRight > imageLeft) {
-        textElement.style.color = '#ffffff';
-        textElement.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
-      } else {
-        textElement.style.color = 'rgb(17, 17, 17)';
-        textElement.style.textShadow = 'none';
-      }
+      charElements.forEach((char) => {
+        const charRect = char.getBoundingClientRect();
+        const charCenter = charRect.left + charRect.width / 2;
+        
+        // Cek apakah karakter berada di atas foto
+        if (charCenter >= imageRect.left && charCenter <= imageRect.right) {
+          char.style.color = '#ffffff';
+          char.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
+        } else {
+          char.style.color = 'rgb(17, 17, 17)';
+          char.style.textShadow = 'none';
+        }
+      });
     };
 
-    // Jalankan setiap frame animasi
     let animationFrame: number;
     const update = () => {
       checkPosition();
@@ -44,7 +51,7 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, []);
+  }, [charElements]);
 
   return (
     <div style={{ 
@@ -81,7 +88,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
 
-      {/* Teks berjalan di atas foto (nimpa foto) */}
+      {/* Teks berjalan di atas foto */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -94,33 +101,31 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }}>
         <div
-          ref={textRef}
+          ref={containerRef}
           style={{
             display: 'inline-block',
-            animation: 'scrollText 10s linear infinite',
+            animation: 'scrollText 15s linear infinite',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
             color: 'rgb(17, 17, 17)',
             lineHeight: 'normal',
             letterSpacing: '2px',
-            transition: 'color 0.1s ease, text-shadow 0.1s ease'
           }}
         >
-          <span style={{ marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
-          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
-          passion
+          {text.split('').map((char, index) => (
+            <span
+              key={index}
+              className="char"
+              style={{
+                display: 'inline-block',
+                transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                color: 'rgb(17, 17, 17)'
+              }}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
         </div>
       </div>
 
