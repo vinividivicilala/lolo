@@ -13,17 +13,18 @@ export default function HomePage(): React.JSX.Element {
     
     if (!textElement || !imageElement) return;
 
-    const handleScroll = () => {
+    const checkPosition = () => {
       const textRect = textElement.getBoundingClientRect();
       const imageRect = imageElement.getBoundingClientRect();
       
-      // Cek apakah teks berada di atas foto (secara horizontal)
-      const textCenter = textRect.left + textRect.width / 2;
+      // Cek apakah teks berada di atas foto
+      const textLeft = textRect.left;
+      const textRight = textRect.right;
       const imageLeft = imageRect.left;
       const imageRight = imageRect.right;
       
-      // Jika teks berada di atas foto, warna putih, selain itu hitam
-      if (textCenter >= imageLeft && textCenter <= imageRight) {
+      // Jika teks overlap dengan foto
+      if (textLeft < imageRight && textRight > imageLeft) {
         textElement.style.color = '#ffffff';
       } else {
         textElement.style.color = 'rgb(17, 17, 17)';
@@ -33,7 +34,7 @@ export default function HomePage(): React.JSX.Element {
     // Jalankan setiap frame animasi
     let animationFrame: number;
     const update = () => {
-      handleScroll();
+      checkPosition();
       animationFrame = requestAnimationFrame(update);
     };
     update();
@@ -78,7 +79,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
 
-      {/* Teks berjalan di atas foto */}
+      {/* Teks berjalan di atas foto (nimpa foto) */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -97,26 +98,26 @@ export default function HomePage(): React.JSX.Element {
             animation: 'scrollText 8s linear infinite',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
-            fontSize: '16px',
+            fontSize: '200px',
             color: 'rgb(17, 17, 17)',
             lineHeight: 'normal',
             letterSpacing: '2px',
-            transition: 'color 0.1s ease'
+            transition: 'color 0.05s ease'
           }}
         >
-          <span style={{ marginRight: '20px' }}>•</span>
+          <span style={{ marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
-          <span style={{ marginLeft: '20px', marginRight: '20px' }}>•</span>
+          <span style={{ marginLeft: '40px', marginRight: '40px' }}>•</span>
           passion
         </div>
       </div>
