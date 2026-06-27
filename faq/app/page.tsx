@@ -88,7 +88,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
 
-      {/* Teks berjalan di atas foto */}
+      {/* Teks berjalan di atas foto - MARQUEE style */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -104,18 +104,33 @@ export default function HomePage(): React.JSX.Element {
           ref={containerRef}
           style={{
             display: 'inline-block',
-            animation: 'scrollText 15s linear infinite',
+            animation: 'scrollText 12s linear infinite',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
             color: 'rgb(17, 17, 17)',
             lineHeight: 'normal',
             letterSpacing: '2px',
+            willChange: 'transform'
           }}
         >
+          {/* Duplikat teks agar tidak ada jeda */}
           {text.split('').map((char, index) => (
             <span
-              key={index}
+              key={`first-${index}`}
+              className="char"
+              style={{
+                display: 'inline-block',
+                transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                color: 'rgb(17, 17, 17)'
+              }}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
+          {text.split('').map((char, index) => (
+            <span
+              key={`second-${index}`}
               className="char"
               style={{
                 display: 'inline-block',
@@ -132,10 +147,10 @@ export default function HomePage(): React.JSX.Element {
       <style jsx>{`
         @keyframes scrollText {
           0% {
-            transform: translateX(100vw);
+            transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
         }
       `}</style>
