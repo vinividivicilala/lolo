@@ -17,14 +17,14 @@ export default function HomePage(): React.JSX.Element {
     }}>
       <div style={{
         position: 'relative',
-        width: '800px',
+        width: '600px',
         height: '600px',
         borderRadius: '16px',
         overflow: 'hidden',
         boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
       }}>
         <Image
-          src="/images/lkhh.jpg"
+          src="/images/11.jpg"
           alt="Center Image"
           fill
           style={{ objectFit: 'cover' }}
