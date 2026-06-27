@@ -23,11 +23,13 @@ export default function HomePage(): React.JSX.Element {
       const imageLeft = imageRect.left;
       const imageRight = imageRect.right;
       
-      // Jika teks overlap dengan foto
+      // Jika teks overlap dengan foto, warna putih, jika tidak hitam
       if (textLeft < imageRight && textRight > imageLeft) {
         textElement.style.color = '#ffffff';
+        textElement.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
       } else {
         textElement.style.color = 'rgb(17, 17, 17)';
+        textElement.style.textShadow = 'none';
       }
     };
 
@@ -95,14 +97,14 @@ export default function HomePage(): React.JSX.Element {
           ref={textRef}
           style={{
             display: 'inline-block',
-            animation: 'scrollText 8s linear infinite',
+            animation: 'scrollText 10s linear infinite',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
             color: 'rgb(17, 17, 17)',
             lineHeight: 'normal',
             letterSpacing: '2px',
-            transition: 'color 0.05s ease'
+            transition: 'color 0.1s ease, text-shadow 0.1s ease'
           }}
         >
           <span style={{ marginRight: '40px' }}>•</span>
