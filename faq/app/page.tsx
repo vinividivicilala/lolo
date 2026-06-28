@@ -9,7 +9,7 @@ export default function HomePage(): React.JSX.Element {
   const textWrapperRef = useRef<HTMLDivElement>(null);
   const [charElements, setCharElements] = useState<HTMLElement[]>([]);
 
-  const text = "• perfectionis • aesthetics • minimalis •";
+  const text = "perfectionism • aesthetics • minimalism •";
 
   useEffect(() => {
     // Kumpulkan semua elemen karakter
@@ -96,6 +96,21 @@ export default function HomePage(): React.JSX.Element {
       overflow: 'hidden',
       position: 'relative'
     }}>
+      {/* Teks "Menuru" di pojok kiri atas */}
+      <div style={{
+        position: 'absolute',
+        top: '40px',
+        left: '40px',
+        zIndex: 10,
+        fontFamily: 'aktiv_grotesk, sans-serif',
+        fontSize: '24px',
+        fontWeight: 400,
+        color: 'rgb(17, 17, 17)',
+        letterSpacing: '-0.02em'
+      }}>
+        Menuru
+      </div>
+
       {/* Foto tengah */}
       <div 
         ref={imageRef}
@@ -133,7 +148,7 @@ export default function HomePage(): React.JSX.Element {
           ref={textWrapperRef}
           style={{
             display: 'inline-block',
-            fontFamily: 'Outfit, system-ui, sans-serif',
+            fontFamily: 'aktiv_grotesk, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
             color: 'rgb(17, 17, 17)',
