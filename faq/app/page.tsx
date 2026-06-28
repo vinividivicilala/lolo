@@ -6,8 +6,8 @@ import Image from "next/image";
 export default function HomePage(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
+  const textWrapperRef = useRef<HTMLDivElement>(null);
   const [charElements, setCharElements] = useState<HTMLElement[]>([]);
-  const [isAnimating, setIsAnimating] = useState(true);
 
   const text = "• perfectionis • aesthetics • minimalis •";
 
@@ -20,6 +20,35 @@ export default function HomePage(): React.JSX.Element {
     setCharElements(Array.from(chars) as HTMLElement[]);
   }, []);
 
+  // Animasi teks berjalan dengan JavaScript
+  useEffect(() => {
+    const wrapper = textWrapperRef.current;
+    if (!wrapper) return;
+
+    let position = 0;
+    let animationId: number;
+
+    const animate = () => {
+      position -= 1; // Kecepatan gerak
+      wrapper.style.transform = `translateX(${position}px)`;
+      
+      // Reset posisi jika sudah melewati setengah dari total lebar
+      const wrapperWidth = wrapper.scrollWidth / 2;
+      if (Math.abs(position) >= wrapperWidth) {
+        position = 0;
+      }
+      
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  // Efek perubahan warna per huruf
   useEffect(() => {
     const imageElement = imageRef.current;
     if (!imageElement || charElements.length === 0) return;
@@ -31,7 +60,6 @@ export default function HomePage(): React.JSX.Element {
         const charRect = char.getBoundingClientRect();
         const charCenter = charRect.left + charRect.width / 2;
         
-        // Cek apakah karakter berada di atas foto
         if (charCenter >= imageRect.left && charCenter <= imageRect.right) {
           char.style.color = '#ffffff';
           char.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
@@ -89,7 +117,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
 
-      {/* Teks berjalan di atas foto - MARQUEE style */}
+      {/* Teks berjalan di atas foto */}
       <div style={{
         position: 'absolute',
         top: '50%',
@@ -102,10 +130,9 @@ export default function HomePage(): React.JSX.Element {
         pointerEvents: 'none'
       }}>
         <div
-          ref={containerRef}
+          ref={textWrapperRef}
           style={{
             display: 'inline-block',
-            animation: isAnimating ? 'scrollText 12s linear infinite' : 'none',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
@@ -115,46 +142,38 @@ export default function HomePage(): React.JSX.Element {
             willChange: 'transform'
           }}
         >
-          {/* Duplikat teks agar tidak ada jeda */}
-          {text.split('').map((char, index) => (
-            <span
-              key={`first-${index}`}
-              className="char"
-              style={{
-                display: 'inline-block',
-                transition: 'color 0.05s ease, text-shadow 0.05s ease',
-                color: 'rgb(17, 17, 17)'
-              }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
-          {text.split('').map((char, index) => (
-            <span
-              key={`second-${index}`}
-              className="char"
-              style={{
-                display: 'inline-block',
-                transition: 'color 0.05s ease, text-shadow 0.05s ease',
-                color: 'rgb(17, 17, 17)'
-              }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
+          <span ref={containerRef}>
+            {text.split('').map((char, index) => (
+              <span
+                key={`first-${index}`}
+                className="char"
+                style={{
+                  display: 'inline-block',
+                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                  color: 'rgb(17, 17, 17)'
+                }}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </span>
+          <span>
+            {text.split('').map((char, index) => (
+              <span
+                key={`second-${index}`}
+                className="char"
+                style={{
+                  display: 'inline-block',
+                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                  color: 'rgb(17, 17, 17)'
+                }}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </span>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes scrollText {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
     </div>
   );
 }
