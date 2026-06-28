@@ -14,35 +14,36 @@ export default function HomePage(): React.JSX.Element {
   const leftTextRef = useRef<HTMLDivElement>(null);
   const centerTextRef = useRef<HTMLDivElement>(null);
   const rightTextRef = useRef<HTMLDivElement>(null);
-  const [rollingIndex, setRollingIndex] = useState(0);
+  const [currentText, setCurrentText] = useState(0);
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const rollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const textIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
 
-  // Rolling teks tengah bergantian dengan GSAP - AKTIF DAN OTOMATIS
+  // Ganti teks tengah bergantian dengan GSAP
   useEffect(() => {
     if (!isLoading) return;
 
-    // Fungsi untuk mengganti teks dengan animasi GSAP
-    const rollText = () => {
-      setRollingIndex((prev) => {
+    // Fungsi untuk mengganti teks dengan GSAP
+    const changeText = () => {
+      setCurrentText((prev) => {
         const next = (prev + 1) % rollingTexts.length;
         if (centerTextRef.current) {
-          // Animasi keluar
+          // Animasi keluar dengan GSAP
           gsap.to(centerTextRef.current, {
             opacity: 0,
-            y: -20,
-            duration: 0.4,
+            y: -30,
+            rotationX: 20,
+            duration: 0.5,
             ease: "power2.in",
             onComplete: () => {
-              // Update teks
-              setRollingIndex(next);
-              // Animasi masuk
+              // Ganti teks
+              setCurrentText(next);
+              // Animasi masuk dengan GSAP
               gsap.fromTo(centerTextRef.current,
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+                { opacity: 0, y: 30, rotationX: -20 },
+                { opacity: 1, y: 0, rotationX: 0, duration: 0.5, ease: "power2.out" }
               );
             }
           });
@@ -51,13 +52,13 @@ export default function HomePage(): React.JSX.Element {
       });
     };
 
-    // Mulai rolling teks - LANGSUNG AKTIF
-    rollingIntervalRef.current = setInterval(rollText, 2500);
+    // Mulai ganti teks setiap 2 detik
+    textIntervalRef.current = setInterval(changeText, 2000);
 
     return () => {
-      if (rollingIntervalRef.current) {
-        clearInterval(rollingIntervalRef.current);
-        rollingIntervalRef.current = null;
+      if (textIntervalRef.current) {
+        clearInterval(textIntervalRef.current);
+        textIntervalRef.current = null;
       }
     };
   }, [isLoading]);
@@ -68,10 +69,10 @@ export default function HomePage(): React.JSX.Element {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        // Hentikan rolling teks
-        if (rollingIntervalRef.current) {
-          clearInterval(rollingIntervalRef.current);
-          rollingIntervalRef.current = null;
+        // Hentikan ganti teks
+        if (textIntervalRef.current) {
+          clearInterval(textIntervalRef.current);
+          textIntervalRef.current = null;
         }
 
         // Animasi keluar loading
@@ -82,17 +83,17 @@ export default function HomePage(): React.JSX.Element {
           onComplete: () => {
             setIsLoading(false);
             gsap.fromTo(mainContentRef.current,
-              { opacity: 0 },
-              { opacity: 1, duration: 0.8, ease: "power2.out" }
+              { opacity: 0, scale: 0.98 },
+              { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
             );
           }
         });
       }
     });
 
-    // Animasi teks kiri (Menuru)
+    // Animasi teks kiri (Menuru) - dari kiri ujung
     if (leftTextRef.current) {
-      gsap.set(leftTextRef.current, { opacity: 0, x: -50 });
+      gsap.set(leftTextRef.current, { opacity: 0, x: -80 });
       tl.to(leftTextRef.current, {
         opacity: 1,
         x: 0,
@@ -101,9 +102,9 @@ export default function HomePage(): React.JSX.Element {
       }, 0);
     }
 
-    // Animasi teks kanan (Studio)
+    // Animasi teks kanan (Studio) - dari kanan ujung
     if (rightTextRef.current) {
-      gsap.set(rightTextRef.current, { opacity: 0, x: 50 });
+      gsap.set(rightTextRef.current, { opacity: 0, x: 80 });
       tl.to(rightTextRef.current, {
         opacity: 1,
         x: 0,
@@ -112,14 +113,15 @@ export default function HomePage(): React.JSX.Element {
       }, 0.2);
     }
 
-    // Animasi teks tengah (rolling) - muncul pertama kali
+    // Animasi teks tengah - muncul
     if (centerTextRef.current) {
-      gsap.set(centerTextRef.current, { opacity: 0, y: 30 });
+      gsap.set(centerTextRef.current, { opacity: 0, y: 30, scale: 0.8 });
       tl.to(centerTextRef.current, {
         opacity: 1,
         y: 0,
+        scale: 1,
         duration: 0.8,
-        ease: "power3.out"
+        ease: "back.out(1.5)"
       }, 0.4);
     }
 
@@ -224,13 +226,12 @@ export default function HomePage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '60px',
-            maxWidth: '1200px',
+            justifyContent: 'space-between',
+            maxWidth: '1400px',
             width: '100%',
-            padding: '0 40px'
+            padding: '0 60px'
           }}>
-            {/* Kiri: Menuru */}
+            {/* Kiri: Menuru - di ujung kiri */}
             <div
               ref={leftTextRef}
               style={{
@@ -238,14 +239,13 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 400,
                 color: '#000000',
                 opacity: 0,
-                fontFamily: 'aktiv_grotesk, sans-serif',
-                minWidth: '150px'
+                fontFamily: 'aktiv_grotesk, sans-serif'
               }}
             >
               Menuru
             </div>
 
-            {/* Tengah: Rolling Text dengan GSAP - AKTIF DAN OTOMATIS */}
+            {/* Tengah: Teks bergantian dengan GSAP */}
             <div
               ref={centerTextRef}
               style={{
@@ -258,10 +258,10 @@ export default function HomePage(): React.JSX.Element {
                 minWidth: '200px'
               }}
             >
-              {rollingTexts[rollingIndex]}
+              {rollingTexts[currentText]}
             </div>
 
-            {/* Kanan: Studio */}
+            {/* Kanan: Studio - di ujung kanan */}
             <div
               ref={rightTextRef}
               style={{
@@ -269,8 +269,7 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 400,
                 color: '#000000',
                 opacity: 0,
-                fontFamily: 'aktiv_grotesk, sans-serif',
-                minWidth: '150px'
+                fontFamily: 'aktiv_grotesk, sans-serif'
               }}
             >
               Studio
