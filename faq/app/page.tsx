@@ -17,11 +17,12 @@ export default function HomePage(): React.JSX.Element {
   const [currentText, setCurrentText] = useState(0);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const textIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const prevTextRef = useRef<HTMLDivElement>(null);
 
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
 
-  // Ganti teks tengah bergantian dengan GSAP
+  // Ganti teks tengah bergantian dengan GSAP - teks lama terlihat
   useEffect(() => {
     if (!isLoading) return;
 
@@ -30,20 +31,21 @@ export default function HomePage(): React.JSX.Element {
       setCurrentText((prev) => {
         const next = (prev + 1) % rollingTexts.length;
         if (centerTextRef.current) {
-          // Animasi keluar dengan GSAP
+          // Animasi keluar - teks lama
           gsap.to(centerTextRef.current, {
             opacity: 0,
-            y: -30,
-            rotationX: 20,
-            duration: 0.5,
+            y: -50,
+            scale: 0.8,
+            rotationX: 30,
+            duration: 0.6,
             ease: "power2.in",
             onComplete: () => {
               // Ganti teks
               setCurrentText(next);
-              // Animasi masuk dengan GSAP
+              // Animasi masuk - teks baru
               gsap.fromTo(centerTextRef.current,
-                { opacity: 0, y: 30, rotationX: -20 },
-                { opacity: 1, y: 0, rotationX: 0, duration: 0.5, ease: "power2.out" }
+                { opacity: 0, y: 50, scale: 0.8, rotationX: -30 },
+                { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.6, ease: "back.out(1.5)" }
               );
             }
           });
@@ -52,8 +54,8 @@ export default function HomePage(): React.JSX.Element {
       });
     };
 
-    // Mulai ganti teks setiap 2 detik
-    textIntervalRef.current = setInterval(changeText, 2000);
+    // Mulai ganti teks setiap 2.5 detik
+    textIntervalRef.current = setInterval(changeText, 2500);
 
     return () => {
       if (textIntervalRef.current) {
@@ -69,13 +71,11 @@ export default function HomePage(): React.JSX.Element {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        // Hentikan ganti teks
         if (textIntervalRef.current) {
           clearInterval(textIntervalRef.current);
           textIntervalRef.current = null;
         }
 
-        // Animasi keluar loading
         gsap.to(loadingRef.current, {
           opacity: 0,
           duration: 0.8,
@@ -91,7 +91,6 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
-    // Animasi teks kiri (Menuru) - dari kiri ujung
     if (leftTextRef.current) {
       gsap.set(leftTextRef.current, { opacity: 0, x: -80 });
       tl.to(leftTextRef.current, {
@@ -102,7 +101,6 @@ export default function HomePage(): React.JSX.Element {
       }, 0);
     }
 
-    // Animasi teks kanan (Studio) - dari kanan ujung
     if (rightTextRef.current) {
       gsap.set(rightTextRef.current, { opacity: 0, x: 80 });
       tl.to(rightTextRef.current, {
@@ -113,7 +111,6 @@ export default function HomePage(): React.JSX.Element {
       }, 0.2);
     }
 
-    // Animasi teks tengah - muncul
     if (centerTextRef.current) {
       gsap.set(centerTextRef.current, { opacity: 0, y: 30, scale: 0.8 });
       tl.to(centerTextRef.current, {
@@ -167,7 +164,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isLoading]);
 
-  // Efek perubahan warna per huruf
+  // Efek perubahan warna per huruf - SEMUA TEKS TERMASUK perfectionism
   useEffect(() => {
     if (isLoading) return;
     
@@ -181,6 +178,7 @@ export default function HomePage(): React.JSX.Element {
         const charRect = char.getBoundingClientRect();
         const charCenter = charRect.left + charRect.width / 2;
         
+        // Setiap huruf berubah warna saat berada di atas foto
         if (charCenter >= imageRect.left && charCenter <= imageRect.right) {
           char.style.color = '#ffffff';
           char.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
@@ -231,7 +229,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             padding: '0 60px'
           }}>
-            {/* Kiri: Menuru - di ujung kiri */}
+            {/* Kiri: Menuru */}
             <div
               ref={leftTextRef}
               style={{
@@ -255,13 +253,14 @@ export default function HomePage(): React.JSX.Element {
                 opacity: 0,
                 fontFamily: 'aktiv_grotesk, sans-serif',
                 textAlign: 'center',
-                minWidth: '200px'
+                minWidth: '200px',
+                perspective: '1000px'
               }}
             >
               {rollingTexts[currentText]}
             </div>
 
-            {/* Kanan: Studio - di ujung kanan */}
+            {/* Kanan: Studio */}
             <div
               ref={rightTextRef}
               style={{
