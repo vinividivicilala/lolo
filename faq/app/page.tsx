@@ -7,6 +7,7 @@ export default function HomePage(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const [charElements, setCharElements] = useState<HTMLElement[]>([]);
+  const [isAnimating, setIsAnimating] = useState(true);
 
   const text = "• perfectionis • aesthetics • minimalis •";
 
@@ -104,7 +105,7 @@ export default function HomePage(): React.JSX.Element {
           ref={containerRef}
           style={{
             display: 'inline-block',
-            animation: 'scrollText 12s linear infinite',
+            animation: isAnimating ? 'scrollText 12s linear infinite' : 'none',
             fontFamily: 'Outfit, system-ui, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
@@ -144,7 +145,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes scrollText {
           0% {
             transform: translateX(0);
