@@ -20,7 +20,7 @@ export default function HomePage(): React.JSX.Element {
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
 
-  // Rolling teks tengah bergantian
+  // Rolling teks tengah bergantian dengan GSAP
   useEffect(() => {
     if (!isLoading) return;
 
@@ -29,7 +29,7 @@ export default function HomePage(): React.JSX.Element {
       if (centerTextRef.current) {
         gsap.fromTo(centerTextRef.current,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
         );
       }
     }, 2000);
@@ -49,10 +49,9 @@ export default function HomePage(): React.JSX.Element {
           ease: "power2.inOut",
           onComplete: () => {
             setIsLoading(false);
-            // Tampilkan halaman utama dengan animasi
             gsap.fromTo(mainContentRef.current,
-              { opacity: 0, scale: 0.98 },
-              { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
+              { opacity: 0 },
+              { opacity: 1, duration: 0.8, ease: "power2.out" }
             );
           }
         });
@@ -98,7 +97,6 @@ export default function HomePage(): React.JSX.Element {
   }, [isLoading]);
 
   useEffect(() => {
-    // Kumpulkan semua elemen karakter
     const container = containerRef.current;
     if (!container) return;
 
@@ -106,7 +104,7 @@ export default function HomePage(): React.JSX.Element {
     setCharElements(Array.from(chars) as HTMLElement[]);
   }, []);
 
-  // Animasi teks berjalan dengan JavaScript
+  // Animasi teks berjalan
   useEffect(() => {
     if (isLoading) return;
     
@@ -214,7 +212,7 @@ export default function HomePage(): React.JSX.Element {
               Menuru
             </div>
 
-            {/* Tengah: Rolling Text */}
+            {/* Tengah: Rolling Text dengan GSAP */}
             <div
               ref={centerTextRef}
               style={{
@@ -262,37 +260,22 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'Arial, sans-serif',
           overflow: 'hidden',
           position: 'relative',
-          opacity: isLoading ? 0 : 1
+          opacity: 0
         }}
       >
-        {/* Teks "Menuru" di pojok kiri atas */}
+        {/* Teks judul "Menuru" di pojok kiri atas */}
         <div style={{
           position: 'absolute',
           top: '40px',
           left: '40px',
           zIndex: 10,
           fontFamily: 'aktiv_grotesk, sans-serif',
-          fontSize: '24px',
+          fontSize: '50px',
           fontWeight: 400,
-          color: 'rgb(17, 17, 17)',
+          color: '#000000',
           letterSpacing: '-0.02em'
         }}>
           Menuru
-        </div>
-
-        {/* Teks "Studio" di pojok kanan atas */}
-        <div style={{
-          position: 'absolute',
-          top: '40px',
-          right: '40px',
-          zIndex: 10,
-          fontFamily: 'aktiv_grotesk, sans-serif',
-          fontSize: '24px',
-          fontWeight: 400,
-          color: 'rgb(17, 17, 17)',
-          letterSpacing: '-0.02em'
-        }}>
-          Studio
         </div>
 
         {/* Foto tengah */}
