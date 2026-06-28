@@ -21,12 +21,12 @@ export default function HomePage(): React.JSX.Element {
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
 
-  // Rolling teks tengah bergantian dengan GSAP - kecepatan normal
+  // Rolling teks tengah bergantian dengan GSAP - AKTIF DAN OTOMATIS
   useEffect(() => {
     if (!isLoading) return;
 
-    // Mulai rolling teks dengan interval 2.5 detik (kecepatan normal)
-    rollingIntervalRef.current = setInterval(() => {
+    // Fungsi untuk mengganti teks dengan animasi GSAP
+    const rollText = () => {
       setRollingIndex((prev) => {
         const next = (prev + 1) % rollingTexts.length;
         if (centerTextRef.current) {
@@ -37,7 +37,7 @@ export default function HomePage(): React.JSX.Element {
             duration: 0.4,
             ease: "power2.in",
             onComplete: () => {
-              // Ganti teks
+              // Update teks
               setRollingIndex(next);
               // Animasi masuk
               gsap.fromTo(centerTextRef.current,
@@ -49,7 +49,10 @@ export default function HomePage(): React.JSX.Element {
         }
         return next;
       });
-    }, 2500);
+    };
+
+    // Mulai rolling teks - LANGSUNG AKTIF
+    rollingIntervalRef.current = setInterval(rollText, 2500);
 
     return () => {
       if (rollingIntervalRef.current) {
@@ -235,13 +238,14 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 400,
                 color: '#000000',
                 opacity: 0,
-                fontFamily: 'aktiv_grotesk, sans-serif'
+                fontFamily: 'aktiv_grotesk, sans-serif',
+                minWidth: '150px'
               }}
             >
               Menuru
             </div>
 
-            {/* Tengah: Rolling Text dengan GSAP */}
+            {/* Tengah: Rolling Text dengan GSAP - AKTIF DAN OTOMATIS */}
             <div
               ref={centerTextRef}
               style={{
@@ -265,7 +269,8 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 400,
                 color: '#000000',
                 opacity: 0,
-                fontFamily: 'aktiv_grotesk, sans-serif'
+                fontFamily: 'aktiv_grotesk, sans-serif',
+                minWidth: '150px'
               }}
             >
               Studio
