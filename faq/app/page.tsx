@@ -16,32 +16,45 @@ export default function HomePage(): React.JSX.Element {
   const rightTextRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const rollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
-  let rollingIntervalId = useRef<NodeJS.Timeout | null>(null);
 
-  // Rolling teks tengah bergantian dengan GSAP - BERJALAN TERUS
+  // Rolling teks tengah bergantian dengan GSAP - kecepatan normal
   useEffect(() => {
     if (!isLoading) return;
 
-    // Mulai rolling teks
-    rollingIntervalId.current = setInterval(() => {
+    // Mulai rolling teks dengan interval 2.5 detik (kecepatan normal)
+    rollingIntervalRef.current = setInterval(() => {
       setRollingIndex((prev) => {
         const next = (prev + 1) % rollingTexts.length;
         if (centerTextRef.current) {
-          gsap.fromTo(centerTextRef.current,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-          );
+          // Animasi keluar
+          gsap.to(centerTextRef.current, {
+            opacity: 0,
+            y: -20,
+            duration: 0.4,
+            ease: "power2.in",
+            onComplete: () => {
+              // Ganti teks
+              setRollingIndex(next);
+              // Animasi masuk
+              gsap.fromTo(centerTextRef.current,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+              );
+            }
+          });
         }
         return next;
       });
-    }, 2000);
+    }, 2500);
 
     return () => {
-      if (rollingIntervalId.current) {
-        clearInterval(rollingIntervalId.current);
+      if (rollingIntervalRef.current) {
+        clearInterval(rollingIntervalRef.current);
+        rollingIntervalRef.current = null;
       }
     };
   }, [isLoading]);
@@ -53,9 +66,9 @@ export default function HomePage(): React.JSX.Element {
     const tl = gsap.timeline({
       onComplete: () => {
         // Hentikan rolling teks
-        if (rollingIntervalId.current) {
-          clearInterval(rollingIntervalId.current);
-          rollingIntervalId.current = null;
+        if (rollingIntervalRef.current) {
+          clearInterval(rollingIntervalRef.current);
+          rollingIntervalRef.current = null;
         }
 
         // Animasi keluar loading
@@ -228,7 +241,7 @@ export default function HomePage(): React.JSX.Element {
               Menuru
             </div>
 
-            {/* Tengah: Rolling Text dengan GSAP - BERJALAN TERUS */}
+            {/* Tengah: Rolling Text dengan GSAP */}
             <div
               ref={centerTextRef}
               style={{
