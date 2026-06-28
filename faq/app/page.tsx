@@ -19,22 +19,31 @@ export default function HomePage(): React.JSX.Element {
 
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
+  let rollingIntervalId = useRef<NodeJS.Timeout | null>(null);
 
-  // Rolling teks tengah bergantian dengan GSAP
+  // Rolling teks tengah bergantian dengan GSAP - BERJALAN TERUS
   useEffect(() => {
     if (!isLoading) return;
 
-    const intervalId = setInterval(() => {
-      setRollingIndex((prev) => (prev + 1) % rollingTexts.length);
-      if (centerTextRef.current) {
-        gsap.fromTo(centerTextRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-        );
-      }
+    // Mulai rolling teks
+    rollingIntervalId.current = setInterval(() => {
+      setRollingIndex((prev) => {
+        const next = (prev + 1) % rollingTexts.length;
+        if (centerTextRef.current) {
+          gsap.fromTo(centerTextRef.current,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+          );
+        }
+        return next;
+      });
     }, 2000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      if (rollingIntervalId.current) {
+        clearInterval(rollingIntervalId.current);
+      }
+    };
   }, [isLoading]);
 
   // Animasi loading GSAP
@@ -43,6 +52,13 @@ export default function HomePage(): React.JSX.Element {
 
     const tl = gsap.timeline({
       onComplete: () => {
+        // Hentikan rolling teks
+        if (rollingIntervalId.current) {
+          clearInterval(rollingIntervalId.current);
+          rollingIntervalId.current = null;
+        }
+
+        // Animasi keluar loading
         gsap.to(loadingRef.current, {
           opacity: 0,
           duration: 0.8,
@@ -80,7 +96,7 @@ export default function HomePage(): React.JSX.Element {
       }, 0.2);
     }
 
-    // Animasi teks tengah (rolling)
+    // Animasi teks tengah (rolling) - muncul pertama kali
     if (centerTextRef.current) {
       gsap.set(centerTextRef.current, { opacity: 0, y: 30 });
       tl.to(centerTextRef.current, {
@@ -212,7 +228,7 @@ export default function HomePage(): React.JSX.Element {
               Menuru
             </div>
 
-            {/* Tengah: Rolling Text dengan GSAP */}
+            {/* Tengah: Rolling Text dengan GSAP - BERJALAN TERUS */}
             <div
               ref={centerTextRef}
               style={{
