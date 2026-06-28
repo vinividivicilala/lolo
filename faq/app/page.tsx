@@ -15,9 +15,27 @@ export default function HomePage(): React.JSX.Element {
   const centerTextRef = useRef<HTMLDivElement>(null);
   const rightTextRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
+  const mainContentRef = useRef<HTMLDivElement>(null);
 
   const text = "perfectionism • aesthetics • minimalism •";
   const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
+
+  // Rolling teks tengah bergantian
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const intervalId = setInterval(() => {
+      setRollingIndex((prev) => (prev + 1) % rollingTexts.length);
+      if (centerTextRef.current) {
+        gsap.fromTo(centerTextRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [isLoading]);
 
   // Animasi loading GSAP
   useEffect(() => {
@@ -31,12 +49,17 @@ export default function HomePage(): React.JSX.Element {
           ease: "power2.inOut",
           onComplete: () => {
             setIsLoading(false);
+            // Tampilkan halaman utama dengan animasi
+            gsap.fromTo(mainContentRef.current,
+              { opacity: 0, scale: 0.98 },
+              { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
+            );
           }
         });
       }
     });
 
-    // Animasi teks kiri
+    // Animasi teks kiri (Menuru)
     if (leftTextRef.current) {
       gsap.set(leftTextRef.current, { opacity: 0, x: -50 });
       tl.to(leftTextRef.current, {
@@ -47,7 +70,7 @@ export default function HomePage(): React.JSX.Element {
       }, 0);
     }
 
-    // Animasi teks kanan
+    // Animasi teks kanan (Studio)
     if (rightTextRef.current) {
       gsap.set(rightTextRef.current, { opacity: 0, x: 50 });
       tl.to(rightTextRef.current, {
@@ -69,23 +92,8 @@ export default function HomePage(): React.JSX.Element {
       }, 0.4);
     }
 
-    // Rolling teks tengah bergantian
-    let intervalId: NodeJS.Timeout;
-    if (!isLoading) {
-      intervalId = setInterval(() => {
-        setRollingIndex((prev) => (prev + 1) % rollingTexts.length);
-        if (centerTextRef.current) {
-          gsap.fromTo(centerTextRef.current,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-          );
-        }
-      }, 2000);
-    }
-
     return () => {
       tl.kill();
-      if (intervalId) clearInterval(intervalId);
     };
   }, [isLoading]);
 
@@ -163,188 +171,209 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [charElements, isLoading]);
 
-  if (isLoading) {
-    return (
-      <div
-        ref={loadingRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#ffffff',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'aktiv_grotesk, sans-serif'
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '60px',
-          maxWidth: '1200px',
-          width: '100%',
-          padding: '0 40px'
-        }}>
-          {/* Kiri: Menuru */}
-          <div
-            ref={leftTextRef}
-            style={{
-              fontSize: '50px',
-              fontWeight: 400,
-              color: '#000000',
-              opacity: 0,
-              fontFamily: 'aktiv_grotesk, sans-serif'
-            }}
-          >
-            Menuru
-          </div>
-
-          {/* Tengah: Rolling Text */}
-          <div
-            ref={centerTextRef}
-            style={{
-              fontSize: '50px',
-              fontWeight: 400,
-              color: '#000000',
-              opacity: 0,
-              fontFamily: 'aktiv_grotesk, sans-serif',
-              textAlign: 'center',
-              minWidth: '200px'
-            }}
-          >
-            {rollingTexts[rollingIndex]}
-          </div>
-
-          {/* Kanan: Teks Statis */}
-          <div
-            ref={rightTextRef}
-            style={{
-              fontSize: '50px',
-              fontWeight: 400,
-              color: '#000000',
-              opacity: 0,
-              fontFamily: 'aktiv_grotesk, sans-serif'
-            }}
-          >
-            Studio
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#ffffff',
-      margin: 0,
-      padding: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      fontFamily: 'Arial, sans-serif',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
-      {/* Teks "Menuru" di pojok kiri atas */}
-      <div style={{
-        position: 'absolute',
-        top: '40px',
-        left: '40px',
-        zIndex: 10,
-        fontFamily: 'aktiv_grotesk, sans-serif',
-        fontSize: '24px',
-        fontWeight: 400,
-        color: 'rgb(17, 17, 17)',
-        letterSpacing: '-0.02em'
-      }}>
-        Menuru
-      </div>
-
-      {/* Foto tengah */}
-      <div 
-        ref={imageRef}
-        style={{
-          position: 'relative',
-          width: '600px',
-          height: '600px',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-          zIndex: 1
-        }}
-      >
-        <Image
-          src="/images/11.jpg"
-          alt="Center Image"
-          fill
-          style={{ objectFit: 'cover' }}
-        />
-      </div>
-
-      {/* Teks berjalan di atas foto */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '0',
-        transform: 'translateY(-50%)',
-        width: '100%',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        zIndex: 2,
-        pointerEvents: 'none'
-      }}>
+    <>
+      {/* LOADING SCREEN */}
+      {isLoading && (
         <div
-          ref={textWrapperRef}
+          ref={loadingRef}
           style={{
-            display: 'inline-block',
-            fontFamily: 'aktiv_grotesk, sans-serif',
-            fontWeight: 400,
-            fontSize: '200px',
-            color: 'rgb(17, 17, 17)',
-            lineHeight: 'normal',
-            letterSpacing: '2px',
-            willChange: 'transform'
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#ffffff',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'aktiv_grotesk, sans-serif'
           }}
         >
-          <span ref={containerRef}>
-            {text.split('').map((char, index) => (
-              <span
-                key={`first-${index}`}
-                className="char"
-                style={{
-                  display: 'inline-block',
-                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
-                  color: 'rgb(17, 17, 17)'
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </span>
-          <span>
-            {text.split('').map((char, index) => (
-              <span
-                key={`second-${index}`}
-                className="char"
-                style={{
-                  display: 'inline-block',
-                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
-                  color: 'rgb(17, 17, 17)'
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '60px',
+            maxWidth: '1200px',
+            width: '100%',
+            padding: '0 40px'
+          }}>
+            {/* Kiri: Menuru */}
+            <div
+              ref={leftTextRef}
+              style={{
+                fontSize: '50px',
+                fontWeight: 400,
+                color: '#000000',
+                opacity: 0,
+                fontFamily: 'aktiv_grotesk, sans-serif'
+              }}
+            >
+              Menuru
+            </div>
+
+            {/* Tengah: Rolling Text */}
+            <div
+              ref={centerTextRef}
+              style={{
+                fontSize: '50px',
+                fontWeight: 400,
+                color: '#000000',
+                opacity: 0,
+                fontFamily: 'aktiv_grotesk, sans-serif',
+                textAlign: 'center',
+                minWidth: '200px'
+              }}
+            >
+              {rollingTexts[rollingIndex]}
+            </div>
+
+            {/* Kanan: Studio */}
+            <div
+              ref={rightTextRef}
+              style={{
+                fontSize: '50px',
+                fontWeight: 400,
+                color: '#000000',
+                opacity: 0,
+                fontFamily: 'aktiv_grotesk, sans-serif'
+              }}
+            >
+              Studio
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MAIN CONTENT */}
+      <div 
+        ref={mainContentRef}
+        style={{ 
+          minHeight: '100vh', 
+          backgroundColor: '#ffffff',
+          margin: 0,
+          padding: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          fontFamily: 'Arial, sans-serif',
+          overflow: 'hidden',
+          position: 'relative',
+          opacity: isLoading ? 0 : 1
+        }}
+      >
+        {/* Teks "Menuru" di pojok kiri atas */}
+        <div style={{
+          position: 'absolute',
+          top: '40px',
+          left: '40px',
+          zIndex: 10,
+          fontFamily: 'aktiv_grotesk, sans-serif',
+          fontSize: '24px',
+          fontWeight: 400,
+          color: 'rgb(17, 17, 17)',
+          letterSpacing: '-0.02em'
+        }}>
+          Menuru
+        </div>
+
+        {/* Teks "Studio" di pojok kanan atas */}
+        <div style={{
+          position: 'absolute',
+          top: '40px',
+          right: '40px',
+          zIndex: 10,
+          fontFamily: 'aktiv_grotesk, sans-serif',
+          fontSize: '24px',
+          fontWeight: 400,
+          color: 'rgb(17, 17, 17)',
+          letterSpacing: '-0.02em'
+        }}>
+          Studio
+        </div>
+
+        {/* Foto tengah */}
+        <div 
+          ref={imageRef}
+          style={{
+            position: 'relative',
+            width: '600px',
+            height: '600px',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+            zIndex: 1
+          }}
+        >
+          <Image
+            src="/images/11.jpg"
+            alt="Center Image"
+            fill
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
+
+        {/* Teks berjalan di atas foto */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '0',
+          transform: 'translateY(-50%)',
+          width: '100%',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          zIndex: 2,
+          pointerEvents: 'none'
+        }}>
+          <div
+            ref={textWrapperRef}
+            style={{
+              display: 'inline-block',
+              fontFamily: 'aktiv_grotesk, sans-serif',
+              fontWeight: 400,
+              fontSize: '200px',
+              color: 'rgb(17, 17, 17)',
+              lineHeight: 'normal',
+              letterSpacing: '2px',
+              willChange: 'transform'
+            }}
+          >
+            <span ref={containerRef}>
+              {text.split('').map((char, index) => (
+                <span
+                  key={`first-${index}`}
+                  className="char"
+                  style={{
+                    display: 'inline-block',
+                    transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                    color: 'rgb(17, 17, 17)'
+                  }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+            <span>
+              {text.split('').map((char, index) => (
+                <span
+                  key={`second-${index}`}
+                  className="char"
+                  style={{
+                    display: 'inline-block',
+                    transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                    color: 'rgb(17, 17, 17)'
+                  }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
