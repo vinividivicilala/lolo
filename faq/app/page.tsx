@@ -2,14 +2,92 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import gsap from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const textWrapperRef = useRef<HTMLDivElement>(null);
   const [charElements, setCharElements] = useState<HTMLElement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const loadingRef = useRef<HTMLDivElement>(null);
+  const leftTextRef = useRef<HTMLDivElement>(null);
+  const centerTextRef = useRef<HTMLDivElement>(null);
+  const rightTextRef = useRef<HTMLDivElement>(null);
+  const [rollingIndex, setRollingIndex] = useState(0);
 
   const text = "perfectionism • aesthetics • minimalism •";
+  const rollingTexts = ["Design", "Innovation", "Creativity", "Vision"];
+
+  // Animasi loading GSAP
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        gsap.to(loadingRef.current, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setIsLoading(false);
+          }
+        });
+      }
+    });
+
+    // Animasi teks kiri
+    if (leftTextRef.current) {
+      gsap.set(leftTextRef.current, { opacity: 0, x: -50 });
+      tl.to(leftTextRef.current, {
+        opacity: 1,
+        x: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      }, 0);
+    }
+
+    // Animasi teks kanan
+    if (rightTextRef.current) {
+      gsap.set(rightTextRef.current, { opacity: 0, x: 50 });
+      tl.to(rightTextRef.current, {
+        opacity: 1,
+        x: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      }, 0.2);
+    }
+
+    // Animasi teks tengah (rolling)
+    if (centerTextRef.current) {
+      gsap.set(centerTextRef.current, { opacity: 0, y: 30 });
+      tl.to(centerTextRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      }, 0.4);
+    }
+
+    // Rolling teks tengah bergantian
+    let intervalId: NodeJS.Timeout;
+    if (!isLoading) {
+      intervalId = setInterval(() => {
+        setRollingIndex((prev) => (prev + 1) % rollingTexts.length);
+        if (centerTextRef.current) {
+          gsap.fromTo(centerTextRef.current,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+          );
+        }
+      }, 2000);
+    }
+
+    return () => {
+      tl.kill();
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isLoading]);
 
   useEffect(() => {
     // Kumpulkan semua elemen karakter
@@ -22,6 +100,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi teks berjalan dengan JavaScript
   useEffect(() => {
+    if (isLoading) return;
+    
     const wrapper = textWrapperRef.current;
     if (!wrapper) return;
 
@@ -29,10 +109,9 @@ export default function HomePage(): React.JSX.Element {
     let animationId: number;
 
     const animate = () => {
-      position -= 1; // Kecepatan gerak
+      position -= 1;
       wrapper.style.transform = `translateX(${position}px)`;
       
-      // Reset posisi jika sudah melewati setengah dari total lebar
       const wrapperWidth = wrapper.scrollWidth / 2;
       if (Math.abs(position) >= wrapperWidth) {
         position = 0;
@@ -46,10 +125,12 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, []);
+  }, [isLoading]);
 
   // Efek perubahan warna per huruf
   useEffect(() => {
+    if (isLoading) return;
+    
     const imageElement = imageRef.current;
     if (!imageElement || charElements.length === 0) return;
 
@@ -80,7 +161,82 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [charElements]);
+  }, [charElements, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div
+        ref={loadingRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#ffffff',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'aktiv_grotesk, sans-serif'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '60px',
+          maxWidth: '1200px',
+          width: '100%',
+          padding: '0 40px'
+        }}>
+          {/* Kiri: Menuru */}
+          <div
+            ref={leftTextRef}
+            style={{
+              fontSize: '50px',
+              fontWeight: 400,
+              color: '#000000',
+              opacity: 0,
+              fontFamily: 'aktiv_grotesk, sans-serif'
+            }}
+          >
+            Menuru
+          </div>
+
+          {/* Tengah: Rolling Text */}
+          <div
+            ref={centerTextRef}
+            style={{
+              fontSize: '50px',
+              fontWeight: 400,
+              color: '#000000',
+              opacity: 0,
+              fontFamily: 'aktiv_grotesk, sans-serif',
+              textAlign: 'center',
+              minWidth: '200px'
+            }}
+          >
+            {rollingTexts[rollingIndex]}
+          </div>
+
+          {/* Kanan: Teks Statis */}
+          <div
+            ref={rightTextRef}
+            style={{
+              fontSize: '50px',
+              fontWeight: 400,
+              color: '#000000',
+              opacity: 0,
+              fontFamily: 'aktiv_grotesk, sans-serif'
+            }}
+          >
+            Studio
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
