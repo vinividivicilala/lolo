@@ -56,7 +56,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek perubahan warna per huruf - tanpa shadow
+  // Efek perubahan warna per huruf
   useEffect(() => {
     const imageElement = imageRef.current;
     if (!imageElement || charElements.length === 0) return;
@@ -67,7 +67,9 @@ export default function HomePage(): React.JSX.Element {
       charElements.forEach((char) => {
         const charRect = char.getBoundingClientRect();
         const charCenter = charRect.left + charRect.width / 2;
+        const charText = char.textContent;
         
+        // Cek apakah karakter berada di atas foto
         if (charCenter >= imageRect.left && charCenter <= imageRect.right) {
           char.style.color = '#ffffff';
           char.style.textShadow = 'none';
@@ -170,34 +172,43 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           <span ref={containerRef}>
-            {text.split('').map((char, index) => (
-              <span
-                key={`first-${index}`}
-                className="char"
-                style={{
-                  display: 'inline-block',
-                  transition: 'color 0.05s ease',
-                  color: 'rgb(17, 17, 17)'
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
+            {text.split('').map((char, index) => {
+              // Deteksi apakah karakter adalah spasi
+              const isSpace = char === ' ';
+              return (
+                <span
+                  key={`first-${index}`}
+                  className="char"
+                  style={{
+                    display: 'inline-block',
+                    transition: 'color 0.05s ease',
+                    color: 'rgb(17, 17, 17)',
+                    whiteSpace: isSpace ? 'pre' : 'normal'
+                  }}
+                >
+                  {isSpace ? '\u00A0' : char}
+                </span>
+              );
+            })}
           </span>
           <span>
-            {text.split('').map((char, index) => (
-              <span
-                key={`second-${index}`}
-                className="char"
-                style={{
-                  display: 'inline-block',
-                  transition: 'color 0.05s ease',
-                  color: 'rgb(17, 17, 17)'
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
+            {text.split('').map((char, index) => {
+              const isSpace = char === ' ';
+              return (
+                <span
+                  key={`second-${index}`}
+                  className="char"
+                  style={{
+                    display: 'inline-block',
+                    transition: 'color 0.05s ease',
+                    color: 'rgb(17, 17, 17)',
+                    whiteSpace: isSpace ? 'pre' : 'normal'
+                  }}
+                >
+                  {isSpace ? '\u00A0' : char}
+                </span>
+              );
+            })}
           </span>
         </div>
       </div>
