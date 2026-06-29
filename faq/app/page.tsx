@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import gsap from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,16 +27,25 @@ export default function HomePage(): React.JSX.Element {
 
     let position = 0;
     let animationId: number;
+    let totalWidth = 0;
+
+    const calculateWidth = () => {
+      const firstChild = wrapper.children[0] as HTMLElement;
+      if (firstChild) {
+        totalWidth = firstChild.scrollWidth;
+      }
+    };
+
+    setTimeout(calculateWidth, 100);
 
     const animate = () => {
-      position -= 1;
-      wrapper.style.transform = `translateX(${position}px)`;
+      position -= 0.8;
       
-      const wrapperWidth = wrapper.scrollWidth / 2;
-      if (Math.abs(position) >= wrapperWidth) {
+      if (Math.abs(position) >= totalWidth) {
         position = 0;
       }
       
+      wrapper.style.transform = `translateX(${position}px)`;
       animationId = requestAnimationFrame(animate);
     };
 
@@ -48,7 +56,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Efek perubahan warna per huruf
+  // Efek perubahan warna per huruf - tanpa shadow
   useEffect(() => {
     const imageElement = imageRef.current;
     if (!imageElement || charElements.length === 0) return;
@@ -62,7 +70,7 @@ export default function HomePage(): React.JSX.Element {
         
         if (charCenter >= imageRect.left && charCenter <= imageRect.right) {
           char.style.color = '#ffffff';
-          char.style.textShadow = '0 0 20px rgba(0,0,0,0.5)';
+          char.style.textShadow = 'none';
         } else {
           char.style.color = 'rgb(17, 17, 17)';
           char.style.textShadow = 'none';
@@ -150,14 +158,15 @@ export default function HomePage(): React.JSX.Element {
         <div
           ref={textWrapperRef}
           style={{
-            display: 'inline-block',
+            display: 'flex',
             fontFamily: 'aktiv_grotesk, sans-serif',
             fontWeight: 400,
             fontSize: '200px',
             color: 'rgb(17, 17, 17)',
             lineHeight: 'normal',
             letterSpacing: '2px',
-            willChange: 'transform'
+            willChange: 'transform',
+            width: 'fit-content'
           }}
         >
           <span ref={containerRef}>
@@ -167,7 +176,7 @@ export default function HomePage(): React.JSX.Element {
                 className="char"
                 style={{
                   display: 'inline-block',
-                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                  transition: 'color 0.05s ease',
                   color: 'rgb(17, 17, 17)'
                 }}
               >
@@ -182,7 +191,7 @@ export default function HomePage(): React.JSX.Element {
                 className="char"
                 style={{
                   display: 'inline-block',
-                  transition: 'color 0.05s ease, text-shadow 0.05s ease',
+                  transition: 'color 0.05s ease',
                   color: 'rgb(17, 17, 17)'
                 }}
               >
