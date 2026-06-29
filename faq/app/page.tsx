@@ -9,16 +9,17 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: '#ffffff',
       margin: 0,
       padding: 0,
-      position: 'relative'
+      position: 'relative',
+      fontFamily: 'Inter, "Inter Fallback"'
     }}>
-      {/* Teks judul "Menuru" di pojok kiri atas */}
+      {/* Teks judul "Menuru" di pojok kiri atas - font 70px */}
       <div style={{
         position: 'absolute',
         top: '40px',
         left: '40px',
         zIndex: 10,
-        fontFamily: 'aktiv_grotesk, sans-serif',
-        fontSize: '50px',
+        fontFamily: 'Inter, "Inter Fallback"',
+        fontSize: '70px',
         fontWeight: 400,
         color: '#000000',
         letterSpacing: '-0.02em'
@@ -26,10 +27,10 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Icon Pesan + Teks Pesan dengan background hijau stabilo */}
+      {/* Icon Pesan + Teks Pesan - pindah dari bawah ke atas, font 90px */}
       <div style={{
         position: 'absolute',
-        bottom: '40px',
+        top: '40px',
         right: '40px',
         zIndex: 10,
         display: 'flex',
@@ -83,13 +84,14 @@ export default function HomePage(): React.JSX.Element {
           />
         </svg>
 
-        {/* Teks Pesan */}
+        {/* Teks Pesan - font 90px */}
         <span style={{
-          fontFamily: 'aktiv_grotesk, sans-serif',
-          fontSize: '18px',
+          fontFamily: 'Inter, "Inter Fallback"',
+          fontSize: '90px',
           fontWeight: 500,
           color: '#000000',
-          letterSpacing: '-0.01em'
+          letterSpacing: '-0.02em',
+          lineHeight: 1
         }}>
           Pesan
         </span>
