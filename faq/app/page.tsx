@@ -18,7 +18,6 @@ export default function HomePage(): React.JSX.Element {
         top: '40px',
         left: '40px',
         zIndex: 10,
-        fontFamily: 'Inter, "Inter Fallback"',
         fontSize: '70px',
         fontWeight: 400,
         color: '#000000',
@@ -86,7 +85,6 @@ export default function HomePage(): React.JSX.Element {
 
         {/* Teks Pesan - font 90px */}
         <span style={{
-          fontFamily: 'Inter, "Inter Fallback"',
           fontSize: '90px',
           fontWeight: 500,
           color: '#000000',
