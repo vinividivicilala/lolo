@@ -21,7 +21,7 @@ export default function HomePage(): React.JSX.Element {
           top: "40px",
           left: "40px",
           zIndex: 10,
-          fontSize: "16px",
+          fontSize: "56px",
           fontWeight: 400,
           color: "#000",
           letterSpacing: "-0.02em",
@@ -40,9 +40,9 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "12px",
+          gap: "16px",
           backgroundColor: "#c5e800",
-          padding: "12px 20px",
+          padding: "16px 28px",
           borderRadius: "999px",
           cursor: "pointer",
           transition: "all .25s ease",
@@ -60,10 +60,10 @@ export default function HomePage(): React.JSX.Element {
             "0 4px 12px rgba(197,232,0,.3)";
         }}
       >
-        {/* Icon SVG Chat Modern */}
+        {/* Icon SVG Chat Minimalist */}
         <svg
-          width="22"
-          height="22"
+          width="32"
+          height="32"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -72,21 +72,21 @@ export default function HomePage(): React.JSX.Element {
           <path
             d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
             stroke="#000000"
-            strokeWidth="1.8"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d="M8 9H16"
             stroke="#000000"
-            strokeWidth="1.8"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d="M8 13H12"
             stroke="#000000"
-            strokeWidth="1.8"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -94,10 +94,10 @@ export default function HomePage(): React.JSX.Element {
 
         <span
           style={{
-            fontSize: "18px",
+            fontSize: "50px",
             fontWeight: 500,
             color: "#000",
-            letterSpacing: "-0.01em",
+            letterSpacing: "-0.02em",
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
