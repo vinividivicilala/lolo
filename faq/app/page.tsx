@@ -1,8 +1,10 @@
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 
 export default function HomePage(): React.JSX.Element {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div
       style={{
@@ -59,6 +61,7 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.boxShadow =
             "0 4px 12px rgba(197,232,0,.3)";
         }}
+        onClick={() => setIsModalOpen(true)}
       >
         {/* Icon SVG Chat Modern - Style Awwwards */}
         <svg
@@ -94,6 +97,142 @@ export default function HomePage(): React.JSX.Element {
           Chat with Menuru
         </span>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(8px)",
+              zIndex: 999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              animation: "fadeIn 0.3s ease",
+            }}
+            onClick={() => setIsModalOpen(false)}
+          >
+            {/* Modal Content */}
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                borderRadius: "24px",
+                padding: "48px 56px",
+                maxWidth: "480px",
+                width: "90%",
+                textAlign: "center",
+                boxShadow: "0 40px 80px rgba(0, 0, 0, 0.2)",
+                animation: "scaleIn 0.3s ease",
+                position: "relative",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Icon */}
+              <div
+                style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  backgroundColor: "#c5e800",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 24px",
+                  fontSize: "36px",
+                }}
+              >
+                🚀
+              </div>
+
+              {/* Title */}
+              <h2
+                style={{
+                  fontSize: "28px",
+                  fontWeight: 600,
+                  color: "#000",
+                  margin: "0 0 12px",
+                  fontFamily: "Inter, 'Inter Fallback'",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Fitur Sedang Dikembangkan
+              </h2>
+
+              {/* Description */}
+              <p
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 400,
+                  color: "#666",
+                  margin: "0 0 32px",
+                  fontFamily: "Inter, 'Inter Fallback'",
+                  lineHeight: 1.6,
+                }}
+              >
+                Silahkan coba lagi nanti. Tim kami sedang bekerja keras untuk
+                menghadirkan pengalaman terbaik untuk Anda.
+              </p>
+
+              {/* Button */}
+              <button
+                onClick={() => setIsModalOpen(false)}
+                style={{
+                  backgroundColor: "#000",
+                  color: "#fff",
+                  border: "none",
+                  padding: "14px 40px",
+                  borderRadius: "60px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  fontFamily: "Inter, 'Inter Fallback'",
+                  cursor: "pointer",
+                  transition: "all .25s ease",
+                  letterSpacing: "-0.01em",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.05)";
+                  e.currentTarget.style.backgroundColor = "#1a1a1a";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.backgroundColor = "#000";
+                }}
+              >
+                Mengerti
+              </button>
+            </div>
+          </div>
+
+          {/* Animasi CSS */}
+          <style jsx>{`
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+              }
+              to {
+                opacity: 1;
+              }
+            }
+            @keyframes scaleIn {
+              from {
+                transform: scale(0.9);
+                opacity: 0;
+              }
+              to {
+                transform: scale(1);
+                opacity: 1;
+              }
+            }
+          `}</style>
+        </>
+      )}
     </div>
   );
 }
