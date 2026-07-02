@@ -7,7 +7,10 @@ import {
   onAuthStateChanged, 
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -21,8 +24,12 @@ import {
   setDoc,
   getDoc,
   where,
-  getDocs
+  getDocs,
+  updateDoc,
+  increment,
+  Timestamp
 } from "firebase/firestore";
+import gsap from "gsap";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -56,7 +63,7 @@ interface ChatUser {
   name: string;
   email: string;
   photoURL: string;
-  invitedBy?: string;
+  createdAt?: any;
 }
 
 interface Message {
@@ -66,6 +73,8 @@ interface Message {
   senderName: string;
   receiverId: string;
   timestamp: any;
+  read: boolean;
+  readAt?: any;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -77,10 +86,17 @@ export default function HomePage(): React.JSX.Element {
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [showInvite, setShowInvite] = useState(false);
-  const [inviteStatus, setInviteStatus] = useState("");
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [addUserStatus, setAddUserStatus] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showLogin, setShowLogin] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState<{[key: string]: number}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   // Auth Listener
   useEffect(() => {
@@ -143,12 +159,23 @@ export default function HomePage(): React.JSX.Element {
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messageList: Message[] = [];
       snapshot.forEach((doc) => {
         messageList.push({ id: doc.id, ...doc.data() } as Message);
       });
       setMessages(messageList);
+      
+      // Mark messages as read
+      const unreadMessages = messageList.filter(m => !m.read && m.senderId !== user.uid);
+      for (const msg of unreadMessages) {
+        const msgRef = doc(db, "chats", chatId, "messages", msg.id);
+        await updateDoc(msgRef, {
+          read: true,
+          readAt: serverTimestamp()
+        });
+      }
+      
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -157,35 +184,45 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // Load chat users (users who have been invited)
+  // Load chat users and unread counts
   useEffect(() => {
     if (!user || !db) return;
     
-    const loadChatUsers = async () => {
+    const loadChatData = async () => {
       try {
         const chatsRef = collection(db, "chats");
         const q = query(chatsRef);
         const querySnapshot = await getDocs(q);
         
         const userIds = new Set<string>();
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.participants) {
-            data.participants.forEach((id: string) => {
-              if (id !== user.uid) userIds.add(id);
-            });
-          }
-        });
+        const unreadMap: {[key: string]: number} = {};
         
+        for (const docSnap of querySnapshot.docs) {
+          const data = docSnap.data();
+          if (data.participants && data.participants.includes(user.uid)) {
+            const otherId = data.participants.find((id: string) => id !== user.uid);
+            if (otherId) {
+              userIds.add(otherId);
+              
+              // Count unread messages
+              const messagesRef = collection(db, "chats", docSnap.id, "messages");
+              const qMsg = query(messagesRef, where("read", "==", false), where("senderId", "!=", user.uid));
+              const msgSnap = await getDocs(qMsg);
+              unreadMap[otherId] = msgSnap.size;
+            }
+          }
+        }
+        
+        setUnreadCounts(unreadMap);
         const chatUserList = users.filter(u => userIds.has(u.id));
         setChatUsers(chatUserList);
       } catch (error) {
-        console.error("Error loading chat users:", error);
+        console.error("Error loading chat data:", error);
       }
     };
     
     if (users.length > 0) {
-      loadChatUsers();
+      loadChatData();
     }
   }, [user, users]);
 
@@ -194,8 +231,23 @@ export default function HomePage(): React.JSX.Element {
     if (!auth) return;
     try {
       await signInWithPopup(auth, googleProvider);
+      setShowLogin(false);
     } catch (error) {
       console.error("Login error:", error);
+    }
+  };
+
+  // Handle login with email
+  const handleEmailLogin = async () => {
+    if (!auth || !loginEmail || !loginPassword) return;
+    try {
+      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      setShowLogin(false);
+      setLoginEmail("");
+      setLoginPassword("");
+    } catch (error) {
+      console.error("Login error:", error);
+      setAddUserStatus("Login gagal. Periksa email dan password.");
     }
   };
 
@@ -235,6 +287,7 @@ export default function HomePage(): React.JSX.Element {
         senderName: user.displayName || user.email || "User",
         receiverId: selectedChat.id,
         timestamp: serverTimestamp(),
+        read: false
       });
 
       setMessage("");
@@ -254,62 +307,99 @@ export default function HomePage(): React.JSX.Element {
   // Toggle chat
   const handleChatToggle = () => {
     if (!user) {
-      handleLogin();
+      setShowLogin(true);
       return;
     }
     setIsChatOpen(!isChatOpen);
     if (!isChatOpen) {
       setSelectedChat(null);
-      setShowInvite(false);
+      setShowAddUser(false);
     }
   };
 
-  // Handle invite user
-  const handleInviteUser = async () => {
-    if (!inviteEmail.trim() || !user || !db) return;
+  // Add user with email (encrypted)
+  const handleAddUser = async () => {
+    if (!newUserEmail || !newUserName || !newUserPassword || !user || !db) return;
     
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", inviteEmail.trim()));
-      const querySnapshot = await getDocs(q);
+      // Create user with email/password
+      const userCredential = await createUserWithEmailAndPassword(auth, newUserEmail, newUserPassword);
+      const newUser = userCredential.user;
       
-      if (querySnapshot.empty) {
-        setInviteStatus("User tidak ditemukan. Pastikan email sudah terdaftar.");
-        return;
+      // Update profile
+      await updateProfile(newUser, {
+        displayName: newUserName
+      });
+      
+      // Save to Firestore
+      await setDoc(doc(db, "users", newUser.uid), {
+        id: newUser.uid,
+        name: newUserName,
+        email: newUserEmail,
+        photoURL: "",
+        createdAt: serverTimestamp(),
+        createdBy: user.uid
+      });
+      
+      // Create chat between users
+      const chatId = [user.uid, newUser.uid].sort().join("_");
+      await setDoc(doc(db, "chats", chatId), {
+        participants: [user.uid, newUser.uid],
+        createdAt: serverTimestamp()
+      });
+      
+      setAddUserStatus(`✅ User ${newUserName} berhasil ditambahkan!`);
+      setNewUserEmail("");
+      setNewUserName("");
+      setNewUserPassword("");
+      setShowAddUser(false);
+      
+      // GSAP animation for success
+      if (addButtonRef.current) {
+        gsap.fromTo(addButtonRef.current, 
+          { scale: 1, backgroundColor: "#000" },
+          { scale: 1.1, backgroundColor: "#c5e800", duration: 0.3, ease: "power2.out" }
+        );
       }
-      
-      const invitedUser = querySnapshot.docs[0];
-      const userData = invitedUser.data() as ChatUser;
-      
-      const chatId = [user.uid, invitedUser.id].sort().join("_");
-      const chatRef = doc(db, "chats", chatId);
-      const chatSnap = await getDoc(chatRef);
-      
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [user.uid, invitedUser.id],
-          createdAt: serverTimestamp()
-        });
-      }
-      
-      setInviteStatus(`Berhasil mengundang ${userData.name || userData.email}`);
-      setInviteEmail("");
-      setShowInvite(false);
-      
-      setTimeout(() => {
-        setChatUsers(prev => {
-          if (!prev.find(u => u.id === invitedUser.id)) {
-            return [...prev, userData];
-          }
-          return prev;
-        });
-      }, 500);
       
     } catch (error) {
-      console.error("Error inviting user:", error);
-      setInviteStatus("Terjadi kesalahan. Silahkan coba lagi.");
+      console.error("Error adding user:", error);
+      setAddUserStatus("❌ Gagal menambahkan user. Email mungkin sudah terdaftar.");
     }
   };
+
+  // Format time
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Format date
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  // Get message status
+  const getMessageStatus = (msg: Message) => {
+    if (msg.senderId !== user?.uid) return null;
+    if (msg.read && msg.readAt) {
+      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+    }
+    return { icon: "✓✓", color: "#999", label: "Terkirim" };
+  };
+
+  // GSAP animation for add button
+  useEffect(() => {
+    if (addButtonRef.current && showAddUser) {
+      gsap.fromTo(addButtonRef.current,
+        { rotation: 0 },
+        { rotation: 45, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  }, [showAddUser]);
 
   if (loading) {
     return (
@@ -386,7 +476,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               />
             )}
-            <span>{user.displayName || user.email}</span>
+            <span style={{ fontWeight: 500 }}>{user.displayName || user.email}</span>
             <button
               onClick={handleLogout}
               style={{
@@ -411,7 +501,7 @@ export default function HomePage(): React.JSX.Element {
           </>
         ) : (
           <button
-            onClick={handleLogin}
+            onClick={() => setShowLogin(true)}
             style={{
               background: "none",
               border: "none",
@@ -430,12 +520,124 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            Login with Google
+            Login
           </button>
         )}
       </div>
 
-      {/* Chat Box - Awwwards Style Minimalist */}
+      {/* Login Modal */}
+      {showLogin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setShowLogin(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "20px",
+              padding: "40px",
+              maxWidth: "400px",
+              width: "90%",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px" }}>
+              Login
+            </h2>
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                marginBottom: "12px",
+                fontSize: "14px",
+                outline: "none",
+                fontFamily: "Inter, 'Inter Fallback'",
+              }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                marginBottom: "16px",
+                fontSize: "14px",
+                outline: "none",
+                fontFamily: "Inter, 'Inter Fallback'",
+              }}
+              onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
+            />
+            <button
+              onClick={handleEmailLogin}
+              style={{
+                width: "100%",
+                backgroundColor: "#000",
+                color: "#fff",
+                border: "none",
+                padding: "12px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "all .2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+            >
+              Login with Email
+            </button>
+            <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666" }}>
+              atau
+            </div>
+            <button
+              onClick={handleLogin}
+              style={{
+                width: "100%",
+                backgroundColor: "#4285f4",
+                color: "#fff",
+                border: "none",
+                padding: "12px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                cursor: "pointer",
+                marginTop: "8px",
+                transition: "all .2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+            >
+              Login with Google
+            </button>
+            <div style={{ marginTop: "12px", textAlign: "center", fontSize: "12px", color: "#999" }}>
+              {addUserStatus}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Box */}
       <div
         style={{
           position: "fixed",
@@ -454,14 +656,13 @@ export default function HomePage(): React.JSX.Element {
             style={{
               backgroundColor: "#ffffff",
               borderRadius: "20px",
-              width: "400px",
-              maxHeight: "520px",
+              width: "420px",
+              maxHeight: "560px",
               boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              backdropFilter: "blur(20px)",
             }}
           >
             {/* Header */}
@@ -472,53 +673,45 @@ export default function HomePage(): React.JSX.Element {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                backgroundColor: "#000",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <span
                   style={{
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    color: "#000",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: "#fff",
                     letterSpacing: "-0.01em",
                   }}
                 >
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
-                {selectedChat && (
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      color: "#999",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {selectedChat.email}
-                  </span>
-                )}
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
-                {!selectedChat && (
+                {!selectedChat && user && (
                   <button
-                    onClick={() => setShowInvite(!showInvite)}
+                    ref={addButtonRef}
+                    onClick={() => setShowAddUser(!showAddUser)}
                     style={{
                       background: "none",
                       border: "none",
-                      fontSize: "16px",
+                      fontSize: "20px",
                       cursor: "pointer",
-                      color: "#666",
+                      color: "#fff",
                       padding: "4px 8px",
                       borderRadius: "8px",
                       transition: "all .2s ease",
+                      fontWeight: 300,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
                     }}
                   >
-                    ➕
+                    +
                   </button>
                 )}
                 <button
@@ -528,17 +721,20 @@ export default function HomePage(): React.JSX.Element {
                     border: "none",
                     fontSize: "16px",
                     cursor: "pointer",
-                    color: "#999",
+                    color: "#fff",
                     padding: "4px 8px",
                     borderRadius: "8px",
                     transition: "all .2s ease",
                     lineHeight: 1,
+                    opacity: 0.6,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                    e.currentTarget.style.opacity = "1";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.opacity = "0.6";
                   }}
                 >
                   ✕
@@ -549,21 +745,56 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Invite Form */}
-                {showInvite && (
+                {/* Add User Form */}
+                {showAddUser && (
                   <div
                     style={{
-                      padding: "12px 16px",
+                      padding: "16px",
                       backgroundColor: "#f8f8f8",
                       borderRadius: "12px",
                       marginBottom: "12px",
                     }}
                   >
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", marginBottom: "12px" }}>
+                      Tambah User Baru
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Nama"
+                      value={newUserName}
+                      onChange={(e) => setNewUserName(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        outline: "none",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                        marginBottom: "8px",
+                      }}
+                    />
                     <input
                       type="email"
-                      placeholder="Masukkan email..."
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="Email"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        outline: "none",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
@@ -577,7 +808,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                     <div style={{ display: "flex", gap: "8px" }}>
                       <button
-                        onClick={handleInviteUser}
+                        onClick={handleAddUser}
                         style={{
                           backgroundColor: "#000",
                           color: "#fff",
@@ -589,17 +820,13 @@ export default function HomePage(): React.JSX.Element {
                           fontWeight: 500,
                           transition: "all .2s ease",
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = "0.8";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = "1";
-                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
-                        Kirim Undangan
+                        Tambah
                       </button>
                       <button
-                        onClick={() => setShowInvite(false)}
+                        onClick={() => setShowAddUser(false)}
                         style={{
                           background: "none",
                           border: "none",
@@ -611,9 +838,9 @@ export default function HomePage(): React.JSX.Element {
                         Batal
                       </button>
                     </div>
-                    {inviteStatus && (
+                    {addUserStatus && (
                       <div style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}>
-                        {inviteStatus}
+                        {addUserStatus}
                       </div>
                     )}
                   </div>
@@ -633,7 +860,7 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
                       Belum ada chat
                       <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                        Undang teman untuk mulai chat
+                        Tambah user untuk mulai chat
                       </div>
                     </div>
                   ) : (
@@ -650,6 +877,7 @@ export default function HomePage(): React.JSX.Element {
                           cursor: "pointer",
                           transition: "all .2s ease",
                           marginBottom: "2px",
+                          position: "relative",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "#f5f5f5";
@@ -660,8 +888,8 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <div
                           style={{
-                            width: "40px",
-                            height: "40px",
+                            width: "44px",
+                            height: "44px",
                             borderRadius: "50%",
                             backgroundColor: "#f0f0f0",
                             display: "flex",
@@ -679,17 +907,36 @@ export default function HomePage(): React.JSX.Element {
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}
                             />
                           ) : (
-                            "👤"
+                            account.name?.charAt(0)?.toUpperCase() || "👤"
                           )}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                          <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
                             {account.name}
                           </div>
                           <div style={{ fontSize: "12px", color: "#999" }}>
                             {account.email}
                           </div>
                         </div>
+                        {unreadCounts[account.id] > 0 && (
+                          <div
+                            style={{
+                              backgroundColor: "#c5e800",
+                              color: "#000",
+                              borderRadius: "50%",
+                              width: "20px",
+                              height: "20px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {unreadCounts[account.id]}
+                          </div>
+                        )}
                         <svg
                           width="18"
                           height="18"
@@ -713,7 +960,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ) : (
               // Chat View
-              <div style={{ display: "flex", flexDirection: "column", height: "400px" }}>
+              <div style={{ display: "flex", flexDirection: "column", height: "420px" }}>
                 {/* Chat Header */}
                 <div
                   style={{
@@ -722,6 +969,7 @@ export default function HomePage(): React.JSX.Element {
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
+                    backgroundColor: "#000",
                   }}
                 >
                   <button
@@ -729,33 +977,37 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       background: "none",
                       border: "none",
-                      fontSize: "16px",
+                      fontSize: "18px",
                       cursor: "pointer",
-                      color: "#666",
+                      color: "#fff",
                       padding: "4px 6px",
                       borderRadius: "8px",
                       transition: "all .2s ease",
+                      opacity: 0.6,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                      e.currentTarget.style.opacity = "1";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.opacity = "0.6";
                     }}
                   >
                     ←
                   </button>
                   <div
                     style={{
-                      width: "32px",
-                      height: "32px",
+                      width: "36px",
+                      height: "36px",
                       borderRadius: "50%",
-                      backgroundColor: "#f0f0f0",
+                      backgroundColor: "#2a2a2a",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "14px",
+                      fontSize: "16px",
                       overflow: "hidden",
+                      color: "#fff",
                     }}
                   >
                     {selectedChat.photoURL ? (
@@ -765,20 +1017,20 @@ export default function HomePage(): React.JSX.Element {
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
-                      "👤"
+                      selectedChat.name?.charAt(0)?.toUpperCase() || "👤"
                     )}
                   </div>
-                  <div>
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
                       {selectedChat.name}
                     </div>
-                    <div style={{ fontSize: "10px", color: "#999" }}>
+                    <div style={{ fontSize: "10px", color: "#666" }}>
                       {selectedChat.email}
                     </div>
                   </div>
                 </div>
 
-                {/* Messages - Background hitam menyatu */}
+                {/* Messages - Background hitam */}
                 <div
                   style={{
                     flex: 1,
@@ -787,7 +1039,7 @@ export default function HomePage(): React.JSX.Element {
                     backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "4px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -808,32 +1060,71 @@ export default function HomePage(): React.JSX.Element {
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user?.uid;
+                      const status = getMessageStatus(msg);
+                      const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
+                        formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                      
                       return (
-                        <div
-                          key={idx}
-                          style={{
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            maxWidth: "75%",
-                            padding: "10px 16px",
-                            borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                            backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
-                            color: isMine ? "#000" : "#fff",
-                            fontSize: "14px",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {msg.text}
+                        <React.Fragment key={idx}>
+                          {showDate && (
+                            <div
+                              style={{
+                                textAlign: "center",
+                                color: "#444",
+                                fontSize: "10px",
+                                padding: "8px 0",
+                                fontWeight: 500,
+                                letterSpacing: "0.03em",
+                              }}
+                            >
+                              {formatDate(msg.timestamp)}
+                            </div>
+                          )}
                           <div
                             style={{
-                              fontSize: "9px",
-                              color: isMine ? "rgba(0,0,0,0.4)" : "#666",
-                              marginTop: "4px",
-                              textAlign: isMine ? "right" : "left",
+                              alignSelf: isMine ? "flex-end" : "flex-start",
+                              maxWidth: "75%",
+                              padding: "10px 14px",
+                              borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+                              backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
+                              color: isMine ? "#000" : "#fff",
+                              fontSize: "14px",
+                              lineHeight: 1.5,
+                              position: "relative",
                             }}
                           >
-                            {isMine ? "Anda" : msg.senderName}
+                            {msg.text}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                marginTop: "4px",
+                                justifyContent: isMine ? "flex-end" : "flex-start",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "9px",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                }}
+                              >
+                                {formatTime(msg.timestamp)}
+                              </span>
+                              {isMine && status && (
+                                <span
+                                  style={{
+                                    fontSize: "10px",
+                                    color: status.color,
+                                    fontWeight: status.label === "Dibaca" ? 700 : 400,
+                                  }}
+                                >
+                                  {status.icon}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </React.Fragment>
                       );
                     })
                   )}
