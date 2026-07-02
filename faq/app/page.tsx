@@ -520,7 +520,17 @@ export default function HomePage(): React.JSX.Element {
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return "Hari ini";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Kemarin";
+    } else {
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
   };
 
   const getMessageStatus = (msg: Message) => {
@@ -1555,11 +1565,14 @@ export default function HomePage(): React.JSX.Element {
                             <div
                               style={{
                                 textAlign: "center",
-                                color: "#444",
-                                fontSize: "10px",
-                                padding: "8px 0",
+                                color: "#666",
+                                fontSize: "11px",
+                                padding: "8px 0 12px 0",
                                 fontWeight: 500,
                                 letterSpacing: "0.03em",
+                                backgroundColor: "rgba(255,255,255,0.03)",
+                                borderRadius: "4px",
+                                marginBottom: "4px",
                               }}
                             >
                               {formatDate(msg.timestamp)}
