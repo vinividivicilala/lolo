@@ -23,8 +23,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  deleteDoc
+  updateDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -536,7 +535,7 @@ export default function HomePage(): React.JSX.Element {
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
 
-  // Available users for new chat (users not already in chat)
+  // Available users for new chat
   const availableUsers = users.filter(u => 
     !chatRooms.some(room => room.participants.includes(u.id))
   );
@@ -564,10 +563,11 @@ export default function HomePage(): React.JSX.Element {
         margin: 0,
         padding: 0,
         position: "relative",
-        fontFamily: "Inter, 'Inter Fallback'"
+        fontFamily: "Inter, 'Inter Fallback'",
+        overflow: "hidden",
       }}
     >
-      {/* Logo */}
+      {/* Logo - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -582,6 +582,27 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         Menuru
+      </div>
+
+      {/* Teks "MENURU" besar di sisi kanan pojok layar - 500px */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          right: "20px",
+          zIndex: 1,
+          fontSize: "500px",
+          fontWeight: 400,
+          color: "#000000",
+          letterSpacing: "-0.02em",
+          lineHeight: 0.9,
+          fontFamily: "Inter, 'Inter Fallback'",
+          opacity: 0.15,
+          userSelect: "none",
+          pointerEvents: "none",
+        }}
+      >
+        MENURU
       </div>
 
       {/* User Status */}
@@ -986,7 +1007,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Pinned Messages - Riwayat Pesan yang di Pin */}
+                {/* Pinned Messages */}
                 {pinnedMessages.length > 0 && (
                   <div style={{ marginBottom: "12px" }}>
                     <div
@@ -1604,7 +1625,6 @@ export default function HomePage(): React.JSX.Element {
                               </button>
                             </div>
                           </div>
-                          {/* Pinned message indicator - tampil di bawah pesan */}
                           {msg.isPinned && (
                             <div
                               style={{
