@@ -23,7 +23,8 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  increment
 } from "firebase/firestore";
 import gsap from "gsap";
 
@@ -73,6 +74,14 @@ interface Message {
   readAt?: any;
 }
 
+interface ChatRoom {
+  id: string;
+  participants: string[];
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+}
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -81,15 +90,15 @@ export default function HomePage(): React.JSX.Element {
   const [messages, setMessages] = useState<Message[]>([]);
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [showAddUser, setShowAddUser] = useState(false);
   const [selectedNewUser, setSelectedNewUser] = useState<string>("");
   const [addUserStatus, setAddUserStatus] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLogin, setShowLogin] = useState(false);
-  const [unreadCounts, setUnreadCounts] = useState<{[key: string]: number}>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [totalUnread, setTotalUnread] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -146,6 +155,68 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
+  // Load chat rooms and real-time messages
+  useEffect(() => {
+    if (!user || !db) return;
+
+    // Load all chats where user is participant
+    const chatsRef = collection(db, "chats");
+    const q = query(chatsRef);
+    
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const rooms: ChatRoom[] = [];
+      let totalUnreadCount = 0;
+      
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        if (data.participants && data.participants.includes(user.uid)) {
+          const otherId = data.participants.find((id: string) => id !== user.uid);
+          const otherUser = users.find(u => u.id === otherId);
+          
+          if (otherUser) {
+            // Get last message
+            const messagesRef = collection(db, "chats", docSnap.id, "messages");
+            const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
+            const msgSnap = await getDocs(qMsg);
+            
+            let lastMessage = "";
+            let lastMessageTime = null;
+            let unreadCount = 0;
+            
+            if (!msgSnap.empty) {
+              const lastMsg = msgSnap.docs[0].data() as Message;
+              lastMessage = lastMsg.text;
+              lastMessageTime = lastMsg.timestamp;
+            }
+            
+            // Count unread messages (messages not read and not from current user)
+            const unreadQuery = query(
+              messagesRef, 
+              where("read", "==", false),
+              where("senderId", "!=", user.uid)
+            );
+            const unreadSnap = await getDocs(unreadQuery);
+            unreadCount = unreadSnap.size;
+            totalUnreadCount += unreadCount;
+            
+            rooms.push({
+              id: docSnap.id,
+              participants: data.participants,
+              lastMessage,
+              lastMessageTime,
+              unreadCount
+            });
+          }
+        }
+      }
+      
+      setChatRooms(rooms);
+      setTotalUnread(totalUnreadCount);
+    });
+
+    return () => unsubscribe();
+  }, [user, users]);
+
   // Load messages for selected chat
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
@@ -171,6 +242,17 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
+      // Update unread count in chat room
+      if (unreadMessages.length > 0) {
+        setChatRooms(prev => prev.map(room => {
+          if (room.id === chatId) {
+            return { ...room, unreadCount: 0 };
+          }
+          return room;
+        }));
+        setTotalUnread(prev => Math.max(0, prev - unreadMessages.length));
+      }
+      
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -178,48 +260,6 @@ export default function HomePage(): React.JSX.Element {
 
     return () => unsubscribe();
   }, [selectedChat, user]);
-
-  // Load chat users and unread counts
-  useEffect(() => {
-    if (!user || !db) return;
-    
-    const loadChatData = async () => {
-      try {
-        const chatsRef = collection(db, "chats");
-        const q = query(chatsRef);
-        const querySnapshot = await getDocs(q);
-        
-        const userIds = new Set<string>();
-        const unreadMap: {[key: string]: number} = {};
-        
-        for (const docSnap of querySnapshot.docs) {
-          const data = docSnap.data();
-          if (data.participants && data.participants.includes(user.uid)) {
-            const otherId = data.participants.find((id: string) => id !== user.uid);
-            if (otherId) {
-              userIds.add(otherId);
-              
-              // Count unread messages
-              const messagesRef = collection(db, "chats", docSnap.id, "messages");
-              const qMsg = query(messagesRef, where("read", "==", false), where("senderId", "!=", user.uid));
-              const msgSnap = await getDocs(qMsg);
-              unreadMap[otherId] = msgSnap.size;
-            }
-          }
-        }
-        
-        setUnreadCounts(unreadMap);
-        const chatUserList = users.filter(u => userIds.has(u.id));
-        setChatUsers(chatUserList);
-      } catch (error) {
-        console.error("Error loading chat data:", error);
-      }
-    };
-    
-    if (users.length > 0) {
-      loadChatData();
-    }
-  }, [user, users]);
 
   // Handle login with Google
   const handleLogin = async () => {
@@ -253,7 +293,7 @@ export default function HomePage(): React.JSX.Element {
       await signOut(auth);
       setIsChatOpen(false);
       setSelectedChat(null);
-      setChatUsers([]);
+      setChatRooms([]);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -284,6 +324,14 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false
       });
+
+      // Update last message in chat room
+      setChatRooms(prev => prev.map(room => {
+        if (room.id === chatId) {
+          return { ...room, lastMessage: message.trim(), lastMessageTime: serverTimestamp() };
+        }
+        return room;
+      }));
 
       setMessage("");
     } catch (error) {
@@ -324,7 +372,6 @@ export default function HomePage(): React.JSX.Element {
         return;
       }
       
-      // Check if chat already exists
       const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -335,22 +382,23 @@ export default function HomePage(): React.JSX.Element {
           createdAt: serverTimestamp()
         });
         setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
+        
+        // Add to chat rooms
+        setChatRooms(prev => [...prev, {
+          id: chatId,
+          participants: [user.uid, targetUser.id],
+          lastMessage: "",
+          lastMessageTime: null,
+          unreadCount: 0
+        }]);
       } else {
         setAddUserStatus(`ℹ️ Chat dengan ${targetUser.name} sudah ada.`);
       }
       
-      // Add to chat users list
-      setChatUsers(prev => {
-        if (!prev.find(u => u.id === targetUser.id)) {
-          return [...prev, targetUser];
-        }
-        return prev;
-      });
-      
       setSelectedNewUser("");
       setShowAddUser(false);
+      setSearchTerm("");
       
-      // GSAP animation
       if (addButtonRef.current) {
         gsap.fromTo(addButtonRef.current, 
           { scale: 1 },
@@ -387,9 +435,14 @@ export default function HomePage(): React.JSX.Element {
     return { icon: "✓✓", color: "#999", label: "Terkirim" };
   };
 
+  // Get user by ID
+  const getUserById = (id: string) => {
+    return users.find(u => u.id === id) || chatRooms.find(r => r.participants.includes(id));
+  };
+
   // Filter users for dropdown
   const availableUsers = users.filter(u => 
-    !chatUsers.find(cu => cu.id === u.id) && 
+    !chatRooms.some(room => room.participants.includes(u.id)) && 
     u.id !== user?.uid &&
     (u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
      u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -691,6 +744,25 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
+                {selectedChat && (
+                  <span style={{ fontSize: "10px", color: "#666" }}>
+                    {selectedChat.email}
+                  </span>
+                )}
+                {!selectedChat && totalUnread > 0 && (
+                  <span
+                    style={{
+                      backgroundColor: "#c5e800",
+                      color: "#000",
+                      borderRadius: "50%",
+                      padding: "2px 8px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {totalUnread}
+                  </span>
+                )}
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
                 {!selectedChat && user && (
@@ -749,7 +821,7 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Add User Form - Pilih user yang sudah ada */}
+                {/* Add User Form */}
                 {showAddUser && (
                   <div
                     style={{
@@ -760,7 +832,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", marginBottom: "12px" }}>
-                      Tambah Chat Baru
+                      Mulai Chat Baru
                     </div>
                     <input
                       type="text"
@@ -820,14 +892,8 @@ export default function HomePage(): React.JSX.Element {
                           fontWeight: 500,
                           transition: "all .2s ease",
                         }}
-                        onMouseEnter={(e) => {
-                          if (selectedNewUser) e.currentTarget.style.opacity = "0.8";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (selectedNewUser) e.currentTarget.style.opacity = "1";
-                        }}
                       >
-                        Tambah Chat
+                        Mulai Chat
                       </button>
                       <button
                         onClick={() => setShowAddUser(false)}
@@ -850,9 +916,9 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Chat List */}
+                {/* Chat Rooms List */}
                 <div style={{ padding: "4px 0" }}>
-                  {chatUsers.length === 0 ? (
+                  {chatRooms.length === 0 ? (
                     <div
                       style={{
                         textAlign: "center",
@@ -864,101 +930,99 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
                       Belum ada chat
                       <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                        Tambah user untuk mulai chat
+                        Mulai chat dengan user lain
                       </div>
                     </div>
                   ) : (
-                    chatUsers.map((account) => (
-                      <div
-                        key={account.id}
-                        onClick={() => setSelectedChat(account)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "12px 14px",
-                          borderRadius: "12px",
-                          cursor: "pointer",
-                          transition: "all .2s ease",
-                          marginBottom: "2px",
-                          position: "relative",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent";
-                        }}
-                      >
+                    chatRooms.map((room) => {
+                      const otherId = room.participants.find(id => id !== user.uid);
+                      const otherUser = users.find(u => u.id === otherId);
+                      if (!otherUser) return null;
+                      
+                      return (
                         <div
+                          key={room.id}
+                          onClick={() => setSelectedChat(otherUser)}
                           style={{
-                            width: "44px",
-                            height: "44px",
-                            borderRadius: "50%",
-                            backgroundColor: "#f0f0f0",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "18px",
-                            flexShrink: 0,
-                            overflow: "hidden",
+                            gap: "12px",
+                            padding: "12px 14px",
+                            borderRadius: "12px",
+                            cursor: "pointer",
+                            transition: "all .2s ease",
+                            marginBottom: "2px",
+                            position: "relative",
+                            backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.08)" : "transparent",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.15)" : "#f5f5f5";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.08)" : "transparent";
                           }}
                         >
-                          {account.photoURL ? (
-                            <img 
-                              src={account.photoURL} 
-                              alt="avatar" 
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          ) : (
-                            account.name?.charAt(0)?.toUpperCase() || "👤"
-                          )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
-                            {account.name}
-                          </div>
-                          <div style={{ fontSize: "12px", color: "#999" }}>
-                            {account.email}
-                          </div>
-                        </div>
-                        {unreadCounts[account.id] > 0 && (
                           <div
                             style={{
-                              backgroundColor: "#c5e800",
-                              color: "#000",
+                              width: "44px",
+                              height: "44px",
                               borderRadius: "50%",
-                              width: "20px",
-                              height: "20px",
+                              backgroundColor: "#f0f0f0",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "10px",
-                              fontWeight: 700,
+                              fontSize: "18px",
                               flexShrink: 0,
+                              overflow: "hidden",
                             }}
                           >
-                            {unreadCounts[account.id]}
+                            {otherUser.photoURL ? (
+                              <img 
+                                src={otherUser.photoURL} 
+                                alt="avatar" 
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            ) : (
+                              otherUser.name?.charAt(0)?.toUpperCase() || "👤"
+                            )}
                           </div>
-                        )}
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          style={{ color: "#ccc", flexShrink: 0 }}
-                        >
-                          <path
-                            d="M5 12H19M19 12L12 5M19 12L12 19"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    ))
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
+                              {otherUser.name}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {room.lastMessage || "Mulai chat..."}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                            {room.lastMessageTime && (
+                              <span style={{ fontSize: "10px", color: "#ccc" }}>
+                                {formatTime(room.lastMessageTime)}
+                              </span>
+                            )}
+                            {room.unreadCount > 0 && (
+                              <div
+                                style={{
+                                  backgroundColor: "#c5e800",
+                                  color: "#000",
+                                  borderRadius: "50%",
+                                  minWidth: "20px",
+                                  height: "20px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "10px",
+                                  fontWeight: 700,
+                                  padding: "0 6px",
+                                }}
+                              >
+                                {room.unreadCount}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -1236,6 +1300,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isChatOpen ? "none" : "0 8px 32px rgba(0,0,0,0.12)",
             userSelect: "none",
             fontFamily: "Inter, 'Inter Fallback'",
+            position: "relative",
           }}
           onMouseEnter={(e) => {
             if (!isChatOpen) {
@@ -1251,18 +1316,39 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           {!isChatOpen && (
-            <span
-              style={{
-                fontSize: "15px",
-                fontWeight: 600,
-                color: "#ffffff",
-                letterSpacing: "-0.01em",
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {user ? "Chat with Menuru" : "Login to Chat"}
-            </span>
+            <>
+              <span
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                  letterSpacing: "-0.01em",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user ? "Chat with Menuru" : "Login to Chat"}
+              </span>
+              {totalUnread > 0 && (
+                <span
+                  style={{
+                    backgroundColor: "#c5e800",
+                    color: "#000",
+                    borderRadius: "50%",
+                    minWidth: "20px",
+                    height: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    padding: "0 6px",
+                  }}
+                >
+                  {totalUnread}
+                </span>
+              )}
+            </>
           )}
         </button>
       </div>
