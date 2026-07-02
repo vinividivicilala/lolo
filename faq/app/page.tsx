@@ -88,51 +88,6 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
-// SVG Icons
-const PinIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
-  </svg>
-);
-
-const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
-    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const BackIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const SendIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const AddUserIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -153,7 +108,6 @@ export default function HomePage(): React.JSX.Element {
   const [searchEmail, setSearchEmail] = useState("");
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<ChatUser[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auth Listener
@@ -206,7 +160,6 @@ export default function HomePage(): React.JSX.Element {
             return 0;
           });
           setUsers(userList);
-          setFilteredUsers(userList);
         });
         return () => unsubscribe();
       } catch (error) {
@@ -508,7 +461,6 @@ export default function HomePage(): React.JSX.Element {
     if (!searchEmail.trim() || !user || !db) return;
     
     try {
-      // Cari user dengan email tersebut di Firestore
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("email", "==", searchEmail.trim()));
       const querySnapshot = await getDocs(q);
@@ -526,7 +478,6 @@ export default function HomePage(): React.JSX.Element {
         return;
       }
       
-      // Cek apakah sudah ada chat room
       const chatId = [user.uid, existingUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -544,11 +495,23 @@ export default function HomePage(): React.JSX.Element {
       
       setSearchEmail("");
       setShowAddUser(false);
-      setAddUserStatus("");
+      setTimeout(() => setAddUserStatus(""), 3000);
       
     } catch (error) {
       console.error("Error adding user:", error);
       setAddUserStatus("❌ Gagal menambahkan user.");
+    }
+  };
+
+  // Toggle chat
+  const handleChatToggle = () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+    setIsChatOpen(!isChatOpen);
+    if (!isChatOpen) {
+      setSelectedChat(null);
     }
   };
 
@@ -573,13 +536,6 @@ export default function HomePage(): React.JSX.Element {
     return { icon: "✓", color: "#999", label: "Terkirim" };
   };
 
-  // Handle key press for search
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddExistingUser();
-    }
-  };
-
   const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
@@ -594,7 +550,7 @@ export default function HomePage(): React.JSX.Element {
         backgroundColor: "#ffffff",
         fontFamily: "Inter, 'Inter Fallback'"
       }}>
-        <div style={{ fontSize: "18px", color: "#666" }}>Loading...</div>
+        <div style={{ fontSize: "20px", color: "#666" }}>Loading...</div>
       </div>
     );
   }
@@ -659,7 +615,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               />
             )}
-            <span style={{ fontWeight: 500 }}>{user.displayName || user.email}</span>
+            <span style={{ fontWeight: 500, fontSize: "14px" }}>{user.displayName || user.email}</span>
             <button
               onClick={handleLogout}
               style={{
@@ -840,8 +796,8 @@ export default function HomePage(): React.JSX.Element {
             style={{
               backgroundColor: "#ffffff",
               borderRadius: "20px",
-              width: "420px",
-              maxHeight: "560px",
+              width: "440px",
+              maxHeight: "600px",
               boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
@@ -852,7 +808,7 @@ export default function HomePage(): React.JSX.Element {
             {/* Header */}
             <div
               style={{
-                padding: "18px 24px",
+                padding: "20px 24px",
                 borderBottom: "1px solid rgba(0,0,0,0.04)",
                 display: "flex",
                 justifyContent: "space-between",
@@ -860,10 +816,10 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "#000",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     color: "#fff",
                     letterSpacing: "-0.01em",
@@ -872,7 +828,7 @@ export default function HomePage(): React.JSX.Element {
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
                 {selectedChat && (
-                  <span style={{ fontSize: "10px", color: "#666" }}>
+                  <span style={{ fontSize: "12px", color: "#666" }}>
                     {selectedChat.email}
                   </span>
                 )}
@@ -882,8 +838,8 @@ export default function HomePage(): React.JSX.Element {
                       backgroundColor: "#c5e800",
                       color: "#000",
                       borderRadius: "50%",
-                      padding: "2px 8px",
-                      fontSize: "10px",
+                      padding: "2px 10px",
+                      fontSize: "12px",
                       fontWeight: 700,
                     }}
                   >
@@ -898,12 +854,13 @@ export default function HomePage(): React.JSX.Element {
                   border: "none",
                   cursor: "pointer",
                   color: "#fff",
-                  padding: "4px 8px",
+                  padding: "4px 10px",
                   borderRadius: "8px",
                   transition: "all .2s ease",
                   opacity: 0.6,
                   display: "flex",
                   alignItems: "center",
+                  fontSize: "20px",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
@@ -914,52 +871,46 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.opacity = "0.6";
                 }}
               >
-                <CloseIcon />
+                ✕
               </button>
             </div>
 
             {/* Content */}
             {!selectedChat ? (
-              <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Add User by Email - Pencarian email yang sudah pernah login */}
+              <div style={{ padding: "12px 16px", overflowY: "auto", flex: 1 }}>
+                {/* Add User by Email */}
                 <div
                   style={{
-                    padding: "12px 16px",
+                    padding: "16px",
                     backgroundColor: "#f8f8f8",
                     borderRadius: "12px",
-                    marginBottom: "12px",
+                    marginBottom: "16px",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                    <AddUserIcon />
-                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
-                      Tambah Chat Baru
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "16px" }}>➕</span>
+                    <span style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>
+                      Chat dengan User Terdaftar
                     </span>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <div style={{ flex: 1, position: "relative" }}>
-                      <input
-                        type="email"
-                        placeholder="Cari email user yang sudah login..."
-                        value={searchEmail}
-                        onChange={(e) => setSearchEmail(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        style={{
-                          width: "100%",
-                          padding: "10px 14px",
-                          paddingLeft: "36px",
-                          border: "1px solid #e0e0e0",
-                          borderRadius: "8px",
-                          fontSize: "13px",
-                          outline: "none",
-                          fontFamily: "Inter, 'Inter Fallback'",
-                          backgroundColor: "#ffffff",
-                        }}
-                      />
-                      <div style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)" }}>
-                        <SearchIcon />
-                      </div>
-                    </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <input
+                      type="email"
+                      placeholder="Masukkan email user..."
+                      value={searchEmail}
+                      onChange={(e) => setSearchEmail(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddExistingUser()}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "10px",
+                        fontSize: "15px",
+                        outline: "none",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                        backgroundColor: "#ffffff",
+                      }}
+                    />
                     <button
                       onClick={handleAddExistingUser}
                       disabled={!searchEmail.trim()}
@@ -967,11 +918,11 @@ export default function HomePage(): React.JSX.Element {
                         backgroundColor: searchEmail.trim() ? "#c5e800" : "#ccc",
                         color: searchEmail.trim() ? "#000" : "#666",
                         border: "none",
-                        padding: "10px 16px",
-                        borderRadius: "8px",
-                        fontSize: "12px",
+                        padding: "12px 20px",
+                        borderRadius: "10px",
+                        fontSize: "15px",
                         cursor: searchEmail.trim() ? "pointer" : "not-allowed",
-                        fontWeight: 500,
+                        fontWeight: 600,
                         transition: "all .2s ease",
                         whiteSpace: "nowrap",
                       }}
@@ -980,7 +931,7 @@ export default function HomePage(): React.JSX.Element {
                     </button>
                   </div>
                   {addUserStatus && (
-                    <div style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}>
+                    <div style={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
                       {addUserStatus}
                     </div>
                   )}
@@ -995,45 +946,46 @@ export default function HomePage(): React.JSX.Element {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                         cursor: "pointer",
-                        backgroundColor: "#f8f8f8",
-                        borderRadius: "8px",
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: "10px",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                        <span style={{ fontSize: "16px" }}>📌</span>
+                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
                           User Pinned ({pinnedUsers.length})
                         </span>
                       </div>
-                      <PinDropdownIcon isOpen={showPinnedUsers} />
+                      <span style={{ fontSize: "16px", transform: showPinnedUsers ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>▼</span>
                     </div>
                     {showPinnedUsers && (
-                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
+                      <div style={{ padding: "6px 0", marginTop: "6px" }}>
                         {pinnedUsers.map((user) => (
                           <div
                             key={user.id}
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              gap: "12px",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
+                              gap: "14px",
+                              padding: "10px 14px",
+                              borderRadius: "10px",
                               backgroundColor: "rgba(197,232,0,0.08)",
-                              borderLeft: "3px solid #c5e800",
+                              borderLeft: "4px solid #c5e800",
+                              marginBottom: "4px",
                             }}
                           >
                             <div
                               style={{
-                                width: "32px",
-                                height: "32px",
+                                width: "40px",
+                                height: "40px",
                                 borderRadius: "50%",
                                 backgroundColor: "#f0f0f0",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                fontSize: "14px",
+                                fontSize: "18px",
                                 overflow: "hidden",
                               }}
                             >
@@ -1044,8 +996,8 @@ export default function HomePage(): React.JSX.Element {
                               )}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{user.name}</div>
-                              <div style={{ fontSize: "10px", color: "#999" }}>{user.email}</div>
+                              <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>{user.name}</div>
+                              <div style={{ fontSize: "13px", color: "#999" }}>{user.email}</div>
                             </div>
                             <button
                               onClick={() => handlePinUser(user.id, true)}
@@ -1054,12 +1006,13 @@ export default function HomePage(): React.JSX.Element {
                                 border: "none",
                                 cursor: "pointer",
                                 color: "#c5e800",
-                                padding: "2px 4px",
+                                padding: "4px 8px",
                                 display: "flex",
                                 alignItems: "center",
+                                fontSize: "18px",
                               }}
                             >
-                              <PinIcon filled={true} />
+                              📌
                             </button>
                           </div>
                         ))}
@@ -1077,22 +1030,22 @@ export default function HomePage(): React.JSX.Element {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                         cursor: "pointer",
-                        backgroundColor: "#f8f8f8",
-                        borderRadius: "8px",
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: "10px",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                        <span style={{ fontSize: "16px" }}>📌</span>
+                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
                           Chat Pinned ({pinnedChats.length})
                         </span>
                       </div>
-                      <PinDropdownIcon isOpen={showPinnedChats} />
+                      <span style={{ fontSize: "16px", transform: showPinnedChats ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>▼</span>
                     </div>
                     {showPinnedChats && (
-                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
+                      <div style={{ padding: "6px 0", marginTop: "6px" }}>
                         {pinnedChats.map((room) => {
                           const otherId = room.participants.find(id => id !== user.uid);
                           const otherUser = users.find(u => u.id === otherId);
@@ -1104,24 +1057,25 @@ export default function HomePage(): React.JSX.Element {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "12px",
-                                padding: "8px 12px",
-                                borderRadius: "8px",
+                                gap: "14px",
+                                padding: "10px 14px",
+                                borderRadius: "10px",
                                 cursor: "pointer",
                                 backgroundColor: "rgba(197,232,0,0.08)",
-                                borderLeft: "3px solid #c5e800",
+                                borderLeft: "4px solid #c5e800",
+                                marginBottom: "4px",
                               }}
                             >
                               <div
                                 style={{
-                                  width: "32px",
-                                  height: "32px",
+                                  width: "40px",
+                                  height: "40px",
                                   borderRadius: "50%",
                                   backgroundColor: "#f0f0f0",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  fontSize: "14px",
+                                  fontSize: "18px",
                                   overflow: "hidden",
                                 }}
                               >
@@ -1132,9 +1086,9 @@ export default function HomePage(): React.JSX.Element {
                                 )}
                               </div>
                               <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
-                                <div style={{ fontSize: "10px", color: "#999" }}>
-                                  {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
+                                <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
+                                <div style={{ fontSize: "13px", color: "#999" }}>
+                                  {room.lastMessage ? room.lastMessage.substring(0, 35) + (room.lastMessage.length > 35 ? "..." : "") : "Belum ada pesan"}
                                 </div>
                               </div>
                               {room.unreadCount > 0 && (
@@ -1143,14 +1097,14 @@ export default function HomePage(): React.JSX.Element {
                                     backgroundColor: "#c5e800",
                                     color: "#000",
                                     borderRadius: "50%",
-                                    minWidth: "18px",
-                                    height: "18px",
+                                    minWidth: "22px",
+                                    height: "22px",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    fontSize: "9px",
+                                    fontSize: "12px",
                                     fontWeight: 700,
-                                    padding: "0 4px",
+                                    padding: "0 6px",
                                   }}
                                 >
                                   {room.unreadCount}
@@ -1166,12 +1120,13 @@ export default function HomePage(): React.JSX.Element {
                                   border: "none",
                                   cursor: "pointer",
                                   color: "#c5e800",
-                                  padding: "2px 4px",
+                                  padding: "4px 8px",
                                   display: "flex",
                                   alignItems: "center",
+                                  fontSize: "18px",
                                 }}
                               >
-                                <PinIcon filled={true} />
+                                📌
                               </button>
                             </div>
                           );
@@ -1188,13 +1143,13 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         textAlign: "center",
                         color: "#999",
-                        fontSize: "13px",
-                        padding: "40px 0",
+                        fontSize: "15px",
+                        padding: "50px 0",
                       }}
                     >
-                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
-                      Belum ada riwayat chat
-                      <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
+                      <div style={{ fontSize: "40px", marginBottom: "12px" }}>💬</div>
+                      <div style={{ fontSize: "16px", fontWeight: 500 }}>Belum ada riwayat chat</div>
+                      <div style={{ fontSize: "14px", marginTop: "6px", color: "#ccc" }}>
                         Cari email user untuk memulai chat
                       </div>
                     </div>
@@ -1213,12 +1168,12 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: "12px",
-                            padding: "12px 14px",
+                            gap: "14px",
+                            padding: "12px 16px",
                             borderRadius: "12px",
                             cursor: "pointer",
                             transition: "all .2s ease",
-                            marginBottom: "2px",
+                            marginBottom: "4px",
                             backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.08)" : "transparent",
                           }}
                           onMouseEnter={(e) => {
@@ -1230,14 +1185,14 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <div
                             style={{
-                              width: "44px",
-                              height: "44px",
+                              width: "48px",
+                              height: "48px",
                               borderRadius: "50%",
                               backgroundColor: "#f0f0f0",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "18px",
+                              fontSize: "20px",
                               flexShrink: 0,
                               overflow: "hidden",
                             }}
@@ -1253,10 +1208,10 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
+                            <div style={{ fontSize: "16px", fontWeight: 500, color: "#000" }}>
                               {otherUser.name}
                             </div>
-                            <div style={{ fontSize: "12px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <div style={{ fontSize: "14px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
                                 <>
                                   {isLastMessageFromMe && "Anda: "}
@@ -1269,25 +1224,25 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
                             {room.lastMessageTime && (
-                              <span style={{ fontSize: "10px", color: "#ccc" }}>
+                              <span style={{ fontSize: "12px", color: "#ccc" }}>
                                 {formatTime(room.lastMessageTime)}
                               </span>
                             )}
-                            <div style={{ display: "flex", gap: "4px" }}>
+                            <div style={{ display: "flex", gap: "6px" }}>
                               {room.unreadCount > 0 && (
                                 <div
                                   style={{
                                     backgroundColor: "#c5e800",
                                     color: "#000",
                                     borderRadius: "50%",
-                                    minWidth: "20px",
-                                    height: "20px",
+                                    minWidth: "24px",
+                                    height: "24px",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    fontSize: "10px",
+                                    fontSize: "12px",
                                     fontWeight: 700,
-                                    padding: "0 6px",
+                                    padding: "0 8px",
                                   }}
                                 >
                                   {room.unreadCount}
@@ -1303,13 +1258,14 @@ export default function HomePage(): React.JSX.Element {
                                   border: "none",
                                   cursor: "pointer",
                                   color: room.isPinned ? "#c5e800" : "#ccc",
-                                  padding: "2px 4px",
+                                  padding: "4px 8px",
                                   display: "flex",
                                   alignItems: "center",
                                   transition: "all .2s ease",
+                                  fontSize: "18px",
                                 }}
                               >
-                                <PinIcon filled={room.isPinned || false} />
+                                📌
                               </button>
                             </div>
                           </div>
@@ -1321,15 +1277,15 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ) : (
               // Chat View
-              <div style={{ display: "flex", flexDirection: "column", height: "420px" }}>
+              <div style={{ display: "flex", flexDirection: "column", height: "450px" }}>
                 {/* Chat Header */}
                 <div
                   style={{
-                    padding: "12px 20px",
+                    padding: "14px 20px",
                     borderBottom: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px",
+                    gap: "14px",
                     backgroundColor: "#000",
                   }}
                 >
@@ -1340,12 +1296,13 @@ export default function HomePage(): React.JSX.Element {
                       border: "none",
                       cursor: "pointer",
                       color: "#fff",
-                      padding: "4px 6px",
+                      padding: "4px 10px",
                       borderRadius: "8px",
                       transition: "all .2s ease",
                       opacity: 0.6,
                       display: "flex",
                       alignItems: "center",
+                      fontSize: "22px",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
@@ -1356,18 +1313,18 @@ export default function HomePage(): React.JSX.Element {
                       e.currentTarget.style.opacity = "0.6";
                     }}
                   >
-                    <BackIcon />
+                    ←
                   </button>
                   <div
                     style={{
-                      width: "36px",
-                      height: "36px",
+                      width: "40px",
+                      height: "40px",
                       borderRadius: "50%",
                       backgroundColor: "#2a2a2a",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "16px",
+                      fontSize: "18px",
                       overflow: "hidden",
                       color: "#fff",
                     }}
@@ -1383,10 +1340,10 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
+                    <div style={{ fontSize: "17px", fontWeight: 500, color: "#fff" }}>
                       {selectedChat.name}
                     </div>
-                    <div style={{ fontSize: "10px", color: "#666" }}>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
                       {selectedChat.email}
                     </div>
                   </div>
@@ -1397,31 +1354,32 @@ export default function HomePage(): React.JSX.Element {
                       border: "none",
                       cursor: "pointer",
                       color: selectedChat.isPinned ? "#c5e800" : "#666",
-                      padding: "4px 8px",
+                      padding: "4px 10px",
                       borderRadius: "8px",
                       display: "flex",
                       alignItems: "center",
                       transition: "all .2s ease",
+                      fontSize: "20px",
                     }}
                   >
-                    <PinIcon filled={selectedChat.isPinned || false} />
+                    📌
                   </button>
                 </div>
 
-                {/* Pinned Messages Section - Di bawah nama user */}
+                {/* Pinned Messages Section */}
                 {pinnedMessages.length > 0 && (
                   <div
                     style={{
-                      padding: "8px 16px",
+                      padding: "10px 16px",
                       backgroundColor: "rgba(197,232,0,0.06)",
                       borderBottom: "1px solid rgba(197,232,0,0.15)",
-                      maxHeight: "100px",
+                      maxHeight: "120px",
                       overflowY: "auto",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                      <PinIcon filled={true} />
-                      <span style={{ fontSize: "10px", fontWeight: 600, color: "#c5e800", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "14px" }}>📌</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#c5e800", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                         Pinned Messages ({pinnedMessages.length})
                       </span>
                     </div>
@@ -1432,17 +1390,17 @@ export default function HomePage(): React.JSX.Element {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                          padding: "4px 8px",
+                          padding: "6px 12px",
                           backgroundColor: "rgba(197,232,0,0.08)",
-                          borderRadius: "6px",
-                          marginBottom: "2px",
-                          fontSize: "12px",
+                          borderRadius: "8px",
+                          marginBottom: "4px",
+                          fontSize: "14px",
                           color: "#000",
-                          borderLeft: "2px solid #c5e800",
+                          borderLeft: "3px solid #c5e800",
                         }}
                       >
-                        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {msg.senderName}: {msg.text}
+                        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "14px" }}>
+                          <strong>{msg.senderName}:</strong> {msg.text}
                         </span>
                         <button
                           onClick={() => {
@@ -1454,18 +1412,18 @@ export default function HomePage(): React.JSX.Element {
                             border: "none",
                             cursor: "pointer",
                             color: "#c5e800",
-                            padding: "2px 6px",
-                            fontSize: "10px",
+                            padding: "2px 8px",
+                            fontSize: "16px",
                           }}
                         >
-                          <PinIcon filled={true} />
+                          📌
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Messages - Background hitam */}
+                {/* Messages */}
                 <div
                   style={{
                     flex: 1,
@@ -1474,7 +1432,7 @@ export default function HomePage(): React.JSX.Element {
                     backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "4px",
+                    gap: "6px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1482,13 +1440,13 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         textAlign: "center",
                         color: "#666",
-                        fontSize: "13px",
-                        marginTop: "60px",
+                        fontSize: "15px",
+                        marginTop: "80px",
                       }}
                     >
-                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
-                      <div style={{ color: "#888" }}>Belum ada pesan</div>
-                      <div style={{ fontSize: "11px", marginTop: "4px", color: "#555" }}>
+                      <div style={{ fontSize: "40px", marginBottom: "12px" }}>💬</div>
+                      <div style={{ color: "#888", fontSize: "16px" }}>Belum ada pesan</div>
+                      <div style={{ fontSize: "14px", marginTop: "6px", color: "#555" }}>
                         Kirim pesan pertama
                       </div>
                     </div>
@@ -1507,10 +1465,10 @@ export default function HomePage(): React.JSX.Element {
                               style={{
                                 textAlign: "center",
                                 color: "#444",
-                                fontSize: "10px",
-                                padding: "8px 0",
+                                fontSize: "12px",
+                                padding: "10px 0",
                                 fontWeight: 500,
-                                letterSpacing: "0.03em",
+                                letterSpacing: "0.05em",
                               }}
                             >
                               {formatDate(msg.timestamp)}
@@ -1520,11 +1478,11 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               alignSelf: isMine ? "flex-end" : "flex-start",
                               maxWidth: "75%",
-                              padding: "10px 14px",
-                              borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+                              padding: "12px 18px",
+                              borderRadius: isMine ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
                               backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
                               color: isMine ? "#000" : "#fff",
-                              fontSize: "14px",
+                              fontSize: "16px",
                               lineHeight: 1.5,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
@@ -1535,14 +1493,14 @@ export default function HomePage(): React.JSX.Element {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "4px",
-                                marginTop: "4px",
+                                gap: "6px",
+                                marginTop: "6px",
                                 justifyContent: isMine ? "flex-end" : "flex-start",
                               }}
                             >
                               <span
                                 style={{
-                                  fontSize: "9px",
+                                  fontSize: "11px",
                                   color: isMine ? "rgba(0,0,0,0.4)" : "#666",
                                 }}
                               >
@@ -1551,7 +1509,7 @@ export default function HomePage(): React.JSX.Element {
                               {isMine && status && (
                                 <span
                                   style={{
-                                    fontSize: "10px",
+                                    fontSize: "12px",
                                     color: status.color,
                                     fontWeight: status.label === "Dibaca" ? 700 : 400,
                                   }}
@@ -1566,13 +1524,14 @@ export default function HomePage(): React.JSX.Element {
                                   border: "none",
                                   cursor: "pointer",
                                   color: msg.isPinned ? "#c5e800" : "#555",
-                                  padding: "0 2px",
+                                  padding: "0 4px",
                                   display: "flex",
                                   alignItems: "center",
                                   transition: "all .2s ease",
+                                  fontSize: "16px",
                                 }}
                               >
-                                <PinIcon filled={msg.isPinned || false} />
+                                📌
                               </button>
                             </div>
                           </div>
@@ -1586,10 +1545,10 @@ export default function HomePage(): React.JSX.Element {
                 {/* Input */}
                 <div
                   style={{
-                    padding: "12px 16px 16px",
+                    padding: "14px 18px 18px",
                     borderTop: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
-                    gap: "10px",
+                    gap: "12px",
                     backgroundColor: "#ffffff",
                   }}
                 >
@@ -1606,10 +1565,10 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       flex: 1,
-                      padding: "10px 16px",
+                      padding: "12px 20px",
                       border: "1px solid #e8e8e8",
                       borderRadius: "60px",
-                      fontSize: "14px",
+                      fontSize: "16px",
                       outline: "none",
                       fontFamily: "Inter, 'Inter Fallback'",
                       transition: "all .2s ease",
@@ -1629,17 +1588,17 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       backgroundColor: "#c5e800",
                       border: "none",
-                      padding: "10px 18px",
+                      padding: "12px 24px",
                       borderRadius: "60px",
-                      fontSize: "14px",
-                      fontWeight: 500,
+                      fontSize: "16px",
+                      fontWeight: 600,
                       color: "#000",
                       cursor: "pointer",
                       transition: "all .2s ease",
                       whiteSpace: "nowrap",
                       display: "flex",
                       alignItems: "center",
-                      gap: "6px",
+                      gap: "8px",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "#b0d000";
@@ -1651,7 +1610,9 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <span>Kirim</span>
-                    <SendIcon />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -1665,9 +1626,9 @@ export default function HomePage(): React.JSX.Element {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "12px",
             backgroundColor: isChatOpen ? "transparent" : "#000",
-            padding: isChatOpen ? "0" : "14px 28px",
+            padding: isChatOpen ? "0" : "16px 32px",
             borderRadius: "60px",
             border: "none",
             cursor: "pointer",
@@ -1694,7 +1655,7 @@ export default function HomePage(): React.JSX.Element {
             <>
               <span
                 style={{
-                  fontSize: "15px",
+                  fontSize: "18px",
                   fontWeight: 600,
                   color: "#ffffff",
                   letterSpacing: "-0.01em",
@@ -1710,14 +1671,14 @@ export default function HomePage(): React.JSX.Element {
                     backgroundColor: "#c5e800",
                     color: "#000",
                     borderRadius: "50%",
-                    minWidth: "20px",
-                    height: "20px",
+                    minWidth: "24px",
+                    height: "24px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "10px",
+                    fontSize: "13px",
                     fontWeight: 700,
-                    padding: "0 6px",
+                    padding: "0 8px",
                   }}
                 >
                   {totalUnread}
@@ -1727,19 +1688,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </button>
       </div>
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
