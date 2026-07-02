@@ -584,22 +584,23 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "MENURU" besar di sisi kanan pojok layar - 500px */}
+      {/* Teks "MENURU" besar di sisi kanan atas layar - 200px */}
       <div
         style={{
           position: "absolute",
-          bottom: "20px",
-          right: "20px",
+          top: "40px",
+          right: "40px",
           zIndex: 1,
-          fontSize: "500px",
+          fontSize: "200px",
           fontWeight: 400,
           color: "#000000",
           letterSpacing: "-0.02em",
           lineHeight: 0.9,
           fontFamily: "Inter, 'Inter Fallback'",
-          opacity: 0.15,
+          opacity: 0.12,
           userSelect: "none",
           pointerEvents: "none",
+          textAlign: "right",
         }}
       >
         MENURU
