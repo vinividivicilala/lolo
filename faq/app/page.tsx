@@ -1429,6 +1429,71 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
+                {/* Riwayat Pin Message - Di bawah nama akun user penerima */}
+                {pinnedMessages.length > 0 && (
+                  <div
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#0a0a0a",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <div
+                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
+                        color: "#999",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PinIcon filled={true} />
+                        <span style={{ fontSize: "12px", fontWeight: 500 }}>
+                          Pesan Pinned ({pinnedMessages.length})
+                        </span>
+                      </div>
+                      <PinDropdownIcon isOpen={showPinnedMessages} />
+                    </div>
+                    {showPinnedMessages && (
+                      <div style={{ marginTop: "8px", maxHeight: "150px", overflowY: "auto" }}>
+                        {pinnedMessages.map((msg) => {
+                          const isMine = msg.senderId === user?.uid;
+                          return (
+                            <div
+                              key={msg.id}
+                              style={{
+                                padding: "6px 10px",
+                                marginBottom: "4px",
+                                borderRadius: "6px",
+                                backgroundColor: isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)",
+                                fontSize: "12px",
+                                color: "#ccc",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <span style={{ color: "#666", fontSize: "10px" }}>
+                                  {isMine ? "Anda: " : `${msg.senderName}: `}
+                                </span>
+                                <span style={{ color: "#fff" }}>
+                                  {msg.text.length > 50 ? msg.text.substring(0, 50) + "..." : msg.text}
+                                </span>
+                              </div>
+                              <span style={{ fontSize: "9px", color: "#555", marginLeft: "8px" }}>
+                                {formatTime(msg.pinnedAt || msg.timestamp)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Messages - Background hitam */}
                 <div
                   style={{
@@ -1526,7 +1591,6 @@ export default function HomePage(): React.JSX.Element {
                                   {status.icon}
                                 </span>
                               )}
-                              {/* Pin button di dalam setiap message */}
                               <button
                                 onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
                                 style={{
