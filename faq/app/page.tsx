@@ -1,45 +1,273 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile,
+  updateEmail,
+  deleteUser
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  increment,
+  writeBatch,
+  where,
+  deleteDoc,
+  getDocs
+} from "firebase/firestore";
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+// Providers untuk login
+const githubProvider = new GithubAuthProvider();
+const googleProvider = new GoogleAuthProvider();
+
+interface ChatUser {
+  id: string;
+  name: string;
+  email: string;
+  photoURL: string;
+}
+
+interface Message {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  timestamp: any;
+}
 
 export default function HomePage(): React.JSX.Element {
+  const [user, setUser] = useState<User | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<ChatUser | null>(null);
   const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState<{[key: string]: string[]}>({});
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<ChatUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Daftar akun terdaftar
-  const accounts = [
-    { id: "user1", name: "Ahmad Fauzi", avatar: "👨" },
-    { id: "user2", name: "Siti Rahma", avatar: "👩" },
-    { id: "user3", name: "Budi Santoso", avatar: "🧑" },
-    { id: "user4", name: "Dewi Lestari", avatar: "👩‍🦰" },
-    { id: "user5", name: "Rizky Pratama", avatar: "👨‍🦱" },
+  // Daftar akun default
+  const defaultUsers: ChatUser[] = [
+    { id: "user1", name: "Ahmad Fauzi", email: "ahmad@email.com", photoURL: "👨" },
+    { id: "user2", name: "Siti Rahma", email: "siti@email.com", photoURL: "👩" },
+    { id: "user3", name: "Budi Santoso", email: "budi@email.com", photoURL: "🧑" },
+    { id: "user4", name: "Dewi Lestari", email: "dewi@email.com", photoURL: "👩‍🦰" },
+    { id: "user5", name: "Rizky Pratama", email: "rizky@email.com", photoURL: "👨‍🦱" },
   ];
 
-  const handleChatClick = () => {
-    setIsChatOpen(!isChatOpen);
-    if (!isChatOpen) {
+  // Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Load users from Firestore
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef);
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const userList: ChatUser[] = [];
+          snapshot.forEach((doc) => {
+            userList.push({ id: doc.id, ...doc.data() } as ChatUser);
+          });
+          if (userList.length === 0) {
+            // Seed default users
+            defaultUsers.forEach(async (u) => {
+              await setDoc(doc(db, "users", u.id), u);
+            });
+            setUsers(defaultUsers);
+          } else {
+            setUsers(userList);
+          }
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error loading users:", error);
+        setUsers(defaultUsers);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  // Load messages for selected chat
+  useEffect(() => {
+    if (!selectedChat || !user) return;
+
+    const chatId = [user.uid, selectedChat.id].sort().join("_");
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messageList: Message[] = [];
+      snapshot.forEach((doc) => {
+        messageList.push({ id: doc.id, ...doc.data() } as Message);
+      });
+      setMessages(messageList);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    });
+
+    return () => unsubscribe();
+  }, [selectedChat, user]);
+
+  // Handle login with Google
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsChatOpen(false);
       setSelectedChat(null);
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
-  const handleSendMessage = () => {
-    if (selectedChat && message.trim()) {
-      setChatMessages(prev => ({
-        ...prev,
-        [selectedChat]: [...(prev[selectedChat] || []), message.trim()]
-      }));
+  // Send message
+  const handleSendMessage = async () => {
+    if (!selectedChat || !user || !message.trim()) return;
+
+    try {
+      const chatId = [user.uid, selectedChat.id].sort().join("_");
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      
+      await addDoc(messagesRef, {
+        text: message.trim(),
+        senderId: user.uid,
+        senderName: user.displayName || "User",
+        receiverId: selectedChat.id,
+        timestamp: serverTimestamp(),
+      });
+
       setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
+  // Handle key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+  // Toggle chat
+  const handleChatToggle = () => {
+    if (!user) {
+      handleLogin();
+      return;
+    }
+    setIsChatOpen(!isChatOpen);
+    if (!isChatOpen) {
+      setSelectedChat(null);
+    }
+  };
+
+  // Get chat users (users that user has chatted with)
+  useEffect(() => {
+    if (!user) return;
+    const getChatUsers = async () => {
+      try {
+        const chatRef = collection(db, "chats");
+        const q = query(chatRef, where("participants", "array-contains", user.uid));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const userIds = new Set<string>();
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.participants) {
+              data.participants.forEach((id: string) => {
+                if (id !== user.uid) userIds.add(id);
+              });
+            }
+          });
+          const chatUserList = users.filter(u => userIds.has(u.id));
+          setChatUsers(chatUserList);
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error loading chat users:", error);
+      }
+    };
+    getChatUsers();
+  }, [user, users]);
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
+        fontFamily: "Inter, 'Inter Fallback'"
+      }}>
+        <div style={{ fontSize: "18px", color: "#666" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -69,17 +297,86 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Chat Button & Chat Box */}
+      {/* User Status */}
       <div
         style={{
           position: "absolute",
+          top: "40px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          padding: "8px 20px",
+          backgroundColor: "#f5f5f5",
+          borderRadius: "60px",
+          fontSize: "14px",
+          color: "#000",
+        }}
+      >
+        {user ? (
+          <>
+            <span>{user.displayName || user.email}</span>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#666",
+                cursor: "pointer",
+                fontSize: "14px",
+                padding: "4px 12px",
+                borderRadius: "20px",
+                transition: "all .2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#e0e0e0";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleLogin}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#0095f6",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: 500,
+              padding: "4px 12px",
+              borderRadius: "20px",
+              transition: "all .2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#f0f0f0";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            Login with Google
+          </button>
+        )}
+      </div>
+
+      {/* Chat Box - Awwwards Style */}
+      <div
+        style={{
+          position: "fixed",
           bottom: "40px",
           right: "40px",
-          zIndex: 10,
+          zIndex: 100,
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
-          gap: "12px",
+          gap: "16px",
         }}
       >
         {/* Chat Box */}
@@ -87,48 +384,63 @@ export default function HomePage(): React.JSX.Element {
           <div
             style={{
               backgroundColor: "#ffffff",
-              borderRadius: "16px",
-              width: "380px",
-              maxHeight: "500px",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-              animation: "slideUp 0.3s ease",
-              border: "1px solid #f0f0f0",
+              borderRadius: "24px",
+              width: "420px",
+              maxHeight: "560px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)",
+              animation: "slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
+              backdropFilter: "blur(20px)",
+              backgroundColor: "rgba(255,255,255,0.98)",
             }}
           >
-            {/* Header */}
+            {/* Header - Awwwards Style */}
             <div
               style={{
-                padding: "16px 20px",
-                borderBottom: "1px solid #f0f0f0",
+                padding: "20px 24px",
+                borderBottom: "1px solid rgba(0,0,0,0.04)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                backgroundColor: "#fafafa",
+                backgroundColor: "rgba(255,255,255,0.98)",
               }}
             >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "#000",
-                }}
-              >
-                💬 Pesan
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: "#c5e800",
+                    animation: "pulse 2s infinite",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    color: "#000",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {selectedChat ? "Chat" : "Pesan"}
+                </span>
+              </div>
               <button
                 onClick={() => setIsChatOpen(false)}
                 style={{
                   background: "none",
                   border: "none",
-                  fontSize: "20px",
+                  fontSize: "18px",
                   cursor: "pointer",
                   color: "#999",
                   padding: "4px 8px",
                   borderRadius: "8px",
                   transition: "all .2s ease",
+                  lineHeight: 1,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#f0f0f0";
@@ -141,55 +453,84 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Daftar Akun */}
+            {/* Content */}
             {!selectedChat ? (
-              <div style={{ padding: "12px", overflowY: "auto", flex: 1 }}>
-                {accounts.map((account) => (
+              // User List - Awwwards Style
+              <div style={{ padding: "8px", overflowY: "auto", flex: 1 }}>
+                <div style={{ padding: "8px 12px 16px", fontSize: "12px", color: "#999", fontWeight: 500, letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                  Kontak
+                </div>
+                {(chatUsers.length > 0 ? chatUsers : users).map((account) => (
                   <div
                     key={account.id}
-                    onClick={() => setSelectedChat(account.id)}
+                    onClick={() => setSelectedChat(account)}
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "12px",
+                      gap: "14px",
                       padding: "12px 16px",
-                      borderRadius: "12px",
+                      borderRadius: "16px",
                       cursor: "pointer",
                       transition: "all .2s ease",
-                      marginBottom: "4px",
+                      marginBottom: "2px",
+                      position: "relative",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateX(4px)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.transform = "translateX(0)";
                     }}
                   >
-                    <span style={{ fontSize: "28px" }}>{account.avatar}</span>
-                    <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        backgroundColor: "#f0f0f0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "22px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {account.photoURL || "👤"}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
                         {account.name}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#999" }}>
-                        {chatMessages[account.id]?.length || 0} pesan
+                      <div style={{ fontSize: "12px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {messages.filter(m => m.senderId === account.id || m.receiverId === account.id).length || 0} pesan
                       </div>
                     </div>
-                    <span style={{ fontSize: "14px", color: "#ccc" }}>→</span>
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        backgroundColor: "#c5e800",
+                        opacity: 0.4,
+                      }}
+                    />
                   </div>
                 ))}
               </div>
             ) : (
-              // Chat View
-              <div style={{ display: "flex", flexDirection: "column", height: "400px" }}>
+              // Chat View - Awwwards Style
+              <div style={{ display: "flex", flexDirection: "column", height: "420px" }}>
                 {/* Chat Header */}
                 <div
                   style={{
-                    padding: "12px 16px",
-                    borderBottom: "1px solid #f0f0f0",
+                    padding: "14px 20px",
+                    borderBottom: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
-                    backgroundColor: "#fafafa",
+                    backgroundColor: "rgba(255,255,255,0.98)",
                   }}
                 >
                   <button
@@ -202,65 +543,112 @@ export default function HomePage(): React.JSX.Element {
                       color: "#666",
                       padding: "4px 8px",
                       borderRadius: "8px",
+                      transition: "all .2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
                     }}
                   >
                     ←
                   </button>
-                  <span style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
-                    {accounts.find(a => a.id === selectedChat)?.avatar}{" "}
-                    {accounts.find(a => a.id === selectedChat)?.name}
-                  </span>
+                  <div
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      backgroundColor: "#f0f0f0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "18px",
+                    }}
+                  >
+                    {selectedChat.photoURL || "👤"}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                      {selectedChat.name}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#999" }}>
+                      {selectedChat.email}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Chat Messages */}
+                {/* Messages */}
                 <div
                   style={{
                     flex: 1,
-                    padding: "16px",
+                    padding: "20px",
                     overflowY: "auto",
                     backgroundColor: "#fafafa",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
                   }}
                 >
-                  {(chatMessages[selectedChat] || []).length === 0 ? (
+                  {messages.length === 0 ? (
                     <div
                       style={{
                         textAlign: "center",
                         color: "#999",
-                        fontSize: "14px",
-                        marginTop: "40px",
+                        fontSize: "13px",
+                        marginTop: "60px",
                       }}
                     >
-                      Belum ada pesan. Kirim pesan pertama!
+                      <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
+                      Belum ada pesan
+                      <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
+                        Kirim pesan pertama!
+                      </div>
                     </div>
                   ) : (
-                    (chatMessages[selectedChat] || []).map((msg, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          backgroundColor: "#c5e800",
-                          padding: "10px 14px",
-                          borderRadius: "12px",
-                          marginBottom: "8px",
-                          maxWidth: "80%",
-                          alignSelf: "flex-end",
-                          marginLeft: "auto",
-                          fontSize: "14px",
-                          color: "#000",
-                        }}
-                      >
-                        {msg}
-                      </div>
-                    ))
+                    messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user?.uid;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "10px 16px",
+                            borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                            backgroundColor: isMine ? "#c5e800" : "#ffffff",
+                            color: isMine ? "#000" : "#000",
+                            fontSize: "14px",
+                            lineHeight: 1.5,
+                            boxShadow: isMine ? "none" : "0 2px 8px rgba(0,0,0,0.04)",
+                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.04)",
+                          }}
+                        >
+                          {msg.text}
+                          <div
+                            style={{
+                              fontSize: "9px",
+                              color: isMine ? "rgba(0,0,0,0.4)" : "#ccc",
+                              marginTop: "4px",
+                              textAlign: isMine ? "right" : "left",
+                            }}
+                          >
+                            {msg.senderName}
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Message */}
+                {/* Input */}
                 <div
                   style={{
-                    padding: "12px 16px",
-                    borderTop: "1px solid #f0f0f0",
+                    padding: "12px 16px 16px",
+                    borderTop: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
-                    gap: "8px",
+                    gap: "10px",
                     backgroundColor: "#ffffff",
                   }}
                 >
@@ -272,19 +660,22 @@ export default function HomePage(): React.JSX.Element {
                     onKeyPress={handleKeyPress}
                     style={{
                       flex: 1,
-                      padding: "10px 14px",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "20px",
+                      padding: "12px 18px",
+                      border: "1px solid #e8e8e8",
+                      borderRadius: "60px",
                       fontSize: "14px",
                       outline: "none",
                       fontFamily: "Inter, 'Inter Fallback'",
-                      transition: "border .2s ease",
+                      transition: "all .2s ease",
+                      backgroundColor: "#f5f5f5",
                     }}
                     onFocus={(e) => {
                       e.currentTarget.style.borderColor = "#c5e800";
+                      e.currentTarget.style.backgroundColor = "#ffffff";
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = "#e0e0e0";
+                      e.currentTarget.style.borderColor = "#e8e8e8";
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
                     }}
                   />
                   <button
@@ -292,8 +683,8 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       backgroundColor: "#c5e800",
                       border: "none",
-                      padding: "10px 16px",
-                      borderRadius: "20px",
+                      padding: "12px 20px",
+                      borderRadius: "60px",
                       fontSize: "14px",
                       fontWeight: 500,
                       color: "#000",
@@ -302,13 +693,15 @@ export default function HomePage(): React.JSX.Element {
                       whiteSpace: "nowrap",
                     }}
                     onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.04)";
                       e.currentTarget.style.backgroundColor = "#b0d000";
                     }}
                     onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
                       e.currentTarget.style.backgroundColor = "#c5e800";
                     }}
                   >
-                    Kirim
+                    Kirim →
                   </button>
                 </div>
               </div>
@@ -316,37 +709,39 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Tombol Chat */}
-        <div
+        {/* Chat Button - Awwwards Style */}
+        <button
+          onClick={handleChatToggle}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            backgroundColor: isChatOpen ? "#e0e0e0" : "#0095f6",
-            padding: "12px 24px",
-            borderRadius: "24px",
+            backgroundColor: isChatOpen ? "#e8e8e8" : "#000",
+            padding: "14px 28px",
+            borderRadius: "60px",
+            border: "none",
             cursor: "pointer",
-            transition: "all .3s ease",
-            boxShadow: isChatOpen ? "none" : "0 4px 12px rgba(0,149,246,0.35)",
+            transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            boxShadow: isChatOpen ? "none" : "0 8px 32px rgba(0,0,0,0.12)",
             userSelect: "none",
+            fontFamily: "Inter, 'Inter Fallback'",
           }}
           onMouseEnter={(e) => {
             if (!isChatOpen) {
               e.currentTarget.style.transform = "scale(1.04)";
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,149,246,0.45)";
+              e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.18)";
             }
           }}
           onMouseLeave={(e) => {
             if (!isChatOpen) {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,149,246,0.35)";
+              e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.12)";
             }
           }}
-          onClick={handleChatClick}
         >
           <span
             style={{
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: 600,
               color: isChatOpen ? "#000" : "#ffffff",
               letterSpacing: "-0.01em",
@@ -354,21 +749,25 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: "nowrap",
             }}
           >
-            {isChatOpen ? "Tutup Chat" : "Chat with Menuru"}
+            {isChatOpen ? "Tutup" : user ? "Chat with Menuru" : "Login to Chat"}
           </span>
-        </div>
+        </button>
       </div>
 
       <style jsx>{`
         @keyframes slideUp {
           from {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateY(24px) scale(0.96);
           }
           to {
             opacity: 1;
             transform: translateY(0) scale(1);
           }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
       `}</style>
     </div>
