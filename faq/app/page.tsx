@@ -8,9 +8,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile
+  signInWithEmailAndPassword
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -25,10 +23,11 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore";
 
-// Konfigurasi Firebase
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -87,130 +86,41 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
-// SVG Icons
+// SVG Icons Minimalist
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      fill={filled ? "currentColor" : "none"}
-    />
-  </svg>
-);
-
-const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ 
-      flexShrink: 0,
-      transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-      transition: 'transform 0.3s ease'
-    }}
-  >
-    <path
-      d="M6 9L12 15L18 9"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
   </svg>
 );
 
 const CloseIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M18 6L6 18M6 6L18 18"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const BackIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M19 12H5M5 12L12 19M5 12L12 5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const SendIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const AddUserIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M12 5V19M5 12H19"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <circle
-      cx="12"
-      cy="12"
-      r="9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
+const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
+    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -231,11 +141,10 @@ export default function HomePage(): React.JSX.Element {
   const [showPinnedUsers, setShowPinnedUsers] = useState(false);
   const [showPinnedChats, setShowPinnedChats] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUserName, setNewUserName] = useState("");
-  const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
+  const [selectedNewUser, setSelectedNewUser] = useState("");
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
+  const [showPinnedMessages, setShowPinnedMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auth Listener
@@ -244,7 +153,6 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
-      
       if (currentUser) {
         try {
           const userRef = doc(db, "users", currentUser.uid);
@@ -270,7 +178,6 @@ export default function HomePage(): React.JSX.Element {
   // Load users from Firestore
   useEffect(() => {
     if (!db || !user) return;
-    
     const loadUsers = async () => {
       try {
         const usersRef = collection(db, "users");
@@ -459,7 +366,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Toggle chat
   const handleChatToggle = () => {
     if (!user) {
       setShowLogin(true);
@@ -501,18 +407,6 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null
       });
 
-      setChatRooms(prev => prev.map(room => {
-        if (room.id === chatId) {
-          return { 
-            ...room, 
-            lastMessage: message.trim(), 
-            lastMessageTime: serverTimestamp(),
-            lastMessageSenderId: user.uid
-          };
-        }
-        return room;
-      }));
-
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -529,13 +423,6 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
       
-      setMessages(prev => prev.map(msg => {
-        if (msg.id === messageId) {
-          return { ...msg, isPinned: !currentPinned, pinnedAt: !currentPinned ? new Date() : null };
-        }
-        return msg;
-      }));
-      
       setPinnedMessages(prev => {
         if (!currentPinned) {
           const msg = messages.find(m => m.id === messageId);
@@ -546,26 +433,6 @@ export default function HomePage(): React.JSX.Element {
       });
     } catch (error) {
       console.error("Error pinning message:", error);
-    }
-  };
-
-  // Pin/Unpin user
-  const handlePinUser = async (userId: string, currentPinned: boolean) => {
-    if (!db) return;
-    try {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        isPinned: !currentPinned
-      });
-      
-      setUsers(prev => prev.map(u => {
-        if (u.id === userId) {
-          return { ...u, isPinned: !currentPinned };
-        }
-        return u;
-      }));
-    } catch (error) {
-      console.error("Error pinning user:", error);
     }
   };
 
@@ -589,44 +456,58 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add new user
-  const handleAddUser = async () => {
-    if (!newUserName || !newUserEmail || !newUserPassword || !user || !db) return;
+  // Pin/Unpin user
+  const handlePinUser = async (userId: string, currentPinned: boolean) => {
+    if (!db) return;
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        isPinned: !currentPinned
+      });
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === userId) {
+          return { ...u, isPinned: !currentPinned };
+        }
+        return u;
+      }));
+    } catch (error) {
+      console.error("Error pinning user:", error);
+    }
+  };
+
+  // Add existing user to chat
+  const handleAddExistingUser = async () => {
+    if (!selectedNewUser || !user || !db) return;
     
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, newUserEmail, newUserPassword);
-      const newUser = userCredential.user;
+      const targetUser = users.find(u => u.id === selectedNewUser);
+      if (!targetUser) {
+        setAddUserStatus("User tidak ditemukan");
+        return;
+      }
       
-      await updateProfile(newUser, {
-        displayName: newUserName
-      });
+      const chatId = [user.uid, targetUser.id].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
       
-      await setDoc(doc(db, "users", newUser.uid), {
-        id: newUser.uid,
-        name: newUserName,
-        email: newUserEmail,
-        photoURL: "",
-        createdAt: serverTimestamp(),
-        isPinned: false,
-        createdBy: user.uid
-      });
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, targetUser.id],
+          createdAt: serverTimestamp(),
+          isPinned: false
+        });
+        setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
+      } else {
+        setAddUserStatus(`ℹ️ Chat dengan ${targetUser.name} sudah ada.`);
+      }
       
-      const chatId = [user.uid, newUser.uid].sort().join("_");
-      await setDoc(doc(db, "chats", chatId), {
-        participants: [user.uid, newUser.uid],
-        createdAt: serverTimestamp(),
-        isPinned: false
-      });
-      
-      setAddUserStatus(`✅ User ${newUserName} berhasil ditambahkan!`);
-      setNewUserName("");
-      setNewUserEmail("");
-      setNewUserPassword("");
+      setSelectedNewUser("");
       setShowAddUser(false);
       
     } catch (error) {
       console.error("Error adding user:", error);
-      setAddUserStatus("❌ Gagal menambahkan user. Email mungkin sudah terdaftar.");
+      setAddUserStatus("❌ Gagal menambahkan user.");
     }
   };
 
@@ -654,6 +535,11 @@ export default function HomePage(): React.JSX.Element {
   const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
+
+  // Available users for new chat (users not already in chat)
+  const availableUsers = users.filter(u => 
+    !chatRooms.some(room => room.participants.includes(u.id))
+  );
 
   if (loading) {
     return (
@@ -1019,7 +905,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <AddUserIcon />
-                  <span style={{ fontSize: "13px", fontWeight: 500 }}>Tambah User Baru</span>
+                  <span style={{ fontSize: "13px", fontWeight: 500 }}>Chat Baru</span>
                 </button>
 
                 {showAddUser && (
@@ -1032,13 +918,11 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", marginBottom: "12px" }}>
-                      Tambah User Baru
+                      Pilih User untuk Chat
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Nama"
-                      value={newUserName}
-                      onChange={(e) => setNewUserName(e.target.value)}
+                    <select
+                      value={selectedNewUser}
+                      onChange={(e) => setSelectedNewUser(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
@@ -1048,58 +932,38 @@ export default function HomePage(): React.JSX.Element {
                         outline: "none",
                         fontFamily: "Inter, 'Inter Fallback'",
                         marginBottom: "8px",
+                        backgroundColor: "#fff",
                       }}
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                      }}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={newUserPassword}
-                      onChange={(e) => setNewUserPassword(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                      }}
-                    />
+                    >
+                      <option value="">Pilih user...</option>
+                      {availableUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.email})
+                        </option>
+                      ))}
+                    </select>
+                    {availableUsers.length === 0 && (
+                      <div style={{ fontSize: "12px", color: "#999", marginBottom: "8px" }}>
+                        Semua user sudah di-chat
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: "8px" }}>
                       <button
-                        onClick={handleAddUser}
+                        onClick={handleAddExistingUser}
+                        disabled={!selectedNewUser}
                         style={{
-                          backgroundColor: "#000",
+                          backgroundColor: selectedNewUser ? "#000" : "#ccc",
                           color: "#fff",
                           border: "none",
                           padding: "8px 16px",
                           borderRadius: "8px",
                           fontSize: "12px",
-                          cursor: "pointer",
+                          cursor: selectedNewUser ? "pointer" : "not-allowed",
                           fontWeight: 500,
                           transition: "all .2s ease",
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
-                        Tambah
+                        Mulai Chat
                       </button>
                       <button
                         onClick={() => setShowAddUser(false)}
@@ -1117,6 +981,90 @@ export default function HomePage(): React.JSX.Element {
                     {addUserStatus && (
                       <div style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}>
                         {addUserStatus}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Pinned Messages - Riwayat Pesan yang di Pin */}
+                {pinnedMessages.length > 0 && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <div
+                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PinIcon filled={true} />
+                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                          Pesan Pinned ({pinnedMessages.length})
+                        </span>
+                      </div>
+                      <PinDropdownIcon isOpen={showPinnedMessages} />
+                    </div>
+                    {showPinnedMessages && (
+                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
+                        {pinnedMessages.map((msg) => {
+                          const sender = users.find(u => u.id === msg.senderId);
+                          return (
+                            <div
+                              key={msg.id}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                backgroundColor: "rgba(197,232,0,0.08)",
+                                borderLeft: "3px solid #c5e800",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                const chatUser = users.find(u => u.id === msg.senderId) || users.find(u => u.id === msg.receiverId);
+                                if (chatUser) setSelectedChat(chatUser);
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#f0f0f0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "12px",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {sender?.photoURL ? (
+                                  <img src={sender.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  sender?.name?.charAt(0)?.toUpperCase() || "👤"
+                                )}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                                  {sender?.name || "Unknown"}
+                                </div>
+                                <div style={{ fontSize: "11px", color: "#666" }}>
+                                  {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
+                                </div>
+                              </div>
+                              <div style={{ fontSize: "9px", color: "#999" }}>
+                                {formatTime(msg.pinnedAt || msg.timestamp)}
+                              </div>
+                              <PinIcon filled={true} />
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -1331,7 +1279,7 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
                       Belum ada riwayat chat
                       <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                        Tunggu pesan masuk dari pengirim lain
+                        Mulai chat dengan user lain
                       </div>
                     </div>
                   ) : (
@@ -1544,7 +1492,7 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Messages */}
+                {/* Messages - Background hitam */}
                 <div
                   style={{
                     flex: 1,
@@ -1656,6 +1604,7 @@ export default function HomePage(): React.JSX.Element {
                               </button>
                             </div>
                           </div>
+                          {/* Pinned message indicator - tampil di bawah pesan */}
                           {msg.isPinned && (
                             <div
                               style={{
