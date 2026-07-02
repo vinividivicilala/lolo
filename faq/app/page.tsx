@@ -459,6 +459,19 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Toggle chat
+  const handleChatToggle = () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+    setIsChatOpen(!isChatOpen);
+    if (!isChatOpen) {
+      setSelectedChat(null);
+      setShowAddUser(false);
+    }
+  };
+
   // Send message
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
@@ -506,7 +519,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin message - PERMANENT
+  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -516,7 +529,6 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
       
-      // Update local state
       setMessages(prev => prev.map(msg => {
         if (msg.id === messageId) {
           return { ...msg, isPinned: !currentPinned, pinnedAt: !currentPinned ? new Date() : null };
@@ -524,7 +536,6 @@ export default function HomePage(): React.JSX.Element {
         return msg;
       }));
       
-      // Update pinned messages list
       setPinnedMessages(prev => {
         if (!currentPinned) {
           const msg = messages.find(m => m.id === messageId);
@@ -1533,7 +1544,7 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Messages - Background hitam */}
+                {/* Messages */}
                 <div
                   style={{
                     flex: 1,
@@ -1645,7 +1656,6 @@ export default function HomePage(): React.JSX.Element {
                               </button>
                             </div>
                           </div>
-                          {/* Pinned message indicator - muncul di bawah pesan yang di-pin */}
                           {msg.isPinned && (
                             <div
                               style={{
