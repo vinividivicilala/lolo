@@ -8,9 +8,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile
+  signInWithEmailAndPassword
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -25,9 +23,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  increment,
-  Timestamp
+  updateDoc
 } from "firebase/firestore";
 import gsap from "gsap";
 
@@ -87,14 +83,13 @@ export default function HomePage(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserName, setNewUserName] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
+  const [selectedNewUser, setSelectedNewUser] = useState<string>("");
   const [addUserStatus, setAddUserStatus] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLogin, setShowLogin] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState<{[key: string]: number}>({});
+  const [searchTerm, setSearchTerm] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -314,57 +309,58 @@ export default function HomePage(): React.JSX.Element {
     if (!isChatOpen) {
       setSelectedChat(null);
       setShowAddUser(false);
+      setSelectedNewUser("");
     }
   };
 
-  // Add user with email (encrypted)
-  const handleAddUser = async () => {
-    if (!newUserEmail || !newUserName || !newUserPassword || !user || !db) return;
+  // Add existing user to chat
+  const handleAddExistingUser = async () => {
+    if (!selectedNewUser || !user || !db) return;
     
     try {
-      // Create user with email/password
-      const userCredential = await createUserWithEmailAndPassword(auth, newUserEmail, newUserPassword);
-      const newUser = userCredential.user;
+      const targetUser = users.find(u => u.id === selectedNewUser);
+      if (!targetUser) {
+        setAddUserStatus("User tidak ditemukan");
+        return;
+      }
       
-      // Update profile
-      await updateProfile(newUser, {
-        displayName: newUserName
+      // Check if chat already exists
+      const chatId = [user.uid, targetUser.id].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, targetUser.id],
+          createdAt: serverTimestamp()
+        });
+        setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
+      } else {
+        setAddUserStatus(`ℹ️ Chat dengan ${targetUser.name} sudah ada.`);
+      }
+      
+      // Add to chat users list
+      setChatUsers(prev => {
+        if (!prev.find(u => u.id === targetUser.id)) {
+          return [...prev, targetUser];
+        }
+        return prev;
       });
       
-      // Save to Firestore
-      await setDoc(doc(db, "users", newUser.uid), {
-        id: newUser.uid,
-        name: newUserName,
-        email: newUserEmail,
-        photoURL: "",
-        createdAt: serverTimestamp(),
-        createdBy: user.uid
-      });
-      
-      // Create chat between users
-      const chatId = [user.uid, newUser.uid].sort().join("_");
-      await setDoc(doc(db, "chats", chatId), {
-        participants: [user.uid, newUser.uid],
-        createdAt: serverTimestamp()
-      });
-      
-      setAddUserStatus(`✅ User ${newUserName} berhasil ditambahkan!`);
-      setNewUserEmail("");
-      setNewUserName("");
-      setNewUserPassword("");
+      setSelectedNewUser("");
       setShowAddUser(false);
       
-      // GSAP animation for success
+      // GSAP animation
       if (addButtonRef.current) {
         gsap.fromTo(addButtonRef.current, 
-          { scale: 1, backgroundColor: "#000" },
-          { scale: 1.1, backgroundColor: "#c5e800", duration: 0.3, ease: "power2.out" }
+          { scale: 1 },
+          { scale: 1.1, duration: 0.3, ease: "power2.out" }
         );
       }
       
     } catch (error) {
       console.error("Error adding user:", error);
-      setAddUserStatus("❌ Gagal menambahkan user. Email mungkin sudah terdaftar.");
+      setAddUserStatus("❌ Gagal menambahkan user.");
     }
   };
 
@@ -390,6 +386,14 @@ export default function HomePage(): React.JSX.Element {
     }
     return { icon: "✓✓", color: "#999", label: "Terkirim" };
   };
+
+  // Filter users for dropdown
+  const availableUsers = users.filter(u => 
+    !chatUsers.find(cu => cu.id === u.id) && 
+    u.id !== user?.uid &&
+    (u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   // GSAP animation for add button
   useEffect(() => {
@@ -745,7 +749,7 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Add User Form */}
+                {/* Add User Form - Pilih user yang sudah ada */}
                 {showAddUser && (
                   <div
                     style={{
@@ -756,13 +760,13 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", marginBottom: "12px" }}>
-                      Tambah User Baru
+                      Tambah Chat Baru
                     </div>
                     <input
                       type="text"
-                      placeholder="Nama"
-                      value={newUserName}
-                      onChange={(e) => setNewUserName(e.target.value)}
+                      placeholder="Cari user..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
@@ -774,11 +778,9 @@ export default function HomePage(): React.JSX.Element {
                         marginBottom: "8px",
                       }}
                     />
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
+                    <select
+                      value={selectedNewUser}
+                      onChange={(e) => setSelectedNewUser(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
@@ -788,42 +790,44 @@ export default function HomePage(): React.JSX.Element {
                         outline: "none",
                         fontFamily: "Inter, 'Inter Fallback'",
                         marginBottom: "8px",
+                        backgroundColor: "#fff",
                       }}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={newUserPassword}
-                      onChange={(e) => setNewUserPassword(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                      }}
-                    />
+                    >
+                      <option value="">Pilih user...</option>
+                      {availableUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.email})
+                        </option>
+                      ))}
+                    </select>
+                    {availableUsers.length === 0 && (
+                      <div style={{ fontSize: "12px", color: "#999", marginBottom: "8px" }}>
+                        Semua user sudah di-chat atau belum terdaftar
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: "8px" }}>
                       <button
-                        onClick={handleAddUser}
+                        onClick={handleAddExistingUser}
+                        disabled={!selectedNewUser}
                         style={{
-                          backgroundColor: "#000",
+                          backgroundColor: selectedNewUser ? "#000" : "#ccc",
                           color: "#fff",
                           border: "none",
                           padding: "8px 16px",
                           borderRadius: "8px",
                           fontSize: "12px",
-                          cursor: "pointer",
+                          cursor: selectedNewUser ? "pointer" : "not-allowed",
                           fontWeight: 500,
                           transition: "all .2s ease",
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                        onMouseEnter={(e) => {
+                          if (selectedNewUser) e.currentTarget.style.opacity = "0.8";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedNewUser) e.currentTarget.style.opacity = "1";
+                        }}
                       >
-                        Tambah
+                        Tambah Chat
                       </button>
                       <button
                         onClick={() => setShowAddUser(false)}
