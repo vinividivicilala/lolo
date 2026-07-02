@@ -33,11 +33,6 @@ import {
   getDocs
 } from "firebase/firestore";
 
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
 // Konfigurasi Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
@@ -84,7 +79,7 @@ interface Message {
 }
 
 export default function HomePage(): React.JSX.Element {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatUser | null>(null);
   const [message, setMessage] = useState("");
@@ -105,6 +100,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Auth Listener
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -114,6 +110,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Load users from Firestore
   useEffect(() => {
+    if (!db) return;
     const loadUsers = async () => {
       try {
         const usersRef = collection(db, "users");
@@ -144,7 +141,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Load messages for selected chat
   useEffect(() => {
-    if (!selectedChat || !user) return;
+    if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
@@ -166,6 +163,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle login with Google
   const handleLogin = async () => {
+    if (!auth) return;
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
@@ -175,6 +173,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle logout
   const handleLogout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
       setIsChatOpen(false);
@@ -186,7 +185,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Send message
   const handleSendMessage = async () => {
-    if (!selectedChat || !user || !message.trim()) return;
+    if (!selectedChat || !user || !message.trim() || !db) return;
 
     try {
       const chatId = [user.uid, selectedChat.id].sort().join("_");
@@ -228,11 +227,11 @@ export default function HomePage(): React.JSX.Element {
 
   // Get chat users (users that user has chatted with)
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
     const getChatUsers = async () => {
       try {
         const chatRef = collection(db, "chats");
-        const q = query(chatRef, where("participants", "array-contains", user.uid));
+        const q = query(chatRef);
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const userIds = new Set<string>();
           snapshot.forEach((doc) => {
