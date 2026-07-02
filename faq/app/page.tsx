@@ -105,6 +105,29 @@ const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   </svg>
 );
 
+const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ 
+      flexShrink: 0,
+      transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      transition: 'transform 0.3s ease'
+    }}
+  >
+    <path
+      d="M6 9L12 15L18 9"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const ArrowIcon = () => (
   <svg
     width="18"
@@ -195,6 +218,8 @@ export default function HomePage(): React.JSX.Element {
   const [showLogin, setShowLogin] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [totalUnread, setTotalUnread] = useState(0);
+  const [showPinnedUsers, setShowPinnedUsers] = useState(false);
+  const [showPinnedChats, setShowPinnedChats] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auth Listener
@@ -240,6 +265,12 @@ export default function HomePage(): React.JSX.Element {
             if (doc.id !== user.uid) {
               userList.push({ id: doc.id, ...doc.data() } as ChatUser);
             }
+          });
+          // Sort: pinned users first
+          userList.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            return 0;
           });
           setUsers(userList);
         });
@@ -307,6 +338,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
+      // Sort: pinned chats first
       rooms.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -555,6 +587,14 @@ export default function HomePage(): React.JSX.Element {
     }
     return { icon: "✓", color: "#999", label: "Terkirim" };
   };
+
+  // Get pinned users
+  const pinnedUsers = users.filter(u => u.isPinned);
+  const unpinnedUsers = users.filter(u => !u.isPinned);
+
+  // Get pinned chats
+  const pinnedChats = chatRooms.filter(r => r.isPinned);
+  const unpinnedChats = chatRooms.filter(r => !r.isPinned);
 
   if (loading) {
     return (
@@ -894,9 +934,204 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
+                {/* Pinned Users Dropdown */}
+                {pinnedUsers.length > 0 && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <div
+                      onClick={() => setShowPinnedUsers(!showPinnedUsers)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PinIcon filled={true} />
+                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                          User Pinned ({pinnedUsers.length})
+                        </span>
+                      </div>
+                      <PinDropdownIcon isOpen={showPinnedUsers} />
+                    </div>
+                    {showPinnedUsers && (
+                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
+                        {pinnedUsers.map((user) => (
+                          <div
+                            key={user.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              backgroundColor: "rgba(197,232,0,0.08)",
+                              borderLeft: "3px solid #c5e800",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "50%",
+                                backgroundColor: "#f0f0f0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "14px",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {user.photoURL ? (
+                                <img src={user.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                user.name?.charAt(0)?.toUpperCase() || "👤"
+                              )}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{user.name}</div>
+                              <div style={{ fontSize: "10px", color: "#999" }}>{user.email}</div>
+                            </div>
+                            <button
+                              onClick={() => handlePinUser(user.id, true)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                color: "#c5e800",
+                                padding: "2px 4px",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <PinIcon filled={true} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Pinned Chats Dropdown */}
+                {pinnedChats.length > 0 && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <div
+                      onClick={() => setShowPinnedChats(!showPinnedChats)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PinIcon filled={true} />
+                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                          Chat Pinned ({pinnedChats.length})
+                        </span>
+                      </div>
+                      <PinDropdownIcon isOpen={showPinnedChats} />
+                    </div>
+                    {showPinnedChats && (
+                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
+                        {pinnedChats.map((room) => {
+                          const otherId = room.participants.find(id => id !== user.uid);
+                          const otherUser = users.find(u => u.id === otherId);
+                          if (!otherUser) return null;
+                          return (
+                            <div
+                              key={room.id}
+                              onClick={() => setSelectedChat(otherUser)}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                backgroundColor: "rgba(197,232,0,0.08)",
+                                borderLeft: "3px solid #c5e800",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#f0f0f0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "14px",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {otherUser.photoURL ? (
+                                  <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  otherUser.name?.charAt(0)?.toUpperCase() || "👤"
+                                )}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
+                                <div style={{ fontSize: "10px", color: "#999" }}>
+                                  {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
+                                </div>
+                              </div>
+                              {room.unreadCount > 0 && (
+                                <div
+                                  style={{
+                                    backgroundColor: "#c5e800",
+                                    color: "#000",
+                                    borderRadius: "50%",
+                                    minWidth: "18px",
+                                    height: "18px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "9px",
+                                    fontWeight: 700,
+                                    padding: "0 4px",
+                                  }}
+                                >
+                                  {room.unreadCount}
+                                </div>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePinChat(room.id, true);
+                                }}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: "#c5e800",
+                                  padding: "2px 4px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <PinIcon filled={true} />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Chat Rooms List */}
                 <div style={{ padding: "4px 0" }}>
-                  {chatRooms.length === 0 ? (
+                  {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
                     <div
                       style={{
                         textAlign: "center",
@@ -912,7 +1147,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   ) : (
-                    chatRooms.map((room) => {
+                    unpinnedChats.map((room) => {
                       const otherId = room.participants.find(id => id !== user.uid);
                       const otherUser = users.find(u => u.id === otherId);
                       if (!otherUser) return null;
@@ -933,7 +1168,6 @@ export default function HomePage(): React.JSX.Element {
                             transition: "all .2s ease",
                             marginBottom: "2px",
                             backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.08)" : "transparent",
-                            borderLeft: room.isPinned ? "3px solid #c5e800" : "3px solid transparent",
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.15)" : "#f5f5f5";
