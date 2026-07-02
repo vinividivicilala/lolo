@@ -23,10 +23,8 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  increment
+  updateDoc
 } from "firebase/firestore";
-import gsap from "gsap";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -61,6 +59,7 @@ interface ChatUser {
   email: string;
   photoURL: string;
   createdAt?: any;
+  isPinned?: boolean;
 }
 
 interface Message {
@@ -72,6 +71,7 @@ interface Message {
   timestamp: any;
   read: boolean;
   readAt?: any;
+  isPinned?: boolean;
 }
 
 interface ChatRoom {
@@ -79,8 +79,107 @@ interface ChatRoom {
   participants: string[];
   lastMessage?: string;
   lastMessageTime?: any;
+  lastMessageSenderId?: string;
   unreadCount: number;
+  isPinned?: boolean;
 }
+
+// SVG Icons Minimalist Awwwards Style
+const PinIcon = ({ filled = false }: { filled?: boolean }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <path
+      d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </svg>
+);
+
+const ArrowIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <path
+      d="M5 12H19M19 12L12 5M19 12L12 19"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <path
+      d="M18 6L6 18M6 6L18 18"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const BackIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <path
+      d="M19 12H5M5 12L12 19M5 12L12 5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <path
+      d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
@@ -91,16 +190,12 @@ export default function HomePage(): React.JSX.Element {
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-  const [showAddUser, setShowAddUser] = useState(false);
-  const [selectedNewUser, setSelectedNewUser] = useState<string>("");
-  const [addUserStatus, setAddUserStatus] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLogin, setShowLogin] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [loginError, setLoginError] = useState("");
   const [totalUnread, setTotalUnread] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   // Auth Listener
   useEffect(() => {
@@ -119,7 +214,8 @@ export default function HomePage(): React.JSX.Element {
               name: currentUser.displayName || currentUser.email,
               email: currentUser.email,
               photoURL: currentUser.photoURL || "",
-              createdAt: serverTimestamp()
+              createdAt: serverTimestamp(),
+              isPinned: false
             });
           }
         } catch (error) {
@@ -155,11 +251,10 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load chat rooms and real-time messages
+  // Load chat rooms and real-time messages with unread count
   useEffect(() => {
     if (!user || !db) return;
 
-    // Load all chats where user is participant
     const chatsRef = collection(db, "chats");
     const q = query(chatsRef);
     
@@ -174,22 +269,22 @@ export default function HomePage(): React.JSX.Element {
           const otherUser = users.find(u => u.id === otherId);
           
           if (otherUser) {
-            // Get last message
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
             
             let lastMessage = "";
             let lastMessageTime = null;
+            let lastMessageSenderId = "";
             let unreadCount = 0;
             
             if (!msgSnap.empty) {
               const lastMsg = msgSnap.docs[0].data() as Message;
               lastMessage = lastMsg.text;
               lastMessageTime = lastMsg.timestamp;
+              lastMessageSenderId = lastMsg.senderId;
             }
             
-            // Count unread messages (messages not read and not from current user)
             const unreadQuery = query(
               messagesRef, 
               where("read", "==", false),
@@ -204,11 +299,22 @@ export default function HomePage(): React.JSX.Element {
               participants: data.participants,
               lastMessage,
               lastMessageTime,
-              unreadCount
+              lastMessageSenderId,
+              unreadCount,
+              isPinned: data.isPinned || false
             });
           }
         }
       }
+      
+      rooms.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        if (a.lastMessageTime && b.lastMessageTime) {
+          return b.lastMessageTime.seconds - a.lastMessageTime.seconds;
+        }
+        return 0;
+      });
       
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
@@ -232,7 +338,6 @@ export default function HomePage(): React.JSX.Element {
       });
       setMessages(messageList);
       
-      // Mark messages as read
       const unreadMessages = messageList.filter(m => !m.read && m.senderId !== user.uid);
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
@@ -242,7 +347,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Update unread count in chat room
       if (unreadMessages.length > 0) {
         setChatRooms(prev => prev.map(room => {
           if (room.id === chatId) {
@@ -267,8 +371,10 @@ export default function HomePage(): React.JSX.Element {
     try {
       await signInWithPopup(auth, googleProvider);
       setShowLogin(false);
+      setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
+      setLoginError("Login gagal. Silahkan coba lagi.");
     }
   };
 
@@ -280,9 +386,10 @@ export default function HomePage(): React.JSX.Element {
       setShowLogin(false);
       setLoginEmail("");
       setLoginPassword("");
+      setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setAddUserStatus("Login gagal. Periksa email dan password.");
+      setLoginError("Email atau password salah.");
     }
   };
 
@@ -294,6 +401,7 @@ export default function HomePage(): React.JSX.Element {
       setIsChatOpen(false);
       setSelectedChat(null);
       setChatRooms([]);
+      setTotalUnread(0);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -311,7 +419,8 @@ export default function HomePage(): React.JSX.Element {
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
           participants: [user.uid, selectedChat.id],
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          isPinned: false
         });
       }
       
@@ -322,13 +431,18 @@ export default function HomePage(): React.JSX.Element {
         senderName: user.displayName || user.email || "User",
         receiverId: selectedChat.id,
         timestamp: serverTimestamp(),
-        read: false
+        read: false,
+        isPinned: false
       });
 
-      // Update last message in chat room
       setChatRooms(prev => prev.map(room => {
         if (room.id === chatId) {
-          return { ...room, lastMessage: message.trim(), lastMessageTime: serverTimestamp() };
+          return { 
+            ...room, 
+            lastMessage: message.trim(), 
+            lastMessageTime: serverTimestamp(),
+            lastMessageSenderId: user.uid
+          };
         }
         return room;
       }));
@@ -356,59 +470,66 @@ export default function HomePage(): React.JSX.Element {
     setIsChatOpen(!isChatOpen);
     if (!isChatOpen) {
       setSelectedChat(null);
-      setShowAddUser(false);
-      setSelectedNewUser("");
     }
   };
 
-  // Add existing user to chat
-  const handleAddExistingUser = async () => {
-    if (!selectedNewUser || !user || !db) return;
-    
+  // Pin/Unpin chat room
+  const handlePinChat = async (chatId: string, currentPinned: boolean) => {
+    if (!db) return;
     try {
-      const targetUser = users.find(u => u.id === selectedNewUser);
-      if (!targetUser) {
-        setAddUserStatus("User tidak ditemukan");
-        return;
-      }
-      
-      const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
-      const chatSnap = await getDoc(chatRef);
+      await updateDoc(chatRef, {
+        isPinned: !currentPinned
+      });
       
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [user.uid, targetUser.id],
-          createdAt: serverTimestamp()
-        });
-        setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
-        
-        // Add to chat rooms
-        setChatRooms(prev => [...prev, {
-          id: chatId,
-          participants: [user.uid, targetUser.id],
-          lastMessage: "",
-          lastMessageTime: null,
-          unreadCount: 0
-        }]);
-      } else {
-        setAddUserStatus(`ℹ️ Chat dengan ${targetUser.name} sudah ada.`);
-      }
-      
-      setSelectedNewUser("");
-      setShowAddUser(false);
-      setSearchTerm("");
-      
-      if (addButtonRef.current) {
-        gsap.fromTo(addButtonRef.current, 
-          { scale: 1 },
-          { scale: 1.1, duration: 0.3, ease: "power2.out" }
-        );
-      }
-      
+      setChatRooms(prev => prev.map(room => {
+        if (room.id === chatId) {
+          return { ...room, isPinned: !currentPinned };
+        }
+        return room;
+      }));
     } catch (error) {
-      console.error("Error adding user:", error);
-      setAddUserStatus("❌ Gagal menambahkan user.");
+      console.error("Error pinning chat:", error);
+    }
+  };
+
+  // Pin/Unpin message
+  const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
+    if (!db) return;
+    try {
+      const msgRef = doc(db, "chats", chatId, "messages", messageId);
+      await updateDoc(msgRef, {
+        isPinned: !currentPinned
+      });
+      
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === messageId) {
+          return { ...msg, isPinned: !currentPinned };
+        }
+        return msg;
+      }));
+    } catch (error) {
+      console.error("Error pinning message:", error);
+    }
+  };
+
+  // Pin/Unpin user
+  const handlePinUser = async (userId: string, currentPinned: boolean) => {
+    if (!db) return;
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        isPinned: !currentPinned
+      });
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === userId) {
+          return { ...u, isPinned: !currentPinned };
+        }
+        return u;
+      }));
+    } catch (error) {
+      console.error("Error pinning user:", error);
     }
   };
 
@@ -432,31 +553,8 @@ export default function HomePage(): React.JSX.Element {
     if (msg.read && msg.readAt) {
       return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
     }
-    return { icon: "✓✓", color: "#999", label: "Terkirim" };
+    return { icon: "✓", color: "#999", label: "Terkirim" };
   };
-
-  // Get user by ID
-  const getUserById = (id: string) => {
-    return users.find(u => u.id === id) || chatRooms.find(r => r.participants.includes(id));
-  };
-
-  // Filter users for dropdown
-  const availableUsers = users.filter(u => 
-    !chatRooms.some(room => room.participants.includes(u.id)) && 
-    u.id !== user?.uid &&
-    (u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  // GSAP animation for add button
-  useEffect(() => {
-    if (addButtonRef.current && showAddUser) {
-      gsap.fromTo(addButtonRef.current,
-        { rotation: 0 },
-        { rotation: 45, duration: 0.3, ease: "power2.out" }
-      );
-    }
-  }, [showAddUser]);
 
   if (loading) {
     return (
@@ -645,6 +743,11 @@ export default function HomePage(): React.JSX.Element {
               }}
               onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
             />
+            {loginError && (
+              <div style={{ color: "#ef4444", fontSize: "12px", marginBottom: "12px" }}>
+                {loginError}
+              </div>
+            )}
             <button
               onClick={handleEmailLogin}
               style={{
@@ -687,9 +790,6 @@ export default function HomePage(): React.JSX.Element {
             >
               Login with Google
             </button>
-            <div style={{ marginTop: "12px", textAlign: "center", fontSize: "12px", color: "#999" }}>
-              {addUserStatus}
-            </div>
           </div>
         </div>
       )}
@@ -764,158 +864,36 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                 )}
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                {!selectedChat && user && (
-                  <button
-                    ref={addButtonRef}
-                    onClick={() => setShowAddUser(!showAddUser)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      fontSize: "20px",
-                      cursor: "pointer",
-                      color: "#fff",
-                      padding: "4px 8px",
-                      borderRadius: "8px",
-                      transition: "all .2s ease",
-                      fontWeight: 300,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    +
-                  </button>
-                )}
-                <button
-                  onClick={() => setIsChatOpen(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    color: "#fff",
-                    padding: "4px 8px",
-                    borderRadius: "8px",
-                    transition: "all .2s ease",
-                    lineHeight: 1,
-                    opacity: 0.6,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                    e.currentTarget.style.opacity = "1";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.opacity = "0.6";
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#fff",
+                  padding: "4px 8px",
+                  borderRadius: "8px",
+                  transition: "all .2s ease",
+                  opacity: 0.6,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.opacity = "1";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.opacity = "0.6";
+                }}
+              >
+                <CloseIcon />
+              </button>
             </div>
 
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Add User Form */}
-                {showAddUser && (
-                  <div
-                    style={{
-                      padding: "16px",
-                      backgroundColor: "#f8f8f8",
-                      borderRadius: "12px",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", marginBottom: "12px" }}>
-                      Mulai Chat Baru
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Cari user..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                      }}
-                    />
-                    <select
-                      value={selectedNewUser}
-                      onChange={(e) => setSelectedNewUser(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                        backgroundColor: "#fff",
-                      }}
-                    >
-                      <option value="">Pilih user...</option>
-                      {availableUsers.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name} ({u.email})
-                        </option>
-                      ))}
-                    </select>
-                    {availableUsers.length === 0 && (
-                      <div style={{ fontSize: "12px", color: "#999", marginBottom: "8px" }}>
-                        Semua user sudah di-chat atau belum terdaftar
-                      </div>
-                    )}
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        onClick={handleAddExistingUser}
-                        disabled={!selectedNewUser}
-                        style={{
-                          backgroundColor: selectedNewUser ? "#000" : "#ccc",
-                          color: "#fff",
-                          border: "none",
-                          padding: "8px 16px",
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                          cursor: selectedNewUser ? "pointer" : "not-allowed",
-                          fontWeight: 500,
-                          transition: "all .2s ease",
-                        }}
-                      >
-                        Mulai Chat
-                      </button>
-                      <button
-                        onClick={() => setShowAddUser(false)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "12px",
-                          color: "#999",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Batal
-                      </button>
-                    </div>
-                    {addUserStatus && (
-                      <div style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}>
-                        {addUserStatus}
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {/* Chat Rooms List */}
                 <div style={{ padding: "4px 0" }}>
                   {chatRooms.length === 0 ? (
@@ -928,9 +906,9 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
-                      Belum ada chat
+                      Belum ada riwayat chat
                       <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                        Mulai chat dengan user lain
+                        Tunggu pesan masuk dari pengirim lain
                       </div>
                     </div>
                   ) : (
@@ -938,6 +916,8 @@ export default function HomePage(): React.JSX.Element {
                       const otherId = room.participants.find(id => id !== user.uid);
                       const otherUser = users.find(u => u.id === otherId);
                       if (!otherUser) return null;
+                      
+                      const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                       
                       return (
                         <div
@@ -952,8 +932,8 @@ export default function HomePage(): React.JSX.Element {
                             cursor: "pointer",
                             transition: "all .2s ease",
                             marginBottom: "2px",
-                            position: "relative",
                             backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.08)" : "transparent",
+                            borderLeft: room.isPinned ? "3px solid #c5e800" : "3px solid transparent",
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.15)" : "#f5f5f5";
@@ -991,7 +971,14 @@ export default function HomePage(): React.JSX.Element {
                               {otherUser.name}
                             </div>
                             <div style={{ fontSize: "12px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {room.lastMessage || "Mulai chat..."}
+                              {room.lastMessage ? (
+                                <>
+                                  {isLastMessageFromMe && "Anda: "}
+                                  {room.lastMessage}
+                                </>
+                              ) : (
+                                "Belum ada pesan"
+                              )}
                             </div>
                           </div>
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
@@ -1000,25 +987,45 @@ export default function HomePage(): React.JSX.Element {
                                 {formatTime(room.lastMessageTime)}
                               </span>
                             )}
-                            {room.unreadCount > 0 && (
-                              <div
+                            <div style={{ display: "flex", gap: "4px" }}>
+                              {room.unreadCount > 0 && (
+                                <div
+                                  style={{
+                                    backgroundColor: "#c5e800",
+                                    color: "#000",
+                                    borderRadius: "50%",
+                                    minWidth: "20px",
+                                    height: "20px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "10px",
+                                    fontWeight: 700,
+                                    padding: "0 6px",
+                                  }}
+                                >
+                                  {room.unreadCount}
+                                </div>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePinChat(room.id, room.isPinned || false);
+                                }}
                                 style={{
-                                  backgroundColor: "#c5e800",
-                                  color: "#000",
-                                  borderRadius: "50%",
-                                  minWidth: "20px",
-                                  height: "20px",
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: room.isPinned ? "#c5e800" : "#ccc",
+                                  padding: "2px 4px",
                                   display: "flex",
                                   alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "10px",
-                                  fontWeight: 700,
-                                  padding: "0 6px",
+                                  transition: "all .2s ease",
                                 }}
                               >
-                                {room.unreadCount}
-                              </div>
-                            )}
+                                <PinIcon filled={room.isPinned || false} />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1045,13 +1052,14 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       background: "none",
                       border: "none",
-                      fontSize: "18px",
                       cursor: "pointer",
                       color: "#fff",
                       padding: "4px 6px",
                       borderRadius: "8px",
                       transition: "all .2s ease",
                       opacity: 0.6,
+                      display: "flex",
+                      alignItems: "center",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
@@ -1062,7 +1070,7 @@ export default function HomePage(): React.JSX.Element {
                       e.currentTarget.style.opacity = "0.6";
                     }}
                   >
-                    ←
+                    <BackIcon />
                   </button>
                   <div
                     style={{
@@ -1096,6 +1104,22 @@ export default function HomePage(): React.JSX.Element {
                       {selectedChat.email}
                     </div>
                   </div>
+                  <button
+                    onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: selectedChat.isPinned ? "#c5e800" : "#666",
+                      padding: "4px 8px",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      transition: "all .2s ease",
+                    }}
+                  >
+                    <PinIcon filled={selectedChat.isPinned || false} />
+                  </button>
                 </div>
 
                 {/* Messages - Background hitam */}
@@ -1129,6 +1153,7 @@ export default function HomePage(): React.JSX.Element {
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user?.uid;
                       const status = getMessageStatus(msg);
+                      const chatId = [user.uid, selectedChat.id].sort().join("_");
                       const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
                         formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
                       
@@ -1159,6 +1184,7 @@ export default function HomePage(): React.JSX.Element {
                               fontSize: "14px",
                               lineHeight: 1.5,
                               position: "relative",
+                              border: msg.isPinned ? "2px solid #c5e800" : "none",
                             }}
                           >
                             {msg.text}
@@ -1190,6 +1216,21 @@ export default function HomePage(): React.JSX.Element {
                                   {status.icon}
                                 </span>
                               )}
+                              <button
+                                onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: msg.isPinned ? "#c5e800" : "#555",
+                                  padding: "0 2px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  transition: "all .2s ease",
+                                }}
+                              >
+                                <PinIcon filled={msg.isPinned || false} />
+                              </button>
                             </div>
                           </div>
                         </React.Fragment>
@@ -1227,7 +1268,7 @@ export default function HomePage(): React.JSX.Element {
                       backgroundColor: "#f5f5f5",
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = "#000";
+                      e.currentTarget.style.borderColor = "#c5e800";
                       e.currentTarget.style.backgroundColor = "#ffffff";
                     }}
                     onBlur={(e) => {
@@ -1238,13 +1279,13 @@ export default function HomePage(): React.JSX.Element {
                   <button
                     onClick={handleSendMessage}
                     style={{
-                      backgroundColor: "#000",
+                      backgroundColor: "#c5e800",
                       border: "none",
                       padding: "10px 18px",
                       borderRadius: "60px",
                       fontSize: "14px",
                       fontWeight: 500,
-                      color: "#fff",
+                      color: "#000",
                       cursor: "pointer",
                       transition: "all .2s ease",
                       whiteSpace: "nowrap",
@@ -1253,30 +1294,16 @@ export default function HomePage(): React.JSX.Element {
                       gap: "6px",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#1a1a1a";
+                      e.currentTarget.style.backgroundColor = "#b0d000";
                       e.currentTarget.style.transform = "scale(1.02)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#000";
+                      e.currentTarget.style.backgroundColor = "#c5e800";
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
                     <span>Kirim</span>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5 12H19M19 12L12 5M19 12L12 19"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <SendIcon />
                   </button>
                 </div>
               </div>
