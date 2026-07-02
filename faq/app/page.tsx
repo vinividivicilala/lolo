@@ -89,7 +89,6 @@ export default function HomePage(): React.JSX.Element {
       setUser(currentUser);
       setLoading(false);
       
-      // Jika user login, simpan ke Firestore
       if (currentUser) {
         try {
           const userRef = doc(db, "users", currentUser.uid);
@@ -164,7 +163,6 @@ export default function HomePage(): React.JSX.Element {
     
     const loadChatUsers = async () => {
       try {
-        // Cari semua chat yang melibatkan user ini
         const chatsRef = collection(db, "chats");
         const q = query(chatsRef);
         const querySnapshot = await getDocs(q);
@@ -179,7 +177,6 @@ export default function HomePage(): React.JSX.Element {
           }
         });
         
-        // Ambil data user yang sudah di-invite
         const chatUserList = users.filter(u => userIds.has(u.id));
         setChatUsers(chatUserList);
       } catch (error) {
@@ -222,7 +219,6 @@ export default function HomePage(): React.JSX.Element {
     try {
       const chatId = [user.uid, selectedChat.id].sort().join("_");
       
-      // Buat dokumen chat jika belum ada
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
@@ -273,7 +269,6 @@ export default function HomePage(): React.JSX.Element {
     if (!inviteEmail.trim() || !user || !db) return;
     
     try {
-      // Cari user dengan email tersebut
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("email", "==", inviteEmail.trim()));
       const querySnapshot = await getDocs(q);
@@ -286,7 +281,6 @@ export default function HomePage(): React.JSX.Element {
       const invitedUser = querySnapshot.docs[0];
       const userData = invitedUser.data() as ChatUser;
       
-      // Buat chat room
       const chatId = [user.uid, invitedUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -302,7 +296,6 @@ export default function HomePage(): React.JSX.Element {
       setInviteEmail("");
       setShowInvite(false);
       
-      // Refresh chat users
       setTimeout(() => {
         setChatUsers(prev => {
           if (!prev.find(u => u.id === invitedUser.id)) {
@@ -714,7 +707,7 @@ export default function HomePage(): React.JSX.Element {
                           />
                         </svg>
                       </div>
-                    )
+                    ))
                   )}
                 </div>
               </div>
@@ -942,7 +935,7 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: isChatOpen ? "transparent" : "#000",
             padding: isChatOpen ? "0" : "14px 28px",
             borderRadius: "60px",
-            border: isChatOpen ? "none" : "none",
+            border: "none",
             cursor: "pointer",
             transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
             boxShadow: isChatOpen ? "none" : "0 8px 32px rgba(0,0,0,0.12)",
