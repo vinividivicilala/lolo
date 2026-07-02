@@ -6,12 +6,8 @@ import {
   getAuth, 
   onAuthStateChanged, 
   signOut,
-  GithubAuthProvider,
   GoogleAuthProvider,
-  signInWithPopup,
-  updateProfile,
-  updateEmail,
-  deleteUser
+  signInWithPopup
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -21,15 +17,10 @@ import {
   orderBy, 
   onSnapshot,
   serverTimestamp,
-  Timestamp,
   doc,
   setDoc,
   getDoc,
-  updateDoc,
-  increment,
-  writeBatch,
   where,
-  deleteDoc,
   getDocs
 } from "firebase/firestore";
 
@@ -58,8 +49,6 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// Providers untuk login
-const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
 interface ChatUser {
@@ -67,6 +56,7 @@ interface ChatUser {
   name: string;
   email: string;
   photoURL: string;
+  invitedBy?: string;
 }
 
 interface Message {
@@ -87,30 +77,44 @@ export default function HomePage(): React.JSX.Element {
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteStatus, setInviteStatus] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Daftar akun default
-  const defaultUsers: ChatUser[] = [
-    { id: "user1", name: "Ahmad Fauzi", email: "ahmad@email.com", photoURL: "👨" },
-    { id: "user2", name: "Siti Rahma", email: "siti@email.com", photoURL: "👩" },
-    { id: "user3", name: "Budi Santoso", email: "budi@email.com", photoURL: "🧑" },
-    { id: "user4", name: "Dewi Lestari", email: "dewi@email.com", photoURL: "👩‍🦰" },
-    { id: "user5", name: "Rizky Pratama", email: "rizky@email.com", photoURL: "👨‍🦱" },
-  ];
 
   // Auth Listener
   useEffect(() => {
     if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      
+      // Jika user login, simpan ke Firestore
+      if (currentUser) {
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              id: currentUser.uid,
+              name: currentUser.displayName || currentUser.email,
+              email: currentUser.email,
+              photoURL: currentUser.photoURL || "",
+              createdAt: serverTimestamp()
+            });
+          }
+        } catch (error) {
+          console.error("Error saving user:", error);
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
 
   // Load users from Firestore
   useEffect(() => {
-    if (!db) return;
+    if (!db || !user) return;
+    
     const loadUsers = async () => {
       try {
         const usersRef = collection(db, "users");
@@ -118,26 +122,19 @@ export default function HomePage(): React.JSX.Element {
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const userList: ChatUser[] = [];
           snapshot.forEach((doc) => {
-            userList.push({ id: doc.id, ...doc.data() } as ChatUser);
+            if (doc.id !== user.uid) {
+              userList.push({ id: doc.id, ...doc.data() } as ChatUser);
+            }
           });
-          if (userList.length === 0) {
-            // Seed default users
-            defaultUsers.forEach(async (u) => {
-              await setDoc(doc(db, "users", u.id), u);
-            });
-            setUsers(defaultUsers);
-          } else {
-            setUsers(userList);
-          }
+          setUsers(userList);
         });
         return () => unsubscribe();
       } catch (error) {
         console.error("Error loading users:", error);
-        setUsers(defaultUsers);
       }
     };
     loadUsers();
-  }, []);
+  }, [user]);
 
   // Load messages for selected chat
   useEffect(() => {
@@ -161,6 +158,40 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
+  // Load chat users (users who have been invited)
+  useEffect(() => {
+    if (!user || !db) return;
+    
+    const loadChatUsers = async () => {
+      try {
+        // Cari semua chat yang melibatkan user ini
+        const chatsRef = collection(db, "chats");
+        const q = query(chatsRef);
+        const querySnapshot = await getDocs(q);
+        
+        const userIds = new Set<string>();
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.participants) {
+            data.participants.forEach((id: string) => {
+              if (id !== user.uid) userIds.add(id);
+            });
+          }
+        });
+        
+        // Ambil data user yang sudah di-invite
+        const chatUserList = users.filter(u => userIds.has(u.id));
+        setChatUsers(chatUserList);
+      } catch (error) {
+        console.error("Error loading chat users:", error);
+      }
+    };
+    
+    if (users.length > 0) {
+      loadChatUsers();
+    }
+  }, [user, users]);
+
   // Handle login with Google
   const handleLogin = async () => {
     if (!auth) return;
@@ -178,6 +209,7 @@ export default function HomePage(): React.JSX.Element {
       await signOut(auth);
       setIsChatOpen(false);
       setSelectedChat(null);
+      setChatUsers([]);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -189,12 +221,22 @@ export default function HomePage(): React.JSX.Element {
 
     try {
       const chatId = [user.uid, selectedChat.id].sort().join("_");
-      const messagesRef = collection(db, "chats", chatId, "messages");
       
+      // Buat dokumen chat jika belum ada
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, selectedChat.id],
+          createdAt: serverTimestamp()
+        });
+      }
+      
+      const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
         text: message.trim(),
         senderId: user.uid,
-        senderName: user.displayName || "User",
+        senderName: user.displayName || user.email || "User",
         receiverId: selectedChat.id,
         timestamp: serverTimestamp(),
       });
@@ -222,36 +264,59 @@ export default function HomePage(): React.JSX.Element {
     setIsChatOpen(!isChatOpen);
     if (!isChatOpen) {
       setSelectedChat(null);
+      setShowInvite(false);
     }
   };
 
-  // Get chat users (users that user has chatted with)
-  useEffect(() => {
-    if (!user || !db) return;
-    const getChatUsers = async () => {
-      try {
-        const chatRef = collection(db, "chats");
-        const q = query(chatRef);
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          const userIds = new Set<string>();
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.participants) {
-              data.participants.forEach((id: string) => {
-                if (id !== user.uid) userIds.add(id);
-              });
-            }
-          });
-          const chatUserList = users.filter(u => userIds.has(u.id));
-          setChatUsers(chatUserList);
-        });
-        return () => unsubscribe();
-      } catch (error) {
-        console.error("Error loading chat users:", error);
+  // Handle invite user
+  const handleInviteUser = async () => {
+    if (!inviteEmail.trim() || !user || !db) return;
+    
+    try {
+      // Cari user dengan email tersebut
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", inviteEmail.trim()));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        setInviteStatus("User tidak ditemukan. Pastikan email sudah terdaftar.");
+        return;
       }
-    };
-    getChatUsers();
-  }, [user, users]);
+      
+      const invitedUser = querySnapshot.docs[0];
+      const userData = invitedUser.data() as ChatUser;
+      
+      // Buat chat room
+      const chatId = [user.uid, invitedUser.id].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, invitedUser.id],
+          createdAt: serverTimestamp()
+        });
+      }
+      
+      setInviteStatus(`Berhasil mengundang ${userData.name || userData.email}`);
+      setInviteEmail("");
+      setShowInvite(false);
+      
+      // Refresh chat users
+      setTimeout(() => {
+        setChatUsers(prev => {
+          if (!prev.find(u => u.id === invitedUser.id)) {
+            return [...prev, userData];
+          }
+          return prev;
+        });
+      }, 500);
+      
+    } catch (error) {
+      console.error("Error inviting user:", error);
+      setInviteStatus("Terjadi kesalahan. Silahkan coba lagi.");
+    }
+  };
 
   if (loading) {
     return (
@@ -316,6 +381,18 @@ export default function HomePage(): React.JSX.Element {
       >
         {user ? (
           <>
+            {user.photoURL && (
+              <img 
+                src={user.photoURL} 
+                alt="avatar" 
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  objectFit: "cover"
+                }}
+              />
+            )}
             <span>{user.displayName || user.email}</span>
             <button
               onClick={handleLogout}
@@ -365,7 +442,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Chat Box - Awwwards Style */}
+      {/* Chat Box - Awwwards Style Minimalist */}
       <div
         style={{
           position: "fixed",
@@ -383,153 +460,275 @@ export default function HomePage(): React.JSX.Element {
           <div
             style={{
               backgroundColor: "#ffffff",
-              borderRadius: "24px",
-              width: "420px",
-              maxHeight: "560px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06)",
-              animation: "slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              borderRadius: "20px",
+              width: "400px",
+              maxHeight: "520px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
               backdropFilter: "blur(20px)",
-              backgroundColor: "rgba(255,255,255,0.98)",
             }}
           >
-            {/* Header - Awwwards Style */}
+            {/* Header */}
             <div
               style={{
-                padding: "20px 24px",
+                padding: "18px 24px",
                 borderBottom: "1px solid rgba(0,0,0,0.04)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.98)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: "#c5e800",
-                    animation: "pulse 2s infinite",
-                  }}
-                />
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <span
                   style={{
-                    fontSize: "15px",
-                    fontWeight: 600,
+                    fontSize: "13px",
+                    fontWeight: 500,
                     color: "#000",
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  {selectedChat ? "Chat" : "Pesan"}
+                  {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
+                {selectedChat && (
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      color: "#999",
+                      fontWeight: 400,
+                    }}
+                  >
+                    {selectedChat.email}
+                  </span>
+                )}
               </div>
-              <button
-                onClick={() => setIsChatOpen(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "18px",
-                  cursor: "pointer",
-                  color: "#999",
-                  padding: "4px 8px",
-                  borderRadius: "8px",
-                  transition: "all .2s ease",
-                  lineHeight: 1,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f0f0f0";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                ✕
-              </button>
+              <div style={{ display: "flex", gap: "8px" }}>
+                {!selectedChat && (
+                  <button
+                    onClick={() => setShowInvite(!showInvite)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "16px",
+                      cursor: "pointer",
+                      color: "#666",
+                      padding: "4px 8px",
+                      borderRadius: "8px",
+                      transition: "all .2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    ➕
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsChatOpen(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    color: "#999",
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    transition: "all .2s ease",
+                    lineHeight: 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f0f0f0";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Content */}
             {!selectedChat ? (
-              // User List - Awwwards Style
-              <div style={{ padding: "8px", overflowY: "auto", flex: 1 }}>
-                <div style={{ padding: "8px 12px 16px", fontSize: "12px", color: "#999", fontWeight: 500, letterSpacing: "0.03em", textTransform: "uppercase" }}>
-                  Kontak
-                </div>
-                {(chatUsers.length > 0 ? chatUsers : users).map((account) => (
+              <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
+                {/* Invite Form */}
+                {showInvite && (
                   <div
-                    key={account.id}
-                    onClick={() => setSelectedChat(account)}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "14px",
                       padding: "12px 16px",
-                      borderRadius: "16px",
-                      cursor: "pointer",
-                      transition: "all .2s ease",
-                      marginBottom: "2px",
-                      position: "relative",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                      e.currentTarget.style.transform = "translateX(4px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.transform = "translateX(0)";
+                      backgroundColor: "#f8f8f8",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
                     }}
                   >
-                    <div
+                    <input
+                      type="email"
+                      placeholder="Masukkan email..."
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
                       style={{
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "50%",
-                        backgroundColor: "#f0f0f0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "22px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {account.photoURL || "👤"}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
-                        {account.name}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {messages.filter(m => m.senderId === account.id || m.receiverId === account.id).length || 0} pesan
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        backgroundColor: "#c5e800",
-                        opacity: 0.4,
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        outline: "none",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                        marginBottom: "8px",
                       }}
                     />
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        onClick={handleInviteUser}
+                        style={{
+                          backgroundColor: "#000",
+                          color: "#fff",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          fontWeight: 500,
+                          transition: "all .2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = "0.8";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = "1";
+                        }}
+                      >
+                        Kirim Undangan
+                      </button>
+                      <button
+                        onClick={() => setShowInvite(false)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          fontSize: "12px",
+                          color: "#999",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Batal
+                      </button>
+                    </div>
+                    {inviteStatus && (
+                      <div style={{ fontSize: "12px", color: "#666", marginTop: "8px" }}>
+                        {inviteStatus}
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
+
+                {/* Chat List */}
+                <div style={{ padding: "4px 0" }}>
+                  {chatUsers.length === 0 ? (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        color: "#999",
+                        fontSize: "13px",
+                        padding: "40px 0",
+                      }}
+                    >
+                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
+                      Belum ada chat
+                      <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
+                        Undang teman untuk mulai chat
+                      </div>
+                    </div>
+                  ) : (
+                    chatUsers.map((account) => (
+                      <div
+                        key={account.id}
+                        onClick={() => setSelectedChat(account)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          padding: "12px 14px",
+                          borderRadius: "12px",
+                          cursor: "pointer",
+                          transition: "all .2s ease",
+                          marginBottom: "2px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            backgroundColor: "#f0f0f0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "18px",
+                            flexShrink: 0,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {account.photoURL ? (
+                            <img 
+                              src={account.photoURL} 
+                              alt="avatar" 
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                          ) : (
+                            "👤"
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                            {account.name}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#999" }}>
+                            {account.email}
+                          </div>
+                        </div>
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ color: "#ccc", flexShrink: 0 }}
+                        >
+                          <path
+                            d="M5 12H19M19 12L12 5M19 12L12 19"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
             ) : (
-              // Chat View - Awwwards Style
-              <div style={{ display: "flex", flexDirection: "column", height: "420px" }}>
+              // Chat View
+              <div style={{ display: "flex", flexDirection: "column", height: "400px" }}>
                 {/* Chat Header */}
                 <div
                   style={{
-                    padding: "14px 20px",
+                    padding: "12px 20px",
                     borderBottom: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
-                    backgroundColor: "rgba(255,255,255,0.98)",
                   }}
                 >
                   <button
@@ -537,10 +736,10 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       background: "none",
                       border: "none",
-                      fontSize: "18px",
+                      fontSize: "16px",
                       cursor: "pointer",
                       color: "#666",
-                      padding: "4px 8px",
+                      padding: "4px 6px",
                       borderRadius: "8px",
                       transition: "all .2s ease",
                     }}
@@ -555,53 +754,62 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                   <div
                     style={{
-                      width: "36px",
-                      height: "36px",
+                      width: "32px",
+                      height: "32px",
                       borderRadius: "50%",
                       backgroundColor: "#f0f0f0",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "18px",
+                      fontSize: "14px",
+                      overflow: "hidden",
                     }}
                   >
-                    {selectedChat.photoURL || "👤"}
+                    {selectedChat.photoURL ? (
+                      <img 
+                        src={selectedChat.photoURL} 
+                        alt="avatar" 
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      "👤"
+                    )}
                   </div>
                   <div>
                     <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
                       {selectedChat.name}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#999" }}>
+                    <div style={{ fontSize: "10px", color: "#999" }}>
                       {selectedChat.email}
                     </div>
                   </div>
                 </div>
 
-                {/* Messages */}
+                {/* Messages - Background hitam menyatu */}
                 <div
                   style={{
                     flex: 1,
                     padding: "20px",
                     overflowY: "auto",
-                    backgroundColor: "#fafafa",
+                    backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "4px",
+                    gap: "6px",
                   }}
                 >
                   {messages.length === 0 ? (
                     <div
                       style={{
                         textAlign: "center",
-                        color: "#999",
+                        color: "#666",
                         fontSize: "13px",
                         marginTop: "60px",
                       }}
                     >
-                      <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
-                      Belum ada pesan
-                      <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                        Kirim pesan pertama!
+                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
+                      <div style={{ color: "#888" }}>Belum ada pesan</div>
+                      <div style={{ fontSize: "11px", marginTop: "4px", color: "#555" }}>
+                        Kirim pesan pertama
                       </div>
                     </div>
                   ) : (
@@ -614,25 +822,23 @@ export default function HomePage(): React.JSX.Element {
                             alignSelf: isMine ? "flex-end" : "flex-start",
                             maxWidth: "75%",
                             padding: "10px 16px",
-                            borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                            backgroundColor: isMine ? "#c5e800" : "#ffffff",
-                            color: isMine ? "#000" : "#000",
+                            borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+                            backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
+                            color: isMine ? "#000" : "#fff",
                             fontSize: "14px",
                             lineHeight: 1.5,
-                            boxShadow: isMine ? "none" : "0 2px 8px rgba(0,0,0,0.04)",
-                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.04)",
                           }}
                         >
                           {msg.text}
                           <div
                             style={{
                               fontSize: "9px",
-                              color: isMine ? "rgba(0,0,0,0.4)" : "#ccc",
+                              color: isMine ? "rgba(0,0,0,0.4)" : "#666",
                               marginTop: "4px",
                               textAlign: isMine ? "right" : "left",
                             }}
                           >
-                            {msg.senderName}
+                            {isMine ? "Anda" : msg.senderName}
                           </div>
                         </div>
                       );
@@ -659,7 +865,7 @@ export default function HomePage(): React.JSX.Element {
                     onKeyPress={handleKeyPress}
                     style={{
                       flex: 1,
-                      padding: "12px 18px",
+                      padding: "10px 16px",
                       border: "1px solid #e8e8e8",
                       borderRadius: "60px",
                       fontSize: "14px",
@@ -669,7 +875,7 @@ export default function HomePage(): React.JSX.Element {
                       backgroundColor: "#f5f5f5",
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = "#c5e800";
+                      e.currentTarget.style.borderColor = "#000";
                       e.currentTarget.style.backgroundColor = "#ffffff";
                     }}
                     onBlur={(e) => {
@@ -680,27 +886,45 @@ export default function HomePage(): React.JSX.Element {
                   <button
                     onClick={handleSendMessage}
                     style={{
-                      backgroundColor: "#c5e800",
+                      backgroundColor: "#000",
                       border: "none",
-                      padding: "12px 20px",
+                      padding: "10px 18px",
                       borderRadius: "60px",
                       fontSize: "14px",
                       fontWeight: 500,
-                      color: "#000",
+                      color: "#fff",
                       cursor: "pointer",
                       transition: "all .2s ease",
                       whiteSpace: "nowrap",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.04)";
-                      e.currentTarget.style.backgroundColor = "#b0d000";
+                      e.currentTarget.style.backgroundColor = "#1a1a1a";
+                      e.currentTarget.style.transform = "scale(1.02)";
                     }}
                     onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#000";
                       e.currentTarget.style.transform = "scale(1)";
-                      e.currentTarget.style.backgroundColor = "#c5e800";
                     }}
                   >
-                    Kirim →
+                    <span>Kirim</span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5 12H19M19 12L12 5M19 12L12 19"
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -708,17 +932,17 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Chat Button - Awwwards Style */}
+        {/* Chat Button */}
         <button
           onClick={handleChatToggle}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            backgroundColor: isChatOpen ? "#e8e8e8" : "#000",
-            padding: "14px 28px",
+            backgroundColor: isChatOpen ? "transparent" : "#000",
+            padding: isChatOpen ? "0" : "14px 28px",
             borderRadius: "60px",
-            border: "none",
+            border: isChatOpen ? "none" : "none",
             cursor: "pointer",
             transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
             boxShadow: isChatOpen ? "none" : "0 8px 32px rgba(0,0,0,0.12)",
@@ -738,18 +962,20 @@ export default function HomePage(): React.JSX.Element {
             }
           }}
         >
-          <span
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: isChatOpen ? "#000" : "#ffffff",
-              letterSpacing: "-0.01em",
-              lineHeight: 1,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {isChatOpen ? "Tutup" : user ? "Chat with Menuru" : "Login to Chat"}
-          </span>
+          {!isChatOpen && (
+            <span
+              style={{
+                fontSize: "15px",
+                fontWeight: 600,
+                color: "#ffffff",
+                letterSpacing: "-0.01em",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {user ? "Chat with Menuru" : "Login to Chat"}
+            </span>
+          )}
         </button>
       </div>
 
@@ -757,16 +983,12 @@ export default function HomePage(): React.JSX.Element {
         @keyframes slideUp {
           from {
             opacity: 0;
-            transform: translateY(24px) scale(0.96);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
           }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
         }
       `}</style>
     </div>
