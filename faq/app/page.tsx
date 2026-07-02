@@ -421,15 +421,6 @@ export default function HomePage(): React.JSX.Element {
         isPinned: !currentPinned,
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
-      
-      setPinnedMessages(prev => {
-        if (!currentPinned) {
-          const msg = messages.find(m => m.id === messageId);
-          return msg ? [...prev, { ...msg, isPinned: true }] : prev;
-        } else {
-          return prev.filter(m => m.id !== messageId);
-        }
-      });
     } catch (error) {
       console.error("Error pinning message:", error);
     }
@@ -1018,91 +1009,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Pinned Messages */}
-                {pinnedMessages.length > 0 && (
-                  <div style={{ marginBottom: "12px" }}>
-                    <div
-                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#f8f8f8",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
-                          Pesan Pinned ({pinnedMessages.length})
-                        </span>
-                      </div>
-                      <PinDropdownIcon isOpen={showPinnedMessages} />
-                    </div>
-                    {showPinnedMessages && (
-                      <div style={{ padding: "4px 0", marginTop: "4px" }}>
-                        {pinnedMessages.map((msg) => {
-                          const sender = users.find(u => u.id === msg.senderId);
-                          return (
-                            <div
-                              key={msg.id}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "12px",
-                                padding: "8px 12px",
-                                borderRadius: "8px",
-                                backgroundColor: "rgba(197,232,0,0.08)",
-                                borderLeft: "3px solid #c5e800",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                const chatUser = users.find(u => u.id === msg.senderId) || users.find(u => u.id === msg.receiverId);
-                                if (chatUser) setSelectedChat(chatUser);
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  borderRadius: "50%",
-                                  backgroundColor: "#f0f0f0",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "12px",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {sender?.photoURL ? (
-                                  <img src={sender.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  sender?.name?.charAt(0)?.toUpperCase() || "👤"
-                                )}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
-                                  {sender?.name || "Unknown"}
-                                </div>
-                                <div style={{ fontSize: "11px", color: "#666" }}>
-                                  {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
-                                </div>
-                              </div>
-                              <div style={{ fontSize: "9px", color: "#999" }}>
-                                {formatTime(msg.pinnedAt || msg.timestamp)}
-                              </div>
-                              <PinIcon filled={true} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Pinned Users */}
+                {/* Pinned Users - Tanpa border hijau */}
                 {pinnedUsers.length > 0 && (
                   <div style={{ marginBottom: "12px" }}>
                     <div
@@ -1136,8 +1043,7 @@ export default function HomePage(): React.JSX.Element {
                               gap: "12px",
                               padding: "8px 12px",
                               borderRadius: "8px",
-                              backgroundColor: "rgba(197,232,0,0.08)",
-                              borderLeft: "3px solid #c5e800",
+                              backgroundColor: "#fafafa",
                             }}
                           >
                             <div
@@ -1184,7 +1090,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Pinned Chats */}
+                {/* Pinned Chats - Tanpa border hijau */}
                 {pinnedChats.length > 0 && (
                   <div style={{ marginBottom: "12px" }}>
                     <div
@@ -1224,8 +1130,7 @@ export default function HomePage(): React.JSX.Element {
                                 padding: "8px 12px",
                                 borderRadius: "8px",
                                 cursor: "pointer",
-                                backgroundColor: "rgba(197,232,0,0.08)",
-                                borderLeft: "3px solid #c5e800",
+                                backgroundColor: "#fafafa",
                               }}
                             >
                               <div
@@ -1621,6 +1526,7 @@ export default function HomePage(): React.JSX.Element {
                                   {status.icon}
                                 </span>
                               )}
+                              {/* Pin button di dalam setiap message */}
                               <button
                                 onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
                                 style={{
