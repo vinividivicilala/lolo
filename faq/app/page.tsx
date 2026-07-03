@@ -53,11 +53,6 @@ if (typeof window !== "undefined") {
 
 const googleProvider = new GoogleAuthProvider();
 
-// ID Akun Official Menuru
-const MENURU_OFFICIAL_ID = "menuru_official";
-const MENURU_OFFICIAL_EMAIL = "official@menuru.com";
-const MENURU_OFFICIAL_NAME = "Menuru Official";
-
 interface ChatUser {
   id: string;
   name: string;
@@ -129,73 +124,12 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Announcement Vector SVG Icon - Awwwards Style
+// Announcement SVG Icon
 const AnnouncementIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="announceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#FF6B6B"/>
-        <stop offset="50%" stopColor="#FFD93D"/>
-        <stop offset="100%" stopColor="#6BCB77"/>
-      </linearGradient>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="2" result="blur"/>
-        <feMerge>
-          <feMergeNode in="blur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    <path d="M3 10L10 5V19L3 14V10Z" stroke="url(#announceGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(255,107,107,0.1)"/>
-    <path d="M10 5L17 2V22L10 19" stroke="url(#announceGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(255,217,61,0.1)"/>
-    <path d="M17 8H20.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M17 12H21.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M17 16H19.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
-    <circle cx="20" cy="4" r="2" stroke="url(#announceGrad)" strokeWidth="2" fill="url(#announceGrad)" fillOpacity="0.3"/>
-    <path d="M7 7L9 5M5 9L7 7" stroke="url(#announceGrad)" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="12" cy="12" r="8" stroke="url(#announceGrad)" strokeWidth="0.5" strokeDasharray="2 4" opacity="0.3"/>
-  </svg>
-);
-
-// Verified Badge Instagram Style
-const VerifiedBadge = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="verifyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#405DE6"/>
-        <stop offset="33%" stopColor="#5851DB"/>
-        <stop offset="66%" stopColor="#833AB4"/>
-        <stop offset="100%" stopColor="#C13584"/>
-      </linearGradient>
-    </defs>
-    <circle cx="12" cy="12" r="10" fill="white" stroke="url(#verifyGrad)" strokeWidth="2"/>
-    <circle cx="12" cy="12" r="9" fill="url(#verifyGrad)" fillOpacity="0.1"/>
-    <path d="M8 12L11 15L16 9" stroke="url(#verifyGrad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Official Badge with Lightning Effect - Awwwards Style
-const OfficialBadge = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="officialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#FFD700"/>
-        <stop offset="50%" stopColor="#FFA500"/>
-        <stop offset="100%" stopColor="#FF6B00"/>
-      </linearGradient>
-      <filter id="lightningGlow">
-        <feGaussianBlur stdDeviation="1.5" result="blur"/>
-        <feMerge>
-          <feMergeNode in="blur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    <circle cx="12" cy="12" r="10" fill="url(#officialGrad)" fillOpacity="0.15" stroke="url(#officialGrad)" strokeWidth="1.5"/>
-    <circle cx="12" cy="12" r="12" fill="url(#officialGrad)" fillOpacity="0.05" filter="url(#lightningGlow)"/>
-    <path d="M12 4L12 10L15 8L12 14L12 20L9 16L12 14L12 4Z" fill="url(#officialGrad)" filter="url(#lightningGlow)"/>
-    <path d="M12 4L12 10L15 8L12 14L12 20L9 16L12 14L12 4Z" fill="white" fillOpacity="0.3"/>
+    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <circle cx="12" cy="12" r="3" fill="#000" />
+    <path d="M12 8V9M12 13V14" stroke="#000" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -239,8 +173,7 @@ export default function HomePage(): React.JSX.Element {
               email: currentUser.email,
               photoURL: currentUser.photoURL || "",
               createdAt: serverTimestamp(),
-              isPinned: false,
-              isOfficial: false
+              isPinned: false
             });
           }
         } catch (error) {
@@ -249,35 +182,6 @@ export default function HomePage(): React.JSX.Element {
       }
     });
     return () => unsubscribe();
-  }, []);
-
-  // Create Official Menuru Account
-  useEffect(() => {
-    if (!db) return;
-    
-    const createOfficialAccount = async () => {
-      try {
-        const officialRef = doc(db, "users", MENURU_OFFICIAL_ID);
-        const officialSnap = await getDoc(officialRef);
-        
-        if (!officialSnap.exists()) {
-          await setDoc(officialRef, {
-            id: MENURU_OFFICIAL_ID,
-            name: MENURU_OFFICIAL_NAME,
-            email: MENURU_OFFICIAL_EMAIL,
-            photoURL: "/images/10.jpg",
-            createdAt: serverTimestamp(),
-            isPinned: false,
-            isOfficial: true
-          });
-          console.log("Menuru Official account created");
-        }
-      } catch (error) {
-        console.error("Error creating official account:", error);
-      }
-    };
-    
-    createOfficialAccount();
   }, []);
 
   // Load users from Firestore
@@ -289,23 +193,16 @@ export default function HomePage(): React.JSX.Element {
         const q = query(usersRef);
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const userList: ChatUser[] = [];
-          
           snapshot.forEach((doc) => {
-            const userData = { id: doc.id, ...doc.data() } as ChatUser;
             if (doc.id !== user.uid) {
-              userList.push(userData);
+              userList.push({ id: doc.id, ...doc.data() } as ChatUser);
             }
           });
-          
-          // Sort: Official first (but not pinned), then pinned, then others
           userList.sort((a, b) => {
-            if (a.id === MENURU_OFFICIAL_ID) return -1;
-            if (b.id === MENURU_OFFICIAL_ID) return 1;
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
             return 0;
           });
-          
           setUsers(userList);
         });
         return () => unsubscribe();
@@ -333,7 +230,7 @@ export default function HomePage(): React.JSX.Element {
           const otherId = data.participants.find((id: string) => id !== user.uid);
           const otherUser = users.find(u => u.id === otherId);
           
-          if (otherUser || otherId === MENURU_OFFICIAL_ID) {
+          if (otherUser) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -645,13 +542,12 @@ export default function HomePage(): React.JSX.Element {
     return { icon: "✓", color: "#999", label: "Terkirim" };
   };
 
-  const pinnedUsers = users.filter(u => u.isPinned && u.id !== MENURU_OFFICIAL_ID);
+  const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
 
-  // Available users for new chat (excluding official)
+  // Available users for new chat
   const availableUsers = users.filter(u => 
-    u.id !== MENURU_OFFICIAL_ID &&
     !chatRooms.some(room => room.participants.includes(u.id))
   );
 
@@ -669,9 +565,6 @@ export default function HomePage(): React.JSX.Element {
       </div>
     );
   }
-
-  // Get official user from users list
-  const officialUserData = users.find(u => u.id === MENURU_OFFICIAL_ID);
 
   return (
     <div
@@ -702,7 +595,7 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "menuru" besar di sisi kanan */}
+      {/* Teks "menuru" besar di sisi kanan - font 300px, di atas, mentok kanan */}
       <div
         style={{
           position: "absolute",
@@ -971,9 +864,6 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
-                {selectedChat && selectedChat.isOfficial && (
-                  <VerifiedBadge />
-                )}
                 {selectedChat && (
                   <span style={{ fontSize: "10px", color: "#999" }}>
                     {selectedChat.email}
@@ -1024,65 +914,29 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Announcement - Awwwards Style with Gradient */}
+                {/* Announcement Section */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "14px",
-                    padding: "14px 18px",
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    gap: "12px",
+                    padding: "12px 16px",
+                    backgroundColor: "#f8f8f8",
                     borderRadius: "12px",
                     marginBottom: "12px",
-                    boxShadow: "0 4px 20px rgba(102,126,234,0.3)",
-                    position: "relative",
-                    overflow: "hidden",
+                    border: "1px solid #e8e8e8",
                   }}
                 >
-                  {/* Glow effect Awwwards style */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-50%",
-                      right: "-20%",
-                      width: "150px",
-                      height: "150px",
-                      background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)",
-                      borderRadius: "50%",
-                      pointerEvents: "none",
-                    }}
-                  />
                   <AnnouncementIcon />
                   <div style={{ flex: 1 }}>
-                    <span style={{ 
-                      fontSize: "13px", 
-                      fontWeight: 600, 
-                      color: "#fff",
-                      display: "block",
-                      letterSpacing: "-0.01em",
-                    }}>
-                      🚀 Fitur Chat Sedang Dikembangkan
-                    </span>
-                    <span style={{ 
-                      fontSize: "11px", 
-                      color: "rgba(255,255,255,0.8)",
-                      display: "block",
-                      marginTop: "2px",
-                    }}>
-                      Tim Menuru sedang bekerja untuk memberikan pengalaman chat terbaik
-                    </span>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#000" }}>
+                      Pengumuman
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
+                      Fitur chat sedang dalam tahap pengembangan. 
+                      Mohon maaf atas ketidaknyamanannya.
+                    </div>
                   </div>
-                  <span style={{ 
-                    fontSize: "9px", 
-                    color: "rgba(255,255,255,0.6)",
-                    fontWeight: 600,
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                    letterSpacing: "0.03em",
-                  }}>
-                    v2.0
-                  </span>
                 </div>
 
                 {/* Add User Button */}
@@ -1098,7 +952,7 @@ export default function HomePage(): React.JSX.Element {
                     borderRadius: "12px",
                     cursor: "pointer",
                     width: "100%",
-                    marginBottom: "8px",
+                    marginBottom: "12px",
                     transition: "all .2s ease",
                     color: "#000",
                   }}
@@ -1387,122 +1241,9 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Chat Rooms List with Official Account */}
+                {/* Chat Rooms List */}
                 <div style={{ padding: "4px 0" }}>
-                  {/* Official Account - Always visible with lightning effect */}
-                  {officialUserData && (
-                    <div
-                      onClick={() => setSelectedChat(officialUserData)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "12px 14px",
-                        borderRadius: "12px",
-                        cursor: "pointer",
-                        transition: "all .3s ease",
-                        marginBottom: "8px",
-                        background: "linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.05) 100%)",
-                        border: "1px solid rgba(255,215,0,0.2)",
-                        position: "relative",
-                        animation: "lightningPulse 2s ease-in-out infinite",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,165,0,0.1) 100%)";
-                        e.currentTarget.style.transform = "scale(1.02)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.05) 100%)";
-                        e.currentTarget.style.transform = "scale(1)";
-                      }}
-                    >
-                      {/* Lightning glow effect */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-50%",
-                          right: "-30%",
-                          width: "200px",
-                          height: "200px",
-                          background: "radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%)",
-                          borderRadius: "50%",
-                          pointerEvents: "none",
-                          animation: "glowPulse 3s ease-in-out infinite",
-                        }}
-                      />
-                      <div
-                        style={{
-                          width: "44px",
-                          height: "44px",
-                          borderRadius: "50%",
-                          background: "linear-gradient(135deg, #FFD700, #FFA500)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "18px",
-                          flexShrink: 0,
-                          color: "#fff",
-                          fontWeight: 700,
-                          position: "relative",
-                          boxShadow: "0 0 20px rgba(255,215,0,0.3)",
-                        }}
-                      >
-                        {officialUserData.photoURL ? (
-                          <img 
-                            src={officialUserData.photoURL} 
-                            alt="official" 
-                            style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
-                          />
-                        ) : (
-                          "M"
-                        )}
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: -2,
-                            right: -2,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <OfficialBadge />
-                        </div>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>
-                            {officialUserData.name}
-                          </span>
-                          <VerifiedBadge />
-                          <span style={{ 
-                            fontSize: "8px", 
-                            fontWeight: 700,
-                            color: "#FFD700",
-                            backgroundColor: "rgba(255,215,0,0.15)",
-                            padding: "2px 8px",
-                            borderRadius: "10px",
-                            letterSpacing: "0.05em",
-                            textTransform: "uppercase",
-                          }}>
-                            ⚡ Official
-                          </span>
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#FFA500" }}>
-                          ✦ Akun Resmi Menuru
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ fontSize: "10px", color: "#999" }}>
-                          {formatTime(new Date())}
-                        </span>
-                        <OfficialBadge />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Other Chat Rooms */}
-                  {unpinnedChats.length === 0 && pinnedChats.length === 0 && !officialUserData ? (
+                  {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
                     <div
                       style={{
                         textAlign: "center",
@@ -1521,7 +1262,7 @@ export default function HomePage(): React.JSX.Element {
                     unpinnedChats.map((room) => {
                       const otherId = room.participants.find(id => id !== user.uid);
                       const otherUser = users.find(u => u.id === otherId);
-                      if (!otherUser || otherUser.id === MENURU_OFFICIAL_ID) return null;
+                      if (!otherUser) return null;
                       
                       const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                       
@@ -1572,9 +1313,22 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
+                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
                               {otherUser.name}
-                            </span>
+                              {otherUser.isOfficial && (
+                                <span style={{ 
+                                  fontSize: "9px", 
+                                  color: "#c5e800", 
+                                  marginLeft: "6px",
+                                  fontWeight: 600,
+                                  backgroundColor: "rgba(197,232,0,0.1)",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px"
+                                }}>
+                                  Official
+                                </span>
+                              )}
+                            </div>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
                                 <>
@@ -1682,16 +1436,13 @@ export default function HomePage(): React.JSX.Element {
                       width: "36px",
                       height: "36px",
                       borderRadius: "50%",
-                      background: selectedChat.isOfficial ? "linear-gradient(135deg, #FFD700, #FFA500)" : "#2a2a2a",
+                      backgroundColor: "#2a2a2a",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "16px",
                       overflow: "hidden",
-                      color: selectedChat.isOfficial ? "#fff" : "#fff",
-                      fontWeight: selectedChat.isOfficial ? 700 : 400,
-                      position: "relative",
-                      boxShadow: selectedChat.isOfficial ? "0 0 20px rgba(255,215,0,0.3)" : "none",
+                      color: "#fff",
                     }}
                   >
                     {selectedChat.photoURL ? (
@@ -1701,32 +1452,25 @@ export default function HomePage(): React.JSX.Element {
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
-                      selectedChat.isOfficial ? "M" : (selectedChat.name?.charAt(0)?.toUpperCase() || "👤")
-                    )}
-                    {selectedChat.isOfficial && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: -2,
-                          right: -2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <OfficialBadge />
-                      </div>
+                      <span style={{ color: "#fff" }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                     )}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
-                        {selectedChat.name}
-                      </span>
-                      {selectedChat.isOfficial && <VerifiedBadge />}
+                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
+                      {selectedChat.name}
+                      {selectedChat.isOfficial && (
+                        <span style={{ 
+                          fontSize: "9px", 
+                          color: "#c5e800", 
+                          marginLeft: "6px",
+                          fontWeight: 600
+                        }}>
+                          Official
+                        </span>
+                      )}
                     </div>
-                    <div style={{ fontSize: "10px", color: selectedChat.isOfficial ? "#FFD700" : "#999" }}>
-                      {selectedChat.isOfficial ? "⭐ Akun Resmi Menuru" : selectedChat.email}
+                    <div style={{ fontSize: "10px", color: "#999" }}>
+                      {selectedChat.email}
                     </div>
                   </div>
                   <button
@@ -1778,7 +1522,6 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{ marginTop: "8px", maxHeight: "150px", overflowY: "auto" }}>
                         {pinnedMessages.map((msg) => {
                           const isMine = msg.senderId === user?.uid;
-                          const isOfficial = msg.senderId === MENURU_OFFICIAL_ID;
                           return (
                             <div
                               key={msg.id}
@@ -1786,7 +1529,7 @@ export default function HomePage(): React.JSX.Element {
                                 padding: "6px 10px",
                                 marginBottom: "4px",
                                 borderRadius: "6px",
-                                backgroundColor: isOfficial ? "rgba(255,215,0,0.1)" : (isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)"),
+                                backgroundColor: isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)",
                                 fontSize: "12px",
                                 display: "flex",
                                 justifyContent: "space-between",
@@ -1794,8 +1537,8 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <div style={{ flex: 1 }}>
-                                <span style={{ color: isOfficial ? "#FFD700" : "#666", fontSize: "10px" }}>
-                                  {isOfficial ? "⭐ Menuru Official: " : (isMine ? "Anda: " : `${msg.senderName}: `)}
+                                <span style={{ color: "#666", fontSize: "10px" }}>
+                                  {isMine ? "Anda: " : `${msg.senderName}: `}
                                 </span>
                                 <span style={{ color: "#fff" }}>
                                   {msg.text.length > 50 ? msg.text.substring(0, 50) + "..." : msg.text}
@@ -1842,7 +1585,6 @@ export default function HomePage(): React.JSX.Element {
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user?.uid;
-                      const isOfficial = msg.senderId === MENURU_OFFICIAL_ID;
                       const status = getMessageStatus(msg);
                       const chatId = [user.uid, selectedChat.id].sort().join("_");
                       const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
@@ -1873,28 +1615,14 @@ export default function HomePage(): React.JSX.Element {
                               maxWidth: "75%",
                               padding: "10px 14px",
                               borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                              backgroundColor: isMine ? "#c5e800" : (isOfficial ? "linear-gradient(135deg, #FFD700, #FFA500)" : "#2a2a2a"),
+                              backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
                               color: isMine ? "#000" : "#fff",
                               fontSize: "14px",
                               lineHeight: 1.5,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
-                              boxShadow: isOfficial ? "0 0 20px rgba(255,215,0,0.15)" : "none",
                             }}
                           >
-                            {isOfficial && (
-                              <div style={{ 
-                                fontSize: "9px", 
-                                color: "rgba(255,255,255,0.8)", 
-                                marginBottom: "4px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                              }}>
-                                <VerifiedBadge />
-                                Menuru Official
-                              </div>
-                            )}
                             {msg.text}
                             <div
                               style={{
@@ -1908,7 +1636,7 @@ export default function HomePage(): React.JSX.Element {
                               <span
                                 style={{
                                   fontSize: "9px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : (isOfficial ? "rgba(255,255,255,0.6)" : "#666"),
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
                                 }}
                               >
                                 {formatTime(msg.timestamp)}
@@ -2124,26 +1852,6 @@ export default function HomePage(): React.JSX.Element {
           to {
             opacity: 1;
             transform: translateY(0);
-          }
-        }
-        
-        @keyframes lightningPulse {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(255,215,0,0.1), 0 0 40px rgba(255,215,0,0.05);
-          }
-          50% {
-            box-shadow: 0 0 30px rgba(255,215,0,0.2), 0 0 60px rgba(255,215,0,0.1);
-          }
-        }
-        
-        @keyframes glowPulse {
-          0%, 100% {
-            opacity: 0.5;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.1);
           }
         }
       `}</style>
