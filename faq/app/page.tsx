@@ -129,34 +129,73 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Icon Bullhorn/Sorak yang lebih real dan bagus untuk pengumuman
+// Announcement Vector SVG Icon - Awwwards Style
 const AnnouncementIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 10L10 5V19L3 14V10Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="rgba(0,0,0,0.05)"/>
-    <path d="M10 5L17 2V22L10 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="rgba(0,0,0,0.03)"/>
-    <path d="M17 8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M17 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M17 16H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <circle cx="20" cy="4" r="1.8" stroke="currentColor" strokeWidth="1.8" fill="currentColor" fillOpacity="0.3"/>
-    <path d="M7 7L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 9L7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="announceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FF6B6B"/>
+        <stop offset="50%" stopColor="#FFD93D"/>
+        <stop offset="100%" stopColor="#6BCB77"/>
+      </linearGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <path d="M3 10L10 5V19L3 14V10Z" stroke="url(#announceGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(255,107,107,0.1)"/>
+    <path d="M10 5L17 2V22L10 19" stroke="url(#announceGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(255,217,61,0.1)"/>
+    <path d="M17 8H20.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M17 12H21.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M17 16H19.5" stroke="url(#announceGrad)" strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="20" cy="4" r="2" stroke="url(#announceGrad)" strokeWidth="2" fill="url(#announceGrad)" fillOpacity="0.3"/>
+    <path d="M7 7L9 5M5 9L7 7" stroke="url(#announceGrad)" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="8" stroke="url(#announceGrad)" strokeWidth="0.5" strokeDasharray="2 4" opacity="0.3"/>
   </svg>
 );
 
-// Icon Verified untuk Official
-const VerifiedIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 1L15 6H21L17 11L18 17L12 14.5L6 17L7 11L3 6H9L12 1Z" stroke="#0095f6" strokeWidth="1.5" strokeLinejoin="round" fill="#0095f6" fillOpacity="0.2"/>
-    <path d="M9 11L11.5 13.5L16 8" stroke="#0095f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Icon Official Badge
-const OfficialBadgeIcon = () => (
+// Verified Badge Instagram Style
+const VerifiedBadge = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="#0095f6" strokeWidth="1.5"/>
-    <path d="M8 12L11 15L16 9" stroke="#0095f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="12" cy="12" r="12" fill="#0095f6" fillOpacity="0.1"/>
+    <defs>
+      <linearGradient id="verifyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#405DE6"/>
+        <stop offset="33%" stopColor="#5851DB"/>
+        <stop offset="66%" stopColor="#833AB4"/>
+        <stop offset="100%" stopColor="#C13584"/>
+      </linearGradient>
+    </defs>
+    <circle cx="12" cy="12" r="10" fill="white" stroke="url(#verifyGrad)" strokeWidth="2"/>
+    <circle cx="12" cy="12" r="9" fill="url(#verifyGrad)" fillOpacity="0.1"/>
+    <path d="M8 12L11 15L16 9" stroke="url(#verifyGrad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Official Badge with Lightning Effect - Awwwards Style
+const OfficialBadge = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="officialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FFD700"/>
+        <stop offset="50%" stopColor="#FFA500"/>
+        <stop offset="100%" stopColor="#FF6B00"/>
+      </linearGradient>
+      <filter id="lightningGlow">
+        <feGaussianBlur stdDeviation="1.5" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <circle cx="12" cy="12" r="10" fill="url(#officialGrad)" fillOpacity="0.15" stroke="url(#officialGrad)" strokeWidth="1.5"/>
+    <circle cx="12" cy="12" r="12" fill="url(#officialGrad)" fillOpacity="0.05" filter="url(#lightningGlow)"/>
+    <path d="M12 4L12 10L15 8L12 14L12 20L9 16L12 14L12 4Z" fill="url(#officialGrad)" filter="url(#lightningGlow)"/>
+    <path d="M12 4L12 10L15 8L12 14L12 20L9 16L12 14L12 4Z" fill="white" fillOpacity="0.3"/>
   </svg>
 );
 
@@ -181,7 +220,6 @@ export default function HomePage(): React.JSX.Element {
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
-  const [officialUser, setOfficialUser] = useState<ChatUser | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auth Listener
@@ -227,9 +265,9 @@ export default function HomePage(): React.JSX.Element {
             id: MENURU_OFFICIAL_ID,
             name: MENURU_OFFICIAL_NAME,
             email: MENURU_OFFICIAL_EMAIL,
-            photoURL: "",
+            photoURL: "/images/10.jpg",
             createdAt: serverTimestamp(),
-            isPinned: true,
+            isPinned: false,
             isOfficial: true
           });
           console.log("Menuru Official account created");
@@ -251,19 +289,15 @@ export default function HomePage(): React.JSX.Element {
         const q = query(usersRef);
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const userList: ChatUser[] = [];
-          let official: ChatUser | null = null;
           
           snapshot.forEach((doc) => {
             const userData = { id: doc.id, ...doc.data() } as ChatUser;
             if (doc.id !== user.uid) {
               userList.push(userData);
             }
-            if (doc.id === MENURU_OFFICIAL_ID) {
-              official = userData;
-            }
           });
           
-          // Sort: Official first, then pinned, then others
+          // Sort: Official first (but not pinned), then pinned, then others
           userList.sort((a, b) => {
             if (a.id === MENURU_OFFICIAL_ID) return -1;
             if (b.id === MENURU_OFFICIAL_ID) return 1;
@@ -273,7 +307,6 @@ export default function HomePage(): React.JSX.Element {
           });
           
           setUsers(userList);
-          setOfficialUser(official);
         });
         return () => unsubscribe();
       } catch (error) {
@@ -939,7 +972,7 @@ export default function HomePage(): React.JSX.Element {
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
                 {selectedChat && selectedChat.isOfficial && (
-                  <VerifiedIcon />
+                  <VerifiedBadge />
                 )}
                 {selectedChat && (
                   <span style={{ fontSize: "10px", color: "#999" }}>
@@ -991,6 +1024,67 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
+                {/* Announcement - Awwwards Style with Gradient */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "14px",
+                    padding: "14px 18px",
+                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    borderRadius: "12px",
+                    marginBottom: "12px",
+                    boxShadow: "0 4px 20px rgba(102,126,234,0.3)",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Glow effect Awwwards style */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-50%",
+                      right: "-20%",
+                      width: "150px",
+                      height: "150px",
+                      background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)",
+                      borderRadius: "50%",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <AnnouncementIcon />
+                  <div style={{ flex: 1 }}>
+                    <span style={{ 
+                      fontSize: "13px", 
+                      fontWeight: 600, 
+                      color: "#fff",
+                      display: "block",
+                      letterSpacing: "-0.01em",
+                    }}>
+                      🚀 Fitur Chat Sedang Dikembangkan
+                    </span>
+                    <span style={{ 
+                      fontSize: "11px", 
+                      color: "rgba(255,255,255,0.8)",
+                      display: "block",
+                      marginTop: "2px",
+                    }}>
+                      Tim Menuru sedang bekerja untuk memberikan pengalaman chat terbaik
+                    </span>
+                  </div>
+                  <span style={{ 
+                    fontSize: "9px", 
+                    color: "rgba(255,255,255,0.6)",
+                    fontWeight: 600,
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    letterSpacing: "0.03em",
+                  }}>
+                    v2.0
+                  </span>
+                </div>
+
                 {/* Add User Button */}
                 <button
                   onClick={() => setShowAddUser(!showAddUser)}
@@ -1020,119 +1114,6 @@ export default function HomePage(): React.JSX.Element {
                   <AddUserIcon />
                   <span style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
                 </button>
-
-                {/* Announcement - Fitur Chat Sedang Dikembangkan dengan Icon lebih real */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "12px 16px",
-                    background: "linear-gradient(135deg, #ffff00 0%, #ffeb00 100%)",
-                    borderRadius: "10px",
-                    marginBottom: "12px",
-                    border: "1px solid #e6e600",
-                    boxShadow: "0 2px 8px rgba(255,255,0,0.2)",
-                  }}
-                >
-                  <AnnouncementIcon />
-                  <span style={{ 
-                    fontSize: "13px", 
-                    fontWeight: 600, 
-                    color: "#000",
-                    flex: 1,
-                    letterSpacing: "-0.01em",
-                  }}>
-                    Fitur chat sedang dikembangkan
-                  </span>
-                  <span style={{ 
-                    fontSize: "10px", 
-                    color: "#000", 
-                    opacity: 0.5,
-                    fontWeight: 500,
-                    backgroundColor: "rgba(0,0,0,0.05)",
-                    padding: "2px 10px",
-                    borderRadius: "12px",
-                  }}>
-                    v2.0
-                  </span>
-                </div>
-
-                {/* Menuru Official - Always visible */}
-                {officialUserData && (
-                  <div
-                    onClick={() => setSelectedChat(officialUserData)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "12px 14px",
-                      borderRadius: "12px",
-                      cursor: "pointer",
-                      transition: "all .2s ease",
-                      marginBottom: "8px",
-                      backgroundColor: "rgba(0,149,246,0.05)",
-                      border: "1px solid rgba(0,149,246,0.15)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(0,149,246,0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(0,149,246,0.05)";
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "50%",
-                        backgroundColor: "#0095f6",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "18px",
-                        flexShrink: 0,
-                        color: "#fff",
-                        fontWeight: 600,
-                        position: "relative",
-                      }}
-                    >
-                      M
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: -2,
-                          right: -2,
-                          backgroundColor: "#0095f6",
-                          borderRadius: "50%",
-                          padding: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <OfficialBadgeIcon />
-                      </div>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>
-                          {officialUserData.name}
-                        </span>
-                        <VerifiedIcon />
-                      </div>
-                      <div style={{ fontSize: "11px", color: "#0095f6" }}>
-                        Official Account
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ fontSize: "10px", color: "#999" }}>
-                        {formatTime(new Date())}
-                      </span>
-                      <PinIcon filled={true} />
-                    </div>
-                  </div>
-                )}
 
                 {showAddUser && (
                   <div
@@ -1406,9 +1387,122 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Chat Rooms List */}
+                {/* Chat Rooms List with Official Account */}
                 <div style={{ padding: "4px 0" }}>
-                  {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
+                  {/* Official Account - Always visible with lightning effect */}
+                  {officialUserData && (
+                    <div
+                      onClick={() => setSelectedChat(officialUserData)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "12px 14px",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        transition: "all .3s ease",
+                        marginBottom: "8px",
+                        background: "linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.05) 100%)",
+                        border: "1px solid rgba(255,215,0,0.2)",
+                        position: "relative",
+                        animation: "lightningPulse 2s ease-in-out infinite",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,165,0,0.1) 100%)";
+                        e.currentTarget.style.transform = "scale(1.02)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,165,0,0.05) 100%)";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    >
+                      {/* Lightning glow effect */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "-50%",
+                          right: "-30%",
+                          width: "200px",
+                          height: "200px",
+                          background: "radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%)",
+                          borderRadius: "50%",
+                          pointerEvents: "none",
+                          animation: "glowPulse 3s ease-in-out infinite",
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: "44px",
+                          height: "44px",
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, #FFD700, #FFA500)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "18px",
+                          flexShrink: 0,
+                          color: "#fff",
+                          fontWeight: 700,
+                          position: "relative",
+                          boxShadow: "0 0 20px rgba(255,215,0,0.3)",
+                        }}
+                      >
+                        {officialUserData.photoURL ? (
+                          <img 
+                            src={officialUserData.photoURL} 
+                            alt="official" 
+                            style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          "M"
+                        )}
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: -2,
+                            right: -2,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <OfficialBadge />
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>
+                            {officialUserData.name}
+                          </span>
+                          <VerifiedBadge />
+                          <span style={{ 
+                            fontSize: "8px", 
+                            fontWeight: 700,
+                            color: "#FFD700",
+                            backgroundColor: "rgba(255,215,0,0.15)",
+                            padding: "2px 8px",
+                            borderRadius: "10px",
+                            letterSpacing: "0.05em",
+                            textTransform: "uppercase",
+                          }}>
+                            ⚡ Official
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#FFA500" }}>
+                          ✦ Akun Resmi Menuru
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ fontSize: "10px", color: "#999" }}>
+                          {formatTime(new Date())}
+                        </span>
+                        <OfficialBadge />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Chat Rooms */}
+                  {unpinnedChats.length === 0 && pinnedChats.length === 0 && !officialUserData ? (
                     <div
                       style={{
                         textAlign: "center",
@@ -1427,10 +1521,9 @@ export default function HomePage(): React.JSX.Element {
                     unpinnedChats.map((room) => {
                       const otherId = room.participants.find(id => id !== user.uid);
                       const otherUser = users.find(u => u.id === otherId);
-                      if (!otherUser) return null;
+                      if (!otherUser || otherUser.id === MENURU_OFFICIAL_ID) return null;
                       
                       const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
-                      const isOfficial = otherUser.id === MENURU_OFFICIAL_ID;
                       
                       return (
                         <div
@@ -1459,16 +1552,13 @@ export default function HomePage(): React.JSX.Element {
                               width: "44px",
                               height: "44px",
                               borderRadius: "50%",
-                              backgroundColor: isOfficial ? "#0095f6" : "#f0f0f0",
+                              backgroundColor: "#f0f0f0",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontSize: "18px",
                               flexShrink: 0,
                               overflow: "hidden",
-                              color: isOfficial ? "#fff" : "#000",
-                              fontWeight: isOfficial ? 600 : 400,
-                              position: "relative",
                             }}
                           >
                             {otherUser.photoURL ? (
@@ -1478,33 +1568,13 @@ export default function HomePage(): React.JSX.Element {
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             ) : (
-                              isOfficial ? "M" : (otherUser.name?.charAt(0)?.toUpperCase() || "👤")
-                            )}
-                            {isOfficial && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  bottom: -2,
-                                  right: -2,
-                                  backgroundColor: "#0095f6",
-                                  borderRadius: "50%",
-                                  padding: 2,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <OfficialBadgeIcon />
-                              </div>
+                              <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                             )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <span style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
-                                {otherUser.name}
-                              </span>
-                              {isOfficial && <VerifiedIcon />}
-                            </div>
+                            <span style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
+                              {otherUser.name}
+                            </span>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
                                 <>
@@ -1612,15 +1682,16 @@ export default function HomePage(): React.JSX.Element {
                       width: "36px",
                       height: "36px",
                       borderRadius: "50%",
-                      backgroundColor: selectedChat.isOfficial ? "#0095f6" : "#2a2a2a",
+                      background: selectedChat.isOfficial ? "linear-gradient(135deg, #FFD700, #FFA500)" : "#2a2a2a",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "16px",
                       overflow: "hidden",
                       color: selectedChat.isOfficial ? "#fff" : "#fff",
-                      fontWeight: selectedChat.isOfficial ? 600 : 400,
+                      fontWeight: selectedChat.isOfficial ? 700 : 400,
                       position: "relative",
+                      boxShadow: selectedChat.isOfficial ? "0 0 20px rgba(255,215,0,0.3)" : "none",
                     }}
                   >
                     {selectedChat.photoURL ? (
@@ -1638,15 +1709,12 @@ export default function HomePage(): React.JSX.Element {
                           position: "absolute",
                           bottom: -2,
                           right: -2,
-                          backgroundColor: "#0095f6",
-                          borderRadius: "50%",
-                          padding: 2,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <OfficialBadgeIcon />
+                        <OfficialBadge />
                       </div>
                     )}
                   </div>
@@ -1655,10 +1723,10 @@ export default function HomePage(): React.JSX.Element {
                       <span style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
                         {selectedChat.name}
                       </span>
-                      {selectedChat.isOfficial && <VerifiedIcon />}
+                      {selectedChat.isOfficial && <VerifiedBadge />}
                     </div>
-                    <div style={{ fontSize: "10px", color: selectedChat.isOfficial ? "#0095f6" : "#999" }}>
-                      {selectedChat.isOfficial ? "Official Account" : selectedChat.email}
+                    <div style={{ fontSize: "10px", color: selectedChat.isOfficial ? "#FFD700" : "#999" }}>
+                      {selectedChat.isOfficial ? "⭐ Akun Resmi Menuru" : selectedChat.email}
                     </div>
                   </div>
                   <button
@@ -1718,7 +1786,7 @@ export default function HomePage(): React.JSX.Element {
                                 padding: "6px 10px",
                                 marginBottom: "4px",
                                 borderRadius: "6px",
-                                backgroundColor: isOfficial ? "rgba(0,149,246,0.1)" : (isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)"),
+                                backgroundColor: isOfficial ? "rgba(255,215,0,0.1)" : (isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)"),
                                 fontSize: "12px",
                                 display: "flex",
                                 justifyContent: "space-between",
@@ -1726,7 +1794,7 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <div style={{ flex: 1 }}>
-                                <span style={{ color: isOfficial ? "#0095f6" : "#666", fontSize: "10px" }}>
+                                <span style={{ color: isOfficial ? "#FFD700" : "#666", fontSize: "10px" }}>
                                   {isOfficial ? "⭐ Menuru Official: " : (isMine ? "Anda: " : `${msg.senderName}: `)}
                                 </span>
                                 <span style={{ color: "#fff" }}>
@@ -1805,24 +1873,25 @@ export default function HomePage(): React.JSX.Element {
                               maxWidth: "75%",
                               padding: "10px 14px",
                               borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                              backgroundColor: isMine ? "#c5e800" : (isOfficial ? "#0095f6" : "#2a2a2a"),
+                              backgroundColor: isMine ? "#c5e800" : (isOfficial ? "linear-gradient(135deg, #FFD700, #FFA500)" : "#2a2a2a"),
                               color: isMine ? "#000" : "#fff",
                               fontSize: "14px",
                               lineHeight: 1.5,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
+                              boxShadow: isOfficial ? "0 0 20px rgba(255,215,0,0.15)" : "none",
                             }}
                           >
                             {isOfficial && (
                               <div style={{ 
                                 fontSize: "9px", 
-                                color: "rgba(255,255,255,0.7)", 
+                                color: "rgba(255,255,255,0.8)", 
                                 marginBottom: "4px",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
                               }}>
-                                <VerifiedIcon />
+                                <VerifiedBadge />
                                 Menuru Official
                               </div>
                             )}
@@ -1839,7 +1908,7 @@ export default function HomePage(): React.JSX.Element {
                               <span
                                 style={{
                                   fontSize: "9px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : (isOfficial ? "rgba(255,255,255,0.5)" : "#666"),
+                                  color: isMine ? "rgba(0,0,0,0.4)" : (isOfficial ? "rgba(255,255,255,0.6)" : "#666"),
                                 }}
                               >
                                 {formatTime(msg.timestamp)}
@@ -1900,7 +1969,7 @@ export default function HomePage(): React.JSX.Element {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input - Disabled if chatting with official? No, allow chat */}
+                {/* Input */}
                 <div
                   style={{
                     padding: "12px 16px 16px",
@@ -2055,6 +2124,26 @@ export default function HomePage(): React.JSX.Element {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        
+        @keyframes lightningPulse {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(255,215,0,0.1), 0 0 40px rgba(255,215,0,0.05);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(255,215,0,0.2), 0 0 60px rgba(255,215,0,0.1);
+          }
+        }
+        
+        @keyframes glowPulse {
+          0%, 100% {
+            opacity: 0.5;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.1);
           }
         }
       `}</style>
