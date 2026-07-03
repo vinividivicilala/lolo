@@ -585,15 +585,14 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-   {/* Teks "menuru" besar di sisi kanan - font 500px, lebih ke kanan */}
+      {/* Teks "menuru" besar di sisi kanan - font 300px, di atas, mentok kanan */}
 <div
   style={{
     position: "absolute",
-    top: "50%",
-    right: "-20px",
-    transform: "translateY(-50%)",
+    top: "120px",
+    right: "-80px",
     zIndex: 1,
-    fontSize: "500px",
+    fontSize: "300px",
     fontWeight: 400,
     color: "#000",
     letterSpacing: "-0.02em",
@@ -603,10 +602,17 @@ export default function HomePage(): React.JSX.Element {
     pointerEvents: "none",
     textAlign: "right",
     textTransform: "lowercase",
+    whiteSpace: "nowrap",
   }}
 >
   menuru
 </div>
+
+
+
+      
+
+  
       {/* User Status */}
       <div
         style={{
