@@ -23,7 +23,8 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -53,6 +54,9 @@ if (typeof window !== "undefined") {
 
 const googleProvider = new GoogleAuthProvider();
 
+// Admin email
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+
 interface ChatUser {
   id: string;
   name: string;
@@ -60,6 +64,7 @@ interface ChatUser {
   photoURL: string;
   createdAt?: any;
   isPinned?: boolean;
+  isAdmin?: boolean;
 }
 
 interface Message {
@@ -73,6 +78,7 @@ interface Message {
   readAt?: any;
   isPinned?: boolean;
   pinnedAt?: any;
+  isBroadcast?: boolean;
 }
 
 interface ChatRoom {
@@ -83,6 +89,7 @@ interface ChatRoom {
   lastMessageSenderId?: string;
   unreadCount: number;
   isPinned?: boolean;
+  isBroadcast?: boolean;
 }
 
 // SVG Icons Minimalist
@@ -123,15 +130,37 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Icon Bullhorn/Sorak untuk pengumuman
-const AnnouncementIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 10L10 5V19L3 14V10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M10 5L17 2V22L10 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M17 8H20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M17 12H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M17 16H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="20" cy="4" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+// Icon Pengumuman Premium
+const AnnouncementIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 10L10 5V19L3 14V10Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M10 5L17 2V22L10 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 8H20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    <path d="M17 12H22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    <path d="M17 16H19.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    <circle cx="21" cy="4" r="2" stroke="currentColor" strokeWidth="1.8"/>
+    <circle cx="21" cy="4" r="1" fill="currentColor"/>
+    <path d="M7 14V16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+  </svg>
+);
+
+// Icon Broadcast
+const BroadcastIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C7.58 2 4 5.58 4 10C4 12.13 4.85 14.07 6.26 15.48L8 17.22V20C8 20.55 8.45 21 9 21H15C15.55 21 16 20.55 16 20V17.22L17.74 15.48C19.15 14.07 20 12.13 20 10C20 5.58 16.42 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="14" r="1" fill="currentColor"/>
+  </svg>
+);
+
+// Icon Admin Crown
+const CrownIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 19L5 7L9 10L12 4L15 10L19 7L21 19L3 19Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 19H20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="8" cy="10" r="1" fill="currentColor"/>
+    <circle cx="12" cy="6" r="1" fill="currentColor"/>
+    <circle cx="16" cy="10" r="1" fill="currentColor"/>
   </svg>
 );
 
@@ -156,6 +185,11 @@ export default function HomePage(): React.JSX.Element {
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [broadcastStatus, setBroadcastStatus] = useState("");
+  const [menuruUser, setMenuruUser] = useState<ChatUser | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auth Listener
@@ -164,6 +198,14 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      
+      // Check if admin
+      if (currentUser?.email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+      
       if (currentUser) {
         try {
           const userRef = doc(db, "users", currentUser.uid);
@@ -175,7 +217,13 @@ export default function HomePage(): React.JSX.Element {
               email: currentUser.email,
               photoURL: currentUser.photoURL || "",
               createdAt: serverTimestamp(),
-              isPinned: false
+              isPinned: false,
+              isAdmin: currentUser.email === ADMIN_EMAIL
+            });
+          } else {
+            // Update admin status if needed
+            await updateDoc(userRef, {
+              isAdmin: currentUser.email === ADMIN_EMAIL
             });
           }
         } catch (error) {
@@ -184,6 +232,46 @@ export default function HomePage(): React.JSX.Element {
       }
     });
     return () => unsubscribe();
+  }, []);
+
+  // Setup Menuru account (broadcast account)
+  useEffect(() => {
+    if (!db) return;
+    
+    const setupMenuruAccount = async () => {
+      try {
+        // Check if Menuru account exists in users collection
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", "menuru@broadcast.com"));
+        const querySnap = await getDocs(q);
+        
+        if (querySnap.empty) {
+          // Create Menuru account
+          const menuruRef = doc(db, "users", "menuru_broadcast");
+          await setDoc(menuruRef, {
+            id: "menuru_broadcast",
+            name: "Menuru Official",
+            email: "menuru@broadcast.com",
+            photoURL: "",
+            createdAt: serverTimestamp(),
+            isPinned: false,
+            isAdmin: true,
+            isBroadcast: true
+          });
+          console.log("Menuru official account created");
+        }
+        
+        // Get Menuru user data
+        const menuruSnap = await getDoc(doc(db, "users", "menuru_broadcast"));
+        if (menuruSnap.exists()) {
+          setMenuruUser({ id: menuruSnap.id, ...menuruSnap.data() } as ChatUser);
+        }
+      } catch (error) {
+        console.error("Error setting up Menuru account:", error);
+      }
+    };
+    
+    setupMenuruAccount();
   }, []);
 
   // Load users from Firestore
@@ -196,7 +284,7 @@ export default function HomePage(): React.JSX.Element {
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const userList: ChatUser[] = [];
           snapshot.forEach((doc) => {
-            if (doc.id !== user.uid) {
+            if (doc.id !== user.uid && doc.id !== "menuru_broadcast") {
               userList.push({ id: doc.id, ...doc.data() } as ChatUser);
             }
           });
@@ -230,9 +318,9 @@ export default function HomePage(): React.JSX.Element {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const otherId = data.participants.find((id: string) => id !== user.uid);
-          const otherUser = users.find(u => u.id === otherId);
+          const otherUser = users.find(u => u.id === otherId) || menuruUser;
           
-          if (otherUser) {
+          if (otherUser || data.isBroadcast) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -265,7 +353,8 @@ export default function HomePage(): React.JSX.Element {
               lastMessageTime,
               lastMessageSenderId,
               unreadCount,
-              isPinned: data.isPinned || false
+              isPinned: data.isPinned || false,
+              isBroadcast: data.isBroadcast || false
             });
           }
         }
@@ -285,7 +374,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [user, users]);
+  }, [user, users, menuruUser]);
 
   // Load messages for selected chat
   useEffect(() => {
@@ -372,6 +461,7 @@ export default function HomePage(): React.JSX.Element {
       setSelectedChat(null);
       setChatRooms([]);
       setTotalUnread(0);
+      setIsAdmin(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -386,6 +476,7 @@ export default function HomePage(): React.JSX.Element {
     if (!isChatOpen) {
       setSelectedChat(null);
       setShowAddUser(false);
+      setShowBroadcast(false);
     }
   };
 
@@ -402,7 +493,8 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, selectedChat.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          isBroadcast: false
         });
       }
       
@@ -415,12 +507,70 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         isPinned: false,
-        pinnedAt: null
+        pinnedAt: null,
+        isBroadcast: false
       });
 
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  // Send broadcast message (admin only)
+  const handleSendBroadcast = async () => {
+    if (!isAdmin || !broadcastMessage.trim() || !db || !user) return;
+    
+    setBroadcastStatus("Mengirim broadcast...");
+    
+    try {
+      // Get all users
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
+      const allUsers = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatUser));
+      
+      let successCount = 0;
+      
+      for (const targetUser of allUsers) {
+        if (targetUser.id === user.uid || targetUser.id === "menuru_broadcast") continue;
+        
+        const chatId = [user.uid, targetUser.id].sort().join("_");
+        const chatRef = doc(db, "chats", chatId);
+        const chatSnap = await getDoc(chatRef);
+        
+        if (!chatSnap.exists()) {
+          await setDoc(chatRef, {
+            participants: [user.uid, targetUser.id],
+            createdAt: serverTimestamp(),
+            isPinned: false,
+            isBroadcast: true
+          });
+        }
+        
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        await addDoc(messagesRef, {
+          text: `📢 ${broadcastMessage.trim()}`,
+          senderId: user.uid,
+          senderName: "Menuru Official",
+          receiverId: targetUser.id,
+          timestamp: serverTimestamp(),
+          read: false,
+          isPinned: false,
+          pinnedAt: null,
+          isBroadcast: true
+        });
+        
+        successCount++;
+      }
+      
+      setBroadcastStatus(`✅ Broadcast berhasil dikirim ke ${successCount} pengguna!`);
+      setBroadcastMessage("");
+      setTimeout(() => setBroadcastStatus(""), 5000);
+      
+    } catch (error) {
+      console.error("Error sending broadcast:", error);
+      setBroadcastStatus("❌ Gagal mengirim broadcast.");
+      setTimeout(() => setBroadcastStatus(""), 5000);
     }
   };
 
@@ -497,7 +647,8 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          isBroadcast: false
         });
         setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
       } else {
@@ -597,7 +748,7 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "menuru" besar di sisi kanan - font 300px, di atas, mentok kanan */}
+      {/* Teks "menuru" besar */}
       <div
         style={{
           position: "absolute",
@@ -653,6 +804,18 @@ export default function HomePage(): React.JSX.Element {
               />
             )}
             <span style={{ fontWeight: 500, color: "#000" }}>{user.displayName || user.email}</span>
+            {isAdmin && (
+              <span style={{ 
+                fontSize: "10px", 
+                color: "#fff", 
+                backgroundColor: "#000",
+                padding: "2px 10px",
+                borderRadius: "12px",
+                fontWeight: 600,
+              }}>
+                Admin
+              </span>
+            )}
             <button
               onClick={handleLogout}
               style={{
@@ -885,6 +1048,21 @@ export default function HomePage(): React.JSX.Element {
                     {totalUnread}
                   </span>
                 )}
+                {isAdmin && !selectedChat && (
+                  <span
+                    style={{
+                      backgroundColor: "#000",
+                      color: "#c5e800",
+                      border: "1px solid #c5e800",
+                      borderRadius: "12px",
+                      padding: "2px 10px",
+                      fontSize: "9px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <CrownIcon />
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => setIsChatOpen(false)}
@@ -946,37 +1124,142 @@ export default function HomePage(): React.JSX.Element {
                   <span style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
                 </button>
 
-                {/* Announcement - Fitur Chat Sedang Dikembangkan */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 14px",
-                    backgroundColor: "#ffff00",
-                    borderRadius: "8px",
-                    marginBottom: "12px",
-                    border: "1px solid #e6e600",
-                  }}
-                >
-                  <AnnouncementIcon />
-                  <span style={{ 
-                    fontSize: "12px", 
-                    fontWeight: 500, 
-                    color: "#000",
-                    flex: 1,
-                  }}>
-                    Fitur chat sedang dikembangkan
-                  </span>
-                  <span style={{ 
-                    fontSize: "10px", 
-                    color: "#000", 
-                    opacity: 0.6,
-                    fontWeight: 400,
-                  }}>
-                    v2.0
-                  </span>
-                </div>
+                {/* Broadcast Button - Admin Only */}
+                {isAdmin && (
+                  <button
+                    onClick={() => setShowBroadcast(!showBroadcast)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px 16px",
+                      backgroundColor: "#000",
+                      border: "none",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                      width: "100%",
+                      marginBottom: showBroadcast ? "8px" : "12px",
+                      transition: "all .2s ease",
+                      color: "#fff",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#1a1a1a";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#000";
+                    }}
+                  >
+                    <BroadcastIcon />
+                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#fff" }}>
+                      Broadcast Pesan
+                    </span>
+                    <span style={{ 
+                      fontSize: "9px", 
+                      color: "#c5e800",
+                      marginLeft: "auto",
+                      fontWeight: 400,
+                    }}>
+                      Admin
+                    </span>
+                  </button>
+                )}
+
+                {/* Broadcast Form */}
+                {showBroadcast && isAdmin && (
+                  <div
+                    style={{
+                      padding: "12px",
+                      backgroundColor: "#f8f8f8",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input
+                        type="text"
+                        placeholder="Tulis pesan broadcast..."
+                        value={broadcastMessage}
+                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          outline: "none",
+                          fontFamily: "Inter, 'Inter Fallback'",
+                          color: "#000",
+                          backgroundColor: "#fff",
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSendBroadcast();
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={handleSendBroadcast}
+                        disabled={!broadcastMessage.trim()}
+                        style={{
+                          backgroundColor: broadcastMessage.trim() ? "#c5e800" : "#ccc",
+                          color: broadcastMessage.trim() ? "#000" : "#666",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          cursor: broadcastMessage.trim() ? "pointer" : "not-allowed",
+                          transition: "all .2s ease",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Kirim ke Semua
+                      </button>
+                    </div>
+                    {broadcastStatus && (
+                      <div style={{ fontSize: "11px", color: broadcastStatus.includes("✅") ? "#22c55e" : "#ef4444", marginTop: "8px" }}>
+                        {broadcastStatus}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "9px", color: "#999", marginTop: "6px" }}>
+                      Pesan akan dikirim ke semua pengguna Menuru
+                    </div>
+                  </div>
+                )}
+
+                {/* Announcement - Fitur Chat Sedang Dikembangkan (untuk non-admin) */}
+                {!isAdmin && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 14px",
+                      backgroundColor: "#ffff00",
+                      borderRadius: "8px",
+                      marginBottom: "12px",
+                      border: "1px solid #e6e600",
+                    }}
+                  >
+                    <AnnouncementIcon size={20} />
+                    <span style={{ 
+                      fontSize: "12px", 
+                      fontWeight: 500, 
+                      color: "#000",
+                      flex: 1,
+                    }}>
+                      Fitur chat sedang dikembangkan
+                    </span>
+                    <span style={{ 
+                      fontSize: "10px", 
+                      color: "#000", 
+                      opacity: 0.6,
+                      fontWeight: 400,
+                    }}>
+                      v2.0
+                    </span>
+                  </div>
+                )}
 
                 {showAddUser && (
                   <div
@@ -1274,6 +1557,7 @@ export default function HomePage(): React.JSX.Element {
                       if (!otherUser) return null;
                       
                       const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
+                      const isBroadcast = room.isBroadcast;
                       
                       return (
                         <div
@@ -1309,6 +1593,7 @@ export default function HomePage(): React.JSX.Element {
                               fontSize: "18px",
                               flexShrink: 0,
                               overflow: "hidden",
+                              position: "relative",
                             }}
                           >
                             {otherUser.photoURL ? (
@@ -1320,10 +1605,34 @@ export default function HomePage(): React.JSX.Element {
                             ) : (
                               <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                             )}
+                            {isBroadcast && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  bottom: -2,
+                                  right: -2,
+                                  backgroundColor: "#c5e800",
+                                  borderRadius: "50%",
+                                  width: "16px",
+                                  height: "16px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  border: "2px solid #fff",
+                                }}
+                              >
+                                <BroadcastIcon />
+                              </div>
+                            )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
                               {otherUser.name}
+                              {isBroadcast && (
+                                <span style={{ fontSize: "8px", color: "#c5e800", marginLeft: "6px", fontWeight: 600 }}>
+                                  • Broadcast
+                                </span>
+                              )}
                             </div>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
@@ -1439,6 +1748,7 @@ export default function HomePage(): React.JSX.Element {
                       fontSize: "16px",
                       overflow: "hidden",
                       color: "#fff",
+                      position: "relative",
                     }}
                   >
                     {selectedChat.photoURL ? (
@@ -1454,6 +1764,11 @@ export default function HomePage(): React.JSX.Element {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
                       {selectedChat.name}
+                      {selectedChat.isAdmin && (
+                        <span style={{ fontSize: "8px", color: "#c5e800", marginLeft: "6px", fontWeight: 600 }}>
+                          • Admin
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: "10px", color: "#999" }}>
                       {selectedChat.email}
@@ -1575,6 +1890,7 @@ export default function HomePage(): React.JSX.Element {
                       const chatId = [user.uid, selectedChat.id].sort().join("_");
                       const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
                         formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                      const isBroadcast = msg.isBroadcast;
                       
                       return (
                         <React.Fragment key={idx}>
@@ -1609,6 +1925,20 @@ export default function HomePage(): React.JSX.Element {
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
                             }}
                           >
+                            {isBroadcast && (
+                              <div style={{ 
+                                fontSize: "9px", 
+                                color: isMine ? "#000" : "#c5e800",
+                                marginBottom: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontWeight: 600,
+                              }}>
+                                <BroadcastIcon />
+                                <span>Broadcast</span>
+                              </div>
+                            )}
                             {msg.text}
                             <div
                               style={{
