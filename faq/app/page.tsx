@@ -124,12 +124,13 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Announcement SVG Icon
+// Announcement SVG Icon - Sorak/Megaphone
 const AnnouncementIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    <circle cx="12" cy="12" r="3" fill="#000" />
-    <path d="M12 8V9M12 13V14" stroke="#000" strokeWidth="1.5" strokeLinecap="round" />
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 8C18 8 19 9 19 12C19 15 18 16 18 16M18 8L6 11.5V16.5L18 20M18 8L20 6V10L18 8Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 11.5L3 10.5V17.5L6 16.5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M10 20L13 18.5" stroke="#000" strokeWidth="1.8" strokeLinecap="round"/>
+    <circle cx="18" cy="12" r="2" stroke="#000" strokeWidth="1.5"/>
   </svg>
 );
 
@@ -173,7 +174,8 @@ export default function HomePage(): React.JSX.Element {
               email: currentUser.email,
               photoURL: currentUser.photoURL || "",
               createdAt: serverTimestamp(),
-              isPinned: false
+              isPinned: false,
+              isOfficial: false
             });
           }
         } catch (error) {
@@ -914,7 +916,7 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Announcement Section */}
+                {/* Announcement Section - Icon Sorak */}
                 <div
                   style={{
                     display: "flex",
@@ -930,7 +932,7 @@ export default function HomePage(): React.JSX.Element {
                   <AnnouncementIcon />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "13px", fontWeight: 600, color: "#000" }}>
-                      Pengumuman
+                      📢 Pengumuman
                     </div>
                     <div style={{ fontSize: "12px", color: "#666" }}>
                       Fitur chat sedang dalam tahap pengembangan. 
@@ -1000,7 +1002,7 @@ export default function HomePage(): React.JSX.Element {
                       <option value="" style={{ color: "#000" }}>Pilih user...</option>
                       {availableUsers.map((u) => (
                         <option key={u.id} value={u.id} style={{ color: "#000" }}>
-                          {u.name} ({u.email})
+                          {u.name} {u.isOfficial ? "⭐ Official" : ""} ({u.email})
                         </option>
                       ))}
                     </select>
@@ -1105,7 +1107,22 @@ export default function HomePage(): React.JSX.Element {
                               )}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{u.name}</div>
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                                {u.name}
+                                {u.isOfficial && (
+                                  <span style={{ 
+                                    fontSize: "9px", 
+                                    color: "#c5e800", 
+                                    marginLeft: "6px",
+                                    fontWeight: 600,
+                                    backgroundColor: "rgba(197,232,0,0.1)",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px"
+                                  }}>
+                                    Official
+                                  </span>
+                                )}
+                              </div>
                               <div style={{ fontSize: "10px", color: "#666" }}>{u.email}</div>
                             </div>
                             <button
@@ -1192,7 +1209,22 @@ export default function HomePage(): React.JSX.Element {
                                 )}
                               </div>
                               <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
+                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                                  {otherUser.name}
+                                  {otherUser.isOfficial && (
+                                    <span style={{ 
+                                      fontSize: "9px", 
+                                      color: "#c5e800", 
+                                      marginLeft: "6px",
+                                      fontWeight: 600,
+                                      backgroundColor: "rgba(197,232,0,0.1)",
+                                      padding: "2px 6px",
+                                      borderRadius: "4px"
+                                    }}>
+                                      Official
+                                    </span>
+                                  )}
+                                </div>
                                 <div style={{ fontSize: "10px", color: "#666" }}>
                                   {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
                                 </div>
