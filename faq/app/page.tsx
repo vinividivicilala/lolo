@@ -123,6 +123,15 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
+// SVG Icon Sorak/Pengumuman
+const AnnouncementIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C10.6868 2 9.38642 2.25866 8.17317 2.7612C6.95991 3.26375 5.85752 4.00035 4.92893 4.92893C3.05357 6.8043 2 9.34784 2 12C2 14.6522 3.05357 17.1957 4.92893 19.0711C5.85752 19.9997 6.95991 20.7362 8.17317 21.2388C9.38642 21.7413 10.6868 22 12 22C14.6522 22 17.1957 20.9464 19.0711 19.0711C20.9464 17.1957 22 14.6522 22 12C22 9.34784 20.9464 6.8043 19.0711 4.92893C18.1425 4.00035 17.0401 3.26375 15.8268 2.7612C14.6136 2.25866 13.3132 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 8V12M12 16H12.01M12 6L12 10M12 14L12 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 4L6 2M16 4L18 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -586,33 +595,28 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       {/* Teks "menuru" besar di sisi kanan - font 300px, di atas, mentok kanan */}
-<div
-  style={{
-    position: "absolute",
-    top: "120px",
-    right: "-80px",
-    zIndex: 1,
-    fontSize: "300px",
-    fontWeight: 400,
-    color: "#000",
-    letterSpacing: "-0.02em",
-    lineHeight: 0.9,
-    fontFamily: "Inter, 'Inter Fallback'",
-    userSelect: "none",
-    pointerEvents: "none",
-    textAlign: "right",
-    textTransform: "lowercase",
-    whiteSpace: "nowrap",
-  }}
->
-  menuru
-</div>
+      <div
+        style={{
+          position: "absolute",
+          top: "120px",
+          right: "-80px",
+          zIndex: 1,
+          fontSize: "300px",
+          fontWeight: 400,
+          color: "#000",
+          letterSpacing: "-0.02em",
+          lineHeight: 0.9,
+          fontFamily: "Inter, 'Inter Fallback'",
+          userSelect: "none",
+          pointerEvents: "none",
+          textAlign: "right",
+          textTransform: "lowercase",
+          whiteSpace: "nowrap",
+        }}
+      >
+        menuru
+      </div>
 
-
-
-      
-
-  
       {/* User Status */}
       <div
         style={{
@@ -922,7 +926,7 @@ export default function HomePage(): React.JSX.Element {
                     borderRadius: "12px",
                     cursor: "pointer",
                     width: "100%",
-                    marginBottom: "12px",
+                    marginBottom: "8px",
                     transition: "all .2s ease",
                     color: "#000",
                   }}
@@ -938,6 +942,38 @@ export default function HomePage(): React.JSX.Element {
                   <AddUserIcon />
                   <span style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
                 </button>
+
+                {/* Announcement - Fitur Chat Sedang Dikembangkan */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 14px",
+                    backgroundColor: "#ffff00",
+                    borderRadius: "8px",
+                    marginBottom: "12px",
+                    border: "1px solid #e6e600",
+                  }}
+                >
+                  <AnnouncementIcon />
+                  <span style={{ 
+                    fontSize: "12px", 
+                    fontWeight: 500, 
+                    color: "#000",
+                    flex: 1,
+                  }}>
+                    Fitur chat sedang dikembangkan
+                  </span>
+                  <span style={{ 
+                    fontSize: "10px", 
+                    color: "#000", 
+                    opacity: 0.6,
+                    fontWeight: 400,
+                  }}>
+                    v2.0
+                  </span>
+                </div>
 
                 {showAddUser && (
                   <div
