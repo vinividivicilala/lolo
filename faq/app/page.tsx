@@ -124,13 +124,20 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Announcement SVG Icon - Sorak/Megaphone
+// Announcement SVG Icon - Sorak/Megaphone dengan struktur jelas
 const AnnouncementIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 8C18 8 19 9 19 12C19 15 18 16 18 16M18 8L6 11.5V16.5L18 20M18 8L20 6V10L18 8Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M6 11.5L3 10.5V17.5L6 16.5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M10 20L13 18.5" stroke="#000" strokeWidth="1.8" strokeLinecap="round"/>
-    <circle cx="18" cy="12" r="2" stroke="#000" strokeWidth="1.5"/>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    {/* Badan megaphone */}
+    <path d="M4 11L17 5V19L4 13V11Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Pegangan megaphone */}
+    <path d="M17 5L20 3V7L17 5Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Garis suara */}
+    <path d="M4 11L2 9V15L4 13" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    {/* Gelombang suara */}
+    <path d="M20 9C21 10 21.5 11.5 21.5 13C21.5 14.5 21 16 20 17" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    <path d="M22 7C23.5 9 24 11 24 13C24 15 23.5 17 22 19" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    {/* Detail suara */}
+    <circle cx="18" cy="12" r="1.5" fill="#000" stroke="none"/>
   </svg>
 );
 
@@ -156,6 +163,56 @@ export default function HomePage(): React.JSX.Element {
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Akun Menuru Official (hardcoded)
+  const MENURU_OFFICIAL: ChatUser = {
+    id: "official_menuru",
+    name: "Menuru Official",
+    email: "official@menuru.com",
+    photoURL: "",
+    isOfficial: true,
+    isPinned: false
+  };
+
+  // Data pesan dari Menuru Official
+  const OFFICIAL_MESSAGES = [
+    {
+      text: "Halo! Selamat datang di Menuru Chat 👋",
+      senderId: "official_menuru",
+      senderName: "Menuru Official",
+      receiverId: "all",
+      timestamp: new Date(),
+      read: true,
+      isPinned: false
+    },
+    {
+      text: "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏",
+      senderId: "official_menuru",
+      senderName: "Menuru Official",
+      receiverId: "all",
+      timestamp: new Date(Date.now() - 60000),
+      read: true,
+      isPinned: false
+    },
+    {
+      text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
+      senderId: "official_menuru",
+      senderName: "Menuru Official",
+      receiverId: "all",
+      timestamp: new Date(Date.now() - 120000),
+      read: true,
+      isPinned: false
+    },
+    {
+      text: "Terima kasih atas pengertiannya! 😊",
+      senderId: "official_menuru",
+      senderName: "Menuru Official",
+      receiverId: "all",
+      timestamp: new Date(Date.now() - 180000),
+      read: true,
+      isPinned: false
+    }
+  ];
 
   // Auth Listener
   useEffect(() => {
@@ -186,7 +243,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load users from Firestore
+  // Load users from Firestore + tambahkan Menuru Official
   useEffect(() => {
     if (!db || !user) return;
     const loadUsers = async () => {
@@ -200,6 +257,13 @@ export default function HomePage(): React.JSX.Element {
               userList.push({ id: doc.id, ...doc.data() } as ChatUser);
             }
           });
+          
+          // Tambahkan Menuru Official ke daftar user (jika belum ada)
+          const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
+          if (!officialExists) {
+            userList.push(MENURU_OFFICIAL);
+          }
+          
           userList.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
@@ -215,7 +279,7 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load chat rooms
+  // Load chat rooms + tambahkan chat dengan Menuru Official
   useEffect(() => {
     if (!user || !db) return;
 
@@ -226,6 +290,44 @@ export default function HomePage(): React.JSX.Element {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
       
+      // Cek apakah sudah ada chat dengan Menuru Official
+      const officialChatExists = snapshot.docs.some(doc => {
+        const data = doc.data();
+        return data.participants && 
+               data.participants.includes(user.uid) && 
+               data.participants.includes(MENURU_OFFICIAL.id);
+      });
+
+      // Jika belum ada chat dengan Menuru Official, buat baru
+      if (!officialChatExists) {
+        const chatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
+        const chatRef = doc(db, "chats", chatId);
+        const chatSnap = await getDoc(chatRef);
+        if (!chatSnap.exists()) {
+          await setDoc(chatRef, {
+            participants: [user.uid, MENURU_OFFICIAL.id],
+            createdAt: serverTimestamp(),
+            isPinned: false
+          });
+          
+          // Kirim pesan-pesan dari Menuru Official
+          const messagesRef = collection(db, "chats", chatId, "messages");
+          for (const msg of OFFICIAL_MESSAGES) {
+            await addDoc(messagesRef, {
+              text: msg.text,
+              senderId: msg.senderId,
+              senderName: msg.senderName,
+              receiverId: user.uid,
+              timestamp: serverTimestamp(),
+              read: false,
+              isPinned: false,
+              pinnedAt: null
+            });
+          }
+        }
+      }
+
+      // Load chat rooms seperti biasa
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
@@ -597,7 +699,7 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "menuru" besar di sisi kanan - font 300px, di atas, mentok kanan */}
+      {/* Teks "menuru" besar di sisi kanan */}
       <div
         style={{
           position: "absolute",
@@ -916,7 +1018,7 @@ export default function HomePage(): React.JSX.Element {
             {/* Content */}
             {!selectedChat ? (
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Announcement Section - Icon Sorak */}
+                {/* Announcement Section - Icon Sorak saja */}
                 <div
                   style={{
                     display: "flex",
@@ -932,7 +1034,7 @@ export default function HomePage(): React.JSX.Element {
                   <AnnouncementIcon />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "13px", fontWeight: 600, color: "#000" }}>
-                      📢 Pengumuman
+                      Pengumuman
                     </div>
                     <div style={{ fontSize: "12px", color: "#666" }}>
                       Fitur chat sedang dalam tahap pengembangan. 
