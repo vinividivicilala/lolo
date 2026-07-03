@@ -585,27 +585,28 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "menuru" besar di sisi kanan bawah */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "40px",
-          right: "40px",
-          zIndex: 1,
-          fontSize: "300px",
-          fontWeight: 400,
-          color: "#000",
-          letterSpacing: "-0.02em",
-          lineHeight: 0.9,
-          fontFamily: "Inter, 'Inter Fallback'",
-          userSelect: "none",
-          pointerEvents: "none",
-          textAlign: "right",
-          textTransform: "lowercase",
-        }}
-      >
-        menuru
-      </div>
+    {/* Teks "menuru" besar di sisi kanan - posisi lebih ke atas dan ke kanan */}
+<div
+  style={{
+    position: "absolute",
+    top: "50%",
+    right: "40px",
+    transform: "translateY(-50%)",
+    zIndex: 1,
+    fontSize: "300px",
+    fontWeight: 400,
+    color: "#000",
+    letterSpacing: "-0.02em",
+    lineHeight: 0.9,
+    fontFamily: "Inter, 'Inter Fallback'",
+    userSelect: "none",
+    pointerEvents: "none",
+    textAlign: "right",
+    textTransform: "lowercase",
+  }}
+>
+  menuru
+</div>
 
       {/* User Status */}
       <div
