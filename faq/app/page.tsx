@@ -163,6 +163,7 @@ export default function HomePage(): React.JSX.Element {
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
 
   // Akun Menuru Official (hardcoded)
   const MENURU_OFFICIAL: ChatUser = {
@@ -179,38 +180,22 @@ export default function HomePage(): React.JSX.Element {
     {
       text: "Halo! Selamat datang di Menuru Chat 👋",
       senderId: "official_menuru",
-      senderName: "Menuru Official",
-      receiverId: "all",
-      timestamp: new Date(),
-      read: true,
-      isPinned: false
+      senderName: "Menuru Official"
     },
     {
       text: "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏",
       senderId: "official_menuru",
-      senderName: "Menuru Official",
-      receiverId: "all",
-      timestamp: new Date(Date.now() - 60000),
-      read: true,
-      isPinned: false
+      senderName: "Menuru Official"
     },
     {
       text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
       senderId: "official_menuru",
-      senderName: "Menuru Official",
-      receiverId: "all",
-      timestamp: new Date(Date.now() - 120000),
-      read: true,
-      isPinned: false
+      senderName: "Menuru Official"
     },
     {
       text: "Terima kasih atas pengertiannya! 😊",
       senderId: "official_menuru",
-      senderName: "Menuru Official",
-      receiverId: "all",
-      timestamp: new Date(Date.now() - 180000),
-      read: true,
-      isPinned: false
+      senderName: "Menuru Official"
     }
   ];
 
@@ -235,6 +220,10 @@ export default function HomePage(): React.JSX.Element {
               isOfficial: false
             });
           }
+          
+          // Cek dan kirim pesan official setelah user terdaftar
+          await checkAndSendOfficialMessages(currentUser.uid);
+          
         } catch (error) {
           console.error("Error saving user:", error);
         }
@@ -242,6 +231,52 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsubscribe();
   }, []);
+
+  // Fungsi untuk cek dan kirim pesan official
+  const checkAndSendOfficialMessages = async (userId: string) => {
+    if (!db || officialMessagesSent) return;
+    
+    try {
+      const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      
+      // Jika chat room belum ada, buat dan kirim pesan
+      if (!chatSnap.exists()) {
+        console.log("Creating official chat room and sending messages...");
+        
+        // Buat chat room
+        await setDoc(chatRef, {
+          participants: [userId, MENURU_OFFICIAL.id],
+          createdAt: serverTimestamp(),
+          isPinned: false
+        });
+        
+        // Kirim pesan-pesan official
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        for (const msg of OFFICIAL_MESSAGES) {
+          await addDoc(messagesRef, {
+            text: msg.text,
+            senderId: msg.senderId,
+            senderName: msg.senderName,
+            receiverId: userId,
+            timestamp: serverTimestamp(),
+            read: false,
+            isPinned: false,
+            pinnedAt: null
+          });
+        }
+        
+        setOfficialMessagesSent(true);
+        console.log("Official messages sent successfully!");
+      } else {
+        setOfficialMessagesSent(true);
+        console.log("Official chat already exists.");
+      }
+    } catch (error) {
+      console.error("Error sending official messages:", error);
+    }
+  };
 
   // Load users from Firestore + tambahkan Menuru Official
   useEffect(() => {
@@ -279,7 +314,7 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load chat rooms + tambahkan chat dengan Menuru Official
+  // Load chat rooms
   useEffect(() => {
     if (!user || !db) return;
 
@@ -290,44 +325,6 @@ export default function HomePage(): React.JSX.Element {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
       
-      // Cek apakah sudah ada chat dengan Menuru Official
-      const officialChatExists = snapshot.docs.some(doc => {
-        const data = doc.data();
-        return data.participants && 
-               data.participants.includes(user.uid) && 
-               data.participants.includes(MENURU_OFFICIAL.id);
-      });
-
-      // Jika belum ada chat dengan Menuru Official, buat baru
-      if (!officialChatExists) {
-        const chatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
-        const chatRef = doc(db, "chats", chatId);
-        const chatSnap = await getDoc(chatRef);
-        if (!chatSnap.exists()) {
-          await setDoc(chatRef, {
-            participants: [user.uid, MENURU_OFFICIAL.id],
-            createdAt: serverTimestamp(),
-            isPinned: false
-          });
-          
-          // Kirim pesan-pesan dari Menuru Official
-          const messagesRef = collection(db, "chats", chatId, "messages");
-          for (const msg of OFFICIAL_MESSAGES) {
-            await addDoc(messagesRef, {
-              text: msg.text,
-              senderId: msg.senderId,
-              senderName: msg.senderName,
-              receiverId: user.uid,
-              timestamp: serverTimestamp(),
-              read: false,
-              isPinned: false,
-              pinnedAt: null
-            });
-          }
-        }
-      }
-
-      // Load chat rooms seperti biasa
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
@@ -474,6 +471,7 @@ export default function HomePage(): React.JSX.Element {
       setSelectedChat(null);
       setChatRooms([]);
       setTotalUnread(0);
+      setOfficialMessagesSent(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
