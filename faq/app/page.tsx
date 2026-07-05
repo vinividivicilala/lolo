@@ -23,7 +23,10 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc,
+  onDisconnect,
+  runTransaction
 } from "firebase/firestore";
 
 // Firebase Config
@@ -61,6 +64,8 @@ interface ChatUser {
   createdAt?: any;
   isPinned?: boolean;
   isOfficial?: boolean;
+  online?: boolean;
+  lastSeen?: any;
 }
 
 interface Message {
@@ -74,6 +79,12 @@ interface Message {
   readAt?: any;
   isPinned?: boolean;
   pinnedAt?: any;
+  replyTo?: string;
+  replyToText?: string;
+  replyToSender?: string;
+  sharedFrom?: string;
+  sharedFromName?: string;
+  isShared?: boolean;
 }
 
 interface ChatRoom {
@@ -124,19 +135,29 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   </svg>
 );
 
-// Announcement SVG Icon - Sorak/Megaphone dengan struktur jelas
+const ReplyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M3 10L10 3V7C15 7 19 9 21 13C19 11 15 10 10 10V14L3 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8.5 10.5L15.5 6.5M8.5 13.5L15.5 17.5" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+// Announcement SVG Icon - Sorak/Megaphone
 const AnnouncementIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    {/* Badan megaphone */}
     <path d="M4 11L17 5V19L4 13V11Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    {/* Pegangan megaphone */}
     <path d="M17 5L20 3V7L17 5Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    {/* Garis suara */}
     <path d="M4 11L2 9V15L4 13" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    {/* Gelombang suara */}
     <path d="M20 9C21 10 21.5 11.5 21.5 13C21.5 14.5 21 16 20 17" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
     <path d="M22 7C23.5 9 24 11 24 13C24 15 23.5 17 22 19" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-    {/* Detail suara */}
     <circle cx="18" cy="12" r="1.5" fill="#000" stroke="none"/>
   </svg>
 );
@@ -162,10 +183,13 @@ export default function HomePage(): React.JSX.Element {
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [showPinnedMessages, setShowPinnedMessages] = useState(false);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareMessage, setShareMessage] = useState<Message | null>(null);
+  const [selectedShareUser, setSelectedShareUser] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
 
-  // Akun Menuru Official (hardcoded)
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
     name: "Menuru Official",
@@ -175,7 +199,6 @@ export default function HomePage(): React.JSX.Element {
     isPinned: false
   };
 
-  // Data pesan dari Menuru Official
   const OFFICIAL_MESSAGES = [
     {
       text: "Halo! Selamat datang di Menuru Chat 👋",
@@ -217,11 +240,25 @@ export default function HomePage(): React.JSX.Element {
               photoURL: currentUser.photoURL || "",
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: false
+              isOfficial: false,
+              online: true,
+              lastSeen: serverTimestamp()
+            });
+          } else {
+            // Update online status
+            await updateDoc(userRef, {
+              online: true,
+              lastSeen: serverTimestamp()
+            });
+            
+            // Set offline on disconnect
+            const disconnectRef = doc(db, "users", currentUser.uid);
+            onDisconnect(disconnectRef).update({
+              online: false,
+              lastSeen: serverTimestamp()
             });
           }
           
-          // Cek dan kirim pesan official setelah user terdaftar
           await checkAndSendOfficialMessages(currentUser.uid);
           
         } catch (error) {
@@ -232,7 +269,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Fungsi untuk cek dan kirim pesan official
   const checkAndSendOfficialMessages = async (userId: string) => {
     if (!db || officialMessagesSent) return;
     
@@ -241,18 +277,13 @@ export default function HomePage(): React.JSX.Element {
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       
-      // Jika chat room belum ada, buat dan kirim pesan
       if (!chatSnap.exists()) {
-        console.log("Creating official chat room and sending messages...");
-        
-        // Buat chat room
         await setDoc(chatRef, {
           participants: [userId, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
           isPinned: false
         });
         
-        // Kirim pesan-pesan official
         const messagesRef = collection(db, "chats", chatId, "messages");
         for (const msg of OFFICIAL_MESSAGES) {
           await addDoc(messagesRef, {
@@ -263,22 +294,24 @@ export default function HomePage(): React.JSX.Element {
             timestamp: serverTimestamp(),
             read: false,
             isPinned: false,
-            pinnedAt: null
+            pinnedAt: null,
+            replyTo: null,
+            replyToText: null,
+            replyToSender: null,
+            isShared: false
           });
         }
         
         setOfficialMessagesSent(true);
-        console.log("Official messages sent successfully!");
       } else {
         setOfficialMessagesSent(true);
-        console.log("Official chat already exists.");
       }
     } catch (error) {
       console.error("Error sending official messages:", error);
     }
   };
 
-  // Load users from Firestore + tambahkan Menuru Official
+  // Load users + online status
   useEffect(() => {
     if (!db || !user) return;
     const loadUsers = async () => {
@@ -289,14 +322,19 @@ export default function HomePage(): React.JSX.Element {
           const userList: ChatUser[] = [];
           snapshot.forEach((doc) => {
             if (doc.id !== user.uid) {
-              userList.push({ id: doc.id, ...doc.data() } as ChatUser);
+              const data = doc.data();
+              userList.push({ 
+                id: doc.id, 
+                ...data,
+                online: data.online || false,
+                lastSeen: data.lastSeen || null
+              } as ChatUser);
             }
           });
           
-          // Tambahkan Menuru Official ke daftar user (jika belum ada)
           const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
-            userList.push(MENURU_OFFICIAL);
+            userList.push({ ...MENURU_OFFICIAL, online: true });
           }
           
           userList.sort((a, b) => {
@@ -386,7 +424,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, users]);
 
-  // Load messages for selected chat
+  // Load messages
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
@@ -466,6 +504,12 @@ export default function HomePage(): React.JSX.Element {
   const handleLogout = async () => {
     if (!auth) return;
     try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        online: false,
+        lastSeen: serverTimestamp()
+      });
+      
       await signOut(auth);
       setIsChatOpen(false);
       setSelectedChat(null);
@@ -486,10 +530,11 @@ export default function HomePage(): React.JSX.Element {
     if (!isChatOpen) {
       setSelectedChat(null);
       setShowAddUser(false);
+      setReplyTo(null);
     }
   };
 
-  // Send message
+  // Send message with reply
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
@@ -507,7 +552,7 @@ export default function HomePage(): React.JSX.Element {
       }
       
       const messagesRef = collection(db, "chats", chatId, "messages");
-      await addDoc(messagesRef, {
+      const msgData: any = {
         text: message.trim(),
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
@@ -515,12 +560,66 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         isPinned: false,
-        pinnedAt: null
-      });
+        pinnedAt: null,
+        isShared: false
+      };
+      
+      // Add reply data if replying
+      if (replyTo) {
+        msgData.replyTo = replyTo.id;
+        msgData.replyToText = replyTo.text;
+        msgData.replyToSender = replyTo.senderName;
+      }
+      
+      await addDoc(messagesRef, msgData);
 
       setMessage("");
+      setReplyTo(null);
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  // Share message to another user
+  const handleShareMessage = async () => {
+    if (!shareMessage || !selectedShareUser || !user || !db) return;
+    
+    try {
+      const targetUser = users.find(u => u.id === selectedShareUser);
+      if (!targetUser) return;
+      
+      const chatId = [user.uid, targetUser.id].sort().join("_");
+      
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, targetUser.id],
+          createdAt: serverTimestamp(),
+          isPinned: false
+        });
+      }
+      
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      await addDoc(messagesRef, {
+        text: `📤 Dibagikan dari ${shareMessage.senderName}: ${shareMessage.text}`,
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        receiverId: targetUser.id,
+        timestamp: serverTimestamp(),
+        read: false,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: true,
+        sharedFrom: shareMessage.senderId,
+        sharedFromName: shareMessage.senderName
+      });
+      
+      setShowShareModal(false);
+      setShareMessage(null);
+      setSelectedShareUser("");
+    } catch (error) {
+      console.error("Error sharing message:", error);
     }
   };
 
@@ -644,11 +743,22 @@ export default function HomePage(): React.JSX.Element {
     return { icon: "✓", color: "#999", label: "Terkirim" };
   };
 
+  const getOnlineStatus = (userId: string) => {
+    const chatUser = users.find(u => u.id === userId);
+    if (!chatUser) return false;
+    return chatUser.online || false;
+  };
+
+  const getLastSeen = (userId: string) => {
+    const chatUser = users.find(u => u.id === userId);
+    if (!chatUser || !chatUser.lastSeen) return "";
+    const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
+    return `Terakhir online ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
   const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
-
-  // Available users for new chat
   const availableUsers = users.filter(u => 
     !chatRooms.some(room => room.participants.includes(u.id))
   );
@@ -697,7 +807,7 @@ export default function HomePage(): React.JSX.Element {
         Menuru
       </div>
 
-      {/* Teks "menuru" besar di sisi kanan */}
+      {/* Teks "menuru" besar */}
       <div
         style={{
           position: "absolute",
@@ -753,6 +863,7 @@ export default function HomePage(): React.JSX.Element {
               />
             )}
             <span style={{ fontWeight: 500, color: "#000" }}>{user.displayName || user.email}</span>
+            <span style={{ fontSize: "10px", color: "#4ade80" }}>● Online</span>
             <button
               onClick={handleLogout}
               style={{
@@ -917,6 +1028,112 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
+      {/* Share Modal */}
+      {showShareModal && shareMessage && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setShowShareModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "20px",
+              padding: "30px",
+              maxWidth: "400px",
+              width: "90%",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px" }}>
+              Bagikan Pesan
+            </h3>
+            <div style={{ 
+              fontSize: "13px", 
+              color: "#666", 
+              marginBottom: "16px",
+              padding: "10px",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "8px"
+            }}>
+              <div style={{ fontWeight: 500, color: "#000" }}>Dari: {shareMessage.senderName}</div>
+              <div>{shareMessage.text}</div>
+            </div>
+            <select
+              value={selectedShareUser}
+              onChange={(e) => setSelectedShareUser(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                fontSize: "13px",
+                outline: "none",
+                fontFamily: "Inter, 'Inter Fallback'",
+                marginBottom: "12px",
+                backgroundColor: "#fff",
+                color: "#000",
+              }}
+            >
+              <option value="">Pilih user...</option>
+              {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} {u.isOfficial ? "⭐ Official" : ""}
+                </option>
+              ))}
+            </select>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={handleShareMessage}
+                disabled={!selectedShareUser}
+                style={{
+                  backgroundColor: selectedShareUser ? "#000" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  cursor: selectedShareUser ? "pointer" : "not-allowed",
+                  fontWeight: 500,
+                  flex: 1,
+                  transition: "all .2s ease",
+                }}
+              >
+                Bagikan
+              </button>
+              <button
+                onClick={() => {
+                  setShowShareModal(false);
+                  setShareMessage(null);
+                  setSelectedShareUser("");
+                }}
+                style={{
+                  background: "none",
+                  border: "1px solid #ddd",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  color: "#666",
+                  cursor: "pointer",
+                }}
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat Box */}
       <div
         style={{
@@ -935,8 +1152,8 @@ export default function HomePage(): React.JSX.Element {
             style={{
               backgroundColor: "#ffffff",
               borderRadius: "20px",
-              width: "420px",
-              maxHeight: "560px",
+              width: "560px",
+              maxHeight: "700px",
               boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
@@ -967,9 +1184,27 @@ export default function HomePage(): React.JSX.Element {
                   {selectedChat ? selectedChat.name : "Pesan"}
                 </span>
                 {selectedChat && (
-                  <span style={{ fontSize: "10px", color: "#999" }}>
-                    {selectedChat.email}
-                  </span>
+                  <>
+                    <span style={{ fontSize: "10px", color: "#999" }}>
+                      {selectedChat.email}
+                    </span>
+                    <span style={{ 
+                      fontSize: "10px", 
+                      color: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}>
+                      <span style={{ 
+                        display: "inline-block",
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        backgroundColor: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666"
+                      }} />
+                      {getOnlineStatus(selectedChat.id) ? "Online" : getLastSeen(selectedChat.id)}
+                    </span>
+                  </>
                 )}
                 {!selectedChat && totalUnread > 0 && (
                   <span
@@ -1015,8 +1250,8 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {!selectedChat ? (
-              <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1 }}>
-                {/* Announcement Section - Icon Sorak saja */}
+              <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "600px" }}>
+                {/* Announcement */}
                 <div
                   style={{
                     display: "flex",
@@ -1102,7 +1337,7 @@ export default function HomePage(): React.JSX.Element {
                       <option value="" style={{ color: "#000" }}>Pilih user...</option>
                       {availableUsers.map((u) => (
                         <option key={u.id} value={u.id} style={{ color: "#000" }}>
-                          {u.name} {u.isOfficial ? "⭐ Official" : ""} ({u.email})
+                          {u.name} {u.isOfficial ? "⭐ Official" : ""} ({u.online ? "🟢 Online" : "⚪ Offline"})
                         </option>
                       ))}
                     </select>
@@ -1223,7 +1458,9 @@ export default function HomePage(): React.JSX.Element {
                                   </span>
                                 )}
                               </div>
-                              <div style={{ fontSize: "10px", color: "#666" }}>{u.email}</div>
+                              <div style={{ fontSize: "10px", color: "#666" }}>
+                                {u.email} • {u.online ? "🟢 Online" : "⚪ Offline"}
+                              </div>
                             </div>
                             <button
                               onClick={() => handlePinUser(u.id, true)}
@@ -1326,7 +1563,7 @@ export default function HomePage(): React.JSX.Element {
                                   )}
                                 </div>
                                 <div style={{ fontSize: "10px", color: "#666" }}>
-                                  {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
+                                  {otherUser.online ? "🟢 Online" : "⚪ Offline"} • {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
                                 </div>
                               </div>
                               {room.unreadCount > 0 && (
@@ -1443,6 +1680,18 @@ export default function HomePage(): React.JSX.Element {
                             ) : (
                               <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                             )}
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: 0,
+                                right: 0,
+                                width: "12px",
+                                height: "12px",
+                                borderRadius: "50%",
+                                backgroundColor: getOnlineStatus(otherUser.id) ? "#4ade80" : "#666",
+                                border: "2px solid #fff",
+                              }}
+                            />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
@@ -1525,8 +1774,8 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View
-              <div style={{ display: "flex", flexDirection: "column", height: "420px" }}>
+              // Chat View - Diperbesar
+              <div style={{ display: "flex", flexDirection: "column", height: "560px" }}>
                 {/* Chat Header */}
                 <div
                   style={{
@@ -1539,7 +1788,10 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <button
-                    onClick={() => setSelectedChat(null)}
+                    onClick={() => {
+                      setSelectedChat(null);
+                      setReplyTo(null);
+                    }}
                     style={{
                       background: "none",
                       border: "none",
@@ -1575,6 +1827,7 @@ export default function HomePage(): React.JSX.Element {
                       fontSize: "16px",
                       overflow: "hidden",
                       color: "#fff",
+                      position: "relative",
                     }}
                   >
                     {selectedChat.photoURL ? (
@@ -1586,6 +1839,18 @@ export default function HomePage(): React.JSX.Element {
                     ) : (
                       <span style={{ color: "#fff" }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                     )}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666",
+                        border: "2px solid #000",
+                      }}
+                    />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
@@ -1602,7 +1867,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
                     <div style={{ fontSize: "10px", color: "#999" }}>
-                      {selectedChat.email}
+                      {selectedChat.online ? "🟢 Online" : `⚪ ${getLastSeen(selectedChat.id)}`}
                     </div>
                   </div>
                   <button
@@ -1623,67 +1888,41 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Riwayat Pin Message */}
-                {pinnedMessages.length > 0 && (
+                {/* Reply Indicator */}
+                {replyTo && (
                   <div
                     style={{
                       padding: "8px 16px",
                       backgroundColor: "#0a0a0a",
                       borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    <div
-                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <ReplyIcon />
+                      <div>
+                        <div style={{ fontSize: "11px", color: "#c5e800", fontWeight: 500 }}>
+                          Membalas {replyTo.senderName === user.displayName ? "diri sendiri" : replyTo.senderName}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#999" }}>
+                          {replyTo.text.length > 40 ? replyTo.text.substring(0, 40) + "..." : replyTo.text}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setReplyTo(null)}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
+                        background: "none",
+                        border: "none",
+                        color: "#666",
                         cursor: "pointer",
-                        color: "#999",
+                        fontSize: "14px",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#fff" }}>
-                          Pesan Pinned ({pinnedMessages.length})
-                        </span>
-                      </div>
-                      <PinDropdownIcon isOpen={showPinnedMessages} />
-                    </div>
-                    {showPinnedMessages && (
-                      <div style={{ marginTop: "8px", maxHeight: "150px", overflowY: "auto" }}>
-                        {pinnedMessages.map((msg) => {
-                          const isMine = msg.senderId === user?.uid;
-                          return (
-                            <div
-                              key={msg.id}
-                              style={{
-                                padding: "6px 10px",
-                                marginBottom: "4px",
-                                borderRadius: "6px",
-                                backgroundColor: isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)",
-                                fontSize: "12px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <div style={{ flex: 1 }}>
-                                <span style={{ color: "#666", fontSize: "10px" }}>
-                                  {isMine ? "Anda: " : `${msg.senderName}: `}
-                                </span>
-                                <span style={{ color: "#fff" }}>
-                                  {msg.text.length > 50 ? msg.text.substring(0, 50) + "..." : msg.text}
-                                </span>
-                              </div>
-                              <span style={{ fontSize: "9px", color: "#555", marginLeft: "8px" }}>
-                                {formatTime(msg.pinnedAt || msg.timestamp)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                      ✕
+                    </button>
                   </div>
                 )}
 
@@ -1696,7 +1935,7 @@ export default function HomePage(): React.JSX.Element {
                     backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "4px",
+                    gap: "6px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1744,25 +1983,47 @@ export default function HomePage(): React.JSX.Element {
                           <div
                             style={{
                               alignSelf: isMine ? "flex-end" : "flex-start",
-                              maxWidth: "75%",
-                              padding: "10px 14px",
+                              maxWidth: "85%",
+                              padding: "12px 16px",
                               borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
                               backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
                               color: isMine ? "#000" : "#fff",
-                              fontSize: "14px",
-                              lineHeight: 1.5,
+                              fontSize: "15px",
+                              lineHeight: 1.6,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
                             }}
                           >
+                            {/* Reply preview */}
+                            {msg.replyTo && msg.replyToText && (
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
+                                  padding: "4px 8px",
+                                  borderLeft: `2px solid ${isMine ? "#000" : "#555"}`,
+                                  marginBottom: "6px",
+                                  backgroundColor: isMine ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)",
+                                  borderRadius: "4px",
+                                }}
+                              >
+                                <span style={{ fontWeight: 500 }}>
+                                  {msg.replyToSender === user.displayName ? "Anda" : msg.replyToSender}:
+                                </span>
+                                {msg.replyToText}
+                              </div>
+                            )}
+                            
                             {msg.text}
+                            
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "4px",
-                                marginTop: "4px",
+                                gap: "6px",
+                                marginTop: "6px",
                                 justifyContent: isMine ? "flex-end" : "flex-start",
+                                flexWrap: "wrap",
                               }}
                             >
                               <span
@@ -1784,6 +2045,41 @@ export default function HomePage(): React.JSX.Element {
                                   {status.icon}
                                 </span>
                               )}
+                              <button
+                                onClick={() => setReplyTo(msg)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                  padding: "2px 4px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  transition: "all .2s ease",
+                                }}
+                                title="Reply"
+                              >
+                                <ReplyIcon />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setShareMessage(msg);
+                                  setShowShareModal(true);
+                                }}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                  padding: "2px 4px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  transition: "all .2s ease",
+                                }}
+                                title="Share"
+                              >
+                                <ShareIcon />
+                              </button>
                               <button
                                 onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
                                 style={{
@@ -1841,7 +2137,7 @@ export default function HomePage(): React.JSX.Element {
                 >
                   <input
                     type="text"
-                    placeholder="Ketik pesan..."
+                    placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={(e) => {
@@ -1852,10 +2148,10 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     style={{
                       flex: 1,
-                      padding: "10px 16px",
-                      border: "1px solid #e8e8e8",
+                      padding: "12px 18px",
+                      border: replyTo ? "2px solid #c5e800" : "1px solid #e8e8e8",
                       borderRadius: "60px",
-                      fontSize: "14px",
+                      fontSize: "15px",
                       outline: "none",
                       fontFamily: "Inter, 'Inter Fallback'",
                       transition: "all .2s ease",
@@ -1867,7 +2163,7 @@ export default function HomePage(): React.JSX.Element {
                       e.currentTarget.style.backgroundColor = "#ffffff";
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = "#e8e8e8";
+                      e.currentTarget.style.borderColor = replyTo ? "#c5e800" : "#e8e8e8";
                       e.currentTarget.style.backgroundColor = "#f5f5f5";
                     }}
                   />
@@ -1876,9 +2172,9 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       backgroundColor: "#c5e800",
                       border: "none",
-                      padding: "10px 18px",
+                      padding: "12px 24px",
                       borderRadius: "60px",
-                      fontSize: "14px",
+                      fontSize: "15px",
                       fontWeight: 500,
                       color: "#000",
                       cursor: "pointer",
@@ -1886,7 +2182,7 @@ export default function HomePage(): React.JSX.Element {
                       whiteSpace: "nowrap",
                       display: "flex",
                       alignItems: "center",
-                      gap: "6px",
+                      gap: "8px",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "#b0d000";
