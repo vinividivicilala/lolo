@@ -96,6 +96,16 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
+interface TrailImage {
+  id: number;
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  opacity: number;
+  image: string;
+}
+
 // SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -386,9 +396,22 @@ export default function HomePage(): React.JSX.Element {
   const [selectedShareUser, setSelectedShareUser] = useState("");
   const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [trailImages, setTrailImages] = useState<TrailImage[]>([]);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const trailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Image paths
+  const IMAGE_PATHS = [
+    '/images/10.jpg',
+    '/images/11.jpg',
+    '/images/12.jpg',
+    '/images/13.jpg',
+    '/images/14.jpg',
+    '/images/15.jpg'
+  ];
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -421,6 +444,52 @@ export default function HomePage(): React.JSX.Element {
       senderName: "Menuru Official"
     }
   ];
+
+  // Mouse trail effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      
+      // Clear previous timeout
+      if (trailTimeoutRef.current) {
+        clearTimeout(trailTimeoutRef.current);
+      }
+      
+      // Add new trail image
+      const randomIndex = Math.floor(Math.random() * IMAGE_PATHS.length);
+      const newImage: TrailImage = {
+        id: Date.now() + Math.random(),
+        x: e.clientX - 25,
+        y: e.clientY - 25,
+        scale: 0.5 + Math.random() * 0.5,
+        rotation: Math.random() * 360,
+        opacity: 0.8 + Math.random() * 0.2,
+        image: IMAGE_PATHS[randomIndex]
+      };
+      
+      setTrailImages(prev => {
+        const updated = [newImage, ...prev];
+        // Keep only last 15 images
+        return updated.slice(0, 15);
+      });
+      
+      // Remove images after animation
+      trailTimeoutRef.current = setTimeout(() => {
+        setTrailImages(prev => {
+          const updated = prev.filter(img => img.id !== newImage.id);
+          return updated;
+        });
+      }, 1500);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (trailTimeoutRef.current) {
+        clearTimeout(trailTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auth Listener
   useEffect(() => {
@@ -743,18 +812,15 @@ export default function HomePage(): React.JSX.Element {
     
     if (!selectedChat || !user || !db) return;
     
-    // Update typing status
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
       typing: value.length > 0
     });
     
-    // Clear previous timeout
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
     
-    // Set timeout to clear typing status after 2 seconds of no typing
     const newTimeout = setTimeout(async () => {
       const userRef2 = doc(db, "users", user.uid);
       await updateDoc(userRef2, {
@@ -770,7 +836,6 @@ export default function HomePage(): React.JSX.Element {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
     try {
-      // Clear typing status
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
@@ -1066,8 +1131,33 @@ export default function HomePage(): React.JSX.Element {
         position: "relative",
         fontFamily: "Inter, 'Inter Fallback'",
         overflow: "hidden",
+        cursor: "default",
       }}
     >
+      {/* Mouse Trail Images */}
+      {trailImages.map((img) => (
+        <img
+          key={img.id}
+          src={img.image}
+          alt="trail"
+          style={{
+            position: "fixed",
+            left: img.x,
+            top: img.y,
+            width: "50px",
+            height: "50px",
+            borderRadius: "50%",
+            objectFit: "cover",
+            pointerEvents: "none",
+            zIndex: 9999,
+            transform: `scale(${img.scale}) rotate(${img.rotation}deg)`,
+            opacity: img.opacity,
+            transition: "all 0.1s ease-out",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+          }}
+        />
+      ))}
+
       {/* Logo - Kiri Atas */}
       <div
         style={{
