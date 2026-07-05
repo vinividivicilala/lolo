@@ -400,7 +400,6 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const trailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const imageCounterRef = useRef(0);
 
   // Image paths
   const IMAGE_PATHS = [
@@ -444,53 +443,64 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Mouse trail effect - GSAP style smooth
+  // Mouse trail effect - GSAP style with sequential display
   useEffect(() => {
+    let imageQueue: TrailImage[] = [];
+    let isProcessing = false;
+    
+    const processQueue = () => {
+      if (isProcessing || imageQueue.length === 0) return;
+      isProcessing = true;
+      
+      const img = imageQueue.shift();
+      if (!img) {
+        isProcessing = false;
+        return;
+      }
+      
+      setTrailImages(prev => {
+        const updated = [img, ...prev];
+        if (updated.length > 6) {
+          return updated.slice(0, 6);
+        }
+        return updated;
+      });
+      
+      setTimeout(() => {
+        setTrailImages(prev => prev.filter(i => i.id !== img.id));
+        isProcessing = false;
+        setTimeout(() => processQueue(), 50);
+      }, 500);
+    };
+    
     const handleMouseMove = (e: MouseEvent) => {
-      // Clear previous timeout
       if (trailTimeoutRef.current) {
         clearTimeout(trailTimeoutRef.current);
       }
       
-      // Get random image
       const randomIndex = Math.floor(Math.random() * IMAGE_PATHS.length);
       
-      // Create new trail image with delay for smooth effect
       const newImage: TrailImage = {
         id: Date.now() + Math.random(),
-        x: e.clientX - 40,
-        y: e.clientY - 55,
+        x: e.clientX - 55,
+        y: e.clientY - 70,
         opacity: 1,
         image: IMAGE_PATHS[randomIndex],
         delay: 0
       };
       
-      // Add new image
-      setTrailImages(prev => {
-        // Keep only last 8 images for smooth trail
-        const updated = [newImage, ...prev].slice(0, 8);
-        return updated;
-      });
+      imageQueue.push(newImage);
+      if (imageQueue.length > 8) {
+        imageQueue = imageQueue.slice(imageQueue.length - 8);
+      }
       
-      // Fade out images gradually (GSAP style)
+      if (!isProcessing) {
+        processQueue();
+      }
+      
       trailTimeoutRef.current = setTimeout(() => {
-        setTrailImages(prev => {
-          // Reduce opacity gradually
-          return prev.map((img, index) => {
-            if (img.id === newImage.id) {
-              return { ...img, opacity: 0.8 };
-            }
-            // Older images fade more
-            const fadeAmount = index * 0.12;
-            return { ...img, opacity: Math.max(0, 1 - fadeAmount) };
-          });
-        });
-        
-        // Remove images completely after fade
-        setTimeout(() => {
-          setTrailImages(prev => prev.filter(img => img.id !== newImage.id));
-        }, 300);
-      }, 100);
+        imageQueue = [];
+      }, 1000);
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -499,6 +509,8 @@ export default function HomePage(): React.JSX.Element {
       if (trailTimeoutRef.current) {
         clearTimeout(trailTimeoutRef.current);
       }
+      imageQueue = [];
+      isProcessing = false;
     };
   }, []);
 
@@ -1145,7 +1157,7 @@ export default function HomePage(): React.JSX.Element {
         cursor: "default",
       }}
     >
-      {/* Mouse Trail Images - GSAP Style Smooth */}
+      {/* Mouse Trail Images - Sequential Display, Larger Portrait */}
       {trailImages.map((img, index) => (
         <img
           key={img.id}
@@ -1153,19 +1165,21 @@ export default function HomePage(): React.JSX.Element {
           alt="trail"
           style={{
             position: "fixed",
-            left: img.x,
-            top: img.y,
-            width: "75px",
-            height: "95px",
+            left: img.x + (index * 22),
+            top: img.y + (index * 17),
+            width: "120px",
+            height: "155px",
             objectFit: "cover",
             pointerEvents: "none",
             zIndex: 9999,
-            opacity: img.opacity,
-            transform: `scale(${1 - index * 0.08})`,
-            transition: "all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            borderRadius: "4px",
-            filter: `brightness(${1 - index * 0.05})`,
+            opacity: 1 - (index * 0.15),
+            transform: `scale(${1 - (index * 0.08)})`,
+            transition: "all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+            borderRadius: "8px",
+            filter: `brightness(${1 - (index * 0.05)})`,
+            border: "2px solid rgba(255,255,255,0.15)",
+            willChange: "transform, opacity",
           }}
         />
       ))}
