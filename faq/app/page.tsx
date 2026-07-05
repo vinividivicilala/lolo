@@ -100,10 +100,9 @@ interface TrailImage {
   id: number;
   x: number;
   y: number;
-  scale: number;
-  rotation: number;
   opacity: number;
   image: string;
+  delay: number;
 }
 
 // SVG Icons
@@ -401,6 +400,7 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const trailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const imageCounterRef = useRef(0);
 
   // Image paths
   const IMAGE_PATHS = [
@@ -444,7 +444,7 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Mouse trail effect
+  // Mouse trail effect - GSAP style smooth
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       // Clear previous timeout
@@ -452,31 +452,45 @@ export default function HomePage(): React.JSX.Element {
         clearTimeout(trailTimeoutRef.current);
       }
       
-      // Add new trail image
+      // Get random image
       const randomIndex = Math.floor(Math.random() * IMAGE_PATHS.length);
+      
+      // Create new trail image with delay for smooth effect
       const newImage: TrailImage = {
         id: Date.now() + Math.random(),
         x: e.clientX - 40,
         y: e.clientY - 55,
-        scale: 0.5 + Math.random() * 0.5,
-        rotation: Math.random() * 360,
-        opacity: 0.8 + Math.random() * 0.2,
-        image: IMAGE_PATHS[randomIndex]
+        opacity: 1,
+        image: IMAGE_PATHS[randomIndex],
+        delay: 0
       };
       
+      // Add new image
       setTrailImages(prev => {
-        const updated = [newImage, ...prev];
-        // Keep only last 10 images
-        return updated.slice(0, 10);
+        // Keep only last 8 images for smooth trail
+        const updated = [newImage, ...prev].slice(0, 8);
+        return updated;
       });
       
-      // Remove images after animation
+      // Fade out images gradually (GSAP style)
       trailTimeoutRef.current = setTimeout(() => {
         setTrailImages(prev => {
-          const updated = prev.filter(img => img.id !== newImage.id);
-          return updated;
+          // Reduce opacity gradually
+          return prev.map((img, index) => {
+            if (img.id === newImage.id) {
+              return { ...img, opacity: 0.8 };
+            }
+            // Older images fade more
+            const fadeAmount = index * 0.12;
+            return { ...img, opacity: Math.max(0, 1 - fadeAmount) };
+          });
         });
-      }, 1000);
+        
+        // Remove images completely after fade
+        setTimeout(() => {
+          setTrailImages(prev => prev.filter(img => img.id !== newImage.id));
+        }, 300);
+      }, 100);
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -1131,8 +1145,8 @@ export default function HomePage(): React.JSX.Element {
         cursor: "default",
       }}
     >
-      {/* Mouse Trail Images - Portrait Normal */}
-      {trailImages.map((img) => (
+      {/* Mouse Trail Images - GSAP Style Smooth */}
+      {trailImages.map((img, index) => (
         <img
           key={img.id}
           src={img.image}
@@ -1141,16 +1155,17 @@ export default function HomePage(): React.JSX.Element {
             position: "fixed",
             left: img.x,
             top: img.y,
-            width: "80px",
-            height: "100px",
+            width: "75px",
+            height: "95px",
             objectFit: "cover",
             pointerEvents: "none",
             zIndex: 9999,
-            transform: `scale(${img.scale}) rotate(${img.rotation}deg)`,
             opacity: img.opacity,
-            transition: "all 0.15s ease-out",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            transform: `scale(${1 - index * 0.08})`,
+            transition: "all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
             borderRadius: "4px",
+            filter: `brightness(${1 - index * 0.05})`,
           }}
         />
       ))}
