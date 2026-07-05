@@ -397,7 +397,6 @@ export default function HomePage(): React.JSX.Element {
   const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [trailImages, setTrailImages] = useState<TrailImage[]>([]);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -448,8 +447,6 @@ export default function HomePage(): React.JSX.Element {
   // Mouse trail effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-      
       // Clear previous timeout
       if (trailTimeoutRef.current) {
         clearTimeout(trailTimeoutRef.current);
@@ -459,8 +456,8 @@ export default function HomePage(): React.JSX.Element {
       const randomIndex = Math.floor(Math.random() * IMAGE_PATHS.length);
       const newImage: TrailImage = {
         id: Date.now() + Math.random(),
-        x: e.clientX - 25,
-        y: e.clientY - 25,
+        x: e.clientX - 40,
+        y: e.clientY - 55,
         scale: 0.5 + Math.random() * 0.5,
         rotation: Math.random() * 360,
         opacity: 0.8 + Math.random() * 0.2,
@@ -469,8 +466,8 @@ export default function HomePage(): React.JSX.Element {
       
       setTrailImages(prev => {
         const updated = [newImage, ...prev];
-        // Keep only last 15 images
-        return updated.slice(0, 15);
+        // Keep only last 10 images
+        return updated.slice(0, 10);
       });
       
       // Remove images after animation
@@ -479,7 +476,7 @@ export default function HomePage(): React.JSX.Element {
           const updated = prev.filter(img => img.id !== newImage.id);
           return updated;
         });
-      }, 1500);
+      }, 1000);
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -1134,7 +1131,7 @@ export default function HomePage(): React.JSX.Element {
         cursor: "default",
       }}
     >
-      {/* Mouse Trail Images */}
+      {/* Mouse Trail Images - Portrait Normal */}
       {trailImages.map((img) => (
         <img
           key={img.id}
@@ -1144,16 +1141,16 @@ export default function HomePage(): React.JSX.Element {
             position: "fixed",
             left: img.x,
             top: img.y,
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
+            width: "80px",
+            height: "100px",
             objectFit: "cover",
             pointerEvents: "none",
             zIndex: 9999,
             transform: `scale(${img.scale}) rotate(${img.rotation}deg)`,
             opacity: img.opacity,
-            transition: "all 0.1s ease-out",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            transition: "all 0.15s ease-out",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            borderRadius: "4px",
           }}
         />
       ))}
