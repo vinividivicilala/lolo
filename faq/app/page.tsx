@@ -245,13 +245,11 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp()
             });
           } else {
-            // Update online status
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp()
             });
             
-            // Set offline on disconnect
             const disconnectRef = doc(db, "users", currentUser.uid);
             onDisconnect(disconnectRef).update({
               online: false,
@@ -564,7 +562,6 @@ export default function HomePage(): React.JSX.Element {
         isShared: false
       };
       
-      // Add reply data if replying
       if (replyTo) {
         msgData.replyTo = replyTo.id;
         msgData.replyToText = replyTo.text;
@@ -1669,6 +1666,7 @@ export default function HomePage(): React.JSX.Element {
                               fontSize: "18px",
                               flexShrink: 0,
                               overflow: "hidden",
+                              position: "relative",
                             }}
                           >
                             {otherUser.photoURL ? (
@@ -1774,7 +1772,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - Diperbesar
+              // Chat View - Diperbesar dengan warna terang
               <div style={{ display: "flex", flexDirection: "column", height: "560px" }}>
                 {/* Chat Header */}
                 <div
@@ -1926,7 +1924,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Messages - Background hitam */}
+                {/* Messages - Background hitam dengan warna terang */}
                 <div
                   style={{
                     flex: 1,
@@ -1942,14 +1940,14 @@ export default function HomePage(): React.JSX.Element {
                     <div
                       style={{
                         textAlign: "center",
-                        color: "#666",
-                        fontSize: "13px",
+                        color: "#888",
+                        fontSize: "14px",
                         marginTop: "60px",
                       }}
                     >
-                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>💬</div>
-                      <div style={{ color: "#888" }}>Belum ada pesan</div>
-                      <div style={{ fontSize: "11px", marginTop: "4px", color: "#555" }}>
+                      <div style={{ fontSize: "32px", marginBottom: "8px" }}>💬</div>
+                      <div style={{ color: "#999" }}>Belum ada pesan</div>
+                      <div style={{ fontSize: "12px", marginTop: "6px", color: "#666" }}>
                         Kirim pesan pertama
                       </div>
                     </div>
@@ -1968,13 +1966,13 @@ export default function HomePage(): React.JSX.Element {
                               style={{
                                 textAlign: "center",
                                 color: "#fff",
-                                fontSize: "11px",
-                                padding: "8px 0 12px 0",
+                                fontSize: "12px",
+                                padding: "10px 0 14px 0",
                                 fontWeight: 500,
                                 letterSpacing: "0.03em",
-                                backgroundColor: "rgba(255,255,255,0.05)",
-                                borderRadius: "4px",
-                                marginBottom: "4px",
+                                backgroundColor: "rgba(255,255,255,0.08)",
+                                borderRadius: "6px",
+                                marginBottom: "6px",
                               }}
                             >
                               {formatDate(msg.timestamp)}
@@ -1984,14 +1982,15 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               alignSelf: isMine ? "flex-end" : "flex-start",
                               maxWidth: "85%",
-                              padding: "12px 16px",
-                              borderRadius: isMine ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                              backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
-                              color: isMine ? "#000" : "#fff",
+                              padding: "14px 18px",
+                              borderRadius: isMine ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
+                              backgroundColor: isMine ? "#c5e800" : "#3a3a3a",
+                              color: isMine ? "#000" : "#ffffff",
                               fontSize: "15px",
                               lineHeight: 1.6,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
+                              boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.2)" : "none",
                             }}
                           >
                             {/* Reply preview */}
@@ -1999,37 +1998,40 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "12px",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
-                                  padding: "4px 8px",
-                                  borderLeft: `2px solid ${isMine ? "#000" : "#555"}`,
-                                  marginBottom: "6px",
-                                  backgroundColor: isMine ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)",
+                                  color: isMine ? "rgba(0,0,0,0.6)" : "#aaa",
+                                  padding: "6px 10px",
+                                  borderLeft: `3px solid ${isMine ? "#000" : "#666"}`,
+                                  marginBottom: "8px",
+                                  backgroundColor: isMine ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
                                   borderRadius: "4px",
                                 }}
                               >
-                                <span style={{ fontWeight: 500 }}>
+                                <span style={{ fontWeight: 600, color: isMine ? "#000" : "#c5e800" }}>
                                   {msg.replyToSender === user.displayName ? "Anda" : msg.replyToSender}:
                                 </span>
-                                {msg.replyToText}
+                                <span style={{ color: isMine ? "#000" : "#ddd" }}> {msg.replyToText}</span>
                               </div>
                             )}
                             
-                            {msg.text}
+                            <span style={{ color: isMine ? "#000" : "#ffffff" }}>
+                              {msg.text}
+                            </span>
                             
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "6px",
-                                marginTop: "6px",
+                                marginTop: "8px",
                                 justifyContent: isMine ? "flex-end" : "flex-start",
                                 flexWrap: "wrap",
                               }}
                             >
                               <span
                                 style={{
-                                  fontSize: "9px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                  fontSize: "10px",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
+                                  fontWeight: 400,
                                 }}
                               >
                                 {formatTime(msg.timestamp)}
@@ -2037,7 +2039,7 @@ export default function HomePage(): React.JSX.Element {
                               {isMine && status && (
                                 <span
                                   style={{
-                                    fontSize: "10px",
+                                    fontSize: "11px",
                                     color: status.color,
                                     fontWeight: status.label === "Dibaca" ? 700 : 400,
                                   }}
@@ -2051,11 +2053,20 @@ export default function HomePage(): React.JSX.Element {
                                   background: "none",
                                   border: "none",
                                   cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
-                                  padding: "2px 4px",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
+                                  padding: "2px 6px",
                                   display: "flex",
                                   alignItems: "center",
                                   transition: "all .2s ease",
+                                  borderRadius: "4px",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+                                  e.currentTarget.style.color = isMine ? "#000" : "#fff";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = "transparent";
+                                  e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.5)" : "#888";
                                 }}
                                 title="Reply"
                               >
@@ -2070,11 +2081,20 @@ export default function HomePage(): React.JSX.Element {
                                   background: "none",
                                   border: "none",
                                   cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
-                                  padding: "2px 4px",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
+                                  padding: "2px 6px",
                                   display: "flex",
                                   alignItems: "center",
                                   transition: "all .2s ease",
+                                  borderRadius: "4px",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+                                  e.currentTarget.style.color = isMine ? "#000" : "#fff";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = "transparent";
+                                  e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.5)" : "#888";
                                 }}
                                 title="Share"
                               >
@@ -2086,11 +2106,24 @@ export default function HomePage(): React.JSX.Element {
                                   background: "none",
                                   border: "none",
                                   cursor: "pointer",
-                                  color: msg.isPinned ? "#c5e800" : "#555",
-                                  padding: "2px 4px",
+                                  color: msg.isPinned ? "#c5e800" : (isMine ? "rgba(0,0,0,0.4)" : "#666"),
+                                  padding: "2px 6px",
                                   display: "flex",
                                   alignItems: "center",
                                   transition: "all .2s ease",
+                                  borderRadius: "4px",
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!msg.isPinned) {
+                                    e.currentTarget.style.color = isMine ? "#000" : "#fff";
+                                    e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!msg.isPinned) {
+                                    e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.4)" : "#666";
+                                    e.currentTarget.style.backgroundColor = "transparent";
+                                  }
                                 }}
                                 title={msg.isPinned ? "Unpin message" : "Pin message"}
                               >
@@ -2102,14 +2135,14 @@ export default function HomePage(): React.JSX.Element {
                             <div
                               style={{
                                 alignSelf: isMine ? "flex-end" : "flex-start",
-                                fontSize: "9px",
+                                fontSize: "10px",
                                 color: "#c5e800",
                                 marginTop: "-2px",
-                                marginBottom: "4px",
-                                padding: "0 4px",
+                                marginBottom: "6px",
+                                padding: "0 6px",
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "4px",
+                                gap: "6px",
                                 fontWeight: 600,
                                 letterSpacing: "0.03em",
                               }}
