@@ -172,7 +172,7 @@ const RosetteBadge = () => (
   </svg>
 );
 
-// Announcement SVG Icon - Sorak/Megaphone
+// Announcement SVG Icon
 const AnnouncementIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M4 11L17 5V19L4 13V11Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -184,19 +184,115 @@ const AnnouncementIcon = () => (
   </svg>
 );
 
-// Online Status Indicator
-const OnlineIndicator = ({ online }: { online: boolean }) => (
-  <span style={{ 
-    display: "inline-block",
-    width: "10px",
-    height: "10px",
-    borderRadius: "50%",
-    backgroundColor: online ? "#4ade80" : "#666",
-    boxShadow: online ? "0 0 12px rgba(74, 222, 128, 0.6)" : "none",
-    flexShrink: 0,
-    transition: "all 0.3s ease"
-  }} />
-);
+// Online Status Indicator with Tooltip
+const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <span 
+        style={{ 
+          display: "inline-block",
+          width: "10px",
+          height: "10px",
+          borderRadius: "50%",
+          backgroundColor: online ? "#4ade80" : "#666",
+          boxShadow: online ? "0 0 12px rgba(74, 222, 128, 0.6)" : "none",
+          flexShrink: 0,
+          transition: "all 0.3s ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      />
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          border: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          {online ? "Online" : (lastSeen || "Offline")}
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Read Status with Tooltip
+const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const status = getMessageStatus(msg);
+  
+  if (!isMine || !status) return null;
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <span 
+        style={{
+          fontSize: "11px",
+          color: status.color,
+          fontWeight: status.label === "Dibaca" ? 700 : 400,
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {status.icon}
+      </span>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          right: 0,
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          border: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          {status.label}
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            right: "10px",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+function getMessageStatus(msg: Message) {
+  if (msg.senderId !== auth?.currentUser?.uid) return null;
+  if (msg.read && msg.readAt) {
+    return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+  }
+  return { icon: "✓", color: "#999", label: "Terkirim" };
+}
 
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
@@ -637,7 +733,7 @@ export default function HomePage(): React.JSX.Element {
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
-        text: `📤 Dibagikan dari ${shareMessage.senderName}: ${shareMessage.text}`,
+        text: `Diteruskan dari ${shareMessage.senderName}: ${shareMessage.text}`,
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: targetUser.id,
@@ -798,14 +894,6 @@ export default function HomePage(): React.JSX.Element {
     } else {
       return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     }
-  };
-
-  const getMessageStatus = (msg: Message) => {
-    if (msg.senderId !== user?.uid) return null;
-    if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
-    }
-    return { icon: "✓", color: "#999", label: "Terkirim" };
   };
 
   const getOnlineStatus = (userId: string) => {
@@ -1132,7 +1220,7 @@ export default function HomePage(): React.JSX.Element {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px" }}>
-              Bagikan Pesan
+              Teruskan Pesan
             </h3>
             <div style={{ 
               fontSize: "13px", 
@@ -1185,7 +1273,7 @@ export default function HomePage(): React.JSX.Element {
                   transition: "all .2s ease",
                 }}
               >
-                Bagikan
+                Teruskan
               </button>
               <button
                 onClick={() => {
@@ -1264,7 +1352,10 @@ export default function HomePage(): React.JSX.Element {
                     <span style={{ fontSize: "10px", color: "#999" }}>
                       {selectedChat.email}
                     </span>
-                    <OnlineIndicator online={getOnlineStatus(selectedChat.id)} />
+                    <OnlineIndicator 
+                      online={getOnlineStatus(selectedChat.id)} 
+                      lastSeen={getLastSeen(selectedChat.id)}
+                    />
                   </>
                 )}
                 {!selectedChat && totalUnread > 0 && (
@@ -1518,7 +1609,7 @@ export default function HomePage(): React.JSX.Element {
                                   {u.email}
                                 </div>
                               </div>
-                              <OnlineIndicator online={u.online || false} />
+                              <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
                             </div>
                             <button
                               onClick={() => handlePinUser(u.id, true)}
@@ -1618,7 +1709,7 @@ export default function HomePage(): React.JSX.Element {
                                     {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
                                   </div>
                                 </div>
-                                <OnlineIndicator online={otherUser.online || false} />
+                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               {room.unreadCount > 0 && (
                                 <div
@@ -1745,7 +1836,7 @@ export default function HomePage(): React.JSX.Element {
                                   <RosetteBadge />
                                 </>
                               )}
-                              <OnlineIndicator online={otherUser.online || false} />
+                              <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                             </div>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
@@ -1889,7 +1980,10 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
                       <div style={{ fontSize: "10px", color: "#999", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <OnlineIndicator online={getOnlineStatus(selectedChat.id)} />
+                        <OnlineIndicator 
+                          online={getOnlineStatus(selectedChat.id)} 
+                          lastSeen={getLastSeen(selectedChat.id)}
+                        />
                         {getOnlineStatus(selectedChat.id) ? "Online" : getLastSeen(selectedChat.id)}
                       </div>
                     </div>
@@ -1911,6 +2005,70 @@ export default function HomePage(): React.JSX.Element {
                     <PinIcon filled={selectedChat.isPinned || false} />
                   </button>
                 </div>
+
+                {/* Riwayat Pin Message */}
+                {pinnedMessages.length > 0 && (
+                  <div
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#0a0a0a",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <div
+                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
+                        color: "#999",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PinIcon filled={true} />
+                        <span style={{ fontSize: "12px", fontWeight: 500, color: "#fff" }}>
+                          Pesan Pinned ({pinnedMessages.length})
+                        </span>
+                      </div>
+                      <PinDropdownIcon isOpen={showPinnedMessages} />
+                    </div>
+                    {showPinnedMessages && (
+                      <div style={{ marginTop: "8px", maxHeight: "150px", overflowY: "auto" }}>
+                        {pinnedMessages.map((msg) => {
+                          const isMine = msg.senderId === user?.uid;
+                          return (
+                            <div
+                              key={msg.id}
+                              style={{
+                                padding: "6px 10px",
+                                marginBottom: "4px",
+                                borderRadius: "6px",
+                                backgroundColor: isMine ? "rgba(197,232,0,0.1)" : "rgba(255,255,255,0.05)",
+                                fontSize: "12px",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <span style={{ color: "#666", fontSize: "10px" }}>
+                                  {isMine ? "Anda: " : `${msg.senderName}: `}
+                                </span>
+                                <span style={{ color: "#fff" }}>
+                                  {msg.text.length > 50 ? msg.text.substring(0, 50) + "..." : msg.text}
+                                </span>
+                              </div>
+                              <span style={{ fontSize: "9px", color: "#555", marginLeft: "8px" }}>
+                                {formatTime(msg.pinnedAt || msg.timestamp)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Reply Indicator */}
                 {replyTo && (
@@ -1980,7 +2138,6 @@ export default function HomePage(): React.JSX.Element {
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user?.uid;
-                      const status = getMessageStatus(msg);
                       const chatId = [user.uid, selectedChat.id].sort().join("_");
                       const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
                         formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
@@ -2019,6 +2176,20 @@ export default function HomePage(): React.JSX.Element {
                               boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.2)" : "none",
                             }}
                           >
+                            {/* Shared indicator */}
+                            {msg.isShared && msg.sharedFromName && (
+                              <div
+                                style={{
+                                  fontSize: "11px",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#888",
+                                  marginBottom: "4px",
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                Diteruskan dari {msg.sharedFromName}
+                              </div>
+                            )}
+                            
                             {/* Reply preview */}
                             {msg.replyTo && msg.replyToText && (
                               <div
@@ -2062,17 +2233,7 @@ export default function HomePage(): React.JSX.Element {
                               >
                                 {formatTime(msg.timestamp)}
                               </span>
-                              {isMine && status && (
-                                <span
-                                  style={{
-                                    fontSize: "11px",
-                                    color: status.color,
-                                    fontWeight: status.label === "Dibaca" ? 700 : 400,
-                                  }}
-                                >
-                                  {status.icon}
-                                </span>
-                              )}
+                              <ReadStatus msg={msg} isMine={isMine} />
                               <button
                                 onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
                                 style={{
@@ -2097,7 +2258,7 @@ export default function HomePage(): React.JSX.Element {
                                   ref={menuRef}
                                   style={{
                                     position: "absolute",
-                                    bottom: "100%",
+                                    bottom: "calc(100% + 8px)",
                                     right: isMine ? 0 : "auto",
                                     left: isMine ? "auto" : 0,
                                     backgroundColor: "#1a1a1a",
@@ -2197,7 +2358,7 @@ export default function HomePage(): React.JSX.Element {
                                     }}
                                   >
                                     <ShareIcon />
-                                    <span>Bagikan</span>
+                                    <span>Teruskan</span>
                                   </button>
                                   <button
                                     onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
