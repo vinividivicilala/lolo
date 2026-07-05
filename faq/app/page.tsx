@@ -64,6 +64,7 @@ interface ChatUser {
   isOfficial?: boolean;
   online?: boolean;
   lastSeen?: any;
+  typing?: boolean;
 }
 
 interface Message {
@@ -235,33 +236,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Rosette Badge
-const RosetteBadge = ({ size = 16 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{
-      marginLeft: "4px",
-      display: "inline-block",
-      verticalAlign: "-2px",
-    }}
-  >
-    <path 
-      d="M12 2L14.5 7.5L20.5 5.5L18.5 11.5L24 14L18 16L19.5 22L14 18.5L9 22L10.5 16L4.5 14L10 11.5L8 5.5L14 7.5L12 2Z" 
-      fill="#FFD700" 
-      stroke="#FFD700" 
-      strokeWidth="1"
-    />
-    <path 
-      d="M12 8L13.5 12L17.5 11L14.5 14L15.5 18L12 15.5L8.5 18L9.5 14L6.5 11L10.5 12L12 8Z" 
-      fill="white"
-    />
-  </svg>
-);
-
 // Announcement SVG Icon
 const AnnouncementIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -411,6 +385,7 @@ export default function HomePage(): React.JSX.Element {
   const [shareMessage, setShareMessage] = useState<Message | null>(null);
   const [selectedShareUser, setSelectedShareUser] = useState("");
   const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -467,7 +442,8 @@ export default function HomePage(): React.JSX.Element {
               isPinned: false,
               isOfficial: false,
               online: true,
-              lastSeen: serverTimestamp()
+              lastSeen: serverTimestamp(),
+              typing: false
             });
           } else {
             await updateDoc(userRef, {
@@ -478,7 +454,8 @@ export default function HomePage(): React.JSX.Element {
             const disconnectRef = doc(db, "users", currentUser.uid);
             onDisconnect(disconnectRef).update({
               online: false,
-              lastSeen: serverTimestamp()
+              lastSeen: serverTimestamp(),
+              typing: false
             });
           }
           
@@ -550,14 +527,15 @@ export default function HomePage(): React.JSX.Element {
                 id: doc.id, 
                 ...data,
                 online: data.online || false,
-                lastSeen: data.lastSeen || null
+                lastSeen: data.lastSeen || null,
+                typing: data.typing || false
               } as ChatUser);
             }
           });
           
           const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
-            userList.push({ ...MENURU_OFFICIAL, online: true });
+            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false });
           }
           
           userList.sort((a, b) => {
@@ -730,7 +708,8 @@ export default function HomePage(): React.JSX.Element {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         online: false,
-        lastSeen: serverTimestamp()
+        lastSeen: serverTimestamp(),
+        typing: false
       });
       
       await signOut(auth);
@@ -757,11 +736,44 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Handle typing
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+    
+    if (!selectedChat || !user || !db) return;
+    
+    // Update typing status
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, {
+      typing: value.length > 0
+    });
+    
+    // Clear previous timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    
+    // Set timeout to clear typing status after 2 seconds of no typing
+    const newTimeout = setTimeout(async () => {
+      const userRef2 = doc(db, "users", user.uid);
+      await updateDoc(userRef2, {
+        typing: false
+      });
+    }, 2000);
+    
+    setTypingTimeout(newTimeout);
+  };
+
   // Send message with reply
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
     try {
+      // Clear typing status
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { typing: false });
+      
       const chatId = [user.uid, selectedChat.id].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
@@ -797,6 +809,11 @@ export default function HomePage(): React.JSX.Element {
 
       setMessage("");
       setReplyTo(null);
+      
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -998,6 +1015,12 @@ export default function HomePage(): React.JSX.Element {
     if (!chatUser || !chatUser.lastSeen) return "";
     const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
     return `Terakhir online ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const getTypingStatus = (userId: string) => {
+    const chatUser = users.find(u => u.id === userId);
+    if (!chatUser) return false;
+    return chatUser.typing || false;
   };
 
   const pinnedUsers = users.filter(u => u.isPinned);
@@ -1689,12 +1712,7 @@ export default function HomePage(): React.JSX.Element {
                               <div>
                                 <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
                                   {u.name}
-                                  {u.isOfficial && (
-                                    <>
-                                      <InstagramVerifiedBadge size={14} />
-                                      <RosetteBadge size={14} />
-                                    </>
-                                  )}
+                                  {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                                 </div>
                                 <div style={{ fontSize: "10px", color: "#666" }}>
                                   {u.email}
@@ -1789,12 +1807,7 @@ export default function HomePage(): React.JSX.Element {
                                 <div>
                                   <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
                                     {otherUser.name}
-                                    {otherUser.isOfficial && (
-                                      <>
-                                        <InstagramVerifiedBadge size={14} />
-                                        <RosetteBadge size={14} />
-                                      </>
-                                    )}
+                                    {otherUser.isOfficial && <InstagramVerifiedBadge size={14} />}
                                   </div>
                                   <div style={{ fontSize: "10px", color: "#666" }}>
                                     {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
@@ -1921,12 +1934,7 @@ export default function HomePage(): React.JSX.Element {
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "15px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
                               {otherUser.name}
-                              {otherUser.isOfficial && (
-                                <>
-                                  <InstagramVerifiedBadge size={14} />
-                                  <RosetteBadge size={14} />
-                                </>
-                              )}
+                              {otherUser.isOfficial && <InstagramVerifiedBadge size={14} />}
                               <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                             </div>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -2059,24 +2067,36 @@ export default function HomePage(): React.JSX.Element {
                       <span style={{ color: "#fff" }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                     )}
                   </div>
-                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div>
-                      <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <span style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
                         {selectedChat.name}
-                        {selectedChat.isOfficial && (
-                          <>
-                            <InstagramVerifiedBadge size={14} />
-                            <RosetteBadge size={14} />
-                          </>
-                        )}
-                      </div>
-                      <div style={{ fontSize: "10px", color: "#999", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <OnlineIndicator 
-                          online={getOnlineStatus(selectedChat.id)} 
-                          lastSeen={getLastSeen(selectedChat.id)}
-                        />
-                        {getOnlineStatus(selectedChat.id) ? "Online" : getLastSeen(selectedChat.id)}
-                      </div>
+                      </span>
+                      {selectedChat.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <OnlineIndicator 
+                        online={getOnlineStatus(selectedChat.id)} 
+                        lastSeen={getLastSeen(selectedChat.id)}
+                      />
+                      {getOnlineStatus(selectedChat.id) ? (
+                        <span style={{ fontSize: "10px", color: "#999" }}>
+                          {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: "10px", color: "#999" }}>
+                          {getLastSeen(selectedChat.id)}
+                        </span>
+                      )}
+                      {getTypingStatus(selectedChat.id) && getOnlineStatus(selectedChat.id) && (
+                        <span style={{ 
+                          fontSize: "10px", 
+                          color: "#4ade80",
+                          animation: "pulse 1.5s ease-in-out infinite"
+                        }}>
+                          ●
+                        </span>
+                      )}
                     </div>
                   </div>
                   <button
@@ -2520,7 +2540,7 @@ export default function HomePage(): React.JSX.Element {
                     type="text"
                     placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={handleTyping}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -2661,6 +2681,14 @@ export default function HomePage(): React.JSX.Element {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.3;
           }
         }
       `}</style>
