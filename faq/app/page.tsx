@@ -169,7 +169,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => (
       verticalAlign: "-2px",
     }}
   >
-    {/* Rounded 8-point shape (lebih gemuk & smooth) */}
     <path
       fill="#0095F6"
       d="
@@ -189,7 +188,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => (
         Z
       "
     />
-    {/* Check proporsional */}
     <path
       d="M9.2 12.3l2 2 4.6-4.6"
       stroke="white"
@@ -1309,7 +1307,7 @@ export default function HomePage(): React.JSX.Element {
               <option value="">Pilih user...</option>
               {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name} {u.isOfficial ? "⭐ Official" : ""}
+                  {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                 </option>
               ))}
             </select>
@@ -2205,14 +2203,11 @@ export default function HomePage(): React.JSX.Element {
                             <div
                               style={{
                                 textAlign: "center",
-                                color: "#fff",
-                                fontSize: "12px",
-                                padding: "10px 0 14px 0",
-                                fontWeight: 500,
+                                color: "#666",
+                                fontSize: "11px",
+                                padding: "8px 0 12px 0",
+                                fontWeight: 400,
                                 letterSpacing: "0.03em",
-                                backgroundColor: "rgba(255,255,255,0.08)",
-                                borderRadius: "6px",
-                                marginBottom: "6px",
                               }}
                             >
                               {formatDate(msg.timestamp)}
