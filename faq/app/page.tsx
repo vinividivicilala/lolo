@@ -156,48 +156,84 @@ const MoreIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{
-      marginLeft: "4px",
-      display: "inline-block",
-      verticalAlign: "-2px",
-    }}
-  >
-    <path
-      fill="#0095F6"
-      d="
-        M12 2.2
-        C13.6 3.8 16.2 3.8 17.8 2.2
-        C18.6 3.8 20.2 5.4 21.8 6.2
-        C20.2 7.8 20.2 10.4 21.8 12
-        C20.2 13.6 20.2 16.2 21.8 17.8
-        C20.2 18.6 18.6 20.2 17.8 21.8
-        C16.2 20.2 13.6 20.2 12 21.8
-        C10.4 20.2 7.8 20.2 6.2 21.8
-        C5.4 20.2 3.8 18.6 2.2 17.8
-        C3.8 16.2 3.8 13.6 2.2 12
-        C3.8 10.4 3.8 7.8 2.2 6.2
-        C3.8 5.4 5.4 3.8 6.2 2.2
-        C7.8 3.8 10.4 3.8 12 2.2
-        Z
-      "
-    />
-    <path
-      d="M9.2 12.3l2 2 4.6-4.6"
-      stroke="white"
-      strokeWidth="2"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+// Instagram Verified Badge with Tooltip
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "-2px",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          border: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          Akun Resmi
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Rosette Badge
 const RosetteBadge = ({ size = 16 }: { size?: number }) => (
@@ -2219,7 +2255,7 @@ export default function HomePage(): React.JSX.Element {
                               maxWidth: "85%",
                               padding: "12px 16px",
                               borderRadius: isMine ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
-                              backgroundColor: isMine ? "#c5e800" : "#3a3a3a",
+                              backgroundColor: isMine ? "#c5e800" : "#0095f6",
                               color: isMine ? "#000" : "#ffffff",
                               fontSize: "15px",
                               lineHeight: 1.6,
@@ -2233,7 +2269,7 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "11px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "#888",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.7)",
                                   marginBottom: "4px",
                                   fontStyle: "italic",
                                 }}
@@ -2247,18 +2283,18 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "12px",
-                                  color: isMine ? "rgba(0,0,0,0.6)" : "#aaa",
+                                  color: isMine ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.7)",
                                   padding: "6px 10px",
-                                  borderLeft: `3px solid ${isMine ? "#000" : "#666"}`,
+                                  borderLeft: `3px solid ${isMine ? "#000" : "rgba(255,255,255,0.5)"}`,
                                   marginBottom: "8px",
-                                  backgroundColor: isMine ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+                                  backgroundColor: isMine ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.15)",
                                   borderRadius: "4px",
                                 }}
                               >
                                 <span style={{ fontWeight: 600, color: isMine ? "#000" : "#c5e800" }}>
                                   {msg.replyToSender === user.displayName ? "Anda" : msg.replyToSender}:
                                 </span>
-                                <span style={{ color: isMine ? "#000" : "#ddd" }}> {msg.replyToText}</span>
+                                <span style={{ color: isMine ? "#000" : "#fff" }}> {msg.replyToText}</span>
                               </div>
                             )}
                             
@@ -2279,7 +2315,7 @@ export default function HomePage(): React.JSX.Element {
                               <span
                                 style={{
                                   fontSize: "10px",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.6)",
                                   fontWeight: 400,
                                 }}
                               >
@@ -2292,7 +2328,7 @@ export default function HomePage(): React.JSX.Element {
                                   background: "none",
                                   border: "none",
                                   cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.5)",
                                   padding: "2px 6px",
                                   display: "flex",
                                   alignItems: "center",
