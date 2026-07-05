@@ -157,18 +157,74 @@ const MoreIcon = () => (
 );
 
 // Instagram Verified Badge
-const VerifiedBadge = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" fill="#1DA1F2" stroke="#1DA1F2" strokeWidth="1"/>
-    <path d="M9 12L11.5 14.5L16 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      marginLeft: "4px",
+      display: "inline-block",
+      verticalAlign: "-2px",
+    }}
+  >
+    {/* Rounded 8-point shape (lebih gemuk & smooth) */}
+    <path
+      fill="#0095F6"
+      d="
+        M12 2.2
+        C13.6 3.8 16.2 3.8 17.8 2.2
+        C18.6 3.8 20.2 5.4 21.8 6.2
+        C20.2 7.8 20.2 10.4 21.8 12
+        C20.2 13.6 20.2 16.2 21.8 17.8
+        C20.2 18.6 18.6 20.2 17.8 21.8
+        C16.2 20.2 13.6 20.2 12 21.8
+        C10.4 20.2 7.8 20.2 6.2 21.8
+        C5.4 20.2 3.8 18.6 2.2 17.8
+        C3.8 16.2 3.8 13.6 2.2 12
+        C3.8 10.4 3.8 7.8 2.2 6.2
+        C3.8 5.4 5.4 3.8 6.2 2.2
+        C7.8 3.8 10.4 3.8 12 2.2
+        Z
+      "
+    />
+    {/* Check proporsional */}
+    <path
+      d="M9.2 12.3l2 2 4.6-4.6"
+      stroke="white"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 // Rosette Badge
-const RosetteBadge = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 2L14.5 7.5L20.5 5.5L18.5 11.5L24 14L18 16L19.5 22L14 18.5L9 22L10.5 16L4.5 14L10 11.5L8 5.5L14 7.5L12 2Z" fill="#FFD700" stroke="#FFD700" strokeWidth="1"/>
-    <path d="M12 8L13.5 12L17.5 11L14.5 14L15.5 18L12 15.5L8.5 18L9.5 14L6.5 11L10.5 12L12 8Z" fill="white"/>
+const RosetteBadge = ({ size = 16 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      marginLeft: "4px",
+      display: "inline-block",
+      verticalAlign: "-2px",
+    }}
+  >
+    <path 
+      d="M12 2L14.5 7.5L20.5 5.5L18.5 11.5L24 14L18 16L19.5 22L14 18.5L9 22L10.5 16L4.5 14L10 11.5L8 5.5L14 7.5L12 2Z" 
+      fill="#FFD700" 
+      stroke="#FFD700" 
+      strokeWidth="1"
+    />
+    <path 
+      d="M12 8L13.5 12L17.5 11L14.5 14L15.5 18L12 15.5L8.5 18L9.5 14L6.5 11L10.5 12L12 8Z" 
+      fill="white"
+    />
   </svg>
 );
 
@@ -239,9 +295,18 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
 // Read Status with Tooltip
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const status = getMessageStatus(msg);
   
-  if (!isMine || !status) return null;
+  if (!isMine) return null;
+  
+  const status = (() => {
+    if (msg.senderId !== auth?.currentUser?.uid) return null;
+    if (msg.read && msg.readAt) {
+      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+    }
+    return { icon: "✓", color: "#999", label: "Terkirim" };
+  })();
+  
+  if (!status) return null;
   
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
@@ -285,14 +350,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     </div>
   );
 };
-
-function getMessageStatus(msg: Message) {
-  if (msg.senderId !== auth?.currentUser?.uid) return null;
-  if (msg.read && msg.readAt) {
-    return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
-  }
-  return { icon: "✓", color: "#999", label: "Terkirim" };
-}
 
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
@@ -1489,7 +1546,7 @@ export default function HomePage(): React.JSX.Element {
                       <option value="" style={{ color: "#000" }}>Pilih user...</option>
                       {availableUsers.map((u) => (
                         <option key={u.id} value={u.id} style={{ color: "#000" }}>
-                          {u.name} {u.isOfficial ? "⭐ Official" : ""} 
+                          {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                           <OnlineIndicator online={u.online || false} />
                         </option>
                       ))}
@@ -1600,8 +1657,8 @@ export default function HomePage(): React.JSX.Element {
                                   {u.name}
                                   {u.isOfficial && (
                                     <>
-                                      <VerifiedBadge />
-                                      <RosetteBadge />
+                                      <InstagramVerifiedBadge size={14} />
+                                      <RosetteBadge size={14} />
                                     </>
                                   )}
                                 </div>
@@ -1700,8 +1757,8 @@ export default function HomePage(): React.JSX.Element {
                                     {otherUser.name}
                                     {otherUser.isOfficial && (
                                       <>
-                                        <VerifiedBadge />
-                                        <RosetteBadge />
+                                        <InstagramVerifiedBadge size={14} />
+                                        <RosetteBadge size={14} />
                                       </>
                                     )}
                                   </div>
@@ -1828,12 +1885,12 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
                               {otherUser.name}
                               {otherUser.isOfficial && (
                                 <>
-                                  <VerifiedBadge />
-                                  <RosetteBadge />
+                                  <InstagramVerifiedBadge size={14} />
+                                  <RosetteBadge size={14} />
                                 </>
                               )}
                               <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
@@ -1974,8 +2031,8 @@ export default function HomePage(): React.JSX.Element {
                         {selectedChat.name}
                         {selectedChat.isOfficial && (
                           <>
-                            <VerifiedBadge />
-                            <RosetteBadge />
+                            <InstagramVerifiedBadge size={14} />
+                            <RosetteBadge size={14} />
                           </>
                         )}
                       </div>
