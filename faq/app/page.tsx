@@ -97,7 +97,7 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
-// SVG Icons Minimalist
+// SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -136,13 +136,13 @@ const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
 );
 
 const ReplyIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M3 10L10 3V7C15 7 19 9 21 13C19 11 15 10 10 10V14L3 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
   </svg>
 );
 
 const ShareIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="1.5"/>
     <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>
     <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="1.5"/>
@@ -150,7 +150,22 @@ const ShareIcon = () => (
   </svg>
 );
 
-// Announcement SVG Icon - Sorak/Megaphone
+const ResendIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M1 4V10H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3.51 15C4.15884 17.1776 5.64527 19.0123 7.64498 20.0529C9.64469 21.0935 11.9724 21.2531 14.086 20.4905C16.1995 19.7279 17.9223 18.1121 18.8663 16.0189C19.8103 13.9257 19.8896 11.5545 19.08 9.4C18.2704 7.24553 16.6537 5.51463 14.5626 4.5674C12.4715 3.62017 10.1012 3.54577 7.95 4.36" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Verified Badge SVG (Twitter/Instagram style)
+const VerifiedBadge = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginLeft: "4px" }}>
+    <circle cx="12" cy="12" r="10" fill="#1DA1F2" stroke="white" strokeWidth="1.5"/>
+    <path d="M7 12L10.5 15.5L17 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Announcement SVG Icon
 const AnnouncementIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M4 11L17 5V19L4 13V11Z" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -159,6 +174,15 @@ const AnnouncementIcon = () => (
     <path d="M20 9C21 10 21.5 11.5 21.5 13C21.5 14.5 21 16 20 17" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
     <path d="M22 7C23.5 9 24 11 24 13C24 15 23.5 17 22 19" stroke="#000" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
     <circle cx="18" cy="12" r="1.5" fill="#000" stroke="none"/>
+  </svg>
+);
+
+// Three Dots Menu Icon
+const MenuDotsIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+    <circle cx="12" cy="19" r="2" fill="currentColor"/>
   </svg>
 );
 
@@ -187,8 +211,10 @@ export default function HomePage(): React.JSX.Element {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareMessage, setShareMessage] = useState<Message | null>(null);
   const [selectedShareUser, setSelectedShareUser] = useState("");
+  const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -221,6 +247,17 @@ export default function HomePage(): React.JSX.Element {
       senderName: "Menuru Official"
     }
   ];
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMessageMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Auth Listener
   useEffect(() => {
@@ -577,6 +614,35 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Resend message
+  const handleResendMessage = async (msg: Message) => {
+    if (!selectedChat || !user || !db) return;
+    
+    try {
+      const chatId = [user.uid, selectedChat.id].sort().join("_");
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      
+      await addDoc(messagesRef, {
+        text: msg.text,
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        receiverId: selectedChat.id,
+        timestamp: serverTimestamp(),
+        read: false,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: false,
+        replyTo: null,
+        replyToText: null,
+        replyToSender: null
+      });
+      
+      setShowMessageMenu(null);
+    } catch (error) {
+      console.error("Error resending message:", error);
+    }
+  };
+
   // Share message to another user
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
@@ -615,6 +681,7 @@ export default function HomePage(): React.JSX.Element {
       setShowShareModal(false);
       setShareMessage(null);
       setSelectedShareUser("");
+      setShowMessageMenu(null);
     } catch (error) {
       console.error("Error sharing message:", error);
     }
@@ -629,6 +696,7 @@ export default function HomePage(): React.JSX.Element {
         isPinned: !currentPinned,
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
+      setShowMessageMenu(null);
     } catch (error) {
       console.error("Error pinning message:", error);
     }
@@ -860,7 +928,12 @@ export default function HomePage(): React.JSX.Element {
               />
             )}
             <span style={{ fontWeight: 500, color: "#000" }}>{user.displayName || user.email}</span>
-            <span style={{ fontSize: "10px", color: "#4ade80" }}>● Online</span>
+            <span style={{ 
+              fontSize: "10px", 
+              color: "#4ade80",
+              fontWeight: 600,
+              textShadow: "0 0 10px rgba(74,222,128,0.5)"
+            }}>● Online</span>
             <button
               onClick={handleLogout}
               style={{
@@ -1085,7 +1158,7 @@ export default function HomePage(): React.JSX.Element {
               <option value="">Pilih user...</option>
               {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name} {u.isOfficial ? "⭐ Official" : ""}
+                  {u.name} {u.isOfficial && "⭐ Official"}
                 </option>
               ))}
             </select>
@@ -1182,6 +1255,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 {selectedChat && (
                   <>
+                    {selectedChat.isOfficial && <VerifiedBadge />}
                     <span style={{ fontSize: "10px", color: "#999" }}>
                       {selectedChat.email}
                     </span>
@@ -1197,7 +1271,8 @@ export default function HomePage(): React.JSX.Element {
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        backgroundColor: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666"
+                        backgroundColor: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666",
+                        boxShadow: getOnlineStatus(selectedChat.id) ? "0 0 10px rgba(74,222,128,0.6)" : "none"
                       }} />
                       {getOnlineStatus(selectedChat.id) ? "Online" : getLastSeen(selectedChat.id)}
                     </span>
@@ -1334,7 +1409,7 @@ export default function HomePage(): React.JSX.Element {
                       <option value="" style={{ color: "#000" }}>Pilih user...</option>
                       {availableUsers.map((u) => (
                         <option key={u.id} value={u.id} style={{ color: "#000" }}>
-                          {u.name} {u.isOfficial ? "⭐ Official" : ""} ({u.online ? "🟢 Online" : "⚪ Offline"})
+                          {u.name} {u.isOfficial && "⭐ Official"} ({u.online ? "🟢 Online" : "⚪ Offline"})
                         </option>
                       ))}
                     </select>
@@ -1430,6 +1505,7 @@ export default function HomePage(): React.JSX.Element {
                                 justifyContent: "center",
                                 fontSize: "14px",
                                 overflow: "hidden",
+                                position: "relative",
                               }}
                             >
                               {u.photoURL ? (
@@ -1439,24 +1515,17 @@ export default function HomePage(): React.JSX.Element {
                               )}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center" }}>
                                 {u.name}
-                                {u.isOfficial && (
-                                  <span style={{ 
-                                    fontSize: "9px", 
-                                    color: "#c5e800", 
-                                    marginLeft: "6px",
-                                    fontWeight: 600,
-                                    backgroundColor: "rgba(197,232,0,0.1)",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px"
-                                  }}>
-                                    Official
-                                  </span>
-                                )}
+                                {u.isOfficial && <VerifiedBadge />}
                               </div>
                               <div style={{ fontSize: "10px", color: "#666" }}>
-                                {u.email} • {u.online ? "🟢 Online" : "⚪ Offline"}
+                                {u.email} • <span style={{ 
+                                  color: u.online ? "#4ade80" : "#666",
+                                  fontWeight: u.online ? 600 : 400
+                                }}>
+                                  {u.online ? "🟢 Online" : "⚪ Offline"}
+                                </span>
                               </div>
                             </div>
                             <button
@@ -1534,6 +1603,7 @@ export default function HomePage(): React.JSX.Element {
                                   justifyContent: "center",
                                   fontSize: "14px",
                                   overflow: "hidden",
+                                  position: "relative",
                                 }}
                               >
                                 {otherUser.photoURL ? (
@@ -1541,26 +1611,32 @@ export default function HomePage(): React.JSX.Element {
                                 ) : (
                                   <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                                 )}
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    bottom: 0,
+                                    right: 0,
+                                    width: "10px",
+                                    height: "10px",
+                                    borderRadius: "50%",
+                                    backgroundColor: getOnlineStatus(otherUser.id) ? "#4ade80" : "#666",
+                                    border: "2px solid #fff",
+                                    boxShadow: getOnlineStatus(otherUser.id) ? "0 0 8px rgba(74,222,128,0.5)" : "none"
+                                  }}
+                                />
                               </div>
                               <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                                <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center" }}>
                                   {otherUser.name}
-                                  {otherUser.isOfficial && (
-                                    <span style={{ 
-                                      fontSize: "9px", 
-                                      color: "#c5e800", 
-                                      marginLeft: "6px",
-                                      fontWeight: 600,
-                                      backgroundColor: "rgba(197,232,0,0.1)",
-                                      padding: "2px 6px",
-                                      borderRadius: "4px"
-                                    }}>
-                                      Official
-                                    </span>
-                                  )}
+                                  {otherUser.isOfficial && <VerifiedBadge />}
                                 </div>
                                 <div style={{ fontSize: "10px", color: "#666" }}>
-                                  {otherUser.online ? "🟢 Online" : "⚪ Offline"} • {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
+                                  <span style={{ 
+                                    color: otherUser.online ? "#4ade80" : "#666",
+                                    fontWeight: otherUser.online ? 600 : 400
+                                  }}>
+                                    {otherUser.online ? "🟢 Online" : "⚪ Offline"}
+                                  </span> • {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "Belum ada pesan"}
                                 </div>
                               </div>
                               {room.unreadCount > 0 && (
@@ -1688,25 +1764,14 @@ export default function HomePage(): React.JSX.Element {
                                 borderRadius: "50%",
                                 backgroundColor: getOnlineStatus(otherUser.id) ? "#4ade80" : "#666",
                                 border: "2px solid #fff",
+                                boxShadow: getOnlineStatus(otherUser.id) ? "0 0 12px rgba(74,222,128,0.6)" : "none"
                               }}
                             />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000" }}>
+                            <div style={{ fontSize: "15px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center" }}>
                               {otherUser.name}
-                              {otherUser.isOfficial && (
-                                <span style={{ 
-                                  fontSize: "9px", 
-                                  color: "#c5e800", 
-                                  marginLeft: "6px",
-                                  fontWeight: 600,
-                                  backgroundColor: "rgba(197,232,0,0.1)",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px"
-                                }}>
-                                  Official
-                                </span>
-                              )}
+                              {otherUser.isOfficial && <VerifiedBadge />}
                             </div>
                             <div style={{ fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {room.lastMessage ? (
@@ -1772,7 +1837,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - Diperbesar dengan warna terang
+              // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "560px" }}>
                 {/* Chat Header */}
                 <div
@@ -1847,25 +1912,22 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: "50%",
                         backgroundColor: getOnlineStatus(selectedChat.id) ? "#4ade80" : "#666",
                         border: "2px solid #000",
+                        boxShadow: getOnlineStatus(selectedChat.id) ? "0 0 12px rgba(74,222,128,0.6)" : "none"
                       }}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
+                    <div style={{ fontSize: "15px", fontWeight: 500, color: "#fff", display: "flex", alignItems: "center" }}>
                       {selectedChat.name}
-                      {selectedChat.isOfficial && (
-                        <span style={{ 
-                          fontSize: "9px", 
-                          color: "#c5e800", 
-                          marginLeft: "6px",
-                          fontWeight: 600
-                        }}>
-                          Official
-                        </span>
-                      )}
+                      {selectedChat.isOfficial && <VerifiedBadge />}
                     </div>
                     <div style={{ fontSize: "10px", color: "#999" }}>
-                      {selectedChat.online ? "🟢 Online" : `⚪ ${getLastSeen(selectedChat.id)}`}
+                      <span style={{ 
+                        color: selectedChat.online ? "#4ade80" : "#666",
+                        fontWeight: selectedChat.online ? 600 : 400
+                      }}>
+                        {selectedChat.online ? "🟢 Online" : `⚪ ${getLastSeen(selectedChat.id)}`}
+                      </span>
                     </div>
                   </div>
                   <button
@@ -1924,7 +1986,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Messages - Background hitam dengan warna terang */}
+                {/* Messages - Tanpa background tambahan */}
                 <div
                   style={{
                     flex: 1,
@@ -1970,7 +2032,7 @@ export default function HomePage(): React.JSX.Element {
                                 padding: "10px 0 14px 0",
                                 fontWeight: 500,
                                 letterSpacing: "0.03em",
-                                backgroundColor: "rgba(255,255,255,0.08)",
+                                backgroundColor: "rgba(255,255,255,0.05)",
                                 borderRadius: "6px",
                                 marginBottom: "6px",
                               }}
@@ -1982,15 +2044,14 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               alignSelf: isMine ? "flex-end" : "flex-start",
                               maxWidth: "85%",
-                              padding: "14px 18px",
+                              padding: "12px 16px",
                               borderRadius: isMine ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
-                              backgroundColor: isMine ? "#c5e800" : "#3a3a3a",
+                              backgroundColor: isMine ? "#c5e800" : "#2a2a2a",
                               color: isMine ? "#000" : "#ffffff",
                               fontSize: "15px",
                               lineHeight: 1.6,
                               position: "relative",
                               border: msg.isPinned ? "2px solid #c5e800" : "none",
-                              boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.2)" : "none",
                             }}
                           >
                             {/* Reply preview */}
@@ -1998,11 +2059,11 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "12px",
-                                  color: isMine ? "rgba(0,0,0,0.6)" : "#aaa",
-                                  padding: "6px 10px",
-                                  borderLeft: `3px solid ${isMine ? "#000" : "#666"}`,
-                                  marginBottom: "8px",
-                                  backgroundColor: isMine ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "#999",
+                                  padding: "4px 8px",
+                                  borderLeft: `2px solid ${isMine ? "#000" : "#555"}`,
+                                  marginBottom: "6px",
+                                  backgroundColor: isMine ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)",
                                   borderRadius: "4px",
                                 }}
                               >
@@ -2022,7 +2083,7 @@ export default function HomePage(): React.JSX.Element {
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "6px",
-                                marginTop: "8px",
+                                marginTop: "6px",
                                 justifyContent: isMine ? "flex-end" : "flex-start",
                                 flexWrap: "wrap",
                               }}
@@ -2030,8 +2091,7 @@ export default function HomePage(): React.JSX.Element {
                               <span
                                 style={{
                                   fontSize: "10px",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
-                                  fontWeight: 400,
+                                  color: isMine ? "rgba(0,0,0,0.4)" : "#666",
                                 }}
                               >
                                 {formatTime(msg.timestamp)}
@@ -2039,7 +2099,7 @@ export default function HomePage(): React.JSX.Element {
                               {isMine && status && (
                                 <span
                                   style={{
-                                    fontSize: "11px",
+                                    fontSize: "10px",
                                     color: status.color,
                                     fontWeight: status.label === "Dibaca" ? 700 : 400,
                                   }}
@@ -2047,88 +2107,173 @@ export default function HomePage(): React.JSX.Element {
                                   {status.icon}
                                 </span>
                               )}
-                              <button
-                                onClick={() => setReplyTo(msg)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
-                                  padding: "2px 6px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  transition: "all .2s ease",
-                                  borderRadius: "4px",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-                                  e.currentTarget.style.color = isMine ? "#000" : "#fff";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = "transparent";
-                                  e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.5)" : "#888";
-                                }}
-                                title="Reply"
-                              >
-                                <ReplyIcon />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setShareMessage(msg);
-                                  setShowShareModal(true);
-                                }}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "#888",
-                                  padding: "2px 6px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  transition: "all .2s ease",
-                                  borderRadius: "4px",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-                                  e.currentTarget.style.color = isMine ? "#000" : "#fff";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = "transparent";
-                                  e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.5)" : "#888";
-                                }}
-                                title="Share"
-                              >
-                                <ShareIcon />
-                              </button>
-                              <button
-                                onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  color: msg.isPinned ? "#c5e800" : (isMine ? "rgba(0,0,0,0.4)" : "#666"),
-                                  padding: "2px 6px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  transition: "all .2s ease",
-                                  borderRadius: "4px",
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (!msg.isPinned) {
+                              
+                              {/* Menu Dots Button */}
+                              <div style={{ position: "relative" }} ref={menuRef}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id);
+                                  }}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: isMine ? "rgba(0,0,0,0.4)" : "#666",
+                                    padding: "2px 4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    borderRadius: "4px",
+                                    transition: "all .2s ease",
+                                  }}
+                                  onMouseEnter={(e) => {
                                     e.currentTarget.style.color = isMine ? "#000" : "#fff";
-                                    e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  if (!msg.isPinned) {
-                                    e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.4)" : "#666";
-                                    e.currentTarget.style.backgroundColor = "transparent";
-                                  }
-                                }}
-                                title={msg.isPinned ? "Unpin message" : "Pin message"}
-                              >
-                                <PinIcon filled={msg.isPinned || false} />
-                              </button>
+                                    e.currentTarget.style.backgroundColor = isMine ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (showMessageMenu !== msg.id) {
+                                      e.currentTarget.style.color = isMine ? "rgba(0,0,0,0.4)" : "#666";
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                    }
+                                  }}
+                                >
+                                  <MenuDotsIcon />
+                                </button>
+                                
+                                {/* Dropdown Menu */}
+                                {showMessageMenu === msg.id && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      bottom: "100%",
+                                      right: 0,
+                                      backgroundColor: "#1a1a1a",
+                                      borderRadius: "8px",
+                                      padding: "4px 0",
+                                      minWidth: "140px",
+                                      boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                                      zIndex: 50,
+                                      border: "1px solid rgba(255,255,255,0.05)",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    <button
+                                      onClick={() => {
+                                        setReplyTo(msg);
+                                        setShowMessageMenu(null);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        padding: "8px 14px",
+                                        width: "100%",
+                                        background: "none",
+                                        border: "none",
+                                        color: "#fff",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        transition: "all .2s ease",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      <ReplyIcon />
+                                      <span>Balas</span>
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleResendMessage(msg);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        padding: "8px 14px",
+                                        width: "100%",
+                                        background: "none",
+                                        border: "none",
+                                        color: "#fff",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        transition: "all .2s ease",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      <ResendIcon />
+                                      <span>Kirim Ulang</span>
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setShareMessage(msg);
+                                        setShowShareModal(true);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        padding: "8px 14px",
+                                        width: "100%",
+                                        background: "none",
+                                        border: "none",
+                                        color: "#fff",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        transition: "all .2s ease",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      <ShareIcon />
+                                      <span>Bagikan</span>
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handlePinMessage(chatId, msg.id, msg.isPinned || false);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        padding: "8px 14px",
+                                        width: "100%",
+                                        background: "none",
+                                        border: "none",
+                                        color: msg.isPinned ? "#c5e800" : "#fff",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        transition: "all .2s ease",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      <PinIcon filled={msg.isPinned || false} />
+                                      <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {msg.isPinned && (
@@ -2138,7 +2283,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontSize: "10px",
                                 color: "#c5e800",
                                 marginTop: "-2px",
-                                marginBottom: "6px",
+                                marginBottom: "4px",
                                 padding: "0 6px",
                                 display: "flex",
                                 alignItems: "center",
