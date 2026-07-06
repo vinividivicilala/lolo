@@ -167,20 +167,6 @@ const EditIcon = () => (
   </svg>
 );
 
-const AddNoteIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-  </svg>
-);
-
-const DeleteIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 6H5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -416,7 +402,7 @@ export default function HomePage(): React.JSX.Element {
     isOfficial: true,
     isPinned: false,
     bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
-    note: ""
+    note: "Official Account"
   };
 
   const OFFICIAL_MESSAGES = [
@@ -1716,7 +1702,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Note dengan background hitam di atas FP
+              // Profile View - Note dengan background hitam kecil di atas foto
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1743,17 +1729,37 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Note Section - Background hitam dengan border radius melengkung */}
-                  <div style={{ width: "100%", marginBottom: "16px" }}>
+                  {/* Note Section - Background hitam kecil nempel di atas foto */}
+                  <div style={{ width: "100%", marginBottom: "0px" }}>
                     <div style={{ 
                       backgroundColor: "#000000", 
-                      borderRadius: "16px",
-                      padding: "16px 20px",
+                      borderRadius: "12px 12px 8px 8px",
+                      padding: "8px 16px",
                       position: "relative",
-                      overflow: "hidden",
+                      marginBottom: "-4px",
+                      zIndex: 2,
+                      borderBottom: "2px solid #000",
+                      maxWidth: "280px",
                     }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                        <span style={{ fontSize: "11px", color: "#666", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ 
+                          fontSize: "10px", 
+                          color: "#666", 
+                          fontWeight: 500, 
+                          letterSpacing: "0.05em", 
+                          textTransform: "uppercase",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}>
+                          <span style={{ 
+                            display: "inline-block",
+                            width: "6px",
+                            height: "6px",
+                            borderRadius: "50%",
+                            backgroundColor: "#c5e800",
+                            marginRight: "4px",
+                          }} />
                           Catatan
                         </span>
                         {profileUser.id === user?.uid && (
@@ -1763,7 +1769,7 @@ export default function HomePage(): React.JSX.Element {
                               background: "none",
                               border: "none",
                               color: "#666",
-                              fontSize: "11px",
+                              fontSize: "10px",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
@@ -1778,7 +1784,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
 
                       {editNote && profileUser.id === user?.uid ? (
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
                           <input
                             type="text"
                             value={noteInput}
@@ -1786,12 +1792,12 @@ export default function HomePage(): React.JSX.Element {
                             placeholder="Tulis catatan..."
                             style={{
                               flex: 1,
-                              padding: "10px 14px",
+                              padding: "6px 10px",
                               backgroundColor: "#1a1a1a",
                               border: "1px solid #333",
-                              borderRadius: "10px",
+                              borderRadius: "6px",
                               color: "#ffffff",
-                              fontSize: "14px",
+                              fontSize: "12px",
                               outline: "none",
                               fontFamily: "Inter, 'Inter Fallback'",
                             }}
@@ -1804,12 +1810,12 @@ export default function HomePage(): React.JSX.Element {
                           <button
                             onClick={handleSaveNote}
                             style={{
-                              padding: "8px 20px",
+                              padding: "4px 12px",
                               backgroundColor: "#c5e800",
                               border: "none",
-                              borderRadius: "10px",
+                              borderRadius: "6px",
                               color: "#000",
-                              fontSize: "13px",
+                              fontSize: "11px",
                               fontWeight: 500,
                               cursor: "pointer",
                               fontFamily: "Inter, 'Inter Fallback'",
@@ -1821,12 +1827,12 @@ export default function HomePage(): React.JSX.Element {
                           <button
                             onClick={() => setEditNote(false)}
                             style={{
-                              padding: "8px 16px",
+                              padding: "4px 10px",
                               backgroundColor: "transparent",
                               border: "1px solid #333",
-                              borderRadius: "10px",
+                              borderRadius: "6px",
                               color: "#666",
-                              fontSize: "13px",
+                              fontSize: "11px",
                               cursor: "pointer",
                               fontFamily: "Inter, 'Inter Fallback'",
                             }}
@@ -1836,11 +1842,11 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         <div style={{ 
-                          padding: "10px 4px",
+                          padding: "4px 0",
                           color: profileUser.note ? "#ffffff" : "#555",
-                          fontSize: "14px",
-                          lineHeight: 1.6,
-                          minHeight: "40px",
+                          fontSize: "13px",
+                          lineHeight: 1.4,
+                          minHeight: "24px",
                         }}>
                           {profileUser.note || "Belum ada catatan"}
                         </div>
@@ -1848,8 +1854,8 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Photo */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "16px", width: "100%" }}>
+                  {/* Photo dengan border radius yang masuk ke foto */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "16px", width: "100%", position: "relative", zIndex: 1 }}>
                     <div
                       style={{
                         width: "80px",
@@ -1864,7 +1870,8 @@ export default function HomePage(): React.JSX.Element {
                         border: "2px solid #000",
                         flexShrink: 0,
                         position: "relative",
-                        marginTop: "-8px",
+                        borderTopLeftRadius: "4px",
+                        borderTopRightRadius: "4px",
                       }}
                     >
                       {profileUser.photoURL ? (
@@ -2035,7 +2042,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View - sama seperti sebelumnya
+              // Chat List View
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2543,7 +2550,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - sama seperti sebelumnya
+              // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
