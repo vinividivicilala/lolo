@@ -65,6 +65,8 @@ interface ChatUser {
   online?: boolean;
   lastSeen?: any;
   typing?: boolean;
+  bio?: string;
+  note?: string;
 }
 
 interface Message {
@@ -154,6 +156,27 @@ const MoreIcon = () => (
     <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
     <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
     <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="5" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M4 20C4 16 7.5 14 12 14C16.5 14 20 16 20 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const NoteIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -386,6 +409,12 @@ export default function HomePage(): React.JSX.Element {
   const [selectedShareUser, setSelectedShareUser] = useState("");
   const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
+  const [editBio, setEditBio] = useState(false);
+  const [bioInput, setBioInput] = useState("");
+  const [editNote, setEditNote] = useState(false);
+  const [noteInput, setNoteInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -396,7 +425,9 @@ export default function HomePage(): React.JSX.Element {
     email: "official@menuru.com",
     photoURL: "",
     isOfficial: true,
-    isPinned: false
+    isPinned: false,
+    bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
+    note: "📢 Official Account"
   };
 
   const OFFICIAL_MESSAGES = [
@@ -443,7 +474,9 @@ export default function HomePage(): React.JSX.Element {
               isOfficial: false,
               online: true,
               lastSeen: serverTimestamp(),
-              typing: false
+              typing: false,
+              bio: "",
+              note: ""
             });
           } else {
             await updateDoc(userRef, {
@@ -528,7 +561,9 @@ export default function HomePage(): React.JSX.Element {
                 ...data,
                 online: data.online || false,
                 lastSeen: data.lastSeen || null,
-                typing: data.typing || false
+                typing: data.typing || false,
+                bio: data.bio || "",
+                note: data.note || ""
               } as ChatUser);
             }
           });
@@ -718,6 +753,8 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms([]);
       setTotalUnread(0);
       setOfficialMessagesSent(false);
+      setShowProfile(false);
+      setProfileUser(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -733,6 +770,8 @@ export default function HomePage(): React.JSX.Element {
       setSelectedChat(null);
       setShowAddUser(false);
       setReplyTo(null);
+      setShowProfile(false);
+      setProfileUser(null);
     }
   };
 
@@ -743,18 +782,15 @@ export default function HomePage(): React.JSX.Element {
     
     if (!selectedChat || !user || !db) return;
     
-    // Update typing status
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
       typing: value.length > 0
     });
     
-    // Clear previous timeout
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
     
-    // Set timeout to clear typing status after 2 seconds of no typing
     const newTimeout = setTimeout(async () => {
       const userRef2 = doc(db, "users", user.uid);
       await updateDoc(userRef2, {
@@ -765,12 +801,64 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
+  // Handle open profile
+  const handleOpenProfile = (chatUser: ChatUser) => {
+    setProfileUser(chatUser);
+    setShowProfile(true);
+    setBioInput(chatUser.bio || "");
+    setNoteInput(chatUser.note || "");
+  };
+
+  // Handle save bio
+  const handleSaveBio = async () => {
+    if (!profileUser || !db) return;
+    try {
+      const userRef = doc(db, "users", profileUser.id);
+      await updateDoc(userRef, {
+        bio: bioInput
+      });
+      setProfileUser({ ...profileUser, bio: bioInput });
+      setEditBio(false);
+      
+      // Update users list
+      setUsers(prev => prev.map(u => {
+        if (u.id === profileUser.id) {
+          return { ...u, bio: bioInput };
+        }
+        return u;
+      }));
+    } catch (error) {
+      console.error("Error saving bio:", error);
+    }
+  };
+
+  // Handle save note
+  const handleSaveNote = async () => {
+    if (!profileUser || !db) return;
+    try {
+      const userRef = doc(db, "users", profileUser.id);
+      await updateDoc(userRef, {
+        note: noteInput
+      });
+      setProfileUser({ ...profileUser, note: noteInput });
+      setEditNote(false);
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === profileUser.id) {
+          return { ...u, note: noteInput };
+        }
+        return u;
+      }));
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
+  };
+
   // Send message with reply
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
     try {
-      // Clear typing status
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
@@ -1412,6 +1500,335 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
+      {/* Profile Modal */}
+      {showProfile && profileUser && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => {
+            setShowProfile(false);
+            setProfileUser(null);
+            setEditBio(false);
+            setEditNote(false);
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: "24px",
+              padding: "40px",
+              maxWidth: "420px",
+              width: "90%",
+              maxHeight: "80vh",
+              overflowY: "auto",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                setShowProfile(false);
+                setProfileUser(null);
+                setEditBio(false);
+                setEditNote(false);
+              }}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "20px",
+                background: "none",
+                border: "none",
+                color: "#666",
+                fontSize: "20px",
+                cursor: "pointer",
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Profile Photo with Note */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
+              <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    borderRadius: "50%",
+                    backgroundColor: "#2a2a2a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "40px",
+                    overflow: "hidden",
+                    border: "3px solid #c5e800",
+                  }}
+                >
+                  {profileUser.photoURL ? (
+                    <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <span style={{ color: "#fff" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                  )}
+                </div>
+                {profileUser.isOfficial && (
+                  <div style={{ position: "absolute", bottom: 0, right: 0 }}>
+                    <InstagramVerifiedBadge size={24} />
+                  </div>
+                )}
+              </div>
+
+              {/* Note di atas FP */}
+              {profileUser.note && (
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "6px 16px",
+                    backgroundColor: "rgba(197,232,0,0.1)",
+                    border: "1px solid rgba(197,232,0,0.2)",
+                    borderRadius: "20px",
+                    fontSize: "12px",
+                    color: "#c5e800",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <NoteIcon />
+                  <span>{profileUser.note}</span>
+                </div>
+              )}
+
+              {profileUser.id === user?.uid && (
+                <button
+                  onClick={() => setEditNote(!editNote)}
+                  style={{
+                    marginTop: "8px",
+                    background: "none",
+                    border: "none",
+                    color: "#666",
+                    fontSize: "11px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <EditIcon />
+                  {profileUser.note ? "Edit Catatan" : "Tambah Catatan"}
+                </button>
+              )}
+
+              {editNote && profileUser.id === user?.uid && (
+                <div style={{ marginTop: "8px", width: "100%" }}>
+                  <input
+                    type="text"
+                    value={noteInput}
+                    onChange={(e) => setNoteInput(e.target.value)}
+                    placeholder="Tulis catatan..."
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      backgroundColor: "#2a2a2a",
+                      border: "1px solid #3a3a3a",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "13px",
+                      outline: "none",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  />
+                  <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+                    <button
+                      onClick={handleSaveNote}
+                      style={{
+                        padding: "4px 16px",
+                        backgroundColor: "#c5e800",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#000",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontWeight: 500,
+                      }}
+                    >
+                      Simpan
+                    </button>
+                    <button
+                      onClick={() => setEditNote(false)}
+                      style={{
+                        padding: "4px 16px",
+                        backgroundColor: "transparent",
+                        border: "1px solid #3a3a3a",
+                        borderRadius: "6px",
+                        color: "#666",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* User Info */}
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <h2 style={{ color: "#fff", fontSize: "20px", fontWeight: 600, margin: 0 }}>
+                {profileUser.name}
+                {profileUser.isOfficial && <InstagramVerifiedBadge size={18} />}
+              </h2>
+              <p style={{ color: "#666", fontSize: "13px", margin: "4px 0 0 0" }}>{profileUser.email}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "6px" }}>
+                <OnlineIndicator online={profileUser.online || false} />
+                <span style={{ color: "#999", fontSize: "12px" }}>
+                  {profileUser.online ? "Online" : getLastSeen(profileUser.id)}
+                </span>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div style={{ 
+              padding: "16px",
+              backgroundColor: "#0a0a0a",
+              borderRadius: "12px",
+              marginBottom: "12px",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ color: "#666", fontSize: "12px", fontWeight: 500 }}>Bio</span>
+                {profileUser.id === user?.uid && (
+                  <button
+                    onClick={() => setEditBio(!editBio)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#666",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <EditIcon />
+                    {profileUser.bio ? "Edit" : "Tambah"}
+                  </button>
+                )}
+              </div>
+              
+              {editBio && profileUser.id === user?.uid ? (
+                <div>
+                  <textarea
+                    value={bioInput}
+                    onChange={(e) => setBioInput(e.target.value)}
+                    placeholder="Tulis bio..."
+                    rows={3}
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      backgroundColor: "#1a1a1a",
+                      border: "1px solid #3a3a3a",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "13px",
+                      outline: "none",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                      resize: "vertical",
+                    }}
+                  />
+                  <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+                    <button
+                      onClick={handleSaveBio}
+                      style={{
+                        padding: "4px 16px",
+                        backgroundColor: "#c5e800",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#000",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontWeight: 500,
+                      }}
+                    >
+                      Simpan
+                    </button>
+                    <button
+                      onClick={() => setEditBio(false)}
+                      style={{
+                        padding: "4px 16px",
+                        backgroundColor: "transparent",
+                        border: "1px solid #3a3a3a",
+                        borderRadius: "6px",
+                        color: "#666",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: profileUser.bio ? "#fff" : "#555", fontSize: "14px", margin: 0, lineHeight: 1.5 }}>
+                  {profileUser.bio || "Belum ada bio"}
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => {
+                  setShowProfile(false);
+                  setProfileUser(null);
+                  setSelectedChat(profileUser);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  backgroundColor: "#c5e800",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#000",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Kirim Pesan
+              </button>
+              <button
+                onClick={() => {
+                  handlePinUser(profileUser.id, profileUser.isPinned || false);
+                }}
+                style={{
+                  padding: "10px 16px",
+                  backgroundColor: "transparent",
+                  border: "1px solid #3a3a3a",
+                  borderRadius: "8px",
+                  color: profileUser.isPinned ? "#c5e800" : "#666",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <PinIcon filled={profileUser.isPinned || false} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat Box */}
       <div
         style={{
@@ -1933,7 +2350,15 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "15px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
-                              {otherUser.name}
+                              <span 
+                                style={{ cursor: "pointer" }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenProfile(otherUser);
+                                }}
+                              >
+                                {otherUser.name}
+                              </span>
                               {otherUser.isOfficial && <InstagramVerifiedBadge size={14} />}
                               <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                             </div>
@@ -2003,7 +2428,7 @@ export default function HomePage(): React.JSX.Element {
             ) : (
               // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "560px" }}>
-                {/* Chat Header */}
+                {/* Chat Header - Clickable name to profile */}
                 <div
                   style={{
                     padding: "12px 20px",
@@ -2055,7 +2480,9 @@ export default function HomePage(): React.JSX.Element {
                       overflow: "hidden",
                       color: "#fff",
                       position: "relative",
+                      cursor: "pointer",
                     }}
+                    onClick={() => handleOpenProfile(selectedChat)}
                   >
                     {selectedChat.photoURL ? (
                       <img 
@@ -2068,7 +2495,10 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <div 
+                      style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                      onClick={() => handleOpenProfile(selectedChat)}
+                    >
                       <span style={{ fontSize: "15px", fontWeight: 500, color: "#fff" }}>
                         {selectedChat.name}
                       </span>
