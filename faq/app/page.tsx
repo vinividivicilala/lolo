@@ -169,7 +169,7 @@ const EditIcon = () => (
 
 // Search Icon
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
     <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
   </svg>
@@ -405,6 +405,7 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1225,9 +1226,6 @@ export default function HomePage(): React.JSX.Element {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMessageMenu(null);
       }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        // Don't close search on outside click
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -1282,7 +1280,7 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "16px",
+          gap: "12px",
         }}
       >
         <div
@@ -1297,7 +1295,7 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Button - Hijau Stabilo */}
+        {/* Search Button - Hijau Stabilo kecil tanpa tulisan */}
         <div style={{ position: "relative" }} ref={searchRef}>
           <button
             onClick={() => {
@@ -1306,29 +1304,28 @@ export default function HomePage(): React.JSX.Element {
                 setSearchQuery("");
                 setSearchResults([]);
                 setTimeout(() => {
-                  const input = document.querySelector('input[type="search"]') as HTMLInputElement;
-                  if (input) input.focus();
+                  if (searchInputRef.current) {
+                    searchInputRef.current.focus();
+                  }
                 }, 100);
               }
             }}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px",
-              padding: "8px 14px",
-              backgroundColor: "#c5e800",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "50%",
               cursor: "pointer",
               transition: "all 0.3s ease",
               color: "#000",
-              fontFamily: "Inter, 'Inter Fallback'",
-              fontSize: "14px",
-              fontWeight: 500,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#b0d000";
-              e.currentTarget.style.transform = "scale(1.02)";
+              e.currentTarget.style.transform = "scale(1.05)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = "#c5e800";
@@ -1336,120 +1333,170 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <SearchIcon />
-            <span style={{ fontSize: "13px" }}>Cari</span>
           </button>
 
-          {/* Search Input - Dropdown */}
+          {/* Search Input - Bergeser ke kanan, nyatu dengan bg hijau stabilo */}
           {showSearch && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 8px)",
-                left: 0,
+                top: "50%",
+                left: "calc(100% + 8px)",
+                transform: "translateY(-50%)",
                 backgroundColor: "#c5e800",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                minWidth: "320px",
-                maxWidth: "400px",
-                boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-                zIndex: 100,
-                border: "1px solid rgba(0,0,0,0.05)",
+                borderRadius: "24px",
+                padding: "4px 8px 4px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                minWidth: "200px",
+                maxWidth: "300px",
+                boxShadow: "0 4px 16px rgba(197,232,0,0.3)",
+                animation: "slideSearch 0.3s ease forwards",
               }}
             >
+              <SearchIcon />
               <input
+                ref={searchInputRef}
                 type="search"
                 placeholder="What are you looking for?"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{
-                  width: "100%",
-                  padding: "10px 16px",
-                  backgroundColor: "rgba(255,255,255,0.9)",
+                  flex: 1,
+                  padding: "6px 8px",
+                  backgroundColor: "transparent",
                   border: "none",
-                  borderRadius: "8px",
-                  fontSize: "14px",
+                  borderRadius: "0",
+                  fontSize: "13px",
                   outline: "none",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
+                  minWidth: "140px",
                 }}
-                autoFocus
               />
-              
-              {/* Search Results */}
               {searchQuery && (
-                <div style={{ marginTop: "8px" }}>
-                  {searchResults.length > 0 ? (
-                    searchResults.map((result) => (
-                      <div
-                        key={result.id}
-                        onClick={() => {
-                          handleOpenProfile(result);
-                          setShowSearch(false);
-                          setSearchQuery("");
-                          setSearchResults([]);
-                        }}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          backgroundColor: "rgba(255,255,255,0.5)",
-                          transition: "background 0.2s ease",
-                          marginBottom: "4px",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.8)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.5)";
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "8px",
-                            backgroundColor: "#f0f0f0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "14px",
-                            overflow: "hidden",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {result.photoURL ? (
-                            <img src={result.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          ) : (
-                            <span>{result.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                          )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
-                            {result.name}
-                            {result.isOfficial && <InstagramVerifiedBadge size={12} />}
-                          </div>
-                          <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.5)" }}>
-                            {result.email}
-                          </div>
-                        </div>
-                        <OnlineIndicator online={result.online || false} />
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ 
-                      padding: "12px", 
-                      textAlign: "center", 
-                      color: "rgba(0,0,0,0.6)",
-                      fontSize: "13px",
-                    }}>
-                      Tidak ada hasil untuk "{searchQuery}"
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "rgba(0,0,0,0.4)",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    padding: "0 4px",
+                  }}
+                >
+                  ✕
+                </button>
               )}
+            </div>
+          )}
+
+          {/* Search Results */}
+          {showSearch && searchQuery && searchResults.length > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 12px)",
+                left: "0",
+                backgroundColor: "#ffffff",
+                borderRadius: "12px",
+                padding: "8px",
+                minWidth: "320px",
+                maxWidth: "400px",
+                boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
+                zIndex: 100,
+                border: "1px solid rgba(0,0,0,0.05)",
+              }}
+            >
+              {searchResults.map((result) => (
+                <div
+                  key={result.id}
+                  onClick={() => {
+                    handleOpenProfile(result);
+                    setShowSearch(false);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    backgroundColor: "transparent",
+                    transition: "background 0.2s ease",
+                    marginBottom: "2px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "8px",
+                      backgroundColor: "#f0f0f0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "16px",
+                      overflow: "hidden",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {result.photoURL ? (
+                      <img src={result.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <span>{result.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                      {result.name}
+                      {result.isOfficial && <InstagramVerifiedBadge size={12} />}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#999" }}>
+                      {result.email}
+                    </div>
+                  </div>
+                  <OnlineIndicator online={result.online || false} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showSearch && searchQuery && searchResults.length === 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 12px)",
+                left: "0",
+                backgroundColor: "#ffffff",
+                borderRadius: "12px",
+                padding: "16px",
+                minWidth: "200px",
+                boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
+                zIndex: 100,
+                border: "1px solid rgba(0,0,0,0.05)",
+                textAlign: "center",
+                color: "#999",
+                fontSize: "13px",
+              }}
+            >
+              Tidak ada hasil untuk "{searchQuery}"
             </div>
           )}
         </div>
@@ -3456,6 +3503,16 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
+          }
+        }
+        @keyframes slideSearch {
+          from {
+            opacity: 0;
+            transform: translateY(-50%) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
           }
         }
       `}</style>
