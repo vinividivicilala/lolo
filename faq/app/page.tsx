@@ -548,7 +548,6 @@ export default function HomePage(): React.JSX.Element {
             }
           });
           
-          // Tambahkan user sendiri ke daftar untuk chat dengan diri sendiri
           const selfUser: ChatUser = {
             id: user.uid,
             name: user.displayName || user.email || "Saya",
@@ -801,7 +800,7 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile
+  // Handle open profile - seamless transition
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -811,7 +810,6 @@ export default function HomePage(): React.JSX.Element {
     setEditNote(false);
   };
 
-  // Handle close profile
   const handleCloseProfile = () => {
     setShowProfile(false);
     setProfileUser(null);
@@ -1156,228 +1154,213 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // Profile Page View
+  // Profile View - Seamless transition dari chat, no background color
   if (showProfile && profileUser) {
     return (
       <div style={{
         minHeight: "100vh",
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#ffffff",
         fontFamily: "Inter, 'Inter Fallback'",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "60px 20px 40px",
+        justifyContent: "center",
+        padding: "40px 20px",
         position: "relative",
       }}>
-        {/* Back Button */}
+        {/* Back Button - Floating */}
         <button
           onClick={handleCloseProfile}
           style={{
-            position: "absolute",
+            position: "fixed",
             top: "40px",
             left: "40px",
             background: "none",
             border: "none",
-            color: "#fff",
+            color: "#000",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             gap: "8px",
             fontSize: "14px",
-            opacity: 0.6,
-            transition: "opacity 0.3s ease",
+            opacity: 0.5,
+            transition: "opacity 0.2s ease",
             fontFamily: "Inter, 'Inter Fallback'",
+            zIndex: 10,
           }}
           onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = "0.6"}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = "0.5"}
         >
           <ArrowLeftIcon />
           <span>Kembali</span>
         </button>
 
-        {/* Profile Card */}
+        {/* Profile Content - Clean, no background */}
         <div style={{
-          maxWidth: "480px",
+          maxWidth: "440px",
           width: "100%",
-          backgroundColor: "#1a1a1a",
-          borderRadius: "32px",
-          padding: "48px 40px",
-          border: "1px solid rgba(255,255,255,0.03)",
-          boxShadow: "0 40px 80px rgba(0,0,0,0.4)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "20px 0",
         }}>
-          {/* Profile Photo */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "32px" }}>
-            <div style={{ position: "relative" }}>
-              <div
-                style={{
-                  width: "140px",
-                  height: "140px",
-                  borderRadius: "50%",
-                  backgroundColor: "#2a2a2a",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "56px",
-                  overflow: "hidden",
-                  border: "3px solid #c5e800",
-                  boxShadow: "0 8px 32px rgba(197,232,0,0.1)",
-                }}
-              >
-                {profileUser.photoURL ? (
-                  <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <span style={{ color: "#fff" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                )}
-              </div>
-              {profileUser.isOfficial && (
-                <div style={{ position: "absolute", bottom: 4, right: 4 }}>
-                  <InstagramVerifiedBadge size={28} />
-                </div>
+          {/* Photo */}
+          <div style={{ position: "relative", marginBottom: "24px" }}>
+            <div
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                backgroundColor: "#f5f5f5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "48px",
+                overflow: "hidden",
+                border: "2px solid #000",
+              }}
+            >
+              {profileUser.photoURL ? (
+                <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
               )}
             </div>
-
-            {/* Note di atas FP */}
-            {profileUser.note && (
-              <div
-                style={{
-                  marginTop: "16px",
-                  padding: "6px 20px",
-                  backgroundColor: "rgba(197,232,0,0.08)",
-                  border: "1px solid rgba(197,232,0,0.15)",
-                  borderRadius: "24px",
-                  fontSize: "13px",
-                  color: "#c5e800",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <span style={{ fontSize: "16px" }}>📌</span>
-                <span>{profileUser.note}</span>
-              </div>
-            )}
-
-            {profileUser.id === user?.uid && (
-              <button
-                onClick={() => setEditNote(!editNote)}
-                style={{
-                  marginTop: "8px",
-                  background: "none",
-                  border: "none",
-                  color: "#666",
-                  fontSize: "12px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  transition: "color 0.3s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
-              >
-                <EditIcon />
-                {profileUser.note ? "Edit Catatan" : "Tambah Catatan"}
-              </button>
-            )}
-
-            {editNote && profileUser.id === user?.uid && (
-              <div style={{ marginTop: "8px", width: "100%" }}>
-                <input
-                  type="text"
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                  placeholder="Tulis catatan..."
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    backgroundColor: "#2a2a2a",
-                    border: "1px solid #3a3a3a",
-                    borderRadius: "12px",
-                    color: "#fff",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                  }}
-                />
-                <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                  <button
-                    onClick={handleSaveNote}
-                    style={{
-                      padding: "6px 20px",
-                      backgroundColor: "#c5e800",
-                      border: "none",
-                      borderRadius: "8px",
-                      color: "#000",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      fontWeight: 500,
-                      fontFamily: "Inter, 'Inter Fallback'",
-                    }}
-                  >
-                    Simpan
-                  </button>
-                  <button
-                    onClick={() => setEditNote(false)}
-                    style={{
-                      padding: "6px 20px",
-                      backgroundColor: "transparent",
-                      border: "1px solid #3a3a3a",
-                      borderRadius: "8px",
-                      color: "#666",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      fontFamily: "Inter, 'Inter Fallback'",
-                    }}
-                  >
-                    Batal
-                  </button>
-                </div>
+            {profileUser.isOfficial && (
+              <div style={{ position: "absolute", bottom: 4, right: 4 }}>
+                <InstagramVerifiedBadge size={24} />
               </div>
             )}
           </div>
 
-          {/* Name & Email */}
-          <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <h1 style={{ 
-              color: "#fff", 
-              fontSize: "28px", 
-              fontWeight: 600, 
-              margin: 0,
-              letterSpacing: "-0.02em",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px"
-            }}>
-              {profileUser.name}
-              {profileUser.isOfficial && <InstagramVerifiedBadge size={20} />}
-            </h1>
-            <p style={{ color: "#666", fontSize: "14px", margin: "6px 0 0 0" }}>{profileUser.email}</p>
-            <div style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              gap: "8px", 
-              marginTop: "8px" 
-            }}>
-              <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-              <span style={{ color: "#999", fontSize: "13px" }}>
-                {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-              </span>
+          {/* Note */}
+          {profileUser.note && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "4px 16px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: "20px",
+                fontSize: "12px",
+                color: "#666",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{ fontSize: "14px" }}>📌</span>
+              <span>{profileUser.note}</span>
             </div>
+          )}
+
+          {profileUser.id === user?.uid && (
+            <button
+              onClick={() => setEditNote(!editNote)}
+              style={{
+                marginBottom: "16px",
+                background: "none",
+                border: "none",
+                color: "#999",
+                fontSize: "12px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: "Inter, 'Inter Fallback'",
+              }}
+            >
+              <EditIcon />
+              {profileUser.note ? "Edit Catatan" : "Tambah Catatan"}
+            </button>
+          )}
+
+          {editNote && profileUser.id === user?.uid && (
+            <div style={{ marginBottom: "16px", width: "100%" }}>
+              <input
+                type="text"
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="Tulis catatan..."
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  backgroundColor: "#f5f5f5",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  color: "#000",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: "Inter, 'Inter Fallback'",
+                }}
+              />
+              <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                <button
+                  onClick={handleSaveNote}
+                  style={{
+                    padding: "6px 20px",
+                    backgroundColor: "#000",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    fontWeight: 500,
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                >
+                  Simpan
+                </button>
+                <button
+                  onClick={() => setEditNote(false)}
+                  style={{
+                    padding: "6px 20px",
+                    backgroundColor: "transparent",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "6px",
+                    color: "#999",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Name */}
+          <h1 style={{
+            fontSize: "24px",
+            fontWeight: 600,
+            color: "#000",
+            margin: "0 0 4px 0",
+            letterSpacing: "-0.02em",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}>
+            {profileUser.name}
+            {profileUser.isOfficial && <InstagramVerifiedBadge size={18} />}
+          </h1>
+          
+          {/* Email */}
+          <p style={{ color: "#999", fontSize: "14px", margin: "0 0 12px 0" }}>
+            {profileUser.email}
+          </p>
+
+          {/* Status */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "24px" }}>
+            <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+            <span style={{ color: "#666", fontSize: "13px" }}>
+              {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+            </span>
           </div>
 
           {/* Bio */}
-          <div style={{ 
-            padding: "20px",
-            backgroundColor: "#0a0a0a",
-            borderRadius: "16px",
-            marginBottom: "24px",
-            border: "1px solid rgba(255,255,255,0.02)",
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ color: "#666", fontSize: "12px", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          <div style={{ width: "100%", marginBottom: "24px", padding: "0 4px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ color: "#999", fontSize: "11px", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                 Bio
               </span>
               {profileUser.id === user?.uid && (
@@ -1386,17 +1369,14 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#666",
-                    fontSize: "12px",
+                    color: "#999",
+                    fontSize: "11px",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
                     fontFamily: "Inter, 'Inter Fallback'",
-                    transition: "color 0.3s ease",
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
-                  onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                 >
                   <EditIcon />
                   {profileUser.bio ? "Edit" : "Tambah"}
@@ -1414,10 +1394,10 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     width: "100%",
                     padding: "12px",
-                    backgroundColor: "#1a1a1a",
-                    border: "1px solid #3a3a3a",
-                    borderRadius: "12px",
-                    color: "#fff",
+                    backgroundColor: "#f5f5f5",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    color: "#000",
                     fontSize: "14px",
                     outline: "none",
                     fontFamily: "Inter, 'Inter Fallback'",
@@ -1429,10 +1409,10 @@ export default function HomePage(): React.JSX.Element {
                     onClick={handleSaveBio}
                     style={{
                       padding: "6px 20px",
-                      backgroundColor: "#c5e800",
+                      backgroundColor: "#000",
                       border: "none",
-                      borderRadius: "8px",
-                      color: "#000",
+                      borderRadius: "6px",
+                      color: "#fff",
                       fontSize: "13px",
                       cursor: "pointer",
                       fontWeight: 500,
@@ -1446,9 +1426,9 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       padding: "6px 20px",
                       backgroundColor: "transparent",
-                      border: "1px solid #3a3a3a",
-                      borderRadius: "8px",
-                      color: "#666",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      color: "#999",
                       fontSize: "13px",
                       cursor: "pointer",
                       fontFamily: "Inter, 'Inter Fallback'",
@@ -1460,7 +1440,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ) : (
               <p style={{ 
-                color: profileUser.bio ? "#e0e0e0" : "#555", 
+                color: profileUser.bio ? "#000" : "#ccc", 
                 fontSize: "14px", 
                 margin: 0, 
                 lineHeight: 1.6,
@@ -1471,8 +1451,8 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: "flex", gap: "10px" }}>
+          {/* Actions */}
+          <div style={{ display: "flex", gap: "10px", width: "100%" }}>
             <button
               onClick={() => {
                 handleCloseProfile();
@@ -1481,51 +1461,35 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 flex: 1,
                 padding: "12px",
-                backgroundColor: "#c5e800",
+                backgroundColor: "#000",
                 border: "none",
-                borderRadius: "12px",
-                color: "#000",
-                fontSize: "15px",
+                borderRadius: "8px",
+                color: "#fff",
+                fontSize: "14px",
                 fontWeight: 500,
                 cursor: "pointer",
                 fontFamily: "Inter, 'Inter Fallback'",
-                transition: "all 0.3s ease",
+                transition: "opacity 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#b0d000";
-                e.currentTarget.style.transform = "scale(1.02)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#c5e800";
-                e.currentTarget.style.transform = "scale(1)";
-              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
             >
               Kirim Pesan
             </button>
             <button
-              onClick={() => {
-                handlePinUser(profileUser.id, profileUser.isPinned || false);
-              }}
+              onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
               style={{
                 padding: "12px 18px",
                 backgroundColor: "transparent",
-                border: "1px solid #3a3a3a",
-                borderRadius: "12px",
-                color: profileUser.isPinned ? "#c5e800" : "#666",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                color: profileUser.isPinned ? "#000" : "#999",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
                 fontFamily: "Inter, 'Inter Fallback'",
-                transition: "all 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#555";
-                e.currentTarget.style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#3a3a3a";
-                e.currentTarget.style.color = profileUser.isPinned ? "#c5e800" : "#666";
+                transition: "all 0.2s ease",
               }}
             >
               <PinIcon filled={profileUser.isPinned || false} />
