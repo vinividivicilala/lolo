@@ -176,16 +176,9 @@ const EditIcon = () => (
 );
 
 const AddNoteIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-  </svg>
-);
-
-const DeleteIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 6H5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
   </svg>
 );
 
@@ -418,7 +411,7 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7"];
+  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7", "#a29bfe"];
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -926,7 +919,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle add note - Instagram style
+  // Handle add note - Instagram Notes Tray style
   const handleAddNote = async () => {
     if (!profileUser || !db || !noteInput.trim()) return;
     
@@ -1821,7 +1814,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Note di atas FP seperti Instagram
+              // Profile View - Instagram Notes Tray Style
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1848,15 +1841,15 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Note - Instagram Style di atas FP */}
+                  {/* Instagram Notes Tray - di atas foto */}
                   <div style={{ width: "100%", marginBottom: "12px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                         Catatan ({profileUser.notes?.length || 0})
                       </span>
-                      {profileUser.id === user?.uid && (
+                      {profileUser.id === user?.uid && !showAddNote && (
                         <button
-                          onClick={() => setShowAddNote(!showAddNote)}
+                          onClick={() => setShowAddNote(true)}
                           style={{
                             background: "none",
                             border: "none",
@@ -1875,25 +1868,28 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* Add Note Form */}
+                    {/* Add Note Input - Instagram style */}
                     {showAddNote && profileUser.id === user?.uid && (
                       <div style={{ 
                         display: "flex", 
                         gap: "6px", 
-                        marginBottom: "10px",
+                        marginBottom: "12px",
                         alignItems: "center",
+                        backgroundColor: "#f5f5f5",
+                        padding: "6px 12px",
+                        borderRadius: "24px",
+                        border: "1px solid #e0e0e0",
                       }}>
                         <input
                           type="text"
                           value={noteInput}
                           onChange={(e) => setNoteInput(e.target.value)}
-                          placeholder="Tulis catatan..."
+                          placeholder="Apa yang sedang kamu pikirkan?"
                           style={{
                             flex: 1,
-                            padding: "8px 14px",
-                            backgroundColor: "#f5f5f5",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "20px",
+                            padding: "6px 4px",
+                            backgroundColor: "transparent",
+                            border: "none",
                             color: "#000",
                             fontSize: "13px",
                             outline: "none",
@@ -1904,19 +1900,22 @@ export default function HomePage(): React.JSX.Element {
                               handleAddNote();
                             }
                           }}
+                          autoFocus
                         />
                         <button
                           onClick={handleAddNote}
+                          disabled={!noteInput.trim()}
                           style={{
-                            padding: "6px 16px",
-                            backgroundColor: "#000",
+                            padding: "4px 14px",
+                            backgroundColor: noteInput.trim() ? "#000" : "#ccc",
                             border: "none",
-                            borderRadius: "20px",
+                            borderRadius: "16px",
                             color: "#fff",
                             fontSize: "12px",
-                            cursor: "pointer",
+                            cursor: noteInput.trim() ? "pointer" : "not-allowed",
                             fontFamily: "Inter, 'Inter Fallback'",
                             whiteSpace: "nowrap",
+                            transition: "all 0.2s ease",
                           }}
                         >
                           Kirim
@@ -1924,39 +1923,45 @@ export default function HomePage(): React.JSX.Element {
                         <button
                           onClick={() => setShowAddNote(false)}
                           style={{
-                            padding: "6px 16px",
-                            backgroundColor: "transparent",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "20px",
+                            background: "none",
+                            border: "none",
                             color: "#999",
-                            fontSize: "12px",
+                            fontSize: "16px",
                             cursor: "pointer",
                             fontFamily: "Inter, 'Inter Fallback'",
+                            padding: "0 4px",
                           }}
                         >
-                          Batal
+                          ✕
                         </button>
                       </div>
                     )}
 
-                    {/* Notes List - Instagram Style bubbles */}
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {/* Notes Bubble - Instagram Notes Tray */}
+                    <div style={{ 
+                      display: "flex", 
+                      flexWrap: "wrap", 
+                      gap: "8px",
+                      padding: "4px 0",
+                    }}>
                       {(profileUser.notes || []).map((note) => (
                         <div
                           key={note.id}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "6px",
+                            gap: "4px",
                             padding: "6px 14px",
                             backgroundColor: note.color || "#f0f0f0",
                             borderRadius: "20px",
                             fontSize: "13px",
                             color: "#000",
                             fontWeight: 500,
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
                             border: "1px solid rgba(0,0,0,0.04)",
-                            maxWidth: "200px",
+                            maxWidth: "220px",
+                            position: "relative",
+                            transition: "all 0.2s ease",
                           }}
                         >
                           {editingNoteId === note.id ? (
@@ -1967,7 +1972,7 @@ export default function HomePage(): React.JSX.Element {
                                 onChange={(e) => setEditNoteText(e.target.value)}
                                 style={{
                                   flex: 1,
-                                  padding: "4px 8px",
+                                  padding: "2px 6px",
                                   backgroundColor: "#fff",
                                   border: "1px solid #e0e0e0",
                                   borderRadius: "12px",
@@ -1975,13 +1980,14 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "12px",
                                   outline: "none",
                                   fontFamily: "Inter, 'Inter Fallback'",
-                                  minWidth: "80px",
+                                  minWidth: "60px",
                                 }}
                                 onKeyPress={(e) => {
                                   if (e.key === 'Enter') {
                                     handleEditNote(note.id);
                                   }
                                 }}
+                                autoFocus
                               />
                               <button
                                 onClick={() => handleEditNote(note.id)}
@@ -1990,9 +1996,10 @@ export default function HomePage(): React.JSX.Element {
                                   border: "none",
                                   color: "#000",
                                   cursor: "pointer",
-                                  fontSize: "11px",
+                                  fontSize: "12px",
                                   fontFamily: "Inter, 'Inter Fallback'",
                                   fontWeight: 500,
+                                  padding: "0 2px",
                                 }}
                               >
                                 ✓
@@ -2007,8 +2014,9 @@ export default function HomePage(): React.JSX.Element {
                                   border: "none",
                                   color: "#999",
                                   cursor: "pointer",
-                                  fontSize: "11px",
+                                  fontSize: "12px",
                                   fontFamily: "Inter, 'Inter Fallback'",
+                                  padding: "0 2px",
                                 }}
                               >
                                 ✕
@@ -2018,6 +2026,12 @@ export default function HomePage(): React.JSX.Element {
                             <>
                               <span style={{ fontSize: "12px", wordBreak: "break-word" }}>
                                 {note.text}
+                              </span>
+                              <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)", marginLeft: "2px" }}>
+                                •
+                              </span>
+                              <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>
+                                {formatTime(note.createdAt)}
                               </span>
                               {profileUser.id === user?.uid && (
                                 <>
@@ -2029,7 +2043,7 @@ export default function HomePage(): React.JSX.Element {
                                     style={{
                                       background: "none",
                                       border: "none",
-                                      color: "rgba(0,0,0,0.3)",
+                                      color: "rgba(0,0,0,0.25)",
                                       cursor: "pointer",
                                       padding: "0 2px",
                                       fontSize: "11px",
@@ -2043,7 +2057,7 @@ export default function HomePage(): React.JSX.Element {
                                     style={{
                                       background: "none",
                                       border: "none",
-                                      color: "rgba(0,0,0,0.3)",
+                                      color: "rgba(0,0,0,0.25)",
                                       cursor: "pointer",
                                       padding: "0 2px",
                                       fontSize: "11px",
@@ -2070,8 +2084,15 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Photo */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "16px", width: "100%" }}>
+                  {/* Photo with Note bubble position - di dalam foto */}
+                  <div style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: "20px", 
+                    marginBottom: "16px", 
+                    width: "100%",
+                    position: "relative",
+                  }}>
                     <div
                       style={{
                         width: "80px",
@@ -2096,6 +2117,33 @@ export default function HomePage(): React.JSX.Element {
                       {profileUser.isOfficial && (
                         <div style={{ position: "absolute", bottom: -4, right: -4 }}>
                           <InstagramVerifiedBadge size={20} />
+                        </div>
+                      )}
+                      
+                      {/* Note bubble di dalam foto (seperti Instagram) */}
+                      {(profileUser.notes || []).length > 0 && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "-6px",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            backgroundColor: "#c5e800",
+                            color: "#000",
+                            fontSize: "9px",
+                            fontWeight: 600,
+                            padding: "2px 10px",
+                            borderRadius: "12px",
+                            border: "2px solid #fff",
+                            whiteSpace: "nowrap",
+                            maxWidth: "70px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            zIndex: 2,
+                          }}
+                        >
+                          {profileUser.notes[0]?.text || "Note"}
                         </div>
                       )}
                     </div>
@@ -2256,7 +2304,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View
+              // Chat List View - sama seperti sebelumnya
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2764,7 +2812,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View
+              // Chat View - sama seperti sebelumnya
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
