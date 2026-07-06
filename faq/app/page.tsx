@@ -167,6 +167,14 @@ const EditIcon = () => (
   </svg>
 );
 
+// Search Icon
+const SearchIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+  </svg>
+);
+
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -390,9 +398,13 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<ChatUser[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -799,6 +811,8 @@ export default function HomePage(): React.JSX.Element {
       setOfficialMessagesSent(false);
       setShowProfile(false);
       setProfileUser(null);
+      setShowSearch(false);
+      setSearchQuery("");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -845,6 +859,22 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+    
+    const results = users.filter(u => 
+      u.name.toLowerCase().includes(query.toLowerCase()) ||
+      u.email.toLowerCase().includes(query.toLowerCase()) ||
+      (u.bio && u.bio.toLowerCase().includes(query.toLowerCase()))
+    );
+    setSearchResults(results);
+  };
+
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
@@ -853,6 +883,8 @@ export default function HomePage(): React.JSX.Element {
     setNoteInput(chatUser.note || "");
     setEditBio(false);
     setEditNote(false);
+    setShowSearch(false);
+    setSearchQuery("");
   };
 
   const handleCloseProfile = () => {
@@ -1193,10 +1225,26 @@ export default function HomePage(): React.JSX.Element {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMessageMenu(null);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        // Don't close search on outside click
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Close search on Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showSearch) {
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showSearch]);
 
   if (loading) {
     return (
@@ -1225,21 +1273,186 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo - Kiri Atas */}
+      {/* Logo - Kiri Atas dengan Search */}
       <div
         style={{
           position: "absolute",
           top: "40px",
           left: "40px",
           zIndex: 10,
-          fontSize: "56px",
-          fontWeight: 400,
-          color: "#000",
-          letterSpacing: "-0.02em",
-          lineHeight: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
         }}
       >
-        Menuru
+        <div
+          style={{
+            fontSize: "56px",
+            fontWeight: 400,
+            color: "#000",
+            letterSpacing: "-0.02em",
+            lineHeight: 1,
+          }}
+        >
+          Menuru
+        </div>
+
+        {/* Search Button - Hijau Stabilo */}
+        <div style={{ position: "relative" }} ref={searchRef}>
+          <button
+            onClick={() => {
+              setShowSearch(!showSearch);
+              if (!showSearch) {
+                setSearchQuery("");
+                setSearchResults([]);
+                setTimeout(() => {
+                  const input = document.querySelector('input[type="search"]') as HTMLInputElement;
+                  if (input) input.focus();
+                }, 100);
+              }
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 14px",
+              backgroundColor: "#c5e800",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              color: "#000",
+              fontFamily: "Inter, 'Inter Fallback'",
+              fontSize: "14px",
+              fontWeight: 500,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#b0d000";
+              e.currentTarget.style.transform = "scale(1.02)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#c5e800";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            <SearchIcon />
+            <span style={{ fontSize: "13px" }}>Cari</span>
+          </button>
+
+          {/* Search Input - Dropdown */}
+          {showSearch && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: 0,
+                backgroundColor: "#c5e800",
+                borderRadius: "12px",
+                padding: "12px 16px",
+                minWidth: "320px",
+                maxWidth: "400px",
+                boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+                zIndex: 100,
+                border: "1px solid rgba(0,0,0,0.05)",
+              }}
+            >
+              <input
+                type="search"
+                placeholder="What are you looking for?"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 16px",
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  outline: "none",
+                  color: "#000",
+                  fontFamily: "Inter, 'Inter Fallback'",
+                }}
+                autoFocus
+              />
+              
+              {/* Search Results */}
+              {searchQuery && (
+                <div style={{ marginTop: "8px" }}>
+                  {searchResults.length > 0 ? (
+                    searchResults.map((result) => (
+                      <div
+                        key={result.id}
+                        onClick={() => {
+                          handleOpenProfile(result);
+                          setShowSearch(false);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          backgroundColor: "rgba(255,255,255,0.5)",
+                          transition: "background 0.2s ease",
+                          marginBottom: "4px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.8)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.5)";
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "8px",
+                            backgroundColor: "#f0f0f0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "14px",
+                            overflow: "hidden",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {result.photoURL ? (
+                            <img src={result.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <span>{result.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                            {result.name}
+                            {result.isOfficial && <InstagramVerifiedBadge size={12} />}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.5)" }}>
+                            {result.email}
+                          </div>
+                        </div>
+                        <OnlineIndicator online={result.online || false} />
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ 
+                      padding: "12px", 
+                      textAlign: "center", 
+                      color: "rgba(0,0,0,0.6)",
+                      fontSize: "13px",
+                    }}>
+                      Tidak ada hasil untuk "{searchQuery}"
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Teks "menuru" besar */}
@@ -1702,10 +1915,9 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Note dengan background hitam kecil di atas foto
+              // Profile View
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                  {/* Back Button */}
                   <button
                     onClick={handleCloseProfile}
                     style={{
@@ -1729,7 +1941,7 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Note Section - Background hitam kecil nempel di atas foto */}
+                  {/* Note Section */}
                   <div style={{ width: "100%", marginBottom: "0px" }}>
                     <div style={{ 
                       backgroundColor: "#000000", 
@@ -1854,7 +2066,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Photo dengan border radius yang masuk ke foto */}
+                  {/* Photo */}
                   <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "16px", width: "100%", position: "relative", zIndex: 1 }}>
                     <div
                       style={{
@@ -1902,7 +2114,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Bio - di bawah FP */}
+                  {/* Bio */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
