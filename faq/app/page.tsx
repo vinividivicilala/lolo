@@ -75,7 +75,6 @@ interface Note {
   id: string;
   text: string;
   createdAt: string;
-  color?: string;
 }
 
 interface Message {
@@ -172,13 +171,6 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const AddNoteIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
   </svg>
 );
 
@@ -403,13 +395,10 @@ export default function HomePage(): React.JSX.Element {
   const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
   const [editBio, setEditBio] = useState(false);
   const [bioInput, setBioInput] = useState("");
-  const [showAddNote, setShowAddNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7", "#a29bfe", "#fd79a8", "#00cec9"];
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -874,7 +863,6 @@ export default function HomePage(): React.JSX.Element {
     setShowProfile(true);
     setBioInput(chatUser.bio || "");
     setNoteInput("");
-    setShowAddNote(false);
     setEditBio(false);
   };
 
@@ -882,7 +870,6 @@ export default function HomePage(): React.JSX.Element {
     setShowProfile(false);
     setProfileUser(null);
     setEditBio(false);
-    setShowAddNote(false);
   };
 
   // Handle save bio
@@ -914,7 +901,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle add note
+  // Handle add note - Instagram Notes style
   const handleAddNote = async () => {
     if (!profileUser || !db || !noteInput.trim()) return;
     
@@ -922,8 +909,7 @@ export default function HomePage(): React.JSX.Element {
       const newNote: Note = {
         id: Date.now().toString(),
         text: noteInput.trim(),
-        createdAt: new Date().toISOString(),
-        color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)]
+        createdAt: new Date().toISOString()
       };
       
       const currentNotes = profileUser.notes || [];
@@ -936,7 +922,6 @@ export default function HomePage(): React.JSX.Element {
       
       setProfileUser({ ...profileUser, notes: updatedNotes });
       setNoteInput("");
-      setShowAddNote(false);
       
       setUsers(prev => prev.map(u => {
         if (u.id === profileUser.id) {
@@ -1770,7 +1755,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Instagram Notes Tray Style
+              // Profile View - Instagram Notes Style
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1797,171 +1782,7 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Instagram Notes Tray - di atas foto */}
-                  <div style={{ width: "100%", marginBottom: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                      <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                        Catatan ({profileUser.notes?.length || 0})
-                      </span>
-                      {profileUser.id === user?.uid && !showAddNote && (
-                        <button
-                          onClick={() => setShowAddNote(true)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#999",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "11px",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                          }}
-                        >
-                          <AddNoteIcon />
-                          Tambah
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Add Note Input - Instagram style */}
-                    {showAddNote && profileUser.id === user?.uid && (
-                      <div style={{ 
-                        display: "flex", 
-                        gap: "6px", 
-                        marginBottom: "12px",
-                        alignItems: "center",
-                        backgroundColor: "#f5f5f5",
-                        padding: "6px 12px",
-                        borderRadius: "24px",
-                        border: "1px solid #e0e0e0",
-                      }}>
-                        <input
-                          type="text"
-                          value={noteInput}
-                          onChange={(e) => setNoteInput(e.target.value)}
-                          placeholder="Apa yang sedang kamu pikirkan?"
-                          style={{
-                            flex: 1,
-                            padding: "6px 4px",
-                            backgroundColor: "transparent",
-                            border: "none",
-                            color: "#000",
-                            fontSize: "13px",
-                            outline: "none",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                          }}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              handleAddNote();
-                            }
-                          }}
-                          autoFocus
-                        />
-                        <button
-                          onClick={handleAddNote}
-                          disabled={!noteInput.trim()}
-                          style={{
-                            padding: "4px 14px",
-                            backgroundColor: noteInput.trim() ? "#000" : "#ccc",
-                            border: "none",
-                            borderRadius: "16px",
-                            color: "#fff",
-                            fontSize: "12px",
-                            cursor: noteInput.trim() ? "pointer" : "not-allowed",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                            whiteSpace: "nowrap",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          Kirim
-                        </button>
-                        <button
-                          onClick={() => setShowAddNote(false)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#999",
-                            fontSize: "16px",
-                            cursor: "pointer",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                            padding: "0 4px",
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Notes Bubble - Instagram Notes Tray */}
-                    <div style={{ 
-                      display: "flex", 
-                      flexWrap: "wrap", 
-                      gap: "8px",
-                      padding: "4px 0",
-                    }}>
-                      {(profileUser.notes || []).map((note) => (
-                        <div
-                          key={note.id}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            padding: "6px 14px",
-                            backgroundColor: note.color || "#f0f0f0",
-                            borderRadius: "20px",
-                            fontSize: "13px",
-                            color: "#000",
-                            fontWeight: 500,
-                            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                            border: "1px solid rgba(0,0,0,0.04)",
-                            maxWidth: "220px",
-                            position: "relative",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <span style={{ fontSize: "12px", wordBreak: "break-word" }}>
-                            {note.text}
-                          </span>
-                          <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)", marginLeft: "2px" }}>
-                            •
-                          </span>
-                          <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>
-                            {formatTime(note.createdAt)}
-                          </span>
-                          {profileUser.id === user?.uid && (
-                            <>
-                              <button
-                                onClick={() => handleDeleteNote(note.id)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: "rgba(0,0,0,0.25)",
-                                  cursor: "pointer",
-                                  padding: "0 2px",
-                                  fontSize: "11px",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                }}
-                              >
-                                ×
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                      {(profileUser.notes || []).length === 0 && (
-                        <div style={{ 
-                          color: "#ccc", 
-                          fontSize: "13px", 
-                          padding: "4px 0" 
-                        }}>
-                          Belum ada catatan
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Photo with Note bubble position - Instagram Notes Bubble di dalam foto */}
+                  {/* Photo dengan Notes Bubble - Instagram Style */}
                   <div style={{ 
                     display: "flex", 
                     alignItems: "center", 
@@ -1997,15 +1818,15 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
                       
-                      {/* Note bubble di dalam foto (Instagram Notes style) */}
+                      {/* Instagram Notes Bubble - di dalam foto */}
                       {(profileUser.notes || []).length > 0 && (
                         <div
                           style={{
                             position: "absolute",
-                            bottom: "-8px",
+                            bottom: "-6px",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            backgroundColor: profileUser.notes[0]?.color || "#c5e800",
+                            backgroundColor: "#c5e800",
                             color: "#000",
                             fontSize: "9px",
                             fontWeight: 600,
@@ -2038,6 +1859,124 @@ export default function HomePage(): React.JSX.Element {
                           {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
                         </span>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Notes Tray - Instagram Style */}
+                  <div style={{ width: "100%", marginBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                        Catatan ({profileUser.notes?.length || 0})
+                      </span>
+                    </div>
+
+                    {/* Add Note - Instagram Style */}
+                    {profileUser.id === user?.uid && (
+                      <div style={{ 
+                        display: "flex", 
+                        gap: "8px", 
+                        marginBottom: "12px",
+                        alignItems: "center",
+                      }}>
+                        <input
+                          type="text"
+                          value={noteInput}
+                          onChange={(e) => setNoteInput(e.target.value)}
+                          placeholder="Apa yang sedang kamu pikirkan?"
+                          style={{
+                            flex: 1,
+                            padding: "8px 14px",
+                            backgroundColor: "#f5f5f5",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "20px",
+                            color: "#000",
+                            fontSize: "13px",
+                            outline: "none",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                          }}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddNote();
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={handleAddNote}
+                          disabled={!noteInput.trim()}
+                          style={{
+                            padding: "6px 18px",
+                            backgroundColor: noteInput.trim() ? "#000" : "#ccc",
+                            border: "none",
+                            borderRadius: "20px",
+                            color: "#fff",
+                            fontSize: "12px",
+                            cursor: noteInput.trim() ? "pointer" : "not-allowed",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            whiteSpace: "nowrap",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          Kirim
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Notes List - Instagram Tray Style */}
+                    <div style={{ 
+                      display: "flex", 
+                      flexWrap: "wrap", 
+                      gap: "8px",
+                      padding: "4px 0",
+                    }}>
+                      {(profileUser.notes || []).map((note) => (
+                        <div
+                          key={note.id}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 14px",
+                            backgroundColor: "#f0f0f0",
+                            borderRadius: "20px",
+                            fontSize: "13px",
+                            color: "#000",
+                            border: "1px solid rgba(0,0,0,0.04)",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                          }}
+                        >
+                          <span style={{ fontSize: "12px", wordBreak: "break-word" }}>
+                            {note.text}
+                          </span>
+                          <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>
+                            {formatTime(note.createdAt)}
+                          </span>
+                          {profileUser.id === user?.uid && (
+                            <button
+                              onClick={() => handleDeleteNote(note.id)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "rgba(0,0,0,0.25)",
+                                cursor: "pointer",
+                                padding: "0 2px",
+                                fontSize: "12px",
+                                fontFamily: "Inter, 'Inter Fallback'",
+                              }}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {(profileUser.notes || []).length === 0 && (
+                        <div style={{ 
+                          color: "#ccc", 
+                          fontSize: "13px", 
+                          padding: "4px 0" 
+                        }}>
+                          Belum ada catatan
+                        </div>
+                      )}
                     </div>
                   </div>
 
