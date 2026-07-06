@@ -405,13 +405,11 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [showAddNote, setShowAddNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
-  const [editNoteText, setEditNoteText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7", "#a29bfe"];
+  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7", "#a29bfe", "#fd79a8", "#00cec9"];
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -877,8 +875,6 @@ export default function HomePage(): React.JSX.Element {
     setBioInput(chatUser.bio || "");
     setNoteInput("");
     setShowAddNote(false);
-    setEditingNoteId(null);
-    setEditNoteText("");
     setEditBio(false);
   };
 
@@ -887,7 +883,6 @@ export default function HomePage(): React.JSX.Element {
     setProfileUser(null);
     setEditBio(false);
     setShowAddNote(false);
-    setEditingNoteId(null);
   };
 
   // Handle save bio
@@ -919,7 +914,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle add note - Instagram Notes Tray style
+  // Handle add note
   const handleAddNote = async () => {
     if (!profileUser || !db || !noteInput.trim()) return;
     
@@ -990,45 +985,6 @@ export default function HomePage(): React.JSX.Element {
       }
     } catch (error) {
       console.error("Error deleting note:", error);
-    }
-  };
-
-  // Handle edit note
-  const handleEditNote = async (noteId: string) => {
-    if (!profileUser || !db || !editNoteText.trim()) return;
-    
-    try {
-      const updatedNotes = (profileUser.notes || []).map(n => {
-        if (n.id === noteId) {
-          return { ...n, text: editNoteText.trim() };
-        }
-        return n;
-      });
-      
-      const userRef = doc(db, "users", profileUser.id);
-      await updateDoc(userRef, {
-        notes: updatedNotes
-      });
-      
-      setProfileUser({ ...profileUser, notes: updatedNotes });
-      setEditingNoteId(null);
-      setEditNoteText("");
-      
-      setUsers(prev => prev.map(u => {
-        if (u.id === profileUser.id) {
-          return { ...u, notes: updatedNotes };
-        }
-        return u;
-      }));
-      
-      if (profileUser.id === user.uid) {
-        setUser((prev: any) => ({
-          ...prev,
-          notes: updatedNotes
-        }));
-      }
-    } catch (error) {
-      console.error("Error editing note:", error);
     }
   };
 
@@ -1964,110 +1920,31 @@ export default function HomePage(): React.JSX.Element {
                             transition: "all 0.2s ease",
                           }}
                         >
-                          {editingNoteId === note.id ? (
+                          <span style={{ fontSize: "12px", wordBreak: "break-word" }}>
+                            {note.text}
+                          </span>
+                          <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)", marginLeft: "2px" }}>
+                            •
+                          </span>
+                          <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>
+                            {formatTime(note.createdAt)}
+                          </span>
+                          {profileUser.id === user?.uid && (
                             <>
-                              <input
-                                type="text"
-                                value={editNoteText}
-                                onChange={(e) => setEditNoteText(e.target.value)}
-                                style={{
-                                  flex: 1,
-                                  padding: "2px 6px",
-                                  backgroundColor: "#fff",
-                                  border: "1px solid #e0e0e0",
-                                  borderRadius: "12px",
-                                  color: "#000",
-                                  fontSize: "12px",
-                                  outline: "none",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                  minWidth: "60px",
-                                }}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleEditNote(note.id);
-                                  }
-                                }}
-                                autoFocus
-                              />
                               <button
-                                onClick={() => handleEditNote(note.id)}
+                                onClick={() => handleDeleteNote(note.id)}
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  color: "#000",
+                                  color: "rgba(0,0,0,0.25)",
                                   cursor: "pointer",
-                                  fontSize: "12px",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                  fontWeight: 500,
                                   padding: "0 2px",
+                                  fontSize: "11px",
+                                  fontFamily: "Inter, 'Inter Fallback'",
                                 }}
                               >
-                                ✓
+                                ×
                               </button>
-                              <button
-                                onClick={() => {
-                                  setEditingNoteId(null);
-                                  setEditNoteText("");
-                                }}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: "#999",
-                                  cursor: "pointer",
-                                  fontSize: "12px",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                  padding: "0 2px",
-                                }}
-                              >
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <span style={{ fontSize: "12px", wordBreak: "break-word" }}>
-                                {note.text}
-                              </span>
-                              <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)", marginLeft: "2px" }}>
-                                •
-                              </span>
-                              <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>
-                                {formatTime(note.createdAt)}
-                              </span>
-                              {profileUser.id === user?.uid && (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      setEditingNoteId(note.id);
-                                      setEditNoteText(note.text);
-                                    }}
-                                    style={{
-                                      background: "none",
-                                      border: "none",
-                                      color: "rgba(0,0,0,0.25)",
-                                      cursor: "pointer",
-                                      padding: "0 2px",
-                                      fontSize: "11px",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                  >
-                                    ✎
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteNote(note.id)}
-                                    style={{
-                                      background: "none",
-                                      border: "none",
-                                      color: "rgba(0,0,0,0.25)",
-                                      cursor: "pointer",
-                                      padding: "0 2px",
-                                      fontSize: "11px",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                  >
-                                    ×
-                                  </button>
-                                </>
-                              )}
                             </>
                           )}
                         </div>
@@ -2084,7 +1961,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Photo with Note bubble position - di dalam foto */}
+                  {/* Photo with Note bubble position - Instagram Notes Bubble di dalam foto */}
                   <div style={{ 
                     display: "flex", 
                     alignItems: "center", 
@@ -2120,15 +1997,15 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
                       
-                      {/* Note bubble di dalam foto (seperti Instagram) */}
+                      {/* Note bubble di dalam foto (Instagram Notes style) */}
                       {(profileUser.notes || []).length > 0 && (
                         <div
                           style={{
                             position: "absolute",
-                            bottom: "-6px",
+                            bottom: "-8px",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            backgroundColor: "#c5e800",
+                            backgroundColor: profileUser.notes[0]?.color || "#c5e800",
                             color: "#000",
                             fontSize: "9px",
                             fontWeight: 600,
@@ -2304,7 +2181,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View - sama seperti sebelumnya
+              // Chat List View
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2812,7 +2689,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - sama seperti sebelumnya
+              // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
