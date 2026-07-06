@@ -170,8 +170,8 @@ const EditIcon = () => (
 // Search Icon
 const SearchIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -1280,7 +1280,7 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "12px",
+          gap: "0px",
         }}
       >
         <div
@@ -1295,67 +1295,58 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Button - Hijau Stabilo kecil tanpa tulisan */}
-        <div style={{ position: "relative" }} ref={searchRef}>
-          <button
-            onClick={() => {
-              setShowSearch(!showSearch);
-              if (!showSearch) {
-                setSearchQuery("");
-                setSearchResults([]);
-                setTimeout(() => {
-                  if (searchInputRef.current) {
-                    searchInputRef.current.focus();
-                  }
-                }, 100);
-              }
-            }}
+        {/* Search - Kotak border radius menyatu */}
+        <div style={{ position: "relative", marginLeft: "16px" }} ref={searchRef}>
+          <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              width: "40px",
-              height: "40px",
-              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
-              border: "none",
-              borderRadius: "50%",
-              cursor: "pointer",
+              backgroundColor: "#c5e800",
+              borderRadius: "8px",
+              overflow: "hidden",
               transition: "all 0.3s ease",
-              color: "#000",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#b0d000";
-              e.currentTarget.style.transform = "scale(1.05)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#c5e800";
-              e.currentTarget.style.transform = "scale(1)";
+              boxShadow: showSearch ? "0 4px 16px rgba(197,232,0,0.3)" : "none",
             }}
           >
-            <SearchIcon />
-          </button>
-
-          {/* Search Input - Bergeser ke kanan, nyatu dengan bg hijau stabilo */}
-          {showSearch && (
-            <div
+            {/* Search Button */}
+            <button
+              onClick={() => {
+                setShowSearch(!showSearch);
+                if (!showSearch) {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                  setTimeout(() => {
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
+                  }, 100);
+                }
+              }}
               style={{
-                position: "absolute",
-                top: "50%",
-                left: "calc(100% + 8px)",
-                transform: "translateY(-50%)",
-                backgroundColor: "#c5e800",
-                borderRadius: "24px",
-                padding: "4px 8px 4px 16px",
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
-                minWidth: "200px",
-                maxWidth: "300px",
-                boxShadow: "0 4px 16px rgba(197,232,0,0.3)",
-                animation: "slideSearch 0.3s ease forwards",
+                justifyContent: "center",
+                width: "40px",
+                height: "40px",
+                backgroundColor: "transparent",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                color: "#000",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
               <SearchIcon />
+            </button>
+
+            {/* Search Input - Menyatu dengan button, tanpa icon search */}
+            {showSearch && (
               <input
                 ref={searchInputRef}
                 type="search"
@@ -1364,7 +1355,7 @@ export default function HomePage(): React.JSX.Element {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{
                   flex: 1,
-                  padding: "6px 8px",
+                  padding: "6px 16px 6px 0",
                   backgroundColor: "transparent",
                   border: "none",
                   borderRadius: "0",
@@ -1372,39 +1363,20 @@ export default function HomePage(): React.JSX.Element {
                   outline: "none",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  minWidth: "140px",
+                  minWidth: "200px",
+                  maxWidth: "260px",
+                  animation: "slideSearch 0.3s ease forwards",
                 }}
               />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "rgba(0,0,0,0.4)",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    padding: "0 4px",
-                  }}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Search Results */}
           {showSearch && searchQuery && searchResults.length > 0 && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 12px)",
+                top: "calc(100% + 8px)",
                 left: "0",
                 backgroundColor: "#ffffff",
                 borderRadius: "12px",
@@ -1482,7 +1454,7 @@ export default function HomePage(): React.JSX.Element {
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 12px)",
+                top: "calc(100% + 8px)",
                 left: "0",
                 backgroundColor: "#ffffff",
                 borderRadius: "12px",
@@ -3508,11 +3480,11 @@ export default function HomePage(): React.JSX.Element {
         @keyframes slideSearch {
           from {
             opacity: 0;
-            transform: translateY(-50%) scale(0.95);
+            width: 0;
           }
           to {
             opacity: 1;
-            transform: translateY(-50%) scale(1);
+            width: auto;
           }
         }
       `}</style>
