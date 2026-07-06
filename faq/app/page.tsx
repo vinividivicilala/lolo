@@ -68,13 +68,6 @@ interface ChatUser {
   typing?: boolean;
   bio?: string;
   note?: string;
-  notes?: Note[];
-}
-
-interface Note {
-  id: string;
-  text: string;
-  createdAt: string;
 }
 
 interface Message {
@@ -171,6 +164,20 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const AddNoteIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 6H5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -395,8 +402,8 @@ export default function HomePage(): React.JSX.Element {
   const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
   const [editBio, setEditBio] = useState(false);
   const [bioInput, setBioInput] = useState("");
+  const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [isAddingNote, setIsAddingNote] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -409,8 +416,7 @@ export default function HomePage(): React.JSX.Element {
     isOfficial: true,
     isPinned: false,
     bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
-    note: "Official Account",
-    notes: []
+    note: ""
   };
 
   const OFFICIAL_MESSAGES = [
@@ -463,8 +469,7 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp(),
               typing: false,
               bio: "",
-              note: "",
-              notes: []
+              note: ""
             });
             
             if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
@@ -510,8 +515,7 @@ export default function HomePage(): React.JSX.Element {
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
-              note: updatedData.note || "",
-              notes: updatedData.notes || []
+              note: updatedData.note || ""
             }));
           }
           
@@ -587,7 +591,6 @@ export default function HomePage(): React.JSX.Element {
                 typing: data.typing || false,
                 bio: data.bio || "",
                 note: data.note || "",
-                notes: data.notes || [],
                 photoURL: data.photoURL || ""
               } as ChatUser);
             }
@@ -604,8 +607,7 @@ export default function HomePage(): React.JSX.Element {
             lastSeen: null,
             typing: false,
             bio: user.bio || "",
-            note: user.note || "",
-            notes: user.notes || []
+            note: user.note || ""
           };
           
           const selfExists = userList.some(u => u.id === user.uid);
@@ -619,15 +621,14 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: user.photoURL || userList[index].photoURL || "",
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
-                note: user.note || userList[index].note || "",
-                notes: user.notes || userList[index].notes || []
+                note: user.note || userList[index].note || ""
               };
             }
           }
           
           const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
-            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, notes: [] });
+            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false });
           }
           
           userList.sort((a, b) => {
@@ -863,16 +864,16 @@ export default function HomePage(): React.JSX.Element {
     setProfileUser(chatUser);
     setShowProfile(true);
     setBioInput(chatUser.bio || "");
-    setNoteInput("");
+    setNoteInput(chatUser.note || "");
     setEditBio(false);
-    setIsAddingNote(false);
+    setEditNote(false);
   };
 
   const handleCloseProfile = () => {
     setShowProfile(false);
     setProfileUser(null);
     setEditBio(false);
-    setIsAddingNote(false);
+    setEditNote(false);
   };
 
   // Handle save bio
@@ -904,62 +905,20 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle add note - Instagram Notes style (hanya 1 note)
-  const handleAddNote = async () => {
-    if (!profileUser || !db || !noteInput.trim()) return;
-    
-    try {
-      const newNote: Note = {
-        id: Date.now().toString(),
-        text: noteInput.trim(),
-        createdAt: new Date().toISOString()
-      };
-      
-      // Hanya simpan 1 note terbaru
-      const updatedNotes = [newNote];
-      
-      const userRef = doc(db, "users", profileUser.id);
-      await updateDoc(userRef, {
-        notes: updatedNotes
-      });
-      
-      setProfileUser({ ...profileUser, notes: updatedNotes });
-      setNoteInput("");
-      setIsAddingNote(false);
-      
-      setUsers(prev => prev.map(u => {
-        if (u.id === profileUser.id) {
-          return { ...u, notes: updatedNotes };
-        }
-        return u;
-      }));
-      
-      if (profileUser.id === user.uid) {
-        setUser((prev: any) => ({
-          ...prev,
-          notes: updatedNotes
-        }));
-      }
-    } catch (error) {
-      console.error("Error adding note:", error);
-    }
-  };
-
-  // Handle delete note
-  const handleDeleteNote = async () => {
+  // Handle save note
+  const handleSaveNote = async () => {
     if (!profileUser || !db) return;
-    
     try {
       const userRef = doc(db, "users", profileUser.id);
       await updateDoc(userRef, {
-        notes: []
+        note: noteInput
       });
-      
-      setProfileUser({ ...profileUser, notes: [] });
+      setProfileUser({ ...profileUser, note: noteInput });
+      setEditNote(false);
       
       setUsers(prev => prev.map(u => {
         if (u.id === profileUser.id) {
-          return { ...u, notes: [] };
+          return { ...u, note: noteInput };
         }
         return u;
       }));
@@ -967,11 +926,11 @@ export default function HomePage(): React.JSX.Element {
       if (profileUser.id === user.uid) {
         setUser((prev: any) => ({
           ...prev,
-          notes: []
+          note: noteInput
         }));
       }
     } catch (error) {
-      console.error("Error deleting note:", error);
+      console.error("Error saving note:", error);
     }
   };
 
@@ -1757,7 +1716,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Instagram Notes Style (Black Background)
+              // Profile View - Note dengan background hitam di atas FP
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1784,20 +1743,118 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Photo dengan Note - Instagram Notes Style */}
-                  <div style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: "20px", 
-                    marginBottom: "16px", 
-                    width: "100%",
-                    position: "relative",
-                  }}>
+                  {/* Note Section - Background hitam dengan border radius melengkung */}
+                  <div style={{ width: "100%", marginBottom: "16px" }}>
+                    <div style={{ 
+                      backgroundColor: "#000000", 
+                      borderRadius: "16px",
+                      padding: "16px 20px",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "11px", color: "#666", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                          Catatan
+                        </span>
+                        {profileUser.id === user?.uid && (
+                          <button
+                            onClick={() => setEditNote(!editNote)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#666",
+                              fontSize: "11px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            <EditIcon />
+                            {profileUser.note ? "Edit" : "Tambah"}
+                          </button>
+                        )}
+                      </div>
+
+                      {editNote && profileUser.id === user?.uid ? (
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <input
+                            type="text"
+                            value={noteInput}
+                            onChange={(e) => setNoteInput(e.target.value)}
+                            placeholder="Tulis catatan..."
+                            style={{
+                              flex: 1,
+                              padding: "10px 14px",
+                              backgroundColor: "#1a1a1a",
+                              border: "1px solid #333",
+                              borderRadius: "10px",
+                              color: "#ffffff",
+                              fontSize: "14px",
+                              outline: "none",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                handleSaveNote();
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={handleSaveNote}
+                            style={{
+                              padding: "8px 20px",
+                              backgroundColor: "#c5e800",
+                              border: "none",
+                              borderRadius: "10px",
+                              color: "#000",
+                              fontSize: "13px",
+                              fontWeight: 500,
+                              cursor: "pointer",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Simpan
+                          </button>
+                          <button
+                            onClick={() => setEditNote(false)}
+                            style={{
+                              padding: "8px 16px",
+                              backgroundColor: "transparent",
+                              border: "1px solid #333",
+                              borderRadius: "10px",
+                              color: "#666",
+                              fontSize: "13px",
+                              cursor: "pointer",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ 
+                          padding: "10px 4px",
+                          color: profileUser.note ? "#ffffff" : "#555",
+                          fontSize: "14px",
+                          lineHeight: 1.6,
+                          minHeight: "40px",
+                        }}>
+                          {profileUser.note || "Belum ada catatan"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Photo */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "16px", width: "100%" }}>
                     <div
                       style={{
                         width: "80px",
                         height: "80px",
-                        borderRadius: "50%",
+                        borderRadius: "12px",
                         backgroundColor: "#f0f0f0",
                         display: "flex",
                         alignItems: "center",
@@ -1807,6 +1864,7 @@ export default function HomePage(): React.JSX.Element {
                         border: "2px solid #000",
                         flexShrink: 0,
                         position: "relative",
+                        marginTop: "-8px",
                       }}
                     >
                       {profileUser.photoURL ? (
@@ -1815,36 +1873,8 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
                       {profileUser.isOfficial && (
-                        <div style={{ position: "absolute", bottom: 0, right: 0 }}>
+                        <div style={{ position: "absolute", bottom: -4, right: -4 }}>
                           <InstagramVerifiedBadge size={20} />
-                        </div>
-                      )}
-                      
-                      {/* Instagram Notes Bubble - Black background dengan border radius melengkung ke dalam foto */}
-                      {(profileUser.notes || []).length > 0 && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: "-4px",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            backgroundColor: "#000000",
-                            color: "#ffffff",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            padding: "4px 12px",
-                            borderRadius: "12px 12px 12px 4px",
-                            border: "2px solid #ffffff",
-                            whiteSpace: "nowrap",
-                            maxWidth: "70px",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                            zIndex: 2,
-                            letterSpacing: "0.02em",
-                          }}
-                        >
-                          {profileUser.notes[0]?.text || "Note"}
                         </div>
                       )}
                     </div>
@@ -1865,155 +1895,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Add Note - Instagram Notes Style (Black Background) */}
-                  {profileUser.id === user?.uid && (
-                    <div style={{ width: "100%", marginBottom: "12px" }}>
-                      {!isAddingNote ? (
-                        <button
-                          onClick={() => setIsAddingNote(true)}
-                          style={{
-                            width: "100%",
-                            padding: "10px 16px",
-                            backgroundColor: "#000000",
-                            borderRadius: "12px 12px 12px 4px",
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                            textAlign: "center",
-                            transition: "all 0.2s ease",
-                            border: "none",
-                            fontWeight: 500,
-                            letterSpacing: "0.02em",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.opacity = "0.8";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.opacity = "1";
-                          }}
-                        >
-                          ✏️ Tambah Catatan
-                        </button>
-                      ) : (
-                        <div style={{ 
-                          display: "flex", 
-                          gap: "8px", 
-                          alignItems: "center",
-                          backgroundColor: "#000000",
-                          padding: "8px 14px",
-                          borderRadius: "12px 12px 12px 4px",
-                        }}>
-                          <input
-                            type="text"
-                            value={noteInput}
-                            onChange={(e) => setNoteInput(e.target.value)}
-                            placeholder="Tulis catatan..."
-                            style={{
-                              flex: 1,
-                              padding: "6px 4px",
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "#ffffff",
-                              fontSize: "13px",
-                              outline: "none",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                              placeholder: { color: "#666" }
-                            }}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                handleAddNote();
-                              }
-                            }}
-                            autoFocus
-                          />
-                          <button
-                            onClick={handleAddNote}
-                            disabled={!noteInput.trim()}
-                            style={{
-                              padding: "4px 14px",
-                              backgroundColor: noteInput.trim() ? "#ffffff" : "#333333",
-                              border: "none",
-                              borderRadius: "8px",
-                              color: noteInput.trim() ? "#000000" : "#666666",
-                              fontSize: "12px",
-                              cursor: noteInput.trim() ? "pointer" : "not-allowed",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                              whiteSpace: "nowrap",
-                              transition: "all 0.2s ease",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Kirim
-                          </button>
-                          <button
-                            onClick={() => setIsAddingNote(false)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "#666666",
-                              fontSize: "16px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                              padding: "0 4px",
-                            }}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Current Note Display - Hanya 1 note di background hitam */}
-                  {(profileUser.notes || []).length > 0 && (
-                    <div style={{ width: "100%", marginBottom: "12px" }}>
-                      <div style={{ 
-                        backgroundColor: "#000000",
-                        padding: "12px 16px",
-                        borderRadius: "12px 12px 12px 4px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}>
-                        <div>
-                          <div style={{ 
-                            color: "#ffffff", 
-                            fontSize: "14px", 
-                            fontWeight: 500,
-                            letterSpacing: "0.02em",
-                          }}>
-                            {profileUser.notes[0]?.text}
-                          </div>
-                          <div style={{ 
-                            color: "#666666", 
-                            fontSize: "10px", 
-                            marginTop: "4px",
-                          }}>
-                            {formatTime(profileUser.notes[0]?.createdAt)}
-                          </div>
-                        </div>
-                        {profileUser.id === user?.uid && (
-                          <button
-                            onClick={handleDeleteNote}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "#666666",
-                              cursor: "pointer",
-                              padding: "4px 8px",
-                              fontSize: "14px",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Bio */}
+                  {/* Bio - di bawah FP */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -2153,7 +2035,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View
+              // Chat List View - sama seperti sebelumnya
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2661,7 +2543,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View
+              // Chat View - sama seperti sebelumnya
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
