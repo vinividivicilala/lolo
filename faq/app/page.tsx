@@ -8,7 +8,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  updateProfile
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -427,7 +428,7 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Auth Listener
+  // Auth Listener - Sinkron foto dari Gmail
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -437,12 +438,18 @@ export default function HomePage(): React.JSX.Element {
         try {
           const userRef = doc(db, "users", currentUser.uid);
           const userSnap = await getDoc(userRef);
+          
+          // Data dari Google/Gmail
+          const googlePhotoURL = currentUser.photoURL || "";
+          const googleName = currentUser.displayName || currentUser.email || "";
+          
           if (!userSnap.exists()) {
+            // Buat user baru dengan data dari Google
             await setDoc(userRef, {
               id: currentUser.uid,
-              name: currentUser.displayName || currentUser.email,
-              email: currentUser.email,
-              photoURL: currentUser.photoURL || "",
+              name: googleName,
+              email: currentUser.email || "",
+              photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
               isOfficial: false,
@@ -452,7 +459,29 @@ export default function HomePage(): React.JSX.Element {
               bio: "",
               note: ""
             });
+            
+            // Update profile di auth dengan foto Google
+            if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
+              await updateProfile(currentUser, {
+                photoURL: googlePhotoURL,
+                displayName: googleName
+              });
+            }
           } else {
+            // Update data user dengan foto dari Google
+            const userData = userSnap.data();
+            const currentPhotoURL = userData?.photoURL || "";
+            
+            // Jika foto berbeda dengan Google, update
+            if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
+              await updateDoc(userRef, {
+                photoURL: googlePhotoURL,
+                name: googleName,
+                lastSeen: serverTimestamp()
+              });
+            }
+            
+            // Update online status
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp()
@@ -466,16 +495,16 @@ export default function HomePage(): React.JSX.Element {
             });
           }
           
-          // Ambil data user terbaru untuk bio dan note
-          const updatedUserSnap = await getDoc(userRef);
-          const userData = updatedUserSnap.data();
-          
-          // Update state user dengan bio dan note
-          if (userData) {
+          // Refresh user data
+          const updatedSnap = await getDoc(userRef);
+          const updatedData = updatedSnap.data();
+          if (updatedData) {
             setUser((prev: any) => ({
               ...prev,
-              bio: userData.bio || "",
-              note: userData.note || ""
+              photoURL: updatedData.photoURL || prev.photoURL || "",
+              displayName: updatedData.name || prev.displayName || prev.email,
+              bio: updatedData.bio || "",
+              note: updatedData.note || ""
             }));
           }
           
@@ -531,7 +560,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Load users + online status
+  // Load users + online status + photo dari Gmail
   useEffect(() => {
     if (!db || !user) return;
     const loadUsers = async () => {
@@ -550,12 +579,13 @@ export default function HomePage(): React.JSX.Element {
                 lastSeen: data.lastSeen || null,
                 typing: data.typing || false,
                 bio: data.bio || "",
-                note: data.note || ""
+                note: data.note || "",
+                photoURL: data.photoURL || ""
               } as ChatUser);
             }
           });
           
-          // Tambahkan user sendiri
+          // Tambahkan user sendiri dengan data terbaru dari Google
           const selfUser: ChatUser = {
             id: user.uid,
             name: user.displayName || user.email || "Saya",
@@ -574,11 +604,12 @@ export default function HomePage(): React.JSX.Element {
           if (!selfExists) {
             userList.push(selfUser);
           } else {
-            // Update user sendiri dengan data terbaru
             const index = userList.findIndex(u => u.id === user.uid);
             if (index !== -1) {
               userList[index] = {
                 ...userList[index],
+                photoURL: user.photoURL || userList[index].photoURL || "",
+                name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
                 note: user.note || userList[index].note || ""
               };
@@ -846,7 +877,6 @@ export default function HomePage(): React.JSX.Element {
       setProfileUser({ ...profileUser, bio: bioInput });
       setEditBio(false);
       
-      // Update users list
       setUsers(prev => prev.map(u => {
         if (u.id === profileUser.id) {
           return { ...u, bio: bioInput };
@@ -854,7 +884,6 @@ export default function HomePage(): React.JSX.Element {
         return u;
       }));
       
-      // Update user state jika ini user sendiri
       if (profileUser.id === user.uid) {
         setUser((prev: any) => ({
           ...prev,
@@ -1677,7 +1706,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Inside Chat Box - Diperbesar
+              // Profile View - Inside Chat Box
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1704,7 +1733,7 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Photo - Kotak dengan border radius */}
+                  {/* Photo - Kotak border radius dengan foto dari Gmail */}
                   <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px", width: "100%" }}>
                     <div
                       style={{
@@ -1750,7 +1779,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Note - Seperti Instagram di atas FP */}
+                  {/* Note - Seperti Instagram */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -2712,7 +2741,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Messages - Diperbesar */}
+                {/* Messages */}
                 <div
                   style={{
                     flex: 1,
