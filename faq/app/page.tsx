@@ -68,6 +68,15 @@ interface ChatUser {
   typing?: boolean;
   bio?: string;
   note?: string;
+  notes?: Note[];
+}
+
+interface Note {
+  id: string;
+  text: string;
+  category: string;
+  createdAt: any;
+  color?: string;
 }
 
 interface Message {
@@ -164,6 +173,20 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const AddNoteIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 6H5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -388,11 +411,19 @@ export default function HomePage(): React.JSX.Element {
   const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
   const [editBio, setEditBio] = useState(false);
   const [bioInput, setBioInput] = useState("");
-  const [editNote, setEditNote] = useState(false);
+  const [showAddNote, setShowAddNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
+  const [noteCategory, setNoteCategory] = useState("Umum");
+  const [noteFilter, setNoteFilter] = useState("Semua");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editNoteText, setEditNoteText] = useState("");
+  const [editNoteCategory, setEditNoteCategory] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const NOTE_CATEGORIES = ["Semua", "Makanan", "Minuman", "Tugas", "Belanja", "Penting", "Lainnya"];
+  const NOTE_COLORS = ["#c5e800", "#0095f6", "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6fb7"];
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -402,7 +433,8 @@ export default function HomePage(): React.JSX.Element {
     isOfficial: true,
     isPinned: false,
     bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
-    note: "Official Account"
+    note: "Official Account",
+    notes: []
   };
 
   const OFFICIAL_MESSAGES = [
@@ -455,7 +487,8 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp(),
               typing: false,
               bio: "",
-              note: ""
+              note: "",
+              notes: []
             });
             
             if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
@@ -497,7 +530,8 @@ export default function HomePage(): React.JSX.Element {
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
-              note: updatedData.note || ""
+              note: updatedData.note || "",
+              notes: updatedData.notes || []
             }));
           }
           
@@ -573,6 +607,7 @@ export default function HomePage(): React.JSX.Element {
                 typing: data.typing || false,
                 bio: data.bio || "",
                 note: data.note || "",
+                notes: data.notes || [],
                 photoURL: data.photoURL || ""
               } as ChatUser);
             }
@@ -589,7 +624,8 @@ export default function HomePage(): React.JSX.Element {
             lastSeen: null,
             typing: false,
             bio: user.bio || "",
-            note: user.note || ""
+            note: user.note || "",
+            notes: user.notes || []
           };
           
           const selfExists = userList.some(u => u.id === user.uid);
@@ -603,14 +639,15 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: user.photoURL || userList[index].photoURL || "",
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
-                note: user.note || userList[index].note || ""
+                note: user.note || userList[index].note || "",
+                notes: user.notes || userList[index].notes || []
               };
             }
           }
           
           const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
-            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false });
+            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, notes: [] });
           }
           
           userList.sort((a, b) => {
@@ -841,21 +878,27 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile - untuk semua user (termasuk diri sendiri)
+  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
     setBioInput(chatUser.bio || "");
-    setNoteInput(chatUser.note || "");
+    setNoteInput("");
+    setNoteCategory("Umum");
+    setNoteFilter("Semua");
+    setShowAddNote(false);
+    setEditingNoteId(null);
+    setEditNoteText("");
+    setEditNoteCategory("");
     setEditBio(false);
-    setEditNote(false);
   };
 
   const handleCloseProfile = () => {
     setShowProfile(false);
     setProfileUser(null);
     setEditBio(false);
-    setEditNote(false);
+    setShowAddNote(false);
+    setEditingNoteId(null);
   };
 
   // Handle save bio
@@ -887,20 +930,35 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle save note
-  const handleSaveNote = async () => {
-    if (!profileUser || !db) return;
+  // Handle add note
+  const handleAddNote = async () => {
+    if (!profileUser || !db || !noteInput.trim()) return;
+    
     try {
+      const newNote: Note = {
+        id: Date.now().toString(),
+        text: noteInput.trim(),
+        category: noteCategory,
+        createdAt: serverTimestamp(),
+        color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)]
+      };
+      
+      const currentNotes = profileUser.notes || [];
+      const updatedNotes = [...currentNotes, newNote];
+      
       const userRef = doc(db, "users", profileUser.id);
       await updateDoc(userRef, {
-        note: noteInput
+        notes: updatedNotes
       });
-      setProfileUser({ ...profileUser, note: noteInput });
-      setEditNote(false);
+      
+      setProfileUser({ ...profileUser, notes: updatedNotes });
+      setNoteInput("");
+      setNoteCategory("Umum");
+      setShowAddNote(false);
       
       setUsers(prev => prev.map(u => {
         if (u.id === profileUser.id) {
-          return { ...u, note: noteInput };
+          return { ...u, notes: updatedNotes };
         }
         return u;
       }));
@@ -908,11 +966,83 @@ export default function HomePage(): React.JSX.Element {
       if (profileUser.id === user.uid) {
         setUser((prev: any) => ({
           ...prev,
-          note: noteInput
+          notes: updatedNotes
         }));
       }
     } catch (error) {
-      console.error("Error saving note:", error);
+      console.error("Error adding note:", error);
+    }
+  };
+
+  // Handle delete note
+  const handleDeleteNote = async (noteId: string) => {
+    if (!profileUser || !db) return;
+    
+    try {
+      const updatedNotes = (profileUser.notes || []).filter(n => n.id !== noteId);
+      
+      const userRef = doc(db, "users", profileUser.id);
+      await updateDoc(userRef, {
+        notes: updatedNotes
+      });
+      
+      setProfileUser({ ...profileUser, notes: updatedNotes });
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === profileUser.id) {
+          return { ...u, notes: updatedNotes };
+        }
+        return u;
+      }));
+      
+      if (profileUser.id === user.uid) {
+        setUser((prev: any) => ({
+          ...prev,
+          notes: updatedNotes
+        }));
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  };
+
+  // Handle edit note
+  const handleEditNote = async (noteId: string) => {
+    if (!profileUser || !db || !editNoteText.trim()) return;
+    
+    try {
+      const updatedNotes = (profileUser.notes || []).map(n => {
+        if (n.id === noteId) {
+          return { ...n, text: editNoteText.trim(), category: editNoteCategory };
+        }
+        return n;
+      });
+      
+      const userRef = doc(db, "users", profileUser.id);
+      await updateDoc(userRef, {
+        notes: updatedNotes
+      });
+      
+      setProfileUser({ ...profileUser, notes: updatedNotes });
+      setEditingNoteId(null);
+      setEditNoteText("");
+      setEditNoteCategory("");
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === profileUser.id) {
+          return { ...u, notes: updatedNotes };
+        }
+        return u;
+      }));
+      
+      if (profileUser.id === user.uid) {
+        setUser((prev: any) => ({
+          ...prev,
+          notes: updatedNotes
+        }));
+      }
+    } catch (error) {
+      console.error("Error editing note:", error);
     }
   };
 
@@ -1261,7 +1391,7 @@ export default function HomePage(): React.JSX.Element {
         menuru
       </div>
 
-      {/* User Status - Klik nama sendiri untuk buka profil */}
+      {/* User Status */}
       <div
         style={{
           position: "absolute",
@@ -1698,7 +1828,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Semua user bisa edit bio & note di profil sendiri
+              // Profile View - Dengan Bio di atas FP dan Notes
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1714,7 +1844,7 @@ export default function HomePage(): React.JSX.Element {
                       gap: "6px",
                       fontSize: "13px",
                       fontFamily: "Inter, 'Inter Fallback'",
-                      marginBottom: "24px",
+                      marginBottom: "16px",
                       padding: "4px 0",
                       transition: "color 0.2s ease",
                     }}
@@ -1725,145 +1855,8 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Photo - Kotak dengan border radius */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px", width: "100%" }}>
-                    <div
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        borderRadius: "12px",
-                        backgroundColor: "#f0f0f0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "32px",
-                        overflow: "hidden",
-                        border: "2px solid #000",
-                        flexShrink: 0,
-                        position: "relative",
-                      }}
-                    >
-                      {profileUser.photoURL ? (
-                        <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                      )}
-                      {profileUser.isOfficial && (
-                        <div style={{ position: "absolute", bottom: -4, right: -4 }}>
-                          <InstagramVerifiedBadge size={20} />
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ fontSize: "20px", fontWeight: 600, color: "#000" }}>
-                          {profileUser.name}
-                        </span>
-                        {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
-                      </div>
-                      <span style={{ fontSize: "14px", color: "#999" }}>{profileUser.email}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
-                        <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                        <span style={{ fontSize: "13px", color: "#666" }}>
-                          {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Note - Muncul di atas FP (seperti Instagram) */}
+                  {/* Bio - di atas FP (seperti Instagram) */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                        Catatan
-                      </span>
-                      {profileUser.id === user?.uid && (
-                        <button
-                          onClick={() => setEditNote(!editNote)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#999",
-                            fontSize: "11px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                          }}
-                        >
-                          <EditIcon />
-                          {profileUser.note ? "Edit" : "Tambah"}
-                        </button>
-                      )}
-                    </div>
-                    {editNote && profileUser.id === user?.uid ? (
-                      <div>
-                        <input
-                          type="text"
-                          value={noteInput}
-                          onChange={(e) => setNoteInput(e.target.value)}
-                          placeholder="Tulis catatan..."
-                          style={{
-                            width: "100%",
-                            padding: "10px 14px",
-                            backgroundColor: "#f5f5f5",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "8px",
-                            color: "#000",
-                            fontSize: "14px",
-                            outline: "none",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                          }}
-                        />
-                        <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                          <button
-                            onClick={handleSaveNote}
-                            style={{
-                              padding: "6px 18px",
-                              backgroundColor: "#000",
-                              border: "none",
-                              borderRadius: "6px",
-                              color: "#fff",
-                              fontSize: "13px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            Simpan
-                          </button>
-                          <button
-                            onClick={() => setEditNote(false)}
-                            style={{
-                              padding: "6px 18px",
-                              backgroundColor: "transparent",
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "6px",
-                              color: "#999",
-                              fontSize: "13px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ 
-                        padding: "10px 14px", 
-                        backgroundColor: "#f8f8f8", 
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        color: profileUser.note ? "#000" : "#ccc",
-                      }}>
-                        {profileUser.note || "Belum ada catatan"}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bio */}
-                  <div style={{ width: "100%", marginBottom: "20px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                         Bio
@@ -1944,15 +1937,344 @@ export default function HomePage(): React.JSX.Element {
                     ) : (
                       <div style={{ 
                         padding: "10px 14px", 
-                        backgroundColor: "#f8f8f8", 
+                        backgroundColor: "#0095f6", 
                         borderRadius: "8px",
                         fontSize: "14px",
-                        color: profileUser.bio ? "#000" : "#ccc",
+                        color: "#ffffff",
                         lineHeight: 1.6,
                       }}>
                         {profileUser.bio || "Belum ada bio"}
                       </div>
                     )}
+                  </div>
+
+                  {/* Photo - Kotak dengan border radius */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px", width: "100%" }}>
+                    <div
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        borderRadius: "12px",
+                        backgroundColor: "#f0f0f0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "32px",
+                        overflow: "hidden",
+                        border: "2px solid #000",
+                        flexShrink: 0,
+                        position: "relative",
+                      }}
+                    >
+                      {profileUser.photoURL ? (
+                        <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                      )}
+                      {profileUser.isOfficial && (
+                        <div style={{ position: "absolute", bottom: -4, right: -4 }}>
+                          <InstagramVerifiedBadge size={20} />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ fontSize: "20px", fontWeight: 600, color: "#000" }}>
+                          {profileUser.name}
+                        </span>
+                        {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
+                      </div>
+                      <span style={{ fontSize: "14px", color: "#999" }}>{profileUser.email}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                        <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                        <span style={{ fontSize: "13px", color: "#666" }}>
+                          {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes - Design makanan/minuman */}
+                  <div style={{ width: "100%", marginBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                        Catatan ({profileUser.notes?.length || 0})
+                      </span>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        {/* Filter dropdown */}
+                        <select
+                          value={noteFilter}
+                          onChange={(e) => setNoteFilter(e.target.value)}
+                          style={{
+                            padding: "4px 10px",
+                            backgroundColor: "#f5f5f5",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            color: "#000",
+                            outline: "none",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {NOTE_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                        {profileUser.id === user?.uid && (
+                          <button
+                            onClick={() => setShowAddNote(!showAddNote)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#999",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              fontSize: "11px",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            <AddNoteIcon />
+                            Tambah
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Add Note Form */}
+                    {showAddNote && profileUser.id === user?.uid && (
+                      <div style={{ 
+                        padding: "12px", 
+                        backgroundColor: "#f8f8f8", 
+                        borderRadius: "8px", 
+                        marginBottom: "10px",
+                        border: "1px solid #e0e0e0"
+                      }}>
+                        <input
+                          type="text"
+                          value={noteInput}
+                          onChange={(e) => setNoteInput(e.target.value)}
+                          placeholder="Tulis catatan..."
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            backgroundColor: "#fff",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "6px",
+                            color: "#000",
+                            fontSize: "13px",
+                            outline: "none",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            marginBottom: "8px",
+                          }}
+                        />
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                          <select
+                            value={noteCategory}
+                            onChange={(e) => setNoteCategory(e.target.value)}
+                            style={{
+                              padding: "4px 10px",
+                              backgroundColor: "#fff",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              color: "#000",
+                              outline: "none",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                              flex: 1,
+                            }}
+                          >
+                            {NOTE_CATEGORIES.filter(c => c !== "Semua").map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={handleAddNote}
+                            style={{
+                              padding: "4px 16px",
+                              backgroundColor: "#000",
+                              border: "none",
+                              borderRadius: "6px",
+                              color: "#fff",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            Simpan
+                          </button>
+                          <button
+                            onClick={() => setShowAddNote(false)}
+                            style={{
+                              padding: "4px 16px",
+                              backgroundColor: "transparent",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "6px",
+                              color: "#999",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes List - Design seperti makanan/minuman */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      {(profileUser.notes || [])
+                        .filter(n => noteFilter === "Semua" || n.category === noteFilter)
+                        .map((note) => (
+                          <div
+                            key={note.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "10px 14px",
+                              backgroundColor: note.color || "#f5f5f5",
+                              borderRadius: "8px",
+                              borderLeft: `4px solid ${note.color || "#ccc"}`,
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            {editingNoteId === note.id ? (
+                              <div style={{ flex: 1, display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                                <input
+                                  type="text"
+                                  value={editNoteText}
+                                  onChange={(e) => setEditNoteText(e.target.value)}
+                                  style={{
+                                    flex: 1,
+                                    padding: "6px 10px",
+                                    backgroundColor: "#fff",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    color: "#000",
+                                    fontSize: "13px",
+                                    outline: "none",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                    minWidth: "100px",
+                                  }}
+                                />
+                                <select
+                                  value={editNoteCategory}
+                                  onChange={(e) => setEditNoteCategory(e.target.value)}
+                                  style={{
+                                    padding: "4px 8px",
+                                    backgroundColor: "#fff",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    fontSize: "11px",
+                                    color: "#000",
+                                    outline: "none",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                  }}
+                                >
+                                  {NOTE_CATEGORIES.filter(c => c !== "Semua").map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                  ))}
+                                </select>
+                                <button
+                                  onClick={() => handleEditNote(note.id)}
+                                  style={{
+                                    padding: "4px 12px",
+                                    backgroundColor: "#000",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    color: "#fff",
+                                    fontSize: "11px",
+                                    cursor: "pointer",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                  }}
+                                >
+                                  Simpan
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingNoteId(null);
+                                    setEditNoteText("");
+                                    setEditNoteCategory("");
+                                  }}
+                                  style={{
+                                    padding: "4px 12px",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    color: "#999",
+                                    fontSize: "11px",
+                                    cursor: "pointer",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                  }}
+                                >
+                                  Batal
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: "13px", color: "#000", fontWeight: 500 }}>
+                                    {note.text}
+                                  </div>
+                                  <div style={{ fontSize: "10px", color: "rgba(0,0,0,0.5)", marginTop: "2px" }}>
+                                    {note.category} • {formatTime(note.createdAt)}
+                                  </div>
+                                </div>
+                                {profileUser.id === user?.uid && (
+                                  <div style={{ display: "flex", gap: "4px" }}>
+                                    <button
+                                      onClick={() => {
+                                        setEditingNoteId(note.id);
+                                        setEditNoteText(note.text);
+                                        setEditNoteCategory(note.category);
+                                      }}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        color: "rgba(0,0,0,0.4)",
+                                        cursor: "pointer",
+                                        padding: "2px 6px",
+                                        fontSize: "12px",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                    >
+                                      <EditIcon />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteNote(note.id)}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        color: "rgba(0,0,0,0.4)",
+                                        cursor: "pointer",
+                                        padding: "2px 6px",
+                                        fontSize: "12px",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                      }}
+                                    >
+                                      <DeleteIcon />
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      {(profileUser.notes || []).filter(n => noteFilter === "Semua" || n.category === noteFilter).length === 0 && (
+                        <div style={{ 
+                          textAlign: "center", 
+                          color: "#ccc", 
+                          fontSize: "13px", 
+                          padding: "20px 0" 
+                        }}>
+                          Tidak ada catatan
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Actions */}
@@ -2002,7 +2324,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View
+              // Chat List View - sama seperti sebelumnya
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2510,7 +2832,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View
+              // Chat View - sama seperti sebelumnya
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
