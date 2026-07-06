@@ -75,7 +75,7 @@ interface Note {
   id: string;
   text: string;
   category: string;
-  createdAt: any;
+  createdAt: string;
   color?: string;
 }
 
@@ -514,12 +514,17 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp()
             });
             
-            const disconnectRef = doc(db, "users", currentUser.uid);
-            onDisconnect(disconnectRef).update({
-              online: false,
-              lastSeen: serverTimestamp(),
-              typing: false
-            });
+            // Set offline on disconnect - perbaikan
+            try {
+              const disconnectRef = doc(db, "users", currentUser.uid);
+              await onDisconnect(disconnectRef).update({
+                online: false,
+                lastSeen: serverTimestamp(),
+                typing: false
+              });
+            } catch (err) {
+              console.log("Disconnect handler not available, skipping");
+            }
           }
           
           const updatedSnap = await getDoc(userRef);
@@ -930,7 +935,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle add note
+  // Handle add note - perbaikan tanpa serverTimestamp di array
   const handleAddNote = async () => {
     if (!profileUser || !db || !noteInput.trim()) return;
     
@@ -939,7 +944,7 @@ export default function HomePage(): React.JSX.Element {
         id: Date.now().toString(),
         text: noteInput.trim(),
         category: noteCategory,
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(),
         color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)]
       };
       
@@ -1828,7 +1833,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* Content */}
             {showProfile && profileUser ? (
-              // Profile View - Dengan Bio di atas FP dan Notes
+              // Profile View
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
@@ -1855,7 +1860,7 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Bio - di atas FP (seperti Instagram) */}
+                  {/* Bio - di atas FP (biru stabilo) */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -1942,13 +1947,14 @@ export default function HomePage(): React.JSX.Element {
                         fontSize: "14px",
                         color: "#ffffff",
                         lineHeight: 1.6,
+                        fontWeight: 500,
                       }}>
                         {profileUser.bio || "Belum ada bio"}
                       </div>
                     )}
                   </div>
 
-                  {/* Photo - Kotak dengan border radius */}
+                  {/* Photo */}
                   <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px", width: "100%" }}>
                     <div
                       style={{
@@ -1994,14 +2000,13 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Notes - Design makanan/minuman */}
+                  {/* Notes */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                       <span style={{ fontSize: "11px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                         Catatan ({profileUser.notes?.length || 0})
                       </span>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                        {/* Filter dropdown */}
                         <select
                           value={noteFilter}
                           onChange={(e) => setNoteFilter(e.target.value)}
@@ -2124,7 +2129,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Notes List - Design seperti makanan/minuman */}
+                    {/* Notes List */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                       {(profileUser.notes || [])
                         .filter(n => noteFilter === "Semua" || n.category === noteFilter)
@@ -2324,7 +2329,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View - sama seperti sebelumnya
+              // Chat List View
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2832,7 +2837,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - sama seperti sebelumnya
+              // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
                 {/* Chat Header */}
                 <div
