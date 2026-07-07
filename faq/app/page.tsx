@@ -1273,37 +1273,34 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - 2 elemen terpisah saling nempel */}
+        {/* Search - 2 elemen terpisah dengan jarak dan border sama */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             borderRadius: "60px",
-            transition: "all 0.3s ease",
             border: isSearchOpen ? "2px solid #c5e800" : "none",
             padding: isSearchOpen ? "2px" : "0",
-            gap: "0",
+            gap: isSearchOpen ? "2px" : "0",
+            background: isSearchOpen ? "transparent" : "transparent",
           }}
         >
-          {/* Icon Search - Kotak border radius */}
+          {/* Icon Search */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: "#c5e800",
+              background: isSearchOpen ? "#c5e800" : "#c5e800",
               border: "none",
               borderRadius: "60px",
-              padding: "10px 16px",
+              padding: isSearchOpen ? "8px 12px" : "10px 14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "all 0.3s ease",
               color: "#000",
               minWidth: "auto",
-              borderTopRightRadius: isSearchOpen ? "0" : "60px",
-              borderBottomRightRadius: isSearchOpen ? "0" : "60px",
-              borderTopLeftRadius: "60px",
-              borderBottomLeftRadius: "60px",
+              borderTopRightRadius: isSearchOpen ? "60px" : "60px",
+              borderBottomRightRadius: isSearchOpen ? "60px" : "60px",
             }}
           >
             <SearchIcon />
@@ -1324,14 +1321,10 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: "14px",
                 color: "#000",
                 fontFamily: "Inter, 'Inter Fallback'",
-                padding: "10px 16px 10px 12px",
+                padding: "8px 16px 8px 12px",
                 minWidth: "200px",
                 width: searchQuery ? "auto" : "200px",
                 borderRadius: "60px",
-                borderTopLeftRadius: "0",
-                borderBottomLeftRadius: "0",
-                borderTopRightRadius: "60px",
-                borderBottomRightRadius: "60px",
               }}
             />
           )}
