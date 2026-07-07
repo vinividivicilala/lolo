@@ -1273,7 +1273,7 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - 2 elemen terpisah dengan border menyatu */}
+        {/* Search - Icon kotak border radius dengan pill rounded seperti jembatan */}
         <div
           style={{
             display: "flex",
@@ -1285,13 +1285,13 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "transparent",
           }}
         >
-          {/* Icon Search */}
+          {/* Icon Search - Kotak border radius */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "none",
-              borderRadius: "60px",
+              borderRadius: "12px",
               padding: "8px 14px",
               cursor: "pointer",
               display: "flex",
@@ -1299,14 +1299,16 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: "center",
               color: "#000",
               minWidth: "auto",
-              borderTopRightRadius: isSearchOpen ? "60px" : "60px",
-              borderBottomRightRadius: isSearchOpen ? "60px" : "60px",
+              borderTopRightRadius: isSearchOpen ? "60px" : "12px",
+              borderBottomRightRadius: isSearchOpen ? "60px" : "12px",
+              borderTopLeftRadius: "12px",
+              borderBottomLeftRadius: "12px",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search */}
+          {/* Input Search - Pill rounded seperti jembatan */}
           {isSearchOpen && (
             <input
               type="text"
