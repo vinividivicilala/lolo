@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-            {/* Logo & Search - Kiri Atas */}
+                 {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1279,20 +1279,19 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             alignItems: "center",
             backgroundColor: "transparent",
-            borderRadius: "12px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
           }}
         >
-          {/* Search Icon */}
+          {/* Search Icon - Kotak dengan background hijau */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
-              border: "none",
-              borderRadius: "12px",
+              border: "2px solid #c5e800",
+              borderRadius: "12px 0 0 12px",
               padding: "14px",
               cursor: "pointer",
               display: "flex",
@@ -1305,17 +1304,16 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // Hanya bagian tengah yang menyatu (tengah kiri dan kanan)
-              borderTopRightRadius: isSearchOpen ? "2px" : "12px",
-              borderBottomRightRadius: isSearchOpen ? "2px" : "12px",
-              // Memberikan jarak tipis di bagian tengah
+              // Hanya bagian tengah yang menyatu (tanpa border di tengah)
+              borderRight: isSearchOpen ? "none" : "2px solid #c5e800",
+              // Memberi jarak tipis di tengah agar tidak full menyatu
               marginRight: isSearchOpen ? "-1px" : "0",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search */}
+          {/* Input Search - Kotak dengan background hijau */}
           {isSearchOpen && (
             <div
               style={{
@@ -1331,10 +1329,9 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
-                // Hanya bagian tengah yang menyatu
-                borderTopLeftRadius: "2px",
-                borderBottomLeftRadius: "2px",
-                // Memberikan jarak tipis di bagian tengah
+                border: "2px solid #c5e800",
+                borderLeft: "none",
+                // Memberi jarak tipis di tengah agar tidak full menyatu
                 marginLeft: "-1px",
               }}
             >
@@ -1351,7 +1348,7 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: "15px",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "10px 0",
+                  padding: "10px 0 10px 4px",
                   width: "100%",
                   minWidth: "180px",
                 }}
@@ -1360,8 +1357,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
-          
-
       
       {/* Teks "menuru" besar */}
       <div
