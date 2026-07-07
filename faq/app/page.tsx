@@ -1295,99 +1295,123 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Connected Pill UI - Seperti di foto */}
+        {/* Search Connected Pill UI - Icon dan Search dalam satu pill dengan jarak */}
         <div style={{ position: "relative" }} ref={searchRef}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              backgroundColor: "#c5e800",
+              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
               borderRadius: "9999px",
               overflow: "hidden",
               transition: "all 0.3s ease",
-              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.3)" : "none",
+              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.3)" : "0 2px 8px rgba(0,0,0,0.04)",
               width: showSearch ? "auto" : "40px",
               height: "40px",
               cursor: "pointer",
-              border: "1px solid rgba(0,0,0,0.05)",
+              border: "1px solid rgba(0,0,0,0.04)",
+              padding: "0",
+              gap: "0px",
             }}
           >
-            {/* Search Button - Left side */}
-            <button
-              onClick={() => {
-                setShowSearch(!showSearch);
-                if (!showSearch) {
-                  setSearchQuery("");
-                  setSearchResults([]);
-                  setTimeout(() => {
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }, 150);
-                }
-              }}
+            {/* Search Button - Left side with border radius pill */}
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "40px",
-                height: "40px",
                 minWidth: "40px",
+                height: "40px",
+                borderRadius: "9999px",
                 backgroundColor: "transparent",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                color: "#000",
                 flexShrink: 0,
-                borderRadius: "9999px 0 0 9999px",
-              }}
-              onMouseEnter={(e) => {
-                if (!showSearch) {
-                  e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
+                transition: "all 0.3s ease",
               }}
             >
-              <SearchIcon />
-            </button>
+              <button
+                onClick={() => {
+                  setShowSearch(!showSearch);
+                  if (!showSearch) {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    setTimeout(() => {
+                      if (searchInputRef.current) {
+                        searchInputRef.current.focus();
+                      }
+                    }, 150);
+                  }
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  color: "#000",
+                  borderRadius: "9999px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!showSearch) {
+                    e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                <SearchIcon />
+              </button>
+            </div>
 
-            {/* Vertical Border Divider - Di tengah antara icon dan text */}
+            {/* Search Input - Right side with border radius pill */}
             {showSearch && (
               <div
                 style={{
-                  width: "1px",
-                  height: "24px",
-                  backgroundColor: "rgba(0,0,0,0.15)",
-                  flexShrink: 0,
-                }}
-              />
-            )}
-
-            {/* Search Input - Right side */}
-            {showSearch && (
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                style={{
+                  display: "flex",
+                  alignItems: "center",
                   flex: 1,
-                  padding: "6px 16px 6px 12px",
+                  height: "40px",
+                  borderRadius: "9999px",
                   backgroundColor: "transparent",
-                  border: "none",
-                  borderRadius: "0 9999px 9999px 0",
-                  fontSize: "13px",
-                  outline: "none",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  minWidth: "180px",
-                  maxWidth: "240px",
-                  animation: "searchExpand 0.3s ease forwards",
+                  paddingRight: "16px",
                 }}
-              />
+              >
+                {/* Vertical Divider - Menjaga jarak antara icon dan search */}
+                <div
+                  style={{
+                    width: "1px",
+                    height: "20px",
+                    backgroundColor: "rgba(0,0,0,0.12)",
+                    flexShrink: 0,
+                    marginRight: "12px",
+                  }}
+                />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="What are you looking for?"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "6px 0",
+                    backgroundColor: "transparent",
+                    border: "none",
+                    borderRadius: "0",
+                    fontSize: "13px",
+                    outline: "none",
+                    color: "#000",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    minWidth: "180px",
+                    maxWidth: "240px",
+                    animation: "searchExpand 0.3s ease forwards",
+                  }}
+                />
+              </div>
             )}
           </div>
 
@@ -3501,12 +3525,10 @@ export default function HomePage(): React.JSX.Element {
           from {
             opacity: 0;
             width: 0;
-            padding: 6px 0 6px 12px;
           }
           to {
             opacity: 1;
             width: auto;
-            padding: 6px 16px 6px 12px;
           }
         }
       `}</style>
