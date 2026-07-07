@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-       {/* Logo & Search - Kiri Atas */}
+            {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1273,27 +1273,28 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon dengan background hijau, input memanjang ke kanan */}
+        {/* Search - Container utama dengan border radius penuh */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: "transparent",
-            borderRadius: "60px",
+            backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
+            borderRadius: "12px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
+            border: isSearchOpen ? "2px solid #c5e800" : "none",
           }}
         >
-          {/* Search Icon - Background hijau stabilo */}
+          {/* Search Icon - Ukuran kotak */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: "#c5e800",
+              background: isSearchOpen ? "transparent" : "#c5e800",
               border: "none",
-              borderRadius: "60px",
-              padding: "14px 18px",
+              borderRadius: isSearchOpen ? "12px 0 0 12px" : "12px",
+              padding: "14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1302,30 +1303,30 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
-              minWidth: "52px",
-              minHeight: "52px",
+              width: "52px",
+              height: "52px",
+              flexShrink: 0,
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Memanjang ke kanan dengan background hijau */}
+          {/* Input Search - Muncul di samping kanan dengan ukuran sama */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "0 60px 60px 0",
-                padding: "0 20px 0 4px",
+                backgroundColor: "transparent",
+                borderRadius: "0 12px 12px 0",
+                padding: "0 16px 0 4px",
                 flex: 1,
-                minWidth: "280px",
-                maxWidth: "400px",
+                minWidth: "200px",
+                maxWidth: "350px",
                 position: "relative",
                 zIndex: 1,
-                marginLeft: "-2px",
-                border: "none",
                 height: "52px",
+                overflow: "hidden",
               }}
             >
               <input
@@ -1341,9 +1342,9 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: "15px",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "10px 4px",
+                  padding: "10px 0",
                   width: "100%",
-                  minWidth: "240px",
+                  minWidth: "180px",
                 }}
               />
             </div>
