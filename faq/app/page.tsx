@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-                 {/* Logo & Search - Kiri Atas */}
+            {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1305,8 +1305,11 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              borderTopRightRadius: isSearchOpen ? "0" : "12px",
-              borderBottomRightRadius: isSearchOpen ? "0" : "12px",
+              // Hanya bagian tengah yang menyatu (tengah kiri dan kanan)
+              borderTopRightRadius: isSearchOpen ? "2px" : "12px",
+              borderBottomRightRadius: isSearchOpen ? "2px" : "12px",
+              // Memberikan jarak tipis di bagian tengah
+              marginRight: isSearchOpen ? "-1px" : "0",
             }}
           >
             <SearchIcon />
@@ -1328,6 +1331,11 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
+                // Hanya bagian tengah yang menyatu
+                borderTopLeftRadius: "2px",
+                borderBottomLeftRadius: "2px",
+                // Memberikan jarak tipis di bagian tengah
+                marginLeft: "-1px",
               }}
             >
               <input
@@ -1352,7 +1360,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
-
           
 
       
