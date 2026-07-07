@@ -3356,4 +3356,3 @@ export default function HomePage(): React.JSX.Element {
       `}</style>
     </div>
   );
-}
