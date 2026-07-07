@@ -1273,7 +1273,7 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - 2 elemen terpisah dengan jarak dan border sama */}
+        {/* Search - 2 elemen terpisah dengan border menyatu */}
         <div
           style={{
             display: "flex",
@@ -1282,17 +1282,17 @@ export default function HomePage(): React.JSX.Element {
             border: isSearchOpen ? "2px solid #c5e800" : "none",
             padding: isSearchOpen ? "2px" : "0",
             gap: isSearchOpen ? "2px" : "0",
-            background: isSearchOpen ? "transparent" : "transparent",
+            backgroundColor: "transparent",
           }}
         >
           {/* Icon Search */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: isSearchOpen ? "#c5e800" : "#c5e800",
+              background: "#c5e800",
               border: "none",
               borderRadius: "60px",
-              padding: isSearchOpen ? "8px 12px" : "10px 14px",
+              padding: "8px 14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1325,6 +1325,8 @@ export default function HomePage(): React.JSX.Element {
                 minWidth: "200px",
                 width: searchQuery ? "auto" : "200px",
                 borderRadius: "60px",
+                borderTopLeftRadius: "60px",
+                borderBottomLeftRadius: "60px",
               }}
             />
           )}
