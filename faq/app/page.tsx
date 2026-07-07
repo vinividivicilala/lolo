@@ -3279,7 +3279,7 @@ export default function HomePage(): React.JSX.Element {
         </button>
       </div>
 
-      {/* CSS Animation */}
+          {/* CSS Animation */}
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
