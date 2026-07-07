@@ -1280,27 +1280,26 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Button & Input - Pill design with connected border */}
+        {/* Search Button & Input - Pill with separated backgrounds */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: isSearchOpen ? "transparent" : "transparent",
+            backgroundColor: "transparent",
             borderRadius: "60px",
             padding: "2px",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            border: "2px solid transparent",
             gap: "0",
             position: "relative",
           }}
         >
-          {/* Search Icon - dengan background hijau dan border */}
+          {/* Search Icon - dengan background hijau dan border kanan lurus */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "none",
-              borderRadius: "60px",
+              borderRadius: "60px 0 0 60px",
               padding: "10px 14px",
               cursor: "pointer",
               display: "flex",
@@ -1310,10 +1309,10 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
-              border: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
+              border: "2px solid #c5e800",
               borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
-              borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
-              marginRight: isSearchOpen ? "-2px" : "0",
+              marginRight: "0",
+              minWidth: isSearchOpen ? "44px" : "auto",
             }}
           >
             <SearchIcon />
@@ -1334,6 +1333,7 @@ export default function HomePage(): React.JSX.Element {
                 position: "relative",
                 zIndex: 1,
                 marginLeft: "-2px",
+                background: "#ffffff",
               }}
             >
               <input
