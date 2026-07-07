@@ -1255,114 +1255,105 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-     {/* Floema Style Search */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    position: "relative",
-    height: "48px",
-  }}
->
-  {/* Icon Bubble */}
-  <button
-    onClick={() => setIsSearchOpen(!isSearchOpen)}
-    style={{
-      width: "48px",
-      height: "48px",
-      background: "#c5e800",
-      border: "none",
-      borderRadius: "18px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      color: "#000",
-      position: "relative",
-      zIndex: 3,
-      transition: "all .35s cubic-bezier(.22,1,.36,1)",
-      boxShadow: "0 12px 30px rgba(0,0,0,.08)",
-      flexShrink: 0,
-    }}
-  >
-    <SearchIcon />
-
-    {/* Connector */}
-    {isSearchOpen && (
+      {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
-          right: "-10px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: "20px",
-          height: "30px",
-          background: "#c5e800",
-          borderRadius: "50%",
-          zIndex: 4,
+          top: "40px",
+          left: "40px",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
         }}
-      />
-    )}
-  </button>
+        ref={searchRef}
+      >
+        <div
+          style={{
+            fontSize: "56px",
+            fontWeight: 400,
+            color: "#000",
+            letterSpacing: "-0.02em",
+            lineHeight: 1,
+          }}
+        >
+          Menuru
+        </div>
 
-  {/* Input Bubble */}
-  <div
-    style={{
-      width: isSearchOpen ? "270px" : "0px",
-      opacity: isSearchOpen ? 1 : 0,
-      overflow: "hidden",
-      marginLeft: isSearchOpen ? "-8px" : "0px",
-      transition:
-        "width .45s cubic-bezier(.22,1,.36,1), opacity .25s ease",
-    }}
-  >
-    <div
-      style={{
-        position: "relative",
-        height: "48px",
-        background: "#c5e800",
-        borderRadius: "24px",
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: "28px",
-        paddingRight: "18px",
-        boxShadow: "0 12px 30px rgba(0,0,0,.08)",
-      }}
-    >
-      {/* Connector kiri */}
-      <div
-        style={{
-          position: "absolute",
-          left: "-10px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: "20px",
-          height: "30px",
-          background: "#c5e800",
-          borderRadius: "50%",
-        }}
-      />
-
-      <input
-        autoFocus={isSearchOpen}
-        type="text"
-        placeholder="What are you looking for?"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{
-          width: "100%",
-          border: "none",
-          outline: "none",
-          background: "transparent",
-          color: "#000",
-          fontSize: "15px",
-          fontWeight: 500,
-          fontFamily: "Inter, sans-serif",
-        }}
-      />
-    </div>
-  </div>
-</div>
+        {/* Search Button & Input - Seperti di foto */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#c5e800",
+            borderRadius: "60px",
+            padding: "4px 6px",
+            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            gap: "0",
+            position: "relative",
+            border: "2px solid #c5e800",
+          }}
+        >
+          {/* Search Icon - dengan background hijau dan border kanan lurus */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            style={{
+              background: "transparent",
+              border: "none",
+              borderRadius: "60px",
+              padding: "8px 8px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.3s ease",
+              color: "#000",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            <SearchIcon />
+          </button>
+          
+          {/* Input Search */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "transparent",
+              borderRadius: "60px",
+              padding: "0 16px 0 4px",
+              flex: 1,
+              minWidth: isSearchOpen ? "200px" : "0",
+              position: "relative",
+              zIndex: 1,
+              transition: "all 0.3s ease",
+              overflow: "hidden",
+              maxWidth: isSearchOpen ? "300px" : "0",
+              opacity: isSearchOpen ? 1 : 0,
+            }}
+          >
+            <input
+              type="text"
+              placeholder="What are you looking for?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus={isSearchOpen}
+              style={{
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontSize: "14px",
+                color: "#000",
+                fontFamily: "Inter, 'Inter Fallback'",
+                padding: "8px 4px",
+                width: "100%",
+                minWidth: "160px",
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Teks "menuru" besar */}
       <div
