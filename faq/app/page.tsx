@@ -1256,108 +1256,101 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
       {/* Logo & Search - Kiri Atas */}
-      <div
-        style={{
-          position: "absolute",
-          top: "40px",
-          left: "40px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-        }}
-        ref={searchRef}
-      >
-        <div
-          style={{
-            fontSize: "56px",
-            fontWeight: 400,
-            color: "#000",
-            letterSpacing: "-0.02em",
-            lineHeight: 1,
-          }}
-        >
-          Menuru
-        </div>
+<div
+  style={{
+    position: "absolute",
+    top: "40px",
+    left: "40px",
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    gap: "24px", // Jarak antara Logo "Menuru" dan Tombol Search
+  }}
+  ref={searchRef}
+>
+  {/* Logo Text */}
+  <div
+    style={{
+      fontSize: "56px",
+      fontWeight: 400,
+      color: "#000",
+      letterSpacing: "-0.02em",
+      lineHeight: 1,
+    }}
+  >
+    Menuru
+  </div>
 
-        {/* Search Button & Input - Pill with separated backgrounds */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "transparent",
-            borderRadius: "60px",
-            padding: "2px",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
-          }}
-        >
-          {/* Search Icon - dengan background hijau dan border kanan lurus */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            style={{
-              background: "#c5e800",
-              border: "none",
-              borderRadius: "60px 0 0 60px",
-              padding: "10px 14px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
-              position: "relative",
-              zIndex: 2,
-              border: "2px solid #c5e800",
-              borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
-              marginRight: "0",
-              minWidth: isSearchOpen ? "44px" : "auto",
-            }}
-          >
-            <SearchIcon />
-          </button>
-          
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "transparent",
-                borderRadius: "0 60px 60px 0",
-                border: "2px solid #c5e800",
-                borderLeft: "2px solid #c5e800",
-                padding: "0 16px 0 4px",
-                flex: 1,
-                minWidth: "200px",
-                position: "relative",
-                zIndex: 1,
-                marginLeft: "-2px",
-                background: "#ffffff",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "14px",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "10px 4px",
-                  width: "100%",
-                  minWidth: "180px",
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+  {/* Unified Search Component (Icon + Input) */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      backgroundColor: "#c5e800", // Warna background menyatu
+      borderRadius: "999px", // Bentuk Pill/Kapsul penuh
+      padding: "6px",
+      transition: "all 0.3s ease",
+      boxShadow: isSearchOpen ? "0 4px 20px rgba(197, 232, 0, 0.3)" : "none",
+      width: isSearchOpen ? "auto" : "auto",
+      minWidth: isSearchOpen ? "280px" : "auto",
+    }}
+  >
+    {/* Icon Search Button */}
+    <button
+      onClick={() => setIsSearchOpen(!isSearchOpen)}
+      style={{
+        background: "transparent",
+        border: "none",
+        borderRadius: "50%",
+        width: "40px",
+        height: "40px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        color: "#000",
+        flexShrink: 0,
+        transition: "transform 0.2s ease",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+    >
+      <SearchIcon />
+    </button>
+
+    {/* Input Field with Animation */}
+    <div
+      style={{
+        overflow: "hidden",
+        transition: "width 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
+        width: isSearchOpen ? "220px" : "0px",
+        opacity: isSearchOpen ? 1 : 0,
+      }}
+    >
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        autoFocus={isSearchOpen}
+        style={{
+          background: "transparent",
+          border: "none",
+          outline: "none",
+          fontSize: "15px",
+          color: "#000",
+          fontFamily: "Inter, 'Inter Fallback'",
+          padding: "0 12px 0 0",
+          width: "100%",
+          fontWeight: 500,
+          "::placeholder": {
+            color: "rgba(0,0,0,0.5)",
+          },
+        }}
+      />
+    </div>
+  </div>
+</div>
 
       {/* Teks "menuru" besar */}
       <div
