@@ -1248,6 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
+
             {/* Logo & Search - Kiri Atas */}
       <div
         style={{
@@ -1366,6 +1367,9 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+
+      
       
       {/* Teks "menuru" besar */}
       <div
