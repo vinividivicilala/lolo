@@ -1273,28 +1273,28 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon dan Input masing-masing dengan border terhubung */}
+        {/* Search - Icon dan Input sama-sama hijau, border tengah menyatu */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             backgroundColor: "transparent",
             borderRadius: "60px",
-            padding: "2px",
+            padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
           }}
         >
-          {/* Search Icon - Background sendiri dengan border kanan */}
+          {/* Search Icon - Background hijau dengan border kanan */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
-              border: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
-              borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
+              border: "2px solid #c5e800",
+              borderRight: isSearchOpen ? "1px solid #c5e800" : "1px solid #c5e800",
               borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
-              padding: "8px 12px",
+              padding: "8px 14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1303,28 +1303,28 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
-              marginRight: isSearchOpen ? "-2px" : "0",
+              marginRight: isSearchOpen ? "0" : "0",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Background sendiri dengan border kiri */}
+          {/* Input Search - Background hijau dengan border kiri */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "#ffffff",
+                backgroundColor: "#c5e800",
                 borderRadius: "0 60px 60px 0",
                 border: "2px solid #c5e800",
-                borderLeft: "2px solid #c5e800",
+                borderLeft: "1px solid #c5e800",
                 padding: "0 16px 0 4px",
                 flex: 1,
                 minWidth: "200px",
                 position: "relative",
                 zIndex: 1,
-                marginLeft: "-2px",
+                marginLeft: "0",
               }}
             >
               <input
