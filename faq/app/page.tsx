@@ -1255,97 +1255,109 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo & Search - Kiri Atas */}
+     {/* Floema Style Search */}
 <div
   style={{
-    position: "absolute",
-    top: "40px",
-    left: "40px",
-    zIndex: 10,
     display: "flex",
     alignItems: "center",
-    gap: "24px", // Jarak antara Logo "Menuru" dan Tombol Search
+    position: "relative",
+    height: "48px",
   }}
-  ref={searchRef}
 >
-  {/* Logo Text */}
-  <div
+  {/* Icon Bubble */}
+  <button
+    onClick={() => setIsSearchOpen(!isSearchOpen)}
     style={{
-      fontSize: "56px",
-      fontWeight: 400,
-      color: "#000",
-      letterSpacing: "-0.02em",
-      lineHeight: 1,
-    }}
-  >
-    Menuru
-  </div>
-
-  {/* Unified Search Component (Icon + Input) */}
-  <div
-    style={{
+      width: "48px",
+      height: "48px",
+      background: "#c5e800",
+      border: "none",
+      borderRadius: "18px",
       display: "flex",
       alignItems: "center",
-      backgroundColor: "#c5e800", // Warna background menyatu
-      borderRadius: "999px", // Bentuk Pill/Kapsul penuh
-      padding: "6px",
-      transition: "all 0.3s ease",
-      boxShadow: isSearchOpen ? "0 4px 20px rgba(197, 232, 0, 0.3)" : "none",
-      width: isSearchOpen ? "auto" : "auto",
-      minWidth: isSearchOpen ? "280px" : "auto",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: "#000",
+      position: "relative",
+      zIndex: 3,
+      transition: "all .35s cubic-bezier(.22,1,.36,1)",
+      boxShadow: "0 12px 30px rgba(0,0,0,.08)",
+      flexShrink: 0,
     }}
   >
-    {/* Icon Search Button */}
-    <button
-      onClick={() => setIsSearchOpen(!isSearchOpen)}
-      style={{
-        background: "transparent",
-        border: "none",
-        borderRadius: "50%",
-        width: "40px",
-        height: "40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        color: "#000",
-        flexShrink: 0,
-        transition: "transform 0.2s ease",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-    >
-      <SearchIcon />
-    </button>
+    <SearchIcon />
 
-    {/* Input Field with Animation */}
+    {/* Connector */}
+    {isSearchOpen && (
+      <div
+        style={{
+          position: "absolute",
+          right: "-10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "20px",
+          height: "30px",
+          background: "#c5e800",
+          borderRadius: "50%",
+          zIndex: 4,
+        }}
+      />
+    )}
+  </button>
+
+  {/* Input Bubble */}
+  <div
+    style={{
+      width: isSearchOpen ? "270px" : "0px",
+      opacity: isSearchOpen ? 1 : 0,
+      overflow: "hidden",
+      marginLeft: isSearchOpen ? "-8px" : "0px",
+      transition:
+        "width .45s cubic-bezier(.22,1,.36,1), opacity .25s ease",
+    }}
+  >
     <div
       style={{
-        overflow: "hidden",
-        transition: "width 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
-        width: isSearchOpen ? "220px" : "0px",
-        opacity: isSearchOpen ? 1 : 0,
+        position: "relative",
+        height: "48px",
+        background: "#c5e800",
+        borderRadius: "24px",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: "28px",
+        paddingRight: "18px",
+        boxShadow: "0 12px 30px rgba(0,0,0,.08)",
       }}
     >
+      {/* Connector kiri */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "20px",
+          height: "30px",
+          background: "#c5e800",
+          borderRadius: "50%",
+        }}
+      />
+
       <input
+        autoFocus={isSearchOpen}
         type="text"
         placeholder="What are you looking for?"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        autoFocus={isSearchOpen}
         style={{
-          background: "transparent",
+          width: "100%",
           border: "none",
           outline: "none",
-          fontSize: "15px",
+          background: "transparent",
           color: "#000",
-          fontFamily: "Inter, 'Inter Fallback'",
-          padding: "0 12px 0 0",
-          width: "100%",
+          fontSize: "15px",
           fontWeight: 500,
-          "::placeholder": {
-            color: "rgba(0,0,0,0.5)",
-          },
+          fontFamily: "Inter, sans-serif",
         }}
       />
     </div>
