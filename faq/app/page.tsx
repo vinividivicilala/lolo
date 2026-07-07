@@ -1248,8 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-
-           {/* Logo & Search - Kiri Atas */}
+      {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1305,8 +1304,8 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // Memberi jarak/ruang kosong di tengah (lebih panjang)
-              marginRight: isSearchOpen ? "4px" : "0",
+              // Bagian tengah yang menyatu (tidak ada jarak)
+              marginRight: isSearchOpen ? "-2px" : "0",
               // Border tetap penuh
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
@@ -1317,7 +1316,7 @@ export default function HomePage(): React.JSX.Element {
             <SearchIcon />
           </button>
           
-          {/* Input Search - Border radius FULL */}
+          {/* Input Search - Border radius FULL, memanjang ke kanan */}
           {isSearchOpen && (
             <div
               style={{
@@ -1325,18 +1324,18 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: "center",
                 backgroundColor: "#c5e800",
                 borderRadius: "12px",
-                padding: "0 16px 0 0",
+                padding: "0 20px 0 0",
                 flex: 1,
-                minWidth: "200px",
-                maxWidth: "350px",
+                minWidth: "300px",
+                maxWidth: "500px",
                 position: "relative",
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
                 // Border penuh
                 border: "2px solid #c5e800",
-                // Memberi jarak/ruang kosong di tengah (lebih panjang)
-                marginLeft: "4px",
+                // Bagian tengah yang menyatu
+                marginLeft: "-2px",
               }}
             >
               <input
@@ -1352,9 +1351,9 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: "15px",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "10px 0 10px 4px",
+                  padding: "10px 0 10px 6px",
                   width: "100%",
-                  minWidth: "180px",
+                  minWidth: "250px",
                 }}
               />
             </div>
