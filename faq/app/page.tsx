@@ -169,9 +169,9 @@ const EditIcon = () => (
 
 // Search Icon
 const SearchIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
+    <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo & Search - Kiri Atas */}
+      {/* Logo & Search - Kiri Atas dengan Organic Blob Style */}
       <div
         style={{
           position: "absolute",
@@ -1273,7 +1273,7 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon kotak border radius dengan pill rounded seperti jembatan */}
+        {/* Organic Blob Search Bar */}
         <div
           style={{
             display: "flex",
@@ -1283,32 +1283,70 @@ export default function HomePage(): React.JSX.Element {
             padding: isSearchOpen ? "2px" : "0",
             gap: isSearchOpen ? "2px" : "0",
             backgroundColor: "transparent",
+            position: "relative",
+            filter: isSearchOpen ? "drop-shadow(0 8px 32px rgba(197,232,0,0.3))" : "none",
+            transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         >
-          {/* Icon Search - Kotak border radius */}
+          {/* Background Blob Effect */}
+          {isSearchOpen && (
+            <div
+              style={{
+                position: "absolute",
+                inset: "-4px",
+                borderRadius: "60px",
+                background: "radial-gradient(circle at 30% 50%, rgba(197,232,0,0.15), transparent 70%)",
+                zIndex: -1,
+                animation: "blobPulse 2s ease-in-out infinite",
+              }}
+            />
+          )}
+
+          {/* Icon Search - Organic Blob Shape */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "none",
-              borderRadius: "12px",
-              padding: "8px 14px",
+              borderRadius: "16px",
+              padding: "10px 16px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#000",
               minWidth: "auto",
-              borderTopRightRadius: isSearchOpen ? "60px" : "12px",
-              borderBottomRightRadius: isSearchOpen ? "60px" : "12px",
-              borderTopLeftRadius: "12px",
-              borderBottomLeftRadius: "12px",
+              borderTopRightRadius: isSearchOpen ? "60px" : "16px",
+              borderBottomRightRadius: isSearchOpen ? "60px" : "16px",
+              borderTopLeftRadius: "16px",
+              borderBottomLeftRadius: "16px",
+              transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              transform: isSearchOpen ? "scale(1.02)" : "scale(1)",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
+            {/* Organic Blob Background Effect */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.2), transparent 60%)",
+                borderRadius: "inherit",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "radial-gradient(circle at 50% 100%, rgba(0,0,0,0.05), transparent 50%)",
+                borderRadius: "inherit",
+              }}
+            />
             <SearchIcon />
           </button>
           
-          {/* Input Search - Pill rounded seperti jembatan */}
+          {/* Input Search - Organic Blob Style */}
           {isSearchOpen && (
             <input
               type="text"
@@ -1323,12 +1361,14 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: "14px",
                 color: "#000",
                 fontFamily: "Inter, 'Inter Fallback'",
-                padding: "8px 16px 8px 12px",
-                minWidth: "200px",
-                width: searchQuery ? "auto" : "200px",
+                padding: "10px 20px 10px 14px",
+                minWidth: "220px",
+                width: searchQuery ? "auto" : "220px",
                 borderRadius: "60px",
                 borderTopLeftRadius: "60px",
                 borderBottomLeftRadius: "60px",
+                transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                position: "relative",
               }}
             />
           )}
@@ -3320,6 +3360,7 @@ export default function HomePage(): React.JSX.Element {
         </button>
       </div>
 
+      {/* CSS Animations for Organic Blob */}
       <style jsx>{`
         @keyframes slideUp {
           from {
@@ -3337,6 +3378,16 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
+          }
+        }
+        @keyframes blobPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.8;
           }
         }
       `}</style>
