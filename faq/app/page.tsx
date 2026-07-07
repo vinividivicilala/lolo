@@ -1271,7 +1271,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo - Kiri Atas dengan Search */}
+      {/* Logo - Kiri Atas dengan Search Connected Pill UI */}
       <div
         style={{
           position: "absolute",
@@ -1280,7 +1280,7 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "0px",
+          gap: "16px",
         }}
       >
         <div
@@ -1295,20 +1295,22 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Kotak border radius menyatu */}
-        <div style={{ position: "relative", marginLeft: "16px" }} ref={searchRef}>
+        {/* Search Connected Pill UI */}
+        <div style={{ position: "relative" }} ref={searchRef}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              backgroundColor: "#c5e800",
-              borderRadius: "8px",
+              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
+              borderRadius: "9999px",
               overflow: "hidden",
               transition: "all 0.3s ease",
-              boxShadow: showSearch ? "0 4px 16px rgba(197,232,0,0.3)" : "none",
+              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.4)" : "0 2px 8px rgba(0,0,0,0.04)",
+              width: showSearch ? "auto" : "40px",
+              cursor: "pointer",
             }}
           >
-            {/* Search Button */}
+            {/* Search Button - Always visible */}
             <button
               onClick={() => {
                 setShowSearch(!showSearch);
@@ -1319,7 +1321,7 @@ export default function HomePage(): React.JSX.Element {
                     if (searchInputRef.current) {
                       searchInputRef.current.focus();
                     }
-                  }, 100);
+                  }, 150);
                 }
               }}
               style={{
@@ -1334,9 +1336,12 @@ export default function HomePage(): React.JSX.Element {
                 transition: "all 0.3s ease",
                 color: "#000",
                 flexShrink: 0,
+                borderRadius: "9999px",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
+                if (!showSearch) {
+                  e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
+                }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
@@ -1345,7 +1350,7 @@ export default function HomePage(): React.JSX.Element {
               <SearchIcon />
             </button>
 
-            {/* Search Input - Menyatu dengan button, tanpa icon search */}
+            {/* Search Input - Connected Pill, muncul saat showSearch true */}
             {showSearch && (
               <input
                 ref={searchInputRef}
@@ -1355,7 +1360,7 @@ export default function HomePage(): React.JSX.Element {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{
                   flex: 1,
-                  padding: "6px 16px 6px 0",
+                  padding: "6px 20px 6px 4px",
                   backgroundColor: "transparent",
                   border: "none",
                   borderRadius: "0",
@@ -1363,9 +1368,9 @@ export default function HomePage(): React.JSX.Element {
                   outline: "none",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  minWidth: "200px",
-                  maxWidth: "260px",
-                  animation: "slideSearch 0.3s ease forwards",
+                  minWidth: "180px",
+                  maxWidth: "240px",
+                  animation: "searchExpand 0.3s ease forwards",
                 }}
               />
             )}
@@ -3477,14 +3482,16 @@ export default function HomePage(): React.JSX.Element {
             opacity: 0.3;
           }
         }
-        @keyframes slideSearch {
+        @keyframes searchExpand {
           from {
             opacity: 0;
             width: 0;
+            padding: 6px 0 6px 4px;
           }
           to {
             opacity: 1;
             width: auto;
+            padding: 6px 20px 6px 4px;
           }
         }
       `}</style>
