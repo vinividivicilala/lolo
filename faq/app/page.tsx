@@ -1248,6 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
+
             {/* Logo & Search - Kiri Atas */}
       <div
         style={{
@@ -1282,7 +1283,7 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: "12px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
+            gap: isSearchOpen ? "0" : "0",
             position: "relative",
           }}
         >
@@ -1305,8 +1306,7 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              borderTopRightRadius: isSearchOpen ? "0" : "12px",
-              borderBottomRightRadius: isSearchOpen ? "0" : "12px",
+              marginRight: isSearchOpen ? "-2px" : "0",
             }}
           >
             <SearchIcon />
@@ -1319,8 +1319,8 @@ export default function HomePage(): React.JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "#c5e800",
-                borderRadius: "0 12px 12px 0",
-                padding: "0 16px 0 0",
+                borderRadius: "12px",
+                padding: "0 16px 0 4px",
                 flex: 1,
                 minWidth: "200px",
                 maxWidth: "350px",
@@ -1328,8 +1328,7 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
-                borderTopLeftRadius: "0",
-                borderBottomLeftRadius: "0",
+                marginLeft: "-2px",
               }}
             >
               <input
@@ -1354,6 +1353,16 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+      
       {/* Teks "menuru" besar */}
       <div
         style={{
