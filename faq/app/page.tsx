@@ -1273,27 +1273,27 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Tengah border menyambung membentuk pill */}
+        {/* Search - Seperti jembatan antar gedung A dan B */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: "#c5e800",
+            backgroundColor: "transparent",
             borderRadius: "60px",
-            padding: "4px",
+            padding: "2px",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
           }}
         >
-          {/* Search Icon */}
+          {/* Search Icon - Background hijau (Gedung A) */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: "transparent",
+              background: "#c5e800",
               border: "none",
               borderRadius: "60px",
-              padding: "6px 12px",
+              padding: "8px 14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1307,20 +1307,50 @@ export default function HomePage(): React.JSX.Element {
             <SearchIcon />
           </button>
           
-          {/* Input Search - Muncul saat diklik */}
+          {/* Jembatan Tengah - Border pill memanjang */}
+          <div
+            style={{
+              display: isSearchOpen ? "flex" : "none",
+              alignItems: "center",
+              height: "36px",
+              width: "4px",
+              backgroundColor: "transparent",
+              position: "relative",
+              zIndex: 1,
+              marginLeft: "-2px",
+              marginRight: "-2px",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: isSearchOpen ? "200px" : "0px",
+                height: "2px",
+                backgroundColor: "#c5e800",
+                borderRadius: "2px",
+                transition: "width 0.3s ease",
+                minWidth: isSearchOpen ? "40px" : "0px",
+              }}
+            />
+          </div>
+          
+          {/* Input Search - Background hijau (Gedung B) */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "transparent",
+                backgroundColor: "#c5e800",
                 borderRadius: "60px",
                 padding: "0 16px 0 4px",
                 flex: 1,
                 minWidth: "200px",
                 position: "relative",
                 zIndex: 1,
-                borderLeft: "1px solid rgba(255,255,255,0.15)",
+                marginLeft: "-2px",
               }}
             >
               <input
