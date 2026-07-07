@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-                 {/* Logo & Search - Kiri Atas */}
+            {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1285,7 +1285,7 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
           }}
         >
-          {/* Search Icon - Kotak dengan background hijau */}
+          {/* Search Icon - Kotak dengan border penuh */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
@@ -1304,16 +1304,20 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // Hanya bagian tengah yang menyatu (tanpa border di tengah)
-              borderRight: isSearchOpen ? "none" : "2px solid #c5e800",
+              // SEMUA border tetap ada, hanya border kanan yang overlap dengan input
+              borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
               // Memberi jarak tipis di tengah agar tidak full menyatu
-              marginRight: isSearchOpen ? "-1px" : "0",
+              marginRight: isSearchOpen ? "-2px" : "0",
+              // Pastikan border bawah dan atas tetap terlihat
+              borderTop: "2px solid #c5e800",
+              borderBottom: "2px solid #c5e800",
+              borderLeft: "2px solid #c5e800",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Kotak dengan background hijau */}
+          {/* Input Search - Kotak dengan border penuh */}
           {isSearchOpen && (
             <div
               style={{
@@ -1329,10 +1333,15 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
+                // SEMUA border tetap ada
                 border: "2px solid #c5e800",
-                borderLeft: "none",
+                // Border kiri overlap dengan icon (agar terlihat menyatu di tengah)
+                borderLeft: "2px solid #c5e800",
+                borderTop: "2px solid #c5e800",
+                borderBottom: "2px solid #c5e800",
+                borderRight: "2px solid #c5e800",
                 // Memberi jarak tipis di tengah agar tidak full menyatu
-                marginLeft: "-1px",
+                marginLeft: "-2px",
               }}
             >
               <input
