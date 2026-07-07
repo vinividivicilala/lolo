@@ -1295,22 +1295,24 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Connected Pill UI */}
+        {/* Search Connected Pill UI - Seperti di foto */}
         <div style={{ position: "relative" }} ref={searchRef}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
+              backgroundColor: "#c5e800",
               borderRadius: "9999px",
               overflow: "hidden",
               transition: "all 0.3s ease",
-              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.4)" : "0 2px 8px rgba(0,0,0,0.04)",
+              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.3)" : "none",
               width: showSearch ? "auto" : "40px",
+              height: "40px",
               cursor: "pointer",
+              border: "1px solid rgba(0,0,0,0.05)",
             }}
           >
-            {/* Search Button - Always visible */}
+            {/* Search Button - Left side */}
             <button
               onClick={() => {
                 setShowSearch(!showSearch);
@@ -1330,13 +1332,14 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: "center",
                 width: "40px",
                 height: "40px",
+                minWidth: "40px",
                 backgroundColor: "transparent",
                 border: "none",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 color: "#000",
                 flexShrink: 0,
-                borderRadius: "9999px",
+                borderRadius: "9999px 0 0 9999px",
               }}
               onMouseEnter={(e) => {
                 if (!showSearch) {
@@ -1350,7 +1353,19 @@ export default function HomePage(): React.JSX.Element {
               <SearchIcon />
             </button>
 
-            {/* Search Input - Connected Pill, muncul saat showSearch true */}
+            {/* Vertical Border Divider - Di tengah antara icon dan text */}
+            {showSearch && (
+              <div
+                style={{
+                  width: "1px",
+                  height: "24px",
+                  backgroundColor: "rgba(0,0,0,0.15)",
+                  flexShrink: 0,
+                }}
+              />
+            )}
+
+            {/* Search Input - Right side */}
             {showSearch && (
               <input
                 ref={searchInputRef}
@@ -1360,10 +1375,10 @@ export default function HomePage(): React.JSX.Element {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{
                   flex: 1,
-                  padding: "6px 20px 6px 4px",
+                  padding: "6px 16px 6px 12px",
                   backgroundColor: "transparent",
                   border: "none",
-                  borderRadius: "0",
+                  borderRadius: "0 9999px 9999px 0",
                   fontSize: "13px",
                   outline: "none",
                   color: "#000",
@@ -3486,12 +3501,12 @@ export default function HomePage(): React.JSX.Element {
           from {
             opacity: 0;
             width: 0;
-            padding: 6px 0 6px 4px;
+            padding: 6px 0 6px 12px;
           }
           to {
             opacity: 1;
             width: auto;
-            padding: 6px 20px 6px 4px;
+            padding: 6px 16px 6px 12px;
           }
         }
       `}</style>
