@@ -169,9 +169,9 @@ const EditIcon = () => (
 
 // Search Icon
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
-    <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
   </svg>
 );
 
@@ -1273,88 +1273,82 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon dan Input dengan ukuran dan radius yang sama */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "transparent",
-            borderRadius: "60px",
-            padding: "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
-          }}
-        >
-          {/* Search Icon - Background hijau */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            style={{
-              background: "#c5e800",
-              border: "none",
-              borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
-              padding: "10px 14px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
-              position: "relative",
-              zIndex: 2,
-              minWidth: "52px",
-              minHeight: "52px",
-              width: "52px",
-              height: "52px",
-              flexShrink: 0,
-            }}
-          >
-            <SearchIcon />
-          </button>
-          
-          {/* Input Search - Background hijau dengan ukuran yang sama */}
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "0 60px 60px 0",
-                padding: "0 20px 0 0",
-                flex: "1 1 auto",
-                minWidth: "0",
-                position: "relative",
-                zIndex: 1,
-                border: "none",
-                minHeight: "52px",
-                height: "52px",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "15px",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "8px 0 8px 8px",
-                  width: "100%",
-                  minWidth: "0",
-                  height: "100%",
-                  flex: "1 1 auto",
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
+       {/* Search - Icon dengan background hijau, input memanjang ke kanan */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderRadius: "60px",
+    padding: "0",
+    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    gap: "0",
+    position: "relative",
+  }}
+>
+  {/* Search Icon - Background hijau stabilo */}
+  <button
+    onClick={() => setIsSearchOpen(!isSearchOpen)}
+    style={{
+      background: "#c5e800",
+      border: "none",
+      borderRadius: "60px",
+      padding: "10px 14px",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.3s ease",
+      color: "#000",
+      position: "relative",
+      zIndex: 2,
+      minWidth: "44px",
+      minHeight: "44px",
+    }}
+  >
+    <SearchIcon />
+  </button>
+  
+  {/* Input Search - Memanjang ke kanan dengan background hijau */}
+  {isSearchOpen && (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#c5e800",
+        borderRadius: "60px",
+        padding: "0 16px 0 4px",
+        flex: 1,
+        minWidth: "200px",
+        position: "relative",
+        zIndex: 1,
+        marginLeft: "-4px",
+        border: "none",
+        height: "44px",
+      }}
+    >
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        autoFocus
+        style={{
+          background: "transparent",
+          border: "none",
+          outline: "none",
+          fontSize: "14px",
+          color: "#000",
+          fontFamily: "Inter, 'Inter Fallback'",
+          padding: "0 4px",
+          width: "100%",
+          minWidth: "180px",
+          height: "44px",
+        }}
+      />
+    </div>
+  )}
+</div>
       {/* Teks "menuru" besar */}
       <div
         style={{
@@ -3038,11 +3032,11 @@ export default function HomePage(): React.JSX.Element {
                                     left: isMine ? "auto" : 0,
                                     backgroundColor: "#1a1a1a",
                                     borderRadius: "12px",
-                                    padding: "6px 0",
+                                    padding: "4px",
                                     minWidth: "160px",
-                                    boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+                                    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+                                    zIndex: 50,
                                     border: "1px solid rgba(255,255,255,0.05)",
-                                    zIndex: 100,
                                   }}
                                 >
                                   <button
@@ -3054,15 +3048,16 @@ export default function HomePage(): React.JSX.Element {
                                       display: "flex",
                                       alignItems: "center",
                                       gap: "10px",
-                                      padding: "10px 16px",
+                                      padding: "8px 14px",
+                                      width: "100%",
                                       background: "none",
                                       border: "none",
                                       color: "#fff",
-                                      cursor: "pointer",
-                                      width: "100%",
                                       fontSize: "13px",
-                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      cursor: "pointer",
+                                      borderRadius: "8px",
                                       transition: "all .2s ease",
+                                      fontFamily: "Inter, 'Inter Fallback'",
                                     }}
                                     onMouseEnter={(e) => {
                                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
@@ -3074,27 +3069,24 @@ export default function HomePage(): React.JSX.Element {
                                     <ReplyIcon />
                                     <span>Balas</span>
                                   </button>
-                                  
                                   <button
                                     onClick={() => {
-                                      if (selectedChat) {
-                                        const chatId = [user.uid, selectedChat.id].sort().join("_");
-                                        handlePinMessage(chatId, msg.id, msg.isPinned || false);
-                                      }
+                                      handleResendMessage(msg);
                                     }}
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
                                       gap: "10px",
-                                      padding: "10px 16px",
+                                      padding: "8px 14px",
+                                      width: "100%",
                                       background: "none",
                                       border: "none",
-                                      color: msg.isPinned ? "#c5e800" : "#fff",
-                                      cursor: "pointer",
-                                      width: "100%",
+                                      color: "#fff",
                                       fontSize: "13px",
-                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      cursor: "pointer",
+                                      borderRadius: "8px",
                                       transition: "all .2s ease",
+                                      fontFamily: "Inter, 'Inter Fallback'",
                                     }}
                                     onMouseEnter={(e) => {
                                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
@@ -3103,10 +3095,9 @@ export default function HomePage(): React.JSX.Element {
                                       e.currentTarget.style.backgroundColor = "transparent";
                                     }}
                                   >
-                                    <PinIcon filled={msg.isPinned || false} />
-                                    <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                    <SendIcon />
+                                    <span>Kirim Ulang</span>
                                   </button>
-                                  
                                   <button
                                     onClick={() => {
                                       setShareMessage(msg);
@@ -3117,15 +3108,16 @@ export default function HomePage(): React.JSX.Element {
                                       display: "flex",
                                       alignItems: "center",
                                       gap: "10px",
-                                      padding: "10px 16px",
+                                      padding: "8px 14px",
+                                      width: "100%",
                                       background: "none",
                                       border: "none",
                                       color: "#fff",
-                                      cursor: "pointer",
-                                      width: "100%",
                                       fontSize: "13px",
-                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      cursor: "pointer",
+                                      borderRadius: "8px",
                                       transition: "all .2s ease",
+                                      fontFamily: "Inter, 'Inter Fallback'",
                                     }}
                                     onMouseEnter={(e) => {
                                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
@@ -3137,41 +3129,57 @@ export default function HomePage(): React.JSX.Element {
                                     <ShareIcon />
                                     <span>Teruskan</span>
                                   </button>
-                                  
-                                  {isMine && (
-                                    <button
-                                      onClick={() => {
-                                        handleResendMessage(msg);
-                                      }}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px",
-                                        padding: "10px 16px",
-                                        background: "none",
-                                        border: "none",
-                                        color: "#fff",
-                                        cursor: "pointer",
-                                        width: "100%",
-                                        fontSize: "13px",
-                                        fontFamily: "Inter, 'Inter Fallback'",
-                                        transition: "all .2s ease",
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = "transparent";
-                                      }}
-                                    >
-                                      <SendIcon />
-                                      <span>Kirim Ulang</span>
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "8px 14px",
+                                      width: "100%",
+                                      background: "none",
+                                      border: "none",
+                                      color: msg.isPinned ? "#c5e800" : "#fff",
+                                      fontSize: "13px",
+                                      cursor: "pointer",
+                                      borderRadius: "8px",
+                                      transition: "all .2s ease",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                    }}
+                                  >
+                                    <PinIcon filled={msg.isPinned || false} />
+                                    <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                  </button>
                                 </div>
                               )}
                             </div>
                           </div>
+                          {msg.isPinned && (
+                            <div
+                              style={{
+                                alignSelf: isMine ? "flex-end" : "flex-start",
+                                fontSize: "10px",
+                                color: "#c5e800",
+                                marginTop: "-2px",
+                                marginBottom: "6px",
+                                padding: "0 6px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                fontWeight: 600,
+                                letterSpacing: "0.03em",
+                              }}
+                            >
+                              <PinIcon filled={true} />
+                              <span style={{ color: "#c5e800" }}>Pinned • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                            </div>
+                          )}
                         </React.Fragment>
                       );
                     })
@@ -3182,49 +3190,73 @@ export default function HomePage(): React.JSX.Element {
                 {/* Input */}
                 <div
                   style={{
-                    padding: "14px 20px",
-                    borderTop: "1px solid rgba(255,255,255,0.04)",
-                    backgroundColor: "#000000",
+                    padding: "12px 16px 16px",
+                    borderTop: "1px solid rgba(0,0,0,0.04)",
                     display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
+                    gap: "10px",
+                    backgroundColor: "#ffffff",
                   }}
                 >
                   <input
                     type="text"
-                    placeholder="Ketik pesan..."
+                    placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
                     value={message}
                     onChange={handleTyping}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
                     style={{
                       flex: 1,
-                      padding: "12px 16px",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: "12px",
-                      fontSize: "14px",
+                      padding: "12px 18px",
+                      border: replyTo ? "2px solid #c5e800" : "1px solid #e8e8e8",
+                      borderRadius: "60px",
+                      fontSize: "15px",
                       outline: "none",
                       fontFamily: "Inter, 'Inter Fallback'",
-                      backgroundColor: "#0a0a0a",
-                      color: "#ffffff",
+                      transition: "all .2s ease",
+                      backgroundColor: "#f5f5f5",
+                      color: "#000",
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = "#c5e800";
+                      e.currentTarget.style.backgroundColor = "#ffffff";
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = replyTo ? "#c5e800" : "#e8e8e8";
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
                     }}
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!message.trim()}
                     style={{
-                      backgroundColor: message.trim() ? "#c5e800" : "#2a2a2a",
+                      backgroundColor: "#c5e800",
                       border: "none",
-                      borderRadius: "12px",
-                      padding: "12px 18px",
-                      cursor: message.trim() ? "pointer" : "not-allowed",
-                      color: message.trim() ? "#000" : "#666",
+                      padding: "12px 24px",
+                      borderRadius: "60px",
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      color: "#000",
+                      cursor: "pointer",
                       transition: "all .2s ease",
+                      whiteSpace: "nowrap",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
+                      gap: "8px",
                       fontFamily: "Inter, 'Inter Fallback'",
                     }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#b0d000";
+                      e.currentTarget.style.transform = "scale(1.02)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#c5e800";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
                   >
+                    <span>Kirim</span>
                     <SendIcon />
                   </button>
                 </div>
@@ -3233,58 +3265,93 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Tombol Chat */}
+        {/* Chat Button */}
         <button
           onClick={handleChatToggle}
           style={{
-            backgroundColor: "#c5e800",
-            border: "none",
-            borderRadius: "60px",
-            padding: "16px 28px",
-            fontSize: "16px",
-            fontWeight: 600,
-            color: "#000",
-            cursor: "pointer",
-            boxShadow: "0 8px 30px rgba(197,232,0,0.3)",
-            transition: "all .3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            fontFamily: "Inter, 'Inter Fallback'",
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "10px",
+            backgroundColor: isChatOpen ? "transparent" : "#000",
+            padding: isChatOpen ? "0" : "14px 28px",
+            borderRadius: "60px",
+            border: "none",
+            cursor: "pointer",
+            transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            boxShadow: isChatOpen ? "none" : "0 8px 32px rgba(0,0,0,0.12)",
+            userSelect: "none",
+            fontFamily: "Inter, 'Inter Fallback'",
+            position: "relative",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.04)";
-            e.currentTarget.style.boxShadow = "0 12px 40px rgba(197,232,0,0.4)";
+            if (!isChatOpen) {
+              e.currentTarget.style.transform = "scale(1.04)";
+              e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.18)";
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = "0 8px 30px rgba(197,232,0,0.3)";
+            if (!isChatOpen) {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.12)";
+            }
           }}
         >
-          <span>💬</span>
-          <span>Chat</span>
-          {totalUnread > 0 && (
-            <span
-              style={{
-                backgroundColor: "#000",
-                color: "#c5e800",
-                borderRadius: "50%",
-                padding: "2px 8px",
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
-            >
-              {totalUnread}
-            </span>
+          {!isChatOpen && (
+            <>
+              <span
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                  letterSpacing: "-0.01em",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user ? "Chat with Menuru" : "Login to Chat"}
+              </span>
+              {totalUnread > 0 && (
+                <span
+                  style={{
+                    backgroundColor: "#c5e800",
+                    color: "#000",
+                    borderRadius: "50%",
+                    minWidth: "20px",
+                    height: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    padding: "0 6px",
+                  }}
+                >
+                  {totalUnread}
+                </span>
+              )}
+            </>
           )}
         </button>
       </div>
 
-      {/* CSS Animation */}
-      <style>{`
+      <style jsx>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
         @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.3;
+          }
         }
       `}</style>
     </div>
