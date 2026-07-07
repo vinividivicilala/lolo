@@ -1273,27 +1273,26 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Container utama dengan border radius penuh */}
+        {/* Search - Container utama */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
+            backgroundColor: "transparent",
             borderRadius: "12px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
-            border: isSearchOpen ? "2px solid #c5e800" : "none",
           }}
         >
-          {/* Search Icon - Ukuran kotak */}
+          {/* Search Icon - Kotak dengan background hijau */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: isSearchOpen ? "transparent" : "#c5e800",
+              background: "#c5e800",
               border: "none",
-              borderRadius: isSearchOpen ? "12px 0 0 12px" : "12px",
+              borderRadius: "12px",
               padding: "14px",
               cursor: "pointer",
               display: "flex",
@@ -1306,20 +1305,22 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
+              borderTopRightRadius: isSearchOpen ? "0" : "12px",
+              borderBottomRightRadius: isSearchOpen ? "0" : "12px",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Muncul di samping kanan dengan ukuran sama */}
+          {/* Input Search - Kotak dengan background hijau */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "transparent",
+                backgroundColor: "#c5e800",
                 borderRadius: "0 12px 12px 0",
-                padding: "0 16px 0 4px",
+                padding: "0 16px 0 0",
                 flex: 1,
                 minWidth: "200px",
                 maxWidth: "350px",
@@ -1327,6 +1328,8 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
               }}
             >
               <input
@@ -1351,7 +1354,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
-
       {/* Teks "menuru" besar */}
       <div
         style={{
