@@ -1274,99 +1274,99 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         {/* Search - Icon dan Input dengan ukuran dan radius yang sama */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "transparent",
-    borderRadius: "60px",
-    padding: "0",
-    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-    gap: "0",
-    position: "relative",
-    overflow: "hidden",
-  }}
->
-  {/* Search Icon - Background hijau */}
-  <button
-    onClick={() => setIsSearchOpen(!isSearchOpen)}
-    style={{
-      background: "#c5e800",
-      border: "none",
-      borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
-      padding: "10px 14px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      transition: "all 0.3s ease",
-      color: "#000",
-      position: "relative",
-      zIndex: 2,
-      minWidth: "52px",
-      minHeight: "52px",
-      width: "52px",
-      height: "52px",
-      flexShrink: 0,
-    }}
-  >
-    <SearchIcon />
-  </button>
-  
-  {/* Input Search - Background hijau dengan ukuran yang sama */}
-  {isSearchOpen && (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: "#c5e800",
-        borderRadius: "0 60px 60px 0",
-        padding: "0 20px 0 4px",
-        flex: "1 1 auto",
-        minWidth: "0",
-        position: "relative",
-        zIndex: 1,
-        border: "none",
-        minHeight: "52px",
-        height: "52px",
-        overflow: "hidden",
-      }}
-    >
-      {/* Bagian tengah yang memanjang */}
-      <div
-        style={{
-          flex: "1 1 auto",
-          minWidth: "0",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="What are you looking for?"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          autoFocus
+        <div
           style={{
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            fontSize: "15px",
-            color: "#000",
-            fontFamily: "Inter, 'Inter Fallback'",
-            padding: "8px 0 8px 8px",
-            width: "100%",
-            minWidth: "0",
-            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "transparent",
+            borderRadius: "60px",
+            padding: "0",
+            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            gap: "0",
+            position: "relative",
+            overflow: "hidden",
           }}
-        />
+        >
+          {/* Search Icon - Background hijau */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            style={{
+              background: "#c5e800",
+              border: "none",
+              borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
+              padding: "10px 14px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.3s ease",
+              color: "#000",
+              position: "relative",
+              zIndex: 2,
+              minWidth: "52px",
+              minHeight: "52px",
+              width: "52px",
+              height: "52px",
+              flexShrink: 0,
+            }}
+          >
+            <SearchIcon />
+          </button>
+          
+          {/* Input Search - Background hijau dengan ukuran yang sama */}
+          {isSearchOpen && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#c5e800",
+                borderRadius: "0 60px 60px 0",
+                padding: "0 20px 0 4px",
+                flex: "1 1 auto",
+                minWidth: "0",
+                position: "relative",
+                zIndex: 1,
+                border: "none",
+                minHeight: "52px",
+                height: "52px",
+                overflow: "hidden",
+              }}
+            >
+              {/* Bagian tengah yang memanjang */}
+              <div
+                style={{
+                  flex: "1 1 auto",
+                  minWidth: "0",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="What are you looking for?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    fontSize: "15px",
+                    color: "#000",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    padding: "8px 0 8px 8px",
+                    width: "100%",
+                    minWidth: "0",
+                    height: "100%",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  )}
-</div>
 
-        
       {/* Teks "menuru" besar */}
       <div
         style={{
@@ -3046,4 +3046,259 @@ export default function HomePage(): React.JSX.Element {
                                   style={{
                                     position: "absolute",
                                     bottom: "calc(100% + 8px)",
-                                    right: isMine ? 0
+                                    right: isMine ? 0 : "auto",
+                                    left: isMine ? "auto" : 0,
+                                    backgroundColor: "#1a1a1a",
+                                    borderRadius: "12px",
+                                    padding: "6px 0",
+                                    minWidth: "160px",
+                                    boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+                                    border: "1px solid rgba(255,255,255,0.05)",
+                                    zIndex: 100,
+                                  }}
+                                >
+                                  <button
+                                    onClick={() => {
+                                      setReplyTo(msg);
+                                      setShowMessageMenu(null);
+                                    }}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "10px 16px",
+                                      background: "none",
+                                      border: "none",
+                                      color: "#fff",
+                                      cursor: "pointer",
+                                      width: "100%",
+                                      fontSize: "13px",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      transition: "all .2s ease",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                    }}
+                                  >
+                                    <ReplyIcon />
+                                    <span>Balas</span>
+                                  </button>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      if (selectedChat) {
+                                        const chatId = [user.uid, selectedChat.id].sort().join("_");
+                                        handlePinMessage(chatId, msg.id, msg.isPinned || false);
+                                      }
+                                    }}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "10px 16px",
+                                      background: "none",
+                                      border: "none",
+                                      color: msg.isPinned ? "#c5e800" : "#fff",
+                                      cursor: "pointer",
+                                      width: "100%",
+                                      fontSize: "13px",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      transition: "all .2s ease",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                    }}
+                                  >
+                                    <PinIcon filled={msg.isPinned || false} />
+                                    <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                  </button>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setShareMessage(msg);
+                                      setShowShareModal(true);
+                                      setShowMessageMenu(null);
+                                    }}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "10px 16px",
+                                      background: "none",
+                                      border: "none",
+                                      color: "#fff",
+                                      cursor: "pointer",
+                                      width: "100%",
+                                      fontSize: "13px",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      transition: "all .2s ease",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                    }}
+                                  >
+                                    <ShareIcon />
+                                    <span>Teruskan</span>
+                                  </button>
+                                  
+                                  {isMine && (
+                                    <button
+                                      onClick={() => {
+                                        handleResendMessage(msg);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "10px 16px",
+                                        background: "none",
+                                        border: "none",
+                                        color: "#fff",
+                                        cursor: "pointer",
+                                        width: "100%",
+                                        fontSize: "13px",
+                                        fontFamily: "Inter, 'Inter Fallback'",
+                                        transition: "all .2s ease",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      <SendIcon />
+                                      <span>Kirim Ulang</span>
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div
+                  style={{
+                    padding: "14px 20px",
+                    borderTop: "1px solid rgba(255,255,255,0.04)",
+                    backgroundColor: "#000000",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Ketik pesan..."
+                    value={message}
+                    onChange={handleTyping}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    style={{
+                      flex: 1,
+                      padding: "12px 16px",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                      outline: "none",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                      backgroundColor: "#0a0a0a",
+                      color: "#ffffff",
+                    }}
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!message.trim()}
+                    style={{
+                      backgroundColor: message.trim() ? "#c5e800" : "#2a2a2a",
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "12px 18px",
+                      cursor: message.trim() ? "pointer" : "not-allowed",
+                      color: message.trim() ? "#000" : "#666",
+                      transition: "all .2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    <SendIcon />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tombol Chat */}
+        <button
+          onClick={handleChatToggle}
+          style={{
+            backgroundColor: "#c5e800",
+            border: "none",
+            borderRadius: "60px",
+            padding: "16px 28px",
+            fontSize: "16px",
+            fontWeight: 600,
+            color: "#000",
+            cursor: "pointer",
+            boxShadow: "0 8px 30px rgba(197,232,0,0.3)",
+            transition: "all .3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            fontFamily: "Inter, 'Inter Fallback'",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.04)";
+            e.currentTarget.style.boxShadow = "0 12px 40px rgba(197,232,0,0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 8px 30px rgba(197,232,0,0.3)";
+          }}
+        >
+          <span>💬</span>
+          <span>Chat</span>
+          {totalUnread > 0 && (
+            <span
+              style={{
+                backgroundColor: "#000",
+                color: "#c5e800",
+                borderRadius: "50%",
+                padding: "2px 8px",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              {totalUnread}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
+    </div>
+  );
+}
