@@ -1210,13 +1210,6 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
-  const filteredUsers = searchQuery 
-    ? users.filter(u => 
-        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : users;
-
   // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1280,17 +1273,17 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Button & Input - Pill design menyatu */}
+        {/* Search Button & Input - Pill design dengan jarak */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
             borderRadius: "60px",
-            padding: isSearchOpen ? "4px 4px 4px 16px" : "0",
+            padding: isSearchOpen ? "4px" : "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            border: isSearchOpen ? "none" : "none",
-            gap: isSearchOpen ? "8px" : "0",
+            border: isSearchOpen ? "2px solid #c5e800" : "none",
+            gap: isSearchOpen ? "4px" : "0",
           }}
         >
           <button
@@ -1299,14 +1292,14 @@ export default function HomePage(): React.JSX.Element {
               background: isSearchOpen ? "transparent" : "#c5e800",
               border: "none",
               borderRadius: "60px",
-              padding: isSearchOpen ? "8px 8px" : "10px 14px",
+              padding: isSearchOpen ? "8px 10px" : "10px 16px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               transition: "all 0.3s ease",
               color: isSearchOpen ? "#000" : "#000",
-              minWidth: isSearchOpen ? "40px" : "auto",
+              minWidth: isSearchOpen ? "auto" : "auto",
             }}
           >
             <SearchIcon />
@@ -1326,7 +1319,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: "14px",
                 color: "#000",
                 fontFamily: "Inter, 'Inter Fallback'",
-                padding: "8px 4px",
+                padding: "8px 12px",
                 minWidth: "200px",
                 width: searchQuery ? "auto" : "200px",
               }}
