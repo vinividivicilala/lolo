@@ -1274,98 +1274,85 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         {/* Search - Icon dan Input dengan ukuran dan radius yang sama */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "transparent",
-            borderRadius: "60px",
-            padding: "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Search Icon - Background hijau */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            style={{
-              background: "#c5e800",
-              border: "none",
-              borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
-              padding: "10px 14px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
-              position: "relative",
-              zIndex: 2,
-              minWidth: "52px",
-              minHeight: "52px",
-              width: "52px",
-              height: "52px",
-              flexShrink: 0,
-            }}
-          >
-            <SearchIcon />
-          </button>
-          
-          {/* Input Search - Background hijau dengan ukuran yang sama */}
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "0 60px 60px 0",
-                padding: "0 20px 0 4px",
-                flex: "1 1 auto",
-                minWidth: "0",
-                position: "relative",
-                zIndex: 1,
-                border: "none",
-                minHeight: "52px",
-                height: "52px",
-                overflow: "hidden",
-              }}
-            >
-              {/* Bagian tengah yang memanjang */}
-              <div
-                style={{
-                  flex: "1 1 auto",
-                  minWidth: "0",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="What are you looking for?"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    fontSize: "15px",
-                    color: "#000",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    padding: "8px 0 8px 8px",
-                    width: "100%",
-                    minWidth: "0",
-                    height: "100%",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderRadius: "60px",
+    padding: "0",
+    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    gap: "0",
+    position: "relative",
+  }}
+>
+  {/* Search Icon - Background hijau */}
+  <button
+    onClick={() => setIsSearchOpen(!isSearchOpen)}
+    style={{
+      background: "#c5e800",
+      border: "none",
+      borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
+      padding: "10px 14px",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.3s ease",
+      color: "#000",
+      position: "relative",
+      zIndex: 2,
+      minWidth: "52px",
+      minHeight: "52px",
+      width: "52px",
+      height: "52px",
+      flexShrink: 0,
+    }}
+  >
+    <SearchIcon />
+  </button>
+  
+  {/* Input Search - Background hijau dengan ukuran yang sama */}
+  {isSearchOpen && (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#c5e800",
+        borderRadius: "0 60px 60px 0",
+        padding: "0 20px 0 0",
+        flex: "1 1 auto",
+        minWidth: "0",
+        position: "relative",
+        zIndex: 1,
+        border: "none",
+        minHeight: "52px",
+        height: "52px",
+      }}
+    >
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        autoFocus
+        style={{
+          background: "transparent",
+          border: "none",
+          outline: "none",
+          fontSize: "15px",
+          color: "#000",
+          fontFamily: "Inter, 'Inter Fallback'",
+          padding: "8px 0 8px 8px",
+          width: "100%",
+          minWidth: "0",
+          height: "100%",
+          flex: "1 1 auto",
+        }}
+      />
+    </div>
+  )}
+</div>
 
       {/* Teks "menuru" besar */}
       <div
