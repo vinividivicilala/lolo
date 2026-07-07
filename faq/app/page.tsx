@@ -1273,38 +1273,43 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Button & Input - Pill design dengan jarak */}
+        {/* Search - 2 elemen terpisah saling nempel */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
             borderRadius: "60px",
-            padding: isSearchOpen ? "4px" : "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transition: "all 0.3s ease",
             border: isSearchOpen ? "2px solid #c5e800" : "none",
-            gap: isSearchOpen ? "4px" : "0",
+            padding: isSearchOpen ? "2px" : "0",
+            gap: "0",
           }}
         >
+          {/* Icon Search - Kotak border radius */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: isSearchOpen ? "transparent" : "#c5e800",
+              background: "#c5e800",
               border: "none",
               borderRadius: "60px",
-              padding: isSearchOpen ? "8px 10px" : "10px 16px",
+              padding: "10px 16px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               transition: "all 0.3s ease",
-              color: isSearchOpen ? "#000" : "#000",
-              minWidth: isSearchOpen ? "auto" : "auto",
+              color: "#000",
+              minWidth: "auto",
+              borderTopRightRadius: isSearchOpen ? "0" : "60px",
+              borderBottomRightRadius: isSearchOpen ? "0" : "60px",
+              borderTopLeftRadius: "60px",
+              borderBottomLeftRadius: "60px",
             }}
           >
             <SearchIcon />
           </button>
           
+          {/* Input Search */}
           {isSearchOpen && (
             <input
               type="text"
@@ -1313,15 +1318,20 @@ export default function HomePage(): React.JSX.Element {
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
               style={{
-                background: "transparent",
+                background: "#c5e800",
                 border: "none",
                 outline: "none",
                 fontSize: "14px",
                 color: "#000",
                 fontFamily: "Inter, 'Inter Fallback'",
-                padding: "8px 12px",
+                padding: "10px 16px 10px 12px",
                 minWidth: "200px",
                 width: searchQuery ? "auto" : "200px",
+                borderRadius: "60px",
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
+                borderTopRightRadius: "60px",
+                borderBottomRightRadius: "60px",
               }}
             />
           )}
