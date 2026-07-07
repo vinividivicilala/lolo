@@ -1273,7 +1273,7 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon Pill dan Input Pill dengan jarak */}
+        {/* Search - Icon dan Input menyambung membentuk pill */}
         <div
           style={{
             display: "flex",
@@ -1282,17 +1282,18 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: "60px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "6px",
+            gap: "0",
             position: "relative",
           }}
         >
-          {/* Search Icon - Bentuk Pill dengan border */}
+          {/* Search Icon - Background hijau dengan border kanan pill */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
-              border: "2px solid #c5e800",
-              borderRadius: "60px",
+              border: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
+              borderRight: isSearchOpen ? "none" : "none",
+              borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
               padding: "8px 14px",
               cursor: "pointer",
               display: "flex",
@@ -1302,25 +1303,30 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
+              borderTopRightRadius: isSearchOpen ? "0" : "60px",
+              borderBottomRightRadius: isSearchOpen ? "0" : "60px",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Bentuk Pill memanjang dengan border */}
+          {/* Input Search - Background hijau dengan border kiri pill */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "#c5e800",
-                borderRadius: "60px",
+                borderRadius: "0 60px 60px 0",
                 border: "2px solid #c5e800",
+                borderLeft: "none",
                 padding: "0 16px 0 4px",
                 flex: 1,
                 minWidth: "200px",
                 position: "relative",
                 zIndex: 1,
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
               }}
             >
               <input
