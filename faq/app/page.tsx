@@ -170,8 +170,8 @@ const EditIcon = () => (
 // Search Icon
 const SearchIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
   </svg>
 );
 
@@ -398,14 +398,12 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<ChatUser[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -526,6 +524,18 @@ export default function HomePage(): React.JSX.Element {
       }
     });
     return () => unsubscribe();
+  }, []);
+
+  // Click outside search
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const checkAndSendOfficialMessages = async (userId: string) => {
@@ -812,8 +822,6 @@ export default function HomePage(): React.JSX.Element {
       setOfficialMessagesSent(false);
       setShowProfile(false);
       setProfileUser(null);
-      setShowSearch(false);
-      setSearchQuery("");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -860,22 +868,6 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === "") {
-      setSearchResults([]);
-      return;
-    }
-    
-    const results = users.filter(u => 
-      u.name.toLowerCase().includes(query.toLowerCase()) ||
-      u.email.toLowerCase().includes(query.toLowerCase()) ||
-      (u.bio && u.bio.toLowerCase().includes(query.toLowerCase()))
-    );
-    setSearchResults(results);
-  };
-
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
@@ -884,8 +876,6 @@ export default function HomePage(): React.JSX.Element {
     setNoteInput(chatUser.note || "");
     setEditBio(false);
     setEditNote(false);
-    setShowSearch(false);
-    setSearchQuery("");
   };
 
   const handleCloseProfile = () => {
@@ -1220,6 +1210,13 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
+  const filteredUsers = searchQuery 
+    ? users.filter(u => 
+        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : users;
+
   // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1230,19 +1227,6 @@ export default function HomePage(): React.JSX.Element {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Close search on Escape
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showSearch) {
-        setShowSearch(false);
-        setSearchQuery("");
-        setSearchResults([]);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [showSearch]);
 
   if (loading) {
     return (
@@ -1271,7 +1255,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo - Kiri Atas dengan Search Connected Pill UI */}
+      {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1282,6 +1266,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           gap: "16px",
         }}
+        ref={searchRef}
       >
         <div
           style={{
@@ -1295,225 +1280,57 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search Connected Pill UI - Icon dan Search dalam satu pill dengan jarak */}
-        <div style={{ position: "relative" }} ref={searchRef}>
-          <div
+        {/* Search Button & Input - Pill design menyatu */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
+            borderRadius: "60px",
+            padding: isSearchOpen ? "4px 4px 4px 16px" : "0",
+            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            border: isSearchOpen ? "none" : "none",
+            gap: isSearchOpen ? "8px" : "0",
+          }}
+        >
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
+              background: isSearchOpen ? "transparent" : "#c5e800",
+              border: "none",
+              borderRadius: "60px",
+              padding: isSearchOpen ? "8px 8px" : "10px 14px",
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              backgroundColor: showSearch ? "#c5e800" : "#c5e800",
-              borderRadius: "9999px",
-              overflow: "hidden",
+              justifyContent: "center",
               transition: "all 0.3s ease",
-              boxShadow: showSearch ? "0 4px 20px rgba(197,232,0,0.3)" : "0 2px 8px rgba(0,0,0,0.04)",
-              width: showSearch ? "auto" : "40px",
-              height: "40px",
-              cursor: "pointer",
-              border: "1px solid rgba(0,0,0,0.04)",
-              padding: "0",
-              gap: "0px",
+              color: isSearchOpen ? "#000" : "#000",
+              minWidth: isSearchOpen ? "40px" : "auto",
             }}
           >
-            {/* Search Button - Left side with border radius pill */}
-            <div
+            <SearchIcon />
+          </button>
+          
+          {isSearchOpen && (
+            <input
+              type="text"
+              placeholder="What are you looking for?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minWidth: "40px",
-                height: "40px",
-                borderRadius: "9999px",
-                backgroundColor: "transparent",
-                flexShrink: 0,
-                transition: "all 0.3s ease",
-              }}
-            >
-              <button
-                onClick={() => {
-                  setShowSearch(!showSearch);
-                  if (!showSearch) {
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    setTimeout(() => {
-                      if (searchInputRef.current) {
-                        searchInputRef.current.focus();
-                      }
-                    }, 150);
-                  }
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  color: "#000",
-                  borderRadius: "9999px",
-                }}
-                onMouseEnter={(e) => {
-                  if (!showSearch) {
-                    e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <SearchIcon />
-              </button>
-            </div>
-
-            {/* Search Input - Right side with border radius pill */}
-            {showSearch && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  flex: 1,
-                  height: "40px",
-                  borderRadius: "9999px",
-                  backgroundColor: "transparent",
-                  paddingRight: "16px",
-                }}
-              >
-                {/* Vertical Divider - Menjaga jarak antara icon dan search */}
-                <div
-                  style={{
-                    width: "1px",
-                    height: "20px",
-                    backgroundColor: "rgba(0,0,0,0.12)",
-                    flexShrink: 0,
-                    marginRight: "12px",
-                  }}
-                />
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  placeholder="What are you looking for?"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "6px 0",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    borderRadius: "0",
-                    fontSize: "13px",
-                    outline: "none",
-                    color: "#000",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    minWidth: "180px",
-                    maxWidth: "240px",
-                    animation: "searchExpand 0.3s ease forwards",
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Search Results */}
-          {showSearch && searchQuery && searchResults.length > 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: "0",
-                backgroundColor: "#ffffff",
-                borderRadius: "12px",
-                padding: "8px",
-                minWidth: "320px",
-                maxWidth: "400px",
-                boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
-                zIndex: 100,
-                border: "1px solid rgba(0,0,0,0.05)",
-              }}
-            >
-              {searchResults.map((result) => (
-                <div
-                  key={result.id}
-                  onClick={() => {
-                    handleOpenProfile(result);
-                    setShowSearch(false);
-                    setSearchQuery("");
-                    setSearchResults([]);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    backgroundColor: "transparent",
-                    transition: "background 0.2s ease",
-                    marginBottom: "2px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "8px",
-                      backgroundColor: "#f0f0f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "16px",
-                      overflow: "hidden",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {result.photoURL ? (
-                      <img src={result.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <span>{result.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
-                      {result.name}
-                      {result.isOfficial && <InstagramVerifiedBadge size={12} />}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#999" }}>
-                      {result.email}
-                    </div>
-                  </div>
-                  <OnlineIndicator online={result.online || false} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {showSearch && searchQuery && searchResults.length === 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: "0",
-                backgroundColor: "#ffffff",
-                borderRadius: "12px",
-                padding: "16px",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontSize: "14px",
+                color: "#000",
+                fontFamily: "Inter, 'Inter Fallback'",
+                padding: "8px 4px",
                 minWidth: "200px",
-                boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
-                zIndex: 100,
-                border: "1px solid rgba(0,0,0,0.05)",
-                textAlign: "center",
-                color: "#999",
-                fontSize: "13px",
+                width: searchQuery ? "auto" : "200px",
               }}
-            >
-              Tidak ada hasil untuk "{searchQuery}"
-            </div>
+            />
           )}
         </div>
       </div>
@@ -1981,6 +1798,7 @@ export default function HomePage(): React.JSX.Element {
               // Profile View
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                  {/* Back Button */}
                   <button
                     onClick={handleCloseProfile}
                     style={{
@@ -3519,16 +3337,6 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
-          }
-        }
-        @keyframes searchExpand {
-          from {
-            opacity: 0;
-            width: 0;
-          }
-          to {
-            opacity: 1;
-            width: auto;
           }
         }
       `}</style>
