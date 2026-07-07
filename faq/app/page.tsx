@@ -1273,80 +1273,119 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Icon dengan background hijau, input memanjang ke kanan */}
-        <div
+       {/* Search - Icon dan Input dengan ukuran dan radius yang sama */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderRadius: "60px",
+    padding: "0",
+    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    gap: "0",
+    position: "relative",
+    overflow: "hidden",
+  }}
+>
+  {/* Search Icon - Background hijau */}
+  <button
+    onClick={() => setIsSearchOpen(!isSearchOpen)}
+    style={{
+      background: "#c5e800",
+      border: "none",
+      borderRadius: isSearchOpen ? "60px 0 0 60px" : "60px",
+      padding: "10px 14px",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.3s ease",
+      color: "#000",
+      position: "relative",
+      zIndex: 2,
+      minWidth: "52px",
+      minHeight: "52px",
+      width: "52px",
+      height: "52px",
+      flexShrink: 0,
+    }}
+  >
+    <SearchIcon />
+  </button>
+  
+  {/* Input Search - Background hijau dengan ukuran yang sama */}
+  {isSearchOpen && (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#c5e800",
+        borderRadius: "0 60px 60px 0",
+        padding: "0 20px 0 4px",
+        flex: "1 1 auto",
+        minWidth: "0",
+        position: "relative",
+        zIndex: 1,
+        border: "none",
+        minHeight: "52px",
+        height: "52px",
+        overflow: "hidden",
+      }}
+    >
+      {/* Bagian tengah yang memanjang */}
+      <div
+        style={{
+          flex: "1 1 auto",
+          minWidth: "0",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <input
+          type="text"
+          placeholder="What are you looking for?"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          autoFocus
           style={{
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            fontSize: "15px",
+            color: "#000",
+            fontFamily: "Inter, 'Inter Fallback'",
+            padding: "8px 0 8px 8px",
+            width: "100%",
+            minWidth: "0",
+            height: "100%",
+          }}
+        />
+      </div>
+      
+      {/* Opsional: tombol close untuk search */}
+      {searchQuery && (
+        <button
+          onClick={() => setSearchQuery("")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "rgba(0,0,0,0.3)",
+            cursor: "pointer",
+            padding: "4px",
             display: "flex",
             alignItems: "center",
-            backgroundColor: "transparent",
-            borderRadius: "60px",
-            padding: "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
+            justifyContent: "center",
+            fontSize: "16px",
+            flexShrink: 0,
           }}
         >
-          {/* Search Icon - Background hijau stabilo */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            style={{
-              background: "#c5e800",
-              border: "none",
-              borderRadius: "60px",
-              padding: "10px 14px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
-              position: "relative",
-              zIndex: 2,
-              minWidth: "44px",
-            }}
-          >
-            <SearchIcon />
-          </button>
-          
-          {/* Input Search - Memanjang ke kanan dengan background hijau */}
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "0 60px 60px 0",
-                padding: "0 16px 0 4px",
-                flex: 1,
-                minWidth: "200px",
-                position: "relative",
-                zIndex: 1,
-                marginLeft: "-2px",
-                border: "none",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "14px",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "8px 4px",
-                  width: "100%",
-                  minWidth: "180px",
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+          ✕
+        </button>
+      )}
+    </div>
+  )}
+</div>
 
       {/* Teks "menuru" besar */}
       <div
