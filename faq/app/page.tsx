@@ -1249,6 +1249,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
+
             {/* Logo & Search - Kiri Atas */}
       <div
         style={{
@@ -1286,13 +1287,13 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
           }}
         >
-          {/* Search Icon - Kotak dengan border penuh */}
+          {/* Search Icon - Border radius FULL di semua sisi */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "2px solid #c5e800",
-              borderRadius: "12px 0 0 12px",
+              borderRadius: "12px",
               padding: "14px",
               cursor: "pointer",
               display: "flex",
@@ -1305,27 +1306,26 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // SEMUA border tetap ada, hanya border kanan yang overlap dengan input
-              borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
-              // Memberi jarak tipis di tengah agar tidak full menyatu
+              // Hanya bagian tengah yang menyatu (tengah kanan icon dengan tengah kiri input)
               marginRight: isSearchOpen ? "-2px" : "0",
-              // Pastikan border bawah dan atas tetap terlihat
+              // Border tetap penuh di semua sisi
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
               borderLeft: "2px solid #c5e800",
+              borderRight: "2px solid #c5e800",
             }}
           >
             <SearchIcon />
           </button>
           
-          {/* Input Search - Kotak dengan border penuh */}
+          {/* Input Search - Border radius FULL di semua sisi */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "#c5e800",
-                borderRadius: "0 12px 12px 0",
+                borderRadius: "12px",
                 padding: "0 16px 0 0",
                 flex: 1,
                 minWidth: "200px",
@@ -1334,14 +1334,9 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
-                // SEMUA border tetap ada
+                // Border penuh di semua sisi
                 border: "2px solid #c5e800",
-                // Border kiri overlap dengan icon (agar terlihat menyatu di tengah)
-                borderLeft: "2px solid #c5e800",
-                borderTop: "2px solid #c5e800",
-                borderBottom: "2px solid #c5e800",
-                borderRight: "2px solid #c5e800",
-                // Memberi jarak tipis di tengah agar tidak full menyatu
+                // Hanya bagian tengah yang menyatu (tengah kiri input dengan tengah kanan icon)
                 marginLeft: "-2px",
               }}
             >
