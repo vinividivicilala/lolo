@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-            {/* Logo & Search - Kiri Atas */}
+                 {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1273,29 +1273,27 @@ export default function HomePage(): React.JSX.Element {
           Menuru
         </div>
 
-        {/* Search - Container utama berbentuk pil */}
+        {/* Search - Container utama */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: isSearchOpen ? "#c5e800" : "transparent",
-            borderRadius: "60px",
+            backgroundColor: "transparent",
+            borderRadius: "12px",
             padding: "0",
             transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             gap: "0",
             position: "relative",
-            border: isSearchOpen ? "2px solid #c5e800" : "none",
-            height: "52px",
           }}
         >
           {/* Search Icon */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
-              background: isSearchOpen ? "transparent" : "#c5e800",
+              background: "#c5e800",
               border: "none",
-              borderRadius: "60px",
-              padding: "14px 18px",
+              borderRadius: "12px",
+              padding: "14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1307,8 +1305,8 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              borderTopRightRadius: isSearchOpen ? "0" : "60px",
-              borderBottomRightRadius: isSearchOpen ? "0" : "60px",
+              borderTopRightRadius: isSearchOpen ? "0" : "12px",
+              borderBottomRightRadius: isSearchOpen ? "0" : "12px",
             }}
           >
             <SearchIcon />
@@ -1320,12 +1318,12 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "transparent",
-                borderRadius: "0 60px 60px 0",
-                padding: "0 20px 0 0",
+                backgroundColor: "#c5e800",
+                borderRadius: "0 12px 12px 0",
+                padding: "0 16px 0 0",
                 flex: 1,
                 minWidth: "200px",
-                maxWidth: "400px",
+                maxWidth: "350px",
                 position: "relative",
                 zIndex: 1,
                 height: "52px",
