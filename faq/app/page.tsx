@@ -99,6 +99,13 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
+interface Track {
+  id: string;
+  artist: string;
+  title: string;
+  albumArt: string;
+}
+
 // SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -167,16 +174,16 @@ const EditIcon = () => (
   </svg>
 );
 
-// Play Icon
-const PlayIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+// Play Icon - Biru Stabilo
+const PlayIconBlue = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="#0095f6" xmlns="http://www.w3.org/2000/svg">
     <path d="M8 5v14l11-7z"/>
   </svg>
 );
 
-// Pause Icon
-const PauseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+// Pause Icon - Biru Stabilo
+const PauseIconBlue = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="#0095f6" xmlns="http://www.w3.org/2000/svg">
     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
   </svg>
 );
@@ -407,61 +414,79 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const musicDropdownRef = useRef<HTMLDivElement>(null);
 
   // Music Widget State
-  const [currentTrack, setCurrentTrack] = useState({
-    artist: "Billie Eilish",
-    title: "BIRDS OF A FEATHER",
+  const [showMusicDropdown, setShowMusicDropdown] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<Track>({
+    id: "feast-nina",
+    artist: "Feast",
+    title: "Nina",
+    albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
   });
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const musicIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Daftar lagu - hanya 1 artist dan 1 lagu per tampilan
-  const tracks = [
-    { artist: "Billie Eilish", title: "BIRDS OF A FEATHER" },
-    { artist: "Taylor Swift", title: "Fortnight feat. Post Malone" },
-    { artist: "Olivia Rodrigo", title: "good 4 u" },
-    { artist: "Ariana Grande", title: "we can't be friends" },
-    { artist: "Sabrina Carpenter", title: "Espresso" },
-    { artist: "The Weeknd", title: "Blinding Lights" },
-    { artist: "Doja Cat", title: "Paint The Town Red" },
-    { artist: "Dua Lipa", title: "Houdini" },
+  // Daftar lagu
+  const tracks: Track[] = [
+    {
+      id: "feast-nina",
+      artist: "Feast",
+      title: "Nina",
+      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
+    },
+    {
+      id: "feast-kami-belum-tentu",
+      artist: "Feast",
+      title: "Kami Belum Tentu",
+      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e9",
+    },
+    {
+      id: "feast-berita-kabar",
+      artist: "Feast",
+      title: "Berita Kabar",
+      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ea",
+    },
+    {
+      id: "feast-uang",
+      artist: "Feast",
+      title: "Uang",
+      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8eb",
+    },
+    {
+      id: "feast-sekali-lagi",
+      artist: "Feast",
+      title: "Sekali Lagi",
+      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ec",
+    },
   ];
 
-  // Fungsi untuk mengganti lagu
-  const nextTrack = () => {
-    const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    setCurrentTrackIndex(nextIndex);
-    setCurrentTrack(tracks[nextIndex]);
-    setIsPlaying(true);
+  // Fungsi untuk memilih lagu
+  const selectTrack = (track: Track) => {
+    if (currentTrack.id === track.id) {
+      // Jika lagu sama, toggle play/pause
+      setIsPlaying(!isPlaying);
+    } else {
+      setCurrentTrack(track);
+      setIsPlaying(true);
+    }
+    setShowMusicDropdown(false);
   };
 
-  // Fungsi toggle play/pause
+  // Fungsi toggle play/pause dari widget utama
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Auto play interval - ganti lagu setiap 10 detik
+  // Close dropdown when clicking outside
   useEffect(() => {
-    if (isPlaying) {
-      musicIntervalRef.current = setInterval(() => {
-        nextTrack();
-      }, 10000);
-    } else {
-      if (musicIntervalRef.current) {
-        clearInterval(musicIntervalRef.current);
-        musicIntervalRef.current = null;
-      }
-    }
-
-    return () => {
-      if (musicIntervalRef.current) {
-        clearInterval(musicIntervalRef.current);
-        musicIntervalRef.current = null;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (musicDropdownRef.current && !musicDropdownRef.current.contains(event.target as Node)) {
+        setShowMusicDropdown(false);
       }
     };
-  }, [isPlaying, currentTrackIndex]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1307,135 +1332,267 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Background besar, foto besar, teks besar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-            padding: "10px 20px 10px 10px",
-            backgroundColor: "#ffffff",
-            borderRadius: "60px",
-            border: "1px solid #e0e0e0",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-            transition: "all 0.3s ease",
-            maxWidth: "320px",
-            minHeight: "56px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
-          }}
-        >
-          {/* Foto Artis - Lebih besar dengan fungsi play/pause */}
+        {/* Music Widget */}
+        <div style={{ position: "relative" }} ref={musicDropdownRef}>
           <div
-            onClick={togglePlay}
+            onClick={() => setShowMusicDropdown(!showMusicDropdown)}
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              flexShrink: 0,
-              backgroundColor: "#f0f0f0",
-              border: "1px solid #e8e8e8",
-              cursor: "pointer",
-              position: "relative",
-              transition: "transform 0.2s ease",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: "14px",
+              padding: "10px 20px 10px 10px",
+              backgroundColor: "#ffffff",
+              borderRadius: "60px",
+              border: "1px solid #e0e0e0",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease",
+              maxWidth: "340px",
+              minHeight: "60px",
+              cursor: "pointer",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
             }}
           >
-            <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentTrack.artist)}&background=000000&color=ffffff&size=64&font-size=0.5`}
-              alt={currentTrack.artist}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23f0f0f0'/%3E%3Ctext x='24' y='30' text-anchor='middle' font-size='20' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
-              }}
-            />
-            {/* Overlay play/pause icon */}
+            {/* Foto Artis */}
             <div
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "rgba(0,0,0,0.3)",
+                width: "48px",
+                height: "48px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                flexShrink: 0,
+                backgroundColor: "#f0f0f0",
+                border: "1px solid #e8e8e8",
+                cursor: "pointer",
+                position: "relative",
+                transition: "transform 0.2s ease",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: 0,
-                transition: "opacity 0.3s ease",
-                borderRadius: "12px",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.transform = "scale(1.05)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "0";
+                e.currentTarget.style.transform = "scale(1)";
               }}
             >
-              {isPlaying ? (
-                <PauseIcon />
-              ) : (
-                <PlayIcon />
-              )}
+              <img
+                src={currentTrack.albumArt}
+                alt={currentTrack.artist}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentTrack.artist)}&background=000000&color=ffffff&size=64&font-size=0.5`;
+                }}
+              />
+              {/* Overlay play/pause icon */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0,0,0,0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0,
+                  transition: "opacity 0.3s ease",
+                  borderRadius: "12px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "0";
+                }}
+              >
+                {isPlaying ? (
+                  <PauseIconBlue />
+                ) : (
+                  <PlayIconBlue />
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Info Lagu - Teks lebih besar */}
-          <div
-            style={{
-              flex: 1,
-              overflow: "hidden",
-              minWidth: 0,
-            }}
-          >
+            {/* Info Lagu - Teks lebih besar */}
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                whiteSpace: "nowrap",
+                flex: 1,
+                overflow: "hidden",
+                minWidth: 0,
               }}
             >
               <div
                 style={{
-                  overflow: "hidden",
-                  position: "relative",
-                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
                 }}
               >
                 <div
                   style={{
-                    display: "inline-block",
-                    animation: isPlaying ? "marquee 12s linear infinite" : "none",
-                    paddingLeft: isPlaying ? "100%" : "0",
-                    fontSize: "15px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    letterSpacing: "-0.01em",
+                    overflow: "hidden",
+                    position: "relative",
+                    width: "100%",
                   }}
                 >
-                  {currentTrack.artist} - {currentTrack.title}
+                  <div
+                    style={{
+                      display: "inline-block",
+                      animation: isPlaying ? "marquee 12s linear infinite" : "none",
+                      paddingLeft: isPlaying ? "100%" : "0",
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {currentTrack.artist} - {currentTrack.title}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Dropdown Daftar Lagu */}
+          {showMusicDropdown && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: 0,
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                border: "1px solid #e8e8e8",
+                width: "340px",
+                maxHeight: "320px",
+                overflowY: "auto",
+                padding: "8px",
+                zIndex: 50,
+              }}
+            >
+              <div style={{ 
+                padding: "8px 12px 4px 12px", 
+                fontSize: "12px", 
+                fontWeight: 600, 
+                color: "#999",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+              }}>
+                Daftar Lagu
+              </div>
+              {tracks.map((track) => {
+                const isActive = currentTrack.id === track.id;
+                return (
+                  <div
+                    key={track.id}
+                    onClick={() => selectTrack(track)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      backgroundColor: isActive ? "rgba(0,149,246,0.08)" : "transparent",
+                      marginBottom: "2px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,149,246,0.12)" : "#f5f5f5";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,149,246,0.08)" : "transparent";
+                    }}
+                  >
+                    {/* Foto artis di kiri */}
+                    <div
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        backgroundColor: "#f0f0f0",
+                      }}
+                    >
+                      <img
+                        src={track.albumArt}
+                        alt={track.artist}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist)}&background=000000&color=ffffff&size=40&font-size=0.5`;
+                        }}
+                      />
+                    </div>
+                    {/* Judul lagu di kiri tengah */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ 
+                        fontSize: "14px", 
+                        fontWeight: 600, 
+                        color: "#000",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}>
+                        {track.title}
+                      </div>
+                    </div>
+                    {/* Nama artis di kanan */}
+                    <div style={{ 
+                      fontSize: "13px", 
+                      color: "#666",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}>
+                      {track.artist}
+                    </div>
+                    {/* Tombol play/pause biru stabilo di kanan */}
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        backgroundColor: isActive && isPlaying ? "#0095f6" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        transition: "all 0.2s ease",
+                        color: isActive && isPlaying ? "#fff" : "#0095f6",
+                      }}
+                    >
+                      {isActive && isPlaying ? (
+                        <PauseIconBlue />
+                      ) : (
+                        <PlayIconBlue />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* User Status */}
