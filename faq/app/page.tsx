@@ -99,89 +99,80 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
-// Search Data Interface
+// Search Data
 interface SearchItem {
   id: string;
   title: string;
   description: string;
-  category: 'blog' | 'note' | 'donasi' | 'calendar';
-  url: string;
-  date?: string;
+  category: string;
+  link: string;
+  image?: string;
 }
 
-// Search Data
-const SEARCH_DATA: SearchItem[] = [
+const searchData: SearchItem[] = [
   {
-    id: 'blog-1',
-    title: 'Bagaimana Rasanya Masuk Kuliah Di Universitas Gunadarma',
-    description: 'Pengalaman pertama masuk kuliah di Universitas Gunadarma, dari proses pendaftaran hingga hari pertama perkuliahan. Simak cerita lengkapnya!',
-    category: 'blog',
-    url: '/blog',
-    date: '15 Jan 2025'
+    id: "blog-1",
+    title: "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma",
+    description: "Pengalaman pertama masuk kuliah di Universitas Gunadarma, dari orientasi hingga adaptasi dengan lingkungan kampus. Simak cerita lengkapnya disini!",
+    category: "Blog",
+    link: "/blog",
+    image: ""
   },
   {
-    id: 'blog-2',
-    title: 'Tips Sukses Menjalani Perkuliahan Online',
-    description: 'Panduan lengkap untuk mahasiswa dalam menghadapi perkuliahan online, termasuk manajemen waktu dan strategi belajar efektif.',
-    category: 'blog',
-    url: '/blog',
-    date: '10 Jan 2025'
+    id: "blog-2",
+    title: "Tips Sukses Menjalani Perkuliahan Daring",
+    description: "Strategi efektif untuk menghadapi perkuliahan online, manajemen waktu, dan tetap produktif di rumah.",
+    category: "Blog",
+    link: "/blog",
+    image: ""
   },
   {
-    id: 'blog-3',
-    title: 'Mengenal Sistem Kredit Semester (SKS) di Gunadarma',
-    description: 'Penjelasan detail tentang sistem SKS, cara menghitung IPK, dan tips memilih mata kuliah di Universitas Gunadarma.',
-    category: 'blog',
-    url: '/blog',
-    date: '5 Jan 2025'
+    id: "note-1",
+    title: "Catatan Perkuliahan Semester 1",
+    description: "Kumpulan catatan penting dari mata kuliah semester 1, termasuk algoritma, basis data, dan pemrograman.",
+    category: "Note",
+    link: "/notes",
+    image: ""
   },
   {
-    id: 'note-1',
-    title: 'Catatan Kuliah: Algoritma dan Pemrograman',
-    description: 'Kumpulan catatan penting mata kuliah Algoritma dan Pemrograman, struktur data, dan kompleksitas algoritma.',
-    category: 'note',
-    url: '/note',
-    date: '12 Jan 2025'
+    id: "note-2",
+    title: "Rangkuman Materi Ujian Akhir",
+    description: "Ringkasan lengkap materi ujian akhir semester ganjil 2025 untuk mata kuliah inti.",
+    category: "Note",
+    link: "/notes",
+    image: ""
   },
   {
-    id: 'note-2',
-    title: 'Rangkuman: Basis Data Terdistribusi',
-    description: 'Ringkasan materi Basis Data Terdistribusi, termasuk konsep CAP Theorem, replication, dan sharding.',
-    category: 'note',
-    url: '/note',
-    date: '8 Jan 2025'
+    id: "donasi-1",
+    title: "Donasi untuk Korban Bencana",
+    description: "Ayo bantu saudara kita yang terkena bencana dengan donasi melalui program peduli sesama.",
+    category: "Donasi",
+    link: "/donasi",
+    image: ""
   },
   {
-    id: 'donasi-1',
-    title: 'Program Donasi: Bantu Mahasiswa Kurang Mampu',
-    description: 'Donasi untuk membantu mahasiswa yang membutuhkan dukungan biaya pendidikan dan perlengkapan kuliah.',
-    category: 'donasi',
-    url: '/donasi',
-    date: '14 Jan 2025'
+    id: "donasi-2",
+    title: "Program Beasiswa Untuk Mahasiswa",
+    description: "Donasi untuk mendukung pendidikan mahasiswa kurang mampu melalui program beasiswa.",
+    category: "Donasi",
+    link: "/donasi",
+    image: ""
   },
   {
-    id: 'donasi-2',
-    title: 'Donasi Buku untuk Perpustakaan Kampus',
-    description: 'Kampanye donasi buku untuk memperkaya koleksi perpustakaan Universitas Gunadarma.',
-    category: 'donasi',
-    url: '/donasi',
-    date: '9 Jan 2025'
+    id: "calendar-1",
+    title: "Jadwal Ujian Semester Genap 2025",
+    description: "Jadwal lengkap ujian semester genap tahun akademik 2024/2025 untuk semua fakultas.",
+    category: "Calendar",
+    link: "/calendar",
+    image: ""
   },
   {
-    id: 'calendar-1',
-    title: 'Jadwal Ujian Akhir Semester Ganjil 2024/2025',
-    description: 'Informasi lengkap jadwal UAS ganjil tahun akademik 2024/2025 untuk semua fakultas di Gunadarma.',
-    category: 'calendar',
-    url: '/calendar',
-    date: '20 Jan 2025'
-  },
-  {
-    id: 'calendar-2',
-    title: 'Kalender Akademik 2025 - Semester Genap',
-    description: 'Kalender akademik resmi semester genap tahun 2025, termasuk tanggal penting dan deadline.',
-    category: 'calendar',
-    url: '/calendar',
-    date: '1 Jan 2025'
+    id: "calendar-2",
+    title: "Kalender Akademik 2025/2026",
+    description: "Informasi tanggal penting seperti jadwal kuliah, ujian, dan libur nasional tahun ajaran 2025/2026.",
+    category: "Calendar",
+    link: "/calendar",
+    image: ""
   }
 ];
 
@@ -486,12 +477,12 @@ export default function HomePage(): React.JSX.Element {
   const [noteInput, setNoteInput] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -526,43 +517,6 @@ export default function HomePage(): React.JSX.Element {
       senderName: "Menuru Official"
     }
   ];
-
-  // Search function
-  const performSearch = (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    const lowerQuery = query.toLowerCase();
-    const results = SEARCH_DATA.filter(item => 
-      item.title.toLowerCase().includes(lowerQuery) ||
-      item.description.toLowerCase().includes(lowerQuery)
-    );
-
-    setSearchResults(results);
-  };
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    performSearch(value);
-  };
-
-  // Handle search open/close
-  const handleSearchToggle = () => {
-    const newState = !isSearchOpen;
-    setIsSearchOpen(newState);
-    if (newState) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    } else {
-      setSearchQuery("");
-      setSearchResults([]);
-    }
-  };
 
   // Auth Listener
   useEffect(() => {
@@ -650,6 +604,49 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsubscribe();
   }, []);
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      setSelectedCategory("");
+      return;
+    }
+
+    const queryLower = searchQuery.toLowerCase();
+    const filtered = searchData.filter(item => {
+      const matchTitle = item.title.toLowerCase().includes(queryLower);
+      const matchDescription = item.description.toLowerCase().includes(queryLower);
+      const matchCategory = item.category.toLowerCase().includes(queryLower);
+      return matchTitle || matchDescription || matchCategory;
+    });
+
+    // Group by category
+    const grouped: { [key: string]: SearchItem[] } = {};
+    filtered.forEach(item => {
+      if (!grouped[item.category]) {
+        grouped[item.category] = [];
+      }
+      grouped[item.category].push(item);
+    });
+
+    // Sort results by relevance
+    const sortedResults: SearchItem[] = [];
+    const categoryOrder = ["Blog", "Note", "Donasi", "Calendar"];
+    categoryOrder.forEach(cat => {
+      if (grouped[cat]) {
+        sortedResults.push(...grouped[cat]);
+      }
+    });
+    // Add any remaining categories
+    Object.keys(grouped).forEach(cat => {
+      if (!categoryOrder.includes(cat)) {
+        sortedResults.push(...grouped[cat]);
+      }
+    });
+
+    setSearchResults(sortedResults);
+  }, [searchQuery]);
 
   // Click outside search
   useEffect(() => {
@@ -1347,26 +1344,6 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Group search results by category
-  const groupResultsByCategory = (results: SearchItem[]) => {
-    const grouped: Record<string, SearchItem[]> = {};
-    results.forEach(item => {
-      if (!grouped[item.category]) {
-        grouped[item.category] = [];
-      }
-      grouped[item.category].push(item);
-    });
-    return grouped;
-  };
-
-  // Category label mapping
-  const categoryLabels: Record<string, string> = {
-    blog: 'Blog',
-    note: 'Catatan',
-    donasi: 'Donasi',
-    calendar: 'Kalender'
-  };
-
   if (loading) {
     return (
       <div style={{
@@ -1426,7 +1403,7 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
-            gap: "0",
+            position: "relative",
           }}
         >
           <div
@@ -1442,11 +1419,11 @@ export default function HomePage(): React.JSX.Element {
           >
             {/* Search Icon */}
             <button
-              onClick={handleSearchToggle}
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
               style={{
                 background: "#c5e800",
                 border: "2px solid #c5e800",
-                borderRadius: isSearchOpen ? "12px 0 0 12px" : "12px",
+                borderRadius: "12px",
                 padding: "16px 18px",
                 cursor: "pointer",
                 display: "flex",
@@ -1465,7 +1442,7 @@ export default function HomePage(): React.JSX.Element {
                 borderTop: "2px solid #c5e800",
                 borderBottom: "2px solid #c5e800",
                 borderLeft: "2px solid #c5e800",
-                borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
+                borderRight: "2px solid #c5e800",
               }}
             >
               <SearchIcon />
@@ -1478,26 +1455,25 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   alignItems: "center",
                   backgroundColor: "#c5e800",
-                  borderRadius: "0 12px 12px 0",
+                  borderRadius: "12px",
                   padding: "0",
                   flex: 1,
                   minWidth: "280px",
-                  maxWidth: "500px",
+                  maxWidth: "450px",
                   position: "relative",
                   zIndex: 1,
                   height: "52px",
                   overflow: "hidden",
                   border: "2px solid #c5e800",
                   marginLeft: "-2px",
-                  borderLeft: "1px solid rgba(0,0,0,0.1)",
                 }}
               >
                 <input
-                  ref={searchInputRef}
                   type="text"
                   placeholder="What are you looking for?"
                   value={searchQuery}
-                  onChange={handleSearchChange}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
                   style={{
                     background: "transparent",
                     border: "none",
@@ -1505,7 +1481,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: "15px",
                     color: "#000",
                     fontFamily: "Inter, 'Inter Fallback'",
-                    padding: "10px 20px 10px 16px",
+                    padding: "10px 20px 10px 8px",
                     width: "100%",
                     minWidth: "230px",
                   }}
@@ -1514,62 +1490,68 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          {/* Search Results - muncul saat ada hasil pencarian */}
-          {isSearchOpen && searchQuery.trim() !== '' && (
+          {/* Search Results Dropdown */}
+          {isSearchOpen && searchResults.length > 0 && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 12px)",
+                top: "60px",
                 left: "0",
+                right: "0",
                 backgroundColor: "#ffffff",
                 borderRadius: "16px",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(0,0,0,0.06)",
-                padding: "8px 0",
-                maxWidth: "600px",
-                width: "100%",
-                maxHeight: "480px",
+                maxHeight: "500px",
                 overflowY: "auto",
-                zIndex: 20,
-                minWidth: "500px",
+                padding: "16px 0",
+                zIndex: 100,
+                width: "calc(100% + 60px)",
+                minWidth: "580px",
               }}
             >
-              {searchResults.length === 0 ? (
-                <div style={{ textAlign: "center", color: "#999", padding: "30px 20px", fontSize: "14px" }}>
-                  <div style={{ fontSize: "24px", marginBottom: "8px" }}>🔍</div>
-                  <div>Tidak ada hasil untuk "{searchQuery}"</div>
-                </div>
-              ) : (
-                Object.entries(groupResultsByCategory(searchResults)).map(([category, items]) => (
+              {(() => {
+                // Group results by category
+                const grouped = searchResults.reduce((acc, item) => {
+                  if (!acc[item.category]) {
+                    acc[item.category] = [];
+                  }
+                  acc[item.category].push(item);
+                  return acc;
+                }, {} as { [key: string]: SearchItem[] });
+
+                const categoryColors: { [key: string]: string } = {
+                  Blog: "#000",
+                  Note: "#0095f6",
+                  Donasi: "#ef4444",
+                  Calendar: "#8b5cf6"
+                };
+
+                return Object.entries(grouped).map(([category, items]) => (
                   <div key={category}>
-                    {/* Category Header */}
                     <div
                       style={{
-                        padding: "10px 20px 6px 20px",
-                        fontSize: "13px",
+                        padding: "6px 24px",
+                        fontSize: "12px",
                         fontWeight: 600,
-                        color: "#666",
+                        color: categoryColors[category] || "#666",
+                        letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        borderBottom: "1px solid #f0f0f0",
-                        marginBottom: "4px",
                       }}
                     >
-                      {categoryLabels[category] || category}
+                      {category}
                     </div>
-                    
-                    {/* Items */}
                     {items.map((item) => (
                       <a
                         key={item.id}
-                        href={item.url}
+                        href={item.link}
                         style={{
                           display: "block",
-                          padding: "10px 20px",
+                          padding: "12px 24px",
                           textDecoration: "none",
-                          color: "#000",
-                          transition: "all 0.15s ease",
-                          borderBottom: "1px solid #f8f8f8",
+                          transition: "background-color 0.15s ease",
+                          cursor: "pointer",
+                          borderBottom: "1px solid rgba(0,0,0,0.03)",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "#f5f5f5";
@@ -1578,35 +1560,59 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.backgroundColor = "transparent";
                         }}
                       >
-                        <div style={{ 
-                          fontSize: "15px", 
-                          fontWeight: 500, 
-                          color: "#000",
-                          marginBottom: "2px",
-                        }}>
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            color: "#000",
+                            marginBottom: "4px",
+                            lineHeight: 1.4,
+                          }}
+                        >
                           {item.title}
                         </div>
-                        <div style={{ 
-                          fontSize: "13px", 
-                          color: "#666", 
-                          lineHeight: 1.5,
-                        }}>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#666",
+                            lineHeight: 1.5,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
                           {item.description}
                         </div>
-                        {item.date && (
-                          <div style={{ 
-                            fontSize: "11px", 
-                            color: "#aaa", 
-                            marginTop: "4px",
-                          }}>
-                            {item.date}
-                          </div>
-                        )}
                       </a>
                     ))}
                   </div>
-                ))
-              )}
+                ));
+              })()}
+            </div>
+          )}
+
+          {isSearchOpen && searchQuery.trim() !== "" && searchResults.length === 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "60px",
+                left: "0",
+                right: "0",
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(0,0,0,0.06)",
+                padding: "24px",
+                zIndex: 100,
+                textAlign: "center",
+                color: "#999",
+                fontSize: "14px",
+                width: "calc(100% + 60px)",
+                minWidth: "580px",
+              }}
+            >
+              Tidak ada hasil untuk "{searchQuery}"
             </div>
           )}
         </div>
