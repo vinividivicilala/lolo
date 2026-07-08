@@ -167,6 +167,20 @@ const EditIcon = () => (
   </svg>
 );
 
+// Play Icon
+const PlayIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+// Pause Icon
+const PauseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+  </svg>
+);
+
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -394,33 +408,60 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Spotify Widget Data
+  // Music Widget State
   const [currentTrack, setCurrentTrack] = useState({
     artist: "Billie Eilish",
     title: "BIRDS OF A FEATHER",
   });
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const musicIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Simulasi pergantian lagu setiap 10 detik
+  // Daftar lagu - hanya 1 artist dan 1 lagu per tampilan
+  const tracks = [
+    { artist: "Billie Eilish", title: "BIRDS OF A FEATHER" },
+    { artist: "Taylor Swift", title: "Fortnight feat. Post Malone" },
+    { artist: "Olivia Rodrigo", title: "good 4 u" },
+    { artist: "Ariana Grande", title: "we can't be friends" },
+    { artist: "Sabrina Carpenter", title: "Espresso" },
+    { artist: "The Weeknd", title: "Blinding Lights" },
+    { artist: "Doja Cat", title: "Paint The Town Red" },
+    { artist: "Dua Lipa", title: "Houdini" },
+  ];
+
+  // Fungsi untuk mengganti lagu
+  const nextTrack = () => {
+    const nextIndex = (currentTrackIndex + 1) % tracks.length;
+    setCurrentTrackIndex(nextIndex);
+    setCurrentTrack(tracks[nextIndex]);
+    setIsPlaying(true);
+  };
+
+  // Fungsi toggle play/pause
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  // Auto play interval - ganti lagu setiap 10 detik
   useEffect(() => {
-    const tracks = [
-      { artist: "Billie Eilish", title: "BIRDS OF A FEATHER" },
-      { artist: "Taylor Swift", title: "Fortnight feat. Post Malone" },
-      { artist: "Olivia Rodrigo", title: "good 4 u" },
-      { artist: "Ariana Grande", title: "we can't be friends" },
-      { artist: "Sabrina Carpenter", title: "Espresso" },
-      { artist: "The Weeknd", title: "Blinding Lights" },
-      { artist: "Doja Cat", title: "Paint The Town Red" },
-      { artist: "Dua Lipa", title: "Houdini" },
-    ];
+    if (isPlaying) {
+      musicIntervalRef.current = setInterval(() => {
+        nextTrack();
+      }, 10000);
+    } else {
+      if (musicIntervalRef.current) {
+        clearInterval(musicIntervalRef.current);
+        musicIntervalRef.current = null;
+      }
+    }
 
-    let index = 0;
-    const interval = setInterval(() => {
-      index = (index + 1) % tracks.length;
-      setCurrentTrack(tracks[index]);
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (musicIntervalRef.current) {
+        clearInterval(musicIntervalRef.current);
+        musicIntervalRef.current = null;
+      }
+    };
+  }, [isPlaying, currentTrackIndex]);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1266,42 +1307,55 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Tanpa Logo, BG Putih, Teks Hitam */}
+        {/* Music Widget - Background besar, foto besar, teks besar */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
-            padding: "6px 16px 6px 6px",
+            gap: "14px",
+            padding: "10px 20px 10px 10px",
             backgroundColor: "#ffffff",
             borderRadius: "60px",
             border: "1px solid #e0e0e0",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
             transition: "all 0.3s ease",
-            cursor: "pointer",
-            maxWidth: "240px",
+            maxWidth: "320px",
+            minHeight: "56px",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)";
+            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+            e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
           }}
         >
-          {/* Kotak kecil di sisi kiri - foto artis */}
+          {/* Foto Artis - Lebih besar dengan fungsi play/pause */}
           <div
+            onClick={togglePlay}
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
+              width: "48px",
+              height: "48px",
+              borderRadius: "12px",
               overflow: "hidden",
               flexShrink: 0,
               backgroundColor: "#f0f0f0",
               border: "1px solid #e8e8e8",
+              cursor: "pointer",
+              position: "relative",
+              transition: "transform 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
             }}
           >
             <img
-              src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=32&font-size=0.5`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentTrack.artist)}&background=000000&color=ffffff&size=64&font-size=0.5`}
               alt={currentTrack.artist}
               style={{
                 width: "100%",
@@ -1309,12 +1363,41 @@ export default function HomePage(): React.JSX.Element {
                 objectFit: "cover",
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23f0f0f0'/%3E%3Ctext x='16' y='20' text-anchor='middle' font-size='14' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
+                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23f0f0f0'/%3E%3Ctext x='24' y='30' text-anchor='middle' font-size='20' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
               }}
             />
+            {/* Overlay play/pause icon */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: 0,
+                transition: "opacity 0.3s ease",
+                borderRadius: "12px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "0";
+              }}
+            >
+              {isPlaying ? (
+                <PauseIcon />
+              ) : (
+                <PlayIcon />
+              )}
+            </div>
           </div>
 
-          {/* Info Lagu - Teks Berjalan */}
+          {/* Info Lagu - Teks lebih besar */}
           <div
             style={{
               flex: 1,
@@ -1340,18 +1423,15 @@ export default function HomePage(): React.JSX.Element {
                 <div
                   style={{
                     display: "inline-block",
-                    animation: "marquee 10s linear infinite",
-                    paddingLeft: "100%",
-                    fontSize: "13px",
+                    animation: isPlaying ? "marquee 12s linear infinite" : "none",
+                    paddingLeft: isPlaying ? "100%" : "0",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
                     letterSpacing: "-0.01em",
                   }}
                 >
                   {currentTrack.artist} - {currentTrack.title}
-                  <span style={{ paddingLeft: "50px", color: "#ccc" }}>
-                    ●
-                  </span>
                 </div>
               </div>
             </div>
