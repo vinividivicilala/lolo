@@ -99,6 +99,120 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
+// Search Data Interface
+interface SearchItem {
+  id: string;
+  title: string;
+  description: string;
+  category: 'blog' | 'note' | 'donasi' | 'calendar' | 'event' | 'lainnya';
+  url: string;
+  icon?: string;
+  date?: string;
+}
+
+// Search Data
+const SEARCH_DATA: SearchItem[] = [
+  {
+    id: 'blog-1',
+    title: 'Bagaimana Rasanya Masuk Kuliah Di Universitas Gunadarma',
+    description: 'Pengalaman pertama masuk kuliah di Universitas Gunadarma, dari proses pendaftaran hingga hari pertama perkuliahan. Simak cerita lengkapnya!',
+    category: 'blog',
+    url: '/blog',
+    icon: '📚',
+    date: '15 Jan 2025'
+  },
+  {
+    id: 'blog-2',
+    title: 'Tips Sukses Menjalani Perkuliahan Online',
+    description: 'Panduan lengkap untuk mahasiswa dalam menghadapi perkuliahan online, termasuk manajemen waktu dan strategi belajar efektif.',
+    category: 'blog',
+    url: '/blog',
+    icon: '💻',
+    date: '10 Jan 2025'
+  },
+  {
+    id: 'blog-3',
+    title: 'Mengenal Sistem Kredit Semester (SKS) di Gunadarma',
+    description: 'Penjelasan detail tentang sistem SKS, cara menghitung IPK, dan tips memilih mata kuliah di Universitas Gunadarma.',
+    category: 'blog',
+    url: '/blog',
+    icon: '📊',
+    date: '5 Jan 2025'
+  },
+  {
+    id: 'note-1',
+    title: 'Catatan Kuliah: Algoritma dan Pemrograman',
+    description: 'Kumpulan catatan penting mata kuliah Algoritma dan Pemrograman, struktur data, dan kompleksitas algoritma.',
+    category: 'note',
+    url: '/note',
+    icon: '📝',
+    date: '12 Jan 2025'
+  },
+  {
+    id: 'note-2',
+    title: 'Rangkuman: Basis Data Terdistribusi',
+    description: 'Ringkasan materi Basis Data Terdistribusi, termasuk konsep CAP Theorem, replication, dan sharding.',
+    category: 'note',
+    url: '/note',
+    icon: '🗃️',
+    date: '8 Jan 2025'
+  },
+  {
+    id: 'donasi-1',
+    title: 'Program Donasi: Bantu Mahasiswa Kurang Mampu',
+    description: 'Donasi untuk membantu mahasiswa yang membutuhkan dukungan biaya pendidikan dan perlengkapan kuliah.',
+    category: 'donasi',
+    url: '/donasi',
+    icon: '❤️',
+    date: '14 Jan 2025'
+  },
+  {
+    id: 'donasi-2',
+    title: 'Donasi Buku untuk Perpustakaan Kampus',
+    description: 'Kampanye donasi buku untuk memperkaya koleksi perpustakaan Universitas Gunadarma.',
+    category: 'donasi',
+    url: '/donasi',
+    icon: '📖',
+    date: '9 Jan 2025'
+  },
+  {
+    id: 'calendar-1',
+    title: 'Jadwal Ujian Akhir Semester Ganjil 2024/2025',
+    description: 'Informasi lengkap jadwal UAS ganjil tahun akademik 2024/2025 untuk semua fakultas di Gunadarma.',
+    category: 'calendar',
+    url: '/calendar',
+    icon: '📅',
+    date: '20 Jan 2025'
+  },
+  {
+    id: 'calendar-2',
+    title: 'Kalender Akademik 2025 - Semester Genap',
+    description: 'Kalender akademik resmi semester genap tahun 2025, termasuk tanggal penting dan deadline.',
+    category: 'calendar',
+    url: '/calendar',
+    icon: '🗓️',
+    date: '1 Jan 2025'
+  },
+  {
+    id: 'event-1',
+    title: 'Workshop: Web Development dengan React JS',
+    description: 'Workshop intensif pengembangan web menggunakan React JS, dibimbing oleh developer berpengalaman.',
+    category: 'event',
+    url: '/event',
+    icon: '🎯',
+    date: '25 Jan 2025'
+  },
+  {
+    id: 'event-2',
+    title: 'Seminar Nasional: Teknologi AI untuk Pendidikan',
+    description: 'Seminar tentang penerapan AI dalam dunia pendidikan, menghadirkan pembicara dari berbagai universitas.',
+    category: 'event',
+    url: '/event',
+    icon: '🎤',
+    date: '18 Jan 2025'
+  }
+];
+
 // SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -400,10 +514,13 @@ export default function HomePage(): React.JSX.Element {
   const [noteInput, setNoteInput] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -438,6 +555,71 @@ export default function HomePage(): React.JSX.Element {
       senderName: "Menuru Official"
     }
   ];
+
+  // Category labels and icons
+  const categoryLabels: Record<string, { label: string; icon: string }> = {
+    all: { label: 'Semua', icon: '🔍' },
+    blog: { label: 'Blog', icon: '📚' },
+    note: { label: 'Catatan', icon: '📝' },
+    donasi: { label: 'Donasi', icon: '❤️' },
+    calendar: { label: 'Kalender', icon: '📅' },
+    event: { label: 'Event', icon: '🎯' },
+    lainnya: { label: 'Lainnya', icon: '📌' }
+  };
+
+  // Search function
+  const performSearch = (query: string, category: string) => {
+    if (!query.trim() && category === 'all') {
+      setSearchResults([]);
+      return;
+    }
+
+    let results = SEARCH_DATA;
+
+    // Filter by category
+    if (category !== 'all') {
+      results = results.filter(item => item.category === category);
+    }
+
+    // Filter by search query
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      results = results.filter(item => 
+        item.title.toLowerCase().includes(lowerQuery) ||
+        item.description.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    setSearchResults(results);
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    performSearch(value, selectedCategory);
+  };
+
+  // Handle category change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    performSearch(searchQuery, category);
+  };
+
+  // Handle search open/close
+  const handleSearchToggle = () => {
+    const newState = !isSearchOpen;
+    setIsSearchOpen(newState);
+    if (newState) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    } else {
+      setSearchQuery("");
+      setSearchResults([]);
+      setSelectedCategory("all");
+    }
+  };
 
   // Auth Listener
   useEffect(() => {
@@ -532,6 +714,8 @@ export default function HomePage(): React.JSX.Element {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
         setSearchQuery("");
+        setSearchResults([]);
+        setSelectedCategory("all");
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1257,7 +1441,7 @@ export default function HomePage(): React.JSX.Element {
           left: "40px",
           zIndex: 10,
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           gap: "16px",
         }}
         ref={searchRef}
@@ -1278,86 +1462,246 @@ export default function HomePage(): React.JSX.Element {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            backgroundColor: "transparent",
-            padding: "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: "8px",
           }}
         >
-          {/* Search Icon - Border radius FULL dengan ruang kosong di dalam */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
+          <div
             style={{
-              background: "#c5e800",
-              border: "2px solid #c5e800",
-              borderRadius: "12px",
-              padding: "16px 18px",
-              cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
+              backgroundColor: "transparent",
+              padding: "0",
+              transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              gap: "0",
               position: "relative",
-              zIndex: 2,
-              width: "auto",
-              height: "52px",
-              flexShrink: 0,
-              // Ruang kosong di dalam border icon (padding)
-              paddingLeft: "18px",
-              paddingRight: "18px",
-              // Menyatu dengan input di tengah
-              marginRight: isSearchOpen ? "-2px" : "0",
-              borderTop: "2px solid #c5e800",
-              borderBottom: "2px solid #c5e800",
-              borderLeft: "2px solid #c5e800",
-              borderRight: "2px solid #c5e800",
             }}
           >
-            <SearchIcon />
-          </button>
-          
-          {/* Input Search - Border radius FULL dengan ruang kosong di dalam */}
+            {/* Search Icon */}
+            <button
+              onClick={handleSearchToggle}
+              style={{
+                background: "#c5e800",
+                border: "2px solid #c5e800",
+                borderRadius: "12px",
+                padding: "16px 18px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.3s ease",
+                color: "#000",
+                position: "relative",
+                zIndex: 2,
+                width: "auto",
+                height: "52px",
+                flexShrink: 0,
+                paddingLeft: "18px",
+                paddingRight: "18px",
+                marginRight: isSearchOpen ? "-2px" : "0",
+                borderTop: "2px solid #c5e800",
+                borderBottom: "2px solid #c5e800",
+                borderLeft: "2px solid #c5e800",
+                borderRight: "2px solid #c5e800",
+              }}
+            >
+              <SearchIcon />
+            </button>
+            
+            {/* Input Search */}
+            {isSearchOpen && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: "#c5e800",
+                  borderRadius: "12px",
+                  padding: "0",
+                  flex: 1,
+                  minWidth: "280px",
+                  maxWidth: "450px",
+                  position: "relative",
+                  zIndex: 1,
+                  height: "52px",
+                  overflow: "hidden",
+                  border: "2px solid #c5e800",
+                  marginLeft: "-2px",
+                }}
+              >
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="What are you looking for?"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    fontSize: "15px",
+                    color: "#000",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    padding: "10px 20px 10px 8px",
+                    width: "100%",
+                    minWidth: "230px",
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Category Filter - muncul saat search open */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "12px",
-                padding: "0",
-                flex: 1,
-                minWidth: "280px",
-                maxWidth: "450px",
-                position: "relative",
-                zIndex: 1,
-                height: "52px",
-                overflow: "hidden",
-                border: "2px solid #c5e800",
-                marginLeft: "-2px",
+                gap: "6px",
+                flexWrap: "wrap",
+                padding: "4px 0",
+                backgroundColor: "transparent",
+                maxWidth: "500px",
               }}
             >
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "15px",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  // Ruang kosong di dalam border input (padding)
-                  padding: "10px 20px 10px 8px",
-                  width: "100%",
-                  minWidth: "230px",
-                }}
-              />
+              {Object.entries(categoryLabels).map(([key, { label, icon }]) => (
+                <button
+                  key={key}
+                  onClick={() => handleCategoryChange(key)}
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    border: selectedCategory === key ? "2px solid #c5e800" : "1px solid #e0e0e0",
+                    backgroundColor: selectedCategory === key ? "#c5e800" : "transparent",
+                    color: selectedCategory === key ? "#000" : "#666",
+                    fontSize: "12px",
+                    fontWeight: selectedCategory === key ? 600 : 400,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== key) {
+                      e.currentTarget.style.borderColor = "#c5e800";
+                      e.currentTarget.style.backgroundColor = "rgba(197,232,0,0.1)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== key) {
+                      e.currentTarget.style.borderColor = "#e0e0e0";
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Search Results - muncul saat ada hasil pencarian */}
+          {isSearchOpen && (searchResults.length > 0 || searchQuery.trim() !== '') && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 12px)",
+                left: 0,
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+                border: "1px solid rgba(0,0,0,0.06)",
+                padding: "16px 20px",
+                maxWidth: "550px",
+                width: "100%",
+                maxHeight: "400px",
+                overflowY: "auto",
+                zIndex: 20,
+                minWidth: "450px",
+              }}
+            >
+              {searchResults.length === 0 && searchQuery.trim() !== '' ? (
+                <div style={{ textAlign: "center", color: "#999", padding: "20px 0", fontSize: "14px" }}>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔍</div>
+                  <div>Tidak ada hasil untuk "{searchQuery}"</div>
+                  <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
+                    Coba kata kunci lain atau pilih kategori
+                  </div>
+                </div>
+              ) : (
+                searchResults.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    style={{
+                      display: "block",
+                      padding: "12px 14px",
+                      borderRadius: "12px",
+                      textDecoration: "none",
+                      color: "#000",
+                      transition: "all 0.2s ease",
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateX(4px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.transform = "translateX(0)";
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                      <div style={{ fontSize: "20px", flexShrink: 0 }}>{item.icon || "📄"}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ 
+                            fontSize: "14px", 
+                            fontWeight: 600, 
+                            color: "#000",
+                          }}>
+                            {item.title}
+                          </span>
+                          <span style={{
+                            fontSize: "9px",
+                            backgroundColor: "#c5e800",
+                            color: "#000",
+                            padding: "2px 8px",
+                            borderRadius: "10px",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}>
+                            {categoryLabels[item.category]?.label || item.category}
+                          </span>
+                        </div>
+                        <div style={{ 
+                          fontSize: "13px", 
+                          color: "#666", 
+                          marginTop: "4px",
+                          lineHeight: 1.5,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}>
+                          {item.description}
+                        </div>
+                        {item.date && (
+                          <div style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
+                            📅 {item.date}
+                          </div>
+                        )}
+                        <div style={{ fontSize: "11px", color: "#c5e800", marginTop: "4px" }}>
+                          Klik untuk membaca →
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))
+              )}
             </div>
           )}
         </div>
