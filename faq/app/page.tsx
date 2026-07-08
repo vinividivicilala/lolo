@@ -104,9 +104,8 @@ interface SearchItem {
   id: string;
   title: string;
   description: string;
-  category: 'blog' | 'note' | 'donasi' | 'calendar' | 'event' | 'lainnya';
+  category: 'blog' | 'note' | 'donasi' | 'calendar';
   url: string;
-  icon?: string;
   date?: string;
 }
 
@@ -118,7 +117,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Pengalaman pertama masuk kuliah di Universitas Gunadarma, dari proses pendaftaran hingga hari pertama perkuliahan. Simak cerita lengkapnya!',
     category: 'blog',
     url: '/blog',
-    icon: '📚',
     date: '15 Jan 2025'
   },
   {
@@ -127,7 +125,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Panduan lengkap untuk mahasiswa dalam menghadapi perkuliahan online, termasuk manajemen waktu dan strategi belajar efektif.',
     category: 'blog',
     url: '/blog',
-    icon: '💻',
     date: '10 Jan 2025'
   },
   {
@@ -136,7 +133,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Penjelasan detail tentang sistem SKS, cara menghitung IPK, dan tips memilih mata kuliah di Universitas Gunadarma.',
     category: 'blog',
     url: '/blog',
-    icon: '📊',
     date: '5 Jan 2025'
   },
   {
@@ -145,7 +141,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Kumpulan catatan penting mata kuliah Algoritma dan Pemrograman, struktur data, dan kompleksitas algoritma.',
     category: 'note',
     url: '/note',
-    icon: '📝',
     date: '12 Jan 2025'
   },
   {
@@ -154,7 +149,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Ringkasan materi Basis Data Terdistribusi, termasuk konsep CAP Theorem, replication, dan sharding.',
     category: 'note',
     url: '/note',
-    icon: '🗃️',
     date: '8 Jan 2025'
   },
   {
@@ -163,7 +157,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Donasi untuk membantu mahasiswa yang membutuhkan dukungan biaya pendidikan dan perlengkapan kuliah.',
     category: 'donasi',
     url: '/donasi',
-    icon: '❤️',
     date: '14 Jan 2025'
   },
   {
@@ -172,7 +165,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Kampanye donasi buku untuk memperkaya koleksi perpustakaan Universitas Gunadarma.',
     category: 'donasi',
     url: '/donasi',
-    icon: '📖',
     date: '9 Jan 2025'
   },
   {
@@ -181,7 +173,6 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Informasi lengkap jadwal UAS ganjil tahun akademik 2024/2025 untuk semua fakultas di Gunadarma.',
     category: 'calendar',
     url: '/calendar',
-    icon: '📅',
     date: '20 Jan 2025'
   },
   {
@@ -190,26 +181,7 @@ const SEARCH_DATA: SearchItem[] = [
     description: 'Kalender akademik resmi semester genap tahun 2025, termasuk tanggal penting dan deadline.',
     category: 'calendar',
     url: '/calendar',
-    icon: '🗓️',
     date: '1 Jan 2025'
-  },
-  {
-    id: 'event-1',
-    title: 'Workshop: Web Development dengan React JS',
-    description: 'Workshop intensif pengembangan web menggunakan React JS, dibimbing oleh developer berpengalaman.',
-    category: 'event',
-    url: '/event',
-    icon: '🎯',
-    date: '25 Jan 2025'
-  },
-  {
-    id: 'event-2',
-    title: 'Seminar Nasional: Teknologi AI untuk Pendidikan',
-    description: 'Seminar tentang penerapan AI dalam dunia pendidikan, menghadirkan pembicara dari berbagai universitas.',
-    category: 'event',
-    url: '/event',
-    icon: '🎤',
-    date: '18 Jan 2025'
   }
 ];
 
@@ -515,7 +487,6 @@ export default function HomePage(): React.JSX.Element {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -556,39 +527,18 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Category labels and icons
-  const categoryLabels: Record<string, { label: string; icon: string }> = {
-    all: { label: 'Semua', icon: '🔍' },
-    blog: { label: 'Blog', icon: '📚' },
-    note: { label: 'Catatan', icon: '📝' },
-    donasi: { label: 'Donasi', icon: '❤️' },
-    calendar: { label: 'Kalender', icon: '📅' },
-    event: { label: 'Event', icon: '🎯' },
-    lainnya: { label: 'Lainnya', icon: '📌' }
-  };
-
   // Search function
-  const performSearch = (query: string, category: string) => {
-    if (!query.trim() && category === 'all') {
+  const performSearch = (query: string) => {
+    if (!query.trim()) {
       setSearchResults([]);
       return;
     }
 
-    let results = SEARCH_DATA;
-
-    // Filter by category
-    if (category !== 'all') {
-      results = results.filter(item => item.category === category);
-    }
-
-    // Filter by search query
-    if (query.trim()) {
-      const lowerQuery = query.toLowerCase();
-      results = results.filter(item => 
-        item.title.toLowerCase().includes(lowerQuery) ||
-        item.description.toLowerCase().includes(lowerQuery)
-      );
-    }
+    const lowerQuery = query.toLowerCase();
+    const results = SEARCH_DATA.filter(item => 
+      item.title.toLowerCase().includes(lowerQuery) ||
+      item.description.toLowerCase().includes(lowerQuery)
+    );
 
     setSearchResults(results);
   };
@@ -597,13 +547,7 @@ export default function HomePage(): React.JSX.Element {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    performSearch(value, selectedCategory);
-  };
-
-  // Handle category change
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    performSearch(searchQuery, category);
+    performSearch(value);
   };
 
   // Handle search open/close
@@ -617,7 +561,6 @@ export default function HomePage(): React.JSX.Element {
     } else {
       setSearchQuery("");
       setSearchResults([]);
-      setSelectedCategory("all");
     }
   };
 
@@ -715,7 +658,6 @@ export default function HomePage(): React.JSX.Element {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
-        setSelectedCategory("all");
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1405,6 +1347,26 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Group search results by category
+  const groupResultsByCategory = (results: SearchItem[]) => {
+    const grouped: Record<string, SearchItem[]> = {};
+    results.forEach(item => {
+      if (!grouped[item.category]) {
+        grouped[item.category] = [];
+      }
+      grouped[item.category].push(item);
+    });
+    return grouped;
+  };
+
+  // Category label mapping
+  const categoryLabels: Record<string, string> = {
+    blog: 'Blog',
+    note: 'Catatan',
+    donasi: 'Donasi',
+    calendar: 'Kalender'
+  };
+
   if (loading) {
     return (
       <div style={{
@@ -1464,7 +1426,7 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
-            gap: "8px",
+            gap: "0",
           }}
         >
           <div
@@ -1484,7 +1446,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 background: "#c5e800",
                 border: "2px solid #c5e800",
-                borderRadius: "12px",
+                borderRadius: isSearchOpen ? "12px 0 0 12px" : "12px",
                 padding: "16px 18px",
                 cursor: "pointer",
                 display: "flex",
@@ -1503,7 +1465,7 @@ export default function HomePage(): React.JSX.Element {
                 borderTop: "2px solid #c5e800",
                 borderBottom: "2px solid #c5e800",
                 borderLeft: "2px solid #c5e800",
-                borderRight: "2px solid #c5e800",
+                borderRight: isSearchOpen ? "2px solid #c5e800" : "2px solid #c5e800",
               }}
             >
               <SearchIcon />
@@ -1516,17 +1478,18 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   alignItems: "center",
                   backgroundColor: "#c5e800",
-                  borderRadius: "12px",
+                  borderRadius: "0 12px 12px 0",
                   padding: "0",
                   flex: 1,
                   minWidth: "280px",
-                  maxWidth: "450px",
+                  maxWidth: "500px",
                   position: "relative",
                   zIndex: 1,
                   height: "52px",
                   overflow: "hidden",
                   border: "2px solid #c5e800",
                   marginLeft: "-2px",
+                  borderLeft: "1px solid rgba(0,0,0,0.1)",
                 }}
               >
                 <input
@@ -1542,7 +1505,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: "15px",
                     color: "#000",
                     fontFamily: "Inter, 'Inter Fallback'",
-                    padding: "10px 20px 10px 8px",
+                    padding: "10px 20px 10px 16px",
                     width: "100%",
                     minWidth: "230px",
                   }}
@@ -1551,155 +1514,97 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          {/* Category Filter - muncul saat search open */}
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                gap: "6px",
-                flexWrap: "wrap",
-                padding: "4px 0",
-                backgroundColor: "transparent",
-                maxWidth: "500px",
-              }}
-            >
-              {Object.entries(categoryLabels).map(([key, { label, icon }]) => (
-                <button
-                  key={key}
-                  onClick={() => handleCategoryChange(key)}
-                  style={{
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                    border: selectedCategory === key ? "2px solid #c5e800" : "1px solid #e0e0e0",
-                    backgroundColor: selectedCategory === key ? "#c5e800" : "transparent",
-                    color: selectedCategory === key ? "#000" : "#666",
-                    fontSize: "12px",
-                    fontWeight: selectedCategory === key ? 600 : 400,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedCategory !== key) {
-                      e.currentTarget.style.borderColor = "#c5e800";
-                      e.currentTarget.style.backgroundColor = "rgba(197,232,0,0.1)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedCategory !== key) {
-                      e.currentTarget.style.borderColor = "#e0e0e0";
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }
-                  }}
-                >
-                  <span>{icon}</span>
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* Search Results - muncul saat ada hasil pencarian */}
-          {isSearchOpen && (searchResults.length > 0 || searchQuery.trim() !== '') && (
+          {isSearchOpen && searchQuery.trim() !== '' && (
             <div
               style={{
                 position: "absolute",
                 top: "calc(100% + 12px)",
-                left: 0,
+                left: "0",
                 backgroundColor: "#ffffff",
                 borderRadius: "16px",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
                 border: "1px solid rgba(0,0,0,0.06)",
-                padding: "16px 20px",
-                maxWidth: "550px",
+                padding: "8px 0",
+                maxWidth: "600px",
                 width: "100%",
-                maxHeight: "400px",
+                maxHeight: "480px",
                 overflowY: "auto",
                 zIndex: 20,
-                minWidth: "450px",
+                minWidth: "500px",
               }}
             >
-              {searchResults.length === 0 && searchQuery.trim() !== '' ? (
-                <div style={{ textAlign: "center", color: "#999", padding: "20px 0", fontSize: "14px" }}>
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔍</div>
+              {searchResults.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#999", padding: "30px 20px", fontSize: "14px" }}>
+                  <div style={{ fontSize: "24px", marginBottom: "8px" }}>🔍</div>
                   <div>Tidak ada hasil untuk "{searchQuery}"</div>
-                  <div style={{ fontSize: "12px", marginTop: "4px", color: "#ccc" }}>
-                    Coba kata kunci lain atau pilih kategori
-                  </div>
                 </div>
               ) : (
-                searchResults.map((item) => (
-                  <a
-                    key={item.id}
-                    href={item.url}
-                    style={{
-                      display: "block",
-                      padding: "12px 14px",
-                      borderRadius: "12px",
-                      textDecoration: "none",
-                      color: "#000",
-                      transition: "all 0.2s ease",
-                      borderBottom: "1px solid #f0f0f0",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                      e.currentTarget.style.transform = "translateX(4px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.transform = "translateX(0)";
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                      <div style={{ fontSize: "20px", flexShrink: 0 }}>{item.icon || "📄"}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                          <span style={{ 
-                            fontSize: "14px", 
-                            fontWeight: 600, 
-                            color: "#000",
-                          }}>
-                            {item.title}
-                          </span>
-                          <span style={{
-                            fontSize: "9px",
-                            backgroundColor: "#c5e800",
-                            color: "#000",
-                            padding: "2px 8px",
-                            borderRadius: "10px",
-                            fontWeight: 600,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}>
-                            {categoryLabels[item.category]?.label || item.category}
-                          </span>
+                Object.entries(groupResultsByCategory(searchResults)).map(([category, items]) => (
+                  <div key={category}>
+                    {/* Category Header */}
+                    <div
+                      style={{
+                        padding: "10px 20px 6px 20px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "#666",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        borderBottom: "1px solid #f0f0f0",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {categoryLabels[category] || category}
+                    </div>
+                    
+                    {/* Items */}
+                    {items.map((item) => (
+                      <a
+                        key={item.id}
+                        href={item.url}
+                        style={{
+                          display: "block",
+                          padding: "10px 20px",
+                          textDecoration: "none",
+                          color: "#000",
+                          transition: "all 0.15s ease",
+                          borderBottom: "1px solid #f8f8f8",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        <div style={{ 
+                          fontSize: "15px", 
+                          fontWeight: 500, 
+                          color: "#000",
+                          marginBottom: "2px",
+                        }}>
+                          {item.title}
                         </div>
                         <div style={{ 
                           fontSize: "13px", 
                           color: "#666", 
-                          marginTop: "4px",
                           lineHeight: 1.5,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
                         }}>
                           {item.description}
                         </div>
                         {item.date && (
-                          <div style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
-                            📅 {item.date}
+                          <div style={{ 
+                            fontSize: "11px", 
+                            color: "#aaa", 
+                            marginTop: "4px",
+                          }}>
+                            {item.date}
                           </div>
                         )}
-                        <div style={{ fontSize: "11px", color: "#c5e800", marginTop: "4px" }}>
-                          Klik untuk membaca →
-                        </div>
-                      </div>
-                    </div>
-                  </a>
+                      </a>
+                    ))}
+                  </div>
                 ))
               )}
             </div>
