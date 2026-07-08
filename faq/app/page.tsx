@@ -410,7 +410,7 @@ export default function HomePage(): React.JSX.Element {
   });
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Daftar lagu
+  // Daftar lagu Feast
   const tracks: Track[] = [
     { id: "feast-nina", artist: "Feast", title: "Nina" },
     { id: "feast-kami-belum-tentu", artist: "Feast", title: "Kami Belum Tentu" },
@@ -430,12 +430,12 @@ export default function HomePage(): React.JSX.Element {
     setShowMusicDropdown(false);
   };
 
-  // Fungsi toggle play/pause
+  // Toggle play/pause
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Close dropdown
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (musicDropdownRef.current && !musicDropdownRef.current.contains(event.target as Node)) {
@@ -1290,22 +1290,22 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Kotak Besar dengan Font 90px */}
+        {/* Music Widget - Kotak besar, font 30px, lebar ke kiri */}
         <div style={{ position: "relative" }} ref={musicDropdownRef}>
           <div
             onClick={() => setShowMusicDropdown(!showMusicDropdown)}
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              padding: "20px 32px",
+              justifyContent: "space-between",
+              padding: "16px 24px",
               backgroundColor: "#ffffff",
               borderRadius: "16px",
               border: "1px solid #e0e0e0",
               boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
               transition: "all 0.3s ease",
-              minWidth: "320px",
-              minHeight: "80px",
+              minWidth: "380px",
+              minHeight: "72px",
               cursor: "pointer",
             }}
             onMouseEnter={(e) => {
@@ -1315,46 +1315,51 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
             }}
           >
-            <div
+            <span
               style={{
-                fontSize: "90px",
-                fontWeight: 700,
+                fontSize: "30px",
+                fontWeight: 600,
                 color: "#000000",
                 letterSpacing: "-0.02em",
-                lineHeight: 1,
-                textAlign: "center",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                maxWidth: "100%",
               }}
             >
-              {currentTrack.title}
-            </div>
+              {currentTrack.artist} - {currentTrack.title}
+            </span>
+            <span
+              style={{
+                fontSize: "14px",
+                color: "#999",
+                fontWeight: 400,
+                marginLeft: "16px",
+                flexShrink: 0,
+              }}
+            >
+              {isPlaying ? "⏸" : "▶"}
+            </span>
           </div>
 
-          {/* Dropdown Daftar Lagu - Lebar ke samping kiri dan kanan */}
+          {/* Dropdown Daftar Lagu - Kotak besar, lebar penuh */}
           {showMusicDropdown && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 12px)",
-                left: "-20px",
-                right: "-20px",
+                top: "calc(100% + 8px)",
+                right: 0,
+                left: 0,
                 backgroundColor: "#ffffff",
                 borderRadius: "16px",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.15)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
                 border: "1px solid #e8e8e8",
-                maxHeight: "360px",
-                overflowY: "auto",
-                padding: "12px",
+                overflow: "hidden",
                 zIndex: 50,
-                minWidth: "360px",
               }}
             >
               <div style={{ 
-                padding: "8px 16px 12px 16px", 
-                fontSize: "14px", 
+                padding: "14px 20px", 
+                fontSize: "13px", 
                 fontWeight: 600, 
                 color: "#999",
                 letterSpacing: "0.05em",
@@ -1373,38 +1378,42 @@ export default function HomePage(): React.JSX.Element {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      padding: "16px 20px",
-                      borderRadius: "12px",
+                      padding: "14px 20px",
                       cursor: "pointer",
                       transition: "all 0.2s ease",
                       backgroundColor: isActive ? "rgba(0,0,0,0.04)" : "transparent",
-                      marginBottom: "2px",
-                      borderLeft: isActive ? "4px solid #000" : "4px solid transparent",
+                      borderBottom: "1px solid #f5f5f5",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,0,0,0.08)" : "#f5f5f5";
+                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,0,0,0.08)" : "#f8f8f8";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = isActive ? "rgba(0,0,0,0.04)" : "transparent";
                     }}
                   >
-                    {/* Judul lagu di kiri - besar */}
-                    <div style={{ 
-                      fontSize: "24px", 
-                      fontWeight: 600, 
-                      color: "#000",
-                      letterSpacing: "-0.01em",
-                    }}>
-                      {track.title}
-                    </div>
-                    {/* Nama artis di kanan - besar */}
-                    <div style={{ 
-                      fontSize: "20px", 
-                      color: "#666",
-                      fontWeight: 400,
-                    }}>
-                      {track.artist}
-                    </div>
+                    <span
+                      style={{
+                        fontSize: "24px",
+                        fontWeight: 500,
+                        color: isActive ? "#000" : "#333",
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {track.artist} - {track.title}
+                    </span>
+                    {isActive && (
+                      <span
+                        style={{
+                          fontSize: "16px",
+                          color: "#0095f6",
+                          fontWeight: 600,
+                          flexShrink: 0,
+                          marginLeft: "12px",
+                        }}
+                      >
+                        {isPlaying ? "⏸" : "▶"}
+                      </span>
+                    )}
                   </div>
                 );
               })}
