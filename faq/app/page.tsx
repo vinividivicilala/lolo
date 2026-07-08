@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Logo & Search - Kiri Atas */}
+           {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1304,8 +1304,8 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // Bagian tengah yang menyatu (tidak ada jarak)
-              marginRight: isSearchOpen ? "-2px" : "0",
+              // Memberi ruang kosong di tengah
+              marginRight: isSearchOpen ? "8px" : "0",
               // Border tetap penuh
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
@@ -1334,8 +1334,8 @@ export default function HomePage(): React.JSX.Element {
                 overflow: "hidden",
                 // Border penuh
                 border: "2px solid #c5e800",
-                // Bagian tengah yang menyatu
-                marginLeft: "-2px",
+                // Memberi ruang kosong di tengah
+                marginLeft: "8px",
               }}
             >
               <input
@@ -1360,7 +1360,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
-
       
       
       {/* Teks "menuru" besar */}
