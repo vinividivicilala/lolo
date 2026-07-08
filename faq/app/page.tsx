@@ -174,28 +174,17 @@ const EditIcon = () => (
   </svg>
 );
 
+// Play/Pause Icons
 const PlayIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M8 5v14l11-7z"/>
   </svg>
 );
 
 const PauseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <rect x="6" y="4" width="4" height="16"/>
     <rect x="14" y="4" width="4" height="16"/>
-  </svg>
-);
-
-const NextIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-  </svg>
-);
-
-const PrevIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 18l-8.5-6L18 6v12zM6 6v12H4V6h2z"/>
   </svg>
 );
 
@@ -427,9 +416,10 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Music Player State
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [marqueeKey, setMarqueeKey] = useState(0);
   
   const tracks: Track[] = [
     { id: 1, artist: "Billie Eilish", title: "BIRDS OF A FEATHER", albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8" },
@@ -444,30 +434,17 @@ export default function HomePage(): React.JSX.Element {
 
   const currentTrack = tracks[currentTrackIndex];
 
-  // Auto advance track
-  useEffect(() => {
-    if (!isPlaying) return;
-    const interval = setInterval(() => {
-      setCurrentTrackIndex((prev) => (prev + 1) % tracks.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [isPlaying, tracks.length]);
-
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
-  };
-
-  const handleNext = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % tracks.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentTrackIndex((prev) => (prev - 1 + tracks.length) % tracks.length);
+    if (!isPlaying) {
+      setMarqueeKey(prev => prev + 1);
+    }
   };
 
   const handleSelectTrack = (index: number) => {
     setCurrentTrackIndex(index);
     setIsPlaying(true);
+    setMarqueeKey(prev => prev + 1);
     setShowPlaylist(false);
   };
 
@@ -1315,34 +1292,34 @@ export default function HomePage(): React.JSX.Element {
           gap: "16px",
         }}
       >
-        {/* Music Player Widget - Large */}
+        {/* Music Player Widget - Simple Design */}
         <div
           style={{
             position: "relative",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            padding: "12px 20px 12px 12px",
+            gap: "14px",
+            padding: "10px 18px 10px 10px",
             backgroundColor: "#ffffff",
-            borderRadius: "16px",
+            borderRadius: "14px",
             border: "1px solid #e8e8e8",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-            minWidth: "320px",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+            minWidth: "280px",
             transition: "all 0.3s ease",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.1)";
+            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)";
+            e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)";
           }}
         >
-          {/* Album Art - Large */}
+          {/* Album Art - Click to Play/Pause */}
           <div
             style={{
-              width: "64px",
-              height: "64px",
-              borderRadius: "12px",
+              width: "52px",
+              height: "52px",
+              borderRadius: "10px",
               overflow: "hidden",
               flexShrink: 0,
               backgroundColor: "#f0f0f0",
@@ -1361,7 +1338,7 @@ export default function HomePage(): React.JSX.Element {
                 objectFit: "cover",
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=64&font-size=0.5`;
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=52&font-size=0.5`;
               }}
             />
             {/* Play/Pause Overlay */}
@@ -1372,13 +1349,12 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: "rgba(0,0,0,0.3)",
+                backgroundColor: "rgba(0,0,0,0.25)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 opacity: 0,
                 transition: "opacity 0.3s ease",
-                cursor: "pointer",
               }}
               onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
               onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}
@@ -1389,186 +1365,87 @@ export default function HomePage(): React.JSX.Element {
                 <PlayIcon />
               )}
             </div>
-          </div>
-
-          {/* Track Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Always visible small indicator */}
             <div
               style={{
-                fontSize: "16px",
+                position: "absolute",
+                bottom: "4px",
+                right: "4px",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                backgroundColor: isPlaying ? "#4ade80" : "#999",
+                border: "2px solid #fff",
+                transition: "all 0.3s ease",
+              }}
+            />
+          </div>
+
+          {/* Track Info - with marquee text only once when playing */}
+          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <div
+              style={{
+                fontSize: "15px",
                 fontWeight: 700,
                 color: "#000000",
                 letterSpacing: "-0.01em",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {currentTrack.artist}
-            </div>
-            <div
-              style={{
-                fontSize: "14px",
-                fontWeight: 400,
-                color: "#666666",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {currentTrack.title}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginTop: "4px",
+                position: "relative",
               }}
             >
               <div
+                key={marqueeKey}
                 style={{
-                  width: isPlaying ? "40px" : "0px",
-                  height: "3px",
-                  backgroundColor: "#000000",
-                  borderRadius: "2px",
-                  overflow: "hidden",
-                  transition: "width 0.3s ease",
+                  display: "inline-block",
+                  animation: isPlaying ? `marqueeOnce 4s linear forwards` : "none",
+                  paddingRight: "30px",
                 }}
               >
-                <div
-                  style={{
-                    width: "60%",
-                    height: "100%",
-                    backgroundColor: "#000000",
-                    borderRadius: "2px",
-                    animation: isPlaying ? "progress 2s linear infinite" : "none",
-                  }}
-                />
+                {currentTrack.artist} - {currentTrack.title}
               </div>
-              <span
-                style={{
-                  fontSize: "10px",
-                  color: "#999999",
-                  fontWeight: 500,
-                }}
-              >
-                {isPlaying ? "▶ Playing" : "⏸ Paused"}
-              </span>
+            </div>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 400,
+                color: "#999999",
+                marginTop: "2px",
+              }}
+            >
+              {isPlaying ? "● Playing" : "⏸ Paused"}
             </div>
           </div>
 
-          {/* Controls */}
-          <div
+          {/* Playlist Toggle Button */}
+          <button
+            onClick={() => setShowPlaylist(!showPlaylist)}
             style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#000000",
+              padding: "4px 8px",
+              borderRadius: "6px",
+              fontSize: "20px",
+              fontWeight: 300,
+              transition: "all 0.2s ease",
+              opacity: 0.5,
               display: "flex",
               alignItems: "center",
-              gap: "4px",
-              flexShrink: 0,
+              justifyContent: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.backgroundColor = "#f0f0f0";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.5";
+              e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            <button
-              onClick={handlePrev}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#000000",
-                padding: "4px 6px",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s ease",
-                opacity: 0.6,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.backgroundColor = "#f0f0f0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "0.6";
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <PrevIcon />
-            </button>
-            <button
-              onClick={handlePlayPause}
-              style={{
-                background: "#000000",
-                border: "none",
-                cursor: "pointer",
-                color: "#ffffff",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-            >
-              {isPlaying ? <PauseIcon /> : <PlayIcon />}
-            </button>
-            <button
-              onClick={handleNext}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#000000",
-                padding: "4px 6px",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s ease",
-                opacity: 0.6,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.backgroundColor = "#f0f0f0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "0.6";
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <NextIcon />
-            </button>
-            <button
-              onClick={() => setShowPlaylist(!showPlaylist)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#000000",
-                padding: "4px 8px",
-                borderRadius: "6px",
-                fontSize: "18px",
-                fontWeight: 400,
-                transition: "all 0.2s ease",
-                opacity: 0.4,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.backgroundColor = "#f0f0f0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "0.4";
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              ☰
-            </button>
-          </div>
+            ☰
+          </button>
 
           {/* Playlist Dropdown */}
           {showPlaylist && (
@@ -1581,9 +1458,9 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "12px",
                 border: "1px solid #e8e8e8",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                padding: "8px 0",
-                minWidth: "260px",
-                maxHeight: "280px",
+                padding: "6px 0",
+                minWidth: "320px",
+                maxHeight: "320px",
                 overflowY: "auto",
                 zIndex: 20,
               }}
@@ -1599,7 +1476,7 @@ export default function HomePage(): React.JSX.Element {
                     padding: "10px 16px",
                     cursor: "pointer",
                     backgroundColor: index === currentTrackIndex ? "#f5f5f5" : "transparent",
-                    transition: "all 0.2s ease",
+                    transition: "all 0.15s ease",
                     borderLeft: index === currentTrackIndex ? "3px solid #000000" : "3px solid transparent",
                   }}
                   onMouseEnter={(e) => {
@@ -1609,11 +1486,12 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.backgroundColor = index === currentTrackIndex ? "#f5f5f5" : "transparent";
                   }}
                 >
+                  {/* Foto di sisi kiri */}
                   <div
                     style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "6px",
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "8px",
                       overflow: "hidden",
                       flexShrink: 0,
                       backgroundColor: "#f0f0f0",
@@ -1628,27 +1506,17 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: "cover",
                       }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`;
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=44&font-size=0.5`;
                       }}
                     />
                   </div>
+                  {/* Nama lagu di tengah */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
-                        fontSize: "13px",
+                        fontSize: "14px",
                         fontWeight: 600,
                         color: index === currentTrackIndex ? "#000000" : "#333333",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {track.artist}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#666666",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -1657,8 +1525,21 @@ export default function HomePage(): React.JSX.Element {
                       {track.title}
                     </div>
                   </div>
+                  {/* Nama artis di kanan */}
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: "#666666",
+                      whiteSpace: "nowrap",
+                      textAlign: "right",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {track.artist}
+                  </div>
                   {index === currentTrackIndex && (
-                    <span style={{ fontSize: "14px", color: "#000000" }}>▶</span>
+                    <span style={{ fontSize: "14px", color: "#000000", marginLeft: "4px" }}>▶</span>
                   )}
                 </div>
               ))}
@@ -3643,12 +3524,12 @@ export default function HomePage(): React.JSX.Element {
             opacity: 0.3;
           }
         }
-        @keyframes progress {
+        @keyframes marqueeOnce {
           0% {
-            transform: translateX(-100%);
+            transform: translateX(0);
           }
           100% {
-            transform: translateX(100%);
+            transform: translateX(-100%);
           }
         }
       `}</style>
