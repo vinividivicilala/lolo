@@ -1248,8 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-
-         {/* Logo & Search - Kiri Atas */}
+      {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1286,14 +1285,14 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
           }}
         >
-          {/* Search Icon - Border radius FULL dengan ruang kosong di dalam */}
+          {/* Search Icon - Border radius FULL */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "2px solid #c5e800",
-             borderRadius: isSearchOpen ? "999px 20px 20px 999px" : "999px",
-              padding: "16px 18px",
+              borderRadius: "12px",
+              padding: "14px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1302,14 +1301,12 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
-              width: "auto",
-              height: "56px",
+              width: "52px",
+              height: "52px",
               flexShrink: 0,
-              // Ruang kosong di dalam border icon (padding)
-              paddingLeft: "18px",
-              paddingRight: "18px",
-              // Menyatu dengan input di tengah
-              marginRight: isSearchOpen ? "-2px" : "0",
+              // Memberi ruang kosong di tengah yang memanjang
+              marginRight: isSearchOpen ? "12px" : "0",
+              // Border tetap penuh
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
               borderLeft: "2px solid #c5e800",
@@ -1319,24 +1316,40 @@ export default function HomePage(): React.JSX.Element {
             <SearchIcon />
           </button>
           
-          {/* Input Search - Border radius FULL dengan ruang kosong di dalam */}
+          {/* Garis pemisah di tengah - ruang kosong yang memanjang */}
+          {isSearchOpen && (
+            <div
+              style={{
+                width: "4px",
+                height: "52px",
+                backgroundColor: "transparent",
+                flexShrink: 0,
+                zIndex: 3,
+                position: "relative",
+              }}
+            />
+          )}
+          
+          {/* Input Search - Border radius FULL, memanjang ke kanan */}
           {isSearchOpen && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "#c5e800",
-                borderRadius: "20px 999px 999px 20px",
-                padding: "0",
+                borderRadius: "12px",
+                padding: "0 20px 0 0",
                 flex: 1,
                 minWidth: "280px",
                 maxWidth: "450px",
                 position: "relative",
                 zIndex: 1,
-                height: "56px",
+                height: "52px",
                 overflow: "hidden",
+                // Border penuh
                 border: "2px solid #c5e800",
-                marginLeft: "-2px",
+                // Tidak ada margin negatif
+                marginLeft: "0",
               }}
             >
               <input
@@ -1352,8 +1365,7 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: "15px",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  // Ruang kosong di dalam border input (padding)
-                 padding: "10px 22px 10px 18px",
+                  padding: "10px 0 10px 6px",
                   width: "100%",
                   minWidth: "230px",
                 }}
@@ -1362,7 +1374,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
-
 
       {/* Teks "menuru" besar */}
       <div
