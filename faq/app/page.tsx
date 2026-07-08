@@ -176,13 +176,13 @@ const EditIcon = () => (
 
 // Play/Pause Icons
 const PlayIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M8 5v14l11-7z"/>
   </svg>
 );
 
 const PauseIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <rect x="6" y="4" width="4" height="16"/>
     <rect x="14" y="4" width="4" height="16"/>
   </svg>
@@ -1287,38 +1287,29 @@ export default function HomePage(): React.JSX.Element {
           gap: "16px",
         }}
       >
-        {/* Music Player Widget - Large Design */}
+        {/* Music Player Widget - Compact with Large Text */}
         <div
           style={{
             position: "relative",
             display: "flex",
             alignItems: "center",
-            gap: "20px",
-            padding: "16px 24px 16px 16px",
+            gap: "14px",
+            padding: "10px 16px 10px 10px",
             backgroundColor: "#ffffff",
-            borderRadius: "20px",
-            border: "1px solid #e8e8e8",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-            minWidth: "420px",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.10)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.06)";
+            borderRadius: "14px",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+            minWidth: "300px",
           }}
         >
-          {/* Album Art - Large */}
+          {/* Album Art - Medium */}
           <div
             style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "16px",
+              width: "48px",
+              height: "48px",
+              borderRadius: "10px",
               overflow: "hidden",
               flexShrink: 0,
               backgroundColor: "#f0f0f0",
-              border: "2px solid #e8e8e8",
               cursor: "pointer",
               position: "relative",
             }}
@@ -1333,10 +1324,9 @@ export default function HomePage(): React.JSX.Element {
                 objectFit: "cover",
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=80&font-size=0.5`;
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=48&font-size=0.5`;
               }}
             />
-            {/* Play/Pause Overlay */}
             <div
               style={{
                 position: "absolute",
@@ -1344,7 +1334,7 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: "rgba(0,0,0,0.3)",
+                backgroundColor: "rgba(0,0,0,0.25)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1354,64 +1344,40 @@ export default function HomePage(): React.JSX.Element {
               onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
               onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}
             >
-              {isPlaying ? (
-                <PauseIcon />
-              ) : (
-                <PlayIcon />
-              )}
+              {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </div>
-            {/* Status indicator */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "6px",
-                right: "6px",
-                width: "12px",
-                height: "12px",
-                borderRadius: "50%",
-                backgroundColor: isPlaying ? "#4ade80" : "#999",
-                border: "2px solid #fff",
-                transition: "all 0.3s ease",
-              }}
-            />
           </div>
 
-          {/* Track Info - with continuous marquee text */}
-          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+          {/* Track Info - Large Text, No Cutoff */}
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: "20px",
+                fontSize: "17px",
                 fontWeight: 700,
                 color: "#000000",
                 letterSpacing: "-0.01em",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
-                position: "relative",
+                textOverflow: "ellipsis",
               }}
             >
-              <div
-                style={{
-                  display: "inline-block",
-                  animation: isPlaying ? "marqueeContinuous 8s linear infinite" : "none",
-                  paddingRight: "40px",
-                }}
-              >
-                {currentTrack.artist} - {currentTrack.title}
-              </div>
+              {currentTrack.artist}
             </div>
             <div
               style={{
-                fontSize: "14px",
+                fontSize: "15px",
                 fontWeight: 400,
-                color: "#999999",
-                marginTop: "4px",
+                color: "#666666",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              {isPlaying ? "● Playing now" : "⏸ Paused"}
+              {currentTrack.title}
             </div>
           </div>
 
-          {/* Playlist Toggle Button - Large */}
+          {/* Playlist Toggle - Simple Text, No Icon */}
           <button
             onClick={() => setShowPlaylist(!showPlaylist)}
             style={{
@@ -1419,15 +1385,12 @@ export default function HomePage(): React.JSX.Element {
               border: "none",
               cursor: "pointer",
               color: "#000000",
-              padding: "8px 12px",
-              borderRadius: "10px",
-              fontSize: "24px",
-              fontWeight: 300,
+              padding: "6px 10px",
+              borderRadius: "6px",
+              fontSize: "13px",
+              fontWeight: 500,
               transition: "all 0.2s ease",
               opacity: 0.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = "1";
@@ -1438,23 +1401,22 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            ☰
+            Daftar
           </button>
 
-          {/* Playlist Dropdown - Large and Wide */}
+          {/* Playlist Dropdown - Wide, No Border Effect */}
           {showPlaylist && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 12px)",
+                top: "calc(100% + 10px)",
                 right: 0,
                 backgroundColor: "#ffffff",
-                borderRadius: "16px",
-                border: "1px solid #e8e8e8",
-                boxShadow: "0 12px 48px rgba(0,0,0,0.12)",
-                padding: "8px 0",
-                minWidth: "480px",
-                maxHeight: "380px",
+                borderRadius: "14px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                padding: "6px 0",
+                minWidth: "420px",
+                maxHeight: "340px",
                 overflowY: "auto",
                 zIndex: 20,
               }}
@@ -1466,12 +1428,11 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "16px",
-                    padding: "14px 20px",
+                    gap: "14px",
+                    padding: "12px 18px",
                     cursor: "pointer",
                     backgroundColor: index === currentTrackIndex ? "#f5f5f5" : "transparent",
                     transition: "all 0.15s ease",
-                    borderLeft: index === currentTrackIndex ? "4px solid #000000" : "4px solid transparent",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f5f5f5";
@@ -1480,12 +1441,12 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.backgroundColor = index === currentTrackIndex ? "#f5f5f5" : "transparent";
                   }}
                 >
-                  {/* Foto album - Large */}
+                  {/* Foto album */}
                   <div
                     style={{
-                      width: "56px",
-                      height: "56px",
-                      borderRadius: "10px",
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "8px",
                       overflow: "hidden",
                       flexShrink: 0,
                       backgroundColor: "#f0f0f0",
@@ -1500,15 +1461,15 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: "cover",
                       }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=56&font-size=0.5`;
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=48&font-size=0.5`;
                       }}
                     />
                   </div>
-                  {/* Nama lagu - Large text */}
+                  {/* Nama lagu */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
-                        fontSize: "16px",
+                        fontSize: "15px",
                         fontWeight: 600,
                         color: index === currentTrackIndex ? "#000000" : "#333333",
                         whiteSpace: "nowrap",
@@ -1519,22 +1480,22 @@ export default function HomePage(): React.JSX.Element {
                       {track.title}
                     </div>
                   </div>
-                  {/* Nama artis - Large text di kanan */}
+                  {/* Nama artis */}
                   <div
                     style={{
-                      fontSize: "15px",
+                      fontSize: "14px",
                       fontWeight: 400,
                       color: "#666666",
                       whiteSpace: "nowrap",
                       textAlign: "right",
                       flexShrink: 0,
-                      minWidth: "100px",
+                      minWidth: "90px",
                     }}
                   >
                     {track.artist}
                   </div>
                   {index === currentTrackIndex && (
-                    <span style={{ fontSize: "16px", color: "#000000", marginLeft: "8px" }}>▶</span>
+                    <span style={{ fontSize: "14px", color: "#000000", marginLeft: "6px" }}>▶</span>
                   )}
                 </div>
               ))}
@@ -3517,14 +3478,6 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
-          }
-        }
-        @keyframes marqueeContinuous {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
           }
         }
       `}</style>
