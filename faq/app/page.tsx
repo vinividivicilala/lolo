@@ -103,7 +103,6 @@ interface Track {
   id: string;
   artist: string;
   title: string;
-  albumArt: string;
 }
 
 // SVG Icons
@@ -171,20 +170,6 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Play Icon - Biru Stabilo
-const PlayIconBlue = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="#0095f6" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 5v14l11-7z"/>
-  </svg>
-);
-
-// Pause Icon - Biru Stabilo
-const PauseIconBlue = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="#0095f6" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
   </svg>
 );
 
@@ -422,48 +407,21 @@ export default function HomePage(): React.JSX.Element {
     id: "feast-nina",
     artist: "Feast",
     title: "Nina",
-    albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
   });
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Daftar lagu
   const tracks: Track[] = [
-    {
-      id: "feast-nina",
-      artist: "Feast",
-      title: "Nina",
-      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
-    },
-    {
-      id: "feast-kami-belum-tentu",
-      artist: "Feast",
-      title: "Kami Belum Tentu",
-      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e9",
-    },
-    {
-      id: "feast-berita-kabar",
-      artist: "Feast",
-      title: "Berita Kabar",
-      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ea",
-    },
-    {
-      id: "feast-uang",
-      artist: "Feast",
-      title: "Uang",
-      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8eb",
-    },
-    {
-      id: "feast-sekali-lagi",
-      artist: "Feast",
-      title: "Sekali Lagi",
-      albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ec",
-    },
+    { id: "feast-nina", artist: "Feast", title: "Nina" },
+    { id: "feast-kami-belum-tentu", artist: "Feast", title: "Kami Belum Tentu" },
+    { id: "feast-berita-kabar", artist: "Feast", title: "Berita Kabar" },
+    { id: "feast-uang", artist: "Feast", title: "Uang" },
+    { id: "feast-sekali-lagi", artist: "Feast", title: "Sekali Lagi" },
   ];
 
   // Fungsi untuk memilih lagu
   const selectTrack = (track: Track) => {
     if (currentTrack.id === track.id) {
-      // Jika lagu sama, toggle play/pause
       setIsPlaying(!isPlaying);
     } else {
       setCurrentTrack(track);
@@ -472,12 +430,12 @@ export default function HomePage(): React.JSX.Element {
     setShowMusicDropdown(false);
   };
 
-  // Fungsi toggle play/pause dari widget utama
+  // Fungsi toggle play/pause
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (musicDropdownRef.current && !musicDropdownRef.current.contains(event.target as Node)) {
@@ -1332,22 +1290,22 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget */}
+        {/* Music Widget - Kotak Besar dengan Font 90px */}
         <div style={{ position: "relative" }} ref={musicDropdownRef}>
           <div
             onClick={() => setShowMusicDropdown(!showMusicDropdown)}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "14px",
-              padding: "10px 20px 10px 10px",
+              justifyContent: "center",
+              padding: "20px 32px",
               backgroundColor: "#ffffff",
-              borderRadius: "60px",
+              borderRadius: "16px",
               border: "1px solid #e0e0e0",
               boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
               transition: "all 0.3s ease",
-              maxWidth: "340px",
-              minHeight: "60px",
+              minWidth: "320px",
+              minHeight: "80px",
               cursor: "pointer",
             }}
             onMouseEnter={(e) => {
@@ -1357,143 +1315,51 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
             }}
           >
-            {/* Foto Artis */}
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-              }}
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                flexShrink: 0,
-                backgroundColor: "#f0f0f0",
-                border: "1px solid #e8e8e8",
-                cursor: "pointer",
-                position: "relative",
-                transition: "transform 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-            >
-              <img
-                src={currentTrack.albumArt}
-                alt={currentTrack.artist}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentTrack.artist)}&background=000000&color=ffffff&size=64&font-size=0.5`;
-                }}
-              />
-              {/* Overlay play/pause icon */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "rgba(0,0,0,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: 0,
-                  transition: "opacity 0.3s ease",
-                  borderRadius: "12px",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "0";
-                }}
-              >
-                {isPlaying ? (
-                  <PauseIconBlue />
-                ) : (
-                  <PlayIconBlue />
-                )}
-              </div>
-            </div>
-
-            {/* Info Lagu - Teks lebih besar */}
             <div
               style={{
-                flex: 1,
+                fontSize: "90px",
+                fontWeight: 700,
+                color: "#000000",
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
+                textAlign: "center",
+                whiteSpace: "nowrap",
                 overflow: "hidden",
-                minWidth: 0,
+                textOverflow: "ellipsis",
+                maxWidth: "100%",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <div
-                  style={{
-                    overflow: "hidden",
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "inline-block",
-                      animation: isPlaying ? "marquee 12s linear infinite" : "none",
-                      paddingLeft: isPlaying ? "100%" : "0",
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      color: "#000000",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {currentTrack.artist} - {currentTrack.title}
-                  </div>
-                </div>
-              </div>
+              {currentTrack.title}
             </div>
           </div>
 
-          {/* Dropdown Daftar Lagu */}
+          {/* Dropdown Daftar Lagu - Lebar ke samping kiri dan kanan */}
           {showMusicDropdown && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 8px)",
-                right: 0,
+                top: "calc(100% + 12px)",
+                left: "-20px",
+                right: "-20px",
                 backgroundColor: "#ffffff",
                 borderRadius: "16px",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.15)",
                 border: "1px solid #e8e8e8",
-                width: "340px",
-                maxHeight: "320px",
+                maxHeight: "360px",
                 overflowY: "auto",
-                padding: "8px",
+                padding: "12px",
                 zIndex: 50,
+                minWidth: "360px",
               }}
             >
               <div style={{ 
-                padding: "8px 12px 4px 12px", 
-                fontSize: "12px", 
+                padding: "8px 16px 12px 16px", 
+                fontSize: "14px", 
                 fontWeight: 600, 
                 color: "#999",
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
+                borderBottom: "1px solid #f0f0f0",
               }}>
                 Daftar Lagu
               </div>
@@ -1506,87 +1372,38 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "12px",
-                      padding: "10px 14px",
+                      justifyContent: "space-between",
+                      padding: "16px 20px",
                       borderRadius: "12px",
                       cursor: "pointer",
                       transition: "all 0.2s ease",
-                      backgroundColor: isActive ? "rgba(0,149,246,0.08)" : "transparent",
+                      backgroundColor: isActive ? "rgba(0,0,0,0.04)" : "transparent",
                       marginBottom: "2px",
+                      borderLeft: isActive ? "4px solid #000" : "4px solid transparent",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,149,246,0.12)" : "#f5f5f5";
+                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,0,0,0.08)" : "#f5f5f5";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,149,246,0.08)" : "transparent";
+                      e.currentTarget.style.backgroundColor = isActive ? "rgba(0,0,0,0.04)" : "transparent";
                     }}
                   >
-                    {/* Foto artis di kiri */}
-                    <div
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        flexShrink: 0,
-                        backgroundColor: "#f0f0f0",
-                      }}
-                    >
-                      <img
-                        src={track.albumArt}
-                        alt={track.artist}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist)}&background=000000&color=ffffff&size=40&font-size=0.5`;
-                        }}
-                      />
-                    </div>
-                    {/* Judul lagu di kiri tengah */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ 
-                        fontSize: "14px", 
-                        fontWeight: 600, 
-                        color: "#000",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}>
-                        {track.title}
-                      </div>
-                    </div>
-                    {/* Nama artis di kanan */}
+                    {/* Judul lagu di kiri - besar */}
                     <div style={{ 
-                      fontSize: "13px", 
+                      fontSize: "24px", 
+                      fontWeight: 600, 
+                      color: "#000",
+                      letterSpacing: "-0.01em",
+                    }}>
+                      {track.title}
+                    </div>
+                    {/* Nama artis di kanan - besar */}
+                    <div style={{ 
+                      fontSize: "20px", 
                       color: "#666",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
+                      fontWeight: 400,
                     }}>
                       {track.artist}
-                    </div>
-                    {/* Tombol play/pause biru stabilo di kanan */}
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        backgroundColor: isActive && isPlaying ? "#0095f6" : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        transition: "all 0.2s ease",
-                        color: isActive && isPlaying ? "#fff" : "#0095f6",
-                      }}
-                    >
-                      {isActive && isPlaying ? (
-                        <PauseIconBlue />
-                      ) : (
-                        <PlayIconBlue />
-                      )}
                     </div>
                   </div>
                 );
@@ -3570,14 +3387,6 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
-          }
-        }
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
           }
         }
       `}</style>
