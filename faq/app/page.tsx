@@ -1249,8 +1249,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-
-      {/* Logo & Search - Kiri Atas */}
+{/* Logo & Search - Kiri Atas */}
 <div
   style={{
     position: "absolute",
@@ -1275,107 +1274,67 @@ export default function HomePage(): React.JSX.Element {
     Menuru
   </div>
 
-  {/* Search - Container utama */}
+  {/* Search - Container utama dengan bentuk melengkung */}
   <div
     style={{
       display: "flex",
       alignItems: "center",
-      backgroundColor: "transparent",
-      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      backgroundColor: "#c5e800",
+      borderRadius: "50px", // Bentuk pill/capsule yang melengkung
+      padding: "0",
+      transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
       position: "relative",
+      height: "56px",
+      // Memanjang ke tengah
+      width: isSearchOpen ? "calc(50vw - 200px)" : "56px",
+      minWidth: isSearchOpen ? "500px" : "56px",
+      maxWidth: "calc(100vw - 400px)",
+      overflow: "hidden",
+      border: "2px solid #c5e800",
     }}
   >
-    {/* Search Icon */}
+    {/* Search Icon - Bagian kiri yang melengkung */}
     <button
       onClick={() => setIsSearchOpen(!isSearchOpen)}
       style={{
-        background: "#c5e800",
-        border: "2px solid #c5e800",
-
-        // Melengkung ke tengah
-        borderRadius: isSearchOpen
-          ? "999px 24px 24px 999px"
-          : "999px",
-
+        background: "transparent",
+        border: "none",
+        borderRadius: "50%",
+        padding: "0",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         transition: "all 0.3s ease",
-
         color: "#000",
-        position: "relative",
-        zIndex: 2,
-
+        width: "56px",
         height: "56px",
-        width: "60px",
         flexShrink: 0,
-
-        // ruang icon
-        paddingLeft: "20px",
-        paddingRight: "20px",
-
-        // menyatu dengan input
-        marginRight: isSearchOpen ? "-2px" : "0",
       }}
     >
       <SearchIcon />
     </button>
-
-    {/* Input Search */}
+    
+    {/* Input Search - Memanjang ke tengah dengan lengkungan */}
     {isSearchOpen && (
-      <div
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        autoFocus
         style={{
-          display: "flex",
-          alignItems: "center",
-
-          backgroundColor: "#c5e800",
-
-          // Melengkung ke tengah
-          borderRadius: "24px 999px 999px 24px",
-
-          flex: 1,
-          minWidth: "300px",
-          maxWidth: "450px",
-
-          position: "relative",
-          zIndex: 1,
-
-          height: "56px",
-
-          overflow: "hidden",
-
-          border: "2px solid #c5e800",
-
-          // menyatu dengan icon
-          marginLeft: "-2px",
-
-          transition: "all 0.3s ease",
+          background: "transparent",
+          border: "none",
+          outline: "none",
+          fontSize: "16px",
+          color: "#000",
+          fontFamily: "Inter, 'Inter Fallback'",
+          padding: "0 24px 0 8px",
+          width: "100%",
+          height: "100%",
         }}
-      >
-        <input
-          type="text"
-          placeholder="What are you looking for?"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          autoFocus
-          style={{
-            background: "transparent",
-            border: "none",
-            outline: "none",
-
-            fontSize: "15px",
-            color: "#000",
-            fontFamily: "Inter, 'Inter Fallback'",
-
-            width: "100%",
-            minWidth: "240px",
-
-            // ruang kosong dari icon
-            padding: "10px 24px 10px 22px",
-          }}
-        />
-      </div>
+      />
     )}
   </div>
 </div>
