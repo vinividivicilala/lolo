@@ -1248,7 +1248,9 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-              {/* Logo & Search - Kiri Atas */}
+
+
+            {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1285,14 +1287,14 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
           }}
         >
-          {/* Search Icon - Border radius FULL */}
+          {/* Search Icon - Border radius FULL dengan ruang kosong di dalam */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             style={{
               background: "#c5e800",
               border: "2px solid #c5e800",
               borderRadius: "12px",
-              padding: "14px",
+              padding: "16px 18px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -1301,12 +1303,14 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               position: "relative",
               zIndex: 2,
-              width: "52px",
+              width: "auto",
               height: "52px",
               flexShrink: 0,
-              // Memberi ruang kosong di tengah yang memanjang
-              marginRight: isSearchOpen ? "12px" : "0",
-              // Border tetap penuh
+              // Ruang kosong di dalam border icon (padding)
+              paddingLeft: "18px",
+              paddingRight: "18px",
+              // Menyatu dengan input di tengah
+              marginRight: isSearchOpen ? "-2px" : "0",
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
               borderLeft: "2px solid #c5e800",
@@ -1316,21 +1320,7 @@ export default function HomePage(): React.JSX.Element {
             <SearchIcon />
           </button>
           
-          {/* Garis pemisah di tengah - ruang kosong yang memanjang */}
-          {isSearchOpen && (
-            <div
-              style={{
-                width: "4px",
-                height: "52px",
-                backgroundColor: "transparent",
-                flexShrink: 0,
-                zIndex: 3,
-                position: "relative",
-              }}
-            />
-          )}
-          
-          {/* Input Search - Border radius FULL, memanjang ke kanan */}
+          {/* Input Search - Border radius FULL dengan ruang kosong di dalam */}
           {isSearchOpen && (
             <div
               style={{
@@ -1338,7 +1328,7 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: "center",
                 backgroundColor: "#c5e800",
                 borderRadius: "12px",
-                padding: "0 20px 0 0",
+                padding: "0",
                 flex: 1,
                 minWidth: "280px",
                 maxWidth: "450px",
@@ -1346,10 +1336,8 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
-                // Border penuh
                 border: "2px solid #c5e800",
-                // Tidak ada margin negatif
-                marginLeft: "0",
+                marginLeft: "-2px",
               }}
             >
               <input
@@ -1365,7 +1353,8 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: "15px",
                   color: "#000",
                   fontFamily: "Inter, 'Inter Fallback'",
-                  padding: "10px 0 10px 6px",
+                  // Ruang kosong di dalam border input (padding)
+                  padding: "10px 20px 10px 8px",
                   width: "100%",
                   minWidth: "230px",
                 }}
@@ -1374,6 +1363,16 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
       
       {/* Teks "menuru" besar */}
       <div
