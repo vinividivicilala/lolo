@@ -1248,7 +1248,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-           {/* Logo & Search - Kiri Atas */}
+              {/* Logo & Search - Kiri Atas */}
       <div
         style={{
           position: "absolute",
@@ -1304,8 +1304,8 @@ export default function HomePage(): React.JSX.Element {
               width: "52px",
               height: "52px",
               flexShrink: 0,
-              // Memberi ruang kosong di tengah
-              marginRight: isSearchOpen ? "8px" : "0",
+              // Memberi ruang kosong di tengah yang memanjang
+              marginRight: isSearchOpen ? "12px" : "0",
               // Border tetap penuh
               borderTop: "2px solid #c5e800",
               borderBottom: "2px solid #c5e800",
@@ -1315,6 +1315,20 @@ export default function HomePage(): React.JSX.Element {
           >
             <SearchIcon />
           </button>
+          
+          {/* Garis pemisah di tengah - ruang kosong yang memanjang */}
+          {isSearchOpen && (
+            <div
+              style={{
+                width: "4px",
+                height: "52px",
+                backgroundColor: "transparent",
+                flexShrink: 0,
+                zIndex: 3,
+                position: "relative",
+              }}
+            />
+          )}
           
           {/* Input Search - Border radius FULL, memanjang ke kanan */}
           {isSearchOpen && (
@@ -1326,16 +1340,16 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "12px",
                 padding: "0 20px 0 0",
                 flex: 1,
-                minWidth: "300px",
-                maxWidth: "500px",
+                minWidth: "280px",
+                maxWidth: "450px",
                 position: "relative",
                 zIndex: 1,
                 height: "52px",
                 overflow: "hidden",
                 // Border penuh
                 border: "2px solid #c5e800",
-                // Memberi ruang kosong di tengah
-                marginLeft: "8px",
+                // Tidak ada margin negatif
+                marginLeft: "0",
               }}
             >
               <input
@@ -1353,14 +1367,13 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: "Inter, 'Inter Fallback'",
                   padding: "10px 0 10px 6px",
                   width: "100%",
-                  minWidth: "250px",
+                  minWidth: "230px",
                 }}
               />
             </div>
           )}
         </div>
       </div>
-      
       
       {/* Teks "menuru" besar */}
       <div
