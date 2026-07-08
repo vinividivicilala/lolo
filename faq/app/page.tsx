@@ -1,4 +1,4 @@
-'use client';
+\'use client';
 
 import React, { useState, useEffect, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
@@ -164,6 +164,13 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Spotify Icon
+const SpotifyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.18-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719.9.42 1.441-.3.419-.9.599-1.44.299z" />
   </svg>
 );
 
@@ -393,6 +400,58 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Spotify Widget Data
+  const [currentTrack, setCurrentTrack] = useState({
+    artist: "Billie Eilish",
+    title: "BIRDS OF A FEATHER",
+    albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
+    isPlaying: true,
+  });
+
+  // Simulasi pergantian lagu setiap 10 detik
+  useEffect(() => {
+    const tracks = [
+      {
+        artist: "Billie Eilish",
+        title: "BIRDS OF A FEATHER",
+        albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8",
+        isPlaying: true,
+      },
+      {
+        artist: "Taylor Swift",
+        title: "Fortnight (feat. Post Malone)",
+        albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e9",
+        isPlaying: true,
+      },
+      {
+        artist: "Olivia Rodrigo",
+        title: "good 4 u",
+        albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ea",
+        isPlaying: true,
+      },
+      {
+        artist: "Ariana Grande",
+        title: "we can't be friends (wait for your love)",
+        albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8eb",
+        isPlaying: true,
+      },
+      {
+        artist: "Sabrina Carpenter",
+        title: "Espresso",
+        albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8ec",
+        isPlaying: true,
+      },
+    ];
+
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % tracks.length;
+      setCurrentTrack(tracks[index]);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1226,7 +1285,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-      {/* User Status - Pojok Kanan Atas */}
+      {/* User Status & Spotify Widget - Pojok Kanan Atas */}
       <div
         style={{
           position: "absolute",
@@ -1235,95 +1294,209 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "16px",
-          padding: "8px 20px",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "60px",
-          fontSize: "14px",
-          color: "#000",
+          gap: "12px",
         }}
       >
-        {user ? (
-          <>
-            {user.photoURL && (
-              <img 
-                src={user.photoURL} 
-                alt="avatar" 
+        {/* Spotify Widget */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "6px 14px 6px 6px",
+            backgroundColor: "#1ed760",
+            borderRadius: "60px",
+            boxShadow: "0 4px 16px rgba(30, 215, 96, 0.25)",
+            transition: "all 0.3s ease",
+            cursor: "pointer",
+            maxWidth: "260px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.03)";
+            e.currentTarget.style.boxShadow = "0 6px 24px rgba(30, 215, 96, 0.35)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 4px 16px rgba(30, 215, 96, 0.25)";
+          }}
+          onClick={() => {
+            window.open("https://open.spotify.com", "_blank");
+          }}
+        >
+          {/* Album Art - Kotak kecil di sisi kiri */}
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px",
+              overflow: "hidden",
+              flexShrink: 0,
+              backgroundColor: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <img
+              src={currentTrack.albumArt}
+              alt="Album Art"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          {/* Info Lagu - Teks Berjalan */}
+          <div
+            style={{
+              flex: 1,
+              overflow: "hidden",
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <SpotifyIcon />
+              <div
                 style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "8px",
-                  objectFit: "cover",
+                  overflow: "hidden",
+                  position: "relative",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-block",
+                    animation: "marquee 8s linear infinite",
+                    paddingLeft: "100%",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "#000",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {currentTrack.artist} - {currentTrack.title}
+                  <span style={{ paddingLeft: "40px", opacity: 0.5 }}>
+                    ♫
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: "9px",
+                color: "rgba(0,0,0,0.6)",
+                fontWeight: 500,
+                letterSpacing: "0.02em",
+                marginTop: "-1px",
+              }}
+            >
+              {currentTrack.isPlaying ? "● Live" : "⏸ Paused"}
+            </div>
+          </div>
+        </div>
+
+        {/* User Status */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            padding: "8px 20px",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "60px",
+            fontSize: "14px",
+            color: "#000",
+          }}
+        >
+          {user ? (
+            <>
+              {user.photoURL && (
+                <img 
+                  src={user.photoURL} 
+                  alt="avatar" 
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "8px",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    const selfUser = users.find(u => u.id === user.uid);
+                    if (selfUser) handleOpenProfile(selfUser);
+                  }}
+                />
+              )}
+              <span 
+                style={{ 
+                  fontWeight: 500, 
+                  color: "#000",
                   cursor: "pointer",
                 }}
                 onClick={() => {
                   const selfUser = users.find(u => u.id === user.uid);
                   if (selfUser) handleOpenProfile(selfUser);
                 }}
-              />
-            )}
-            <span 
-              style={{ 
-                fontWeight: 500, 
-                color: "#000",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                const selfUser = users.find(u => u.id === user.uid);
-                if (selfUser) handleOpenProfile(selfUser);
-              }}
-            >
-              {user.displayName || user.email}
-            </span>
-            <OnlineIndicator online={true} />
+              >
+                {user.displayName || user.email}
+              </span>
+              <OnlineIndicator online={true} />
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#000",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  transition: "all .2s ease",
+                  fontFamily: "Inter, 'Inter Fallback'",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e0e0e0";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogin(true)}
               style={{
                 background: "none",
                 border: "none",
                 color: "#000",
                 cursor: "pointer",
                 fontSize: "14px",
+                fontWeight: 500,
                 padding: "4px 12px",
                 borderRadius: "20px",
                 transition: "all .2s ease",
                 fontFamily: "Inter, 'Inter Fallback'",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#e0e0e0";
+                e.currentTarget.style.backgroundColor = "#f0f0f0";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              Logout
+              Login
             </button>
-          </>
-        ) : (
-          <button
-            onClick={() => setShowLogin(true)}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#000",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: 500,
-              padding: "4px 12px",
-              borderRadius: "20px",
-              transition: "all .2s ease",
-              fontFamily: "Inter, 'Inter Fallback'",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#f0f0f0";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            Login
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Login Modal */}
@@ -3204,6 +3377,14 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
+          }
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
           }
         }
       `}</style>
