@@ -1250,129 +1250,129 @@ export default function HomePage(): React.JSX.Element {
     >
 
       {/* Logo & Search - Kiri Atas */}
-      <div
+<div
+  style={{
+    position: "absolute",
+    top: "40px",
+    left: "40px",
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  }}
+  ref={searchRef}
+>
+  <div
+    style={{
+      fontSize: "56px",
+      fontWeight: 400,
+      color: "#000",
+      letterSpacing: "-0.02em",
+      lineHeight: 1,
+    }}
+  >
+    Menuru
+  </div>
+
+  {/* Search */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      position: "relative",
+    }}
+  >
+    {/* Search Icon */}
+    <button
+      onClick={() => setIsSearchOpen(!isSearchOpen)}
+      style={{
+        background: "#c5e800",
+        border: "2px solid #c5e800",
+        borderRight: "none",
+
+        // Pill kiri
+        borderRadius: isSearchOpen ? "999px 0 0 999px" : "999px",
+
+        height: "56px",
+        width: "64px",
+
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+
+        cursor: "pointer",
+        color: "#000",
+
+        transition: "all .35s cubic-bezier(.22,1,.36,1)",
+
+        paddingLeft: "20px",
+        paddingRight: "18px",
+
+        flexShrink: 0,
+        zIndex: 2,
+      }}
+    >
+      <SearchIcon />
+    </button>
+
+    {/* Search Input */}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+
+        background: "#c5e800",
+
+        border: "2px solid #c5e800",
+        borderLeft: "none",
+
+        // Pill kanan
+        borderRadius: "0 999px 999px 0",
+
+        overflow: "hidden",
+
+        height: "56px",
+
+        maxWidth: isSearchOpen ? "420px" : "0px",
+        width: isSearchOpen ? "420px" : "0px",
+
+        opacity: isSearchOpen ? 1 : 0,
+
+        transition:
+          "max-width .35s cubic-bezier(.22,1,.36,1), opacity .25s ease",
+
+        paddingLeft: isSearchOpen ? "22px" : "0px",
+        paddingRight: isSearchOpen ? "22px" : "0px",
+
+        whiteSpace: "nowrap",
+      }}
+    >
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        autoFocus={isSearchOpen}
         style={{
-          position: "absolute",
-          top: "40px",
-          left: "40px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          outline: "none",
+
+          fontSize: "15px",
+          fontFamily: "Inter, 'Inter Fallback'",
+          color: "#000",
+
+          padding: "0",
         }}
-        ref={searchRef}
-      >
-        <div
-          style={{
-            fontSize: "56px",
-            fontWeight: 400,
-            color: "#000",
-            letterSpacing: "-0.02em",
-            lineHeight: 1,
-          }}
-        >
-          Menuru
-        </div>
-
-        {/* Search - Container utama */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "transparent",
-            padding: "0",
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            gap: "0",
-            position: "relative",
-          }}
-        >
-          {/* Search Icon - Border radius FULL dengan ruang kosong di dalam */}
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            style={{
-              background: "#c5e800",
-              border: "2px solid #c5e800",
-              borderRadius: "12px",
-              padding: "16px 18px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s ease",
-              color: "#000",
-              position: "relative",
-              zIndex: 2,
-              width: "auto",
-              height: "52px",
-              flexShrink: 0,
-              // Ruang kosong di dalam border icon (padding)
-              paddingLeft: "18px",
-              paddingRight: "18px",
-              // Menyatu dengan input di tengah
-              marginRight: isSearchOpen ? "-2px" : "0",
-              borderTop: "2px solid #c5e800",
-              borderBottom: "2px solid #c5e800",
-              borderLeft: "2px solid #c5e800",
-              borderRight: "2px solid #c5e800",
-            }}
-          >
-            <SearchIcon />
-          </button>
-          
-          {/* Input Search - Border radius FULL dengan ruang kosong di dalam */}
-          {isSearchOpen && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#c5e800",
-                borderRadius: "12px",
-                padding: "0",
-                flex: 1,
-                minWidth: "280px",
-                maxWidth: "450px",
-                position: "relative",
-                zIndex: 1,
-                height: "52px",
-                overflow: "hidden",
-                border: "2px solid #c5e800",
-                marginLeft: "-2px",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "15px",
-                  color: "#000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                  // Ruang kosong di dalam border input (padding)
-                  padding: "10px 20px 10px 8px",
-                  width: "100%",
-                  minWidth: "230px",
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      />
+    </div>
+  </div>
+</div>
 
 
 
 
-
-
-
-
-
-
-      
 
       {/* Teks "menuru" besar */}
       <div
