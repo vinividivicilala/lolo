@@ -416,9 +416,10 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Music Player State
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [marqueeKey, setMarqueeKey] = useState(0);
   
   const tracks: Track[] = [
     { id: 1, artist: "Billie Eilish", title: "BIRDS OF A FEATHER", albumArt: "https://i.scdn.co/image/ab67616d0000b2738f8b9d6cd7d7b2b8a7d8f8e8" },
@@ -435,11 +436,15 @@ export default function HomePage(): React.JSX.Element {
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
+    if (!isPlaying) {
+      setMarqueeKey(prev => prev + 1);
+    }
   };
 
   const handleSelectTrack = (index: number) => {
     setCurrentTrackIndex(index);
     setIsPlaying(true);
+    setMarqueeKey(prev => prev + 1);
     setShowPlaylist(false);
   };
 
@@ -1287,29 +1292,38 @@ export default function HomePage(): React.JSX.Element {
           gap: "16px",
         }}
       >
-        {/* Music Player Widget - Compact with Large Text */}
+        {/* Music Player Widget - Simple Design */}
         <div
           style={{
             position: "relative",
             display: "flex",
             alignItems: "center",
             gap: "14px",
-            padding: "10px 16px 10px 10px",
+            padding: "10px 18px 10px 10px",
             backgroundColor: "#ffffff",
             borderRadius: "14px",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-            minWidth: "300px",
+            border: "1px solid #e8e8e8",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+            minWidth: "280px",
+            transition: "all 0.3s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)";
           }}
         >
-          {/* Album Art - Medium */}
+          {/* Album Art - Click to Play/Pause */}
           <div
             style={{
-              width: "48px",
-              height: "48px",
+              width: "52px",
+              height: "52px",
               borderRadius: "10px",
               overflow: "hidden",
               flexShrink: 0,
               backgroundColor: "#f0f0f0",
+              border: "1px solid #e8e8e8",
               cursor: "pointer",
               position: "relative",
             }}
@@ -1324,9 +1338,10 @@ export default function HomePage(): React.JSX.Element {
                 objectFit: "cover",
               }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=48&font-size=0.5`;
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=52&font-size=0.5`;
               }}
             />
+            {/* Play/Pause Overlay */}
             <div
               style={{
                 position: "absolute",
@@ -1344,40 +1359,65 @@ export default function HomePage(): React.JSX.Element {
               onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
               onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}
             >
-              {isPlaying ? <PauseIcon /> : <PlayIcon />}
+              {isPlaying ? (
+                <PauseIcon />
+              ) : (
+                <PlayIcon />
+              )}
             </div>
-          </div>
-
-          {/* Track Info - Large Text, No Cutoff */}
-          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Always visible small indicator */}
             <div
               style={{
-                fontSize: "17px",
+                position: "absolute",
+                bottom: "4px",
+                right: "4px",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                backgroundColor: isPlaying ? "#4ade80" : "#999",
+                border: "2px solid #fff",
+                transition: "all 0.3s ease",
+              }}
+            />
+          </div>
+
+          {/* Track Info - with marquee text only once when playing */}
+          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <div
+              style={{
+                fontSize: "15px",
                 fontWeight: 700,
                 color: "#000000",
                 letterSpacing: "-0.01em",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
-                textOverflow: "ellipsis",
+                position: "relative",
               }}
             >
-              {currentTrack.artist}
+              <div
+                key={marqueeKey}
+                style={{
+                  display: "inline-block",
+                  animation: isPlaying ? `marqueeOnce 4s linear forwards` : "none",
+                  paddingRight: "30px",
+                }}
+              >
+                {currentTrack.artist} - {currentTrack.title}
+              </div>
             </div>
             <div
               style={{
-                fontSize: "15px",
+                fontSize: "12px",
                 fontWeight: 400,
-                color: "#666666",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                color: "#999999",
+                marginTop: "2px",
               }}
             >
-              {currentTrack.title}
+              {isPlaying ? "● Playing" : "⏸ Paused"}
             </div>
           </div>
 
-          {/* Playlist Toggle - Simple Text, No Icon */}
+          {/* Playlist Toggle Button */}
           <button
             onClick={() => setShowPlaylist(!showPlaylist)}
             style={{
@@ -1385,12 +1425,15 @@ export default function HomePage(): React.JSX.Element {
               border: "none",
               cursor: "pointer",
               color: "#000000",
-              padding: "6px 10px",
+              padding: "4px 8px",
               borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: 500,
+              fontSize: "20px",
+              fontWeight: 300,
               transition: "all 0.2s ease",
               opacity: 0.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = "1";
@@ -1401,22 +1444,23 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            Daftar
+            ☰
           </button>
 
-          {/* Playlist Dropdown - Wide, No Border Effect */}
+          {/* Playlist Dropdown */}
           {showPlaylist && (
             <div
               style={{
                 position: "absolute",
-                top: "calc(100% + 10px)",
+                top: "calc(100% + 8px)",
                 right: 0,
                 backgroundColor: "#ffffff",
-                borderRadius: "14px",
+                borderRadius: "12px",
+                border: "1px solid #e8e8e8",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
                 padding: "6px 0",
-                minWidth: "420px",
-                maxHeight: "340px",
+                minWidth: "320px",
+                maxHeight: "320px",
                 overflowY: "auto",
                 zIndex: 20,
               }}
@@ -1428,11 +1472,12 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "14px",
-                    padding: "12px 18px",
+                    gap: "12px",
+                    padding: "10px 16px",
                     cursor: "pointer",
                     backgroundColor: index === currentTrackIndex ? "#f5f5f5" : "transparent",
                     transition: "all 0.15s ease",
+                    borderLeft: index === currentTrackIndex ? "3px solid #000000" : "3px solid transparent",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f5f5f5";
@@ -1441,11 +1486,11 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.backgroundColor = index === currentTrackIndex ? "#f5f5f5" : "transparent";
                   }}
                 >
-                  {/* Foto album */}
+                  {/* Foto di sisi kiri */}
                   <div
                     style={{
-                      width: "48px",
-                      height: "48px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "8px",
                       overflow: "hidden",
                       flexShrink: 0,
@@ -1461,15 +1506,15 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: "cover",
                       }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=48&font-size=0.5`;
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${track.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=44&font-size=0.5`;
                       }}
                     />
                   </div>
-                  {/* Nama lagu */}
+                  {/* Nama lagu di tengah */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
-                        fontSize: "15px",
+                        fontSize: "14px",
                         fontWeight: 600,
                         color: index === currentTrackIndex ? "#000000" : "#333333",
                         whiteSpace: "nowrap",
@@ -1480,22 +1525,21 @@ export default function HomePage(): React.JSX.Element {
                       {track.title}
                     </div>
                   </div>
-                  {/* Nama artis */}
+                  {/* Nama artis di kanan */}
                   <div
                     style={{
-                      fontSize: "14px",
+                      fontSize: "13px",
                       fontWeight: 400,
                       color: "#666666",
                       whiteSpace: "nowrap",
                       textAlign: "right",
                       flexShrink: 0,
-                      minWidth: "90px",
                     }}
                   >
                     {track.artist}
                   </div>
                   {index === currentTrackIndex && (
-                    <span style={{ fontSize: "14px", color: "#000000", marginLeft: "6px" }}>▶</span>
+                    <span style={{ fontSize: "14px", color: "#000000", marginLeft: "4px" }}>▶</span>
                   )}
                 </div>
               ))}
@@ -3478,6 +3522,14 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
+          }
+        }
+        @keyframes marqueeOnce {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
           }
         }
       `}</style>
