@@ -275,11 +275,11 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
       <span 
         style={{ 
           display: "inline-block",
-          width: "10px",
-          height: "10px",
+          width: "8px",
+          height: "8px",
           borderRadius: "50%",
-          backgroundColor: online ? "#4ade80" : "#666",
-          boxShadow: online ? "0 0 12px rgba(74, 222, 128, 0.6)" : "none",
+          backgroundColor: online ? "#4ade80" : "#999",
+          boxShadow: online ? "0 0 8px rgba(74, 222, 128, 0.4)" : "none",
           flexShrink: 0,
           transition: "all 0.3s ease",
           cursor: "pointer",
@@ -338,9 +338,9 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
       <span 
         style={{
-          fontSize: "11px",
+          fontSize: "10px",
           color: status.color,
-          fontWeight: status.label === "Dibaca" ? 700 : 400,
+          fontWeight: status.label === "Dibaca" ? 600 : 400,
           cursor: "pointer",
         }}
         onMouseEnter={() => setShowTooltip(true)}
@@ -416,6 +416,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Chat button text animation
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
+  const [incomingMessageText, setIncomingMessageText] = useState("");
   const chatTexts = [
     "Chat with Menuru",
     "💬 Chat with Menuru",
@@ -424,6 +425,7 @@ export default function HomePage(): React.JSX.Element {
     "📩 Chat with Menuru"
   ];
   let chatTextIndex = 0;
+  const [isIncomingMessage, setIsIncomingMessage] = useState(false);
 
   // Music Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -705,6 +707,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
+      let newMessageFrom = "";
       
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -738,6 +741,10 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
+            if (unreadCount > 0 && otherUser) {
+              newMessageFrom = otherUser.name;
+            }
+            
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
@@ -764,19 +771,16 @@ export default function HomePage(): React.JSX.Element {
       setTotalUnread(totalUnreadCount);
 
       // Update chat button text when new message arrives
-      if (totalUnreadCount > 0) {
-        const unreadFrom = rooms.find(r => r.unreadCount > 0);
-        if (unreadFrom) {
-          const otherId = unreadFrom.participants.find(id => id !== user.uid);
-          const otherUser = users.find(u => u.id === otherId);
-          if (otherUser) {
-            setChatButtonText(`📩 ${otherUser.name} sent message`);
-            setTimeout(() => {
-              setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
-              chatTextIndex++;
-            }, 3000);
-          }
-        }
+      if (totalUnreadCount > 0 && newMessageFrom) {
+        setIsIncomingMessage(true);
+        setIncomingMessageText(`📩 ${newMessageFrom} mengirim pesan`);
+        setChatButtonText(`📩 ${newMessageFrom} mengirim pesan`);
+        
+        setTimeout(() => {
+          setIsIncomingMessage(false);
+          setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
+          chatTextIndex++;
+        }, 4000);
       }
     });
 
@@ -1280,13 +1284,13 @@ export default function HomePage(): React.JSX.Element {
   // Animate chat button text
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isChatOpen && user) {
+      if (!isChatOpen && user && !isIncomingMessage) {
         setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
         chatTextIndex++;
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [isChatOpen, user]);
+  }, [isChatOpen, user, isIncomingMessage]);
 
   if (loading) {
     return (
@@ -1328,7 +1332,7 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Dengan lagu asli dari Spotify */}
+        {/* Music Widget */}
         <div
           style={{
             display: "flex",
@@ -1351,7 +1355,6 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
           }}
         >
-          {/* Kotak foto artis */}
           <div
             style={{
               width: "40px",
@@ -1374,7 +1377,6 @@ export default function HomePage(): React.JSX.Element {
             />
           </div>
 
-          {/* Info Lagu - Teks Berjalan Otomatis */}
           <div
             style={{
               flex: 1,
@@ -1401,7 +1403,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Tombol daftar lagu */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -1426,7 +1427,7 @@ export default function HomePage(): React.JSX.Element {
           </button>
         </div>
 
-        {/* User Status - Border radius 12px */}
+        {/* User Status */}
         <div
           style={{
             display: "flex",
@@ -1524,7 +1525,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Music Player Modal - Dengan Spotify Embed asli */}
+      {/* Music Player Modal */}
       {showMusicPlayer && (
         <div
           style={{
@@ -1555,7 +1556,6 @@ export default function HomePage(): React.JSX.Element {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                {/* Foto artis di modal */}
                 <div
                   style={{
                     width: "40px",
@@ -1596,7 +1596,6 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Spotify Embed Asli */}
             <div style={{ borderRadius: "12px", overflow: "hidden" }}>
               <iframe
                 style={{ borderRadius: "12px", border: "none", width: "100%" }}
@@ -1609,7 +1608,6 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Tombol Ganti Lagu */}
             <div style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
               {playlist.map((track) => (
                 <button
@@ -1747,7 +1745,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Login Modal - Border radius 12px */}
+      {/* Login Modal */}
       {showLogin && (
         <div
           style={{
@@ -1976,7 +1974,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Chat Box - Minimalist GSAP Style */}
+      {/* Chat Box */}
       <div
         style={{
           position: "fixed",
@@ -1993,26 +1991,26 @@ export default function HomePage(): React.JSX.Element {
           <div
             style={{
               backgroundColor: "#ffffff",
-              borderRadius: "12px",
+              borderRadius: "16px",
               width: "620px",
               maxHeight: "760px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.06)",
-              border: "none",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+              border: "1px solid rgba(0,0,0,0.04)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
               animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
-            {/* Header - Minimalist */}
+            {/* Header - Hitam */}
             <div
               style={{
                 padding: "16px 20px",
-                borderBottom: "1px solid rgba(0,0,0,0.04)",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                backgroundColor: "transparent",
+                backgroundColor: "#000000",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -2020,7 +2018,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     fontSize: "15px",
                     fontWeight: 500,
-                    color: "#000",
+                    color: "#ffffff",
                     letterSpacing: "-0.01em",
                   }}
                 >
@@ -2028,7 +2026,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 {!showProfile && selectedChat && (
                   <>
-                    <span style={{ fontSize: "10px", color: "#999" }}>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
                       {selectedChat.email}
                     </span>
                     <OnlineIndicator 
@@ -2041,7 +2039,7 @@ export default function HomePage(): React.JSX.Element {
                   <span
                     style={{
                       backgroundColor: "#c5e800",
-                      color: "#000",
+                      color: "#000000",
                       padding: "2px 6px",
                       borderRadius: "4px",
                       fontSize: "10px",
@@ -2064,7 +2062,7 @@ export default function HomePage(): React.JSX.Element {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#666",
+                  color: "rgba(255,255,255,0.5)",
                   padding: "4px 8px",
                   borderRadius: "4px",
                   transition: "all .2s ease",
@@ -2072,17 +2070,19 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: "center",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.color = "#ffffff";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.5)";
                 }}
               >
                 <CloseIcon />
               </button>
             </div>
 
-            {/* Content - Profile View */}
+            {/* Content */}
             {showProfile && profileUser ? (
               <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
@@ -2109,7 +2109,6 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Note Section */}
                   <div style={{ width: "100%", marginBottom: "0px" }}>
                     <div style={{ 
                       backgroundColor: "#f5f5f5", 
@@ -2232,7 +2231,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Photo */}
                   <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
                     <div
                       style={{
@@ -2278,7 +2276,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* Bio */}
                   <div style={{ width: "100%", marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -2371,7 +2368,6 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                     <button
                       onClick={() => {
@@ -2418,7 +2414,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View - Minimalist
+              // Chat List View
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
@@ -2444,7 +2440,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Add User Button - Minimalist */}
                 <button
                   onClick={() => setShowAddUser(!showAddUser)}
                   style={{
@@ -2556,7 +2551,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Pinned Users */}
                 {pinnedUsers.length > 0 && (
                   <div style={{ marginBottom: "10px" }}>
                     <div
@@ -2649,7 +2643,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Pinned Chats */}
                 {pinnedChats.length > 0 && (
                   <div style={{ marginBottom: "10px" }}>
                     <div
@@ -2773,7 +2766,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Chat Rooms List - Minimalist */}
                 <div style={{ padding: "4px 0" }}>
                   {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
                     <div
@@ -2919,17 +2911,17 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : (
-              // Chat View - Minimalist
+              // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
-                {/* Chat Header - Minimalist */}
+                {/* Chat Header - Hitam */}
                 <div
                   style={{
                     padding: "10px 16px",
-                    borderBottom: "1px solid rgba(0,0,0,0.04)",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
                     display: "flex",
                     alignItems: "center",
                     gap: "10px",
-                    backgroundColor: "transparent",
+                    backgroundColor: "#000000",
                   }}
                 >
                   <button
@@ -2941,7 +2933,7 @@ export default function HomePage(): React.JSX.Element {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      color: "#666",
+                      color: "rgba(255,255,255,0.5)",
                       padding: "4px 6px",
                       borderRadius: "4px",
                       transition: "all .2s ease",
@@ -2949,10 +2941,12 @@ export default function HomePage(): React.JSX.Element {
                       alignItems: "center",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                      e.currentTarget.style.color = "#ffffff";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "rgba(255,255,255,0.5)";
                     }}
                   >
                     <BackIcon />
@@ -2962,13 +2956,13 @@ export default function HomePage(): React.JSX.Element {
                       width: "32px",
                       height: "32px",
                       borderRadius: "6px",
-                      backgroundColor: "#f0f0f0",
+                      backgroundColor: "rgba(255,255,255,0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "14px",
                       overflow: "hidden",
-                      color: "#000",
+                      color: "#fff",
                       position: "relative",
                       cursor: "pointer",
                     }}
@@ -2989,7 +2983,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
                       onClick={() => handleOpenProfile(selectedChat)}
                     >
-                      <span style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                      <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff" }}>
                         {selectedChat.name}
                       </span>
                       {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
@@ -3000,11 +2994,11 @@ export default function HomePage(): React.JSX.Element {
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
                       {getOnlineStatus(selectedChat.id) ? (
-                        <span style={{ fontSize: "9px", color: "#999" }}>
+                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
                           {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
                         </span>
                       ) : (
-                        <span style={{ fontSize: "9px", color: "#999" }}>
+                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
                           {getLastSeen(selectedChat.id)}
                         </span>
                       )}
@@ -3016,7 +3010,7 @@ export default function HomePage(): React.JSX.Element {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      color: selectedChat.isPinned ? "#c5e800" : "#ddd",
+                      color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
                       padding: "4px 6px",
                       borderRadius: "4px",
                       display: "flex",
@@ -3028,12 +3022,12 @@ export default function HomePage(): React.JSX.Element {
                   </button>
                 </div>
 
-                {/* Riwayat Pin Message - Minimalist */}
+                {/* Riwayat Pin Message */}
                 {pinnedMessages.length > 0 && (
                   <div
                     style={{
                       padding: "6px 14px",
-                      backgroundColor: "#f8f8f8",
+                      backgroundColor: "rgba(0,0,0,0.02)",
                       borderBottom: "1px solid rgba(0,0,0,0.04)",
                     }}
                   >
@@ -3092,12 +3086,12 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Reply Indicator - Minimalist, tanpa border */}
+                {/* Reply Indicator - Tanpa border, background minimal */}
                 {replyTo && (
                   <div
                     style={{
                       padding: "6px 14px",
-                      backgroundColor: "#f5f5f5",
+                      backgroundColor: "rgba(197,232,0,0.06)",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -3129,7 +3123,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Messages - Minimalist */}
+                {/* Messages - Warna stabilo seperti Awwards */}
                 <div
                   style={{
                     flex: 1,
@@ -3181,9 +3175,9 @@ export default function HomePage(): React.JSX.Element {
                               alignSelf: isMine ? "flex-end" : "flex-start",
                               maxWidth: "80%",
                               padding: "10px 14px",
-                              borderRadius: isMine ? "12px 4px 12px 12px" : "4px 12px 12px 12px",
+                              borderRadius: "12px",
                               backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
-                              color: isMine ? "#000" : "#000",
+                              color: isMine ? "#000000" : "#000000",
                               fontSize: "14px",
                               lineHeight: 1.5,
                               position: "relative",
@@ -3429,7 +3423,7 @@ export default function HomePage(): React.JSX.Element {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input - Minimalist */}
+                {/* Input */}
                 <div
                   style={{
                     padding: "10px 14px 14px",
@@ -3512,7 +3506,7 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            backgroundColor: isChatOpen ? "transparent" : "#000",
+            backgroundColor: isChatOpen ? "transparent" : "#000000",
             padding: isChatOpen ? "0" : "12px 24px",
             borderRadius: "60px",
             border: "none",
@@ -3555,7 +3549,7 @@ export default function HomePage(): React.JSX.Element {
                 <span
                   style={{
                     backgroundColor: "#c5e800",
-                    color: "#000",
+                    color: "#000000",
                     padding: "0 6px",
                     borderRadius: "4px",
                     fontSize: "10px",
