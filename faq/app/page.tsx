@@ -415,7 +415,7 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Privacy Policy
+  // Privacy Policy - Halaman seperti Profile
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   // Chat button text - rolling text
@@ -502,9 +502,18 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Broadcast privacy policy message to all users
+  // Broadcast privacy policy message to all users (hanya sekali)
   const broadcastPrivacyPolicy = async () => {
     if (!db || !user) return;
+    
+    // Cek apakah sudah pernah broadcast
+    const broadcastRef = doc(db, "system", "broadcast");
+    const broadcastSnap = await getDoc(broadcastRef);
+    
+    if (broadcastSnap.exists() && broadcastSnap.data().privacyPolicySent) {
+      console.log("Privacy policy already broadcasted");
+      return;
+    }
     
     try {
       // Get all users except current user
@@ -549,6 +558,12 @@ export default function HomePage(): React.JSX.Element {
           isShared: false
         });
       }
+      
+      // Tandai sudah broadcast
+      await setDoc(broadcastRef, {
+        privacyPolicySent: true,
+        sentAt: serverTimestamp()
+      });
       
       console.log("Privacy policy broadcast sent to all users");
     } catch (error) {
@@ -636,11 +651,8 @@ export default function HomePage(): React.JSX.Element {
           // Send official messages to current user
           await checkAndSendOfficialMessages(currentUser.uid);
           
-          // Broadcast privacy policy to all users (only once)
-          if (!officialMessagesSent) {
-            await broadcastPrivacyPolicy();
-            setOfficialMessagesSent(true);
-          }
+          // Broadcast privacy policy to all users (hanya sekali)
+          await broadcastPrivacyPolicy();
           
         } catch (error) {
           console.error("Error saving user:", error);
@@ -981,9 +993,9 @@ export default function HomePage(): React.JSX.Element {
       setSelectedChat(null);
       setChatRooms([]);
       setTotalUnread(0);
-      setOfficialMessagesSent(false);
       setShowProfile(false);
       setProfileUser(null);
+      setShowPrivacyPolicy(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1431,8 +1443,8 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-      {/* Privacy Policy Modal - Seperti Halaman Profile */}
-      {showPrivacyPolicy && (
+      {/* Privacy Policy - Halaman seperti Profile (bukan modal) */}
+      {showPrivacyPolicy ? (
         <div
           style={{
             position: "fixed",
@@ -1440,97 +1452,88 @@ export default function HomePage(): React.JSX.Element {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
+            backgroundColor: "#ffffff",
             zIndex: 2000,
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
-          onClick={() => setShowPrivacyPolicy(false)}
         >
+          {/* Header - Seperti Profile */}
           <div
             style={{
-              backgroundColor: "#ffffff",
-              borderRadius: "16px",
-              padding: "28px 32px",
-              maxWidth: "540px",
-              width: "100%",
-              maxHeight: "85vh",
-              overflowY: "auto",
-              border: "1px solid #e8e8e8",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
-              position: "relative",
-              animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              padding: "16px 24px",
+              borderBottom: "1px solid #f0f0f0",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              backgroundColor: "#000000",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header dengan Back Button seperti Profile */}
-            <div
+            <button
+              onClick={() => setShowPrivacyPolicy(false)}
               style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#ffffff",
+                padding: "6px 12px",
+                borderRadius: "8px",
+                transition: "all 0.2s ease",
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
-                marginBottom: "20px",
-                paddingBottom: "16px",
-                borderBottom: "1px solid #f0f0f0",
+                gap: "8px",
+                fontFamily: "Inter, 'Inter Fallback'",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              <button
-                onClick={() => setShowPrivacyPolicy(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#666",
-                  cursor: "pointer",
-                  padding: "4px 8px",
-                  borderRadius: "8px",
-                  transition: "all 0.2s ease",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f5f5f5";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <BackIcon />
-                <span style={{ fontSize: "13px", marginLeft: "4px", fontFamily: "Inter, 'Inter Fallback'" }}>
-                  Kembali
-                </span>
-              </button>
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Privacy Policy
-              </span>
-            </div>
-
-            {/* Content - Seperti Profile */}
-            <div
+              <BackIcon />
+              <span>Kembali</span>
+            </button>
+            <span
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
+                fontSize: "16px",
+                fontWeight: 600,
+                color: "#ffffff",
                 fontFamily: "Inter, 'Inter Fallback'",
               }}
             >
+              Privacy Policy
+            </span>
+          </div>
+
+          {/* Content - Seperti Profile */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "32px 40px",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <div
+              style={{
+                maxWidth: "640px",
+                margin: "0 auto",
+                width: "100%",
+              }}
+            >
               {/* Badge dan Title */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <div
                   style={{
                     display: "inline-block",
                     padding: "4px 14px",
                     backgroundColor: "#000000",
                     borderRadius: "20px",
-                    marginBottom: "10px",
+                    marginBottom: "12px",
                   }}
                 >
                   <span
@@ -1540,6 +1543,7 @@ export default function HomePage(): React.JSX.Element {
                       color: "#ffffff",
                       letterSpacing: "0.05em",
                       textTransform: "uppercase",
+                      fontFamily: "Inter, 'Inter Fallback'",
                     }}
                   >
                     Kebijakan Privasi
@@ -1547,10 +1551,10 @@ export default function HomePage(): React.JSX.Element {
                 </div>
                 <h2
                   style={{
-                    fontSize: "22px",
-                    fontWeight: 600,
+                    fontSize: "28px",
+                    fontWeight: 700,
                     color: "#000000",
-                    margin: "4px 0 2px 0",
+                    margin: "0 0 4px 0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1558,7 +1562,7 @@ export default function HomePage(): React.JSX.Element {
                 </h2>
                 <p
                   style={{
-                    fontSize: "12px",
+                    fontSize: "14px",
                     color: "#999",
                     margin: "0",
                     fontFamily: "Inter, 'Inter Fallback'",
@@ -1569,13 +1573,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 1 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1583,10 +1587,10 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
-                    margin: 0,
+                    lineHeight: 1.7,
+                    margin: "0 0 8px 0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1594,11 +1598,11 @@ export default function HomePage(): React.JSX.Element {
                 </p>
                 <ul
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.8,
-                    paddingLeft: "20px",
-                    margin: "6px 0 0 0",
+                    lineHeight: 1.9,
+                    paddingLeft: "24px",
+                    margin: "0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1610,13 +1614,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 2 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1624,10 +1628,10 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
-                    margin: 0,
+                    lineHeight: 1.7,
+                    margin: "0 0 8px 0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1635,11 +1639,11 @@ export default function HomePage(): React.JSX.Element {
                 </p>
                 <ul
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.8,
-                    paddingLeft: "20px",
-                    margin: "6px 0 0 0",
+                    lineHeight: 1.9,
+                    paddingLeft: "24px",
+                    margin: "0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1651,13 +1655,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 3 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1665,9 +1669,9 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                     margin: 0,
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
@@ -1677,13 +1681,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 4 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1691,9 +1695,9 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                     margin: 0,
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
@@ -1703,13 +1707,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 5 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1717,10 +1721,10 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
-                    margin: 0,
+                    lineHeight: 1.7,
+                    margin: "0 0 8px 0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1728,11 +1732,11 @@ export default function HomePage(): React.JSX.Element {
                 </p>
                 <ul
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.8,
-                    paddingLeft: "20px",
-                    margin: "6px 0 0 0",
+                    lineHeight: 1.9,
+                    paddingLeft: "24px",
+                    margin: "0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1743,13 +1747,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 6 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1757,9 +1761,9 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                     margin: 0,
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
@@ -1769,13 +1773,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Section 7 */}
-              <div>
+              <div style={{ marginBottom: "24px" }}>
                 <h3
                   style={{
-                    fontSize: "13px",
+                    fontSize: "15px",
                     fontWeight: 600,
                     color: "#000000",
-                    marginBottom: "6px",
+                    marginBottom: "8px",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1783,10 +1787,10 @@ export default function HomePage(): React.JSX.Element {
                 </h3>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#666",
-                    lineHeight: 1.6,
-                    margin: 0,
+                    lineHeight: 1.7,
+                    margin: "0 0 4px 0",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
@@ -1794,7 +1798,7 @@ export default function HomePage(): React.JSX.Element {
                 </p>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     color: "#000000",
                     marginTop: "4px",
                     fontWeight: 500,
@@ -1808,8 +1812,8 @@ export default function HomePage(): React.JSX.Element {
               {/* Footer */}
               <div
                 style={{
-                  marginTop: "4px",
-                  paddingTop: "14px",
+                  marginTop: "8px",
+                  paddingTop: "16px",
                   borderTop: "1px solid #f0f0f0",
                   display: "flex",
                   justifyContent: "space-between",
@@ -1818,7 +1822,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 <span
                   style={{
-                    fontSize: "11px",
+                    fontSize: "12px",
                     color: "#999",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
@@ -1827,7 +1831,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 <span
                   style={{
-                    fontSize: "11px",
+                    fontSize: "12px",
                     color: "#999",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
@@ -1838,1649 +1842,753 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
         </div>
-      )}
-
-      {/* User Status & Music Widget - Pojok Kanan Atas */}
-      <div
-        style={{
-          position: "absolute",
-          top: "40px",
-          right: "40px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-        }}
-      >
-        {/* Music Widget */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "6px 16px 6px 6px",
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            border: "1px solid #e0e0e0",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            transition: "all 0.3s ease",
-            maxWidth: "260px",
-            cursor: "pointer",
-          }}
-          onClick={() => setShowMusicPlayer(true)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
-          }}
-        >
+      ) : (
+        // Main Content
+        <>
+          {/* User Status & Music Widget - Pojok Kanan Atas */}
           <div
             style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              overflow: "hidden",
-              flexShrink: 0,
-              backgroundColor: "#f0f0f0",
-              border: "1px solid #e8e8e8",
-              position: "relative",
-            }}
-          >
-            <img
-              src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
-              alt={currentTrack.artist}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0f0f0'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-size='18' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              overflow: "hidden",
-              minWidth: 0,
-            }}
-          >
-            <div style={{ overflow: "hidden", position: "relative" }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  animation: "marquee 12s linear infinite",
-                  paddingLeft: "100%",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  letterSpacing: "-0.01em",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {currentTrack.artist} - {currentTrack.title}
-                <span style={{ paddingLeft: "50px", color: "#ccc" }}>●</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPlaylist(!showPlaylist);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#666",
-              cursor: "pointer",
-              padding: "4px 8px",
-              fontSize: "18px",
-              fontWeight: 300,
-              borderRadius: "4px",
-              transition: "all 0.2s ease",
-              lineHeight: 1,
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#f0f0f0"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-          >
-            ⋮
-          </button>
-        </div>
-
-        {/* User Status */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            padding: "8px 20px",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "12px",
-            fontSize: "14px",
-            color: "#000",
-            border: "1px solid #e0e0e0",
-          }}
-        >
-          {user ? (
-            <>
-              {user.photoURL && (
-                <img 
-                  src={user.photoURL} 
-                  alt="avatar" 
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "6px",
-                    objectFit: "cover",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    const selfUser = users.find(u => u.id === user.uid);
-                    if (selfUser) handleOpenProfile(selfUser);
-                  }}
-                />
-              )}
-              <span 
-                style={{ 
-                  fontWeight: 500, 
-                  color: "#000",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  const selfUser = users.find(u => u.id === user.uid);
-                  if (selfUser) handleOpenProfile(selfUser);
-                }}
-              >
-                {user.displayName || user.email}
-              </span>
-              <OnlineIndicator online={true} />
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#000",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  padding: "4px 12px",
-                  borderRadius: "20px",
-                  transition: "all .2s ease",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e0e0e0";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setShowLogin(true)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#000",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: 500,
-                padding: "4px 12px",
-                borderRadius: "20px",
-                transition: "all .2s ease",
-                fontFamily: "Inter, 'Inter Fallback'",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f0f0f0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              Login
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Music Player Modal */}
-      {showMusicPlayer && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setShowMusicPlayer(false)}
-        >
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "420px",
-              width: "90%",
-              border: "1px solid #e0e0e0",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    backgroundColor: "#f0f0f0",
-                    border: "1px solid #e8e8e8",
-                    flexShrink: 0,
-                  }}
-                >
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
-                    alt={currentTrack.artist}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                </div>
-                <div>
-                  <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
-                    {currentTrack.title}
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#666" }}>
-                    {currentTrack.artist}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowMusicPlayer(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#666",
-                  padding: "4px",
-                }}
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <div style={{ borderRadius: "12px", overflow: "hidden" }}>
-              <iframe
-                style={{ borderRadius: "12px", border: "none", width: "100%" }}
-                src={currentTrack.embedUrl}
-                height="352"
-                frameBorder="0"
-                allowFullScreen
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-              />
-            </div>
-
-            <div style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
-              {playlist.map((track) => (
-                <button
-                  key={track.title}
-                  onClick={() => {
-                    setCurrentTrack(track);
-                    const iframe = document.querySelector('iframe[src*="open.spotify.com"]') as HTMLIFrameElement;
-                    if (iframe) {
-                      iframe.src = track.embedUrl;
-                    }
-                  }}
-                  style={{
-                    padding: "6px 16px",
-                    borderRadius: "20px",
-                    border: currentTrack.title === track.title ? "2px solid #000" : "1px solid #e0e0e0",
-                    backgroundColor: currentTrack.title === track.title ? "#f0f0f0" : "transparent",
-                    color: "#000",
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                  }}
-                >
-                  {track.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Playlist Dropdown */}
-      {showPlaylist && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            padding: "24px 28px",
-            maxWidth: "380px",
-            width: "90%",
-            zIndex: 1000,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-            border: "1px solid #e0e0e0",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <span style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
-              Daftar Lagu
-            </span>
-            <button
-              onClick={() => setShowPlaylist(false)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#666",
-                fontSize: "20px",
-                padding: "0 4px",
-              }}
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {playlist.map((track, index) => {
-              const isActive = currentTrack.title === track.title && currentTrack.artist === track.artist;
-              return (
-                <div
-                  key={index}
-                  onClick={() => {
-                    selectTrack(track);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    backgroundColor: isActive ? "#f0f0f0" : "transparent",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    border: isActive ? "1px solid #000" : "1px solid transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = "#f8f8f8";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "6px",
-                      backgroundColor: "#f0f0f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "12px",
-                      flexShrink: 0,
-                      color: "#666",
-                    }}
-                  >
-                    ♫
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
-                      {track.title}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#666" }}>
-                      {track.artist}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <span style={{ fontSize: "11px", color: "#000", fontWeight: 600 }}>
-                      ▶
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Login Modal */}
-      {showLogin && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setShowLogin(false)}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              padding: "32px 36px",
-              maxWidth: "400px",
-              width: "90%",
-              border: "1px solid #e0e0e0",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: "Inter, 'Inter Fallback'" }}>
-              Login
-            </h2>
-            <input
-              type="email"
-              placeholder="Email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                marginBottom: "12px",
-                fontSize: "14px",
-                outline: "none",
-                fontFamily: "Inter, 'Inter Fallback'",
-                color: "#000",
-              }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                marginBottom: "16px",
-                fontSize: "14px",
-                outline: "none",
-                fontFamily: "Inter, 'Inter Fallback'",
-                color: "#000",
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
-            />
-            {loginError && (
-              <div style={{ color: "#ef4444", fontSize: "12px", marginBottom: "12px" }}>
-                {loginError}
-              </div>
-            )}
-            <button
-              onClick={handleEmailLogin}
-              style={{
-                width: "100%",
-                backgroundColor: "#000",
-                color: "#fff",
-                border: "none",
-                padding: "12px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                cursor: "pointer",
-                transition: "all .2s ease",
-                fontFamily: "Inter, 'Inter Fallback'",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-            >
-              Login with Email
-            </button>
-            <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666" }}>
-              atau
-            </div>
-            <button
-              onClick={handleLogin}
-              style={{
-                width: "100%",
-                backgroundColor: "#4285f4",
-                color: "#fff",
-                border: "none",
-                padding: "12px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                cursor: "pointer",
-                marginTop: "8px",
-                transition: "all .2s ease",
-                fontFamily: "Inter, 'Inter Fallback'",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-            >
-              Login with Google
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Share Modal */}
-      {showShareModal && shareMessage && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setShowShareModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              padding: "30px",
-              maxWidth: "400px",
-              width: "90%",
-              border: "1px solid #e0e0e0",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
-              Teruskan Pesan
-            </h3>
-            <div style={{ 
-              fontSize: "13px", 
-              color: "#666", 
-              marginBottom: "16px",
-              padding: "10px",
-              backgroundColor: "#f5f5f5",
-              borderRadius: "8px"
-            }}>
-              <div style={{ fontWeight: 500, color: "#000" }}>Dari: {shareMessage.senderName}</div>
-              <div>{shareMessage.text}</div>
-            </div>
-            <select
-              value={selectedShareUser}
-              onChange={(e) => setSelectedShareUser(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                fontSize: "13px",
-                outline: "none",
-                fontFamily: "Inter, 'Inter Fallback'",
-                marginBottom: "12px",
-                backgroundColor: "#fff",
-                color: "#000",
-              }}
-            >
-              <option value="">Pilih user...</option>
-              {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
-                </option>
-              ))}
-            </select>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={handleShareMessage}
-                disabled={!selectedShareUser}
-                style={{
-                  backgroundColor: selectedShareUser ? "#000" : "#ccc",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  cursor: selectedShareUser ? "pointer" : "not-allowed",
-                  fontWeight: 500,
-                  flex: 1,
-                  transition: "all .2s ease",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Teruskan
-              </button>
-              <button
-                onClick={() => {
-                  setShowShareModal(false);
-                  setShareMessage(null);
-                  setSelectedShareUser("");
-                }}
-                style={{
-                  background: "none",
-                  border: "1px solid #ddd",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  color: "#666",
-                  cursor: "pointer",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Batal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Chat Box */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: "40px",
-          right: "40px",
-          zIndex: 100,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: "16px",
-        }}
-      >
-        {isChatOpen && (
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              borderRadius: "16px",
-              width: "620px",
-              maxHeight: "760px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-              border: "1px solid rgba(0,0,0,0.04)",
+              position: "absolute",
+              top: "40px",
+              right: "40px",
+              zIndex: 10,
               display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              alignItems: "center",
+              gap: "12px",
             }}
           >
-            {/* Header - Hitam dengan teks cerah */}
+            {/* Music Widget */}
             <div
               style={{
-                padding: "16px 20px",
-                borderBottom: "none",
                 display: "flex",
-                justifyContent: "space-between",
                 alignItems: "center",
-                backgroundColor: "#000000",
+                gap: "10px",
+                padding: "6px 16px 6px 6px",
+                backgroundColor: "#ffffff",
+                borderRadius: "12px",
+                border: "1px solid #e0e0e0",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                transition: "all 0.3s ease",
+                maxWidth: "260px",
+                cursor: "pointer",
+              }}
+              onClick={() => setShowMusicPlayer(true)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: 500,
-                    color: "#ffffff",
-                    letterSpacing: "-0.01em",
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                  backgroundColor: "#f0f0f0",
+                  border: "1px solid #e8e8e8",
+                  position: "relative",
+                }}
+              >
+                <img
+                  src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
+                  alt={currentTrack.artist}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0f0f0'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-size='18' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
                   }}
-                >
-                  {showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")}
-                </span>
-                {/* Tombol Privacy Policy */}
-                <button
-                  onClick={() => setShowPrivacyPolicy(true)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "rgba(255,255,255,0.4)",
-                    fontSize: "10px",
-                    cursor: "pointer",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    transition: "all 0.2s ease",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    textDecoration: "underline",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "#ffffff";
-                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "rgba(255,255,255,0.4)";
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  Privacy Policy
-                </button>
-                {!showProfile && selectedChat && (
-                  <>
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
-                      {selectedChat.email}
-                    </span>
-                    <OnlineIndicator 
-                      online={getOnlineStatus(selectedChat.id)} 
-                      lastSeen={getLastSeen(selectedChat.id)}
-                    />
-                  </>
-                )}
-                {!showProfile && !selectedChat && totalUnread > 0 && (
-                  <span
+                />
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  overflow: "hidden",
+                  minWidth: 0,
+                }}
+              >
+                <div style={{ overflow: "hidden", position: "relative" }}>
+                  <div
                     style={{
-                      backgroundColor: "#c5e800",
-                      color: "#000000",
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                      fontSize: "10px",
+                      display: "inline-block",
+                      animation: "marquee 12s linear infinite",
+                      paddingLeft: "100%",
+                      fontSize: "13px",
                       fontWeight: 600,
+                      color: "#000000",
+                      letterSpacing: "-0.01em",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {totalUnread}
-                  </span>
-                )}
+                    {currentTrack.artist} - {currentTrack.title}
+                    <span style={{ paddingLeft: "50px", color: "#ccc" }}>●</span>
+                  </div>
+                </div>
               </div>
+
               <button
-                onClick={() => {
-                  if (showProfile) {
-                    handleCloseProfile();
-                  } else {
-                    setIsChatOpen(false);
-                  }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPlaylist(!showPlaylist);
                 }}
                 style={{
                   background: "none",
                   border: "none",
+                  color: "#666",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,0.5)",
                   padding: "4px 8px",
+                  fontSize: "18px",
+                  fontWeight: 300,
                   borderRadius: "4px",
-                  transition: "all .2s ease",
-                  display: "flex",
-                  alignItems: "center",
+                  transition: "all 0.2s ease",
+                  lineHeight: 1,
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                  e.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#f0f0f0"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
               >
-                <CloseIcon />
+                ⋮
               </button>
             </div>
 
-            {/* Content - Profile View */}
-            {showProfile && profileUser ? (
-              <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+            {/* User Status */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                padding: "8px 20px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+                fontSize: "14px",
+                color: "#000",
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              {user ? (
+                <>
+                  {user.photoURL && (
+                    <img 
+                      src={user.photoURL} 
+                      alt="avatar" 
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "6px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        const selfUser = users.find(u => u.id === user.uid);
+                        if (selfUser) handleOpenProfile(selfUser);
+                      }}
+                    />
+                  )}
+                  <span 
+                    style={{ 
+                      fontWeight: 500, 
+                      color: "#000",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      const selfUser = users.find(u => u.id === user.uid);
+                      if (selfUser) handleOpenProfile(selfUser);
+                    }}
+                  >
+                    {user.displayName || user.email}
+                  </span>
+                  <OnlineIndicator online={true} />
                   <button
-                    onClick={handleCloseProfile}
+                    onClick={handleLogout}
                     style={{
                       background: "none",
                       border: "none",
-                      color: "#666",
+                      color: "#000",
                       cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      fontSize: "13px",
+                      fontSize: "14px",
+                      padding: "4px 12px",
+                      borderRadius: "20px",
+                      transition: "all .2s ease",
                       fontFamily: "Inter, 'Inter Fallback'",
-                      marginBottom: "16px",
-                      padding: "4px 0",
-                      transition: "color 0.2s ease",
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
-                    onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#e0e0e0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
                   >
-                    <BackIcon />
-                    <span>Kembali</span>
+                    Logout
                   </button>
-
-                  <div style={{ width: "100%", marginBottom: "0px" }}>
-                    <div style={{ 
-                      backgroundColor: "#f5f5f5", 
-                      borderRadius: "8px",
-                      padding: "8px 14px",
-                      position: "relative",
-                      marginBottom: "8px",
-                      maxWidth: "280px",
-                    }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ 
-                          fontSize: "10px", 
-                          color: "#666", 
-                          fontWeight: 500, 
-                          letterSpacing: "0.05em", 
-                          textTransform: "uppercase",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}>
-                          <span style={{ 
-                            display: "inline-block",
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            backgroundColor: "#c5e800",
-                            marginRight: "4px",
-                          }} />
-                          Catatan
-                        </span>
-                        {profileUser.id === user?.uid && (
-                          <button
-                            onClick={() => setEditNote(!editNote)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "#666",
-                              fontSize: "10px",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            <EditIcon />
-                            {profileUser.note ? "Edit" : "Tambah"}
-                          </button>
-                        )}
-                      </div>
-
-                      {editNote && profileUser.id === user?.uid ? (
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
-                          <input
-                            type="text"
-                            value={noteInput}
-                            onChange={(e) => setNoteInput(e.target.value)}
-                            placeholder="Tulis catatan..."
-                            style={{
-                              flex: 1,
-                              padding: "6px 10px",
-                              backgroundColor: "#fff",
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "4px",
-                              color: "#000",
-                              fontSize: "12px",
-                              outline: "none",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                handleSaveNote();
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={handleSaveNote}
-                            style={{
-                              padding: "4px 12px",
-                              backgroundColor: "#c5e800",
-                              border: "none",
-                              borderRadius: "4px",
-                              color: "#000",
-                              fontSize: "11px",
-                              fontWeight: 500,
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            Simpan
-                          </button>
-                          <button
-                            onClick={() => setEditNote(false)}
-                            style={{
-                              padding: "4px 10px",
-                              backgroundColor: "transparent",
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "4px",
-                              color: "#666",
-                              fontSize: "11px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      ) : (
-                        <div style={{ 
-                          padding: "4px 0",
-                          color: profileUser.note ? "#000" : "#999",
-                          fontSize: "13px",
-                          lineHeight: 1.4,
-                          minHeight: "24px",
-                        }}>
-                          {profileUser.note || "Belum ada catatan"}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
-                    <div
-                      style={{
-                        width: "64px",
-                        height: "64px",
-                        borderRadius: "8px",
-                        backgroundColor: "#f0f0f0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "28px",
-                        overflow: "hidden",
-                        border: "1px solid #e8e8e8",
-                        flexShrink: 0,
-                        position: "relative",
-                      }}
-                    >
-                      {profileUser.photoURL ? (
-                        <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                      )}
-                      {profileUser.isOfficial && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={16} />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ fontSize: "18px", fontWeight: 500, color: "#000" }}>
-                          {profileUser.name}
-                        </span>
-                        {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
-                      </div>
-                      <span style={{ fontSize: "13px", color: "#999" }}>{profileUser.email}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                        <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                        <span style={{ fontSize: "12px", color: "#666" }}>
-                          {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ width: "100%", marginBottom: "16px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                        Bio
-                      </span>
-                      {profileUser.id === user?.uid && (
-                        <button
-                          onClick={() => setEditBio(!editBio)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#999",
-                            fontSize: "10px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                          }}
-                        >
-                          <EditIcon />
-                          {profileUser.bio ? "Edit" : "Tambah"}
-                        </button>
-                      )}
-                    </div>
-                    {editBio && profileUser.id === user?.uid ? (
-                      <div>
-                        <textarea
-                          value={bioInput}
-                          onChange={(e) => setBioInput(e.target.value)}
-                          placeholder="Tulis bio..."
-                          rows={2}
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            backgroundColor: "#f5f5f5",
-                            border: "1px solid #e8e8e8",
-                            borderRadius: "6px",
-                            color: "#000",
-                            fontSize: "13px",
-                            outline: "none",
-                            fontFamily: "Inter, 'Inter Fallback'",
-                            resize: "vertical",
-                          }}
-                        />
-                        <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                          <button
-                            onClick={handleSaveBio}
-                            style={{
-                              padding: "4px 14px",
-                              backgroundColor: "#000",
-                              border: "none",
-                              borderRadius: "4px",
-                              color: "#fff",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            Simpan
-                          </button>
-                          <button
-                            onClick={() => setEditBio(false)}
-                            style={{
-                              padding: "4px 14px",
-                              backgroundColor: "transparent",
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "4px",
-                              color: "#999",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
-                            }}
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ 
-                        padding: "8px 12px", 
-                        backgroundColor: "#f8f8f8", 
-                        borderRadius: "6px",
-                        fontSize: "13px",
-                        color: profileUser.bio ? "#000" : "#ccc",
-                        lineHeight: 1.5,
-                      }}>
-                        {profileUser.bio || "Belum ada bio"}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                    <button
-                      onClick={() => {
-                        handleCloseProfile();
-                        setSelectedChat(profileUser);
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "10px",
-                        backgroundColor: "#000",
-                        border: "none",
-                        borderRadius: "8px",
-                        color: "#fff",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        transition: "opacity 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                    >
-                      Kirim Pesan
-                    </button>
-                    <button
-                      onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
-                      style={{
-                        padding: "10px 16px",
-                        backgroundColor: "transparent",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                        color: profileUser.isPinned ? "#000" : "#999",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <PinIcon filled={profileUser.isPinned || false} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : !selectedChat ? (
-              // Chat List View
-              <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
-                {/* Announcement */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 14px",
-                    backgroundColor: "#f8f8f8",
-                    borderRadius: "8px",
-                    marginBottom: "10px",
-                    border: "none",
-                  }}
-                >
-                  <div style={{ fontSize: "20px" }}>📢</div>
-                  <div>
-                    <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
-                      Pengumuman
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#666" }}>
-                      Fitur chat sedang dalam tahap pengembangan.
-                    </div>
-                  </div>
-                </div>
-
+                </>
+              ) : (
                 <button
-                  onClick={() => setShowAddUser(!showAddUser)}
+                  onClick={() => setShowLogin(true)}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    backgroundColor: "transparent",
-                    border: "1px dashed #ddd",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    width: "100%",
-                    marginBottom: "10px",
-                    transition: "all .2s ease",
+                    background: "none",
+                    border: "none",
                     color: "#000",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    transition: "all .2s ease",
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                    e.currentTarget.style.borderColor = "#c5e800";
+                    e.currentTarget.style.backgroundColor = "#f0f0f0";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.borderColor = "#ddd";
                   }}
                 >
-                  <AddUserIcon />
-                  <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
+                  Login
                 </button>
+              )}
+            </div>
+          </div>
 
-                {showAddUser && (
-                  <div
+          {/* Music Player Modal */}
+          {showMusicPlayer && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.6)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setShowMusicPlayer(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  maxWidth: "420px",
+                  width: "90%",
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "#f0f0f0",
+                        border: "1px solid #e8e8e8",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
+                        alt={currentTrack.artist}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
+                        {currentTrack.title}
+                      </div>
+                      <div style={{ fontSize: "13px", color: "#666" }}>
+                        {currentTrack.artist}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowMusicPlayer(false)}
                     style={{
-                      padding: "14px",
-                      backgroundColor: "#f8f8f8",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#666",
+                      padding: "4px",
                     }}
                   >
-                    <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "10px", fontFamily: "Inter, 'Inter Fallback'" }}>
-                      Pilih User untuk Chat
-                    </div>
-                    <select
-                      value={selectedNewUser}
-                      onChange={(e) => setSelectedNewUser(e.target.value)}
+                    <CloseIcon />
+                  </button>
+                </div>
+
+                <div style={{ borderRadius: "12px", overflow: "hidden" }}>
+                  <iframe
+                    style={{ borderRadius: "12px", border: "none", width: "100%" }}
+                    src={currentTrack.embedUrl}
+                    height="352"
+                    frameBorder="0"
+                    allowFullScreen
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
+                  {playlist.map((track) => (
+                    <button
+                      key={track.title}
+                      onClick={() => {
+                        setCurrentTrack(track);
+                        const iframe = document.querySelector('iframe[src*="open.spotify.com"]') as HTMLIFrameElement;
+                        if (iframe) {
+                          iframe.src = track.embedUrl;
+                        }
+                      }}
                       style={{
-                        width: "100%",
-                        padding: "8px 12px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                        marginBottom: "8px",
-                        backgroundColor: "#fff",
+                        padding: "6px 16px",
+                        borderRadius: "20px",
+                        border: currentTrack.title === track.title ? "2px solid #000" : "1px solid #e0e0e0",
+                        backgroundColor: currentTrack.title === track.title ? "#f0f0f0" : "transparent",
                         color: "#000",
-                      }}
-                    >
-                      <option value="">Pilih user...</option>
-                      {availableUsers.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
-                        </option>
-                      ))}
-                    </select>
-                    {availableUsers.length === 0 && (
-                      <div style={{ fontSize: "11px", color: "#666", marginBottom: "6px" }}>
-                        Semua user sudah di-chat
-                      </div>
-                    )}
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        onClick={handleAddExistingUser}
-                        disabled={!selectedNewUser}
-                        style={{
-                          backgroundColor: selectedNewUser ? "#000" : "#ccc",
-                          color: "#fff",
-                          border: "none",
-                          padding: "6px 14px",
-                          borderRadius: "6px",
-                          fontSize: "12px",
-                          cursor: selectedNewUser ? "pointer" : "not-allowed",
-                          fontWeight: 500,
-                          transition: "all .2s ease",
-                          fontFamily: "Inter, 'Inter Fallback'",
-                        }}
-                      >
-                        Mulai Chat
-                      </button>
-                      <button
-                        onClick={() => setShowAddUser(false)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                          cursor: "pointer",
-                          fontFamily: "Inter, 'Inter Fallback'",
-                        }}
-                      >
-                        Batal
-                      </button>
-                    </div>
-                    {addUserStatus && (
-                      <div style={{ fontSize: "11px", color: "#000", marginTop: "6px" }}>
-                        {addUserStatus}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {pinnedUsers.length > 0 && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <div
-                      onClick={() => setShowPinnedUsers(!showPinnedUsers)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "6px 10px",
+                        fontSize: "12px",
+                        fontWeight: 500,
                         cursor: "pointer",
-                        backgroundColor: "transparent",
-                        borderRadius: "6px",
+                        transition: "all 0.2s ease",
+                        fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                          User Pinned ({pinnedUsers.length})
-                        </span>
-                      </div>
-                      <PinDropdownIcon isOpen={showPinnedUsers} />
-                    </div>
-                    {showPinnedUsers && (
-                      <div style={{ padding: "4px 0", marginTop: "2px" }}>
-                        {pinnedUsers.map((u) => (
-                          <div
-                            key={u.id}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "10px",
-                              padding: "6px 10px",
-                              borderRadius: "6px",
-                              backgroundColor: "#fafafa",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: "32px",
-                                height: "32px",
-                                borderRadius: "6px",
-                                backgroundColor: "#f0f0f0",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "14px",
-                                overflow: "hidden",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {u.photoURL ? (
-                                <img src={u.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                              ) : (
-                                <span style={{ color: "#000" }}>{u.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                              )}
-                            </div>
-                            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
-                              <div>
-                                <div 
-                                  style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
-                                  onClick={() => handleOpenProfile(u)}
-                                >
-                                  {u.name}
-                                  {u.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                </div>
-                                <div style={{ fontSize: "9px", color: "#999" }}>
-                                  {u.email}
-                                </div>
-                              </div>
-                              <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
-                            </div>
-                            <button
-                              onClick={() => handlePinUser(u.id, true)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                color: "#c5e800",
-                                padding: "2px 4px",
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
-                              <PinIcon filled={true} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {pinnedChats.length > 0 && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <div
-                      onClick={() => setShowPinnedChats(!showPinnedChats)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "6px 10px",
-                        cursor: "pointer",
-                        backgroundColor: "transparent",
-                        borderRadius: "6px",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                          Chat Pinned ({pinnedChats.length})
-                        </span>
-                      </div>
-                      <PinDropdownIcon isOpen={showPinnedChats} />
-                    </div>
-                    {showPinnedChats && (
-                      <div style={{ padding: "4px 0", marginTop: "2px" }}>
-                        {pinnedChats.map((room) => {
-                          const otherId = room.participants.find(id => id !== user.uid);
-                          const otherUser = users.find(u => u.id === otherId);
-                          if (!otherUser) return null;
-                          return (
-                            <div
-                              key={room.id}
-                              onClick={() => setSelectedChat(otherUser)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "10px",
-                                padding: "6px 10px",
-                                borderRadius: "6px",
-                                cursor: "pointer",
-                                backgroundColor: "#fafafa",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  borderRadius: "6px",
-                                  backgroundColor: "#f0f0f0",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "14px",
-                                  overflow: "hidden",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {otherUser.photoURL ? (
-                                  <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                                )}
-                              </div>
-                              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
-                                <div>
-                                  <div 
-                                    style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenProfile(otherUser);
-                                    }}
-                                  >
-                                    {otherUser.name}
-                                    {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                  </div>
-                                  <div style={{ fontSize: "9px", color: "#999" }}>
-                                    {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "Belum ada pesan"}
-                                  </div>
-                                </div>
-                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
-                              </div>
-                              {room.unreadCount > 0 && (
-                                <div
-                                  style={{
-                                    backgroundColor: "#c5e800",
-                                    color: "#000",
-                                    padding: "0 6px",
-                                    borderRadius: "4px",
-                                    fontSize: "9px",
-                                    fontWeight: 600,
-                                    lineHeight: "18px",
-                                    height: "18px",
-                                    minWidth: "18px",
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  {room.unreadCount}
-                                </div>
-                              )}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePinChat(room.id, true);
-                                }}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  color: "#c5e800",
-                                  padding: "2px 4px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <PinIcon filled={true} />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div style={{ padding: "4px 0" }}>
-                  {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        color: "#999",
-                        fontSize: "13px",
-                        padding: "40px 0",
-                      }}
-                    >
-                      <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                      <div>Belum ada riwayat chat</div>
-                    </div>
-                  ) : (
-                    unpinnedChats.map((room) => {
-                      const otherId = room.participants.find(id => id !== user.uid);
-                      const otherUser = users.find(u => u.id === otherId);
-                      if (!otherUser) return null;
-                      
-                      const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
-                      
-                      return (
-                        <div
-                          key={room.id}
-                          onClick={() => setSelectedChat(otherUser)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            padding: "10px 12px",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            transition: "all .2s ease",
-                            marginBottom: "2px",
-                            backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.12)" : "#f5f5f5";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent";
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "6px",
-                              backgroundColor: "#f0f0f0",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "16px",
-                              flexShrink: 0,
-                              overflow: "hidden",
-                              position: "relative",
-                            }}
-                          >
-                            {otherUser.photoURL ? (
-                              <img 
-                                src={otherUser.photoURL} 
-                                alt="avatar" 
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              />
-                            ) : (
-                              <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                            )}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
-                              <span 
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenProfile(otherUser);
-                                }}
-                              >
-                                {otherUser.name}
-                              </span>
-                              {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                              <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
-                            </div>
-                            <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {room.lastMessage ? (
-                                <>
-                                  {isLastMessageFromMe && "Anda: "}
-                                  {room.lastMessage}
-                                </>
-                              ) : (
-                                "Belum ada pesan"
-                              )}
-                            </div>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                            {room.lastMessageTime && (
-                              <span style={{ fontSize: "9px", color: "#bbb" }}>
-                                {formatTime(room.lastMessageTime)}
-                              </span>
-                            )}
-                            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                              {room.unreadCount > 0 && (
-                                <div
-                                  style={{
-                                    backgroundColor: "#c5e800",
-                                    color: "#000",
-                                    padding: "0 6px",
-                                    borderRadius: "4px",
-                                    fontSize: "9px",
-                                    fontWeight: 600,
-                                    lineHeight: "18px",
-                                    height: "18px",
-                                    minWidth: "18px",
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  {room.unreadCount}
-                                </div>
-                              )}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePinChat(room.id, room.isPinned || false);
-                                }}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  color: room.isPinned ? "#c5e800" : "#ddd",
-                                  padding: "2px 4px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  transition: "all .2s ease",
-                                }}
-                              >
-                                <PinIcon filled={room.isPinned || false} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                      {track.title}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ) : (
-              // Chat View
-              <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
-                {/* Chat Header - Hitam dengan teks cerah */}
+            </div>
+          )}
+
+          {/* Playlist Dropdown */}
+          {showPlaylist && (
+            <div
+              style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "#ffffff",
+                borderRadius: "12px",
+                padding: "24px 28px",
+                maxWidth: "380px",
+                width: "90%",
+                zIndex: 1000,
+                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+                border: "1px solid #e0e0e0",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <span style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
+                  Daftar Lagu
+                </span>
+                <button
+                  onClick={() => setShowPlaylist(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#666",
+                    fontSize: "20px",
+                    padding: "0 4px",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {playlist.map((track, index) => {
+                  const isActive = currentTrack.title === track.title && currentTrack.artist === track.artist;
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        selectTrack(track);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        backgroundColor: isActive ? "#f0f0f0" : "transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        border: isActive ? "1px solid #000" : "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = "#f8f8f8";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "6px",
+                          backgroundColor: "#f0f0f0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          flexShrink: 0,
+                          color: "#666",
+                        }}
+                      >
+                        ♫
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
+                          {track.title}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#666" }}>
+                          {track.artist}
+                        </div>
+                      </div>
+                      {isActive && (
+                        <span style={{ fontSize: "11px", color: "#000", fontWeight: 600 }}>
+                          ▶
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Login Modal */}
+          {showLogin && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setShowLogin(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "12px",
+                  padding: "32px 36px",
+                  maxWidth: "400px",
+                  width: "90%",
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: "Inter, 'Inter Fallback'" }}>
+                  Login
+                </h2>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    marginBottom: "12px",
+                    fontSize: "14px",
+                    outline: "none",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    color: "#000",
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    marginBottom: "16px",
+                    fontSize: "14px",
+                    outline: "none",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    color: "#000",
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
+                />
+                {loginError && (
+                  <div style={{ color: "#ef4444", fontSize: "12px", marginBottom: "12px" }}>
+                    {loginError}
+                  </div>
+                )}
+                <button
+                  onClick={handleEmailLogin}
+                  style={{
+                    width: "100%",
+                    backgroundColor: "#000",
+                    color: "#fff",
+                    border: "none",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all .2s ease",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                >
+                  Login with Email
+                </button>
+                <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666" }}>
+                  atau
+                </div>
+                <button
+                  onClick={handleLogin}
+                  style={{
+                    width: "100%",
+                    backgroundColor: "#4285f4",
+                    color: "#fff",
+                    border: "none",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    marginTop: "8px",
+                    transition: "all .2s ease",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                >
+                  Login with Google
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Share Modal */}
+          {showShareModal && shareMessage && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setShowShareModal(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "12px",
+                  padding: "30px",
+                  maxWidth: "400px",
+                  width: "90%",
+                  border: "1px solid #e0e0e0",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
+                  Teruskan Pesan
+                </h3>
+                <div style={{ 
+                  fontSize: "13px", 
+                  color: "#666", 
+                  marginBottom: "16px",
+                  padding: "10px",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "8px"
+                }}>
+                  <div style={{ fontWeight: 500, color: "#000" }}>Dari: {shareMessage.senderName}</div>
+                  <div>{shareMessage.text}</div>
+                </div>
+                <select
+                  value={selectedShareUser}
+                  onChange={(e) => setSelectedShareUser(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    outline: "none",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    marginBottom: "12px",
+                    backgroundColor: "#fff",
+                    color: "#000",
+                  }}
+                >
+                  <option value="">Pilih user...</option>
+                  {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={handleShareMessage}
+                    disabled={!selectedShareUser}
+                    style={{
+                      backgroundColor: selectedShareUser ? "#000" : "#ccc",
+                      color: "#fff",
+                      border: "none",
+                      padding: "10px 20px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      cursor: selectedShareUser ? "pointer" : "not-allowed",
+                      fontWeight: 500,
+                      flex: 1,
+                      transition: "all .2s ease",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Teruskan
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowShareModal(false);
+                      setShareMessage(null);
+                      setSelectedShareUser("");
+                    }}
+                    style={{
+                      background: "none",
+                      border: "1px solid #ddd",
+                      padding: "10px 20px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      color: "#666",
+                      cursor: "pointer",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Chat Box */}
+          <div
+            style={{
+              position: "fixed",
+              bottom: "40px",
+              right: "40px",
+              zIndex: 100,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: "16px",
+            }}
+          >
+            {isChatOpen && (
+              <div
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: "16px",
+                  width: "620px",
+                  maxHeight: "760px",
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+                  border: "1px solid rgba(0,0,0,0.04)",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                }}
+              >
+                {/* Header - Hitam dengan teks cerah */}
                 <div
                   style={{
-                    padding: "10px 16px",
+                    padding: "16px 20px",
                     borderBottom: "none",
                     display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    gap: "10px",
                     backgroundColor: "#000000",
                   }}
                 >
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 500,
+                        color: "#ffffff",
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")}
+                    </span>
+                    {!showProfile && selectedChat && (
+                      <>
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                          {selectedChat.email}
+                        </span>
+                        <OnlineIndicator 
+                          online={getOnlineStatus(selectedChat.id)} 
+                          lastSeen={getLastSeen(selectedChat.id)}
+                        />
+                      </>
+                    )}
+                    {!showProfile && !selectedChat && totalUnread > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: "#c5e800",
+                          color: "#000000",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {totalUnread}
+                      </span>
+                    )}
+                  </div>
                   <button
                     onClick={() => {
-                      setSelectedChat(null);
-                      setReplyTo(null);
+                      if (showProfile) {
+                        handleCloseProfile();
+                      } else {
+                        setIsChatOpen(false);
+                      }
                     }}
                     style={{
                       background: "none",
                       border: "none",
                       cursor: "pointer",
                       color: "rgba(255,255,255,0.5)",
-                      padding: "4px 6px",
+                      padding: "4px 8px",
                       borderRadius: "4px",
                       transition: "all .2s ease",
                       display: "flex",
@@ -3495,702 +2603,1570 @@ export default function HomePage(): React.JSX.Element {
                       e.currentTarget.style.color = "rgba(255,255,255,0.5)";
                     }}
                   >
-                    <BackIcon />
-                  </button>
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "6px",
-                      backgroundColor: "rgba(255,255,255,0.1)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "14px",
-                      overflow: "hidden",
-                      color: "#fff",
-                      position: "relative",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleOpenProfile(selectedChat)}
-                  >
-                    {selectedChat.photoURL ? (
-                      <img 
-                        src={selectedChat.photoURL} 
-                        alt="avatar" 
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    ) : (
-                      <span>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
-                    <div 
-                      style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
-                      onClick={() => handleOpenProfile(selectedChat)}
-                    >
-                      <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff" }}>
-                        {selectedChat.name}
-                      </span>
-                      {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <OnlineIndicator 
-                        online={getOnlineStatus(selectedChat.id)} 
-                        lastSeen={getLastSeen(selectedChat.id)}
-                      />
-                      {getOnlineStatus(selectedChat.id) ? (
-                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
-                          {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
-                          {getLastSeen(selectedChat.id)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
-                      padding: "4px 6px",
-                      borderRadius: "4px",
-                      display: "flex",
-                      alignItems: "center",
-                      transition: "all .2s ease",
-                    }}
-                  >
-                    <PinIcon filled={selectedChat.isPinned || false} />
+                    <CloseIcon />
                   </button>
                 </div>
 
-                {/* Riwayat Pin Message */}
-                {pinnedMessages.length > 0 && (
-                  <div
-                    style={{
-                      padding: "6px 14px",
-                      backgroundColor: "rgba(0,0,0,0.02)",
-                      borderBottom: "1px solid rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <div
-                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        cursor: "pointer",
-                        color: "#999",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <PinIcon filled={true} />
-                        <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                          Pesan Pinned ({pinnedMessages.length})
-                        </span>
-                      </div>
-                      <PinDropdownIcon isOpen={showPinnedMessages} />
-                    </div>
-                    {showPinnedMessages && (
-                      <div style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}>
-                        {pinnedMessages.map((msg) => {
-                          const isMine = msg.senderId === user?.uid;
-                          return (
-                            <div
-                              key={msg.id}
-                              style={{
-                                padding: "4px 8px",
-                                marginBottom: "2px",
-                                borderRadius: "4px",
-                                backgroundColor: isMine ? "rgba(197,232,0,0.08)" : "rgba(0,0,0,0.04)",
-                                fontSize: "11px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <div style={{ flex: 1 }}>
-                                <span style={{ color: "#999", fontSize: "9px" }}>
-                                  {isMine ? "Anda: " : `${msg.senderName}: `}
-                                </span>
-                                <span style={{ color: "#000" }}>
-                                  {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
-                                </span>
-                              </div>
-                              <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px" }}>
-                                {formatTime(msg.pinnedAt || msg.timestamp)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Content - Profile View */}
+                {showProfile && profileUser ? (
+                  <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                      <button
+                        onClick={handleCloseProfile}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#666",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontSize: "13px",
+                          fontFamily: "Inter, 'Inter Fallback'",
+                          marginBottom: "16px",
+                          padding: "4px 0",
+                          transition: "color 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
+                        onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
+                      >
+                        <BackIcon />
+                        <span>Kembali</span>
+                      </button>
 
-                {/* Reply Indicator - Tanpa border dan background */}
-                {replyTo && (
-                  <div
-                    style={{
-                      padding: "4px 14px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <ReplyIcon />
-                      <div>
-                        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
-                          Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#666" }}>
-                          {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setReplyTo(null)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#999",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-
-                {/* Messages - Warna stabilo seperti Awwards dengan Balas: [nama] */}
-                <div
-                  style={{
-                    flex: 1,
-                    padding: "16px 20px",
-                    overflowY: "auto",
-                    backgroundColor: "#ffffff",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  {messages.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        color: "#bbb",
-                        fontSize: "13px",
-                        marginTop: "60px",
-                      }}
-                    >
-                      <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                      <div>Belum ada pesan</div>
-                    </div>
-                  ) : (
-                    messages.map((msg, idx) => {
-                      const isMine = msg.senderId === user?.uid;
-                      const chatId = [user.uid, selectedChat.id].sort().join("_");
-                      const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
-                        formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
-                      
-                      // Tentukan nama untuk balasan
-                      const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
-                      
-                      // Cek apakah pesan dari official dan mengandung "Privacy Policy"
-                      const isPrivacyPolicyMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
-                      
-                      return (
-                        <React.Fragment key={idx}>
-                          {showDate && (
-                            <div
-                              style={{
-                                textAlign: "center",
-                                color: "#ccc",
-                                fontSize: "10px",
-                                padding: "6px 0 10px 0",
-                                fontWeight: 400,
-                                letterSpacing: "0.03em",
-                              }}
-                            >
-                              {formatDate(msg.timestamp)}
-                            </div>
-                          )}
-                          <div
-                            style={{
-                              alignSelf: isMine ? "flex-end" : "flex-start",
-                              maxWidth: "80%",
-                              padding: "10px 14px",
-                              borderRadius: "12px",
-                              backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
-                              color: "#000000",
-                              fontSize: "14px",
-                              lineHeight: 1.5,
-                              position: "relative",
-                              border: msg.isPinned ? "1px solid #c5e800" : "none",
-                              boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.1)" : "none",
-                            }}
-                          >
-                            {msg.isShared && msg.sharedFromName && (
-                              <div
-                                style={{
-                                  fontSize: "10px",
-                                  color: "rgba(0,0,0,0.4)",
-                                  marginBottom: "4px",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                Diteruskan dari {msg.sharedFromName}
-                              </div>
-                            )}
-                            
-                            {/* Reply Preview - Tampilkan "Balas: [nama]" */}
-                            {msg.replyTo && msg.replyToText && (
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.5)",
-                                  padding: "4px 8px",
-                                  borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
-                                  marginBottom: "6px",
-                                  backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
-                                  borderRadius: "4px",
-                                }}
-                              >
-                                <span style={{ fontWeight: 500, color: "#22c55e" }}>
-                                  {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
-                                </span>
-                                <span style={{ color: isMine ? "#000" : "#333" }}> {msg.replyToText}</span>
-                              </div>
-                            )}
-                            
-                            {/* Pesan dengan link Privacy Policy */}
-                            {isPrivacyPolicyMessage ? (
-                              <span>
-                                Jangan lupa baca{' '}
-                                <span
-                                  onClick={() => setShowPrivacyPolicy(true)}
-                                  style={{
-                                    color: "#0095f6",
-                                    textDecoration: "underline",
-                                    cursor: "pointer",
-                                    fontWeight: 500,
-                                  }}
-                                >
-                                  Privacy Policy
-                                </span>
-                                {' '}kami 👇
-                              </span>
-                            ) : (
-                              <span>{msg.text}</span>
-                            )}
-                            
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                marginTop: "6px",
-                                justifyContent: isMine ? "flex-end" : "flex-start",
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "9px",
-                                  color: "rgba(0,0,0,0.4)",
-                                  fontWeight: 400,
-                                }}
-                              >
-                                {formatTime(msg.timestamp)}
-                              </span>
-                              <ReadStatus msg={msg} isMine={isMine} />
+                      <div style={{ width: "100%", marginBottom: "0px" }}>
+                        <div style={{ 
+                          backgroundColor: "#f5f5f5", 
+                          borderRadius: "8px",
+                          padding: "8px 14px",
+                          position: "relative",
+                          marginBottom: "8px",
+                          maxWidth: "280px",
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ 
+                              fontSize: "10px", 
+                              color: "#666", 
+                              fontWeight: 500, 
+                              letterSpacing: "0.05em", 
+                              textTransform: "uppercase",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}>
+                              <span style={{ 
+                                display: "inline-block",
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                backgroundColor: "#c5e800",
+                                marginRight: "4px",
+                              }} />
+                              Catatan
+                            </span>
+                            {profileUser.id === user?.uid && (
                               <button
-                                onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
+                                onClick={() => setEditNote(!editNote)}
                                 style={{
                                   background: "none",
                                   border: "none",
+                                  color: "#666",
+                                  fontSize: "10px",
                                   cursor: "pointer",
-                                  color: "rgba(0,0,0,0.3)",
-                                  padding: "2px 4px",
                                   display: "flex",
                                   alignItems: "center",
-                                  transition: "all .2s ease",
-                                  borderRadius: "4px",
+                                  gap: "4px",
+                                  fontFamily: "Inter, 'Inter Fallback'",
                                 }}
-                                title="More"
                               >
-                                <MoreIcon />
+                                <EditIcon />
+                                {profileUser.note ? "Edit" : "Tambah"}
                               </button>
-                              
-                              {showMessageMenu === msg.id && (
-                                <div
-                                  ref={menuRef}
-                                  style={{
-                                    position: "absolute",
-                                    bottom: "calc(100% + 6px)",
-                                    right: isMine ? 0 : "auto",
-                                    left: isMine ? "auto" : 0,
-                                    backgroundColor: "#ffffff",
-                                    borderRadius: "8px",
-                                    padding: "4px",
-                                    minWidth: "140px",
-                                    boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                                    zIndex: 50,
-                                    border: "1px solid rgba(0,0,0,0.04)",
-                                  }}
-                                >
-                                  <button
-                                    onClick={() => {
-                                      setReplyTo(msg);
-                                      setShowMessageMenu(null);
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                      padding: "6px 12px",
-                                      width: "100%",
-                                      background: "none",
-                                      border: "none",
-                                      color: "#000",
-                                      fontSize: "12px",
-                                      cursor: "pointer",
-                                      borderRadius: "6px",
-                                      transition: "all .2s ease",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.backgroundColor = "transparent";
-                                    }}
-                                  >
-                                    <ReplyIcon />
-                                    <span>Balas</span>
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      handleResendMessage(msg);
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                      padding: "6px 12px",
-                                      width: "100%",
-                                      background: "none",
-                                      border: "none",
-                                      color: "#000",
-                                      fontSize: "12px",
-                                      cursor: "pointer",
-                                      borderRadius: "6px",
-                                      transition: "all .2s ease",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.backgroundColor = "transparent";
-                                    }}
-                                  >
-                                    <SendIcon />
-                                    <span>Kirim Ulang</span>
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setShareMessage(msg);
-                                      setShowShareModal(true);
-                                      setShowMessageMenu(null);
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                      padding: "6px 12px",
-                                      width: "100%",
-                                      background: "none",
-                                      border: "none",
-                                      color: "#000",
-                                      fontSize: "12px",
-                                      cursor: "pointer",
-                                      borderRadius: "6px",
-                                      transition: "all .2s ease",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.backgroundColor = "transparent";
-                                    }}
-                                  >
-                                    <ShareIcon />
-                                    <span>Teruskan</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                      padding: "6px 12px",
-                                      width: "100%",
-                                      background: "none",
-                                      border: "none",
-                                      color: msg.isPinned ? "#c5e800" : "#000",
-                                      fontSize: "12px",
-                                      cursor: "pointer",
-                                      borderRadius: "6px",
-                                      transition: "all .2s ease",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.backgroundColor = "transparent";
-                                    }}
-                                  >
-                                    <PinIcon filled={msg.isPinned || false} />
-                                    <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </div>
-                          {msg.isPinned && (
-                            <div
+
+                          {editNote && profileUser.id === user?.uid ? (
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+                              <input
+                                type="text"
+                                value={noteInput}
+                                onChange={(e) => setNoteInput(e.target.value)}
+                                placeholder="Tulis catatan..."
+                                style={{
+                                  flex: 1,
+                                  padding: "6px 10px",
+                                  backgroundColor: "#fff",
+                                  border: "1px solid #e0e0e0",
+                                  borderRadius: "4px",
+                                  color: "#000",
+                                  fontSize: "12px",
+                                  outline: "none",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveNote();
+                                  }
+                                }}
+                              />
+                              <button
+                                onClick={handleSaveNote}
+                                style={{
+                                  padding: "4px 12px",
+                                  backgroundColor: "#c5e800",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  color: "#000",
+                                  fontSize: "11px",
+                                  fontWeight: 500,
+                                  cursor: "pointer",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                Simpan
+                              </button>
+                              <button
+                                onClick={() => setEditNote(false)}
+                                style={{
+                                  padding: "4px 10px",
+                                  backgroundColor: "transparent",
+                                  border: "1px solid #e0e0e0",
+                                  borderRadius: "4px",
+                                  color: "#666",
+                                  fontSize: "11px",
+                                  cursor: "pointer",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                              >
+                                Batal
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ 
+                              padding: "4px 0",
+                              color: profileUser.note ? "#000" : "#999",
+                              fontSize: "13px",
+                              lineHeight: 1.4,
+                              minHeight: "24px",
+                            }}>
+                              {profileUser.note || "Belum ada catatan"}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
+                        <div
+                          style={{
+                            width: "64px",
+                            height: "64px",
+                            borderRadius: "8px",
+                            backgroundColor: "#f0f0f0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "28px",
+                            overflow: "hidden",
+                            border: "1px solid #e8e8e8",
+                            flexShrink: 0,
+                            position: "relative",
+                          }}
+                        >
+                          {profileUser.photoURL ? (
+                            <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                          )}
+                          {profileUser.isOfficial && (
+                            <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                              <InstagramVerifiedBadge size={16} />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{ fontSize: "18px", fontWeight: 500, color: "#000" }}>
+                              {profileUser.name}
+                            </span>
+                            {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
+                          </div>
+                          <span style={{ fontSize: "13px", color: "#999" }}>{profileUser.email}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                            <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                            <span style={{ fontSize: "12px", color: "#666" }}>
+                              {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ width: "100%", marginBottom: "16px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                            Bio
+                          </span>
+                          {profileUser.id === user?.uid && (
+                            <button
+                              onClick={() => setEditBio(!editBio)}
                               style={{
-                                alignSelf: isMine ? "flex-end" : "flex-start",
-                                fontSize: "9px",
-                                color: "#c5e800",
-                                marginTop: "-2px",
-                                marginBottom: "4px",
-                                padding: "0 4px",
+                                background: "none",
+                                border: "none",
+                                color: "#999",
+                                fontSize: "10px",
+                                cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
-                                fontWeight: 500,
+                                fontFamily: "Inter, 'Inter Fallback'",
                               }}
                             >
-                              <PinIcon filled={true} />
-                              <span>Pinned • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
-                            </div>
+                              <EditIcon />
+                              {profileUser.bio ? "Edit" : "Tambah"}
+                            </button>
                           )}
-                        </React.Fragment>
-                      );
-                    })
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
+                        </div>
+                        {editBio && profileUser.id === user?.uid ? (
+                          <div>
+                            <textarea
+                              value={bioInput}
+                              onChange={(e) => setBioInput(e.target.value)}
+                              placeholder="Tulis bio..."
+                              rows={2}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                backgroundColor: "#f5f5f5",
+                                border: "1px solid #e8e8e8",
+                                borderRadius: "6px",
+                                color: "#000",
+                                fontSize: "13px",
+                                outline: "none",
+                                fontFamily: "Inter, 'Inter Fallback'",
+                                resize: "vertical",
+                              }}
+                            />
+                            <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
+                              <button
+                                onClick={handleSaveBio}
+                                style={{
+                                  padding: "4px 14px",
+                                  backgroundColor: "#000",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  color: "#fff",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                              >
+                                Simpan
+                              </button>
+                              <button
+                                onClick={() => setEditBio(false)}
+                                style={{
+                                  padding: "4px 14px",
+                                  backgroundColor: "transparent",
+                                  border: "1px solid #e0e0e0",
+                                  borderRadius: "4px",
+                                  color: "#999",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                              >
+                                Batal
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ 
+                            padding: "8px 12px", 
+                            backgroundColor: "#f8f8f8", 
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            color: profileUser.bio ? "#000" : "#ccc",
+                            lineHeight: 1.5,
+                          }}>
+                            {profileUser.bio || "Belum ada bio"}
+                          </div>
+                        )}
+                      </div>
 
-                {/* Input */}
-                <div
-                  style={{
-                    padding: "10px 14px 14px",
-                    borderTop: "1px solid rgba(0,0,0,0.04)",
-                    display: "flex",
-                    gap: "8px",
-                    backgroundColor: "#ffffff",
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
-                    value={message}
-                    onChange={handleTyping}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: "10px 16px",
-                      border: "1px solid #e8e8e8",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      outline: "none",
-                      fontFamily: "Inter, 'Inter Fallback'",
-                      transition: "all .2s ease",
-                      backgroundColor: "#f5f5f5",
-                      color: "#000",
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = "#c5e800";
-                      e.currentTarget.style.backgroundColor = "#ffffff";
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = "#e8e8e8";
-                      e.currentTarget.style.backgroundColor = "#f5f5f5";
-                    }}
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    style={{
-                      backgroundColor: "#c5e800",
-                      border: "none",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      color: "#000",
-                      cursor: "pointer",
-                      transition: "all .2s ease",
-                      whiteSpace: "nowrap",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      fontFamily: "Inter, 'Inter Fallback'",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#b0d000";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#c5e800";
-                    }}
-                  >
-                    <span>Kirim</span>
-                    <SendIcon />
-                  </button>
-                </div>
+                      <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                        <button
+                          onClick={() => {
+                            handleCloseProfile();
+                            setSelectedChat(profileUser);
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: "10px",
+                            backgroundColor: "#000",
+                            border: "none",
+                            borderRadius: "8px",
+                            color: "#fff",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            transition: "opacity 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                        >
+                          Kirim Pesan
+                        </button>
+                        <button
+                          onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
+                          style={{
+                            padding: "10px 16px",
+                            backgroundColor: "transparent",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "8px",
+                            color: profileUser.isPinned ? "#000" : "#999",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          <PinIcon filled={profileUser.isPinned || false} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : !selectedChat ? (
+                  // Chat List View
+                  <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
+                    {/* Announcement */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
+                        border: "none",
+                      }}
+                    >
+                      <div style={{ fontSize: "20px" }}>📢</div>
+                      <div>
+                        <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                          Pengumuman
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#666" }}>
+                          Fitur chat sedang dalam tahap pengembangan.
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowAddUser(!showAddUser)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 14px",
+                        backgroundColor: "transparent",
+                        border: "1px dashed #ddd",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        width: "100%",
+                        marginBottom: "10px",
+                        transition: "all .2s ease",
+                        color: "#000",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                        e.currentTarget.style.borderColor = "#c5e800";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.borderColor = "#ddd";
+                      }}
+                    >
+                      <AddUserIcon />
+                      <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
+                    </button>
+
+                    {showAddUser && (
+                      <div
+                        style={{
+                          padding: "14px",
+                          backgroundColor: "#f8f8f8",
+                          borderRadius: "8px",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "10px", fontFamily: "Inter, 'Inter Fallback'" }}>
+                          Pilih User untuk Chat
+                        </div>
+                        <select
+                          value={selectedNewUser}
+                          onChange={(e) => setSelectedNewUser(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            outline: "none",
+                            fontFamily: "Inter, 'Inter Fallback'",
+                            marginBottom: "8px",
+                            backgroundColor: "#fff",
+                            color: "#000",
+                          }}
+                        >
+                          <option value="">Pilih user...</option>
+                          {availableUsers.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                            </option>
+                          ))}
+                        </select>
+                        {availableUsers.length === 0 && (
+                          <div style={{ fontSize: "11px", color: "#666", marginBottom: "6px" }}>
+                            Semua user sudah di-chat
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            onClick={handleAddExistingUser}
+                            disabled={!selectedNewUser}
+                            style={{
+                              backgroundColor: selectedNewUser ? "#000" : "#ccc",
+                              color: "#fff",
+                              border: "none",
+                              padding: "6px 14px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: selectedNewUser ? "pointer" : "not-allowed",
+                              fontWeight: 500,
+                              transition: "all .2s ease",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            Mulai Chat
+                          </button>
+                          <button
+                            onClick={() => setShowAddUser(false)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              fontSize: "12px",
+                              color: "#666",
+                              cursor: "pointer",
+                              fontFamily: "Inter, 'Inter Fallback'",
+                            }}
+                          >
+                            Batal
+                          </button>
+                        </div>
+                        {addUserStatus && (
+                          <div style={{ fontSize: "11px", color: "#000", marginTop: "6px" }}>
+                            {addUserStatus}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {pinnedUsers.length > 0 && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div
+                          onClick={() => setShowPinnedUsers(!showPinnedUsers)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <PinIcon filled={true} />
+                            <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                              User Pinned ({pinnedUsers.length})
+                            </span>
+                          </div>
+                          <PinDropdownIcon isOpen={showPinnedUsers} />
+                        </div>
+                        {showPinnedUsers && (
+                          <div style={{ padding: "4px 0", marginTop: "2px" }}>
+                            {pinnedUsers.map((u) => (
+                              <div
+                                key={u.id}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  backgroundColor: "#fafafa",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "6px",
+                                    backgroundColor: "#f0f0f0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "14px",
+                                    overflow: "hidden",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {u.photoURL ? (
+                                    <img src={u.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                  ) : (
+                                    <span style={{ color: "#000" }}>{u.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                  )}
+                                </div>
+                                <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <div>
+                                    <div 
+                                      style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
+                                      onClick={() => handleOpenProfile(u)}
+                                    >
+                                      {u.name}
+                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                    </div>
+                                    <div style={{ fontSize: "9px", color: "#999" }}>
+                                      {u.email}
+                                    </div>
+                                  </div>
+                                  <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
+                                </div>
+                                <button
+                                  onClick={() => handlePinUser(u.id, true)}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: "#c5e800",
+                                    padding: "2px 4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <PinIcon filled={true} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {pinnedChats.length > 0 && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div
+                          onClick={() => setShowPinnedChats(!showPinnedChats)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <PinIcon filled={true} />
+                            <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                              Chat Pinned ({pinnedChats.length})
+                            </span>
+                          </div>
+                          <PinDropdownIcon isOpen={showPinnedChats} />
+                        </div>
+                        {showPinnedChats && (
+                          <div style={{ padding: "4px 0", marginTop: "2px" }}>
+                            {pinnedChats.map((room) => {
+                              const otherId = room.participants.find(id => id !== user.uid);
+                              const otherUser = users.find(u => u.id === otherId);
+                              if (!otherUser) return null;
+                              return (
+                                <div
+                                  key={room.id}
+                                  onClick={() => setSelectedChat(otherUser)}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    backgroundColor: "#fafafa",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: "32px",
+                                      height: "32px",
+                                      borderRadius: "6px",
+                                      backgroundColor: "#f0f0f0",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: "14px",
+                                      overflow: "hidden",
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {otherUser.photoURL ? (
+                                      <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ) : (
+                                      <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                    )}
+                                  </div>
+                                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
+                                    <div>
+                                      <div 
+                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenProfile(otherUser);
+                                        }}
+                                      >
+                                        {otherUser.name}
+                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                      </div>
+                                      <div style={{ fontSize: "9px", color: "#999" }}>
+                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "Belum ada pesan"}
+                                      </div>
+                                    </div>
+                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                  </div>
+                                  {room.unreadCount > 0 && (
+                                    <div
+                                      style={{
+                                        backgroundColor: "#c5e800",
+                                        color: "#000",
+                                        padding: "0 6px",
+                                        borderRadius: "4px",
+                                        fontSize: "9px",
+                                        fontWeight: 600,
+                                        lineHeight: "18px",
+                                        height: "18px",
+                                        minWidth: "18px",
+                                        textAlign: "center",
+                                      }}
+                                    >
+                                      {room.unreadCount}
+                                    </div>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePinChat(room.id, true);
+                                    }}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "#c5e800",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <PinIcon filled={true} />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div style={{ padding: "4px 0" }}>
+                      {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            color: "#999",
+                            fontSize: "13px",
+                            padding: "40px 0",
+                          }}
+                        >
+                          <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
+                          <div>Belum ada riwayat chat</div>
+                        </div>
+                      ) : (
+                        unpinnedChats.map((room) => {
+                          const otherId = room.participants.find(id => id !== user.uid);
+                          const otherUser = users.find(u => u.id === otherId);
+                          if (!otherUser) return null;
+                          
+                          const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
+                          
+                          return (
+                            <div
+                              key={room.id}
+                              onClick={() => setSelectedChat(otherUser)}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                transition: "all .2s ease",
+                                marginBottom: "2px",
+                                backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.12)" : "#f5f5f5";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent";
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  borderRadius: "6px",
+                                  backgroundColor: "#f0f0f0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "16px",
+                                  flexShrink: 0,
+                                  overflow: "hidden",
+                                  position: "relative",
+                                }}
+                              >
+                                {otherUser.photoURL ? (
+                                  <img 
+                                    src={otherUser.photoURL} 
+                                    alt="avatar" 
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                )}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
+                                  <span 
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenProfile(otherUser);
+                                    }}
+                                  >
+                                    {otherUser.name}
+                                  </span>
+                                  {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                  <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                </div>
+                                <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                  {room.lastMessage ? (
+                                    <>
+                                      {isLastMessageFromMe && "Anda: "}
+                                      {room.lastMessage}
+                                    </>
+                                  ) : (
+                                    "Belum ada pesan"
+                                  )}
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                {room.lastMessageTime && (
+                                  <span style={{ fontSize: "9px", color: "#bbb" }}>
+                                    {formatTime(room.lastMessageTime)}
+                                  </span>
+                                )}
+                                <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                                  {room.unreadCount > 0 && (
+                                    <div
+                                      style={{
+                                        backgroundColor: "#c5e800",
+                                        color: "#000",
+                                        padding: "0 6px",
+                                        borderRadius: "4px",
+                                        fontSize: "9px",
+                                        fontWeight: 600,
+                                        lineHeight: "18px",
+                                        height: "18px",
+                                        minWidth: "18px",
+                                        textAlign: "center",
+                                      }}
+                                    >
+                                      {room.unreadCount}
+                                    </div>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePinChat(room.id, room.isPinned || false);
+                                    }}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: room.isPinned ? "#c5e800" : "#ddd",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      transition: "all .2s ease",
+                                    }}
+                                  >
+                                    <PinIcon filled={room.isPinned || false} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  // Chat View
+                  <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
+                    {/* Chat Header - Hitam dengan teks cerah */}
+                    <div
+                      style={{
+                        padding: "10px 16px",
+                        borderBottom: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        backgroundColor: "#000000",
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedChat(null);
+                          setReplyTo(null);
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "rgba(255,255,255,0.5)",
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          transition: "all .2s ease",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                          e.currentTarget.style.color = "#ffffff";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.color = "rgba(255,255,255,0.5)";
+                        }}
+                      >
+                        <BackIcon />
+                      </button>
+                      <div
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "6px",
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "14px",
+                          overflow: "hidden",
+                          color: "#fff",
+                          position: "relative",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleOpenProfile(selectedChat)}
+                      >
+                        {selectedChat.photoURL ? (
+                          <img 
+                            src={selectedChat.photoURL} 
+                            alt="avatar" 
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <span>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
+                        <div 
+                          style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                          onClick={() => handleOpenProfile(selectedChat)}
+                        >
+                          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff" }}>
+                            {selectedChat.name}
+                          </span>
+                          {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <OnlineIndicator 
+                            online={getOnlineStatus(selectedChat.id)} 
+                            lastSeen={getLastSeen(selectedChat.id)}
+                          />
+                          {getOnlineStatus(selectedChat.id) ? (
+                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                              {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                              {getLastSeen(selectedChat.id)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          transition: "all .2s ease",
+                        }}
+                      >
+                        <PinIcon filled={selectedChat.isPinned || false} />
+                      </button>
+                    </div>
+
+                    {/* Riwayat Pin Message */}
+                    {pinnedMessages.length > 0 && (
+                      <div
+                        style={{
+                          padding: "6px 14px",
+                          backgroundColor: "rgba(0,0,0,0.02)",
+                          borderBottom: "1px solid rgba(0,0,0,0.04)",
+                        }}
+                      >
+                        <div
+                          onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            cursor: "pointer",
+                            color: "#999",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <PinIcon filled={true} />
+                            <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                              Pesan Pinned ({pinnedMessages.length})
+                            </span>
+                          </div>
+                          <PinDropdownIcon isOpen={showPinnedMessages} />
+                        </div>
+                        {showPinnedMessages && (
+                          <div style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}>
+                            {pinnedMessages.map((msg) => {
+                              const isMine = msg.senderId === user?.uid;
+                              return (
+                                <div
+                                  key={msg.id}
+                                  style={{
+                                    padding: "4px 8px",
+                                    marginBottom: "2px",
+                                    borderRadius: "4px",
+                                    backgroundColor: isMine ? "rgba(197,232,0,0.08)" : "rgba(0,0,0,0.04)",
+                                    fontSize: "11px",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <span style={{ color: "#999", fontSize: "9px" }}>
+                                      {isMine ? "Anda: " : `${msg.senderName}: `}
+                                    </span>
+                                    <span style={{ color: "#000" }}>
+                                      {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
+                                    </span>
+                                  </div>
+                                  <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px" }}>
+                                    {formatTime(msg.pinnedAt || msg.timestamp)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reply Indicator - Tanpa border dan background */}
+                    {replyTo && (
+                      <div
+                        style={{
+                          padding: "4px 14px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <ReplyIcon />
+                          <div>
+                            <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
+                              Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#666" }}>
+                              {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setReplyTo(null)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#999",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Messages */}
+                    <div
+                      style={{
+                        flex: 1,
+                        padding: "16px 20px",
+                        overflowY: "auto",
+                        backgroundColor: "#ffffff",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px",
+                      }}
+                    >
+                      {messages.length === 0 ? (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            color: "#bbb",
+                            fontSize: "13px",
+                            marginTop: "60px",
+                          }}
+                        >
+                          <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
+                          <div>Belum ada pesan</div>
+                        </div>
+                      ) : (
+                        messages.map((msg, idx) => {
+                          const isMine = msg.senderId === user?.uid;
+                          const chatId = [user.uid, selectedChat.id].sort().join("_");
+                          const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
+                            formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                          
+                          const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
+                          const isPrivacyPolicyMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
+                          
+                          return (
+                            <React.Fragment key={idx}>
+                              {showDate && (
+                                <div
+                                  style={{
+                                    textAlign: "center",
+                                    color: "#ccc",
+                                    fontSize: "10px",
+                                    padding: "6px 0 10px 0",
+                                    fontWeight: 400,
+                                    letterSpacing: "0.03em",
+                                  }}
+                                >
+                                  {formatDate(msg.timestamp)}
+                                </div>
+                              )}
+                              <div
+                                style={{
+                                  alignSelf: isMine ? "flex-end" : "flex-start",
+                                  maxWidth: "80%",
+                                  padding: "10px 14px",
+                                  borderRadius: "12px",
+                                  backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
+                                  color: "#000000",
+                                  fontSize: "14px",
+                                  lineHeight: 1.5,
+                                  position: "relative",
+                                  border: msg.isPinned ? "1px solid #c5e800" : "none",
+                                  boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.1)" : "none",
+                                }}
+                              >
+                                {msg.isShared && msg.sharedFromName && (
+                                  <div
+                                    style={{
+                                      fontSize: "10px",
+                                      color: "rgba(0,0,0,0.4)",
+                                      marginBottom: "4px",
+                                      fontStyle: "italic",
+                                    }}
+                                  >
+                                    Diteruskan dari {msg.sharedFromName}
+                                  </div>
+                                )}
+                                
+                                {msg.replyTo && msg.replyToText && (
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                      color: isMine ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.5)",
+                                      padding: "4px 8px",
+                                      borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
+                                      marginBottom: "6px",
+                                      backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
+                                      borderRadius: "4px",
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: 500, color: "#22c55e" }}>
+                                      {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
+                                    </span>
+                                    <span style={{ color: isMine ? "#000" : "#333" }}> {msg.replyToText}</span>
+                                  </div>
+                                )}
+                                
+                                {isPrivacyPolicyMessage ? (
+                                  <span>
+                                    Jangan lupa baca{' '}
+                                    <span
+                                      onClick={() => setShowPrivacyPolicy(true)}
+                                      style={{
+                                        color: "#0095f6",
+                                        textDecoration: "underline",
+                                        cursor: "pointer",
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      Privacy Policy
+                                    </span>
+                                    {' '}kami 👇
+                                  </span>
+                                ) : (
+                                  <span>{msg.text}</span>
+                                )}
+                                
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    marginTop: "6px",
+                                    justifyContent: isMine ? "flex-end" : "flex-start",
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "9px",
+                                      color: "rgba(0,0,0,0.4)",
+                                      fontWeight: 400,
+                                    }}
+                                  >
+                                    {formatTime(msg.timestamp)}
+                                  </span>
+                                  <ReadStatus msg={msg} isMine={isMine} />
+                                  <button
+                                    onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "rgba(0,0,0,0.3)",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      transition: "all .2s ease",
+                                      borderRadius: "4px",
+                                    }}
+                                    title="More"
+                                  >
+                                    <MoreIcon />
+                                  </button>
+                                  
+                                  {showMessageMenu === msg.id && (
+                                    <div
+                                      ref={menuRef}
+                                      style={{
+                                        position: "absolute",
+                                        bottom: "calc(100% + 6px)",
+                                        right: isMine ? 0 : "auto",
+                                        left: isMine ? "auto" : 0,
+                                        backgroundColor: "#ffffff",
+                                        borderRadius: "8px",
+                                        padding: "4px",
+                                        minWidth: "140px",
+                                        boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                                        zIndex: 50,
+                                        border: "1px solid rgba(0,0,0,0.04)",
+                                      }}
+                                    >
+                                      <button
+                                        onClick={() => {
+                                          setReplyTo(msg);
+                                          setShowMessageMenu(null);
+                                        }}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "6px 12px",
+                                          width: "100%",
+                                          background: "none",
+                                          border: "none",
+                                          color: "#000",
+                                          fontSize: "12px",
+                                          cursor: "pointer",
+                                          borderRadius: "6px",
+                                          transition: "all .2s ease",
+                                          fontFamily: "Inter, 'Inter Fallback'",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                        }}
+                                      >
+                                        <ReplyIcon />
+                                        <span>Balas</span>
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          handleResendMessage(msg);
+                                        }}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "6px 12px",
+                                          width: "100%",
+                                          background: "none",
+                                          border: "none",
+                                          color: "#000",
+                                          fontSize: "12px",
+                                          cursor: "pointer",
+                                          borderRadius: "6px",
+                                          transition: "all .2s ease",
+                                          fontFamily: "Inter, 'Inter Fallback'",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                        }}
+                                      >
+                                        <SendIcon />
+                                        <span>Kirim Ulang</span>
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setShareMessage(msg);
+                                          setShowShareModal(true);
+                                          setShowMessageMenu(null);
+                                        }}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "6px 12px",
+                                          width: "100%",
+                                          background: "none",
+                                          border: "none",
+                                          color: "#000",
+                                          fontSize: "12px",
+                                          cursor: "pointer",
+                                          borderRadius: "6px",
+                                          transition: "all .2s ease",
+                                          fontFamily: "Inter, 'Inter Fallback'",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                        }}
+                                      >
+                                        <ShareIcon />
+                                        <span>Teruskan</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "6px 12px",
+                                          width: "100%",
+                                          background: "none",
+                                          border: "none",
+                                          color: msg.isPinned ? "#c5e800" : "#000",
+                                          fontSize: "12px",
+                                          cursor: "pointer",
+                                          borderRadius: "6px",
+                                          transition: "all .2s ease",
+                                          fontFamily: "Inter, 'Inter Fallback'",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                        }}
+                                      >
+                                        <PinIcon filled={msg.isPinned || false} />
+                                        <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {msg.isPinned && (
+                                <div
+                                  style={{
+                                    alignSelf: isMine ? "flex-end" : "flex-start",
+                                    fontSize: "9px",
+                                    color: "#c5e800",
+                                    marginTop: "-2px",
+                                    marginBottom: "4px",
+                                    padding: "0 4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <PinIcon filled={true} />
+                                  <span>Pinned • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                </div>
+                              )}
+                            </React.Fragment>
+                          );
+                        })
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <div
+                      style={{
+                        padding: "10px 14px 14px",
+                        borderTop: "1px solid rgba(0,0,0,0.04)",
+                        display: "flex",
+                        gap: "8px",
+                        backgroundColor: "#ffffff",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
+                        value={message}
+                        onChange={handleTyping}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: "10px 16px",
+                          border: "1px solid #e8e8e8",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          outline: "none",
+                          fontFamily: "Inter, 'Inter Fallback'",
+                          transition: "all .2s ease",
+                          backgroundColor: "#f5f5f5",
+                          color: "#000",
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = "#c5e800";
+                          e.currentTarget.style.backgroundColor = "#ffffff";
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = "#e8e8e8";
+                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                        }}
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        style={{
+                          backgroundColor: "#c5e800",
+                          border: "none",
+                          padding: "10px 20px",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "#000",
+                          cursor: "pointer",
+                          transition: "all .2s ease",
+                          whiteSpace: "nowrap",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontFamily: "Inter, 'Inter Fallback'",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#b0d000";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "#c5e800";
+                        }}
+                      >
+                        <span>Kirim</span>
+                        <SendIcon />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {/* Chat Button - Rolling text pesan masuk */}
-        <button
-          onClick={handleChatToggle}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            backgroundColor: isChatOpen ? "transparent" : "#000000",
-            padding: isChatOpen ? "0" : "12px 24px",
-            borderRadius: "60px",
-            border: "none",
-            cursor: "pointer",
-            transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            boxShadow: isChatOpen ? "none" : "0 4px 20px rgba(0,0,0,0.08)",
-            userSelect: "none",
-            fontFamily: "Inter, 'Inter Fallback'",
-            position: "relative",
-            maxWidth: "360px",
-            overflow: "hidden",
-          }}
-          onMouseEnter={(e) => {
-            if (!isChatOpen) {
-              e.currentTarget.style.transform = "scale(1.03)";
-              e.currentTarget.style.boxShadow = "0 6px 28px rgba(0,0,0,0.12)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isChatOpen) {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
-            }
-          }}
-        >
-          {!isChatOpen && (
-            <>
-              <span
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "#ffffff",
-                  letterSpacing: "-0.01em",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  transition: "all 0.5s ease",
-                  animation: isIncomingMessage ? "fadeInOut 0.5s ease" : "none",
-                }}
-              >
-                {user ? chatButtonText : "Login to Chat"}
-              </span>
-              {totalUnread > 0 && (
-                <span
-                  style={{
-                    backgroundColor: "#c5e800",
-                    color: "#000000",
-                    padding: "0 6px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    lineHeight: "18px",
-                    height: "18px",
-                    minWidth: "18px",
-                    textAlign: "center",
-                  }}
-                >
-                  {totalUnread}
-                </span>
+            {/* Chat Button */}
+            <button
+              onClick={handleChatToggle}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                backgroundColor: isChatOpen ? "transparent" : "#000000",
+                padding: isChatOpen ? "0" : "12px 24px",
+                borderRadius: "60px",
+                border: "none",
+                cursor: "pointer",
+                transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                boxShadow: isChatOpen ? "none" : "0 4px 20px rgba(0,0,0,0.08)",
+                userSelect: "none",
+                fontFamily: "Inter, 'Inter Fallback'",
+                position: "relative",
+                maxWidth: "360px",
+                overflow: "hidden",
+              }}
+              onMouseEnter={(e) => {
+                if (!isChatOpen) {
+                  e.currentTarget.style.transform = "scale(1.03)";
+                  e.currentTarget.style.boxShadow = "0 6px 28px rgba(0,0,0,0.12)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isChatOpen) {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
+                }
+              }}
+            >
+              {!isChatOpen && (
+                <>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "#ffffff",
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                      transition: "all 0.5s ease",
+                      animation: isIncomingMessage ? "fadeInOut 0.5s ease" : "none",
+                    }}
+                  >
+                    {user ? chatButtonText : "Login to Chat"}
+                  </span>
+                  {totalUnread > 0 && (
+                    <span
+                      style={{
+                        backgroundColor: "#c5e800",
+                        color: "#000000",
+                        padding: "0 6px",
+                        borderRadius: "4px",
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        lineHeight: "18px",
+                        height: "18px",
+                        minWidth: "18px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {totalUnread}
+                    </span>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </button>
-      </div>
+            </button>
+          </div>
 
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.3;
-          }
-        }
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        @keyframes fadeInOut {
-          0% {
-            opacity: 0.7;
-            transform: scale(0.98);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
+          <style jsx>{`
+            @keyframes slideUp {
+              from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            @keyframes pulse {
+              0%, 100% {
+                opacity: 1;
+              }
+              50% {
+                opacity: 0.3;
+              }
+            }
+            @keyframes marquee {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-100%);
+              }
+            }
+            @keyframes fadeInOut {
+              0% {
+                opacity: 0.7;
+                transform: scale(0.98);
+              }
+              50% {
+                opacity: 1;
+                transform: scale(1);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+          `}</style>
+        </>
+      )}
     </div>
   );
 }
