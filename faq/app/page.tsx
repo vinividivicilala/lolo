@@ -102,6 +102,7 @@ interface ChatRoom {
 interface Track {
   artist: string;
   title: string;
+  embedUrl: string;
 }
 
 // SVG Icons
@@ -418,21 +419,29 @@ export default function HomePage(): React.JSX.Element {
   const [currentTrack, setCurrentTrack] = useState<Track>({
     artist: "Feast",
     title: "Nina",
+    embedUrl: "https://open.spotify.com/embed/track/0daEJMXc3b4ZMTnvtHpuTt?utm_source=generator&si=af642931b9f4461f"
   });
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Playlist Data
+  // Playlist Data dengan embed Spotify
   const playlist: Track[] = [
-    { artist: "Feast", title: "Nina" },
-    { artist: "Feast", title: "Kami Belum Tentu" }
+    { 
+      artist: "Feast", 
+      title: "Nina",
+      embedUrl: "https://open.spotify.com/embed/track/0daEJMXc3b4ZMTnvtHpuTt?utm_source=generator&si=af642931b9f4461f"
+    },
+    { 
+      artist: "Feast", 
+      title: "Kami Belum Tentu",
+      embedUrl: "https://open.spotify.com/embed/track/38yM3PwNtTSsb8UqEgqaUl?utm_source=generator&si=41bc38b2a7db4bcf"
+    }
   ];
 
-  // Audio Player Setup
+  // Audio Player Setup untuk dummy
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Menggunakan audio dummy dari soundhelix sebagai contoh
-      // Untuk menggunakan lagu asli, ganti URL ini dengan file MP3 yang valid
       audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
       audioRef.current.loop = false;
       
@@ -451,22 +460,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, []);
 
-  // Update audio source when track changes
-  useEffect(() => {
-    if (audioRef.current) {
-      const wasPlaying = isPlaying;
-      audioRef.current.pause();
-      // Ganti dengan URL yang valid untuk lagu yang berbeda
-      audioRef.current.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-      audioRef.current.load();
-      
-      if (wasPlaying) {
-        audioRef.current.play().catch(() => {});
-      }
-    }
-  }, [currentTrack.title]);
-
-  // Play/Pause Handler
+  // Play/Pause Handler untuk dummy audio
   const togglePlay = () => {
     if (!audioRef.current) return;
     
@@ -488,11 +482,41 @@ export default function HomePage(): React.JSX.Element {
   const selectTrack = (track: Track) => {
     if (audioRef.current && isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     }
     setCurrentTrack(track);
-    setIsPlaying(false);
     setShowPlaylist(false);
+    // Buka modal music player
+    setShowMusicPlayer(true);
   };
+
+  // Spotify Widget Data - dipertahankan
+  const [spotifyTrack, setSpotifyTrack] = useState({
+    artist: "Billie Eilish",
+    title: "BIRDS OF A FEATHER",
+  });
+
+  // Simulasi pergantian lagu setiap 10 detik - dipertahankan
+  useEffect(() => {
+    const tracks = [
+      { artist: "Billie Eilish", title: "BIRDS OF A FEATHER" },
+      { artist: "Taylor Swift", title: "Fortnight feat. Post Malone" },
+      { artist: "Olivia Rodrigo", title: "good 4 u" },
+      { artist: "Ariana Grande", title: "we can't be friends" },
+      { artist: "Sabrina Carpenter", title: "Espresso" },
+      { artist: "The Weeknd", title: "Blinding Lights" },
+      { artist: "Doja Cat", title: "Paint The Town Red" },
+      { artist: "Dua Lipa", title: "Houdini" },
+    ];
+
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % tracks.length;
+      setSpotifyTrack(tracks[index]);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1338,7 +1362,7 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Tanpa Logo, Tanpa Icon Spotify */}
+        {/* Music Widget - Dengan fitur play/stop dan modal */}
         <div
           style={{
             display: "flex",
@@ -1351,7 +1375,9 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             transition: "all 0.3s ease",
             maxWidth: "260px",
+            cursor: "pointer",
           }}
+          onClick={() => setShowMusicPlayer(true)}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)";
           }}
@@ -1370,9 +1396,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: "#f0f0f0",
               border: "1px solid #e8e8e8",
               position: "relative",
-              cursor: "pointer",
             }}
-            onClick={togglePlay}
           >
             <img
               src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
@@ -1382,8 +1406,12 @@ export default function HomePage(): React.JSX.Element {
                 (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0f0f0'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-size='18' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
               }}
             />
-            {/* Overlay play/stop - hanya di sini */}
-            <div
+            {/* Tombol play/stop di overlay foto artis */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
               style={{
                 position: "absolute",
                 top: 0,
@@ -1391,9 +1419,13 @@ export default function HomePage(): React.JSX.Element {
                 width: "100%",
                 height: "100%",
                 background: "rgba(0,0,0,0.4)",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                borderRadius: "8px",
                 opacity: 0,
                 transition: "opacity 0.3s ease",
               }}
@@ -1401,7 +1433,7 @@ export default function HomePage(): React.JSX.Element {
               onMouseLeave={(e) => { e.currentTarget.style.opacity = "0"; }}
             >
               {isPlaying ? <MusicPauseIcon /> : <MusicPlayIcon />}
-            </div>
+            </button>
           </div>
 
           {/* Info Lagu - Teks Berjalan Otomatis */}
@@ -1410,16 +1442,14 @@ export default function HomePage(): React.JSX.Element {
               flex: 1,
               overflow: "hidden",
               minWidth: 0,
-              cursor: "pointer",
             }}
-            onClick={togglePlay}
           >
             <div style={{ overflow: "hidden", position: "relative" }}>
               <div
                 style={{
                   display: "inline-block",
-                  animation: "marquee 12s linear infinite",
-                  paddingLeft: "100%",
+                  animation: isPlaying ? "marquee 12s linear infinite" : "none",
+                  paddingLeft: isPlaying ? "100%" : "0",
                   fontSize: "13px",
                   fontWeight: 600,
                   color: "#000000",
@@ -1433,9 +1463,12 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Tombol daftar lagu - tanpa icon, pakai titik tiga */}
+          {/* Tombol daftar lagu */}
           <button
-            onClick={() => setShowPlaylist(!showPlaylist)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPlaylist(!showPlaylist);
+            }}
             style={{
               background: "none",
               border: "none",
@@ -1455,7 +1488,7 @@ export default function HomePage(): React.JSX.Element {
           </button>
         </div>
 
-        {/* User Status */}
+        {/* User Status - Border radius 12px */}
         <div
           style={{
             display: "flex",
@@ -1553,7 +1586,127 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Playlist Modal - Desain sama dengan tampilan lagu */}
+      {/* Music Player Modal - Dengan Spotify Embed dan foto artis */}
+      {showMusicPlayer && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setShowMusicPlayer(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "420px",
+              width: "90%",
+              border: "1px solid #e0e0e0",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {/* Foto artis di modal */}
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    backgroundColor: "#f0f0f0",
+                    border: "1px solid #e8e8e8",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
+                    alt={currentTrack.artist}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <div>
+                  <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
+                    {currentTrack.title}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#666" }}>
+                    {currentTrack.artist}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMusicPlayer(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#666",
+                  padding: "4px",
+                }}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            {/* Spotify Embed */}
+            <div style={{ borderRadius: "12px", overflow: "hidden" }}>
+              <iframe
+                style={{ borderRadius: "12px", border: "none" }}
+                src={currentTrack.embedUrl}
+                width="100%"
+                height="352"
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Tombol Ganti Lagu */}
+            <div style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
+              {playlist.map((track) => (
+                <button
+                  key={track.title}
+                  onClick={() => {
+                    setCurrentTrack(track);
+                    // Refresh iframe dengan mengganti src
+                    const iframe = document.querySelector('iframe[src*="open.spotify.com"]') as HTMLIFrameElement;
+                    if (iframe) {
+                      iframe.src = track.embedUrl;
+                    }
+                  }}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "20px",
+                    border: currentTrack.title === track.title ? "2px solid #000" : "1px solid #e0e0e0",
+                    backgroundColor: currentTrack.title === track.title ? "#f0f0f0" : "transparent",
+                    color: "#000",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                >
+                  {track.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Playlist Dropdown */}
       {showPlaylist && (
         <div
           style={{
@@ -1597,7 +1750,9 @@ export default function HomePage(): React.JSX.Element {
               return (
                 <div
                   key={index}
-                  onClick={() => selectTrack(track)}
+                  onClick={() => {
+                    selectTrack(track);
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1620,7 +1775,6 @@ export default function HomePage(): React.JSX.Element {
                     }
                   }}
                 >
-                  {/* Kotak kecil seperti di tampilan lagu */}
                   <div
                     style={{
                       width: "32px",
@@ -1635,7 +1789,7 @@ export default function HomePage(): React.JSX.Element {
                       color: "#666",
                     }}
                   >
-                    {isActive ? (isPlaying ? "▶" : "⏸") : "♫"}
+                    ♫
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
@@ -1647,7 +1801,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                   {isActive && (
                     <span style={{ fontSize: "11px", color: "#000", fontWeight: 600 }}>
-                      {isPlaying ? "Playing" : "Paused"}
+                      ▶
                     </span>
                   )}
                 </div>
@@ -1886,7 +2040,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Chat Box - tetap sama seperti sebelumnya */}
+      {/* Chat Box */}
       <div
         style={{
           position: "fixed",
@@ -1994,7 +2148,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content */}
+            {/* Content - Chat List View */}
             {showProfile && profileUser ? (
               // Profile View
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
