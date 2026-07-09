@@ -3133,40 +3133,53 @@ export default function HomePage(): React.JSX.Element {
                 )}
 
                 {/* Reply Indicator - Tanpa border dan background */}
-                {replyTo && (
-                  <div
-                    style={{
-                      padding: "4px 14px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <ReplyIcon />
-                      <div>
-                        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
-                          Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#666" }}>
-                          {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setReplyTo(null)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#999",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
+                
+{replyTo && (
+  <div
+    style={{
+      padding: "4px 14px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    }}
+  >
+    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+      <ReplyIcon />
+      <div>
+        {/* Menampilkan Balas: [nama pengirim] atau Balas: [nama penerima] */}
+        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
+          {replyTo.senderId === user?.uid 
+            ? `Balas: ${replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}` 
+            : `Balas: ${replyTo.senderName}`}
+        </div>
+        <div style={{ fontSize: "11px", color: "#666" }}>
+          {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
+        </div>
+      </div>
+    </div>
+    <button
+      onClick={() => setReplyTo(null)}
+      style={{
+        background: "none",
+        border: "none",
+        color: "#999",
+        cursor: "pointer",
+        fontSize: "14px",
+        padding: "4px 8px",
+        borderRadius: "4px",
+        transition: "all 0.2s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+      }}
+    >
+      ✕
+    </button>
+  </div>
+)}
 
                 {/* Messages - Warna stabilo seperti Awwards */}
                 <div
@@ -3249,7 +3262,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "11px",
                                   color: "rgba(0,0,0,0.5)",
                                   padding: "4px 8px",
-                                  borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
+                                
                                   marginBottom: "6px",
                                   backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
                                   borderRadius: "4px",
