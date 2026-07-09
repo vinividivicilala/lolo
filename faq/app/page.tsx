@@ -415,7 +415,7 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Privacy Policy - Halaman seperti Profile
+  // Privacy Policy - Halaman di dalam chat (seperti room chat)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   // Chat button text - rolling text
@@ -573,7 +573,6 @@ export default function HomePage(): React.JSX.Element {
   // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
-    // Broadcast privacy policy ke semua user (hanya sekali)
     broadcastPrivacyPolicy();
   }, []);
 
@@ -1016,6 +1015,7 @@ export default function HomePage(): React.JSX.Element {
       setReplyTo(null);
       setShowProfile(false);
       setProfileUser(null);
+      setShowPrivacyPolicy(false);
     }
   };
 
@@ -1445,403 +1445,6 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-
-      {/* Privacy Policy - Halaman seperti Profile (bukan modal, tetap di bg chat) */}
-      {showPrivacyPolicy && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            padding: "28px 32px",
-            maxWidth: "560px",
-            width: "90%",
-            maxHeight: "80vh",
-            overflowY: "auto",
-            border: "1px solid #e8e8e8",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-            zIndex: 2000,
-            animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header - Seperti Profile */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "20px",
-              paddingBottom: "16px",
-              borderBottom: "1px solid #f0f0f0",
-            }}
-          >
-            <button
-              onClick={() => setShowPrivacyPolicy(false)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#666",
-                cursor: "pointer",
-                padding: "4px 8px",
-                borderRadius: "8px",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                fontFamily: "Inter, 'Inter Fallback'",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f5f5f5";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <BackIcon />
-              <span style={{ fontSize: "13px", marginLeft: "4px" }}>
-                Kembali
-              </span>
-            </button>
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "#000000",
-                fontFamily: "Inter, 'Inter Fallback'",
-              }}
-            >
-              Privacy Policy
-            </span>
-          </div>
-
-          {/* Content - Seperti Profile */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-              fontFamily: "Inter, 'Inter Fallback'",
-            }}
-          >
-            {/* Badge dan Title */}
-            <div>
-              <div
-                style={{
-                  display: "inline-block",
-                  padding: "4px 14px",
-                  backgroundColor: "#000000",
-                  borderRadius: "20px",
-                  marginBottom: "10px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    color: "#ffffff",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Kebijakan Privasi
-                </span>
-              </div>
-              <h2
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  margin: "4px 0 2px 0",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Chat with Menuru
-              </h2>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#999",
-                  margin: "0",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Terakhir diperbarui: 9 Juli 2026
-              </p>
-            </div>
-
-            {/* Section 1 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                1. Informasi yang Kami Kumpulkan
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
-              </p>
-              <ul
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.8,
-                  paddingLeft: "20px",
-                  margin: "6px 0 0 0",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                <li>Nama dan email dari akun Google Anda</li>
-                <li>Foto profil dari akun Google Anda</li>
-                <li>Pesan dan riwayat chat yang Anda kirim</li>
-                <li>Status online dan aktivitas chat</li>
-              </ul>
-            </div>
-
-            {/* Section 2 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                2. Bagaimana Kami Menggunakan Informasi
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Informasi yang kami kumpulkan digunakan untuk:
-              </p>
-              <ul
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.8,
-                  paddingLeft: "20px",
-                  margin: "6px 0 0 0",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                <li>Menyediakan dan memelihara layanan chat</li>
-                <li>Mengirimkan pesan antar pengguna</li>
-                <li>Menampilkan status online pengguna</li>
-                <li>Menyimpan riwayat chat untuk akses di masa depan</li>
-              </ul>
-            </div>
-
-            {/* Section 3 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                3. Penyimpanan Data
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
-              </p>
-            </div>
-
-            {/* Section 4 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                4. Keamanan
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
-              </p>
-            </div>
-
-            {/* Section 5 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                5. Hak Anda
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Anda memiliki hak untuk:
-              </p>
-              <ul
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.8,
-                  paddingLeft: "20px",
-                  margin: "6px 0 0 0",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                <li>Mengakses data pribadi Anda</li>
-                <li>Menghapus akun dan data chat Anda</li>
-                <li>Menonaktifkan notifikasi</li>
-              </ul>
-            </div>
-
-            {/* Section 6 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                6. Perubahan Kebijakan
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
-              </p>
-            </div>
-
-            {/* Section 7 */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  marginBottom: "6px",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                7. Kontak
-              </h3>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
-              </p>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#000000",
-                  marginTop: "4px",
-                  fontWeight: 500,
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                📧 support@menuru.com
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div
-              style={{
-                marginTop: "4px",
-                paddingTop: "14px",
-                borderTop: "1px solid #f0f0f0",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#999",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                Chat with Menuru v1.0
-              </span>
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#999",
-                  fontFamily: "Inter, 'Inter Fallback'",
-                }}
-              >
-                © 2026 Menuru
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
@@ -2545,9 +2148,9 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  {showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")}
+                  {showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))}
                 </span>
-                {!showProfile && selectedChat && (
+                {!showProfile && !showPrivacyPolicy && selectedChat && (
                   <>
                     <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
                       {selectedChat.email}
@@ -2558,7 +2161,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </>
                 )}
-                {!showProfile && !selectedChat && totalUnread > 0 && (
+                {!showProfile && !showPrivacyPolicy && !selectedChat && totalUnread > 0 && (
                   <span
                     style={{
                       backgroundColor: "#c5e800",
@@ -2575,7 +2178,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
               <button
                 onClick={() => {
-                  if (showProfile) {
+                  if (showPrivacyPolicy) {
+                    setShowPrivacyPolicy(false);
+                  } else if (showProfile) {
                     handleCloseProfile();
                   } else {
                     setIsChatOpen(false);
@@ -2605,8 +2210,333 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Profile View */}
-            {showProfile && profileUser ? (
+            {/* Content - Privacy Policy (seperti room chat) */}
+            {showPrivacyPolicy ? (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "28px 32px",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                {/* Badge dan Title */}
+                <div style={{ marginBottom: "24px" }}>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      padding: "4px 14px",
+                      backgroundColor: "#000000",
+                      borderRadius: "20px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Kebijakan Privasi
+                    </span>
+                  </div>
+                  <h2
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      margin: "0 0 4px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Chat with Menuru
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#999",
+                      margin: "0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Terakhir diperbarui: 9 Juli 2026
+                  </p>
+                </div>
+
+                {/* Section 1 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    1. Informasi yang Kami Kumpulkan
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: "0 0 6px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
+                  </p>
+                  <ul
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.9,
+                      paddingLeft: "20px",
+                      margin: "0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    <li>Nama dan email dari akun Google Anda</li>
+                    <li>Foto profil dari akun Google Anda</li>
+                    <li>Pesan dan riwayat chat yang Anda kirim</li>
+                    <li>Status online dan aktivitas chat</li>
+                  </ul>
+                </div>
+
+                {/* Section 2 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    2. Bagaimana Kami Menggunakan Informasi
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: "0 0 6px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Informasi yang kami kumpulkan digunakan untuk:
+                  </p>
+                  <ul
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.9,
+                      paddingLeft: "20px",
+                      margin: "0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    <li>Menyediakan dan memelihara layanan chat</li>
+                    <li>Mengirimkan pesan antar pengguna</li>
+                    <li>Menampilkan status online pengguna</li>
+                    <li>Menyimpan riwayat chat untuk akses di masa depan</li>
+                  </ul>
+                </div>
+
+                {/* Section 3 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    3. Penyimpanan Data
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
+                  </p>
+                </div>
+
+                {/* Section 4 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    4. Keamanan
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
+                  </p>
+                </div>
+
+                {/* Section 5 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    5. Hak Anda
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: "0 0 6px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Anda memiliki hak untuk:
+                  </p>
+                  <ul
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.9,
+                      paddingLeft: "20px",
+                      margin: "0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    <li>Mengakses data pribadi Anda</li>
+                    <li>Menghapus akun dan data chat Anda</li>
+                    <li>Menonaktifkan notifikasi</li>
+                  </ul>
+                </div>
+
+                {/* Section 6 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    6. Perubahan Kebijakan
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
+                  </p>
+                </div>
+
+                {/* Section 7 */}
+                <div style={{ marginBottom: "20px" }}>
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      marginBottom: "6px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    7. Kontak
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      margin: "0 0 4px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#000000",
+                      marginTop: "4px",
+                      fontWeight: 500,
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    📧 support@menuru.com
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div
+                  style={{
+                    marginTop: "8px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid #f0f0f0",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Chat with Menuru v1.0
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    © 2026 Menuru
+                  </span>
+                </div>
+              </div>
+            ) : showProfile && profileUser ? (
+              // Profile View
               <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   <button
