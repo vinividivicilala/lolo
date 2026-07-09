@@ -414,9 +414,11 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Chat button text animation
+  // Chat button text animation - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
-  const [incomingMessageText, setIncomingMessageText] = useState("");
+  const [incomingMessages, setIncomingMessages] = useState<string[]>([]);
+  const [currentIncomingIndex, setCurrentIncomingIndex] = useState(0);
+  const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
     "Chat with Menuru",
     "💬 Chat with Menuru",
@@ -425,7 +427,6 @@ export default function HomePage(): React.JSX.Element {
     "📩 Chat with Menuru"
   ];
   let chatTextIndex = 0;
-  const [isIncomingMessage, setIsIncomingMessage] = useState(false);
 
   // Music Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -707,7 +708,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
-      let newMessageFrom = "";
+      let newMessages: string[] = [];
       
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -742,7 +743,11 @@ export default function HomePage(): React.JSX.Element {
             totalUnreadCount += unreadCount;
             
             if (unreadCount > 0 && otherUser) {
-              newMessageFrom = otherUser.name;
+              // Ambil pesan terakhir dari pengirim
+              const lastUnreadMsg = unreadSnap.docs[0]?.data() as Message;
+              if (lastUnreadMsg) {
+                newMessages.push(`📩 ${otherUser.name}: ${lastUnreadMsg.text.substring(0, 30)}${lastUnreadMsg.text.length > 30 ? '...' : ''}`);
+              }
             }
             
             rooms.push({
@@ -770,17 +775,30 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
-      // Update chat button text when new message arrives
-      if (totalUnreadCount > 0 && newMessageFrom) {
+      // Update chat button text with rolling messages
+      if (totalUnreadCount > 0 && newMessages.length > 0) {
+        setIncomingMessages(newMessages);
         setIsIncomingMessage(true);
-        setIncomingMessageText(`📩 ${newMessageFrom} mengirim pesan`);
-        setChatButtonText(`📩 ${newMessageFrom} mengirim pesan`);
+        setCurrentIncomingIndex(0);
+        setChatButtonText(newMessages[0]);
         
+        // Auto-rotate through incoming messages
+        let index = 0;
+        const interval = setInterval(() => {
+          index = (index + 1) % newMessages.length;
+          setCurrentIncomingIndex(index);
+          setChatButtonText(newMessages[index]);
+        }, 3000);
+        
+        // After 10 seconds, revert to normal text
         setTimeout(() => {
+          clearInterval(interval);
           setIsIncomingMessage(false);
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
           chatTextIndex++;
-        }, 4000);
+        }, 10000);
+        
+        return () => clearInterval(interval);
       }
     });
 
@@ -2002,11 +2020,11 @@ export default function HomePage(): React.JSX.Element {
               animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
-            {/* Header - Hitam */}
+            {/* Header - Hitam dengan teks cerah */}
             <div
               style={{
                 padding: "16px 20px",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                borderBottom: "none",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -2026,7 +2044,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 {!showProfile && selectedChat && (
                   <>
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
                       {selectedChat.email}
                     </span>
                     <OnlineIndicator 
@@ -2913,11 +2931,11 @@ export default function HomePage(): React.JSX.Element {
             ) : (
               // Chat View
               <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
-                {/* Chat Header - Hitam */}
+                {/* Chat Header - Hitam dengan teks cerah */}
                 <div
                   style={{
                     padding: "10px 16px",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    borderBottom: "none",
                     display: "flex",
                     alignItems: "center",
                     gap: "10px",
@@ -2994,11 +3012,11 @@ export default function HomePage(): React.JSX.Element {
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
                       {getOnlineStatus(selectedChat.id) ? (
-                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
+                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
                           {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
                         </span>
                       ) : (
-                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
+                        <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
                           {getLastSeen(selectedChat.id)}
                         </span>
                       )}
@@ -3086,12 +3104,11 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Reply Indicator - Tanpa border, background minimal */}
+                {/* Reply Indicator - Tanpa border dan background */}
                 {replyTo && (
                   <div
                     style={{
                       padding: "6px 14px",
-                      backgroundColor: "rgba(197,232,0,0.06)",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -3177,7 +3194,7 @@ export default function HomePage(): React.JSX.Element {
                               padding: "10px 14px",
                               borderRadius: "12px",
                               backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
-                              color: isMine ? "#000000" : "#000000",
+                              color: "#000000",
                               fontSize: "14px",
                               lineHeight: 1.5,
                               position: "relative",
@@ -3189,7 +3206,7 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "10px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.4)",
+                                  color: "rgba(0,0,0,0.4)",
                                   marginBottom: "4px",
                                   fontStyle: "italic",
                                 }}
@@ -3202,7 +3219,7 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   fontSize: "11px",
-                                  color: isMine ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.5)",
+                                  color: "rgba(0,0,0,0.5)",
                                   padding: "4px 8px",
                                   borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
                                   marginBottom: "6px",
@@ -3234,7 +3251,7 @@ export default function HomePage(): React.JSX.Element {
                               <span
                                 style={{
                                   fontSize: "9px",
-                                  color: isMine ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.3)",
+                                  color: "rgba(0,0,0,0.4)",
                                   fontWeight: 400,
                                 }}
                               >
@@ -3247,7 +3264,7 @@ export default function HomePage(): React.JSX.Element {
                                   background: "none",
                                   border: "none",
                                   cursor: "pointer",
-                                  color: isMine ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.3)",
+                                  color: "rgba(0,0,0,0.3)",
                                   padding: "2px 4px",
                                   display: "flex",
                                   alignItems: "center",
@@ -3499,7 +3516,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Chat Button - Dengan teks berubah-ubah */}
+        {/* Chat Button - Dengan rolling text pesan masuk */}
         <button
           onClick={handleChatToggle}
           style={{
@@ -3516,6 +3533,8 @@ export default function HomePage(): React.JSX.Element {
             userSelect: "none",
             fontFamily: "Inter, 'Inter Fallback'",
             position: "relative",
+            maxWidth: "320px",
+            overflow: "hidden",
           }}
           onMouseEnter={(e) => {
             if (!isChatOpen) {
@@ -3540,7 +3559,8 @@ export default function HomePage(): React.JSX.Element {
                   letterSpacing: "-0.01em",
                   lineHeight: 1,
                   whiteSpace: "nowrap",
-                  transition: "all 0.3s ease",
+                  transition: "all 0.5s ease",
+                  animation: isIncomingMessage ? "fadeInOut 0.5s ease" : "none",
                 }}
               >
                 {user ? chatButtonText : "Login to Chat"}
@@ -3593,6 +3613,20 @@ export default function HomePage(): React.JSX.Element {
           }
           100% {
             transform: translateX(-100%);
+          }
+        }
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0.5;
+            transform: scale(0.98);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
           }
         }
       `}</style>
