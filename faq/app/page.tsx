@@ -415,6 +415,9 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Privacy Policy
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+
   // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
@@ -484,6 +487,11 @@ export default function HomePage(): React.JSX.Element {
     },
     {
       text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    },
+    {
+      text: "Jangan lupa baca Privacy Policy kami 👇",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
@@ -1366,6 +1374,268 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
+      {/* Privacy Policy Modal */}
+      {showPrivacyPolicy && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setShowPrivacyPolicy(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "16px",
+              padding: "32px 36px",
+              maxWidth: "560px",
+              width: "100%",
+              maxHeight: "80vh",
+              overflowY: "auto",
+              border: "1px solid #e0e0e0",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPrivacyPolicy(false)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#999",
+                padding: "8px",
+                borderRadius: "8px",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f0f0f0";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <CloseIcon />
+            </button>
+
+            {/* Header */}
+            <div style={{ marginBottom: "24px" }}>
+              <div style={{ 
+                display: "inline-block",
+                padding: "4px 12px",
+                backgroundColor: "#000000",
+                borderRadius: "20px",
+                marginBottom: "12px",
+              }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "#ffffff", letterSpacing: "0.05em" }}>
+                  Kebijakan Privasi
+                </span>
+              </div>
+              <h2 style={{ 
+                fontSize: "24px", 
+                fontWeight: 600, 
+                color: "#000000", 
+                margin: 0,
+                fontFamily: "Inter, 'Inter Fallback'",
+              }}>
+                Chat with Menuru
+              </h2>
+              <p style={{ 
+                fontSize: "13px", 
+                color: "#999", 
+                marginTop: "4px",
+                fontFamily: "Inter, 'Inter Fallback'",
+              }}>
+                Terakhir diperbarui: 9 Juli 2026
+              </p>
+            </div>
+
+            {/* Content */}
+            <div style={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              gap: "20px",
+              fontFamily: "Inter, 'Inter Fallback'",
+            }}>
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  1. Informasi yang Kami Kumpulkan
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
+                </p>
+                <ul style={{ 
+                  fontSize: "13px", 
+                  color: "#666", 
+                  lineHeight: 1.8, 
+                  paddingLeft: "20px",
+                  margin: "8px 0 0 0",
+                }}>
+                  <li>Nama dan email dari akun Google Anda</li>
+                  <li>Foto profil dari akun Google Anda</li>
+                  <li>Pesan dan riwayat chat yang Anda kirim</li>
+                  <li>Status online dan aktivitas chat</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  2. Bagaimana Kami Menggunakan Informasi
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Informasi yang kami kumpulkan digunakan untuk:
+                </p>
+                <ul style={{ 
+                  fontSize: "13px", 
+                  color: "#666", 
+                  lineHeight: 1.8, 
+                  paddingLeft: "20px",
+                  margin: "8px 0 0 0",
+                }}>
+                  <li>Menyediakan dan memelihara layanan chat</li>
+                  <li>Mengirimkan pesan antar pengguna</li>
+                  <li>Menampilkan status online pengguna</li>
+                  <li>Menyimpan riwayat chat untuk akses di masa depan</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  3. Penyimpanan Data
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  4. Keamanan
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  5. Hak Anda
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Anda memiliki hak untuk:
+                </p>
+                <ul style={{ 
+                  fontSize: "13px", 
+                  color: "#666", 
+                  lineHeight: 1.8, 
+                  paddingLeft: "20px",
+                  margin: "8px 0 0 0",
+                }}>
+                  <li>Mengakses data pribadi Anda</li>
+                  <li>Menghapus akun dan data chat Anda</li>
+                  <li>Menonaktifkan notifikasi</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  6. Perubahan Kebijakan
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
+                </p>
+              </div>
+
+              <div>
+                <h3 style={{ 
+                  fontSize: "14px", 
+                  fontWeight: 600, 
+                  color: "#000000", 
+                  marginBottom: "8px",
+                }}>
+                  7. Kontak
+                </h3>
+                <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.6, margin: 0 }}>
+                  Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
+                </p>
+                <p style={{ 
+                  fontSize: "13px", 
+                  color: "#000000", 
+                  marginTop: "4px",
+                  fontWeight: 500,
+                }}>
+                  📧 support@menuru.com
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div style={{ 
+                marginTop: "8px",
+                paddingTop: "16px",
+                borderTop: "1px solid #f0f0f0",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+                <span style={{ fontSize: "11px", color: "#999" }}>
+                  Chat with Menuru v1.0
+                </span>
+                <span style={{ fontSize: "11px", color: "#999" }}>
+                  © 2026 Menuru
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
         style={{
@@ -2070,9 +2340,35 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")}
                 </span>
+                {/* Tombol Privacy Policy */}
+                <button
+                  onClick={() => setShowPrivacyPolicy(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: "10px",
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    transition: "all 0.2s ease",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    textDecoration: "underline",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#ffffff";
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "rgba(255,255,255,0.4)";
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  Privacy Policy
+                </button>
                 {!showProfile && selectedChat && (
                   <>
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
                       {selectedChat.email}
                     </span>
                     <OnlineIndicator 
@@ -2128,7 +2424,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content */}
+            {/* Content - Profile View */}
             {showProfile && profileUser ? (
               <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
@@ -3211,6 +3507,9 @@ export default function HomePage(): React.JSX.Element {
                       // Tentukan nama untuk balasan
                       const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
                       
+                      // Cek apakah pesan dari official dan mengandung "Privacy Policy"
+                      const isPrivacyPolicyMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
+                      
                       return (
                         <React.Fragment key={idx}>
                           {showDate && (
@@ -3275,9 +3574,26 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             )}
                             
-                            <span>
-                              {msg.text}
-                            </span>
+                            {/* Pesan dengan link Privacy Policy */}
+                            {isPrivacyPolicyMessage ? (
+                              <span>
+                                Jangan lupa baca{' '}
+                                <span
+                                  onClick={() => setShowPrivacyPolicy(true)}
+                                  style={{
+                                    color: "#0095f6",
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  Privacy Policy
+                                </span>
+                                {' '}kami 👇
+                              </span>
+                            ) : (
+                              <span>{msg.text}</span>
+                            )}
                             
                             <div
                               style={{
