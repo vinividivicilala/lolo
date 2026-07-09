@@ -414,9 +414,10 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Chat button text - hanya nama pengirim
+  // Chat button text - hanya nama pengirim dengan rolling
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
-  const [incomingSenderName, setIncomingSenderName] = useState("");
+  const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
     "Chat with Menuru",
@@ -425,6 +426,7 @@ export default function HomePage(): React.JSX.Element {
     "Chat with Menuru"
   ];
   let chatTextIndex = 0;
+  let rollingInterval: NodeJS.Timeout | null = null;
 
   // Music Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -706,7 +708,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
-      let senderName = "";
+      const newMessages: string[] = [];
       
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -741,7 +743,10 @@ export default function HomePage(): React.JSX.Element {
             totalUnreadCount += unreadCount;
             
             if (unreadCount > 0 && otherUser) {
-              senderName = otherUser.name;
+              const lastUnreadMsg = unreadSnap.docs[0]?.data() as Message;
+              if (lastUnreadMsg) {
+                newMessages.push(`Pesan dari ${otherUser.name}: ${lastUnreadMsg.text.substring(0, 20)}${lastUnreadMsg.text.length > 20 ? '...' : ''}`);
+              }
             }
             
             rooms.push({
@@ -769,21 +774,51 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
-      // Update chat button text - hanya nama pengirim
-      if (totalUnreadCount > 0 && senderName) {
+      // Update chat button text with rolling messages
+      if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
-        setIncomingSenderName(senderName);
-        setChatButtonText(`Pesan dari ${senderName}`);
+        setIncomingMessagesList(newMessages);
+        setCurrentMessageIndex(0);
+        setChatButtonText(newMessages[0]);
         
+        // Clear previous interval
+        if (rollingInterval) {
+          clearInterval(rollingInterval);
+        }
+        
+        // Auto-rotate through incoming messages
+        let index = 0;
+        rollingInterval = setInterval(() => {
+          index = (index + 1) % newMessages.length;
+          setCurrentMessageIndex(index);
+          setChatButtonText(newMessages[index]);
+        }, 3000);
+        
+        // After 10 seconds, revert to normal text
         setTimeout(() => {
+          if (rollingInterval) {
+            clearInterval(rollingInterval);
+            rollingInterval = null;
+          }
           setIsIncomingMessage(false);
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
           chatTextIndex++;
-        }, 4000);
+        }, 10000);
+      } else {
+        // If no unread messages, show normal text
+        if (!isIncomingMessage) {
+          setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
+        }
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (rollingInterval) {
+        clearInterval(rollingInterval);
+        rollingInterval = null;
+      }
+    };
   }, [user, users]);
 
   // Load messages
@@ -3497,7 +3532,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Chat Button - Hanya nama pengirim */}
+        {/* Chat Button - Rolling text pesan masuk */}
         <button
           onClick={handleChatToggle}
           style={{
@@ -3514,7 +3549,7 @@ export default function HomePage(): React.JSX.Element {
             userSelect: "none",
             fontFamily: "Inter, 'Inter Fallback'",
             position: "relative",
-            maxWidth: "320px",
+            maxWidth: "360px",
             overflow: "hidden",
           }}
           onMouseEnter={(e) => {
@@ -3541,6 +3576,7 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   transition: "all 0.5s ease",
+                  animation: isIncomingMessage ? "fadeInOut 0.5s ease" : "none",
                 }}
               >
                 {user ? chatButtonText : "Login to Chat"}
@@ -3593,6 +3629,20 @@ export default function HomePage(): React.JSX.Element {
           }
           100% {
             transform: translateX(-100%);
+          }
+        }
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0.7;
+            transform: scale(0.98);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
           }
         }
       `}</style>
