@@ -3237,7 +3237,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "11px",
                                   color: "rgba(0,0,0,0.5)",
                                   padding: "4px 8px",
-                                  borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
+                          
                                   marginBottom: "6px",
                                   backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
                                   borderRadius: "4px",
