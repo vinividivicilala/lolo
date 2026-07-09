@@ -413,8 +413,9 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Chat button text - hanya nama pengirim dengan rolling
+  // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -426,7 +427,6 @@ export default function HomePage(): React.JSX.Element {
     "Chat with Menuru"
   ];
   let chatTextIndex = 0;
-  let rollingInterval: NodeJS.Timeout | null = null;
 
   // Music Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -742,10 +742,12 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
+            // Kumpulkan semua pesan masuk dari semua pengirim
             if (unreadCount > 0 && otherUser) {
-              const lastUnreadMsg = unreadSnap.docs[0]?.data() as Message;
-              if (lastUnreadMsg) {
-                newMessages.push(`Pesan dari ${otherUser.name}: ${lastUnreadMsg.text.substring(0, 20)}${lastUnreadMsg.text.length > 20 ? '...' : ''}`);
+              const unreadDocs = unreadSnap.docs;
+              for (const doc of unreadDocs) {
+                const msg = doc.data() as Message;
+                newMessages.push(`Pesan dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
               }
             }
             
@@ -774,7 +776,7 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
-      // Update chat button text with rolling messages
+      // Update chat button text dengan rolling messages
       if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
         setIncomingMessagesList(newMessages);
@@ -782,28 +784,29 @@ export default function HomePage(): React.JSX.Element {
         setChatButtonText(newMessages[0]);
         
         // Clear previous interval
-        if (rollingInterval) {
-          clearInterval(rollingInterval);
+        if (rollingInterval.current) {
+          clearInterval(rollingInterval.current);
+          rollingInterval.current = null;
         }
         
-        // Auto-rotate through incoming messages
+        // Auto-rotate through incoming messages - berganti setiap 3 detik
         let index = 0;
-        rollingInterval = setInterval(() => {
+        rollingInterval.current = setInterval(() => {
           index = (index + 1) % newMessages.length;
           setCurrentMessageIndex(index);
           setChatButtonText(newMessages[index]);
         }, 3000);
         
-        // After 10 seconds, revert to normal text
+        // After 12 seconds, revert to normal text
         setTimeout(() => {
-          if (rollingInterval) {
-            clearInterval(rollingInterval);
-            rollingInterval = null;
+          if (rollingInterval.current) {
+            clearInterval(rollingInterval.current);
+            rollingInterval.current = null;
           }
           setIsIncomingMessage(false);
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
           chatTextIndex++;
-        }, 10000);
+        }, 12000);
       } else {
         // If no unread messages, show normal text
         if (!isIncomingMessage) {
@@ -814,9 +817,9 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       unsubscribe();
-      if (rollingInterval) {
-        clearInterval(rollingInterval);
-        rollingInterval = null;
+      if (rollingInterval.current) {
+        clearInterval(rollingInterval.current);
+        rollingInterval.current = null;
       }
     };
   }, [user, users]);
@@ -1080,6 +1083,15 @@ export default function HomePage(): React.JSX.Element {
 
       setMessage("");
       setReplyTo(null);
+      
+      // Reset rolling text setelah mengirim pesan
+      if (rollingInterval.current) {
+        clearInterval(rollingInterval.current);
+        rollingInterval.current = null;
+      }
+      setIsIncomingMessage(false);
+      setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
+      chatTextIndex++;
       
       if (typingTimeout) {
         clearTimeout(typingTimeout);
@@ -3134,7 +3146,7 @@ export default function HomePage(): React.JSX.Element {
                       <ReplyIcon />
                       <div>
                         <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
-                          Membalas {replyTo.senderName === user.displayName ? "diri sendiri" : replyTo.senderName}
+                          Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
                         </div>
                         <div style={{ fontSize: "11px", color: "#666" }}>
                           {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -3237,7 +3249,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "11px",
                                   color: "rgba(0,0,0,0.5)",
                                   padding: "4px 8px",
-                          
+                                  borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
                                   marginBottom: "6px",
                                   backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
                                   borderRadius: "4px",
