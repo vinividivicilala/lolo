@@ -414,17 +414,15 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Chat button text animation - rolling text
+  // Chat button text - hanya nama pengirim
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
-  const [incomingMessages, setIncomingMessages] = useState<string[]>([]);
-  const [currentIncomingIndex, setCurrentIncomingIndex] = useState(0);
+  const [incomingSenderName, setIncomingSenderName] = useState("");
   const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
     "Chat with Menuru",
-    "💬 Chat with Menuru",
-    "✨ Chat with Menuru",
-    "💭 Chat with Menuru",
-    "📩 Chat with Menuru"
+    "Chat with Menuru",
+    "Chat with Menuru",
+    "Chat with Menuru"
   ];
   let chatTextIndex = 0;
 
@@ -708,7 +706,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
-      let newMessages: string[] = [];
+      let senderName = "";
       
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -743,11 +741,7 @@ export default function HomePage(): React.JSX.Element {
             totalUnreadCount += unreadCount;
             
             if (unreadCount > 0 && otherUser) {
-              // Ambil pesan terakhir dari pengirim
-              const lastUnreadMsg = unreadSnap.docs[0]?.data() as Message;
-              if (lastUnreadMsg) {
-                newMessages.push(`📩 ${otherUser.name}: ${lastUnreadMsg.text.substring(0, 30)}${lastUnreadMsg.text.length > 30 ? '...' : ''}`);
-              }
+              senderName = otherUser.name;
             }
             
             rooms.push({
@@ -775,30 +769,17 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
-      // Update chat button text with rolling messages
-      if (totalUnreadCount > 0 && newMessages.length > 0) {
-        setIncomingMessages(newMessages);
+      // Update chat button text - hanya nama pengirim
+      if (totalUnreadCount > 0 && senderName) {
         setIsIncomingMessage(true);
-        setCurrentIncomingIndex(0);
-        setChatButtonText(newMessages[0]);
+        setIncomingSenderName(senderName);
+        setChatButtonText(`Pesan dari ${senderName}`);
         
-        // Auto-rotate through incoming messages
-        let index = 0;
-        const interval = setInterval(() => {
-          index = (index + 1) % newMessages.length;
-          setCurrentIncomingIndex(index);
-          setChatButtonText(newMessages[index]);
-        }, 3000);
-        
-        // After 10 seconds, revert to normal text
         setTimeout(() => {
-          clearInterval(interval);
           setIsIncomingMessage(false);
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
           chatTextIndex++;
-        }, 10000);
-        
-        return () => clearInterval(interval);
+        }, 4000);
       }
     });
 
@@ -3108,7 +3089,7 @@ export default function HomePage(): React.JSX.Element {
                 {replyTo && (
                   <div
                     style={{
-                      padding: "6px 14px",
+                      padding: "4px 14px",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -3117,7 +3098,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <ReplyIcon />
                       <div>
-                        <div style={{ fontSize: "10px", color: "#c5e800", fontWeight: 500 }}>
+                        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
                           Membalas {replyTo.senderName === user.displayName ? "diri sendiri" : replyTo.senderName}
                         </div>
                         <div style={{ fontSize: "11px", color: "#666" }}>
@@ -3516,7 +3497,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Chat Button - Dengan rolling text pesan masuk */}
+        {/* Chat Button - Hanya nama pengirim */}
         <button
           onClick={handleChatToggle}
           style={{
@@ -3560,7 +3541,6 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   transition: "all 0.5s ease",
-                  animation: isIncomingMessage ? "fadeInOut 0.5s ease" : "none",
                 }}
               >
                 {user ? chatButtonText : "Login to Chat"}
@@ -3613,20 +3593,6 @@ export default function HomePage(): React.JSX.Element {
           }
           100% {
             transform: translateX(-100%);
-          }
-        }
-        @keyframes fadeInOut {
-          0% {
-            opacity: 0.5;
-            transform: scale(0.98);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
           }
         }
       `}</style>
