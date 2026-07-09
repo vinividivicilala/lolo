@@ -425,7 +425,7 @@ export default function HomePage(): React.JSX.Element {
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Playlist Data dengan embed Spotify
+  // Playlist Data dengan embed Spotify asli
   const playlist: Track[] = [
     { 
       artist: "Feast", 
@@ -439,84 +439,12 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Audio Player Setup untuk dummy
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
-      audioRef.current.loop = false;
-      
-      const handleEnded = () => {
-        setIsPlaying(false);
-      };
-      
-      audioRef.current.addEventListener('ended', handleEnded);
-      
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.removeEventListener('ended', handleEnded);
-        }
-      };
-    }
-  }, []);
-
-  // Play/Pause Handler untuk dummy audio
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play()
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((err) => {
-          console.log("Play error:", err);
-        });
-    }
-  };
-
   // Select Track from Playlist
   const selectTrack = (track: Track) => {
-    if (audioRef.current && isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
     setCurrentTrack(track);
     setShowPlaylist(false);
-    // Buka modal music player
     setShowMusicPlayer(true);
   };
-
-  // Spotify Widget Data - dipertahankan
-  const [spotifyTrack, setSpotifyTrack] = useState({
-    artist: "Billie Eilish",
-    title: "BIRDS OF A FEATHER",
-  });
-
-  // Simulasi pergantian lagu setiap 10 detik - dipertahankan
-  useEffect(() => {
-    const tracks = [
-      { artist: "Billie Eilish", title: "BIRDS OF A FEATHER" },
-      { artist: "Taylor Swift", title: "Fortnight feat. Post Malone" },
-      { artist: "Olivia Rodrigo", title: "good 4 u" },
-      { artist: "Ariana Grande", title: "we can't be friends" },
-      { artist: "Sabrina Carpenter", title: "Espresso" },
-      { artist: "The Weeknd", title: "Blinding Lights" },
-      { artist: "Doja Cat", title: "Paint The Town Red" },
-      { artist: "Dua Lipa", title: "Houdini" },
-    ];
-
-    let index = 0;
-    const interval = setInterval(() => {
-      index = (index + 1) % tracks.length;
-      setSpotifyTrack(tracks[index]);
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
@@ -1362,7 +1290,7 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Music Widget - Dengan fitur play/stop dan modal */}
+        {/* Music Widget - Dengan lagu asli dari Spotify */}
         <div
           style={{
             display: "flex",
@@ -1385,7 +1313,7 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
           }}
         >
-          {/* Kotak foto artis dengan tombol play/stop */}
+          {/* Kotak foto artis */}
           <div
             style={{
               width: "40px",
@@ -1406,34 +1334,6 @@ export default function HomePage(): React.JSX.Element {
                 (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0f0f0'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-size='18' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
               }}
             />
-            {/* Tombol play/stop di overlay foto artis */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-              }}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: "rgba(0,0,0,0.4)",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "8px",
-                opacity: 0,
-                transition: "opacity 0.3s ease",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = "0"; }}
-            >
-              {isPlaying ? <MusicPauseIcon /> : <MusicPlayIcon />}
-            </button>
           </div>
 
           {/* Info Lagu - Teks Berjalan Otomatis */}
@@ -1448,8 +1348,8 @@ export default function HomePage(): React.JSX.Element {
               <div
                 style={{
                   display: "inline-block",
-                  animation: isPlaying ? "marquee 12s linear infinite" : "none",
-                  paddingLeft: isPlaying ? "100%" : "0",
+                  animation: "marquee 12s linear infinite",
+                  paddingLeft: "100%",
                   fontSize: "13px",
                   fontWeight: 600,
                   color: "#000000",
@@ -1586,7 +1486,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Music Player Modal - Dengan Spotify Embed dan foto artis */}
+      {/* Music Player Modal - Dengan Spotify Embed asli */}
       {showMusicPlayer && (
         <div
           style={{
@@ -1658,12 +1558,11 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Spotify Embed */}
+            {/* Spotify Embed Asli */}
             <div style={{ borderRadius: "12px", overflow: "hidden" }}>
               <iframe
-                style={{ borderRadius: "12px", border: "none" }}
+                style={{ borderRadius: "12px", border: "none", width: "100%" }}
                 src={currentTrack.embedUrl}
-                width="100%"
                 height="352"
                 frameBorder="0"
                 allowFullScreen
@@ -2148,9 +2047,8 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Chat List View */}
+            {/* Content - Profile View */}
             {showProfile && profileUser ? (
-              // Profile View
               <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   {/* Back Button */}
