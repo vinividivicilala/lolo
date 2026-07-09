@@ -3133,55 +3133,51 @@ export default function HomePage(): React.JSX.Element {
                 )}
 
                 {/* Reply Indicator - Tanpa border dan background */}
-                
-{replyTo && (
-  <div
-    style={{
-      padding: "4px 14px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    }}
-  >
-    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      <ReplyIcon />
-      <div>
-        {/* Menampilkan Balas: [nama pengirim] atau Balas: [nama penerima] */}
-        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
-          {replyTo.senderId === user?.uid 
-            ? `Balas: ${replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}` 
-            : `Balas: ${replyTo.senderName}`}
-        </div>
-        <div style={{ fontSize: "11px", color: "#666" }}>
-          {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
-        </div>
-      </div>
-    </div>
-    <button
-      onClick={() => setReplyTo(null)}
-      style={{
-        background: "none",
-        border: "none",
-        color: "#999",
-        cursor: "pointer",
-        fontSize: "14px",
-        padding: "4px 8px",
-        borderRadius: "4px",
-        transition: "all 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-      }}
-    >
-      ✕
-    </button>
-  </div>
-)}
+                {replyTo && (
+                  <div
+                    style={{
+                      padding: "4px 14px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <ReplyIcon />
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
+                          Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#666" }}>
+                          {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setReplyTo(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#999",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
 
-                {/* Messages - Warna stabilo seperti Awwards */}
+                {/* Messages - Warna stabilo seperti Awwards dengan Balas: [nama] */}
                 <div
                   style={{
                     flex: 1,
@@ -3211,6 +3207,9 @@ export default function HomePage(): React.JSX.Element {
                       const chatId = [user.uid, selectedChat.id].sort().join("_");
                       const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
                         formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                      
+                      // Tentukan nama untuk balasan
+                      const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
                       
                       return (
                         <React.Fragment key={idx}>
@@ -3256,22 +3255,23 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             )}
                             
+                            {/* Reply Preview - Tampilkan "Balas: [nama]" */}
                             {msg.replyTo && msg.replyToText && (
                               <div
                                 style={{
                                   fontSize: "11px",
-                                  color: "rgba(0,0,0,0.5)",
+                                  color: isMine ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.5)",
                                   padding: "4px 8px",
-                                
+                                  borderLeft: `2px solid ${isMine ? "#000" : "#999"}`,
                                   marginBottom: "6px",
                                   backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
                                   borderRadius: "4px",
                                 }}
                               >
-                                <span style={{ fontWeight: 500 }}>
-                                  {msg.replyToSender === user.displayName ? "Anda" : msg.replyToSender}:
+                                <span style={{ fontWeight: 500, color: "#22c55e" }}>
+                                  {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
                                 </span>
-                                <span> {msg.replyToText}</span>
+                                <span style={{ color: isMine ? "#000" : "#333" }}> {msg.replyToText}</span>
                               </div>
                             )}
                             
