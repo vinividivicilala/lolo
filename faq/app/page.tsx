@@ -1526,8 +1526,8 @@ export default function HomePage(): React.JSX.Element {
 <div
   style={{
     position: "absolute",
-    top: "20px",
-    left: "40px",
+    top: "0px",
+    left: "0px",
     zIndex: 10,
     display: "flex",
     alignItems: "center",
