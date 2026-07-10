@@ -111,6 +111,9 @@ interface UpdateItem {
   description: string;
   date: string;
   status: "live" | "coming" | "done";
+  detail: string;
+  link: string;
+  publishedBy: string;
 }
 
 // SVG Icons
@@ -428,6 +431,7 @@ export default function HomePage(): React.JSX.Element {
   
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
+  const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
 
   // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
@@ -449,35 +453,50 @@ export default function HomePage(): React.JSX.Element {
       title: "Fitur Chat Real-time",
       description: "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan.",
       date: "10 Juli 2026",
-      status: "live"
+      status: "live",
+      detail: "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator.",
+      link: "https://menuru.com/update/chat-realtime",
+      publishedBy: "Tim Menuru"
     },
     {
       id: "2",
       title: "Privacy Policy & Update System",
       description: "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan.",
       date: "9 Juli 2026",
-      status: "live"
+      status: "live",
+      detail: "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna.",
+      link: "https://menuru.com/update/privacy-policy",
+      publishedBy: "Tim Menuru"
     },
     {
       id: "3",
       title: "Fitur Pin Message",
       description: "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas.",
       date: "8 Juli 2026",
-      status: "coming"
+      status: "coming",
+      detail: "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus.",
+      link: "https://menuru.com/update/pin-message",
+      publishedBy: "Tim Menuru"
     },
     {
       id: "4",
       title: "Fitur Reply & Share Message",
       description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
       date: "7 Juli 2026",
-      status: "done"
+      status: "done",
+      detail: "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah.",
+      link: "https://menuru.com/update/reply-share",
+      publishedBy: "Tim Menuru"
     },
     {
       id: "5",
       title: "Online Status & Typing Indicator",
       description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
       date: "6 Juli 2026",
-      status: "done"
+      status: "done",
+      detail: "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif.",
+      link: "https://menuru.com/update/online-status",
+      publishedBy: "Tim Menuru"
     }
   ];
 
@@ -2264,7 +2283,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Update Page dengan design baru */}
+            {/* Content - Update Page dengan Expandable Detail */}
             {showUpdate ? (
               <div
                 style={{
@@ -2321,7 +2340,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Timeline - Design baru dengan titik pemancar */}
+                {/* Timeline */}
                 <div style={{ position: "relative", paddingLeft: "28px" }}>
                   {/* Garis vertikal titik-titik */}
                   <div
@@ -2340,8 +2359,8 @@ export default function HomePage(): React.JSX.Element {
                     const isLive = item.status === "live";
                     const isComing = item.status === "coming";
                     const isDone = item.status === "done";
+                    const isExpanded = expandedUpdate === item.id;
                     
-                    // Warna titik: biru stabilo untuk live, hitam untuk done, merah stabilo untuk coming
                     const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
                     const glowColor = isLive ? "rgba(59, 130, 246, 0.8)" : "none";
                     const isPulsing = isLive;
@@ -2355,7 +2374,7 @@ export default function HomePage(): React.JSX.Element {
                           paddingLeft: "24px",
                         }}
                       >
-                        {/* Titik bulat di tengah line titik-titik dengan efek pemancar */}
+                        {/* Titik bulat dengan efek pemancar */}
                         <div
                           style={{
                             position: "absolute",
@@ -2369,10 +2388,12 @@ export default function HomePage(): React.JSX.Element {
                             boxShadow: isPulsing ? `0 0 20px ${glowColor}, 0 0 40px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
                             animation: isPulsing ? "pulseTransmitter 1.5s ease-in-out infinite" : "none",
                             zIndex: 1,
+                            cursor: "pointer",
                           }}
+                          onClick={() => setExpandedUpdate(isExpanded ? null : item.id)}
                         />
                         
-                        {/* Garis titik-titik dari titik ke judul (sama dengan garis ke bawah) */}
+                        {/* Garis titik-titik dari titik ke judul */}
                         <div
                           style={{
                             position: "absolute",
@@ -2385,11 +2406,13 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         />
                         
-                        {/* Card Update - Tanpa bg, tanpa border */}
+                        {/* Card Update */}
                         <div
                           style={{
                             padding: "0",
+                            cursor: "pointer",
                           }}
+                          onClick={() => setExpandedUpdate(isExpanded ? null : item.id)}
                         >
                           <div
                             style={{
@@ -2400,37 +2423,135 @@ export default function HomePage(): React.JSX.Element {
                           >
                             <div
                               style={{
-                                fontSize: "16px",
-                                fontWeight: 700,
-                                color: "#000000",
-                                fontFamily: "Inter, 'Inter Fallback'",
-                                letterSpacing: "-0.01em",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "12px",
                               }}
                             >
-                              {item.title}
+                              <div
+                                style={{
+                                  fontSize: "18px",
+                                  fontWeight: 700,
+                                  color: "#000000",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                  letterSpacing: "-0.01em",
+                                }}
+                              >
+                                {item.title}
+                              </div>
+                              {/* Panah SVG */}
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{
+                                  flexShrink: 0,
+                                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                  transition: 'transform 0.3s ease',
+                                  color: "#000000",
+                                }}
+                              >
+                                <path
+                                  d="M6 9L12 15L18 9"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
                             </div>
-                            <p
-                              style={{
-                                fontSize: "14px",
-                                color: "#000000",
-                                lineHeight: 1.6,
-                                margin: 0,
-                                fontFamily: "Inter, 'Inter Fallback'",
-                              }}
-                            >
-                              {item.description}
-                            </p>
-                            <span
-                              style={{
-                                fontSize: "13px",
-                                color: "#000000",
-                                fontWeight: 400,
-                                fontFamily: "Inter, 'Inter Fallback'",
-                                opacity: 0.7,
-                              }}
-                            >
-                              {item.date}
-                            </span>
+                            
+                            {/* Detail yang muncul saat di-expand */}
+                            {isExpanded && (
+                              <div
+                                style={{
+                                  marginTop: "8px",
+                                  paddingTop: "12px",
+                                  borderTop: "1px solid #f0f0f0",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "8px",
+                                }}
+                              >
+                                <p
+                                  style={{
+                                    fontSize: "15px",
+                                    color: "#000000",
+                                    lineHeight: 1.7,
+                                    margin: 0,
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                  }}
+                                >
+                                  {item.detail}
+                                </p>
+                                
+                                {/* Link */}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "14px",
+                                      color: "#666",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                    }}
+                                  >
+                                    🔗
+                                  </span>
+                                  <a
+                                    href={item.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      fontSize: "14px",
+                                      color: "#000000",
+                                      textDecoration: "underline",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                      fontWeight: 500,
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {item.link}
+                                  </a>
+                                </div>
+                                
+                                {/* Publish & Date */}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px",
+                                    marginTop: "4px",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "13px",
+                                      color: "#666",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                    }}
+                                  >
+                                    📅 {item.date}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: "13px",
+                                      color: "#666",
+                                      fontFamily: "Inter, 'Inter Fallback'",
+                                    }}
+                                  >
+                                    ✍️ {item.publishedBy}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -2795,7 +2916,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : showProfile && profileUser ? (
-              // Profile View
+              // Profile View - sama seperti sebelumnya
               <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   <button
@@ -3126,7 +3247,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View
+              // Chat List View - sama seperti sebelumnya
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
