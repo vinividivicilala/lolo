@@ -110,7 +110,7 @@ interface UpdateItem {
   title: string;
   description: string;
   date: string;
-  status: "live" | "coming" | "fixed";
+  status: "live" | "coming" | "done";
 }
 
 // SVG Icons
@@ -470,14 +470,14 @@ export default function HomePage(): React.JSX.Element {
       title: "Fitur Reply & Share Message",
       description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
       date: "7 Juli 2026",
-      status: "fixed"
+      status: "done"
     },
     {
       id: "5",
       title: "Online Status & Typing Indicator",
       description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
       date: "6 Juli 2026",
-      status: "live"
+      status: "done"
     }
   ];
 
@@ -2264,7 +2264,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Update Page */}
+            {/* Content - Update Page dengan design baru */}
             {showUpdate ? (
               <div
                 style={{
@@ -2275,7 +2275,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {/* Header Update */}
-                <div style={{ marginBottom: "24px" }}>
+                <div style={{ marginBottom: "28px" }}>
                   <div
                     style={{
                       display: "inline-block",
@@ -2321,17 +2321,17 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Timeline */}
-                <div style={{ position: "relative", paddingLeft: "28px" }}>
-                  {/* Garis vertikal putus-putus */}
+                {/* Timeline - Design baru */}
+                <div style={{ position: "relative", paddingLeft: "32px" }}>
+                  {/* Garis vertikal titik-titik */}
                   <div
                     style={{
                       position: "absolute",
                       left: "8px",
-                      top: "4px",
-                      bottom: "4px",
+                      top: "6px",
+                      bottom: "6px",
                       width: "2px",
-                      borderLeft: "2px dashed #d0d0d0",
+                      borderLeft: "2px dotted #d0d0d0",
                       zIndex: 0,
                     }}
                   />
@@ -2339,10 +2339,12 @@ export default function HomePage(): React.JSX.Element {
                   {updates.map((item, index) => {
                     const isLive = item.status === "live";
                     const isComing = item.status === "coming";
-                    const isFixed = item.status === "fixed";
+                    const isDone = item.status === "done";
                     
-                    const statusColor = isLive ? "#22c55e" : (isComing ? "#f59e0b" : "#3b82f6");
-                    const statusLabel = isLive ? "Live" : (isComing ? "Coming Soon" : "Fixed");
+                    // Warna titik: biru stabilo untuk live, hitam untuk done, merah stabilo untuk coming
+                    const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
+                    const glowColor = isLive ? "rgba(59, 130, 246, 0.6)" : "none";
+                    const isPulsing = isLive;
                     
                     return (
                       <div
@@ -2353,7 +2355,7 @@ export default function HomePage(): React.JSX.Element {
                           paddingLeft: "20px",
                         }}
                       >
-                        {/* Titik bulat dengan kedap kedip untuk live */}
+                        {/* Titik bulat di tengah line titik-titik */}
                         <div
                           style={{
                             position: "absolute",
@@ -2362,95 +2364,73 @@ export default function HomePage(): React.JSX.Element {
                             width: "14px",
                             height: "14px",
                             borderRadius: "50%",
-                            backgroundColor: statusColor,
+                            backgroundColor: dotColor,
                             border: "2px solid #ffffff",
-                            boxShadow: isLive ? "0 0 16px rgba(34, 197, 94, 0.6)" : "0 0 8px rgba(0,0,0,0.1)",
-                            animation: isLive ? "pulse 1.5s ease-in-out infinite" : "none",
+                            boxShadow: isPulsing ? `0 0 20px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
+                            animation: isPulsing ? "pulse 1.5s ease-in-out infinite" : "none",
                             zIndex: 1,
                           }}
                         />
                         
-                        {/* Card Update */}
+                        {/* Garis titik-titik dari titik ke judul */}
                         <div
                           style={{
-                            backgroundColor: "#f8f8f8",
-                            borderRadius: "10px",
-                            padding: "14px 18px",
-                            border: isLive ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid #e8e8e8",
-                            transition: "all 0.2s ease",
+                            position: "absolute",
+                            left: "-4px",
+                            top: "18px",
+                            width: "16px",
+                            height: "1px",
+                            borderTop: "1px dotted #d0d0d0",
+                            zIndex: 0,
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "#f0f0f0";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "#f8f8f8";
+                        />
+                        
+                        {/* Card Update - Tanpa bg, tanpa border */}
+                        <div
+                          style={{
+                            padding: "0 0 0 4px",
                           }}
                         >
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "flex-start",
-                              gap: "12px",
+                              flexDirection: "column",
+                              gap: "4px",
                             }}
                           >
-                            <div style={{ flex: 1 }}>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "14px",
-                                    fontWeight: 600,
-                                    color: "#000000",
-                                    fontFamily: "Inter, 'Inter Fallback'",
-                                  }}
-                                >
-                                  {item.title}
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: "9px",
-                                    fontWeight: 600,
-                                    color: statusColor,
-                                    backgroundColor: isLive ? "rgba(34, 197, 94, 0.1)" : (isComing ? "rgba(245, 158, 11, 0.1)" : "rgba(59, 130, 246, 0.1)"),
-                                    padding: "2px 10px",
-                                    borderRadius: "12px",
-                                    letterSpacing: "0.03em",
-                                    textTransform: "uppercase",
-                                    fontFamily: "Inter, 'Inter Fallback'",
-                                    border: `1px solid ${statusColor}40`,
-                                  }}
-                                >
-                                  {statusLabel}
-                                </span>
-                              </div>
-                              <p
-                                style={{
-                                  fontSize: "13px",
-                                  color: "#666",
-                                  lineHeight: 1.6,
-                                  margin: "0 0 6px 0",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                }}
-                              >
-                                {item.description}
-                              </p>
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#999",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                }}
-                              >
-                                📅 {item.date}
-                              </span>
+                            <div
+                              style={{
+                                fontSize: "16px",
+                                fontWeight: 700,
+                                color: "#000000",
+                                fontFamily: "Inter, 'Inter Fallback'",
+                                letterSpacing: "-0.01em",
+                              }}
+                            >
+                              {item.title}
                             </div>
+                            <p
+                              style={{
+                                fontSize: "14px",
+                                color: "#000000",
+                                lineHeight: 1.6,
+                                margin: 0,
+                                fontFamily: "Inter, 'Inter Fallback'",
+                              }}
+                            >
+                              {item.description}
+                            </p>
+                            <span
+                              style={{
+                                fontSize: "13px",
+                                color: "#000000",
+                                fontWeight: 400,
+                                fontFamily: "Inter, 'Inter Fallback'",
+                                opacity: 0.7,
+                              }}
+                            >
+                              {item.date}
+                            </span>
                           </div>
                         </div>
                       </div>
