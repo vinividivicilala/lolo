@@ -431,7 +431,7 @@ export default function HomePage(): React.JSX.Element {
   
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
-  const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
+  const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
 
   // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
@@ -1068,6 +1068,7 @@ export default function HomePage(): React.JSX.Element {
       setProfileUser(null);
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
+      setSelectedUpdateId(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1087,6 +1088,7 @@ export default function HomePage(): React.JSX.Element {
       setProfileUser(null);
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
+      setSelectedUpdateId(null);
     }
   };
 
@@ -1503,6 +1505,9 @@ export default function HomePage(): React.JSX.Element {
       </div>
     );
   }
+
+  // Get selected update item
+  const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
   return (
     <div
@@ -2219,9 +2224,9 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  {showUpdate ? "Update" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")))}
+                  {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))))}
                 </span>
-                {!showProfile && !showPrivacyPolicy && !showUpdate && selectedChat && (
+                {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                   <>
                     <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
                       {selectedChat.email}
@@ -2232,7 +2237,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </>
                 )}
-                {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedChat && totalUnread > 0 && (
+                {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
                   <span
                     style={{
                       backgroundColor: "#c5e800",
@@ -2249,7 +2254,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
               <button
                 onClick={() => {
-                  if (showUpdate) {
+                  if (selectedUpdateId) {
+                    setSelectedUpdateId(null);
+                  } else if (showUpdate) {
                     setShowUpdate(false);
                   } else if (showPrivacyPolicy) {
                     setShowPrivacyPolicy(false);
@@ -2283,8 +2290,222 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Update Page dengan Expandable Detail */}
-            {showUpdate ? (
+            {/* Content - Update Detail Page (seperti halaman profile) */}
+            {selectedUpdateId && selectedUpdate ? (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "28px 32px",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                  {/* Back Button */}
+                  <button
+                    onClick={() => setSelectedUpdateId(null)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#666",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "13px",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                      marginBottom: "16px",
+                      padding: "4px 0",
+                      transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
+                    onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
+                  >
+                    <BackIcon />
+                    <span>Kembali</span>
+                  </button>
+
+                  {/* Badge Status */}
+                  <div
+                    style={{
+                      display: "inline-block",
+                      padding: "4px 14px",
+                      backgroundColor: selectedUpdate.status === "live" ? "#3b82f6" : (selectedUpdate.status === "coming" ? "#ef4444" : "#000000"),
+                      borderRadius: "20px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      {selectedUpdate.status === "live" ? "Live" : (selectedUpdate.status === "coming" ? "Coming Soon" : "Done")}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h2
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      margin: "0 0 8px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    {selectedUpdate.title}
+                  </h2>
+
+                  {/* Date & Published By */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      {selectedUpdate.date}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      • {selectedUpdate.publishedBy}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      color: "#000000",
+                      lineHeight: 1.8,
+                      margin: "0 0 16px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    {selectedUpdate.description}
+                  </p>
+
+                  {/* Detail */}
+                  <div
+                    style={{
+                      width: "100%",
+                      marginBottom: "16px",
+                      padding: "16px 20px",
+                      backgroundColor: "#f8f8f8",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "8px",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Detail Update
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "#333",
+                        lineHeight: 1.8,
+                        margin: 0,
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      {selectedUpdate.detail}
+                    </p>
+                  </div>
+
+                  {/* Link */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Link:
+                    </span>
+                    <a
+                      href={selectedUpdate.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "14px",
+                        color: "#3b82f6",
+                        textDecoration: "underline",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {selectedUpdate.link}
+                    </a>
+                  </div>
+
+                  {/* Footer */}
+                  <div
+                    style={{
+                      width: "100%",
+                      paddingTop: "14px",
+                      borderTop: "1px solid #f0f0f0",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Chat with Menuru v1.0
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      © 2026 Menuru
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : showUpdate ? (
+              // Update List Page
               <div
                 style={{
                   flex: 1,
@@ -2359,7 +2580,6 @@ export default function HomePage(): React.JSX.Element {
                     const isLive = item.status === "live";
                     const isComing = item.status === "coming";
                     const isDone = item.status === "done";
-                    const isExpanded = expandedUpdate === item.id;
                     
                     const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
                     const glowColor = isLive ? "rgba(59, 130, 246, 0.8)" : "none";
@@ -2372,7 +2592,9 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                           paddingBottom: index === updates.length - 1 ? "0" : "28px",
                           paddingLeft: "24px",
+                          cursor: "pointer",
                         }}
+                        onClick={() => setSelectedUpdateId(item.id)}
                       >
                         {/* Titik bulat dengan efek pemancar */}
                         <div
@@ -2388,9 +2610,7 @@ export default function HomePage(): React.JSX.Element {
                             boxShadow: isPulsing ? `0 0 20px ${glowColor}, 0 0 40px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
                             animation: isPulsing ? "pulseTransmitter 1.5s ease-in-out infinite" : "none",
                             zIndex: 1,
-                            cursor: "pointer",
                           }}
-                          onClick={() => setExpandedUpdate(isExpanded ? null : item.id)}
                         />
                         
                         {/* Garis titik-titik dari titik ke judul */}
@@ -2410,148 +2630,47 @@ export default function HomePage(): React.JSX.Element {
                         <div
                           style={{
                             padding: "0",
-                            cursor: "pointer",
                           }}
-                          onClick={() => setExpandedUpdate(isExpanded ? null : item.id)}
                         >
                           <div
                             style={{
                               display: "flex",
-                              flexDirection: "column",
-                              gap: "2px",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "12px",
                             }}
                           >
                             <div
                               style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                gap: "12px",
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                color: "#000000",
+                                fontFamily: "Inter, 'Inter Fallback'",
+                                letterSpacing: "-0.01em",
                               }}
                             >
-                              <div
-                                style={{
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                  color: "#000000",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                  letterSpacing: "-0.01em",
-                                }}
-                              >
-                                {item.title}
-                              </div>
-                              {/* Panah SVG */}
-                              <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                style={{
-                                  flexShrink: 0,
-                                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                  transition: 'transform 0.3s ease',
-                                  color: "#000000",
-                                }}
-                              >
-                                <path
-                                  d="M6 9L12 15L18 9"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                              {item.title}
                             </div>
-                            
-                            {/* Detail yang muncul saat di-expand */}
-                            {isExpanded && (
-                              <div
-                                style={{
-                                  marginTop: "8px",
-                                  paddingTop: "12px",
-                                  borderTop: "1px solid #f0f0f0",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "8px",
-                                }}
-                              >
-                                <p
-                                  style={{
-                                    fontSize: "15px",
-                                    color: "#000000",
-                                    lineHeight: 1.7,
-                                    margin: 0,
-                                    fontFamily: "Inter, 'Inter Fallback'",
-                                  }}
-                                >
-                                  {item.detail}
-                                </p>
-                                
-                                {/* Link */}
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "6px",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "14px",
-                                      color: "#666",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                  >
-                                    🔗
-                                  </span>
-                                  <a
-                                    href={item.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      fontSize: "14px",
-                                      color: "#000000",
-                                      textDecoration: "underline",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                      fontWeight: 500,
-                                    }}
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {item.link}
-                                  </a>
-                                </div>
-                                
-                                {/* Publish & Date */}
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "16px",
-                                    marginTop: "4px",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "13px",
-                                      color: "#666",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                  >
-                                    📅 {item.date}
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: "13px",
-                                      color: "#666",
-                                      fontFamily: "Inter, 'Inter Fallback'",
-                                    }}
-                                  >
-                                    ✍️ {item.publishedBy}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                            {/* Panah SVG */}
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              style={{
+                                flexShrink: 0,
+                                color: "#000000",
+                              }}
+                            >
+                              <path
+                                d="M9 6L15 12L9 18"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
                           </div>
                         </div>
                       </div>
@@ -2880,7 +2999,7 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: "Inter, 'Inter Fallback'",
                     }}
                   >
-                    📧 support@menuru.com
+                    support@menuru.com
                   </p>
                 </div>
 
@@ -2916,7 +3035,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : showProfile && profileUser ? (
-              // Profile View - sama seperti sebelumnya
+              // Profile View
               <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                   <button
@@ -3247,7 +3366,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ) : !selectedChat ? (
-              // Chat List View - sama seperti sebelumnya
+              // Chat List View
               <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
                 {/* Announcement */}
                 <div
