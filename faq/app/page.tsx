@@ -2321,13 +2321,13 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Timeline - Design baru */}
-                <div style={{ position: "relative", paddingLeft: "32px" }}>
+                {/* Timeline - Design baru dengan titik pemancar */}
+                <div style={{ position: "relative", paddingLeft: "28px" }}>
                   {/* Garis vertikal titik-titik */}
                   <div
                     style={{
                       position: "absolute",
-                      left: "8px",
+                      left: "6px",
                       top: "6px",
                       bottom: "6px",
                       width: "2px",
@@ -2343,7 +2343,7 @@ export default function HomePage(): React.JSX.Element {
                     
                     // Warna titik: biru stabilo untuk live, hitam untuk done, merah stabilo untuk coming
                     const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-                    const glowColor = isLive ? "rgba(59, 130, 246, 0.6)" : "none";
+                    const glowColor = isLive ? "rgba(59, 130, 246, 0.8)" : "none";
                     const isPulsing = isLive;
                     
                     return (
@@ -2352,35 +2352,35 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           position: "relative",
                           paddingBottom: index === updates.length - 1 ? "0" : "28px",
-                          paddingLeft: "20px",
+                          paddingLeft: "24px",
                         }}
                       >
-                        {/* Titik bulat di tengah line titik-titik */}
+                        {/* Titik bulat di tengah line titik-titik dengan efek pemancar */}
                         <div
                           style={{
                             position: "absolute",
-                            left: "-24px",
+                            left: "-22px",
                             top: "4px",
                             width: "14px",
                             height: "14px",
                             borderRadius: "50%",
                             backgroundColor: dotColor,
                             border: "2px solid #ffffff",
-                            boxShadow: isPulsing ? `0 0 20px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
-                            animation: isPulsing ? "pulse 1.5s ease-in-out infinite" : "none",
+                            boxShadow: isPulsing ? `0 0 20px ${glowColor}, 0 0 40px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
+                            animation: isPulsing ? "pulseTransmitter 1.5s ease-in-out infinite" : "none",
                             zIndex: 1,
                           }}
                         />
                         
-                        {/* Garis titik-titik dari titik ke judul */}
+                        {/* Garis titik-titik dari titik ke judul (sama dengan garis ke bawah) */}
                         <div
                           style={{
                             position: "absolute",
-                            left: "-4px",
+                            left: "-6px",
                             top: "18px",
-                            width: "16px",
+                            width: "20px",
                             height: "1px",
-                            borderTop: "1px dotted #d0d0d0",
+                            borderTop: "2px dotted #d0d0d0",
                             zIndex: 0,
                           }}
                         />
@@ -2388,14 +2388,14 @@ export default function HomePage(): React.JSX.Element {
                         {/* Card Update - Tanpa bg, tanpa border */}
                         <div
                           style={{
-                            padding: "0 0 0 4px",
+                            padding: "0",
                           }}
                         >
                           <div
                             style={{
                               display: "flex",
                               flexDirection: "column",
-                              gap: "4px",
+                              gap: "2px",
                             }}
                           >
                             <div
@@ -4339,6 +4339,16 @@ export default function HomePage(): React.JSX.Element {
           }
           50% {
             opacity: 0.3;
+          }
+        }
+        @keyframes pulseTransmitter {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+          }
+          50% {
+            transform: scale(1.2);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
           }
         }
         @keyframes marquee {
