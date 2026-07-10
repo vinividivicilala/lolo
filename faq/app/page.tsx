@@ -105,6 +105,14 @@ interface Track {
   embedUrl: string;
 }
 
+interface UpdateItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  status: "live" | "coming" | "fixed";
+}
+
 // SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -415,8 +423,11 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Privacy Policy - Halaman di dalam chat (seperti room chat)
+  // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  
+  // Update Page
+  const [showUpdate, setShowUpdate] = useState(false);
 
   // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
@@ -430,6 +441,45 @@ export default function HomePage(): React.JSX.Element {
     "Chat with Menuru"
   ];
   let chatTextIndex = 0;
+
+  // Update Data
+  const updates: UpdateItem[] = [
+    {
+      id: "1",
+      title: "Fitur Chat Real-time",
+      description: "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan.",
+      date: "10 Juli 2026",
+      status: "live"
+    },
+    {
+      id: "2",
+      title: "Privacy Policy & Update System",
+      description: "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan.",
+      date: "9 Juli 2026",
+      status: "live"
+    },
+    {
+      id: "3",
+      title: "Fitur Pin Message",
+      description: "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas.",
+      date: "8 Juli 2026",
+      status: "coming"
+    },
+    {
+      id: "4",
+      title: "Fitur Reply & Share Message",
+      description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
+      date: "7 Juli 2026",
+      status: "fixed"
+    },
+    {
+      id: "5",
+      title: "Online Status & Typing Indicator",
+      description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
+      date: "6 Juli 2026",
+      status: "live"
+    }
+  ];
 
   // Music Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -491,7 +541,7 @@ export default function HomePage(): React.JSX.Element {
       senderName: "Menuru Official"
     },
     {
-      text: "Jangan lupa baca Privacy Policy kami 👇",
+      text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
@@ -502,16 +552,16 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Broadcast privacy policy message to all users (tanpa sistem login)
-  const broadcastPrivacyPolicy = async () => {
+  // Broadcast messages to all users (tanpa sistem login)
+  const broadcastMessages = async () => {
     if (!db) return;
     
     // Cek apakah sudah pernah broadcast
     const broadcastRef = doc(db, "system", "broadcast");
     const broadcastSnap = await getDoc(broadcastRef);
     
-    if (broadcastSnap.exists() && broadcastSnap.data().privacyPolicySent) {
-      console.log("Privacy policy already broadcasted");
+    if (broadcastSnap.exists() && broadcastSnap.data().messagesSent) {
+      console.log("Messages already broadcasted");
       return;
     }
     
@@ -520,8 +570,8 @@ export default function HomePage(): React.JSX.Element {
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
-      const privacyMessage = {
-        text: "Jangan lupa baca Privacy Policy kami 👇",
+      const broadcastMessage = {
+        text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
         senderId: "official_menuru",
         senderName: "Menuru Official"
       };
@@ -543,9 +593,9 @@ export default function HomePage(): React.JSX.Element {
         
         const messagesRef = collection(db, "chats", chatId, "messages");
         await addDoc(messagesRef, {
-          text: privacyMessage.text,
-          senderId: privacyMessage.senderId,
-          senderName: privacyMessage.senderName,
+          text: broadcastMessage.text,
+          senderId: broadcastMessage.senderId,
+          senderName: broadcastMessage.senderName,
           receiverId: userId,
           timestamp: serverTimestamp(),
           read: false,
@@ -560,20 +610,20 @@ export default function HomePage(): React.JSX.Element {
       
       // Tandai sudah broadcast
       await setDoc(broadcastRef, {
-        privacyPolicySent: true,
+        messagesSent: true,
         sentAt: serverTimestamp()
       });
       
-      console.log("Privacy policy broadcast sent to all users");
+      console.log("Broadcast messages sent to all users");
     } catch (error) {
-      console.error("Error broadcasting privacy policy:", error);
+      console.error("Error broadcasting messages:", error);
     }
   };
 
   // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
-    broadcastPrivacyPolicy();
+    broadcastMessages();
   }, []);
 
   // Auth Listener
@@ -998,6 +1048,7 @@ export default function HomePage(): React.JSX.Element {
       setShowProfile(false);
       setProfileUser(null);
       setShowPrivacyPolicy(false);
+      setShowUpdate(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1016,6 +1067,7 @@ export default function HomePage(): React.JSX.Element {
       setShowProfile(false);
       setProfileUser(null);
       setShowPrivacyPolicy(false);
+      setShowUpdate(false);
     }
   };
 
@@ -2148,9 +2200,9 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  {showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))}
+                  {showUpdate ? "Update" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan")))}
                 </span>
-                {!showProfile && !showPrivacyPolicy && selectedChat && (
+                {!showProfile && !showPrivacyPolicy && !showUpdate && selectedChat && (
                   <>
                     <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
                       {selectedChat.email}
@@ -2161,7 +2213,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </>
                 )}
-                {!showProfile && !showPrivacyPolicy && !selectedChat && totalUnread > 0 && (
+                {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedChat && totalUnread > 0 && (
                   <span
                     style={{
                       backgroundColor: "#c5e800",
@@ -2178,7 +2230,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
               <button
                 onClick={() => {
-                  if (showPrivacyPolicy) {
+                  if (showUpdate) {
+                    setShowUpdate(false);
+                  } else if (showPrivacyPolicy) {
                     setShowPrivacyPolicy(false);
                   } else if (showProfile) {
                     handleCloseProfile();
@@ -2210,8 +2264,233 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Privacy Policy (seperti room chat) */}
-            {showPrivacyPolicy ? (
+            {/* Content - Update Page */}
+            {showUpdate ? (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "28px 32px",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                {/* Header Update */}
+                <div style={{ marginBottom: "24px" }}>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      padding: "4px 14px",
+                      backgroundColor: "#000000",
+                      borderRadius: "20px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Update Sistem
+                    </span>
+                  </div>
+                  <h2
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      margin: "0 0 4px 0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Chat with Menuru
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#999",
+                      margin: "0",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Riwayat pembaruan dan pengembangan
+                  </p>
+                </div>
+
+                {/* Timeline */}
+                <div style={{ position: "relative", paddingLeft: "28px" }}>
+                  {/* Garis vertikal putus-putus */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      top: "4px",
+                      bottom: "4px",
+                      width: "2px",
+                      borderLeft: "2px dashed #d0d0d0",
+                      zIndex: 0,
+                    }}
+                  />
+
+                  {updates.map((item, index) => {
+                    const isLive = item.status === "live";
+                    const isComing = item.status === "coming";
+                    const isFixed = item.status === "fixed";
+                    
+                    const statusColor = isLive ? "#22c55e" : (isComing ? "#f59e0b" : "#3b82f6");
+                    const statusLabel = isLive ? "Live" : (isComing ? "Coming Soon" : "Fixed");
+                    
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          position: "relative",
+                          paddingBottom: index === updates.length - 1 ? "0" : "28px",
+                          paddingLeft: "20px",
+                        }}
+                      >
+                        {/* Titik bulat dengan kedap kedip untuk live */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: "-24px",
+                            top: "4px",
+                            width: "14px",
+                            height: "14px",
+                            borderRadius: "50%",
+                            backgroundColor: statusColor,
+                            border: "2px solid #ffffff",
+                            boxShadow: isLive ? "0 0 16px rgba(34, 197, 94, 0.6)" : "0 0 8px rgba(0,0,0,0.1)",
+                            animation: isLive ? "pulse 1.5s ease-in-out infinite" : "none",
+                            zIndex: 1,
+                          }}
+                        />
+                        
+                        {/* Card Update */}
+                        <div
+                          style={{
+                            backgroundColor: "#f8f8f8",
+                            borderRadius: "10px",
+                            padding: "14px 18px",
+                            border: isLive ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid #e8e8e8",
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f0f0f0";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f8f8f8";
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              gap: "12px",
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: "14px",
+                                    fontWeight: 600,
+                                    color: "#000000",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                  }}
+                                >
+                                  {item.title}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: "9px",
+                                    fontWeight: 600,
+                                    color: statusColor,
+                                    backgroundColor: isLive ? "rgba(34, 197, 94, 0.1)" : (isComing ? "rgba(245, 158, 11, 0.1)" : "rgba(59, 130, 246, 0.1)"),
+                                    padding: "2px 10px",
+                                    borderRadius: "12px",
+                                    letterSpacing: "0.03em",
+                                    textTransform: "uppercase",
+                                    fontFamily: "Inter, 'Inter Fallback'",
+                                    border: `1px solid ${statusColor}40`,
+                                  }}
+                                >
+                                  {statusLabel}
+                                </span>
+                              </div>
+                              <p
+                                style={{
+                                  fontSize: "13px",
+                                  color: "#666",
+                                  lineHeight: 1.6,
+                                  margin: "0 0 6px 0",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                              >
+                                {item.description}
+                              </p>
+                              <span
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#999",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                }}
+                              >
+                                📅 {item.date}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Footer */}
+                <div
+                  style={{
+                    marginTop: "20px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid #f0f0f0",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    Chat with Menuru v1.0
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      fontFamily: "Inter, 'Inter Fallback'",
+                    }}
+                  >
+                    © 2026 Menuru
+                  </span>
+                </div>
+              </div>
+            ) : showPrivacyPolicy ? (
+              // Privacy Policy Page
               <div
                 style={{
                   flex: 1,
@@ -3616,7 +3895,7 @@ export default function HomePage(): React.JSX.Element {
                         formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
                       
                       const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
-                      const isPrivacyPolicyMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
+                      const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                       
                       return (
                         <React.Fragment key={idx}>
@@ -3681,7 +3960,7 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             )}
                             
-                            {isPrivacyPolicyMessage ? (
+                            {isBroadcastMessage ? (
                               <span>
                                 Jangan lupa baca{' '}
                                 <span
@@ -3694,6 +3973,18 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   Privacy Policy
+                                </span>
+                                {' dan '}
+                                <span
+                                  onClick={() => setShowUpdate(true)}
+                                  style={{
+                                    color: "#0095f6",
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  Update
                                 </span>
                                 {' '}kami 👇
                               </span>
