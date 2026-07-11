@@ -1600,33 +1600,34 @@ export default function HomePage(): React.JSX.Element {
     >
 
       {/* Logo Menuru'26 - Pojok Kiri Atas */}
-      <div
-        style={{
-          position: "absolute",
-          top: "0px",
-          left: "0px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#000000",
-          padding: "16px 32px",
-          borderRadius: "0px",
-          boxShadow: "none",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "50px",
-            fontWeight: 700,
-            color: "#ffffff",
-            letterSpacing: "-0.02em",
-            fontFamily: "Inter, 'Inter Fallback'",
-            lineHeight: 1,
-          }}
-        >
-          Menuru'26
-        </span>
-      </div>
+<div
+  style={{
+    position: "absolute",
+    top: "0px",
+    left: "0px",
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#000000",
+    padding: "4px 12px",
+    borderRadius: "0px",
+    boxShadow: "none",
+  }}
+>
+  <span
+    style={{
+      fontSize: "18px",
+      fontWeight: 600,
+      color: "#ffffff",
+      letterSpacing: "-0.01em",
+      fontFamily: "Inter, 'Inter Fallback'",
+      lineHeight: 1.4,
+    }}
+  >
+    Menuru'26
+  </span>
+</div>
+      
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
