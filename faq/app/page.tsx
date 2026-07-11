@@ -1605,6 +1605,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
+
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
@@ -1615,8 +1616,7 @@ export default function HomePage(): React.JSX.Element {
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    width: isExpanded ? "100%" : "auto", // Lebar penuh saat expand
-    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    width: "100%",
   }}
 >
   {/* Logo Menuru'26 - Background Hitam */}
@@ -1624,15 +1624,12 @@ export default function HomePage(): React.JSX.Element {
     style={{
       display: "flex",
       alignItems: "center",
-      backgroundColor: isExpanded ? "#FE7141" : "#000000", // Berubah jadi orange saat expand
+      backgroundColor: "#000000",
       padding: "6px 18px",
       borderRadius: "0px",
       boxShadow: "none",
       height: "48px",
-      transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      opacity: isExpanded ? 0 : 1, // Hilang saat expand
-      width: isExpanded ? 0 : "auto",
-      overflow: "hidden",
+      flexShrink: 0,
     }}
   >
     <span
@@ -1643,7 +1640,6 @@ export default function HomePage(): React.JSX.Element {
         letterSpacing: "-0.015em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
-        whiteSpace: "nowrap",
       }}
     >
       Menuru'26
@@ -1655,55 +1651,45 @@ export default function HomePage(): React.JSX.Element {
     style={{
       display: "flex",
       alignItems: "center",
-      justifyContent: isExpanded ? "flex-start" : "flex-end", // Jadi kiri saat expand
       backgroundColor: "#FE7141",
-      padding: isExpanded ? "6px 40px 6px 40px" : "6px 35px 6px 200px",
+      padding: "6px 35px 6px 30px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      height: isExpanded ? "100vh" : "48px", // Turun ke bawah saat expand
-      width: isExpanded ? "100%" : "auto",
-      minWidth: isExpanded ? "100%" : "450px",
+      transition: "all 0.3s ease",
+      height: "48px",
+      flex: 1,
+      minWidth: "200px",
+      overflow: "hidden",
       position: "relative",
-      zIndex: isExpanded ? 100 : 1, // Di atas semua saat expand
     }}
+    onMouseEnter={() => setIsReportHovered(true)}
+    onMouseLeave={() => setIsReportHovered(false)}
     onMouseEnter={(e) => {
-      if (!isExpanded) {
-        e.currentTarget.style.backgroundColor = "#e8653a";
-      }
+      e.currentTarget.style.backgroundColor = "#e8653a";
     }}
     onMouseLeave={(e) => {
-      if (!isExpanded) {
-        e.currentTarget.style.backgroundColor = "#FE7141";
-      }
+      e.currentTarget.style.backgroundColor = "#FE7141";
+    }}
+    onClick={() => {
+      console.log("Read the Report clicked");
     }}
   >
-    {/* Rolling Teks - saat hover */}
+    {/* Container Rolling Teks - Maju Mundur */}
     <div
       style={{
         overflow: "hidden",
         position: "relative",
-        maxWidth: isExpanded ? "100%" : "180px",
-        transition: "all 0.5s ease",
-      }}
-      onMouseEnter={(e) => {
-        if (!isExpanded) {
-          const container = e.currentTarget;
-          container.style.animation = "marquee 3s linear infinite";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!isExpanded) {
-          const container = e.currentTarget;
-          container.style.animation = "none";
-        }
+        flex: 1,
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <span
         style={{
-          fontSize: isExpanded ? "24px" : "18px",
+          fontSize: "18px",
           fontWeight: 600,
           color: "#000000",
           letterSpacing: "-0.01em",
@@ -1711,134 +1697,39 @@ export default function HomePage(): React.JSX.Element {
           lineHeight: 1.2,
           whiteSpace: "nowrap",
           display: "inline-block",
-          paddingLeft: isExpanded ? "0" : "100%",
-          animation: isExpanded ? "none" : "none",
+          animation: isReportHovered ? "marqueeMundur 3s ease-in-out infinite" : "none",
+          position: "relative",
         }}
       >
-        {isExpanded ? "📄 Read the Report - Menuru'26" : "Read the Report"}
+        Read the Report
       </span>
     </div>
 
-    {/* Icon + - Klik untuk expand */}
+    {/* Icon + */}
     <span
       style={{
-        fontSize: isExpanded ? "40px" : "30px",
+        fontSize: "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
-        transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        transform: isExpanded ? "rotate(45deg)" : "rotate(0deg)",
-        cursor: "pointer",
-        zIndex: 2,
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
+        flexShrink: 0,
+        transition: "transform 0.3s ease",
       }}
     >
       +
     </span>
-
-    {/* Konten saat expand */}
-    {isExpanded && (
-      <div
-        style={{
-          position: "absolute",
-          top: "70px",
-          left: "40px",
-          right: "40px",
-          bottom: "40px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          color: "#000000",
-          animation: "slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "36px",
-            fontWeight: 700,
-            margin: 0,
-            fontFamily: "Inter, 'Inter Fallback'",
-          }}
-        >
-          Read the Report
-        </h2>
-        <p
-          style={{
-            fontSize: "18px",
-            lineHeight: 1.8,
-            maxWidth: "600px",
-            fontFamily: "Inter, 'Inter Fallback'",
-          }}
-        >
-          Menuru'26 adalah platform chat modern yang menghubungkan orang-orang dengan cara yang sederhana dan elegan. 
-          Temukan fitur-fitur terbaru kami dan nikmati pengalaman chatting yang menyenangkan.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            marginTop: "20px",
-          }}
-        >
-          <button
-            style={{
-              padding: "12px 32px",
-              backgroundColor: "#000000",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "Inter, 'Inter Fallback'",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.8";
-              e.currentTarget.style.transform = "scale(1.02)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
-            Explore
-          </button>
-          <button
-            style={{
-              padding: "12px 32px",
-              backgroundColor: "transparent",
-              color: "#000000",
-              border: "2px solid #000000",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "Inter, 'Inter Fallback'",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#000000";
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "#000000";
-            }}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    )}
   </div>
 </div>
 
 
+
+
+
+
+      
+
+     
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
@@ -4897,6 +4788,18 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
+
+      @keyframes marqueeMundur {
+    0% {
+      transform: translateX(0%);
+    }
+    50% {
+      transform: translateX(-30%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
         @keyframes slideUp {
           from {
             opacity: 0;
