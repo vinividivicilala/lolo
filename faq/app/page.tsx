@@ -733,7 +733,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-
 // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
@@ -870,17 +869,17 @@ const handleReportToggle = () => {
   }
 
   if (!isReportExpanded) {
-    // EXPAND - melebar ke kiri dan ke bawah dari posisi tombol
+    // EXPAND - melebar ke kiri dan ke bawah dari ujung kiri tombol
     console.log("Expanding...");
     
-    // Dapatkan posisi dan ukuran tombol
+    // Dapatkan posisi tombol
     const rect = report.getBoundingClientRect();
-    const startX = rect.right; // ujung kanan tombol
+    const startX = rect.left; // ujung KIRI tombol (bukan kanan)
     const startY = rect.top; // atas tombol
-    const buttonWidth = rect.width; // lebar tombol
-    const buttonHeight = rect.height; // tinggi tombol
+    const buttonWidth = rect.width;
+    const buttonHeight = rect.height;
     
-    // Set initial state - tetap di posisi tombol
+    // Set initial state - mulai dari ujung KIRI tombol
     gsap.set(container, {
       position: "fixed",
       top: `${startY}px`,
@@ -893,13 +892,15 @@ const handleReportToggle = () => {
       borderRadius: "0px",
     });
 
-    // HITUNG LEBAR MAKSIMAL - dari posisi tombol ke kiri
-    const maxWidth = startX; // jarak dari ujung kanan tombol ke ujung kiri layar
+    // LEBAR: dari ujung KIRI tombol ke ujung KIRI layar
+    const maxWidth = startX; // jarak dari ujung kiri tombol ke ujung kiri layar
     
-    // HITUNG TINGGI MAKSIMAL - dari posisi tombol ke bawah
+    // TINGGI: dari posisi tombol ke bawah
     const maxHeight = window.innerHeight - startY;
 
-    // Animate container melebar ke kiri (tidak full screen, hanya sebatas yang diperlukan)
+    console.log(`Expanding: left=${startX}px, top=${startY}px, width=${maxWidth}px, height=${maxHeight}px`);
+
+    // Animate container melebar ke kiri dan ke bawah
     gsap.to(container, {
       width: `${maxWidth}px`,
       height: `${maxHeight}px`,
@@ -908,12 +909,12 @@ const handleReportToggle = () => {
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${startY}px`,
-      left: "0px",
+      left: "0px", // melebar sampai ujung kiri layar
       zIndex: 100,
       borderRadius: "0px",
     });
 
-    // Animate report - pindah ke dalam container
+    // Animate report - mengisi container
     gsap.to(report, {
       width: "100%",
       height: "100%",
@@ -965,7 +966,7 @@ const handleReportToggle = () => {
 
     // Dapatkan posisi tombol
     const rect = report.getBoundingClientRect();
-    const endX = rect.right;
+    const endX = rect.left;
     const endY = rect.top;
 
     // Kembalikan container ke posisi tombol
@@ -1991,18 +1992,18 @@ const handleReportToggle = () => {
       display: "flex",
       alignItems: "center",
       justifyContent: "flex-end",
-      backgroundColor: isReportExpanded ? "#FE7141" : "#FE7141",
-      padding: isReportExpanded ? "20px 30px" : "6px 35px 6px 200px",
+      backgroundColor: "#FE7141",
+      padding: "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "auto" : "48px",
-      minWidth: isReportExpanded ? "100%" : "450px",
+      height: "48px",
+      minWidth: "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
-      transition: "all 0.3s ease",
+      transition: "background-color 0.3s ease",
     }}
     onMouseEnter={(e) => {
       if (!isReportExpanded) {
@@ -2024,17 +2025,16 @@ const handleReportToggle = () => {
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "28px" : "18px",
-        fontWeight: isReportExpanded ? 700 : 600,
+        fontSize: "18px",
+        fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
-        whiteSpace: isReportExpanded ? "normal" : "nowrap",
+        whiteSpace: "nowrap",
         display: "inline-block",
         position: "relative",
         zIndex: 2,
-        padding: isReportExpanded ? "20px" : "0",
       }}
     >
       Read the Report
@@ -2043,7 +2043,7 @@ const handleReportToggle = () => {
     <span
       ref={reportIconRef}
       style={{
-        fontSize: isReportExpanded ? "30px" : "30px",
+        fontSize: "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
@@ -2053,7 +2053,6 @@ const handleReportToggle = () => {
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "20px" : "0",
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -2065,7 +2064,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
 
 
 
