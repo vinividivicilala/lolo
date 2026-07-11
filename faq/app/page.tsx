@@ -1599,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-      {/* Logo Menuru'26 - Pojok Kiri Atas */}
+     {/* Logo Menuru'26 - Pojok Kiri Atas */}
 <div
   style={{
     position: "absolute",
@@ -1609,19 +1609,19 @@ export default function HomePage(): React.JSX.Element {
     display: "flex",
     alignItems: "center",
     backgroundColor: "#000000",
-    padding: "4px 12px",
+    padding: "6px 18px",
     borderRadius: "0px",
     boxShadow: "none",
   }}
 >
   <span
     style={{
-      fontSize: "18px",
+      fontSize: "30px",
       fontWeight: 600,
       color: "#ffffff",
-      letterSpacing: "-0.01em",
+      letterSpacing: "-0.015em",
       fontFamily: "Inter, 'Inter Fallback'",
-      lineHeight: 1.4,
+      lineHeight: 1.2,
     }}
   >
     Menuru'26
