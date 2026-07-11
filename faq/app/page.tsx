@@ -426,8 +426,7 @@ export default function HomePage(): React.JSX.Element {
    const [isReportHovered, setIsReportHovered] = useState(false);
 
 
-
-  // Di dalam komponen HomePage, tambahkan refs
+// Di dalam komponen HomePage, tambahkan refs
 const reportRef = useRef<HTMLDivElement | null>(null);
 const reportTextRef = useRef<HTMLSpanElement | null>(null);
 const reportIconRef = useRef<HTMLSpanElement | null>(null);
@@ -946,9 +945,6 @@ const [isExpanded, setIsExpanded] = useState(false);
   }, [user]);
 
 
-
-
-
 // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window !== "undefined" && reportRef.current) {
@@ -1048,7 +1044,6 @@ useEffect(() => {
     }
   }
 }, [isReportExpanded]);
-
 
 
 
@@ -1738,8 +1733,6 @@ useEffect(() => {
       }}
     >
 
-
-
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
@@ -1847,7 +1840,7 @@ useEffect(() => {
   </div>
 </div>
 
-      
+
 
      
 
