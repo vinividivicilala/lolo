@@ -428,13 +428,12 @@ export default function HomePage(): React.JSX.Element {
 
 
 
+  // Di dalam komponen HomePage, tambahkan refs
 const reportRef = useRef<HTMLDivElement | null>(null);
 const reportTextRef = useRef<HTMLSpanElement | null>(null);
 const reportIconRef = useRef<HTMLSpanElement | null>(null);
 const reportContainerRef = useRef<HTMLDivElement | null>(null);
 const [isReportExpanded, setIsReportExpanded] = useState(false);
-
-
 
 
 
@@ -948,101 +947,114 @@ const [isReportExpanded, setIsReportExpanded] = useState(false);
 
 
 
-  // GSAP Animation untuk Read the Report
+
+
+// GSAP Animation untuk Read the Report
 useEffect(() => {
-  if (typeof window !== "undefined" && reportTextRef.current) {
-    const textElement = reportTextRef.current;
-    
-    // Hover: teks bergerak maju dan mundur (gonta-ganti)
-    const handleMouseEnter = () => {
-      gsap.to(textElement, {
-        x: 15,
-        scale: 1.08,
-        duration: 0.4,
+  if (typeof window !== "undefined" && reportRef.current) {
+    const report = reportRef.current;
+    const text = reportTextRef.current;
+    const icon = reportIconRef.current;
+    const container = reportContainerRef.current;
+
+    if (report && text && icon && container) {
+      // Hover animation untuk teks
+      const hoverTl = gsap.timeline({ paused: true });
+      hoverTl.to(text, {
+        x: 5,
+        duration: 0.3,
         ease: "power2.out",
         color: "#000000",
+        scale: 1.05,
       });
-    };
-    
-    const handleMouseLeave = () => {
-      gsap.to(textElement, {
-        x: 0,
-        scale: 1,
+      hoverTl.to(icon, {
+        rotation: 90,
+        duration: 0.4,
+        ease: "back.out(1.7)",
+        scale: 1.2,
+      }, 0);
+
+      report.addEventListener('mouseenter', () => {
+        hoverTl.play();
+      });
+      
+      report.addEventListener('mouseleave', () => {
+        hoverTl.reverse();
+      });
+
+      // Click animation untuk expand
+      const clickTl = gsap.timeline({ paused: true });
+      clickTl.to(container, {
+        width: "100vw",
+        height: "100vh",
+        duration: 0.6,
+        ease: "power2.inOut",
+        borderRadius: "0px",
+        padding: "20px 40px",
+        backgroundColor: "#FE7141",
+        justifyContent: "flex-start",
+        gap: "20px",
+      });
+      clickTl.to(report, {
+        width: "100%",
         duration: 0.4,
         ease: "power2.out",
-        color: "#000000",
+      }, 0);
+      clickTl.to(text, {
+        fontSize: "40px",
+        fontWeight: 700,
+        duration: 0.4,
+        ease: "power2.out",
+      }, 0.2);
+      clickTl.to(icon, {
+        fontSize: "40px",
+        rotation: 45,
+        duration: 0.4,
+        ease: "back.out(1.7)",
+      }, 0.2);
+
+      // Klik pada report untuk expand
+      report.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isReportExpanded) {
+          clickTl.play();
+          setIsReportExpanded(true);
+        } else {
+          clickTl.reverse();
+          setIsReportExpanded(false);
+        }
       });
-    };
-    
-    textElement.addEventListener('mouseenter', handleMouseEnter);
-    textElement.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      textElement.removeEventListener('mouseenter', handleMouseEnter);
-      textElement.removeEventListener('mouseleave', handleMouseLeave);
-    };
+
+      // Klik di luar untuk collapse
+      const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+          if (isReportExpanded) {
+            clickTl.reverse();
+            setIsReportExpanded(false);
+          }
+        }
+      };
+
+      document.addEventListener('click', handleClickOutside);
+
+      return () => {
+        report.removeEventListener('mouseenter', () => {});
+        report.removeEventListener('mouseleave', () => {});
+        report.removeEventListener('click', () => {});
+        document.removeEventListener('click', handleClickOutside);
+        hoverTl.kill();
+        clickTl.kill();
+      };
+    }
   }
-}, []);
+}, [isReportExpanded]);
 
-// Animasi klik: bg orange melebar ke kiri sampai mentok
-const handleReportClick = () => {
-  if (!reportContainerRef.current) return;
+
+
+
+
+
   
-  setIsReportExpanded(!isReportExpanded);
-  
-  if (!isReportExpanded) {
-    // Expand: bg orange melebar ke kiri sampai mentok
-    gsap.to(reportContainerRef.current, {
-      left: "0px",
-      width: "100vw",
-      duration: 0.8,
-      ease: "power3.inOut",
-      padding: "6px 35px 6px 40px", // Padding kiri berubah jadi 40px
-      minWidth: "100vw",
-    });
-    
-    gsap.to(reportIconRef.current, {
-      rotation: 45,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-    });
-    
-    // Sembunyikan logo Menuru'26
-    gsap.to('.menuru-logo', {
-      opacity: 0,
-      duration: 0.4,
-      ease: "power2.out",
-    });
-  } else {
-    // Collapse: kembali ke ukuran semula
-    gsap.to(reportContainerRef.current, {
-      left: "0px",
-      width: "auto",
-      duration: 0.8,
-      ease: "power3.inOut",
-      padding: "6px 35px 6px 200px",
-      minWidth: "450px",
-    });
-    
-    gsap.to(reportIconRef.current, {
-      rotation: 0,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-    });
-    
-    // Tampilkan kembali logo Menuru'26
-    gsap.to('.menuru-logo', {
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out",
-      delay: 0.3,
-    });
-  }
-};
-
-
-
-
 
 
 
@@ -1726,8 +1738,11 @@ const handleReportClick = () => {
       }}
     >
 
-{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+
+
+      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
+  ref={reportContainerRef}
   style={{
     position: "absolute",
     top: "0px",
@@ -1736,11 +1751,12 @@ const handleReportClick = () => {
     display: "flex",
     alignItems: "center",
     gap: "0px",
+    transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    overflow: "hidden",
   }}
 >
   {/* Logo Menuru'26 - Background Hitam */}
   <div
-    className="menuru-logo"
     style={{
       display: "flex",
       alignItems: "center",
@@ -1749,7 +1765,7 @@ const handleReportClick = () => {
       borderRadius: "0px",
       boxShadow: "none",
       height: "48px",
-      transition: "opacity 0.4s ease",
+      flexShrink: 0,
     }}
   >
     <span
@@ -1766,9 +1782,9 @@ const handleReportClick = () => {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 */}
+  {/* Read the Report - Background #FE7141 (Sangat Panjang) */}
   <div
-    ref={reportContainerRef}
+    ref={reportRef}
     style={{
       display: "flex",
       alignItems: "center",
@@ -1779,25 +1795,23 @@ const handleReportClick = () => {
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
+      transition: "all 0.3s ease",
       height: "48px",
       minWidth: "450px",
+      flexShrink: 0,
       position: "relative",
-      overflow: "hidden",
-      transition: "background-color 0.3s ease",
+      zIndex: 20,
     }}
     onMouseEnter={(e) => {
-      if (!isReportExpanded) {
-        e.currentTarget.style.backgroundColor = "#e8653a";
-      }
+      e.currentTarget.style.backgroundColor = "#e8653a";
     }}
     onMouseLeave={(e) => {
       if (!isReportExpanded) {
         e.currentTarget.style.backgroundColor = "#FE7141";
       }
     }}
-    onClick={handleReportClick}
   >
-    {/* Teks - Read the Report (berubah saat hover dengan GSAP) */}
+    {/* Teks di sisi kanan */}
     <span
       ref={reportTextRef}
       style={{
@@ -1808,7 +1822,6 @@ const handleReportClick = () => {
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
         whiteSpace: "nowrap",
-        cursor: "pointer",
         display: "inline-block",
         position: "relative",
         zIndex: 2,
@@ -1816,7 +1829,6 @@ const handleReportClick = () => {
     >
       Read the Report
     </span>
-    
     {/* Icon + di sisi kanan */}
     <span
       ref={reportIconRef}
@@ -1834,8 +1846,6 @@ const handleReportClick = () => {
     </span>
   </div>
 </div>
-
-
 
       
 
