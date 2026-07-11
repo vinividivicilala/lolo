@@ -1599,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-   {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+  {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1620,6 +1620,7 @@ export default function HomePage(): React.JSX.Element {
       padding: "6px 18px",
       borderRadius: "0px",
       boxShadow: "none",
+      height: "48px",
     }}
   >
     <span
@@ -1641,14 +1642,16 @@ export default function HomePage(): React.JSX.Element {
     style={{
       display: "flex",
       alignItems: "center",
+      justifyContent: "flex-end",
       backgroundColor: "#FE7141",
-      padding: "6px 50px 6px 18px",
+      padding: "6px 40px 6px 80px", // Kiri 80px (kosong), kanan 40px
       borderRadius: "0px",
       boxShadow: "none",
-      gap: "12px",
+      gap: "14px",
       cursor: "pointer",
       transition: "all 0.3s ease",
-      height: "100%",
+      height: "48px",
+      minWidth: "280px", // Lebar lebih panjang
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = "#e8653a";
@@ -1660,19 +1663,7 @@ export default function HomePage(): React.JSX.Element {
       console.log("Read the Report clicked");
     }}
   >
-    {/* Icon + di kiri */}
-    <span
-      style={{
-        fontSize: "30px",
-        fontWeight: 300,
-        color: "#000000",
-        lineHeight: 1,
-        display: "inline-block",
-      }}
-    >
-      +
-    </span>
-    {/* Teks di kanan */}
+    {/* Teks di sisi kanan */}
     <span
       style={{
         fontSize: "18px",
@@ -1686,9 +1677,20 @@ export default function HomePage(): React.JSX.Element {
     >
       Read the Report
     </span>
+    {/* Icon + di sisi kanan (setelah teks) */}
+    <span
+      style={{
+        fontSize: "30px",
+        fontWeight: 300,
+        color: "#000000",
+        lineHeight: 1,
+        display: "inline-block",
+      }}
+    >
+      +
+    </span>
   </div>
 </div>
-
 
 
   
