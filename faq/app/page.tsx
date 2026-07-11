@@ -179,20 +179,6 @@ const EditIcon = () => (
   </svg>
 );
 
-// Music Icons
-const MusicPlayIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-    <polygon points="5,3 19,12 5,21" />
-  </svg>
-);
-
-const MusicPauseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-    <rect x="6" y="4" width="4" height="16" />
-    <rect x="14" y="4" width="4" height="16" />
-  </svg>
-);
-
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -421,28 +407,14 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Report GSAP Refs
+  const reportContainerRef = useRef<HTMLDivElement | null>(null);
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const reportTextRef = useRef<HTMLSpanElement | null>(null);
+  const reportIconRef = useRef<HTMLSpanElement | null>(null);
+  const logoRef = useRef<HTMLDivElement | null>(null);
+  const [isReportExpanded, setIsReportExpanded] = useState(false);
 
-
-
-// Di dalam komponen HomePage, tambahkan refs dan state
-const reportContainerRef = useRef<HTMLDivElement | null>(null);
-const reportRef = useRef<HTMLDivElement | null>(null);
-const reportTextRef = useRef<HTMLSpanElement | null>(null);
-const reportIconRef = useRef<HTMLSpanElement | null>(null);
-const logoRef = useRef<HTMLDivElement | null>(null);
-const [isReportExpanded, setIsReportExpanded] = useState(false);
-
-
-
-
-  
-const [isExpanded, setIsExpanded] = useState(false);
-
-
-  
-
-
-  // GSAP Animation for Add User Button
   const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const plusIconRef = useRef<HTMLSpanElement | null>(null);
 
@@ -531,7 +503,6 @@ const [isExpanded, setIsExpanded] = useState(false);
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Playlist Data dengan embed Spotify asli
   const playlist: Track[] = [
     { 
       artist: "Feast", 
@@ -545,7 +516,6 @@ const [isExpanded, setIsExpanded] = useState(false);
     }
   ];
 
-  // Select Track from Playlist
   const selectTrack = (track: Track) => {
     setCurrentTrack(track);
     setShowPlaylist(false);
@@ -591,11 +561,10 @@ const [isExpanded, setIsExpanded] = useState(false);
     }
   ];
 
-  // Broadcast messages to all users (tanpa sistem login)
+  // Broadcast messages to all users
   const broadcastMessages = async () => {
     if (!db) return;
     
-    // Cek apakah sudah pernah broadcast
     const broadcastRef = doc(db, "system", "broadcast");
     const broadcastSnap = await getDoc(broadcastRef);
     
@@ -605,7 +574,6 @@ const [isExpanded, setIsExpanded] = useState(false);
     }
     
     try {
-      // Get all users
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
@@ -647,7 +615,6 @@ const [isExpanded, setIsExpanded] = useState(false);
         });
       }
       
-      // Tandai sudah broadcast
       await setDoc(broadcastRef, {
         messagesSent: true,
         sentAt: serverTimestamp()
@@ -659,7 +626,6 @@ const [isExpanded, setIsExpanded] = useState(false);
     }
   };
 
-  // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
     broadcastMessages();
@@ -668,16 +634,13 @@ const [isExpanded, setIsExpanded] = useState(false);
   // GSAP Animation for Add User Button
   useEffect(() => {
     if (typeof window !== "undefined" && addUserButtonRef.current) {
-      // Import GSAP dynamically
       import('gsap').then((gsapModule) => {
         const gsap = gsapModule.default;
         
-        // Animasi hover untuk tombol
         const button = addUserButtonRef.current;
         const plusIcon = plusIconRef.current;
         
         if (button && plusIcon) {
-          // Hover animation
           button.addEventListener('mouseenter', () => {
             gsap.to(button, {
               scale: 1.02,
@@ -710,7 +673,6 @@ const [isExpanded, setIsExpanded] = useState(false);
             });
           });
           
-          // Click animation
           button.addEventListener('click', () => {
             gsap.to(button, {
               scale: 0.95,
@@ -744,6 +706,277 @@ const [isExpanded, setIsExpanded] = useState(false);
       });
     }
   }, [addUserButtonRef, plusIconRef]);
+
+  // GSAP Animation untuk Read the Report
+  useEffect(() => {
+    if (typeof window !== "undefined" && reportRef.current) {
+      const report = reportRef.current;
+      const text = reportTextRef.current;
+      const icon = reportIconRef.current;
+      const container = reportContainerRef.current;
+      const logo = logoRef.current;
+
+      if (report && text && icon && container && logo) {
+        // Hover animation - text berganti-ganti dengan efek GSAP
+        const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
+        let textIndex = 0;
+        let hoverTimeout: NodeJS.Timeout | null = null;
+        
+        const hoverTl = gsap.timeline({ paused: true });
+        hoverTl.to(text, {
+          scale: 1.05,
+          duration: 0.2,
+          ease: "power2.out",
+          color: "#000000",
+        });
+        hoverTl.to(icon, {
+          rotation: 90,
+          duration: 0.4,
+          ease: "back.out(1.7)",
+          scale: 1.2,
+        }, 0);
+
+        // Hover effect dengan gonta-ganti teks
+        const startTextHover = () => {
+          if (!isReportExpanded) {
+            hoverTl.play();
+            // Ganti teks setiap 600ms saat hover
+            if (!hoverTimeout) {
+              let count = 0;
+              hoverTimeout = setInterval(() => {
+                if (text) {
+                  textIndex = (textIndex + 1) % textVariants.length;
+                  gsap.to(text, {
+                    opacity: 0,
+                    y: -5,
+                    duration: 0.15,
+                    ease: "power2.out",
+                    onComplete: () => {
+                      if (text) {
+                        text.textContent = textVariants[textIndex];
+                        gsap.to(text, {
+                          opacity: 1,
+                          y: 0,
+                          duration: 0.15,
+                          ease: "power2.out",
+                        });
+                      }
+                    }
+                  });
+                }
+                count++;
+                if (count >= textVariants.length * 2) {
+                  clearInterval(hoverTimeout!);
+                  hoverTimeout = null;
+                  // Kembali ke teks awal
+                  if (text && !isReportExpanded) {
+                    gsap.to(text, {
+                      opacity: 0,
+                      y: -5,
+                      duration: 0.15,
+                      ease: "power2.out",
+                      onComplete: () => {
+                        if (text) {
+                          text.textContent = textVariants[0];
+                          gsap.to(text, {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.15,
+                            ease: "power2.out",
+                          });
+                        }
+                      }
+                    });
+                  }
+                }
+              }, 600);
+            }
+          }
+        };
+
+        const stopTextHover = () => {
+          if (hoverTimeout) {
+            clearInterval(hoverTimeout);
+            hoverTimeout = null;
+          }
+          if (!isReportExpanded) {
+            hoverTl.reverse();
+            // Kembalikan teks ke awal
+            if (text && text.textContent !== textVariants[0]) {
+              gsap.to(text, {
+                opacity: 0,
+                y: -5,
+                duration: 0.15,
+                ease: "power2.out",
+                onComplete: () => {
+                  if (text) {
+                    text.textContent = textVariants[0];
+                    gsap.to(text, {
+                      opacity: 1,
+                      y: 0,
+                      duration: 0.15,
+                      ease: "power2.out",
+                    });
+                  }
+                }
+              });
+            }
+          }
+        };
+
+        report.addEventListener('mouseenter', startTextHover);
+        report.addEventListener('mouseleave', stopTextHover);
+
+        // Expand animation - dari kanan ke kiri sampai bawah
+        const expandTl = gsap.timeline({ paused: true });
+        expandTl.to(container, {
+          width: "100vw",
+          height: "100vh",
+          duration: 0.8,
+          ease: "power3.inOut",
+          backgroundColor: "#FE7141",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 100,
+          borderRadius: 0,
+          transformOrigin: "right center",
+        });
+        expandTl.to(report, {
+          width: "100%",
+          height: "100vh",
+          padding: "40px 60px",
+          justifyContent: "flex-start",
+          gap: "20px",
+          backgroundColor: "#FE7141",
+          duration: 0.6,
+          ease: "power3.out",
+          minWidth: "100%",
+          position: "relative",
+          borderRadius: 0,
+        }, 0);
+        expandTl.to(logo, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.out",
+          pointerEvents: "none",
+        }, 0.1);
+        expandTl.to(text, {
+          fontSize: "40px",
+          fontWeight: 700,
+          x: 0,
+          duration: 0.4,
+          ease: "power2.out",
+          scale: 1,
+          color: "#000000",
+        }, 0.2);
+        expandTl.to(icon, {
+          fontSize: "40px",
+          rotation: 45,
+          duration: 0.4,
+          ease: "back.out(1.7)",
+          scale: 1.2,
+        }, 0.2);
+
+        // Collapse animation
+        const collapseTl = gsap.timeline({ paused: true });
+        collapseTl.to(container, {
+          width: "auto",
+          height: "auto",
+          duration: 0.7,
+          ease: "power3.inOut",
+          backgroundColor: "transparent",
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          zIndex: 10,
+        });
+        collapseTl.to(report, {
+          width: "auto",
+          height: "48px",
+          padding: "6px 35px 6px 200px",
+          justifyContent: "flex-end",
+          gap: "6px",
+          backgroundColor: "#FE7141",
+          duration: 0.5,
+          ease: "power3.out",
+          minWidth: "450px",
+          position: "relative",
+          borderRadius: 0,
+        }, 0);
+        collapseTl.to(logo, {
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out",
+          pointerEvents: "auto",
+        }, 0.1);
+        collapseTl.to(text, {
+          fontSize: "18px",
+          fontWeight: 600,
+          duration: 0.4,
+          ease: "power2.out",
+          scale: 1,
+          color: "#000000",
+        }, 0.2);
+        collapseTl.to(icon, {
+          fontSize: "30px",
+          rotation: 0,
+          duration: 0.4,
+          ease: "back.out(1.7)",
+          scale: 1,
+        }, 0.2);
+
+        // Klik pada icon + untuk expand
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isReportExpanded) {
+            expandTl.play();
+            setIsReportExpanded(true);
+            // Hentikan hover text saat expanded
+            if (hoverTimeout) {
+              clearInterval(hoverTimeout);
+              hoverTimeout = null;
+            }
+          }
+        });
+
+        // Klik pada report (selain icon) untuk collapse
+        report.addEventListener('click', (e) => {
+          if (isReportExpanded) {
+            if (e.target === icon) return;
+            collapseTl.play();
+            setIsReportExpanded(false);
+          }
+        });
+
+        // Klik di luar untuk collapse
+        const handleClickOutside = (e: MouseEvent) => {
+          if (container && !container.contains(e.target as Node)) {
+            if (isReportExpanded) {
+              collapseTl.play();
+              setIsReportExpanded(false);
+            }
+          }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+          report.removeEventListener('mouseenter', startTextHover);
+          report.removeEventListener('mouseleave', stopTextHover);
+          report.removeEventListener('click', () => {});
+          icon.removeEventListener('click', () => {});
+          document.removeEventListener('click', handleClickOutside);
+          if (hoverTimeout) {
+            clearInterval(hoverTimeout);
+          }
+          hoverTl.kill();
+          expandTl.kill();
+          collapseTl.kill();
+        };
+      }
+    }
+  }, [isReportExpanded]);
 
   // Auth Listener
   useEffect(() => {
@@ -822,7 +1055,6 @@ const [isExpanded, setIsExpanded] = useState(false);
             }));
           }
           
-          // Send official messages to current user
           await checkAndSendOfficialMessages(currentUser.uid);
           
         } catch (error) {
@@ -946,193 +1178,6 @@ const [isExpanded, setIsExpanded] = useState(false);
     loadUsers();
   }, [user]);
 
-
-
-
-  
-// GSAP Animation untuk Read the Report
-useEffect(() => {
-  if (typeof window !== "undefined" && reportRef.current) {
-    const report = reportRef.current;
-    const text = reportTextRef.current;
-    const icon = reportIconRef.current;
-    const container = reportContainerRef.current;
-    const logo = logoRef.current;
-
-    if (report && text && icon && container && logo) {
-      // Hover animation untuk teks
-      const hoverTl = gsap.timeline({ paused: true });
-      hoverTl.to(text, {
-        x: 5,
-        duration: 0.3,
-        ease: "power2.out",
-        color: "#000000",
-        scale: 1.05,
-      });
-      hoverTl.to(icon, {
-        rotation: 90,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1.2,
-      }, 0);
-
-      report.addEventListener('mouseenter', () => {
-        if (!isReportExpanded) {
-          hoverTl.play();
-        }
-      });
-      
-      report.addEventListener('mouseleave', () => {
-        if (!isReportExpanded) {
-          hoverTl.reverse();
-        }
-      });
-
-      // Click animation untuk expand - klik pada icon +
-      const expandTl = gsap.timeline({ paused: true });
-      expandTl.to(container, {
-        width: "100vw",
-        height: "100vh",
-        duration: 0.6,
-        ease: "power2.inOut",
-        backgroundColor: "#FE7141",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 100,
-      });
-      expandTl.to(report, {
-        width: "100%",
-        height: "100vh",
-        padding: "40px 60px",
-        justifyContent: "flex-start",
-        gap: "20px",
-        backgroundColor: "#FE7141",
-        duration: 0.4,
-        ease: "power2.out",
-        minWidth: "100%",
-        position: "relative",
-      }, 0);
-      expandTl.to(logo, {
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.out",
-        pointerEvents: "none",
-      }, 0.1);
-      expandTl.to(text, {
-        fontSize: "40px",
-        fontWeight: 700,
-        x: 0,
-        duration: 0.4,
-        ease: "power2.out",
-        scale: 1,
-      }, 0.2);
-      expandTl.to(icon, {
-        fontSize: "40px",
-        rotation: 45,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1.2,
-      }, 0.2);
-
-      // Collapse animation
-      const collapseTl = gsap.timeline({ paused: true });
-      collapseTl.to(container, {
-        width: "auto",
-        height: "auto",
-        duration: 0.5,
-        ease: "power2.inOut",
-        backgroundColor: "transparent",
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        zIndex: 10,
-      });
-      collapseTl.to(report, {
-        width: "auto",
-        height: "48px",
-        padding: "6px 35px 6px 200px",
-        justifyContent: "flex-end",
-        gap: "6px",
-        backgroundColor: "#FE7141",
-        duration: 0.4,
-        ease: "power2.out",
-        minWidth: "450px",
-        position: "relative",
-      }, 0);
-      collapseTl.to(logo, {
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out",
-        pointerEvents: "auto",
-      }, 0.1);
-      collapseTl.to(text, {
-        fontSize: "18px",
-        fontWeight: 600,
-        duration: 0.4,
-        ease: "power2.out",
-        scale: 1,
-      }, 0.2);
-      collapseTl.to(icon, {
-        fontSize: "30px",
-        rotation: 0,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1,
-      }, 0.2);
-
-      // Klik pada icon + untuk expand
-      icon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!isReportExpanded) {
-          expandTl.play();
-          setIsReportExpanded(true);
-        }
-      });
-
-      // Klik pada report (selain icon) untuk collapse
-      report.addEventListener('click', (e) => {
-        if (isReportExpanded) {
-          // Cek apakah klik pada icon
-          if (e.target === icon) return;
-          collapseTl.play();
-          setIsReportExpanded(false);
-        }
-      });
-
-      // Klik di luar untuk collapse
-      const handleClickOutside = (e: MouseEvent) => {
-        if (container && !container.contains(e.target as Node)) {
-          if (isReportExpanded) {
-            collapseTl.play();
-            setIsReportExpanded(false);
-          }
-        }
-      };
-
-      document.addEventListener('click', handleClickOutside);
-
-      return () => {
-        report.removeEventListener('mouseenter', () => {});
-        report.removeEventListener('mouseleave', () => {});
-        report.removeEventListener('click', () => {});
-        icon.removeEventListener('click', () => {});
-        document.removeEventListener('click', handleClickOutside);
-        hoverTl.kill();
-        expandTl.kill();
-        collapseTl.kill();
-      };
-    }
-  }, [isReportExpanded]);
-
-
-
-  
-
-
-
-  
-
   // Load chat rooms
   useEffect(() => {
     if (!user || !db) return;
@@ -1177,7 +1222,6 @@ useEffect(() => {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
-            // Kumpulkan semua pesan masuk dari semua pengirim
             if (unreadCount > 0 && otherUser) {
               const unreadDocs = unreadSnap.docs;
               for (const doc of unreadDocs) {
@@ -1211,20 +1255,17 @@ useEffect(() => {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
-      // Update chat button text dengan rolling messages
       if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
         setIncomingMessagesList(newMessages);
         setCurrentMessageIndex(0);
         setChatButtonText(newMessages[0]);
         
-        // Clear previous interval
         if (rollingInterval.current) {
           clearInterval(rollingInterval.current);
           rollingInterval.current = null;
         }
         
-        // Auto-rotate through incoming messages - berganti setiap 3 detik
         let index = 0;
         rollingInterval.current = setInterval(() => {
           index = (index + 1) % newMessages.length;
@@ -1232,7 +1273,6 @@ useEffect(() => {
           setChatButtonText(newMessages[index]);
         }, 3000);
         
-        // After 12 seconds, revert to normal text
         setTimeout(() => {
           if (rollingInterval.current) {
             clearInterval(rollingInterval.current);
@@ -1243,7 +1283,6 @@ useEffect(() => {
           chatTextIndex++;
         }, 12000);
       } else {
-        // If no unread messages, show normal text
         if (!isIncomingMessage) {
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
         }
@@ -1524,7 +1563,6 @@ useEffect(() => {
       setMessage("");
       setReplyTo(null);
       
-      // Reset rolling text setelah mengirim pesan
       if (rollingInterval.current) {
         clearInterval(rollingInterval.current);
         rollingInterval.current = null;
@@ -1793,10 +1831,7 @@ useEffect(() => {
     );
   }
 
-  // Get selected update item
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
-
-  
 
   return (
     <div
@@ -1810,122 +1845,116 @@ useEffect(() => {
         overflow: "hidden",
       }}
     >
-
-
-
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-<div
-  ref={reportContainerRef}
-  style={{
-    position: "absolute",
-    top: "0px",
-    left: "0px",
-    zIndex: 10,
-    display: "flex",
-    alignItems: "center",
-    gap: "0px",
-    overflow: "hidden",
-    backgroundColor: "transparent",
-  }}
->
-  {/* Logo Menuru'26 - Background Hitam */}
-  <div
-    ref={logoRef}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      backgroundColor: "#000000",
-      padding: "6px 18px",
-      borderRadius: "0px",
-      boxShadow: "none",
-      height: "48px",
-      flexShrink: 0,
-    }}
-  >
-    <span
-      style={{
-        fontSize: "30px",
-        fontWeight: 600,
-        color: "#ffffff",
-        letterSpacing: "-0.015em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-      }}
-    >
-      Menuru'26
-    </span>
-  </div>
+      <div
+        ref={reportContainerRef}
+        style={{
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: "0px",
+          overflow: "hidden",
+          backgroundColor: "transparent",
+        }}
+      >
+        {/* Logo Menuru'26 - Background Hitam */}
+        <div
+          ref={logoRef}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#000000",
+            padding: "6px 18px",
+            borderRadius: "0px",
+            boxShadow: "none",
+            height: "48px",
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "30px",
+              fontWeight: 600,
+              color: "#ffffff",
+              letterSpacing: "-0.015em",
+              fontFamily: "Inter, 'Inter Fallback'",
+              lineHeight: 1.2,
+            }}
+          >
+            Menuru'26
+          </span>
+        </div>
 
-  {/* Read the Report - Background #FE7141 */}
-  <div
-    ref={reportRef}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      backgroundColor: "#FE7141",
-      padding: "6px 35px 6px 200px",
-      borderRadius: "0px",
-      boxShadow: "none",
-      gap: "6px",
-      cursor: "pointer",
-      height: "48px",
-      minWidth: "450px",
-      flexShrink: 0,
-      position: "relative",
-      zIndex: 20,
-      transition: "background-color 0.3s ease",
-    }}
-    onMouseEnter={(e) => {
-      if (!isReportExpanded) {
-        e.currentTarget.style.backgroundColor = "#e8653a";
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (!isReportExpanded) {
-        e.currentTarget.style.backgroundColor = "#FE7141";
-      }
-    }}
-  >
-    {/* Teks di sisi kanan */}
-    <span
-      ref={reportTextRef}
-      style={{
-        fontSize: "18px",
-        fontWeight: 600,
-        color: "#000000",
-        letterSpacing: "-0.01em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-        whiteSpace: "nowrap",
-        display: "inline-block",
-        position: "relative",
-        zIndex: 2,
-      }}
-    >
-      Read the Report
-    </span>
-    {/* Icon + di sisi kanan (klik untuk expand) */}
-    <span
-      ref={reportIconRef}
-      style={{
-        fontSize: "30px",
-        fontWeight: 300,
-        color: "#000000",
-        lineHeight: 1,
-        display: "inline-block",
-        position: "relative",
-        zIndex: 2,
-        cursor: "pointer",
-      }}
-    >
-      +
-    </span>
-  </div>
-</div>
-
-
-     
+        {/* Read the Report - Background #FE7141 */}
+        <div
+          ref={reportRef}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            backgroundColor: "#FE7141",
+            padding: "6px 35px 6px 200px",
+            borderRadius: "0px",
+            boxShadow: "none",
+            gap: "6px",
+            cursor: "pointer",
+            height: "48px",
+            minWidth: "450px",
+            flexShrink: 0,
+            position: "relative",
+            zIndex: 20,
+            transition: "background-color 0.3s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (!isReportExpanded) {
+              e.currentTarget.style.backgroundColor = "#e8653a";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isReportExpanded) {
+              e.currentTarget.style.backgroundColor = "#FE7141";
+            }
+          }}
+        >
+          {/* Teks di sisi kanan */}
+          <span
+            ref={reportTextRef}
+            style={{
+              fontSize: "18px",
+              fontWeight: 600,
+              color: "#000000",
+              letterSpacing: "-0.01em",
+              fontFamily: "Inter, 'Inter Fallback'",
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+              display: "inline-block",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            Read the Report
+          </span>
+          {/* Icon + di sisi kanan (klik untuk expand) */}
+          <span
+            ref={reportIconRef}
+            style={{
+              fontSize: "30px",
+              fontWeight: 300,
+              color: "#000000",
+              lineHeight: 1,
+              display: "inline-block",
+              position: "relative",
+              zIndex: 2,
+              cursor: "pointer",
+            }}
+          >
+            +
+          </span>
+        </div>
+      </div>
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
@@ -2695,7 +2724,7 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* Content - Update Detail Page (seperti halaman profile) */}
+            {/* Content - Update Detail Page */}
             {selectedUpdateId && selectedUpdate ? (
               <div
                 style={{
@@ -2706,7 +2735,6 @@ useEffect(() => {
                 }}
               >
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                  {/* Back Button */}
                   <button
                     onClick={() => setSelectedUpdateId(null)}
                     style={{
@@ -2730,7 +2758,6 @@ useEffect(() => {
                     <span>Kembali</span>
                   </button>
 
-                  {/* Badge Status */}
                   <div
                     style={{
                       display: "inline-block",
@@ -2754,7 +2781,6 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  {/* Title */}
                   <h2
                     style={{
                       fontSize: "22px",
@@ -2767,7 +2793,6 @@ useEffect(() => {
                     {selectedUpdate.title}
                   </h2>
 
-                  {/* Date & Published By */}
                   <div
                     style={{
                       display: "flex",
@@ -2796,7 +2821,6 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  {/* Description */}
                   <p
                     style={{
                       fontSize: "15px",
@@ -2809,7 +2833,6 @@ useEffect(() => {
                     {selectedUpdate.description}
                   </p>
 
-                  {/* Detail */}
                   <div
                     style={{
                       width: "100%",
@@ -2843,7 +2866,6 @@ useEffect(() => {
                     </p>
                   </div>
 
-                  {/* Link */}
                   <div
                     style={{
                       display: "flex",
@@ -2877,7 +2899,6 @@ useEffect(() => {
                     </a>
                   </div>
 
-                  {/* Footer */}
                   <div
                     style={{
                       width: "100%",
@@ -2919,7 +2940,6 @@ useEffect(() => {
                   backgroundColor: "#ffffff",
                 }}
               >
-                {/* Header Update */}
                 <div style={{ marginBottom: "28px" }}>
                   <div
                     style={{
@@ -2966,9 +2986,7 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Timeline */}
                 <div style={{ position: "relative", paddingLeft: "28px" }}>
-                  {/* Garis vertikal titik-titik */}
                   <div
                     style={{
                       position: "absolute",
@@ -3001,7 +3019,6 @@ useEffect(() => {
                         }}
                         onClick={() => setSelectedUpdateId(item.id)}
                       >
-                        {/* Titik bulat dengan efek pemancar */}
                         <div
                           style={{
                             position: "absolute",
@@ -3018,7 +3035,6 @@ useEffect(() => {
                           }}
                         />
                         
-                        {/* Garis titik-titik dari titik ke judul */}
                         <div
                           style={{
                             position: "absolute",
@@ -3031,7 +3047,6 @@ useEffect(() => {
                           }}
                         />
                         
-                        {/* Card Update */}
                         <div
                           style={{
                             padding: "0",
@@ -3056,7 +3071,6 @@ useEffect(() => {
                             >
                               {item.title}
                             </div>
-                            {/* Panah SVG */}
                             <svg
                               width="20"
                               height="20"
@@ -3083,7 +3097,6 @@ useEffect(() => {
                   })}
                 </div>
 
-                {/* Footer */}
                 <div
                   style={{
                     marginTop: "20px",
@@ -3124,7 +3137,6 @@ useEffect(() => {
                   backgroundColor: "#ffffff",
                 }}
               >
-                {/* Badge dan Title */}
                 <div style={{ marginBottom: "24px" }}>
                   <div
                     style={{
@@ -3171,7 +3183,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Section 1 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3212,7 +3223,6 @@ useEffect(() => {
                   </ul>
                 </div>
 
-                {/* Section 2 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3253,7 +3263,6 @@ useEffect(() => {
                   </ul>
                 </div>
 
-                {/* Section 3 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3279,7 +3288,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Section 4 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3305,7 +3313,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Section 5 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3345,7 +3352,6 @@ useEffect(() => {
                   </ul>
                 </div>
 
-                {/* Section 6 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3371,7 +3377,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Section 7 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3408,7 +3413,6 @@ useEffect(() => {
                   </p>
                 </div>
 
-                {/* Footer */}
                 <div
                   style={{
                     marginTop: "8px",
@@ -3799,46 +3803,46 @@ useEffect(() => {
 
                 {/* Chat Baru Button dengan GSAP Animation */}
                 <button
-  ref={addUserButtonRef}
-  onClick={() => setShowAddUser(!showAddUser)}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "8px 0",
-    backgroundColor: "transparent",
-    border: "none",
-    cursor: "pointer",
-    width: "100%",
-    marginBottom: "12px",
-    fontFamily: "Inter, 'Inter Fallback'",
-  }}
->
-  <span
-    ref={plusIconRef}
-    style={{
-      fontSize: "32px",
-      fontWeight: 300,
-      display: "inline-block",
-      lineHeight: 1,
-      transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      color: "#000000",
-      transform: showAddUser ? "rotate(45deg)" : "rotate(0deg)",
-    }}
-  >
-    +
-  </span>
-  <span
-    style={{
-      fontSize: "18px",
-      fontWeight: 500,
-      color: "#000000",
-      letterSpacing: "-0.01em",
-    }}
-  >
-    Chat Baru
-  </span>
-</button>
+                  ref={addUserButtonRef}
+                  onClick={() => setShowAddUser(!showAddUser)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "8px 0",
+                    backgroundColor: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    width: "100%",
+                    marginBottom: "12px",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                  }}
+                >
+                  <span
+                    ref={plusIconRef}
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: 300,
+                      display: "inline-block",
+                      lineHeight: 1,
+                      transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      color: "#000000",
+                      transform: showAddUser ? "rotate(45deg)" : "rotate(0deg)",
+                    }}
+                  >
+                    +
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: 500,
+                      color: "#000000",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Chat Baru
+                  </span>
+                </button>
                 
                 {showAddUser && (
                   <div
@@ -4459,7 +4463,7 @@ useEffect(() => {
                   </div>
                 )}
 
-                {/* Reply Indicator - Tanpa border dan background */}
+                {/* Reply Indicator */}
                 {replyTo && (
                   <div
                     style={{
@@ -4984,18 +4988,6 @@ useEffect(() => {
       </div>
 
       <style jsx>{`
-
-      @keyframes marqueeMundur {
-    0% {
-      transform: translateX(0%);
-    }
-    50% {
-      transform: translateX(-30%);
-    }
-    100% {
-      transform: translateX(0%);
-    }
-  }
         @keyframes slideUp {
           from {
             opacity: 0;
