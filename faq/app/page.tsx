@@ -419,6 +419,10 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+
   // GSAP Animation for Add User Button
   const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const plusIconRef = useRef<HTMLSpanElement | null>(null);
@@ -1586,6 +1590,8 @@ export default function HomePage(): React.JSX.Element {
   // Get selected update item
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
+  
+
   return (
     <div
       style={{
@@ -1599,7 +1605,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
- {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1609,6 +1615,8 @@ export default function HomePage(): React.JSX.Element {
     display: "flex",
     alignItems: "center",
     gap: "0px",
+    width: isExpanded ? "100%" : "auto", // Lebar penuh saat expand
+    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
   }}
 >
   {/* Logo Menuru'26 - Background Hitam */}
@@ -1616,11 +1624,15 @@ export default function HomePage(): React.JSX.Element {
     style={{
       display: "flex",
       alignItems: "center",
-      backgroundColor: "#000000",
+      backgroundColor: isExpanded ? "#FE7141" : "#000000", // Berubah jadi orange saat expand
       padding: "6px 18px",
       borderRadius: "0px",
       boxShadow: "none",
       height: "48px",
+      transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      opacity: isExpanded ? 0 : 1, // Hilang saat expand
+      width: isExpanded ? 0 : "auto",
+      overflow: "hidden",
     }}
   >
     <span
@@ -1631,67 +1643,202 @@ export default function HomePage(): React.JSX.Element {
         letterSpacing: "-0.015em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
+        whiteSpace: "nowrap",
       }}
     >
       Menuru'26
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 (Sangat Panjang) */}
+  {/* Read the Report - Background #FE7141 */}
   <div
     style={{
       display: "flex",
       alignItems: "center",
-      justifyContent: "flex-end",
+      justifyContent: isExpanded ? "flex-start" : "flex-end", // Jadi kiri saat expand
       backgroundColor: "#FE7141",
-      padding: "6px 35px 6px 200px", // Kiri 200px (sangat kosong), kanan 35px
+      padding: isExpanded ? "6px 40px 6px 40px" : "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
-      gap: "6px", // Jarak sangat dekat antara teks dan icon
+      gap: "6px",
       cursor: "pointer",
-      transition: "all 0.3s ease",
-      height: "48px",
-      minWidth: "450px", // Lebar sangat panjang
+      transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      height: isExpanded ? "100vh" : "48px", // Turun ke bawah saat expand
+      width: isExpanded ? "100%" : "auto",
+      minWidth: isExpanded ? "100%" : "450px",
+      position: "relative",
+      zIndex: isExpanded ? 100 : 1, // Di atas semua saat expand
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = "#e8653a";
+      if (!isExpanded) {
+        e.currentTarget.style.backgroundColor = "#e8653a";
+      }
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = "#FE7141";
-    }}
-    onClick={() => {
-      console.log("Read the Report clicked");
+      if (!isExpanded) {
+        e.currentTarget.style.backgroundColor = "#FE7141";
+      }
     }}
   >
-    {/* Teks di sisi kanan */}
-    <span
+    {/* Rolling Teks - saat hover */}
+    <div
       style={{
-        fontSize: "18px",
-        fontWeight: 600,
-        color: "#000000",
-        letterSpacing: "-0.01em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-        whiteSpace: "nowrap",
+        overflow: "hidden",
+        position: "relative",
+        maxWidth: isExpanded ? "100%" : "180px",
+        transition: "all 0.5s ease",
+      }}
+      onMouseEnter={(e) => {
+        if (!isExpanded) {
+          const container = e.currentTarget;
+          container.style.animation = "marquee 3s linear infinite";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isExpanded) {
+          const container = e.currentTarget;
+          container.style.animation = "none";
+        }
       }}
     >
-      Read the Report
-    </span>
-    {/* Icon + di sisi kanan (sangat dekat dengan teks) */}
+      <span
+        style={{
+          fontSize: isExpanded ? "24px" : "18px",
+          fontWeight: 600,
+          color: "#000000",
+          letterSpacing: "-0.01em",
+          fontFamily: "Inter, 'Inter Fallback'",
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          paddingLeft: isExpanded ? "0" : "100%",
+          animation: isExpanded ? "none" : "none",
+        }}
+      >
+        {isExpanded ? "📄 Read the Report - Menuru'26" : "Read the Report"}
+      </span>
+    </div>
+
+    {/* Icon + - Klik untuk expand */}
     <span
       style={{
-        fontSize: "30px",
+        fontSize: isExpanded ? "40px" : "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
+        transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transform: isExpanded ? "rotate(45deg)" : "rotate(0deg)",
+        cursor: "pointer",
+        zIndex: 2,
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsExpanded(!isExpanded);
       }}
     >
       +
     </span>
+
+    {/* Konten saat expand */}
+    {isExpanded && (
+      <div
+        style={{
+          position: "absolute",
+          top: "70px",
+          left: "40px",
+          right: "40px",
+          bottom: "40px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          color: "#000000",
+          animation: "slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "36px",
+            fontWeight: 700,
+            margin: 0,
+            fontFamily: "Inter, 'Inter Fallback'",
+          }}
+        >
+          Read the Report
+        </h2>
+        <p
+          style={{
+            fontSize: "18px",
+            lineHeight: 1.8,
+            maxWidth: "600px",
+            fontFamily: "Inter, 'Inter Fallback'",
+          }}
+        >
+          Menuru'26 adalah platform chat modern yang menghubungkan orang-orang dengan cara yang sederhana dan elegan. 
+          Temukan fitur-fitur terbaru kami dan nikmati pengalaman chatting yang menyenangkan.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            marginTop: "20px",
+          }}
+        >
+          <button
+            style={{
+              padding: "12px 32px",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: "Inter, 'Inter Fallback'",
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.8";
+              e.currentTarget.style.transform = "scale(1.02)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            Explore
+          </button>
+          <button
+            style={{
+              padding: "12px 32px",
+              backgroundColor: "transparent",
+              color: "#000000",
+              border: "2px solid #000000",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: "Inter, 'Inter Fallback'",
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#000000";
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "#000000";
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    )}
   </div>
 </div>
-      
+
+
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
