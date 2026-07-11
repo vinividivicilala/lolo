@@ -179,6 +179,20 @@ const EditIcon = () => (
   </svg>
 );
 
+// Music Icons
+const MusicPlayIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+    <polygon points="5,3 19,12 5,21" />
+  </svg>
+);
+
+const MusicPauseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+    <rect x="6" y="4" width="4" height="16" />
+    <rect x="14" y="4" width="4" height="16" />
+  </svg>
+);
+
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -415,6 +429,9 @@ export default function HomePage(): React.JSX.Element {
   const logoRef = useRef<HTMLDivElement | null>(null);
   const [isReportExpanded, setIsReportExpanded] = useState(false);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // GSAP Animation for Add User Button
   const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const plusIconRef = useRef<HTMLSpanElement | null>(null);
 
@@ -503,6 +520,7 @@ export default function HomePage(): React.JSX.Element {
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Playlist Data dengan embed Spotify asli
   const playlist: Track[] = [
     { 
       artist: "Feast", 
@@ -516,6 +534,7 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
+  // Select Track from Playlist
   const selectTrack = (track: Track) => {
     setCurrentTrack(track);
     setShowPlaylist(false);
@@ -561,10 +580,11 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Broadcast messages to all users
+  // Broadcast messages to all users (tanpa sistem login)
   const broadcastMessages = async () => {
     if (!db) return;
     
+    // Cek apakah sudah pernah broadcast
     const broadcastRef = doc(db, "system", "broadcast");
     const broadcastSnap = await getDoc(broadcastRef);
     
@@ -574,6 +594,7 @@ export default function HomePage(): React.JSX.Element {
     }
     
     try {
+      // Get all users
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
@@ -615,6 +636,7 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
+      // Tandai sudah broadcast
       await setDoc(broadcastRef, {
         messagesSent: true,
         sentAt: serverTimestamp()
@@ -626,6 +648,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
     broadcastMessages();
@@ -634,13 +657,16 @@ export default function HomePage(): React.JSX.Element {
   // GSAP Animation for Add User Button
   useEffect(() => {
     if (typeof window !== "undefined" && addUserButtonRef.current) {
+      // Import GSAP dynamically
       import('gsap').then((gsapModule) => {
         const gsap = gsapModule.default;
         
+        // Animasi hover untuk tombol
         const button = addUserButtonRef.current;
         const plusIcon = plusIconRef.current;
         
         if (button && plusIcon) {
+          // Hover animation
           button.addEventListener('mouseenter', () => {
             gsap.to(button, {
               scale: 1.02,
@@ -673,6 +699,7 @@ export default function HomePage(): React.JSX.Element {
             });
           });
           
+          // Click animation
           button.addEventListener('click', () => {
             gsap.to(button, {
               scale: 0.95,
@@ -707,7 +734,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-  // GSAP Animation untuk Read the Report
+  // GSAP Animation untuk Read the Report - PERBAIKAN
   useEffect(() => {
     if (typeof window !== "undefined" && reportRef.current) {
       const report = reportRef.current;
@@ -717,11 +744,13 @@ export default function HomePage(): React.JSX.Element {
       const logo = logoRef.current;
 
       if (report && text && icon && container && logo) {
-        // Hover animation - text berganti-ganti dengan efek GSAP
+        // Text variants untuk hover gonta-ganti
         const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
         let textIndex = 0;
         let hoverTimeout: NodeJS.Timeout | null = null;
+        let isHovering = false;
         
+        // Hover animation untuk teks
         const hoverTl = gsap.timeline({ paused: true });
         hoverTl.to(text, {
           scale: 1.05,
@@ -736,15 +765,16 @@ export default function HomePage(): React.JSX.Element {
           scale: 1.2,
         }, 0);
 
-        // Hover effect dengan gonta-ganti teks
+        // Fungsi ganti teks saat hover
         const startTextHover = () => {
           if (!isReportExpanded) {
+            isHovering = true;
             hoverTl.play();
-            // Ganti teks setiap 600ms saat hover
+            textIndex = 0;
+            
             if (!hoverTimeout) {
-              let count = 0;
               hoverTimeout = setInterval(() => {
-                if (text) {
+                if (text && isHovering && !isReportExpanded) {
                   textIndex = (textIndex + 1) % textVariants.length;
                   gsap.to(text, {
                     opacity: 0,
@@ -752,7 +782,7 @@ export default function HomePage(): React.JSX.Element {
                     duration: 0.15,
                     ease: "power2.out",
                     onComplete: () => {
-                      if (text) {
+                      if (text && isHovering && !isReportExpanded) {
                         text.textContent = textVariants[textIndex];
                         gsap.to(text, {
                           opacity: 1,
@@ -764,37 +794,13 @@ export default function HomePage(): React.JSX.Element {
                     }
                   });
                 }
-                count++;
-                if (count >= textVariants.length * 2) {
-                  clearInterval(hoverTimeout!);
-                  hoverTimeout = null;
-                  // Kembali ke teks awal
-                  if (text && !isReportExpanded) {
-                    gsap.to(text, {
-                      opacity: 0,
-                      y: -5,
-                      duration: 0.15,
-                      ease: "power2.out",
-                      onComplete: () => {
-                        if (text) {
-                          text.textContent = textVariants[0];
-                          gsap.to(text, {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.15,
-                            ease: "power2.out",
-                          });
-                        }
-                      }
-                    });
-                  }
-                }
               }, 600);
             }
           }
         };
 
         const stopTextHover = () => {
+          isHovering = false;
           if (hoverTimeout) {
             clearInterval(hoverTimeout);
             hoverTimeout = null;
@@ -809,7 +815,7 @@ export default function HomePage(): React.JSX.Element {
                 duration: 0.15,
                 ease: "power2.out",
                 onComplete: () => {
-                  if (text) {
+                  if (text && !isReportExpanded) {
                     text.textContent = textVariants[0];
                     gsap.to(text, {
                       opacity: 1,
@@ -824,11 +830,18 @@ export default function HomePage(): React.JSX.Element {
           }
         };
 
-        report.addEventListener('mouseenter', startTextHover);
-        report.addEventListener('mouseleave', stopTextHover);
-
         // Expand animation - dari kanan ke kiri sampai bawah
         const expandTl = gsap.timeline({ paused: true });
+        
+        expandTl.set(container, {
+          width: "auto",
+          height: "auto",
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          zIndex: 10,
+        });
+        
         expandTl.to(container, {
           width: "100vw",
           height: "100vh",
@@ -842,6 +855,7 @@ export default function HomePage(): React.JSX.Element {
           borderRadius: 0,
           transformOrigin: "right center",
         });
+        
         expandTl.to(report, {
           width: "100%",
           height: "100vh",
@@ -855,12 +869,14 @@ export default function HomePage(): React.JSX.Element {
           position: "relative",
           borderRadius: 0,
         }, 0);
+        
         expandTl.to(logo, {
           opacity: 0,
           duration: 0.3,
           ease: "power2.out",
           pointerEvents: "none",
         }, 0.1);
+        
         expandTl.to(text, {
           fontSize: "40px",
           fontWeight: 700,
@@ -870,6 +886,7 @@ export default function HomePage(): React.JSX.Element {
           scale: 1,
           color: "#000000",
         }, 0.2);
+        
         expandTl.to(icon, {
           fontSize: "40px",
           rotation: 45,
@@ -880,6 +897,7 @@ export default function HomePage(): React.JSX.Element {
 
         // Collapse animation
         const collapseTl = gsap.timeline({ paused: true });
+        
         collapseTl.to(container, {
           width: "auto",
           height: "auto",
@@ -891,6 +909,7 @@ export default function HomePage(): React.JSX.Element {
           left: "0px",
           zIndex: 10,
         });
+        
         collapseTl.to(report, {
           width: "auto",
           height: "48px",
@@ -904,12 +923,14 @@ export default function HomePage(): React.JSX.Element {
           position: "relative",
           borderRadius: 0,
         }, 0);
+        
         collapseTl.to(logo, {
           opacity: 1,
           duration: 0.3,
           ease: "power2.out",
           pointerEvents: "auto",
         }, 0.1);
+        
         collapseTl.to(text, {
           fontSize: "18px",
           fontWeight: 600,
@@ -918,6 +939,7 @@ export default function HomePage(): React.JSX.Element {
           scale: 1,
           color: "#000000",
         }, 0.2);
+        
         collapseTl.to(icon, {
           fontSize: "30px",
           rotation: 0,
@@ -926,46 +948,78 @@ export default function HomePage(): React.JSX.Element {
           scale: 1,
         }, 0.2);
 
-        // Klik pada icon + untuk expand
-        icon.addEventListener('click', (e) => {
+        // Event listener untuk icon "+" - PERBAIKAN UTAMA
+        const handleIconClick = (e: React.MouseEvent | MouseEvent) => {
           e.stopPropagation();
+          e.preventDefault();
           if (!isReportExpanded) {
-            expandTl.play();
-            setIsReportExpanded(true);
-            // Hentikan hover text saat expanded
+            // Hentikan hover text
+            isHovering = false;
             if (hoverTimeout) {
               clearInterval(hoverTimeout);
               hoverTimeout = null;
             }
+            expandTl.play();
+            setIsReportExpanded(true);
+          } else {
+            collapseTl.play();
+            setIsReportExpanded(false);
+            // Kembalikan teks ke awal
+            if (text && text.textContent !== textVariants[0]) {
+              text.textContent = textVariants[0];
+            }
           }
-        });
+        };
 
-        // Klik pada report (selain icon) untuk collapse
-        report.addEventListener('click', (e) => {
+        // Event listener untuk report click (collapse)
+        const handleReportClick = (e: React.MouseEvent | MouseEvent) => {
           if (isReportExpanded) {
+            // Jangan collapse jika klik pada icon
             if (e.target === icon) return;
             collapseTl.play();
             setIsReportExpanded(false);
+            // Kembalikan teks ke awal
+            if (text && text.textContent !== textVariants[0]) {
+              text.textContent = textVariants[0];
+            }
           }
-        });
+        };
 
-        // Klik di luar untuk collapse
+        // Event listener untuk click outside
         const handleClickOutside = (e: MouseEvent) => {
           if (container && !container.contains(e.target as Node)) {
             if (isReportExpanded) {
               collapseTl.play();
               setIsReportExpanded(false);
+              // Kembalikan teks ke awal
+              if (text && text.textContent !== textVariants[0]) {
+                text.textContent = textVariants[0];
+              }
             }
           }
         };
 
+        // Attach event listeners
+        report.addEventListener('mouseenter', startTextHover);
+        report.addEventListener('mouseleave', stopTextHover);
+        report.addEventListener('click', handleReportClick as any);
+        
+        // Gunakan pointer events untuk icon
+        if (icon) {
+          icon.style.pointerEvents = 'auto';
+          icon.addEventListener('click', handleIconClick as any);
+        }
+        
         document.addEventListener('click', handleClickOutside);
 
+        // Cleanup
         return () => {
           report.removeEventListener('mouseenter', startTextHover);
           report.removeEventListener('mouseleave', stopTextHover);
-          report.removeEventListener('click', () => {});
-          icon.removeEventListener('click', () => {});
+          report.removeEventListener('click', handleReportClick as any);
+          if (icon) {
+            icon.removeEventListener('click', handleIconClick as any);
+          }
           document.removeEventListener('click', handleClickOutside);
           if (hoverTimeout) {
             clearInterval(hoverTimeout);
@@ -1055,6 +1109,7 @@ export default function HomePage(): React.JSX.Element {
             }));
           }
           
+          // Send official messages to current user
           await checkAndSendOfficialMessages(currentUser.uid);
           
         } catch (error) {
@@ -1222,6 +1277,7 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
+            // Kumpulkan semua pesan masuk dari semua pengirim
             if (unreadCount > 0 && otherUser) {
               const unreadDocs = unreadSnap.docs;
               for (const doc of unreadDocs) {
@@ -1255,17 +1311,20 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
 
+      // Update chat button text dengan rolling messages
       if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
         setIncomingMessagesList(newMessages);
         setCurrentMessageIndex(0);
         setChatButtonText(newMessages[0]);
         
+        // Clear previous interval
         if (rollingInterval.current) {
           clearInterval(rollingInterval.current);
           rollingInterval.current = null;
         }
         
+        // Auto-rotate through incoming messages - berganti setiap 3 detik
         let index = 0;
         rollingInterval.current = setInterval(() => {
           index = (index + 1) % newMessages.length;
@@ -1273,6 +1332,7 @@ export default function HomePage(): React.JSX.Element {
           setChatButtonText(newMessages[index]);
         }, 3000);
         
+        // After 12 seconds, revert to normal text
         setTimeout(() => {
           if (rollingInterval.current) {
             clearInterval(rollingInterval.current);
@@ -1283,6 +1343,7 @@ export default function HomePage(): React.JSX.Element {
           chatTextIndex++;
         }, 12000);
       } else {
+        // If no unread messages, show normal text
         if (!isIncomingMessage) {
           setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
         }
@@ -1563,6 +1624,7 @@ export default function HomePage(): React.JSX.Element {
       setMessage("");
       setReplyTo(null);
       
+      // Reset rolling text setelah mengirim pesan
       if (rollingInterval.current) {
         clearInterval(rollingInterval.current);
         rollingInterval.current = null;
@@ -1831,6 +1893,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
+  // Get selected update item
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
   return (
@@ -1949,6 +2012,7 @@ export default function HomePage(): React.JSX.Element {
               position: "relative",
               zIndex: 2,
               cursor: "pointer",
+              pointerEvents: "auto",
             }}
           >
             +
@@ -2610,7 +2674,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Chat Box */}
+      {/* Chat Box - Kode lengkap seperti sebelumnya */}
       <div
         style={{
           position: "fixed",
@@ -2724,7 +2788,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Content - Update Detail Page */}
+            {/* Content - Update Detail Page (seperti halaman profile) */}
             {selectedUpdateId && selectedUpdate ? (
               <div
                 style={{
@@ -2735,6 +2799,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                  {/* Back Button */}
                   <button
                     onClick={() => setSelectedUpdateId(null)}
                     style={{
@@ -2758,6 +2823,7 @@ export default function HomePage(): React.JSX.Element {
                     <span>Kembali</span>
                   </button>
 
+                  {/* Badge Status */}
                   <div
                     style={{
                       display: "inline-block",
@@ -2781,6 +2847,7 @@ export default function HomePage(): React.JSX.Element {
                     </span>
                   </div>
 
+                  {/* Title */}
                   <h2
                     style={{
                       fontSize: "22px",
@@ -2793,6 +2860,7 @@ export default function HomePage(): React.JSX.Element {
                     {selectedUpdate.title}
                   </h2>
 
+                  {/* Date & Published By */}
                   <div
                     style={{
                       display: "flex",
@@ -2821,6 +2889,7 @@ export default function HomePage(): React.JSX.Element {
                     </span>
                   </div>
 
+                  {/* Description */}
                   <p
                     style={{
                       fontSize: "15px",
@@ -2833,6 +2902,7 @@ export default function HomePage(): React.JSX.Element {
                     {selectedUpdate.description}
                   </p>
 
+                  {/* Detail */}
                   <div
                     style={{
                       width: "100%",
@@ -2866,6 +2936,7 @@ export default function HomePage(): React.JSX.Element {
                     </p>
                   </div>
 
+                  {/* Link */}
                   <div
                     style={{
                       display: "flex",
@@ -2899,6 +2970,7 @@ export default function HomePage(): React.JSX.Element {
                     </a>
                   </div>
 
+                  {/* Footer */}
                   <div
                     style={{
                       width: "100%",
@@ -2940,6 +3012,7 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: "#ffffff",
                 }}
               >
+                {/* Header Update */}
                 <div style={{ marginBottom: "28px" }}>
                   <div
                     style={{
@@ -2986,7 +3059,9 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Timeline */}
                 <div style={{ position: "relative", paddingLeft: "28px" }}>
+                  {/* Garis vertikal titik-titik */}
                   <div
                     style={{
                       position: "absolute",
@@ -3019,6 +3094,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                         onClick={() => setSelectedUpdateId(item.id)}
                       >
+                        {/* Titik bulat dengan efek pemancar */}
                         <div
                           style={{
                             position: "absolute",
@@ -3035,6 +3111,7 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         />
                         
+                        {/* Garis titik-titik dari titik ke judul */}
                         <div
                           style={{
                             position: "absolute",
@@ -3047,6 +3124,7 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         />
                         
+                        {/* Card Update */}
                         <div
                           style={{
                             padding: "0",
@@ -3071,6 +3149,7 @@ export default function HomePage(): React.JSX.Element {
                             >
                               {item.title}
                             </div>
+                            {/* Panah SVG */}
                             <svg
                               width="20"
                               height="20"
@@ -3097,6 +3176,7 @@ export default function HomePage(): React.JSX.Element {
                   })}
                 </div>
 
+                {/* Footer */}
                 <div
                   style={{
                     marginTop: "20px",
@@ -3137,6 +3217,7 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: "#ffffff",
                 }}
               >
+                {/* Badge dan Title */}
                 <div style={{ marginBottom: "24px" }}>
                   <div
                     style={{
@@ -3183,6 +3264,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Section 1 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3223,6 +3305,7 @@ export default function HomePage(): React.JSX.Element {
                   </ul>
                 </div>
 
+                {/* Section 2 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3263,6 +3346,7 @@ export default function HomePage(): React.JSX.Element {
                   </ul>
                 </div>
 
+                {/* Section 3 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3288,6 +3372,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Section 4 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3313,6 +3398,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Section 5 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3352,6 +3438,7 @@ export default function HomePage(): React.JSX.Element {
                   </ul>
                 </div>
 
+                {/* Section 6 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3377,6 +3464,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Section 7 */}
                 <div style={{ marginBottom: "20px" }}>
                   <h3
                     style={{
@@ -3413,6 +3501,7 @@ export default function HomePage(): React.JSX.Element {
                   </p>
                 </div>
 
+                {/* Footer */}
                 <div
                   style={{
                     marginTop: "8px",
@@ -4463,7 +4552,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* Reply Indicator */}
+                {/* Reply Indicator - Tanpa border dan background */}
                 {replyTo && (
                   <div
                     style={{
@@ -4988,6 +5077,17 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
+        @keyframes marqueeMundur {
+          0% {
+            transform: translateX(0%);
+          }
+          50% {
+            transform: translateX(-30%);
+          }
+          100% {
+            transform: translateX(0%);
+          }
+        }
         @keyframes slideUp {
           from {
             opacity: 0;
