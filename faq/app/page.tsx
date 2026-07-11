@@ -1627,6 +1627,62 @@ export default function HomePage(): React.JSX.Element {
     Menuru'26
   </span>
 </div>
+
+      {/* Read the Report - Sisi Kanan Atas */}
+<div
+  style={{
+    position: "absolute",
+    top: "0px",
+    right: "0px",
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#FE7141",
+    padding: "4px 20px 4px 14px",
+    borderRadius: "0px",
+    boxShadow: "none",
+    gap: "12px",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.backgroundColor = "#e8653a";
+    e.currentTarget.style.transform = "scale(1.02)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.backgroundColor = "#FE7141";
+    e.currentTarget.style.transform = "scale(1)";
+  }}
+  onClick={() => {
+    // Aksi ketika diklik
+    console.log("Read the Report clicked");
+  }}
+>
+  <span
+    style={{
+      fontSize: "32px",
+      fontWeight: 300,
+      color: "#000000",
+      lineHeight: 1,
+      display: "inline-block",
+    }}
+  >
+    +
+  </span>
+  <span
+    style={{
+      fontSize: "18px",
+      fontWeight: 600,
+      color: "#000000",
+      letterSpacing: "-0.01em",
+      fontFamily: "Inter, 'Inter Fallback'",
+      lineHeight: 1.2,
+      whiteSpace: "nowrap",
+    }}
+  >
+    Read the Report
+  </span>
+</div>
       
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
