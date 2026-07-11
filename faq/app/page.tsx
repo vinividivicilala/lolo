@@ -1599,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+   {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1636,18 +1636,19 @@ export default function HomePage(): React.JSX.Element {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 (Samping Kanan Logo) */}
+  {/* Read the Report - Background #FE7141 (Panjang ke Kanan) */}
   <div
     style={{
       display: "flex",
       alignItems: "center",
       backgroundColor: "#FE7141",
-      padding: "6px 20px 6px 18px",
+      padding: "6px 50px 6px 18px",
       borderRadius: "0px",
       boxShadow: "none",
-      gap: "10px",
+      gap: "12px",
       cursor: "pointer",
       transition: "all 0.3s ease",
+      height: "100%",
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = "#e8653a";
@@ -1686,7 +1687,7 @@ export default function HomePage(): React.JSX.Element {
       Read the Report
     </span>
   </div>
-   </div>
+</div>
 
 
 
