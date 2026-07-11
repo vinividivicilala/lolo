@@ -3500,58 +3500,53 @@ export default function HomePage(): React.JSX.Element {
 
                 {/* Chat Baru Button dengan GSAP Animation */}
                 <button
-                  ref={addUserButtonRef}
-                  onClick={() => setShowAddUser(!showAddUser)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "12px 20px",
-                    backgroundColor: "transparent",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "12px",
-                    cursor: "pointer",
-                    width: "100%",
-                    marginBottom: "12px",
-                    transition: "all 0.2s ease",
-                    color: "#000000",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#000000";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!showAddUser) {
-                      e.currentTarget.style.borderColor = "#e0e0e0";
-                    }
-                  }}
-                >
-                  <span
-                    ref={plusIconRef}
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: 300,
-                      display: "inline-block",
-                      lineHeight: 1,
-                      transition: "all 0.3s ease",
-                      color: "inherit",
-                    }}
-                  >
-                    +
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      color: "inherit",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    Chat Baru
-                  </span>
-                </button>
+  ref={addUserButtonRef}
+  onClick={() => setShowAddUser(!showAddUser)}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 0",
+    backgroundColor: "transparent",
+    border: "none",
+    cursor: "pointer",
+    width: "100%",
+    marginBottom: "12px",
+    transition: "all 0.2s ease",
+    color: "#000000",
+    fontFamily: "Inter, 'Inter Fallback'",
+    position: "relative",
+    overflow: "hidden",
+  }}
+>
+  <span
+    ref={plusIconRef}
+    style={{
+      fontSize: "20px",
+      fontWeight: 300,
+      display: "inline-block",
+      lineHeight: 1,
+      transition: "all 0.3s ease",
+      color: "inherit",
+      backgroundColor: "#000000",
+      color: "#ffffff",
+      padding: "4px 10px",
+      borderRadius: "6px",
+    }}
+  >
+    +
+  </span>
+  <span
+    style={{
+      fontSize: "18px",
+      fontWeight: 500,
+      color: "#000000",
+      letterSpacing: "-0.01em",
+    }}
+  >
+    Chat Baru
+  </span>
+</button>
 
                 {showAddUser && (
                   <div
