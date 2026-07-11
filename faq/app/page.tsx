@@ -1599,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-     {/* Logo Menuru'26 - Pojok Kiri Atas */}
+      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1608,81 +1608,87 @@ export default function HomePage(): React.JSX.Element {
     zIndex: 10,
     display: "flex",
     alignItems: "center",
-    backgroundColor: "#000000",
-    padding: "6px 18px",
-    borderRadius: "0px",
-    boxShadow: "none",
+    gap: "0px",
   }}
 >
-  <span
+  {/* Logo Menuru'26 - Background Hitam */}
+  <div
     style={{
-      fontSize: "30px",
-      fontWeight: 600,
-      color: "#ffffff",
-      letterSpacing: "-0.015em",
-      fontFamily: "Inter, 'Inter Fallback'",
-      lineHeight: 1.2,
+      display: "flex",
+      alignItems: "center",
+      backgroundColor: "#000000",
+      padding: "6px 18px",
+      borderRadius: "0px",
+      boxShadow: "none",
     }}
   >
-    Menuru'26
-  </span>
-</div>
+    <span
+      style={{
+        fontSize: "30px",
+        fontWeight: 600,
+        color: "#ffffff",
+        letterSpacing: "-0.015em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        lineHeight: 1.2,
+      }}
+    >
+      Menuru'26
+    </span>
+  </div>
 
-      {/* Read the Report - Sisi Kanan Atas */}
-<div
-  style={{
-    position: "absolute",
-    top: "0px",
-    right: "0px",
-    zIndex: 10,
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "#FE7141",
-    padding: "4px 20px 4px 14px",
-    borderRadius: "0px",
-    boxShadow: "none",
-    gap: "12px",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.backgroundColor = "#e8653a";
-    e.currentTarget.style.transform = "scale(1.02)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.backgroundColor = "#FE7141";
-    e.currentTarget.style.transform = "scale(1)";
-  }}
-  onClick={() => {
-    // Aksi ketika diklik
-    console.log("Read the Report clicked");
-  }}
->
-  <span
+  {/* Read the Report - Background #FE7141 (Samping Kanan Logo) */}
+  <div
     style={{
-      fontSize: "32px",
-      fontWeight: 300,
-      color: "#000000",
-      lineHeight: 1,
-      display: "inline-block",
+      display: "flex",
+      alignItems: "center",
+      backgroundColor: "#FE7141",
+      padding: "6px 20px 6px 18px",
+      borderRadius: "0px",
+      boxShadow: "none",
+      gap: "10px",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = "#e8653a";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = "#FE7141";
+    }}
+    onClick={() => {
+      console.log("Read the Report clicked");
     }}
   >
-    +
-  </span>
-  <span
-    style={{
-      fontSize: "18px",
-      fontWeight: 600,
-      color: "#000000",
-      letterSpacing: "-0.01em",
-      fontFamily: "Inter, 'Inter Fallback'",
-      lineHeight: 1.2,
-      whiteSpace: "nowrap",
-    }}
-  >
-    Read the Report
-  </span>
-</div>
+    {/* Icon + di kiri */}
+    <span
+      style={{
+        fontSize: "30px",
+        fontWeight: 300,
+        color: "#000000",
+        lineHeight: 1,
+        display: "inline-block",
+      }}
+    >
+      +
+    </span>
+    {/* Teks di kanan */}
+    <span
+      style={{
+        fontSize: "18px",
+        fontWeight: 600,
+        color: "#000000",
+        letterSpacing: "-0.01em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        lineHeight: 1.2,
+        whiteSpace: "nowrap",
+      }}
+    >
+      Read the Report
+    </span>
+  </div>
+
+
+  
       
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
