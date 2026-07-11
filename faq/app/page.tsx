@@ -3505,33 +3505,26 @@ export default function HomePage(): React.JSX.Element {
   style={{
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "12px",
     padding: "8px 0",
     backgroundColor: "transparent",
     border: "none",
     cursor: "pointer",
     width: "100%",
     marginBottom: "12px",
-    transition: "all 0.2s ease",
-    color: "#000000",
     fontFamily: "Inter, 'Inter Fallback'",
-    position: "relative",
-    overflow: "hidden",
   }}
 >
   <span
     ref={plusIconRef}
     style={{
-      fontSize: "20px",
+      fontSize: "32px",
       fontWeight: 300,
       display: "inline-block",
       lineHeight: 1,
-      transition: "all 0.3s ease",
-      color: "inherit",
-      backgroundColor: "#000000",
-      color: "#ffffff",
-      padding: "4px 10px",
-      borderRadius: "6px",
+      transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      color: "#000000",
+      transform: showAddUser ? "rotate(45deg)" : "rotate(0deg)",
     }}
   >
     +
@@ -3547,7 +3540,7 @@ export default function HomePage(): React.JSX.Element {
     Chat Baru
   </span>
 </button>
-
+                
                 {showAddUser && (
                   <div
                     style={{
