@@ -422,7 +422,6 @@ export default function HomePage(): React.JSX.Element {
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
 
-  const [isExpanded, setIsExpanded] = useState(false);
 
    const [isReportHovered, setIsReportHovered] = useState(false);
 
