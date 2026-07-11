@@ -733,97 +733,63 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-  // GSAP Animation untuk Read the Report - PERBAIKAN SEDERHANA
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    
-    // Tunggu DOM siap
-    const timer = setTimeout(() => {
-      const report = reportRef.current;
-      const text = reportTextRef.current;
-      const icon = reportIconRef.current;
-      const container = reportContainerRef.current;
-      const logo = logoRef.current;
 
-      if (!report || !text || !icon || !container || !logo) {
-        console.log("Refs not ready");
-        return;
-      }
 
-      console.log("GSAP Report initialized");
+  // GSAP Animation untuk Read the Report - VERSI SEDERHANA
+useEffect(() => {
+  if (typeof window === "undefined") return;
 
-      // Text variants untuk hover gonta-ganti
-      const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
-      let textIndex = 0;
-      let hoverTimeout: NodeJS.Timeout | null = null;
-      let isHovering = false;
+  const container = reportContainerRef.current;
+  const report = reportRef.current;
+  const text = reportTextRef.current;
+  const icon = reportIconRef.current;
+  const logo = logoRef.current;
+
+  if (!container || !report || !text || !icon || !logo) {
+    console.log("Refs not ready");
+    return;
+  }
+
+  console.log("GSAP Report initialized");
+
+  // Text variants untuk hover
+  const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
+  let textIndex = 0;
+  let hoverTimeout: NodeJS.Timeout | null = null;
+  let isHovering = false;
+
+  // Hover animation
+  const startTextHover = () => {
+    if (!isReportExpanded) {
+      isHovering = true;
+      textIndex = 0;
       
-      // Hover animation untuk teks
-      const hoverTl = gsap.timeline({ paused: true });
-      hoverTl.to(text, {
+      // Scale effect
+      gsap.to(text, {
         scale: 1.05,
         duration: 0.2,
         ease: "power2.out",
-        color: "#000000",
       });
-      hoverTl.to(icon, {
+      gsap.to(icon, {
         rotation: 90,
         duration: 0.4,
         ease: "back.out(1.7)",
         scale: 1.2,
-      }, 0);
+      });
 
-      // Fungsi ganti teks saat hover
-      const startTextHover = () => {
-        if (!isReportExpanded) {
-          isHovering = true;
-          hoverTl.play();
-          textIndex = 0;
-          
-          if (!hoverTimeout) {
-            hoverTimeout = setInterval(() => {
-              if (text && isHovering && !isReportExpanded) {
-                textIndex = (textIndex + 1) % textVariants.length;
-                gsap.to(text, {
-                  opacity: 0,
-                  y: -5,
-                  duration: 0.15,
-                  ease: "power2.out",
-                  onComplete: () => {
-                    if (text && isHovering && !isReportExpanded) {
-                      text.textContent = textVariants[textIndex];
-                      gsap.to(text, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.15,
-                        ease: "power2.out",
-                      });
-                    }
-                  }
-                });
-              }
-            }, 600);
-          }
-        }
-      };
-
-      const stopTextHover = () => {
-        isHovering = false;
-        if (hoverTimeout) {
-          clearInterval(hoverTimeout);
-          hoverTimeout = null;
-        }
-        if (!isReportExpanded) {
-          hoverTl.reverse();
-          if (text && text.textContent !== textVariants[0]) {
+      // Ganti teks setiap 600ms
+      if (!hoverTimeout) {
+        hoverTimeout = setInterval(() => {
+          if (text && isHovering && !isReportExpanded) {
+            textIndex = (textIndex + 1) % textVariants.length;
             gsap.to(text, {
               opacity: 0,
               y: -5,
               duration: 0.15,
               ease: "power2.out",
               onComplete: () => {
-                if (text && !isReportExpanded) {
-                  text.textContent = textVariants[0];
+                if (text && isHovering && !isReportExpanded) {
+                  text.textContent = textVariants[textIndex];
                   gsap.to(text, {
                     opacity: 1,
                     y: 0,
@@ -834,213 +800,242 @@ export default function HomePage(): React.JSX.Element {
               }
             });
           }
-        }
-      };
+        }, 600);
+      }
+    }
+  };
 
-      // EXPAND ANIMATION
-      const expandTl = gsap.timeline({ paused: true });
-      
-      expandTl.set(container, {
-        width: "auto",
-        height: "auto",
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        zIndex: 10,
-        backgroundColor: "transparent",
+  const stopTextHover = () => {
+    isHovering = false;
+    if (hoverTimeout) {
+      clearInterval(hoverTimeout);
+      hoverTimeout = null;
+    }
+    if (!isReportExpanded) {
+      gsap.to(text, {
+        scale: 1,
+        duration: 0.2,
+        ease: "power2.out",
       });
-      
-      expandTl.to(container, {
-        width: "100vw",
-        height: "100vh",
-        duration: 0.8,
-        ease: "power3.inOut",
-        backgroundColor: "#FE7141",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 100,
-        borderRadius: 0,
-        transformOrigin: "right center",
-      }, 0);
-      
-      expandTl.to(report, {
-        width: "100%",
-        height: "100vh",
-        padding: "40px 60px",
-        justifyContent: "flex-start",
-        gap: "20px",
-        backgroundColor: "#FE7141",
-        duration: 0.6,
-        ease: "power3.out",
-        minWidth: "100%",
-        position: "relative",
-        borderRadius: 0,
-      }, 0);
-      
-      expandTl.to(logo, {
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.out",
-        pointerEvents: "none",
-      }, 0.1);
-      
-      expandTl.to(text, {
-        fontSize: "40px",
-        fontWeight: 700,
-        x: 0,
-        duration: 0.4,
-        ease: "power2.out",
-        scale: 1,
-        color: "#000000",
-      }, 0.2);
-      
-      expandTl.to(icon, {
-        fontSize: "40px",
-        rotation: 45,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1.2,
-      }, 0.2);
-
-      // COLLAPSE ANIMATION
-      const collapseTl = gsap.timeline({ paused: true });
-      
-      collapseTl.to(container, {
-        width: "auto",
-        height: "auto",
-        duration: 0.7,
-        ease: "power3.inOut",
-        backgroundColor: "transparent",
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        zIndex: 10,
-      }, 0);
-      
-      collapseTl.to(report, {
-        width: "auto",
-        height: "48px",
-        padding: "6px 35px 6px 200px",
-        justifyContent: "flex-end",
-        gap: "6px",
-        backgroundColor: "#FE7141",
-        duration: 0.5,
-        ease: "power3.out",
-        minWidth: "450px",
-        position: "relative",
-        borderRadius: 0,
-      }, 0);
-      
-      collapseTl.to(logo, {
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out",
-        pointerEvents: "auto",
-      }, 0.1);
-      
-      collapseTl.to(text, {
-        fontSize: "18px",
-        fontWeight: 600,
-        duration: 0.4,
-        ease: "power2.out",
-        scale: 1,
-        color: "#000000",
-      }, 0.2);
-      
-      collapseTl.to(icon, {
-        fontSize: "30px",
+      gsap.to(icon, {
         rotation: 0,
         duration: 0.4,
         ease: "back.out(1.7)",
         scale: 1,
-      }, 0.2);
-
-      // HOVER EVENTS
-      report.addEventListener('mouseenter', startTextHover);
-      report.addEventListener('mouseleave', stopTextHover);
-
-      // CLICK EVENT UNTUK ICON +
-      const handleIconClick = (e: Event) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log("Icon clicked! Expanded:", isReportExpanded);
-        
-        if (!isReportExpanded) {
-          isHovering = false;
-          if (hoverTimeout) {
-            clearInterval(hoverTimeout);
-            hoverTimeout = null;
-          }
-          expandTl.play();
-          setIsReportExpanded(true);
-        } else {
-          collapseTl.play();
-          setIsReportExpanded(false);
-          if (text && text.textContent !== textVariants[0]) {
-            text.textContent = textVariants[0];
-          }
-        }
-      };
-
-      // CLICK EVENT UNTUK REPORT (collapse)
-      const handleReportClick = (e: Event) => {
-        if (isReportExpanded) {
-          if (e.target === icon) return;
-          collapseTl.play();
-          setIsReportExpanded(false);
-          if (text && text.textContent !== textVariants[0]) {
-            text.textContent = textVariants[0];
-          }
-        }
-      };
-
-      // CLICK OUTSIDE
-      const handleClickOutside = (e: MouseEvent) => {
-        if (container && !container.contains(e.target as Node)) {
-          if (isReportExpanded) {
-            collapseTl.play();
-            setIsReportExpanded(false);
-            if (text && text.textContent !== textVariants[0]) {
+      });
+      if (text && text.textContent !== textVariants[0]) {
+        gsap.to(text, {
+          opacity: 0,
+          y: -5,
+          duration: 0.15,
+          ease: "power2.out",
+          onComplete: () => {
+            if (text && !isReportExpanded) {
               text.textContent = textVariants[0];
+              gsap.to(text, {
+                opacity: 1,
+                y: 0,
+                duration: 0.15,
+                ease: "power2.out",
+              });
             }
           }
-        }
-      };
+        });
+      }
+    }
+  };
 
-      // PASANG EVENT LISTENERS
-      report.addEventListener('click', handleReportClick);
-      
-      // PASTIKAN ICON BISA DIKLIK
-      icon.style.pointerEvents = 'auto';
-      icon.style.cursor = 'pointer';
-      icon.style.position = 'relative';
-      icon.style.zIndex = '30';
-      icon.addEventListener('click', handleIconClick);
-      
-      document.addEventListener('click', handleClickOutside);
+  // Hover events
+  report.addEventListener('mouseenter', startTextHover);
+  report.addEventListener('mouseleave', stopTextHover);
 
-      console.log("Event listeners attached");
+  // Cleanup
+  return () => {
+    report.removeEventListener('mouseenter', startTextHover);
+    report.removeEventListener('mouseleave', stopTextHover);
+    if (hoverTimeout) {
+      clearInterval(hoverTimeout);
+    }
+  };
+}, [isReportExpanded]);
 
-      // CLEANUP
-      return () => {
-        report.removeEventListener('mouseenter', startTextHover);
-        report.removeEventListener('mouseleave', stopTextHover);
-        report.removeEventListener('click', handleReportClick);
-        icon.removeEventListener('click', handleIconClick);
-        document.removeEventListener('click', handleClickOutside);
-        if (hoverTimeout) {
-          clearInterval(hoverTimeout);
-        }
-        hoverTl.kill();
-        expandTl.kill();
-        collapseTl.kill();
-      };
-    }, 100);
+// Fungsi untuk handle expand/collapse
+const handleReportToggle = () => {
+  console.log("Toggle clicked, current state:", isReportExpanded);
+  
+  const container = reportContainerRef.current;
+  const report = reportRef.current;
+  const text = reportTextRef.current;
+  const icon = reportIconRef.current;
+  const logo = logoRef.current;
 
-    return () => clearTimeout(timer);
-  }, [isReportExpanded]);
+  if (!container || !report || !text || !icon || !logo) {
+    console.log("Refs not ready for toggle");
+    return;
+  }
 
+  if (!isReportExpanded) {
+    // EXPAND - dari kanan ke kiri
+    console.log("Expanding...");
+    
+    // Set initial state
+    gsap.set(container, {
+      width: "auto",
+      height: "auto",
+      position: "absolute",
+      top: "0px",
+      left: "0px",
+      zIndex: 10,
+      backgroundColor: "transparent",
+    });
+
+    // Animate container ke full screen
+    gsap.to(container, {
+      width: "100vw",
+      height: "100vh",
+      duration: 0.8,
+      ease: "power3.inOut",
+      backgroundColor: "#FE7141",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      zIndex: 100,
+      borderRadius: 0,
+      transformOrigin: "right center",
+    });
+
+    // Animate report
+    gsap.to(report, {
+      width: "100%",
+      height: "100vh",
+      padding: "40px 60px",
+      justifyContent: "flex-start",
+      gap: "20px",
+      backgroundColor: "#FE7141",
+      duration: 0.6,
+      ease: "power3.out",
+      minWidth: "100%",
+      position: "relative",
+      borderRadius: 0,
+    });
+
+    // Hide logo
+    gsap.to(logo, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      pointerEvents: "none",
+    });
+
+    // Perbesar teks
+    gsap.to(text, {
+      fontSize: "40px",
+      fontWeight: 700,
+      duration: 0.4,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
+    });
+
+    // Rotasi icon
+    gsap.to(icon, {
+      fontSize: "40px",
+      rotation: 45,
+      duration: 0.4,
+      ease: "back.out(1.7)",
+      scale: 1.2,
+    });
+
+    // Update teks icon
+    icon.textContent = "✕";
+
+    setIsReportExpanded(true);
+  } else {
+    // COLLAPSE
+    console.log("Collapsing...");
+
+    // Kembalikan container
+    gsap.to(container, {
+      width: "auto",
+      height: "auto",
+      duration: 0.7,
+      ease: "power3.inOut",
+      backgroundColor: "transparent",
+      position: "absolute",
+      top: "0px",
+      left: "0px",
+      zIndex: 10,
+    });
+
+    // Kembalikan report
+    gsap.to(report, {
+      width: "auto",
+      height: "48px",
+      padding: "6px 35px 6px 200px",
+      justifyContent: "flex-end",
+      gap: "6px",
+      backgroundColor: "#FE7141",
+      duration: 0.5,
+      ease: "power3.out",
+      minWidth: "450px",
+      position: "relative",
+      borderRadius: 0,
+    });
+
+    // Tampilkan logo
+    gsap.to(logo, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+      pointerEvents: "auto",
+    });
+
+    // Kembalikan teks
+    gsap.to(text, {
+      fontSize: "18px",
+      fontWeight: 600,
+      duration: 0.4,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
+    });
+
+    // Kembalikan icon
+    gsap.to(icon, {
+      fontSize: "30px",
+      rotation: 0,
+      duration: 0.4,
+      ease: "back.out(1.7)",
+      scale: 1,
+    });
+
+    // Update teks icon
+    icon.textContent = "+";
+
+    // Kembalikan teks report ke awal
+    if (text.textContent !== "Read the Report") {
+      text.textContent = "Read the Report";
+    }
+
+    setIsReportExpanded(false);
+  }
+};
+
+// Fungsi untuk handle click di luar
+const handleClickOutside = (e: MouseEvent) => {
+  const container = reportContainerRef.current;
+  if (container && !container.contains(e.target as Node)) {
+    if (isReportExpanded) {
+      handleReportToggle();
+    }
+  }
+};
+
+// Pasang event listener untuk click outside
+useEffect(() => {
+  document.addEventListener('click', handleClickOutside);
+  return () => document.removeEventListener('click', handleClickOutside);
+}, [isReportExpanded]);
 
 
 
@@ -1928,118 +1923,127 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-      <div
-        ref={reportContainerRef}
-        style={{
-          position: "absolute",
-          top: "0px",
-          left: "0px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: "0px",
-          overflow: "hidden",
-          backgroundColor: "transparent",
-        }}
-      >
-        {/* Logo Menuru'26 - Background Hitam */}
-        <div
-          ref={logoRef}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#000000",
-            padding: "6px 18px",
-            borderRadius: "0px",
-            boxShadow: "none",
-            height: "48px",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontSize: "30px",
-              fontWeight: 600,
-              color: "#ffffff",
-              letterSpacing: "-0.015em",
-              fontFamily: "Inter, 'Inter Fallback'",
-              lineHeight: 1.2,
-            }}
-          >
-            Menuru'26
-          </span>
-        </div>
+<div
+  ref={reportContainerRef}
+  style={{
+    position: "absolute",
+    top: "0px",
+    left: "0px",
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    gap: "0px",
+    overflow: "hidden",
+    backgroundColor: "transparent",
+  }}
+>
+  {/* Logo Menuru'26 - Background Hitam */}
+  <div
+    ref={logoRef}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      backgroundColor: "#000000",
+      padding: "6px 18px",
+      borderRadius: "0px",
+      boxShadow: "none",
+      height: "48px",
+      flexShrink: 0,
+    }}
+  >
+    <span
+      style={{
+        fontSize: "30px",
+        fontWeight: 600,
+        color: "#ffffff",
+        letterSpacing: "-0.015em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        lineHeight: 1.2,
+      }}
+    >
+      Menuru'26
+    </span>
+  </div>
 
-        {/* Read the Report - Background #FE7141 */}
-        <div
-          ref={reportRef}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            backgroundColor: "#FE7141",
-            padding: "6px 35px 6px 200px",
-            borderRadius: "0px",
-            boxShadow: "none",
-            gap: "6px",
-            cursor: "pointer",
-            height: "48px",
-            minWidth: "450px",
-            flexShrink: 0,
-            position: "relative",
-            zIndex: 20,
-            transition: "background-color 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (!isReportExpanded) {
-              e.currentTarget.style.backgroundColor = "#e8653a";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isReportExpanded) {
-              e.currentTarget.style.backgroundColor = "#FE7141";
-            }
-          }}
-        >
-          {/* Teks di sisi kanan */}
-          <span
-            ref={reportTextRef}
-            style={{
-              fontSize: "18px",
-              fontWeight: 600,
-              color: "#000000",
-              letterSpacing: "-0.01em",
-              fontFamily: "Inter, 'Inter Fallback'",
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-              display: "inline-block",
-              position: "relative",
-              zIndex: 2,
-            }}
-          >
-            Read the Report
-          </span>
-          {/* Icon + di sisi kanan (klik untuk expand) */}
-          <span
-            ref={reportIconRef}
-            style={{
-              fontSize: "30px",
-              fontWeight: 300,
-              color: "#000000",
-              lineHeight: 1,
-              display: "inline-block",
-              position: "relative",
-              zIndex: 2,
-              cursor: "pointer",
-              pointerEvents: "auto",
-              userSelect: "none",
-            }}
-          >
-            +
-          </span>
-        </div>
-      </div>
-
+  {/* Read the Report - Background #FE7141 */}
+  <div
+    ref={reportRef}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      backgroundColor: "#FE7141",
+      padding: "6px 35px 6px 200px",
+      borderRadius: "0px",
+      boxShadow: "none",
+      gap: "6px",
+      cursor: "pointer",
+      height: "48px",
+      minWidth: "450px",
+      flexShrink: 0,
+      position: "relative",
+      zIndex: 20,
+      transition: "background-color 0.3s ease",
+    }}
+    onMouseEnter={(e) => {
+      if (!isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "#e8653a";
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (!isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "#FE7141";
+      }
+    }}
+    onClick={() => {
+      if (isReportExpanded) {
+        handleReportToggle();
+      }
+    }}
+  >
+    {/* Teks di sisi kanan */}
+    <span
+      ref={reportTextRef}
+      style={{
+        fontSize: "18px",
+        fontWeight: 600,
+        color: "#000000",
+        letterSpacing: "-0.01em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        lineHeight: 1.2,
+        whiteSpace: "nowrap",
+        display: "inline-block",
+        position: "relative",
+        zIndex: 2,
+      }}
+    >
+      Read the Report
+    </span>
+    {/* Icon + di sisi kanan (klik untuk expand) */}
+    <span
+      ref={reportIconRef}
+      style={{
+        fontSize: "30px",
+        fontWeight: 300,
+        color: "#000000",
+        lineHeight: 1,
+        display: "inline-block",
+        position: "relative",
+        zIndex: 30,
+        cursor: "pointer",
+        pointerEvents: "auto",
+        userSelect: "none",
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        handleReportToggle();
+      }}
+    >
+      {isReportExpanded ? "✕" : "+"}
+    </span>
+  </div>
+</div>
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
         style={{
