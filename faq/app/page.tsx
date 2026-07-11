@@ -426,12 +426,19 @@ export default function HomePage(): React.JSX.Element {
 
    const [isReportHovered, setIsReportHovered] = useState(false);
 
-// Di dalam komponen HomePage, tambahkan refs
+
+
 const reportRef = useRef<HTMLDivElement | null>(null);
 const reportTextRef = useRef<HTMLSpanElement | null>(null);
 const reportIconRef = useRef<HTMLSpanElement | null>(null);
 const reportContainerRef = useRef<HTMLDivElement | null>(null);
 const [isReportExpanded, setIsReportExpanded] = useState(false);
+
+
+
+
+
+
   
 
 
@@ -941,18 +948,19 @@ const [isReportExpanded, setIsReportExpanded] = useState(false);
 
 
 
-// GSAP Animation untuk Read the Report
+  // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window !== "undefined" && reportTextRef.current) {
-    // Animasi hover: teks bergerak maju dan mundur
     const textElement = reportTextRef.current;
     
+    // Hover: teks bergerak maju dan mundur (gonta-ganti)
     const handleMouseEnter = () => {
       gsap.to(textElement, {
-        x: 10,
-        scale: 1.05,
+        x: 15,
+        scale: 1.08,
         duration: 0.4,
         ease: "power2.out",
+        color: "#000000",
       });
     };
     
@@ -962,6 +970,7 @@ useEffect(() => {
         scale: 1,
         duration: 0.4,
         ease: "power2.out",
+        color: "#000000",
       });
     };
     
@@ -975,39 +984,27 @@ useEffect(() => {
   }
 }, []);
 
-// Animasi klik: bg orange menutupi layar kiri
+// Animasi klik: bg orange melebar ke kiri sampai mentok
 const handleReportClick = () => {
   if (!reportContainerRef.current) return;
   
   setIsReportExpanded(!isReportExpanded);
   
   if (!isReportExpanded) {
-    // Expand: bg orange menutupi layar kiri
+    // Expand: bg orange melebar ke kiri sampai mentok
     gsap.to(reportContainerRef.current, {
-      width: "100vw",
-      height: "100vh",
       left: "0px",
-      top: "0px",
+      width: "100vw",
       duration: 0.8,
       ease: "power3.inOut",
-      borderRadius: "0px",
-      padding: "20px 40px",
-      backgroundColor: "#FE7141",
-      zIndex: 100,
-    });
-    
-    gsap.to(reportTextRef.current, {
-      fontSize: "32px",
-      duration: 0.6,
-      ease: "power2.out",
-      delay: 0.3,
+      padding: "6px 35px 6px 40px", // Padding kiri berubah jadi 40px
+      minWidth: "100vw",
     });
     
     gsap.to(reportIconRef.current, {
       rotation: 45,
       duration: 0.5,
       ease: "back.out(1.7)",
-      delay: 0.2,
     });
     
     // Sembunyikan logo Menuru'26
@@ -1019,22 +1016,12 @@ const handleReportClick = () => {
   } else {
     // Collapse: kembali ke ukuran semula
     gsap.to(reportContainerRef.current, {
-      width: "auto",
-      height: "48px",
       left: "0px",
-      top: "0px",
+      width: "auto",
       duration: 0.8,
       ease: "power3.inOut",
-      borderRadius: "0px",
       padding: "6px 35px 6px 200px",
-      backgroundColor: "#FE7141",
-      zIndex: 10,
-    });
-    
-    gsap.to(reportTextRef.current, {
-      fontSize: "18px",
-      duration: 0.6,
-      ease: "power2.out",
+      minWidth: "450px",
     });
     
     gsap.to(reportIconRef.current, {
@@ -1739,8 +1726,7 @@ const handleReportClick = () => {
       }}
     >
 
-
-     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1780,7 +1766,7 @@ const handleReportClick = () => {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 (Sangat Panjang) */}
+  {/* Read the Report - Background #FE7141 */}
   <div
     ref={reportContainerRef}
     style={{
@@ -1793,11 +1779,11 @@ const handleReportClick = () => {
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      transition: "all 0.3s ease",
       height: "48px",
       minWidth: "450px",
       position: "relative",
       overflow: "hidden",
+      transition: "background-color 0.3s ease",
     }}
     onMouseEnter={(e) => {
       if (!isReportExpanded) {
@@ -1811,7 +1797,7 @@ const handleReportClick = () => {
     }}
     onClick={handleReportClick}
   >
-    {/* Teks di sisi kanan */}
+    {/* Teks - Read the Report (berubah saat hover dengan GSAP) */}
     <span
       ref={reportTextRef}
       style={{
@@ -1830,6 +1816,7 @@ const handleReportClick = () => {
     >
       Read the Report
     </span>
+    
     {/* Icon + di sisi kanan */}
     <span
       ref={reportIconRef}
@@ -1847,8 +1834,6 @@ const handleReportClick = () => {
     </span>
   </div>
 </div>
-
-
 
 
 
