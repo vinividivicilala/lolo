@@ -873,10 +873,12 @@ const handleReportToggle = () => {
     // EXPAND - melebar ke kiri dan ke bawah dari posisi tombol
     console.log("Expanding...");
     
-    // Dapatkan posisi tombol
+    // Dapatkan posisi dan ukuran tombol
     const rect = report.getBoundingClientRect();
     const startX = rect.right; // ujung kanan tombol
     const startY = rect.top; // atas tombol
+    const buttonWidth = rect.width; // lebar tombol
+    const buttonHeight = rect.height; // tinggi tombol
     
     // Set initial state - tetap di posisi tombol
     gsap.set(container, {
@@ -891,10 +893,16 @@ const handleReportToggle = () => {
       borderRadius: "0px",
     });
 
-    // Animate container melebar ke kiri dan ke bawah
+    // HITUNG LEBAR MAKSIMAL - dari posisi tombol ke kiri
+    const maxWidth = startX; // jarak dari ujung kanan tombol ke ujung kiri layar
+    
+    // HITUNG TINGGI MAKSIMAL - dari posisi tombol ke bawah
+    const maxHeight = window.innerHeight - startY;
+
+    // Animate container melebar ke kiri (tidak full screen, hanya sebatas yang diperlukan)
     gsap.to(container, {
-      width: `${window.innerWidth}px`,
-      height: `${window.innerHeight - startY}px`,
+      width: `${maxWidth}px`,
+      height: `${maxHeight}px`,
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
@@ -908,17 +916,16 @@ const handleReportToggle = () => {
     // Animate report - pindah ke dalam container
     gsap.to(report, {
       width: "100%",
-      height: "auto",
-      padding: "20px 30px",
+      height: "100%",
+      padding: "30px 40px",
       justifyContent: "flex-start",
-      gap: "10px",
+      gap: "15px",
       backgroundColor: "#FE7141",
       duration: 0.6,
       ease: "power3.out",
       minWidth: "100%",
       position: "relative",
       borderRadius: "0px",
-      marginTop: "10px",
     });
 
     // Hide logo
@@ -931,7 +938,7 @@ const handleReportToggle = () => {
 
     // Perbesar teks
     gsap.to(text, {
-      fontSize: "28px",
+      fontSize: "24px",
       fontWeight: 700,
       duration: 0.4,
       ease: "power2.out",
@@ -983,6 +990,15 @@ const handleReportToggle = () => {
           height: "auto",
           zIndex: 10,
           backgroundColor: "transparent",
+        });
+        gsap.set(report, {
+          width: "auto",
+          height: "48px",
+          padding: "6px 35px 6px 200px",
+          justifyContent: "flex-end",
+          gap: "6px",
+          minWidth: "450px",
+          position: "relative",
         });
       }
     });
@@ -1040,8 +1056,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
-
 
 
 
