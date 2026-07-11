@@ -436,6 +436,7 @@ const reportContainerRef = useRef<HTMLDivElement | null>(null);
 const [isReportExpanded, setIsReportExpanded] = useState(false);
 
 
+const [isExpanded, setIsExpanded] = useState(false);
 
 
   
