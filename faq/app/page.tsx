@@ -1599,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       }}
     >
 
-  {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+ {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1637,21 +1637,21 @@ export default function HomePage(): React.JSX.Element {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 (Panjang ke Kanan) */}
+  {/* Read the Report - Background #FE7141 (Sangat Panjang) */}
   <div
     style={{
       display: "flex",
       alignItems: "center",
       justifyContent: "flex-end",
       backgroundColor: "#FE7141",
-      padding: "6px 40px 6px 80px", // Kiri 80px (kosong), kanan 40px
+      padding: "6px 35px 6px 200px", // Kiri 200px (sangat kosong), kanan 35px
       borderRadius: "0px",
       boxShadow: "none",
-      gap: "14px",
+      gap: "6px", // Jarak sangat dekat antara teks dan icon
       cursor: "pointer",
       transition: "all 0.3s ease",
       height: "48px",
-      minWidth: "280px", // Lebar lebih panjang
+      minWidth: "450px", // Lebar sangat panjang
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = "#e8653a";
@@ -1677,7 +1677,7 @@ export default function HomePage(): React.JSX.Element {
     >
       Read the Report
     </span>
-    {/* Icon + di sisi kanan (setelah teks) */}
+    {/* Icon + di sisi kanan (sangat dekat dengan teks) */}
     <span
       style={{
         fontSize: "30px",
@@ -1691,9 +1691,6 @@ export default function HomePage(): React.JSX.Element {
     </span>
   </div>
 </div>
-
-
-  
       
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
