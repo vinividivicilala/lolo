@@ -141,13 +141,6 @@ const SendIcon = () => (
   </svg>
 );
 
-const AddUserIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-  </svg>
-);
-
 const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
     <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -426,6 +419,10 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // GSAP Animation for Add User Button
+  const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
+  const plusIconRef = useRef<HTMLSpanElement | null>(null);
+
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   
@@ -644,6 +641,86 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
     broadcastMessages();
   }, []);
+
+  // GSAP Animation for Add User Button
+  useEffect(() => {
+    if (typeof window !== "undefined" && addUserButtonRef.current) {
+      // Import GSAP dynamically
+      import('gsap').then((gsapModule) => {
+        const gsap = gsapModule.default;
+        
+        // Animasi hover untuk tombol
+        const button = addUserButtonRef.current;
+        const plusIcon = plusIconRef.current;
+        
+        if (button && plusIcon) {
+          // Hover animation
+          button.addEventListener('mouseenter', () => {
+            gsap.to(button, {
+              scale: 1.02,
+              duration: 0.3,
+              ease: "power2.out",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+            });
+            gsap.to(plusIcon, {
+              rotation: 90,
+              duration: 0.4,
+              ease: "back.out(1.7)",
+              scale: 1.2,
+            });
+          });
+          
+          button.addEventListener('mouseleave', () => {
+            gsap.to(button, {
+              scale: 1,
+              duration: 0.3,
+              ease: "power2.out",
+              backgroundColor: "transparent",
+              color: "#000000",
+            });
+            gsap.to(plusIcon, {
+              rotation: 0,
+              duration: 0.4,
+              ease: "back.out(1.7)",
+              scale: 1,
+            });
+          });
+          
+          // Click animation
+          button.addEventListener('click', () => {
+            gsap.to(button, {
+              scale: 0.95,
+              duration: 0.15,
+              ease: "power2.out",
+              onComplete: () => {
+                gsap.to(button, {
+                  scale: 1,
+                  duration: 0.3,
+                  ease: "elastic.out(1, 0.5)",
+                });
+              }
+            });
+            
+            gsap.to(plusIcon, {
+              rotation: 90,
+              duration: 0.4,
+              ease: "back.out(1.7)",
+              scale: 1.3,
+              onComplete: () => {
+                gsap.to(plusIcon, {
+                  rotation: 90,
+                  duration: 0.3,
+                  ease: "power2.out",
+                  scale: 1,
+                });
+              }
+            });
+          });
+        }
+      });
+    }
+  }, [addUserButtonRef, plusIconRef]);
 
   // Auth Listener
   useEffect(() => {
@@ -1523,39 +1600,33 @@ export default function HomePage(): React.JSX.Element {
     >
 
       {/* Logo Menuru'26 - Pojok Kiri Atas */}
-<div
-  style={{
-    position: "absolute",
-    top: "0px",
-    left: "0px",
-    zIndex: 10,
-    display: "flex",
-    alignItems: "center",
-  }}
->
-  <div
-    style={{
-      display: "inline-block",
-      backgroundColor: "#000000",
-      padding: "12px 28px",
-      borderRadius: "0px",
-      boxShadow: "none",
-    }}
-  >
-    <span
-      style={{
-        fontSize: "60px",
-        fontWeight: 700,
-        color: "#ffffff",
-        letterSpacing: "-0.02em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1,
-      }}
-    >
-      Menuru'26
-    </span>
-  </div>
-</div>
+      <div
+        style={{
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#000000",
+          padding: "16px 32px",
+          borderRadius: "0px",
+          boxShadow: "none",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "50px",
+            fontWeight: 700,
+            color: "#ffffff",
+            letterSpacing: "-0.02em",
+            fontFamily: "Inter, 'Inter Fallback'",
+            lineHeight: 1,
+          }}
+        >
+          Menuru'26
+        </span>
+      </div>
 
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
@@ -3427,46 +3498,72 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
+                {/* Chat Baru Button dengan GSAP Animation */}
                 <button
+                  ref={addUserButtonRef}
                   onClick={() => setShowAddUser(!showAddUser)}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
+                    gap: "12px",
+                    padding: "12px 20px",
                     backgroundColor: "transparent",
-                    border: "1px dashed #ddd",
-                    borderRadius: "8px",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "12px",
                     cursor: "pointer",
                     width: "100%",
-                    marginBottom: "10px",
-                    transition: "all .2s ease",
-                    color: "#000",
+                    marginBottom: "12px",
+                    transition: "all 0.2s ease",
+                    color: "#000000",
                     fontFamily: "Inter, 'Inter Fallback'",
+                    position: "relative",
+                    overflow: "hidden",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                    e.currentTarget.style.borderColor = "#c5e800";
+                    e.currentTarget.style.borderColor = "#000000";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.borderColor = "#ddd";
+                    if (!showAddUser) {
+                      e.currentTarget.style.borderColor = "#e0e0e0";
+                    }
                   }}
                 >
-                  <AddUserIcon />
-                  <span style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>Chat Baru</span>
+                  <span
+                    ref={plusIconRef}
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 300,
+                      display: "inline-block",
+                      lineHeight: 1,
+                      transition: "all 0.3s ease",
+                      color: "inherit",
+                    }}
+                  >
+                    +
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "inherit",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Chat Baru
+                  </span>
                 </button>
 
                 {showAddUser && (
                   <div
                     style={{
-                      padding: "14px",
+                      padding: "16px",
                       backgroundColor: "#f8f8f8",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
+                      animation: "slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
                     }}
                   >
-                    <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "10px", fontFamily: "Inter, 'Inter Fallback'" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
                       Pilih User untuk Chat
                     </div>
                     <select
@@ -3474,10 +3571,10 @@ export default function HomePage(): React.JSX.Element {
                       onChange={(e) => setSelectedNewUser(e.target.value)}
                       style={{
                         width: "100%",
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                         border: "1px solid #e0e0e0",
-                        borderRadius: "6px",
-                        fontSize: "12px",
+                        borderRadius: "8px",
+                        fontSize: "13px",
                         outline: "none",
                         fontFamily: "Inter, 'Inter Fallback'",
                         marginBottom: "8px",
@@ -3493,11 +3590,11 @@ export default function HomePage(): React.JSX.Element {
                       ))}
                     </select>
                     {availableUsers.length === 0 && (
-                      <div style={{ fontSize: "11px", color: "#666", marginBottom: "6px" }}>
+                      <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px" }}>
                         Semua user sudah di-chat
                       </div>
                     )}
-                    <div style={{ display: "flex", gap: "6px" }}>
+                    <div style={{ display: "flex", gap: "8px" }}>
                       <button
                         onClick={handleAddExistingUser}
                         disabled={!selectedNewUser}
@@ -3505,8 +3602,8 @@ export default function HomePage(): React.JSX.Element {
                           backgroundColor: selectedNewUser ? "#000" : "#ccc",
                           color: "#fff",
                           border: "none",
-                          padding: "6px 14px",
-                          borderRadius: "6px",
+                          padding: "8px 16px",
+                          borderRadius: "8px",
                           fontSize: "12px",
                           cursor: selectedNewUser ? "pointer" : "not-allowed",
                           fontWeight: 500,
@@ -3531,13 +3628,14 @@ export default function HomePage(): React.JSX.Element {
                       </button>
                     </div>
                     {addUserStatus && (
-                      <div style={{ fontSize: "11px", color: "#000", marginTop: "6px" }}>
+                      <div style={{ fontSize: "11px", color: "#000", marginTop: "8px" }}>
                         {addUserStatus}
                       </div>
                     )}
                   </div>
                 )}
 
+                {/* Pinned Users */}
                 {pinnedUsers.length > 0 && (
                   <div style={{ marginBottom: "10px" }}>
                     <div
@@ -3630,6 +3728,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
+                {/* Pinned Chats */}
                 {pinnedChats.length > 0 && (
                   <div style={{ marginBottom: "10px" }}>
                     <div
