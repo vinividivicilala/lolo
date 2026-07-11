@@ -734,7 +734,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-  // GSAP Animation untuk Read the Report - PERBAIKAN
+  // GSAP Animation untuk Read the Report - PERBAIKAN SEDERHANA
   useEffect(() => {
     if (typeof window !== "undefined" && reportRef.current) {
       const report = reportRef.current;
@@ -830,9 +830,10 @@ export default function HomePage(): React.JSX.Element {
           }
         };
 
-        // Expand animation - dari kanan ke kiri sampai bawah
+        // EXPAND ANIMATION - Dari kanan ke kiri sampai bawah
         const expandTl = gsap.timeline({ paused: true });
         
+        // Set initial state
         expandTl.set(container, {
           width: "auto",
           height: "auto",
@@ -840,8 +841,10 @@ export default function HomePage(): React.JSX.Element {
           top: "0px",
           left: "0px",
           zIndex: 10,
+          backgroundColor: "transparent",
         });
         
+        // Expand container ke full screen dari kanan
         expandTl.to(container, {
           width: "100vw",
           height: "100vh",
@@ -854,8 +857,9 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 100,
           borderRadius: 0,
           transformOrigin: "right center",
-        });
+        }, 0);
         
+        // Expand report
         expandTl.to(report, {
           width: "100%",
           height: "100vh",
@@ -870,6 +874,7 @@ export default function HomePage(): React.JSX.Element {
           borderRadius: 0,
         }, 0);
         
+        // Hide logo
         expandTl.to(logo, {
           opacity: 0,
           duration: 0.3,
@@ -877,6 +882,7 @@ export default function HomePage(): React.JSX.Element {
           pointerEvents: "none",
         }, 0.1);
         
+        // Perbesar teks
         expandTl.to(text, {
           fontSize: "40px",
           fontWeight: 700,
@@ -887,6 +893,7 @@ export default function HomePage(): React.JSX.Element {
           color: "#000000",
         }, 0.2);
         
+        // Rotasi icon
         expandTl.to(icon, {
           fontSize: "40px",
           rotation: 45,
@@ -895,9 +902,10 @@ export default function HomePage(): React.JSX.Element {
           scale: 1.2,
         }, 0.2);
 
-        // Collapse animation
+        // COLLAPSE ANIMATION
         const collapseTl = gsap.timeline({ paused: true });
         
+        // Kembalikan container
         collapseTl.to(container, {
           width: "auto",
           height: "auto",
@@ -908,8 +916,9 @@ export default function HomePage(): React.JSX.Element {
           top: "0px",
           left: "0px",
           zIndex: 10,
-        });
+        }, 0);
         
+        // Kembalikan report
         collapseTl.to(report, {
           width: "auto",
           height: "48px",
@@ -924,6 +933,7 @@ export default function HomePage(): React.JSX.Element {
           borderRadius: 0,
         }, 0);
         
+        // Tampilkan logo
         collapseTl.to(logo, {
           opacity: 1,
           duration: 0.3,
@@ -931,6 +941,7 @@ export default function HomePage(): React.JSX.Element {
           pointerEvents: "auto",
         }, 0.1);
         
+        // Kembalikan teks
         collapseTl.to(text, {
           fontSize: "18px",
           fontWeight: 600,
@@ -940,6 +951,7 @@ export default function HomePage(): React.JSX.Element {
           color: "#000000",
         }, 0.2);
         
+        // Kembalikan icon
         collapseTl.to(icon, {
           fontSize: "30px",
           rotation: 0,
@@ -948,10 +960,12 @@ export default function HomePage(): React.JSX.Element {
           scale: 1,
         }, 0.2);
 
-        // Event listener untuk icon "+" - PERBAIKAN UTAMA
-        const handleIconClick = (e: React.MouseEvent | MouseEvent) => {
+        // EVENT HANDLER UNTUK ICON "+"
+        const handleIconClick = (e: any) => {
           e.stopPropagation();
           e.preventDefault();
+          console.log("Icon clicked! Expanded:", isReportExpanded);
+          
           if (!isReportExpanded) {
             // Hentikan hover text
             isHovering = false;
@@ -959,9 +973,11 @@ export default function HomePage(): React.JSX.Element {
               clearInterval(hoverTimeout);
               hoverTimeout = null;
             }
+            // Play expand
             expandTl.play();
             setIsReportExpanded(true);
           } else {
+            // Play collapse
             collapseTl.play();
             setIsReportExpanded(false);
             // Kembalikan teks ke awal
@@ -971,8 +987,8 @@ export default function HomePage(): React.JSX.Element {
           }
         };
 
-        // Event listener untuk report click (collapse)
-        const handleReportClick = (e: React.MouseEvent | MouseEvent) => {
+        // EVENT HANDLER UNTUK CLICK PADA REPORT (collapse)
+        const handleReportClick = (e: any) => {
           if (isReportExpanded) {
             // Jangan collapse jika klik pada icon
             if (e.target === icon) return;
@@ -985,7 +1001,7 @@ export default function HomePage(): React.JSX.Element {
           }
         };
 
-        // Event listener untuk click outside
+        // EVENT HANDLER UNTUK CLICK OUTSIDE
         const handleClickOutside = (e: MouseEvent) => {
           if (container && !container.contains(e.target as Node)) {
             if (isReportExpanded) {
@@ -999,26 +1015,34 @@ export default function HomePage(): React.JSX.Element {
           }
         };
 
-        // Attach event listeners
+        // ATTACH EVENT LISTENERS
+        // Hover events
         report.addEventListener('mouseenter', startTextHover);
         report.addEventListener('mouseleave', stopTextHover);
+        
+        // Click events
         report.addEventListener('click', handleReportClick as any);
         
-        // Gunakan pointer events untuk icon
+        // Khusus untuk icon - pastikan pointer events aktif
         if (icon) {
           icon.style.pointerEvents = 'auto';
+          icon.style.cursor = 'pointer';
           icon.addEventListener('click', handleIconClick as any);
+          // Tambahkan juga untuk mencegah event bubbling
+          icon.addEventListener('mousedown', (e: any) => e.stopPropagation());
         }
         
+        // Click outside
         document.addEventListener('click', handleClickOutside);
 
-        // Cleanup
+        // CLEANUP
         return () => {
           report.removeEventListener('mouseenter', startTextHover);
           report.removeEventListener('mouseleave', stopTextHover);
           report.removeEventListener('click', handleReportClick as any);
           if (icon) {
             icon.removeEventListener('click', handleIconClick as any);
+            icon.removeEventListener('mousedown', (e: any) => e.stopPropagation());
           }
           document.removeEventListener('click', handleClickOutside);
           if (hoverTimeout) {
@@ -2013,6 +2037,7 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 2,
               cursor: "pointer",
               pointerEvents: "auto",
+              userSelect: "none",
             }}
           >
             +
