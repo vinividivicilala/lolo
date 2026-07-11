@@ -733,6 +733,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
+
 // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
@@ -874,20 +875,15 @@ const handleReportToggle = () => {
     
     // Dapatkan posisi tombol
     const rect = report.getBoundingClientRect();
-    const startX = rect.left; // ujung KIRI tombol
-    const startY = rect.top; // atas tombol
+    const startX = rect.left;
+    const startY = rect.top;
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
     
-    // LEBAR: dari ujung KIRI tombol ke ujung KIRI layar
-    const expandWidth = startX; // jarak ke kiri
-    
-    // TINGGI: dari posisi tombol ke bawah
+    const expandWidth = startX;
     const expandHeight = window.innerHeight - startY;
 
-    console.log(`Expanding from left=${startX}px, top=${startY}px, width=${expandWidth}px, height=${expandHeight}px`);
-
-    // SET POSISI AWAL - tetap di posisi tombol
+    // SET POSISI AWAL
     gsap.set(container, {
       position: "fixed",
       top: `${startY}px`,
@@ -905,12 +901,13 @@ const handleReportToggle = () => {
       position: "relative",
       width: "100%",
       height: "100%",
-      padding: "10px 20px",
+      padding: "20px 30px",
       backgroundColor: "#FE7141",
       borderRadius: "0px",
       display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
     });
 
     // HIDE LOGO
@@ -921,7 +918,7 @@ const handleReportToggle = () => {
       pointerEvents: "none",
     });
 
-    // ANIMASI CONTAINER - melebar ke kiri dan ke bawah DARI POSISI TOMBOL
+    // ANIMASI CONTAINER - melebar ke kiri dan ke bawah
     gsap.to(container, {
       width: `${expandWidth + buttonWidth}px`,
       height: `${expandHeight}px`,
@@ -935,23 +932,24 @@ const handleReportToggle = () => {
       borderRadius: "0px",
     });
 
-    // ANIMASI REPORT - mengisi container dengan layout flex
+    // ANIMASI REPORT - mengisi container
     gsap.to(report, {
       width: "100%",
       height: "100%",
-      padding: "30px 40px",
+      padding: "40px 50px",
       backgroundColor: "#FE7141",
       duration: 0.6,
       ease: "power3.out",
       borderRadius: "0px",
       display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
     });
 
-    // Perbesar teks di kiri
+    // Perbesar teks di kiri atas
     gsap.to(text, {
-      fontSize: "28px",
+      fontSize: "32px",
       fontWeight: 700,
       duration: 0.4,
       ease: "power2.out",
@@ -959,7 +957,7 @@ const handleReportToggle = () => {
       scale: 1,
     });
 
-    // Rotasi icon di kanan
+    // Pindahkan icon ke kanan atas dengan posisi absolute
     gsap.to(icon, {
       fontSize: "36px",
       rotation: 0,
@@ -983,7 +981,7 @@ const handleReportToggle = () => {
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
 
-    // 1. KECILKAN TEKS TERLEBIH DAHULU
+    // 1. KECILKAN TEKS
     gsap.to(text, {
       fontSize: "18px",
       fontWeight: 600,
@@ -1002,7 +1000,7 @@ const handleReportToggle = () => {
       scale: 1,
     });
 
-    // 3. KEMBALIKAN REPORT KE POSISI SEMULA (menyusut)
+    // 3. KEMBALIKAN REPORT KE POSISI SEMULA
     gsap.to(report, {
       width: "auto",
       height: "48px",
@@ -1016,10 +1014,11 @@ const handleReportToggle = () => {
       position: "relative",
       borderRadius: "0px",
       display: "flex",
+      flexDirection: "row",
       alignItems: "center",
     });
 
-    // 4. KEMBALIKAN CONTAINER - menyusut dari bawah ke atas dan kiri ke kanan
+    // 4. KEMBALIKAN CONTAINER - menyusut
     gsap.to(container, {
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
@@ -1032,7 +1031,7 @@ const handleReportToggle = () => {
       zIndex: 100,
       borderRadius: "0px",
       onComplete: () => {
-        // Reset style setelah animasi selesai
+        // Reset style
         gsap.set(container, {
           position: "absolute",
           top: "0px",
@@ -1052,6 +1051,7 @@ const handleReportToggle = () => {
           minWidth: "450px",
           position: "relative",
           display: "flex",
+          flexDirection: "row",
           alignItems: "center",
         });
         gsap.set(logo, {
@@ -1072,7 +1072,7 @@ const handleReportToggle = () => {
     // 6. UPDATE ICON MENJADI +
     icon.textContent = "+";
 
-    // 7. KEMBALIKAN TEKS REPORT KE AWAL
+    // 7. KEMBALIKAN TEKS
     if (text.textContent !== "Read the Report") {
       text.textContent = "Read the Report";
     }
@@ -1080,10 +1080,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
-
-
-  
 
   
 
@@ -1966,8 +1962,7 @@ const handleReportToggle = () => {
       }}
     >
 
-
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2016,20 +2011,19 @@ const handleReportToggle = () => {
     style={{
       display: "flex",
       alignItems: "center",
-      justifyContent: isReportExpanded ? "space-between" : "flex-end",
+      justifyContent: "flex-end",
       backgroundColor: "#FE7141",
-      padding: isReportExpanded ? "30px 40px" : "6px 35px 6px 200px",
+      padding: "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
+      height: "48px",
+      minWidth: "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
-      transition: "all 0.3s ease",
+      transition: "background-color 0.3s ease",
     }}
     onMouseEnter={(e) => {
       if (!isReportExpanded) {
@@ -2047,11 +2041,11 @@ const handleReportToggle = () => {
       }
     }}
   >
-    {/* Teks di sisi KIRI saat expanded, di KANAN saat collapsed */}
+    {/* Teks - di kiri atas saat expanded, di kanan saat collapsed */}
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "28px" : "18px",
+        fontSize: isReportExpanded ? "32px" : "18px",
         fontWeight: isReportExpanded ? 700 : 600,
         color: "#000000",
         letterSpacing: "-0.01em",
@@ -2061,14 +2055,16 @@ const handleReportToggle = () => {
         display: "inline-block",
         position: "relative",
         zIndex: 2,
-        order: isReportExpanded ? 0 : 1,
+        order: isReportExpanded ? 1 : 1,
+        marginTop: isReportExpanded ? "0" : "0",
+        alignSelf: isReportExpanded ? "flex-start" : "auto",
         padding: isReportExpanded ? "0" : "0",
       }}
     >
       Read the Report
     </span>
     
-    {/* Icon di sisi KANAN - tombol close (✕) saat expanded, (+) saat collapsed */}
+    {/* Icon - di kanan atas saat expanded, di kanan saat collapsed */}
     <span
       ref={reportIconRef}
       style={{
@@ -2077,13 +2073,16 @@ const handleReportToggle = () => {
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
-        position: "relative",
+        position: isReportExpanded ? "absolute" : "relative",
+        top: isReportExpanded ? "30px" : "auto",
+        right: isReportExpanded ? "40px" : "auto",
         zIndex: 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        order: isReportExpanded ? 1 : 2,
-        padding: isReportExpanded ? "0 0 0 20px" : "0",
+        order: isReportExpanded ? 2 : 2,
+        padding: isReportExpanded ? "0" : "0",
+        alignSelf: isReportExpanded ? "flex-start" : "auto",
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -2095,8 +2094,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
-
 
 
 
