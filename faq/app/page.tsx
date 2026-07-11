@@ -734,8 +734,7 @@ export default function HomePage(): React.JSX.Element {
   }, [addUserButtonRef, plusIconRef]);
 
 
-
-  // GSAP Animation untuk Read the Report - VERSI SEDERHANA
+// GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -764,7 +763,6 @@ useEffect(() => {
       isHovering = true;
       textIndex = 0;
       
-      // Scale effect
       gsap.to(text, {
         scale: 1.05,
         duration: 0.2,
@@ -777,7 +775,6 @@ useEffect(() => {
         scale: 1.2,
       });
 
-      // Ganti teks setiap 600ms
       if (!hoverTimeout) {
         hoverTimeout = setInterval(() => {
           if (text && isHovering && !isReportExpanded) {
@@ -845,11 +842,9 @@ useEffect(() => {
     }
   };
 
-  // Hover events
   report.addEventListener('mouseenter', startTextHover);
   report.addEventListener('mouseleave', stopTextHover);
 
-  // Cleanup
   return () => {
     report.removeEventListener('mouseenter', startTextHover);
     report.removeEventListener('mouseleave', stopTextHover);
@@ -859,7 +854,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi untuk handle expand/collapse
+// Fungsi handle toggle - PERBAIKAN UTAMA
 const handleReportToggle = () => {
   console.log("Toggle clicked, current state:", isReportExpanded);
   
@@ -875,48 +870,55 @@ const handleReportToggle = () => {
   }
 
   if (!isReportExpanded) {
-    // EXPAND - dari kanan ke kiri
+    // EXPAND - melebar ke kiri dan ke bawah dari posisi tombol
     console.log("Expanding...");
     
-    // Set initial state
+    // Dapatkan posisi tombol
+    const rect = report.getBoundingClientRect();
+    const startX = rect.right; // ujung kanan tombol
+    const startY = rect.top; // atas tombol
+    
+    // Set initial state - tetap di posisi tombol
     gsap.set(container, {
-      width: "auto",
-      height: "auto",
-      position: "absolute",
-      top: "0px",
-      left: "0px",
-      zIndex: 10,
-      backgroundColor: "transparent",
+      position: "fixed",
+      top: `${startY}px`,
+      left: `${startX}px`,
+      width: "0px",
+      height: "0px",
+      zIndex: 100,
+      backgroundColor: "#FE7141",
+      overflow: "hidden",
+      borderRadius: "0px",
     });
 
-    // Animate container ke full screen
+    // Animate container melebar ke kiri dan ke bawah
     gsap.to(container, {
-      width: "100vw",
-      height: "100vh",
+      width: `${window.innerWidth}px`,
+      height: `${window.innerHeight - startY}px`,
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: 0,
-      left: 0,
+      top: `${startY}px`,
+      left: "0px",
       zIndex: 100,
-      borderRadius: 0,
-      transformOrigin: "right center",
+      borderRadius: "0px",
     });
 
-    // Animate report
+    // Animate report - pindah ke dalam container
     gsap.to(report, {
       width: "100%",
-      height: "100vh",
-      padding: "40px 60px",
+      height: "auto",
+      padding: "20px 30px",
       justifyContent: "flex-start",
-      gap: "20px",
+      gap: "10px",
       backgroundColor: "#FE7141",
       duration: 0.6,
       ease: "power3.out",
       minWidth: "100%",
       position: "relative",
-      borderRadius: 0,
+      borderRadius: "0px",
+      marginTop: "10px",
     });
 
     // Hide logo
@@ -929,7 +931,7 @@ const handleReportToggle = () => {
 
     // Perbesar teks
     gsap.to(text, {
-      fontSize: "40px",
+      fontSize: "28px",
       fontWeight: 700,
       duration: 0.4,
       ease: "power2.out",
@@ -939,7 +941,7 @@ const handleReportToggle = () => {
 
     // Rotasi icon
     gsap.to(icon, {
-      fontSize: "40px",
+      fontSize: "30px",
       rotation: 45,
       duration: 0.4,
       ease: "back.out(1.7)",
@@ -951,20 +953,38 @@ const handleReportToggle = () => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE
+    // COLLAPSE - kembali ke ukuran semula
     console.log("Collapsing...");
 
-    // Kembalikan container
+    // Dapatkan posisi tombol
+    const rect = report.getBoundingClientRect();
+    const endX = rect.right;
+    const endY = rect.top;
+
+    // Kembalikan container ke posisi tombol
     gsap.to(container, {
-      width: "auto",
-      height: "auto",
+      width: "0px",
+      height: "0px",
       duration: 0.7,
       ease: "power3.inOut",
-      backgroundColor: "transparent",
-      position: "absolute",
-      top: "0px",
-      left: "0px",
-      zIndex: 10,
+      backgroundColor: "#FE7141",
+      position: "fixed",
+      top: `${endY}px`,
+      left: `${endX}px`,
+      zIndex: 100,
+      borderRadius: "0px",
+      onComplete: () => {
+        // Reset style setelah animasi selesai
+        gsap.set(container, {
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          width: "auto",
+          height: "auto",
+          zIndex: 10,
+          backgroundColor: "transparent",
+        });
+      }
     });
 
     // Kembalikan report
@@ -979,7 +999,7 @@ const handleReportToggle = () => {
       ease: "power3.out",
       minWidth: "450px",
       position: "relative",
-      borderRadius: 0,
+      borderRadius: "0px",
     });
 
     // Tampilkan logo
@@ -1020,23 +1040,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
-// Fungsi untuk handle click di luar
-const handleClickOutside = (e: MouseEvent) => {
-  const container = reportContainerRef.current;
-  if (container && !container.contains(e.target as Node)) {
-    if (isReportExpanded) {
-      handleReportToggle();
-    }
-  }
-};
-
-// Pasang event listener untuk click outside
-useEffect(() => {
-  document.addEventListener('click', handleClickOutside);
-  return () => document.removeEventListener('click', handleClickOutside);
-}, [isReportExpanded]);
-
 
 
 
@@ -1922,6 +1925,8 @@ useEffect(() => {
         overflow: "hidden",
       }}
     >
+
+
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
@@ -1972,18 +1977,18 @@ useEffect(() => {
       display: "flex",
       alignItems: "center",
       justifyContent: "flex-end",
-      backgroundColor: "#FE7141",
-      padding: "6px 35px 6px 200px",
+      backgroundColor: isReportExpanded ? "#FE7141" : "#FE7141",
+      padding: isReportExpanded ? "20px 30px" : "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: "48px",
-      minWidth: "450px",
+      height: isReportExpanded ? "auto" : "48px",
+      minWidth: isReportExpanded ? "100%" : "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
-      transition: "background-color 0.3s ease",
+      transition: "all 0.3s ease",
     }}
     onMouseEnter={(e) => {
       if (!isReportExpanded) {
@@ -2005,16 +2010,17 @@ useEffect(() => {
     <span
       ref={reportTextRef}
       style={{
-        fontSize: "18px",
-        fontWeight: 600,
+        fontSize: isReportExpanded ? "28px" : "18px",
+        fontWeight: isReportExpanded ? 700 : 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
-        whiteSpace: "nowrap",
+        whiteSpace: isReportExpanded ? "normal" : "nowrap",
         display: "inline-block",
         position: "relative",
         zIndex: 2,
+        padding: isReportExpanded ? "20px" : "0",
       }}
     >
       Read the Report
@@ -2023,7 +2029,7 @@ useEffect(() => {
     <span
       ref={reportIconRef}
       style={{
-        fontSize: "30px",
+        fontSize: isReportExpanded ? "30px" : "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
@@ -2033,6 +2039,7 @@ useEffect(() => {
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
+        padding: isReportExpanded ? "20px" : "0",
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -2044,6 +2051,17 @@ useEffect(() => {
     </span>
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+      
       {/* User Status & Music Widget - Pojok Kanan Atas */}
       <div
         style={{
