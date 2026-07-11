@@ -733,7 +733,8 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-// GSAP Animation untuk Read the Report
+
+  // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -869,41 +870,59 @@ const handleReportToggle = () => {
   }
 
   if (!isReportExpanded) {
-    // EXPAND - melebar ke kiri dan ke bawah dari ujung kiri tombol
+    // EXPAND - melebar ke kiri dan ke bawah DARI POSISI TOMBOL
     console.log("Expanding...");
     
     // Dapatkan posisi tombol
     const rect = report.getBoundingClientRect();
-    const startX = rect.left; // ujung KIRI tombol (bukan kanan)
+    const startX = rect.left; // ujung KIRI tombol
     const startY = rect.top; // atas tombol
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
     
-    // Set initial state - mulai dari ujung KIRI tombol
+    // LEBAR: dari ujung KIRI tombol ke ujung KIRI layar
+    const expandWidth = startX; // jarak ke kiri
+    
+    // TINGGI: dari posisi tombol ke bawah
+    const expandHeight = window.innerHeight - startY;
+
+    console.log(`Expanding from left=${startX}px, top=${startY}px, width=${expandWidth}px, height=${expandHeight}px`);
+
+    // SET POSISI AWAL - tetap di posisi tombol
     gsap.set(container, {
       position: "fixed",
       top: `${startY}px`,
       left: `${startX}px`,
-      width: "0px",
-      height: "0px",
+      width: `${buttonWidth}px`,
+      height: `${buttonHeight}px`,
       zIndex: 100,
       backgroundColor: "#FE7141",
       overflow: "hidden",
       borderRadius: "0px",
     });
 
-    // LEBAR: dari ujung KIRI tombol ke ujung KIRI layar
-    const maxWidth = startX; // jarak dari ujung kiri tombol ke ujung kiri layar
-    
-    // TINGGI: dari posisi tombol ke bawah
-    const maxHeight = window.innerHeight - startY;
+    // SET REPORT DI DALAM CONTAINER
+    gsap.set(report, {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      padding: "10px 20px",
+      backgroundColor: "#FE7141",
+      borderRadius: "0px",
+    });
 
-    console.log(`Expanding: left=${startX}px, top=${startY}px, width=${maxWidth}px, height=${maxHeight}px`);
+    // HIDE LOGO
+    gsap.to(logo, {
+      opacity: 0,
+      duration: 0.1,
+      ease: "power2.out",
+      pointerEvents: "none",
+    });
 
-    // Animate container melebar ke kiri dan ke bawah
+    // ANIMASI CONTAINER - melebar ke kiri dan ke bawah DARI POSISI TOMBOL
     gsap.to(container, {
-      width: `${maxWidth}px`,
-      height: `${maxHeight}px`,
+      width: `${expandWidth + buttonWidth}px`, // lebar = jarak ke kiri + lebar tombol
+      height: `${expandHeight}px`,
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
@@ -914,7 +933,7 @@ const handleReportToggle = () => {
       borderRadius: "0px",
     });
 
-    // Animate report - mengisi container
+    // ANIMASI REPORT - mengisi container
     gsap.to(report, {
       width: "100%",
       height: "100%",
@@ -924,17 +943,7 @@ const handleReportToggle = () => {
       backgroundColor: "#FE7141",
       duration: 0.6,
       ease: "power3.out",
-      minWidth: "100%",
-      position: "relative",
       borderRadius: "0px",
-    });
-
-    // Hide logo
-    gsap.to(logo, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.out",
-      pointerEvents: "none",
     });
 
     // Perbesar teks
@@ -961,18 +970,20 @@ const handleReportToggle = () => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE - kembali ke ukuran semula
+    // COLLAPSE - kembali ke ukuran tombol
     console.log("Collapsing...");
 
     // Dapatkan posisi tombol
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
+    const buttonWidth = rect.width;
+    const buttonHeight = rect.height;
 
-    // Kembalikan container ke posisi tombol
+    // Kembalikan container ke ukuran tombol
     gsap.to(container, {
-      width: "0px",
-      height: "0px",
+      width: `${buttonWidth}px`,
+      height: `${buttonHeight}px`,
       duration: 0.7,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
@@ -1000,6 +1011,10 @@ const handleReportToggle = () => {
           gap: "6px",
           minWidth: "450px",
           position: "relative",
+        });
+        gsap.set(logo, {
+          opacity: 1,
+          pointerEvents: "auto",
         });
       }
     });
@@ -1059,6 +1074,9 @@ const handleReportToggle = () => {
 };
 
 
+
+
+  
 
   
 
@@ -1941,8 +1959,7 @@ const handleReportToggle = () => {
       }}
     >
 
-
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
