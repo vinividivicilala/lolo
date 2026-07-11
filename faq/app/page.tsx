@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
+import gsap from 'gsap';
+
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -424,7 +426,12 @@ export default function HomePage(): React.JSX.Element {
 
    const [isReportHovered, setIsReportHovered] = useState(false);
 
-
+// Di dalam komponen HomePage, tambahkan refs
+const reportRef = useRef<HTMLDivElement | null>(null);
+const reportTextRef = useRef<HTMLSpanElement | null>(null);
+const reportIconRef = useRef<HTMLSpanElement | null>(null);
+const reportContainerRef = useRef<HTMLDivElement | null>(null);
+const [isReportExpanded, setIsReportExpanded] = useState(false);
   
 
 
@@ -931,6 +938,128 @@ export default function HomePage(): React.JSX.Element {
     };
     loadUsers();
   }, [user]);
+
+
+
+// GSAP Animation untuk Read the Report
+useEffect(() => {
+  if (typeof window !== "undefined" && reportTextRef.current) {
+    // Animasi hover: teks bergerak maju dan mundur
+    const textElement = reportTextRef.current;
+    
+    const handleMouseEnter = () => {
+      gsap.to(textElement, {
+        x: 10,
+        scale: 1.05,
+        duration: 0.4,
+        ease: "power2.out",
+      });
+    };
+    
+    const handleMouseLeave = () => {
+      gsap.to(textElement, {
+        x: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: "power2.out",
+      });
+    };
+    
+    textElement.addEventListener('mouseenter', handleMouseEnter);
+    textElement.addEventListener('mouseleave', handleMouseLeave);
+    
+    return () => {
+      textElement.removeEventListener('mouseenter', handleMouseEnter);
+      textElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }
+}, []);
+
+// Animasi klik: bg orange menutupi layar kiri
+const handleReportClick = () => {
+  if (!reportContainerRef.current) return;
+  
+  setIsReportExpanded(!isReportExpanded);
+  
+  if (!isReportExpanded) {
+    // Expand: bg orange menutupi layar kiri
+    gsap.to(reportContainerRef.current, {
+      width: "100vw",
+      height: "100vh",
+      left: "0px",
+      top: "0px",
+      duration: 0.8,
+      ease: "power3.inOut",
+      borderRadius: "0px",
+      padding: "20px 40px",
+      backgroundColor: "#FE7141",
+      zIndex: 100,
+    });
+    
+    gsap.to(reportTextRef.current, {
+      fontSize: "32px",
+      duration: 0.6,
+      ease: "power2.out",
+      delay: 0.3,
+    });
+    
+    gsap.to(reportIconRef.current, {
+      rotation: 45,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+      delay: 0.2,
+    });
+    
+    // Sembunyikan logo Menuru'26
+    gsap.to('.menuru-logo', {
+      opacity: 0,
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  } else {
+    // Collapse: kembali ke ukuran semula
+    gsap.to(reportContainerRef.current, {
+      width: "auto",
+      height: "48px",
+      left: "0px",
+      top: "0px",
+      duration: 0.8,
+      ease: "power3.inOut",
+      borderRadius: "0px",
+      padding: "6px 35px 6px 200px",
+      backgroundColor: "#FE7141",
+      zIndex: 10,
+    });
+    
+    gsap.to(reportTextRef.current, {
+      fontSize: "18px",
+      duration: 0.6,
+      ease: "power2.out",
+    });
+    
+    gsap.to(reportIconRef.current, {
+      rotation: 0,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+    });
+    
+    // Tampilkan kembali logo Menuru'26
+    gsap.to('.menuru-logo', {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out",
+      delay: 0.3,
+    });
+  }
+};
+
+
+
+
+
+
+
+  
 
   // Load chat rooms
   useEffect(() => {
@@ -1611,7 +1740,7 @@ export default function HomePage(): React.JSX.Element {
     >
 
 
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   style={{
     position: "absolute",
@@ -1621,11 +1750,11 @@ export default function HomePage(): React.JSX.Element {
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    width: "100%",
   }}
 >
   {/* Logo Menuru'26 - Background Hitam */}
   <div
+    className="menuru-logo"
     style={{
       display: "flex",
       alignItems: "center",
@@ -1634,7 +1763,7 @@ export default function HomePage(): React.JSX.Element {
       borderRadius: "0px",
       boxShadow: "none",
       height: "48px",
-      flexShrink: 0,
+      transition: "opacity 0.4s ease",
     }}
   >
     <span
@@ -1651,82 +1780,73 @@ export default function HomePage(): React.JSX.Element {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 */}
+  {/* Read the Report - Background #FE7141 (Sangat Panjang) */}
   <div
+    ref={reportContainerRef}
     style={{
       display: "flex",
       alignItems: "center",
+      justifyContent: "flex-end",
       backgroundColor: "#FE7141",
-      padding: "6px 35px 6px 30px",
+      padding: "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
       transition: "all 0.3s ease",
       height: "48px",
-      flex: 1,
-      minWidth: "200px",
-      overflow: "hidden",
+      minWidth: "450px",
       position: "relative",
+      overflow: "hidden",
     }}
-    onMouseEnter={() => setIsReportHovered(true)}
-    onMouseLeave={() => setIsReportHovered(false)}
     onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = "#e8653a";
+      if (!isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "#e8653a";
+      }
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = "#FE7141";
+      if (!isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "#FE7141";
+      }
     }}
-    onClick={() => {
-      console.log("Read the Report clicked");
-    }}
+    onClick={handleReportClick}
   >
-    {/* Container Rolling Teks - Maju Mundur */}
-    <div
+    {/* Teks di sisi kanan */}
+    <span
+      ref={reportTextRef}
       style={{
-        overflow: "hidden",
+        fontSize: "18px",
+        fontWeight: 600,
+        color: "#000000",
+        letterSpacing: "-0.01em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        lineHeight: 1.2,
+        whiteSpace: "nowrap",
+        cursor: "pointer",
+        display: "inline-block",
         position: "relative",
-        flex: 1,
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
+        zIndex: 2,
       }}
     >
-      <span
-        style={{
-          fontSize: "18px",
-          fontWeight: 600,
-          color: "#000000",
-          letterSpacing: "-0.01em",
-          fontFamily: "Inter, 'Inter Fallback'",
-          lineHeight: 1.2,
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          animation: isReportHovered ? "marqueeMundur 3s ease-in-out infinite" : "none",
-          position: "relative",
-        }}
-      >
-        Read the Report
-      </span>
-    </div>
-
-    {/* Icon + */}
+      Read the Report
+    </span>
+    {/* Icon + di sisi kanan */}
     <span
+      ref={reportIconRef}
       style={{
         fontSize: "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
-        flexShrink: 0,
-        transition: "transform 0.3s ease",
+        position: "relative",
+        zIndex: 2,
       }}
     >
       +
     </span>
   </div>
 </div>
-
 
 
 
