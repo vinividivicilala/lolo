@@ -422,6 +422,11 @@ export default function HomePage(): React.JSX.Element {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+   const [isReportHovered, setIsReportHovered] = useState(false);
+
+
+  
+
 
   // GSAP Animation for Add User Button
   const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
