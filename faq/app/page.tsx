@@ -892,8 +892,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-
-  const handleReportToggle = () => {
+const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
@@ -903,6 +902,7 @@ useEffect(() => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
+    // EXPAND - menjadi full screen
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -918,7 +918,7 @@ useEffect(() => {
       left: `${startX}px`,
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      zIndex: 1000,
+      zIndex: 100,
       backgroundColor: "#FE7141",
       overflow: "hidden",
       borderRadius: "0px",
@@ -953,7 +953,7 @@ useEffect(() => {
       position: "fixed",
       top: `${startY}px`,
       left: "0px",
-      zIndex: 1000,
+      zIndex: 100,
       borderRadius: "0px",
     });
 
@@ -996,17 +996,18 @@ useEffect(() => {
       right: "50px",
       cursor: "pointer",
       color: "#000000",
-      opacity: 0,
+      opacity: 1,
       backgroundColor: "rgba(0,0,0,0.1)",
       padding: "10px 16px",
       borderRadius: "8px",
       border: "2px solid rgba(0,0,0,0.15)",
     });
 
-    icon.textContent = "";
+    icon.textContent = "✕";
 
     setIsReportExpanded(true);
   } else {
+    // COLLAPSE - kembali ke ukuran kecil
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1070,7 +1071,7 @@ useEffect(() => {
       position: "fixed",
       top: `${endY}px`,
       left: `${endX}px`,
-      zIndex: 1000,
+      zIndex: 100,
       borderRadius: "0px",
       onComplete: () => {
         gsap.set(container, {
@@ -1081,7 +1082,7 @@ useEffect(() => {
           height: "auto",
           zIndex: 10,
           backgroundColor: "transparent",
-          overflow: "hidden",
+          overflow: "visible",
         });
         gsap.set(report, {
           width: "auto",
@@ -1109,7 +1110,6 @@ useEffect(() => {
           padding: "0",
           borderRadius: "0px",
           border: "none",
-          opacity: 1,
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1128,8 +1128,6 @@ useEffect(() => {
     setIsReportExpanded(false);
   }
 };
-
-
 
   
 
@@ -2005,9 +2003,8 @@ useEffect(() => {
       }}
     >
 
-     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-
-    <div
+    {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+<div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2021,7 +2018,7 @@ useEffect(() => {
     backgroundColor: "transparent",
   }}
 >
-  {/* Logo Menuru'26 */}
+  {/* Logo Menuru'26 - Background Hitam */}
   <div
     ref={logoRef}
     style={{
@@ -2049,7 +2046,7 @@ useEffect(() => {
     </span>
   </div>
 
-  {/* Read the Report - DESIGN TETAP SAMA */}
+  {/* Read the Report - Background #FE7141 */}
   <div
     ref={reportRef}
     style={{
@@ -2093,11 +2090,13 @@ useEffect(() => {
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         textAlign: isReportExpanded ? "left" : "center",
         transition: "all 0.3s ease",
+        pointerEvents: isReportExpanded ? "none" : "auto",
       }}
     >
       Read the Report
     </span>
     
+    {/* TOMBOL CLOSE - INI ADALAH ICON YANG SUDAH ADA, TAPI DITAMBAHKAN FUNGSI CLICK */}
     <span
       ref={reportIconRef}
       style={{
@@ -2111,7 +2110,7 @@ useEffect(() => {
         right: isReportExpanded ? "50px" : "auto",
         zIndex: 30,
         cursor: "pointer",
-        pointerEvents: isReportExpanded ? "none" : "auto",
+        pointerEvents: "auto",
         userSelect: "none",
         padding: isReportExpanded ? "10px 16px" : "0",
         borderRadius: isReportExpanded ? "8px" : "0px",
@@ -2119,57 +2118,33 @@ useEffect(() => {
         border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         transition: "all 0.3s ease",
-        opacity: isReportExpanded ? 0 : 1,
       }}
-    >
-      {isReportExpanded ? "" : "+"}
-    </span>
-
-    {/* TOMBOL CLOSE - HANYA TEKS "Close" */}
-    {isReportExpanded && (
-      <div
-        style={{
-          position: "absolute",
-          top: "45px",
-          right: "50px",
-          zIndex: 100,
-          cursor: "pointer",
-          padding: "10px 20px",
-          backgroundColor: "rgba(0,0,0,0.1)",
-          borderRadius: "8px",
-          border: "2px solid rgba(0,0,0,0.15)",
-          transition: "all 0.3s ease",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          handleReportToggle();
-        }}
-        onMouseEnter={(e) => {
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (isReportExpanded) {
+          handleReportToggle(); // INI FUNGSI UNTUK MENUTUP PANEL
+        }
+      }}
+      onMouseEnter={(e) => {
+        if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
           e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
           e.currentTarget.style.transform = "scale(1)";
-        }}
-      >
-        <span
-          style={{
-            fontSize: "18px",
-            fontWeight: 600,
-            color: "#000000",
-            fontFamily: "Inter, 'Inter Fallback'",
-          }}
-        >
-          Close
-        </span>
-      </div>
-    )}
+          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
+        }
+      }}
+    >
+      {isReportExpanded ? "✕" : "+"}
+    </span>
   </div>
 </div>
-
-
 
 
 
