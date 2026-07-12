@@ -428,13 +428,13 @@ export default function HomePage(): React.JSX.Element {
   const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const plusIconRef = useRef<HTMLSpanElement | null>(null);
 
-  // Report Refs
-  const reportContainerRef = useRef<HTMLDivElement | null>(null);
-  const reportRef = useRef<HTMLDivElement | null>(null);
-  const reportTextRef = useRef<HTMLSpanElement | null>(null);
-  const reportIconRef = useRef<HTMLSpanElement | null>(null);
-  const logoRef = useRef<HTMLDivElement | null>(null);
-  const [isReportExpanded, setIsReportExpanded] = useState(false);
+ const reportContainerRef = useRef<HTMLDivElement | null>(null);
+const reportRef = useRef<HTMLDivElement | null>(null);
+const reportTextRef = useRef<HTMLSpanElement | null>(null);
+const reportIconRef = useRef<HTMLSpanElement | null>(null);
+const logoRef = useRef<HTMLDivElement | null>(null);
+const [isReportExpanded, setIsReportExpanded] = useState(false);
+const [isHoveringReport, setIsHoveringReport] = useState(false);
 
   // Lenis Scroll
   useEffect(() => {
@@ -682,8 +682,6 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
 
-
-
 // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
@@ -803,7 +801,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi toggle expanded
+// Fungsi toggle expanded - PINDAHKAN KE SINI (SEBELUM JSX)
 const handleReportToggle = () => {
   console.log("Toggle clicked, isReportExpanded:", isReportExpanded);
   
@@ -819,7 +817,7 @@ const handleReportToggle = () => {
   }
 
   if (!isReportExpanded) {
-    // EXPAND
+    // EXPAND - menjadi full screen
     console.log("Expanding...");
     
     const rect = report.getBoundingClientRect();
@@ -928,7 +926,7 @@ const handleReportToggle = () => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE
+    // COLLAPSE - kembali ke ukuran kecil
     console.log("Collapsing...");
     
     const rect = report.getBoundingClientRect();
@@ -1051,7 +1049,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
 
 
 
@@ -1933,9 +1930,7 @@ const handleReportToggle = () => {
     >
       {/* ==================== REPORT CONTAINER ==================== */}
 
-
-
-      <div
+<div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -1983,29 +1978,31 @@ const handleReportToggle = () => {
     style={{
       display: "flex",
       alignItems: "center",
-      justifyContent: isReportExpanded ? "flex-start" : "flex-end",
+      justifyContent: "center",
       backgroundColor: "#FE7141",
-      padding: isReportExpanded ? "0" : "6px 35px 6px 35px",
+      padding: "6px 35px 6px 35px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "200px",
+      height: "48px",
+      width: "auto",
+      minWidth: "200px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
-      transition: "all 0.3s ease",
-      flexDirection: isReportExpanded ? "column" : "row",
-      alignItems: isReportExpanded ? "flex-start" : "center",
+    }}
+    onClick={() => {
+      if (!isReportExpanded) {
+        toggleReport();
+      }
     }}
   >
     {/* Teks "Read the Report" */}
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "24px" : "18px",
+        fontSize: "18px",
         fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
@@ -2013,59 +2010,29 @@ const handleReportToggle = () => {
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
-        zIndex: 2,
-        padding: "0",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        textAlign: isReportExpanded ? "left" : "center",
       }}
     >
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded */}
+    {/* Icon + atau ✕ */}
     <span
       ref={reportIconRef}
       style={{
-        fontSize: isReportExpanded ? "40px" : "24px",
+        fontSize: "24px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "45px" : "auto",
-        right: isReportExpanded ? "50px" : "auto",
-        zIndex: 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "10px 16px" : "0",
-        borderRadius: isReportExpanded ? "8px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
-        border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
       }}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        console.log("Close button clicked");
-        handleReportToggle();
-      }}
-      onMouseEnter={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
-        }
+        console.log("Icon clicked!");
+        toggleReport();
       }}
     >
       {isReportExpanded ? "✕" : "+"}
@@ -2073,7 +2040,77 @@ const handleReportToggle = () => {
   </div>
 </div>
 
-
+{/* ==================== EXPANDED OVERLAY ==================== */}
+{isReportExpanded && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "#FE7141",
+      zIndex: 100,
+      display: "flex",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+      padding: "50px",
+    }}
+    onClick={() => toggleReport()}
+  >
+    {/* Teks di KIRI ATAS */}
+    <span
+      style={{
+        fontSize: "24px",
+        fontWeight: 600,
+        color: "#000000",
+        letterSpacing: "-0.01em",
+        fontFamily: "Inter, 'Inter Fallback'",
+        position: "absolute",
+        top: "50px",
+        left: "50px",
+      }}
+    >
+      Read the Report
+    </span>
+    
+    {/* Tombol CLOSE di KANAN ATAS */}
+    <span
+      style={{
+        fontSize: "40px",
+        fontWeight: 300,
+        color: "#000000",
+        position: "absolute",
+        top: "40px",
+        right: "50px",
+        cursor: "pointer",
+        padding: "10px 16px",
+        borderRadius: "8px",
+        backgroundColor: "rgba(0,0,0,0.1)",
+        border: "2px solid rgba(0,0,0,0.15)",
+        userSelect: "none",
+        transition: "all 0.3s ease",
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log("Close button clicked!");
+        toggleReport();
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
+        e.currentTarget.style.transform = "scale(1.05)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
+      }}
+    >
+      ✕
+    </span>
+  </div>
+)}
 
 
 
