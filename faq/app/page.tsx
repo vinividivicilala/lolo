@@ -984,6 +984,7 @@ const handleReportToggle = () => {
       textAlign: "left",
     });
 
+    // ICON - INI ADALAH TOMBOL CLOSE
     gsap.to(icon, {
       fontSize: "40px",
       fontWeight: 300,
@@ -1128,8 +1129,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
-  
 
 
   
@@ -2004,7 +2003,8 @@ const handleReportToggle = () => {
     >
 
     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-<div
+
+      <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2096,7 +2096,7 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE - INI ADALAH ICON YANG SUDAH ADA, TAPI DITAMBAHKAN FUNGSI CLICK */}
+    {/* TOMBOL CLOSE - ICON SUDAH ADA, TAMBAHKAN onClick */}
     <span
       ref={reportIconRef}
       style={{
@@ -2123,7 +2123,7 @@ const handleReportToggle = () => {
         e.stopPropagation();
         e.preventDefault();
         if (isReportExpanded) {
-          handleReportToggle(); // INI FUNGSI UNTUK MENUTUP PANEL
+          handleReportToggle(); // <-- INI FUNGSI UNTUK MENUTUP PANEL
         }
       }}
       onMouseEnter={(e) => {
