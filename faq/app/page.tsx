@@ -733,8 +733,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-
-  // GSAP Animation untuk Read the Report
+// GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -932,7 +931,7 @@ const handleReportToggle = () => {
     gsap.to(report, {
       width: "100%",
       height: "100%",
-      padding: "60px 80px",
+      padding: "40px 50px",
       backgroundColor: "#FE7141",
       duration: 0.6,
       ease: "power3.out",
@@ -943,10 +942,10 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     });
 
-    // Teks di KIRI ATAS - ukuran besar
+    // Teks di KIRI ATAS - ukuran SAMA dengan tombol kecil (18px)
     gsap.to(text, {
-      fontSize: "48px",
-      fontWeight: 700,
+      fontSize: "18px",
+      fontWeight: 600,
       duration: 0.4,
       ease: "power2.out",
       color: "#000000",
@@ -958,14 +957,14 @@ const handleReportToggle = () => {
 
     // Icon di KANAN ATAS - menjadi ✕
     gsap.to(icon, {
-      fontSize: "44px",
+      fontSize: "30px",
       rotation: 0,
       scale: 1.2,
       duration: 0.4,
       ease: "back.out(1.7)",
       position: "absolute",
-      top: "60px",
-      right: "80px",
+      top: "40px",
+      right: "50px",
       cursor: "pointer",
     });
 
@@ -1970,7 +1969,7 @@ const handleReportToggle = () => {
       }}
     >
 
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2021,7 +2020,7 @@ const handleReportToggle = () => {
       alignItems: "center",
       justifyContent: isReportExpanded ? "flex-start" : "flex-end",
       backgroundColor: "#FE7141",
-      padding: isReportExpanded ? "60px 80px" : "6px 35px 6px 200px",
+      padding: isReportExpanded ? "40px 50px" : "6px 35px 6px 200px",
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
@@ -2037,12 +2036,12 @@ const handleReportToggle = () => {
       alignItems: isReportExpanded ? "flex-start" : "center",
     }}
   >
-    {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
+    {/* Teks "Read the Report" - di KIRI ATAS saat expanded, ukuran SAMA dengan tombol kecil */}
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "48px" : "18px",
-        fontWeight: isReportExpanded ? 700 : 600,
+        fontSize: "18px",
+        fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
@@ -2058,18 +2057,18 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* Icon - di KANAN ATAS saat expanded (absolute) */}
+    {/* Icon Close - di KANAN ATAS saat expanded */}
     <span
       ref={reportIconRef}
       style={{
-        fontSize: isReportExpanded ? "44px" : "30px",
+        fontSize: "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
         display: "inline-block",
         position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "60px" : "auto",
-        right: isReportExpanded ? "80px" : "auto",
+        top: isReportExpanded ? "40px" : "auto",
+        right: isReportExpanded ? "50px" : "auto",
         zIndex: 30,
         cursor: "pointer",
         pointerEvents: "auto",
@@ -2087,7 +2086,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
 
 
 
