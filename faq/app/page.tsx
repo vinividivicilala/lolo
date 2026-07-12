@@ -690,6 +690,26 @@ const [isHoveringReport, setIsHoveringReport] = useState(false);
     }
   };
 
+// Kontrol scroll body saat expanded
+useEffect(() => {
+  if (isReportExpanded) {
+    document.body.classList.add('no-scroll');
+  } else {
+    document.body.classList.remove('no-scroll');
+  }
+  
+  return () => {
+    document.body.classList.remove('no-scroll');
+  };
+}, [isReportExpanded]);
+
+
+
+
+
+
+  
+
   // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
@@ -2028,8 +2048,7 @@ const handleReportToggle = () => {
       }}
     >
 
-
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2084,16 +2103,19 @@ const handleReportToggle = () => {
       borderRadius: "0px",
       boxShadow: "none",
       gap: "6px",
-      cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
+      cursor: isReportExpanded ? "default" : "pointer",
+      height: isReportExpanded ? "100vh" : "48px",
+      width: isReportExpanded ? "100vw" : "auto",
+      minWidth: isReportExpanded ? "100vw" : "450px",
       flexShrink: 0,
-      position: "relative",
-      zIndex: 20,
-      transition: "all 0.3s ease",
+      position: isReportExpanded ? "fixed" : "relative",
+      top: isReportExpanded ? "0" : "auto",
+      left: isReportExpanded ? "0" : "auto",
+      zIndex: isReportExpanded ? 1000 : 20,
+      transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       flexDirection: isReportExpanded ? "column" : "row",
       alignItems: isReportExpanded ? "flex-start" : "center",
+      margin: 0,
     }}
     onClick={!isReportExpanded ? handleReportToggle : undefined}
   >
@@ -2101,78 +2123,100 @@ const handleReportToggle = () => {
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "24px" : "18px",
+        fontSize: isReportExpanded ? "32px" : "18px",
         fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
-        whiteSpace: "nowrap",
+        whiteSpace: isReportExpanded ? "normal" : "nowrap",
         display: "inline-block",
         position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
+        top: isReportExpanded ? "60px" : "auto",
+        left: isReportExpanded ? "60px" : "auto",
         zIndex: 2,
         padding: "0",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         textAlign: isReportExpanded ? "left" : "center",
         transition: "all 0.3s ease",
         pointerEvents: isReportExpanded ? "none" : "auto",
+        maxWidth: isReportExpanded ? "70%" : "auto",
       }}
     >
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded */}
-    <span
-      ref={reportIconRef}
-      style={{
-        fontSize: isReportExpanded ? "40px" : "30px",
-        fontWeight: 300,
-        color: "#000000",
-        lineHeight: 1,
-        display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "45px" : "auto",
-        right: isReportExpanded ? "50px" : "auto",
-        zIndex: 30,
-        cursor: "pointer",
-        pointerEvents: "auto",
-        userSelect: "none",
-        padding: isReportExpanded ? "10px 16px" : "0",
-        borderRadius: isReportExpanded ? "8px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
-        border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        transition: "all 0.3s ease",
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleReportToggle(); // Panggil toggle untuk collapse
-      }}
-      onMouseEnter={(e) => {
-        if (isReportExpanded) {
+    {/* Tombol Close - Muncul di KANAN ATAS saat expanded */}
+    {isReportExpanded && (
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: "spring", damping: 20, delay: 0.2 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          handleReportToggle();
+        }}
+        style={{
+          position: "fixed",
+          top: "45px",
+          right: "50px",
+          zIndex: 1001,
+          fontSize: "32px",
+          fontWeight: 300,
+          color: "#000000",
+          backgroundColor: "rgba(0,0,0,0.1)",
+          padding: "12px 20px",
+          borderRadius: "10px",
+          border: "2px solid rgba(0,0,0,0.15)",
+          cursor: "pointer",
+          pointerEvents: "auto",
+          userSelect: "none",
+          fontFamily: "Inter, 'Inter Fallback'",
+          transition: "all 0.3s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        }}
+        onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
           e.currentTarget.style.transform = "scale(1.05)";
           e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isReportExpanded) {
+        }}
+        onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
           e.currentTarget.style.transform = "scale(1)";
           e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
-        }
-      }}
-    >
-      {isReportExpanded ? "✕" : "+"}
-    </span>
+        }}
+      >
+        ✕
+      </motion.button>
+    )}
+    
+    {/* Icon Plus - Hanya muncul saat collapsed */}
+    {!isReportExpanded && (
+      <span
+        ref={reportIconRef}
+        style={{
+          fontSize: "30px",
+          fontWeight: 300,
+          color: "#000000",
+          lineHeight: 1,
+          display: "inline-block",
+          position: "relative",
+          cursor: "pointer",
+          userSelect: "none",
+          transition: "all 0.3s ease",
+        }}
+      >
+        +
+      </span>
+    )}
   </div>
 </div>
-
-
-
 
 
 
@@ -5317,33 +5361,37 @@ const handleReportToggle = () => {
 
       <style jsx>{`
         @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes pulseTransmitter {
-          0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
-          }
-          50% {
-            transform: scale(1.2);
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
-          }
-        }
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes pulseTransmitter {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+    }
+    50% {
+      transform: scale(1.2);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
+    }
+  }
+  /* Prevent body scroll when expanded */
+  body.no-scroll {
+    overflow: hidden;
+  }
       `}</style>
     </div>
   );
