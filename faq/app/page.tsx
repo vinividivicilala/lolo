@@ -420,13 +420,23 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+
+
+
+
+
+
+
+
+
   // Report GSAP Refs
-  const reportContainerRef = useRef<HTMLDivElement | null>(null);
-  const reportRef = useRef<HTMLDivElement | null>(null);
-  const reportTextRef = useRef<HTMLSpanElement | null>(null);
-  const reportIconRef = useRef<HTMLSpanElement | null>(null);
-  const logoRef = useRef<HTMLDivElement | null>(null);
-  const [isReportExpanded, setIsReportExpanded] = useState(false);
+const reportContainerRef = useRef<HTMLDivElement | null>(null);
+const reportRef = useRef<HTMLDivElement | null>(null);
+const reportTextRef = useRef<HTMLSpanElement | null>(null);
+const reportIconRef = useRef<HTMLSpanElement | null>(null);
+const logoRef = useRef<HTMLDivElement | null>(null);
+const [isReportExpanded, setIsReportExpanded] = useState(false);
+const [isHoveringReport, setIsHoveringReport] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -735,9 +745,7 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
-
-  // GSAP Animation untuk Read the Report
+// GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -747,25 +755,50 @@ useEffect(() => {
   const icon = reportIconRef.current;
   const logo = logoRef.current;
 
+  // Cek semua refs sudah siap
   if (!container || !report || !text || !icon || !logo) {
-    console.log("Refs not ready");
-    return;
+    console.log("Refs not ready - waiting for next render");
+    // Set timeout untuk cek ulang
+    const timer = setTimeout(() => {
+      const container2 = reportContainerRef.current;
+      const report2 = reportRef.current;
+      const text2 = reportTextRef.current;
+      const icon2 = reportIconRef.current;
+      const logo2 = logoRef.current;
+      
+      if (container2 && report2 && text2 && icon2 && logo2) {
+        console.log("Refs ready after timeout");
+        initializeGSAP(container2, report2, text2, icon2, logo2);
+      } else {
+        console.log("Refs still not ready");
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }
 
   console.log("GSAP Report initialized");
+  initializeGSAP(container, report, text, icon, logo);
 
-  // Text variants untuk rolling (HANYA UNTUK TOMBOL KECIL)
+  return () => {
+    // Cleanup jika diperlukan
+  };
+}, [isReportExpanded]);
+
+// Fungsi initialize GSAP
+const initializeGSAP = (container: HTMLDivElement, report: HTMLDivElement, text: HTMLSpanElement, icon: HTMLSpanElement, logo: HTMLDivElement) => {
+  // Text variants untuk rolling
   const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
   let textIndex = 0;
   let hoverTimeout: NodeJS.Timeout | null = null;
   let isHovering = false;
 
-  // ROLLING TEXT - HANYA untuk tombol kecil (bukan di dalam expanded)
+  // ROLLING TEXT - Hanya untuk tombol kecil (bukan expanded)
   const startRollingText = () => {
     if (!isReportExpanded) {
-      // Hanya untuk tombol kecil
       isHovering = true;
+      setIsHoveringReport(true);
       textIndex = 0;
+      
       gsap.to(text, {
         scale: 1.05,
         duration: 0.2,
@@ -807,12 +840,12 @@ useEffect(() => {
 
   const stopRollingText = () => {
     isHovering = false;
+    setIsHoveringReport(false);
     if (hoverTimeout) {
       clearInterval(hoverTimeout);
       hoverTimeout = null;
     }
     if (!isReportExpanded) {
-      // Kembalikan tombol kecil ke normal
       gsap.to(text, {
         scale: 1,
         duration: 0.2,
@@ -846,10 +879,11 @@ useEffect(() => {
     }
   };
 
-  // Hanya pasang event untuk rolling di tombol kecil
+  // Event listeners untuk rolling di tombol kecil
   report.addEventListener('mouseenter', startRollingText);
   report.addEventListener('mouseleave', stopRollingText);
 
+  // Cleanup function untuk event listeners
   return () => {
     report.removeEventListener('mouseenter', startRollingText);
     report.removeEventListener('mouseleave', stopRollingText);
@@ -857,7 +891,7 @@ useEffect(() => {
       clearInterval(hoverTimeout);
     }
   };
-}, [isReportExpanded]);
+};
 
 // Fungsi handle toggle
 const handleReportToggle = () => {
@@ -886,6 +920,9 @@ const handleReportToggle = () => {
     
     const expandWidth = startX;
     const expandHeight = window.innerHeight - startY;
+
+    // Reset rolling text
+    setIsHoveringReport(false);
 
     gsap.set(container, {
       position: "fixed",
@@ -957,11 +994,13 @@ const handleReportToggle = () => {
       position: "relative",
       top: "0px",
       left: "0px",
+      textAlign: "left",
     });
 
-    // Icon di KANAN ATAS - menjadi ✕
+    // Icon di KANAN ATAS - menjadi ✕ dengan ukuran lebih besar dan jelas
     gsap.to(icon, {
-      fontSize: "30px",
+      fontSize: "36px",
+      fontWeight: 300,
       rotation: 0,
       scale: 1.2,
       duration: 0.4,
@@ -970,9 +1009,13 @@ const handleReportToggle = () => {
       top: "40px",
       right: "50px",
       cursor: "pointer",
+      color: "#000000",
+      opacity: 1,
     });
 
     icon.textContent = "✕";
+    icon.style.color = "#000000";
+    icon.style.fontSize = "36px";
 
     setIsReportExpanded(true);
   } else {
@@ -995,10 +1038,12 @@ const handleReportToggle = () => {
       position: "relative",
       top: "auto",
       left: "auto",
+      textAlign: "center",
     });
 
     gsap.to(icon, {
       fontSize: "30px",
+      fontWeight: 300,
       rotation: 0,
       scale: 1,
       duration: 0.3,
@@ -1006,6 +1051,8 @@ const handleReportToggle = () => {
       position: "relative",
       top: "auto",
       right: "auto",
+      color: "#000000",
+      opacity: 1,
     });
 
     gsap.to(report, {
@@ -1067,10 +1114,13 @@ const handleReportToggle = () => {
           position: "relative",
           top: "auto",
           right: "auto",
+          fontSize: "30px",
+          fontWeight: 300,
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
         }
+        icon.textContent = "+";
       }
     });
 
@@ -1081,18 +1131,10 @@ const handleReportToggle = () => {
       pointerEvents: "auto",
     });
 
-    icon.textContent = "+";
-
-    if (text.textContent !== "Read the Report") {
-      text.textContent = "Read the Report";
-    }
-
     setIsReportExpanded(false);
   }
 };
 
-
-  
 
 
 
@@ -1975,7 +2017,7 @@ const handleReportToggle = () => {
 
      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-      <div
+     <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2040,8 +2082,18 @@ const handleReportToggle = () => {
       flexDirection: isReportExpanded ? "column" : "row",
       alignItems: isReportExpanded ? "flex-start" : "center",
     }}
+    onMouseEnter={() => {
+      if (!isReportExpanded) {
+        setIsHoveringReport(true);
+      }
+    }}
+    onMouseLeave={() => {
+      if (!isReportExpanded) {
+        setIsHoveringReport(false);
+      }
+    }}
   >
-    {/* Teks "Read the Report" - di KIRI ATAS saat expanded, ukuran SAMA dengan tombol kecil */}
+    {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
     <span
       ref={reportTextRef}
       style={{
@@ -2053,20 +2105,24 @@ const handleReportToggle = () => {
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "relative" : "relative",
+        position: isReportExpanded ? "absolute" : "relative",
+        top: isReportExpanded ? "40px" : "auto",
+        left: isReportExpanded ? "50px" : "auto",
         zIndex: 2,
-        padding: isReportExpanded ? "0" : "0",
+        padding: "0",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
+        textAlign: isReportExpanded ? "left" : "center",
+        transition: "all 0.3s ease",
       }}
     >
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded */}
+    {/* Icon Close - di KANAN ATAS saat expanded, terlihat jelas */}
     <span
       ref={reportIconRef}
       style={{
-        fontSize: "30px",
+        fontSize: isReportExpanded ? "36px" : "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
@@ -2078,22 +2134,71 @@ const handleReportToggle = () => {
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "0" : "0",
+        padding: isReportExpanded ? "8px" : "0",
+        borderRadius: isReportExpanded ? "8px" : "0",
+        backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
+        transition: "all 0.3s ease",
       }}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
+        console.log("Close button clicked");
         handleReportToggle();
+      }}
+      onMouseEnter={(e) => {
+        if (isReportExpanded) {
+          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
+          e.currentTarget.style.transform = "scale(1.1)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (isReportExpanded) {
+          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
+          e.currentTarget.style.transform = "scale(1)";
+        }
       }}
     >
       {isReportExpanded ? "✕" : "+"}
     </span>
+
+    {/* Konten tambahan saat expanded */}
+    {isReportExpanded && (
+      <div
+        style={{
+          position: "absolute",
+          top: "120px",
+          left: "50px",
+          right: "50px",
+          bottom: "60px",
+          overflowY: "auto",
+          color: "#000000",
+          fontSize: "16px",
+          lineHeight: 1.8,
+          fontFamily: "Inter, 'Inter Fallback'",
+        }}
+      >
+        <h2 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "20px" }}>
+          Laporan Menuru'26
+        </h2>
+        <p style={{ marginBottom: "16px" }}>
+          Ini adalah laporan lengkap tentang perkembangan dan pencapaian Menuru'26.
+        </p>
+        <p style={{ marginBottom: "16px" }}>
+          Kami telah mencapai berbagai milestone penting dalam perjalanan kami.
+        </p>
+        <ul style={{ marginBottom: "16px", paddingLeft: "20px" }}>
+          <li style={{ marginBottom: "8px" }}>✓ Pencapaian 1</li>
+          <li style={{ marginBottom: "8px" }}>✓ Pencapaian 2</li>
+          <li style={{ marginBottom: "8px" }}>✓ Pencapaian 3</li>
+        </ul>
+        <p>
+          Terima kasih atas dukungan Anda.
+        </p>
+      </div>
+    )}
   </div>
 </div>
-
-
-
 
       
       {/* User Status & Music Widget - Pojok Kanan Atas */}
@@ -5153,6 +5258,9 @@ const handleReportToggle = () => {
       </div>
 
       <style jsx>{`
+
+
+      
         @keyframes marqueeMundur {
           0% {
             transform: translateX(0%);
