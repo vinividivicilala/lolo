@@ -893,7 +893,7 @@ useEffect(() => {
 }, [isReportExpanded]);
 
 
-  const handleReportToggle = () => {
+ const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
@@ -919,9 +919,9 @@ useEffect(() => {
       left: `${startX}px`,
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
+      zIndex: 10000,
       backgroundColor: "#FE7141",
-      overflow: "hidden",
+      overflow: "visible",
       borderRadius: "0px",
     });
 
@@ -946,15 +946,15 @@ useEffect(() => {
     });
 
     gsap.to(container, {
-      width: `${expandWidth + buttonWidth}px`,
-      height: `${expandHeight}px`,
+      width: "100vw",
+      height: "100vh",
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: `${startY}px`,
+      top: "0px",
       left: "0px",
-      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
+      zIndex: 10000,
       borderRadius: "0px",
     });
 
@@ -979,29 +979,37 @@ useEffect(() => {
       ease: "power2.out",
       color: "#000000",
       scale: 1,
-      position: "absolute",
+      position: "fixed",
       top: "50px",
       left: "50px",
       textAlign: "left",
+      zIndex: 10001,
     });
 
+    // TOMBOL CLOSE - DIBUAT JELAS DENGAN POSITION FIXED
     gsap.to(icon, {
       fontSize: "40px",
-      fontWeight: 300,
+      fontWeight: 700,
       rotation: 0,
       scale: 1,
       duration: 0.4,
       ease: "back.out(1.7)",
-      position: "absolute",
-      top: "45px",
-      right: "50px",
+      position: "fixed",
+      top: "40px",
+      right: "40px",
       cursor: "pointer",
       color: "#000000",
       opacity: 1,
-      backgroundColor: "rgba(0,0,0,0.1)",
-      padding: "10px 16px",
-      borderRadius: "8px",
-      border: "2px solid rgba(0,0,0,0.15)",
+      backgroundColor: "rgba(255,255,255,0.95)",
+      padding: "12px 20px",
+      borderRadius: "12px",
+      border: "3px solid #000000",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+      zIndex: 10002,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      lineHeight: 1,
     });
 
     icon.textContent = "✕";
@@ -1026,6 +1034,7 @@ useEffect(() => {
       top: "auto",
       left: "auto",
       textAlign: "center",
+      zIndex: 2,
     });
 
     gsap.to(icon, {
@@ -1044,6 +1053,8 @@ useEffect(() => {
       padding: "0",
       borderRadius: "0px",
       border: "none",
+      boxShadow: "none",
+      zIndex: 30,
     });
 
     gsap.to(report, {
@@ -1072,7 +1083,7 @@ useEffect(() => {
       position: "fixed",
       top: `${endY}px`,
       left: `${endX}px`,
-      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
+      zIndex: 10000,
       borderRadius: "0px",
       onComplete: () => {
         gsap.set(container, {
@@ -1111,6 +1122,8 @@ useEffect(() => {
           padding: "0",
           borderRadius: "0px",
           border: "none",
+          boxShadow: "none",
+          zIndex: 30,
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1129,7 +1142,6 @@ useEffect(() => {
     setIsReportExpanded(false);
   }
 };
-
 
 
 
@@ -2012,7 +2024,7 @@ useEffect(() => {
 
     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-   <div
+      <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2022,7 +2034,7 @@ useEffect(() => {
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    overflow: "hidden",
+    overflow: "visible",
     backgroundColor: "transparent",
   }}
 >
@@ -2067,9 +2079,9 @@ useEffect(() => {
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
+      height: isReportExpanded ? "100vh" : "48px",
+      width: isReportExpanded ? "100vw" : "auto",
+      minWidth: isReportExpanded ? "100vw" : "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
@@ -2090,10 +2102,10 @@ useEffect(() => {
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
+        position: isReportExpanded ? "fixed" : "relative",
         top: isReportExpanded ? "50px" : "auto",
         left: isReportExpanded ? "50px" : "auto",
-        zIndex: 2,
+        zIndex: isReportExpanded ? 10001 : 2,
         padding: "0",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         textAlign: isReportExpanded ? "left" : "center",
@@ -2104,48 +2116,53 @@ useEffect(() => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE - TETAP DI DALAM PANEL */}
+    {/* TOMBOL CLOSE - PASTI TERLIHAT */}
     <span
       ref={reportIconRef}
       style={{
         fontSize: isReportExpanded ? "40px" : "30px",
-        fontWeight: 300,
+        fontWeight: isReportExpanded ? 700 : 300,
         color: "#000000",
         lineHeight: 1,
-        display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "45px" : "auto",
-        right: isReportExpanded ? "50px" : "auto",
-        zIndex: 30,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: isReportExpanded ? "fixed" : "relative",
+        top: isReportExpanded ? "40px" : "auto",
+        right: isReportExpanded ? "40px" : "auto",
+        zIndex: isReportExpanded ? 10002 : 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "10px 16px" : "0",
-        borderRadius: isReportExpanded ? "8px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
-        border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
+        padding: isReportExpanded ? "12px 20px" : "0",
+        borderRadius: isReportExpanded ? "12px" : "0px",
+        backgroundColor: isReportExpanded ? "rgba(255,255,255,0.95)" : "transparent",
+        border: isReportExpanded ? "3px solid #000000" : "none",
+        boxShadow: isReportExpanded ? "0 8px 30px rgba(0,0,0,0.2)" : "none",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         transition: "all 0.3s ease",
+        minWidth: isReportExpanded ? "60px" : "auto",
+        minHeight: isReportExpanded ? "60px" : "auto",
       }}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
         if (isReportExpanded) {
-          handleReportToggle(); // <-- FUNGSI UNTUK MENUTUP PANEL
+          handleReportToggle();
         }
       }}
       onMouseEnter={(e) => {
         if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
+          e.currentTarget.style.backgroundColor = "#ffffff";
+          e.currentTarget.style.transform = "scale(1.08)";
+          e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)";
         }
       }}
       onMouseLeave={(e) => {
         if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
+          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.95)";
           e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
+          e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.2)";
         }
       }}
     >
@@ -2153,6 +2170,7 @@ useEffect(() => {
     </span>
   </div>
 </div>
+
 
 
 
