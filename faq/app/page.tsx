@@ -430,8 +430,6 @@ export default function HomePage(): React.JSX.Element {
   const plusIconRef = useRef<HTMLSpanElement | null>(null);
 
 
-
-
 // Report GSAP Refs
 const reportContainerRef = useRef<HTMLDivElement | null>(null);
 const reportRef = useRef<HTMLDivElement | null>(null);
@@ -439,9 +437,6 @@ const reportTextRef = useRef<HTMLSpanElement | null>(null);
 const reportIconRef = useRef<HTMLSpanElement | null>(null);
 const logoRef = useRef<HTMLDivElement | null>(null);
 const [isReportExpanded, setIsReportExpanded] = useState(false);
-const [isHoveringReport, setIsHoveringReport] = useState(false);
-
-
 
 
 
@@ -777,7 +772,7 @@ const [isHoveringReport, setIsHoveringReport] = useState(false);
   }, []);
 
 
-// GSAP Animation untuk Read the Report
+// GSAP Animation untuk Read the Report - Rolling Text
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -785,7 +780,12 @@ useEffect(() => {
   const text = reportTextRef.current;
   const icon = reportIconRef.current;
 
-  if (!report || !text || !icon) return;
+  if (!report || !text || !icon) {
+    console.log("Refs not ready");
+    return;
+  }
+
+  console.log("GSAP Report initialized - Rolling Text Active");
 
   // Text variants untuk rolling
   const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
@@ -878,7 +878,7 @@ useEffect(() => {
     }
   };
 
-  // Event listeners untuk hover
+  // Event listeners untuk hover - ROLLING TEXT AKTIF
   report.addEventListener('mouseenter', startRollingText);
   report.addEventListener('mouseleave', stopRollingText);
 
@@ -891,18 +891,25 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi toggle expanded
+// Fungsi toggle expanded - TOMBOL CLOSE
 const handleReportToggle = () => {
+  console.log("Toggle clicked, isReportExpanded:", isReportExpanded);
+  
   const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
   const icon = reportIconRef.current;
   const logo = logoRef.current;
 
-  if (!container || !report || !text || !icon || !logo) return;
+  if (!container || !report || !text || !icon || !logo) {
+    console.log("Refs not ready for toggle");
+    return;
+  }
 
   if (!isReportExpanded) {
     // EXPAND - menjadi full screen
+    console.log("Expanding...");
+    
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -971,7 +978,7 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     });
 
-    // Teks di KIRI ATAS
+    // Teks di KIRI ATAS - POSISI KIRI
     gsap.to(text, {
       fontSize: "24px",
       fontWeight: 600,
@@ -985,7 +992,7 @@ const handleReportToggle = () => {
       textAlign: "left",
     });
 
-    // Icon Close di KANAN ATAS
+    // Icon Close di KANAN ATAS - TOMBOL CLOSE
     gsap.to(icon, {
       fontSize: "40px",
       fontWeight: 300,
@@ -1006,10 +1013,14 @@ const handleReportToggle = () => {
     });
 
     icon.textContent = "✕";
+    icon.style.cursor = "pointer";
+    icon.style.pointerEvents = "auto";
 
     setIsReportExpanded(true);
   } else {
     // COLLAPSE - kembali ke ukuran kecil
+    console.log("Collapsing...");
+    
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1045,6 +1056,7 @@ const handleReportToggle = () => {
       padding: "0",
       borderRadius: "0px",
       border: "none",
+      cursor: "pointer",
     });
 
     gsap.to(report, {
@@ -1112,6 +1124,7 @@ const handleReportToggle = () => {
           padding: "0",
           borderRadius: "0px",
           border: "none",
+          cursor: "pointer",
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1130,7 +1143,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
 
 
 
@@ -2075,6 +2087,12 @@ const handleReportToggle = () => {
       flexDirection: isReportExpanded ? "column" : "row",
       alignItems: isReportExpanded ? "flex-start" : "center",
     }}
+    onClick={() => {
+      // Klik pada area orange untuk toggle (hanya jika tidak expanded)
+      if (!isReportExpanded) {
+        handleReportToggle();
+      }
+    }}
   >
     {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
     <span
@@ -2101,7 +2119,7 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded */}
+    {/* Icon Close - di KANAN ATAS saat expanded - TOMBOL CLOSE */}
     <span
       ref={reportIconRef}
       style={{
@@ -2127,6 +2145,7 @@ const handleReportToggle = () => {
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
+        console.log("Close button clicked");
         handleReportToggle();
       }}
       onMouseEnter={(e) => {
@@ -2148,6 +2167,8 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
+
+      
 
 
 
