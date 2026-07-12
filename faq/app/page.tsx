@@ -904,6 +904,8 @@ const handleReportToggle = () => {
 
   if (!isReportExpanded) {
     // EXPAND
+    setShowCloseButton(true);
+    
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -921,7 +923,7 @@ const handleReportToggle = () => {
       height: `${buttonHeight}px`,
       zIndex: 1000,
       backgroundColor: "#FE7141",
-      overflow: "hidden",
+      overflow: "visible",
       borderRadius: "0px",
     });
 
@@ -946,13 +948,13 @@ const handleReportToggle = () => {
     });
 
     gsap.to(container, {
-      width: `${expandWidth + buttonWidth}px`,
-      height: `${expandHeight}px`,
+      width: "100vw",
+      height: "100vh",
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: `${startY}px`,
+      top: "0px",
       left: "0px",
       zIndex: 1000,
       borderRadius: "0px",
@@ -973,47 +975,31 @@ const handleReportToggle = () => {
     });
 
     gsap.to(text, {
-      fontSize: "24px",
-      fontWeight: 600,
+      fontSize: "32px",
+      fontWeight: 700,
       duration: 0.4,
       ease: "power2.out",
       color: "#000000",
       scale: 1,
-      position: "absolute",
-      top: "50px",
-      left: "50px",
+      position: "fixed",
+      top: "60px",
+      left: "60px",
       textAlign: "left",
+      zIndex: 1001,
     });
 
+    // Sembunyikan icon asli
     gsap.to(icon, {
-  width: "110px",
-  height: "44px",
-  fontSize: "15px",
-  fontWeight: 600,
-  rotation: 0,
-  scale: 1,
-  duration: 0.4,
-  ease: "power3.out",
-  position: "absolute",
-  top: "40px",
-  right: "40px",
-  cursor: "pointer",
-  color: "#FFFFFF",
-  opacity: 1,
-  backgroundColor: "#000000",
-  padding: "0",
-  borderRadius: "999px",
-  border: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
-
-icon.textContent = "CLOSE";
+      opacity: 0,
+      duration: 0.2,
+      ease: "power2.out",
+    });
 
     setIsReportExpanded(true);
   } else {
     // COLLAPSE
+    setShowCloseButton(false);
+    
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1031,27 +1017,23 @@ icon.textContent = "CLOSE";
       top: "auto",
       left: "auto",
       textAlign: "center",
+      zIndex: 2,
     });
 
-   gsap.to(icon, {
-  width: "auto",
-  height: "auto",
-  fontSize: "30px",
-  fontWeight: 300,
-  rotation: 0,
-  scale: 1,
-  duration: 0.3,
-  ease: "power2.out",
-  position: "relative",
-  top: "auto",
-  right: "auto",
-  color: "#000000",
-  opacity: 1,
-  backgroundColor: "transparent",
-  padding: "0",
-  borderRadius: "0px",
-  border: "none",
-});
+    gsap.to(icon, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+      position: "relative",
+      top: "auto",
+      right: "auto",
+      fontSize: "30px",
+      fontWeight: 300,
+      backgroundColor: "transparent",
+      padding: "0",
+      borderRadius: "0px",
+      border: "none",
+    });
 
     gsap.to(report, {
       width: "auto",
@@ -1090,7 +1072,7 @@ icon.textContent = "CLOSE";
           height: "auto",
           zIndex: 10,
           backgroundColor: "transparent",
-          overflow: "hidden",
+          overflow: "visible",
         });
         gsap.set(report, {
           width: "auto",
@@ -1108,20 +1090,18 @@ icon.textContent = "CLOSE";
           opacity: 1,
           pointerEvents: "auto",
         });
-       gsap.set(icon, {
-  position: "relative",
-  top: "auto",
-  right: "auto",
-  width: "auto",
-  height: "auto",
-  fontSize: "30px",
-  fontWeight: 300,
-  color: "#000000",
-  backgroundColor: "transparent",
-  padding: "0",
-  borderRadius: "0px",
-  border: "none",
-});
+        gsap.set(icon, {
+          opacity: 1,
+          position: "relative",
+          top: "auto",
+          right: "auto",
+          fontSize: "30px",
+          fontWeight: 300,
+          backgroundColor: "transparent",
+          padding: "0",
+          borderRadius: "0px",
+          border: "none",
+        });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
         }
@@ -1139,7 +1119,6 @@ icon.textContent = "CLOSE";
     setIsReportExpanded(false);
   }
 };
-  
   
 
   
@@ -2015,7 +1994,7 @@ icon.textContent = "CLOSE";
 
      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-<div
+      <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2025,7 +2004,7 @@ icon.textContent = "CLOSE";
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    overflow: "hidden",
+    overflow: "visible",
     backgroundColor: "transparent",
   }}
 >
@@ -2070,9 +2049,9 @@ icon.textContent = "CLOSE";
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
+      height: isReportExpanded ? "100vh" : "48px",
+      width: isReportExpanded ? "100vw" : "auto",
+      minWidth: isReportExpanded ? "100vw" : "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
@@ -2085,94 +2064,117 @@ icon.textContent = "CLOSE";
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "24px" : "18px",
-        fontWeight: 600,
+        fontSize: isReportExpanded ? "32px" : "18px",
+        fontWeight: isReportExpanded ? 700 : 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
-        zIndex: 2,
+        position: isReportExpanded ? "fixed" : "relative",
+        top: isReportExpanded ? "60px" : "auto",
+        left: isReportExpanded ? "60px" : "auto",
+        zIndex: isReportExpanded ? 1001 : 2,
         padding: "0",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         textAlign: isReportExpanded ? "left" : "center",
         transition: "all 0.3s ease",
+        pointerEvents: isReportExpanded ? "none" : "auto",
       }}
     >
       Read the Report
     </span>
+    
+    <span
+      ref={reportIconRef}
+      style={{
+        fontSize: "30px",
+        fontWeight: 300,
+        color: "#000000",
+        lineHeight: 1,
+        display: "inline-block",
+        position: isReportExpanded ? "fixed" : "relative",
+        top: isReportExpanded ? "120px" : "auto",
+        right: isReportExpanded ? "50px" : "auto",
+        zIndex: isReportExpanded ? 1001 : 30,
+        cursor: "pointer",
+        pointerEvents: isReportExpanded ? "none" : "auto",
+        userSelect: "none",
+        padding: "0",
+        backgroundColor: "transparent",
+        border: "none",
+        alignSelf: isReportExpanded ? "flex-start" : "auto",
+        transition: "all 0.3s ease",
+        opacity: isReportExpanded ? 0 : 1,
+      }}
+    >
+      {isReportExpanded ? "" : "+"}
+    </span>
 
-    {/* Tombol + saat kecil */}
-    {!isReportExpanded && (
-      <span
-        ref={reportIconRef}
-        style={{
-          fontSize: "30px",
-          fontWeight: 300,
-          color: "#000000",
-          lineHeight: 1,
-          display: "inline-block",
-          cursor: "pointer",
-          userSelect: "none",
-          transition: "all 0.3s ease",
-        }}
-      >
-        +
-      </span>
-    )}
-
-    {/* Tombol CLOSE saat panel expand */}
+    {/* TOMBOL CLOSE - DI DALAM PANEL BG OREN */}
     {isReportExpanded && (
-      <button
+      <div
+        style={{
+          position: "fixed",
+          top: "50px",
+          right: "50px",
+          zIndex: 10000,
+          cursor: "pointer",
+          backgroundColor: "#ffffff",
+          padding: "16px 24px",
+          borderRadius: "14px",
+          border: "3px solid #000000",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "12px",
+          transition: "all 0.3s ease",
+          minWidth: "120px",
+        }}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           handleReportToggle();
         }}
-        style={{
-          position: "absolute",
-          top: "40px",
-          right: "40px",
-          zIndex: 100,
-
-          height: "48px",
-          padding: "0 24px",
-
-          backgroundColor: "#000000",
-          color: "#FFFFFF",
-
-          border: "none",
-          borderRadius: "999px",
-
-          fontSize: "15px",
-          fontWeight: 600,
-          fontFamily: "Inter, 'Inter Fallback'",
-
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-
-          cursor: "pointer",
-          transition: "all 0.25s ease",
-        }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#1f1f1f";
+          e.currentTarget.style.backgroundColor = "#f0f0f0";
           e.currentTarget.style.transform = "scale(1.05)";
+          e.currentTarget.style.boxShadow = "0 12px 50px rgba(0,0,0,0.4)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#000000";
+          e.currentTarget.style.backgroundColor = "#ffffff";
           e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.boxShadow = "0 8px 40px rgba(0,0,0,0.3)";
         }}
       >
-        CLOSE
-      </button>
+        <span
+          style={{
+            fontSize: "30px",
+            fontWeight: 700,
+            color: "#000000",
+            lineHeight: 1,
+            fontFamily: "Inter, 'Inter Fallback'",
+          }}
+        >
+          ✕
+        </span>
+        <span
+          style={{
+            fontSize: "18px",
+            fontWeight: 600,
+            color: "#000000",
+            fontFamily: "Inter, 'Inter Fallback'",
+          }}
+        >
+          Close
+        </span>
+      </div>
     )}
   </div>
 </div>
+
 
 
 
