@@ -733,167 +733,361 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-// GSAP Animation untuk Read the Report - PERBAIKAN DENGAN useLayoutEffect
-useLayoutEffect(() => {
+// GSAP Animation untuk Read the Report
+useEffect(() => {
   if (typeof window === "undefined") return;
 
-  // Fungsi untuk setup GSAP
-  const setupGSAP = () => {
-    const container = reportContainerRef.current;
-    const report = reportRef.current;
-    const text = reportTextRef.current;
-    const icon = reportIconRef.current;
-    const logo = logoRef.current;
+  const container = reportContainerRef.current;
+  const report = reportRef.current;
+  const text = reportTextRef.current;
+  const icon = reportIconRef.current;
+  const logo = logoRef.current;
 
-    // Log untuk debugging
-    console.log("Checking refs:", { 
-      container: !!container, 
-      report: !!report, 
-      text: !!text, 
-      icon: !!icon, 
-      logo: !!logo 
-    });
+  if (!container || !report || !text || !icon || !logo) {
+    console.log("Refs not ready");
+    return;
+  }
 
-    if (!container || !report || !text || !icon || !logo) {
-      console.log("Refs not ready, will retry...");
-      return false;
+  console.log("GSAP Report initialized");
+
+  // Text variants untuk rolling (HANYA UNTUK TOMBOL KECIL)
+  const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
+  let textIndex = 0;
+  let hoverTimeout: NodeJS.Timeout | null = null;
+  let isHovering = false;
+
+  // ROLLING TEXT - HANYA untuk tombol kecil (bukan di dalam expanded)
+  const startRollingText = () => {
+    if (!isReportExpanded) {
+      // Hanya untuk tombol kecil
+      isHovering = true;
+      textIndex = 0;
+      gsap.to(text, {
+        scale: 1.05,
+        duration: 0.2,
+        ease: "power2.out",
+      });
+      gsap.to(icon, {
+        rotation: 90,
+        duration: 0.4,
+        ease: "back.out(1.7)",
+        scale: 1.2,
+      });
+      
+      if (!hoverTimeout) {
+        hoverTimeout = setInterval(() => {
+          if (text && isHovering && !isReportExpanded) {
+            textIndex = (textIndex + 1) % textVariants.length;
+            gsap.to(text, {
+              opacity: 0,
+              y: -5,
+              duration: 0.15,
+              ease: "power2.out",
+              onComplete: () => {
+                if (text && isHovering && !isReportExpanded) {
+                  text.textContent = textVariants[textIndex];
+                  gsap.to(text, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.15,
+                    ease: "power2.out",
+                  });
+                }
+              }
+            });
+          }
+        }, 600);
+      }
     }
+  };
 
-    console.log("GSAP Report initialized successfully!");
-
-    // Text variants untuk rolling (HANYA UNTUK TOMBOL KECIL)
-    const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
-    let textIndex = 0;
-    let hoverTimeout: NodeJS.Timeout | null = null;
-    let isHovering = false;
-
-    // Hapus event listener lama jika ada
-    report.removeEventListener('mouseenter', startRollingText);
-    report.removeEventListener('mouseleave', stopRollingText);
-
-    // ROLLING TEXT - HANYA untuk tombol kecil
-    function startRollingText() {
-      if (!isReportExpanded) {
-        isHovering = true;
-        textIndex = 0;
+  const stopRollingText = () => {
+    isHovering = false;
+    if (hoverTimeout) {
+      clearInterval(hoverTimeout);
+      hoverTimeout = null;
+    }
+    if (!isReportExpanded) {
+      // Kembalikan tombol kecil ke normal
+      gsap.to(text, {
+        scale: 1,
+        duration: 0.2,
+        ease: "power2.out",
+      });
+      gsap.to(icon, {
+        rotation: 0,
+        duration: 0.4,
+        ease: "back.out(1.7)",
+        scale: 1,
+      });
+      if (text && text.textContent !== textVariants[0]) {
         gsap.to(text, {
-          scale: 1.05,
-          duration: 0.2,
+          opacity: 0,
+          y: -5,
+          duration: 0.15,
           ease: "power2.out",
-        });
-        gsap.to(icon, {
-          rotation: 90,
-          duration: 0.4,
-          ease: "back.out(1.7)",
-          scale: 1.2,
-        });
-        
-        if (!hoverTimeout) {
-          hoverTimeout = setInterval(() => {
-            if (text && isHovering && !isReportExpanded) {
-              textIndex = (textIndex + 1) % textVariants.length;
+          onComplete: () => {
+            if (text && !isReportExpanded) {
+              text.textContent = textVariants[0];
               gsap.to(text, {
-                opacity: 0,
-                y: -5,
+                opacity: 1,
+                y: 0,
                 duration: 0.15,
                 ease: "power2.out",
-                onComplete: () => {
-                  if (text && isHovering && !isReportExpanded) {
-                    text.textContent = textVariants[textIndex];
-                    gsap.to(text, {
-                      opacity: 1,
-                      y: 0,
-                      duration: 0.15,
-                      ease: "power2.out",
-                    });
-                  }
-                }
               });
             }
-          }, 600);
-        }
-      }
-    }
-
-    function stopRollingText() {
-      isHovering = false;
-      if (hoverTimeout) {
-        clearInterval(hoverTimeout);
-        hoverTimeout = null;
-      }
-      if (!isReportExpanded) {
-        gsap.to(text, {
-          scale: 1,
-          duration: 0.2,
-          ease: "power2.out",
+          }
         });
-        gsap.to(icon, {
-          rotation: 0,
-          duration: 0.4,
-          ease: "back.out(1.7)",
-          scale: 1,
-        });
-        if (text && text.textContent !== textVariants[0]) {
-          gsap.to(text, {
-            opacity: 0,
-            y: -5,
-            duration: 0.15,
-            ease: "power2.out",
-            onComplete: () => {
-              if (text && !isReportExpanded) {
-                text.textContent = textVariants[0];
-                gsap.to(text, {
-                  opacity: 1,
-                  y: 0,
-                  duration: 0.15,
-                  ease: "power2.out",
-                });
-              }
-            }
-          });
-        }
       }
-    }
-
-    // Pasang event listener
-    report.addEventListener('mouseenter', startRollingText);
-    report.addEventListener('mouseleave', stopRollingText);
-
-    // Cleanup function untuk useEffect
-    return () => {
-      report.removeEventListener('mouseenter', startRollingText);
-      report.removeEventListener('mouseleave', stopRollingText);
-      if (hoverTimeout) {
-        clearInterval(hoverTimeout);
-      }
-    };
-  };
-
-  // Coba setup GSAP dengan delay
-  let retryCount = 0;
-  const maxRetries = 5;
-  
-  const trySetup = () => {
-    const success = setupGSAP();
-    if (!success && retryCount < maxRetries) {
-      retryCount++;
-      console.log(`Retry ${retryCount} of ${maxRetries}...`);
-      setTimeout(trySetup, 300);
-    } else if (!success) {
-      console.log("Failed to initialize GSAP after max retries");
     }
   };
 
-  // Mulai dengan delay 100ms
-  const timer = setTimeout(trySetup, 100);
+  // Hanya pasang event untuk rolling di tombol kecil
+  report.addEventListener('mouseenter', startRollingText);
+  report.addEventListener('mouseleave', stopRollingText);
 
   return () => {
-    clearTimeout(timer);
+    report.removeEventListener('mouseenter', startRollingText);
+    report.removeEventListener('mouseleave', stopRollingText);
+    if (hoverTimeout) {
+      clearInterval(hoverTimeout);
+    }
   };
 }, [isReportExpanded]);
 
-
+// Fungsi handle toggle
+const handleReportToggle = () => {
+  console.log("Toggle clicked, current state:", isReportExpanded);
   
+  const container = reportContainerRef.current;
+  const report = reportRef.current;
+  const text = reportTextRef.current;
+  const icon = reportIconRef.current;
+  const logo = logoRef.current;
+
+  if (!container || !report || !text || !icon || !logo) {
+    console.log("Refs not ready for toggle");
+    return;
+  }
+
+  if (!isReportExpanded) {
+    // EXPAND
+    console.log("Expanding...");
+    
+    const rect = report.getBoundingClientRect();
+    const startX = rect.left;
+    const startY = rect.top;
+    const buttonWidth = rect.width;
+    const buttonHeight = rect.height;
+    
+    const expandWidth = startX;
+    const expandHeight = window.innerHeight - startY;
+
+    gsap.set(container, {
+      position: "fixed",
+      top: `${startY}px`,
+      left: `${startX}px`,
+      width: `${buttonWidth}px`,
+      height: `${buttonHeight}px`,
+      zIndex: 100,
+      backgroundColor: "#FE7141",
+      overflow: "hidden",
+      borderRadius: "0px",
+    });
+
+    gsap.set(report, {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      padding: "20px 30px",
+      backgroundColor: "#FE7141",
+      borderRadius: "0px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+    });
+
+    gsap.to(logo, {
+      opacity: 0,
+      duration: 0.1,
+      ease: "power2.out",
+      pointerEvents: "none",
+    });
+
+    gsap.to(container, {
+      width: `${expandWidth + buttonWidth}px`,
+      height: `${expandHeight}px`,
+      duration: 0.8,
+      ease: "power3.inOut",
+      backgroundColor: "#FE7141",
+      position: "fixed",
+      top: `${startY}px`,
+      left: "0px",
+      zIndex: 100,
+      borderRadius: "0px",
+    });
+
+    gsap.to(report, {
+      width: "100%",
+      height: "100%",
+      padding: "40px 50px",
+      backgroundColor: "#FE7141",
+      duration: 0.6,
+      ease: "power3.out",
+      borderRadius: "0px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+    });
+
+    // Teks di KIRI ATAS - ukuran SAMA dengan tombol kecil (18px)
+    gsap.to(text, {
+      fontSize: "18px",
+      fontWeight: 600,
+      duration: 0.4,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
+      position: "relative",
+      top: "0px",
+      left: "0px",
+    });
+
+    // Icon di KANAN ATAS - menjadi ✕
+    gsap.to(icon, {
+      fontSize: "30px",
+      rotation: 0,
+      scale: 1.2,
+      duration: 0.4,
+      ease: "back.out(1.7)",
+      position: "absolute",
+      top: "40px",
+      right: "50px",
+      cursor: "pointer",
+    });
+
+    icon.textContent = "✕";
+
+    setIsReportExpanded(true);
+  } else {
+    // COLLAPSE
+    console.log("Collapsing...");
+
+    const rect = report.getBoundingClientRect();
+    const endX = rect.left;
+    const endY = rect.top;
+    const buttonWidth = rect.width;
+    const buttonHeight = rect.height;
+
+    gsap.to(text, {
+      fontSize: "18px",
+      fontWeight: 600,
+      duration: 0.3,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
+      position: "relative",
+      top: "auto",
+      left: "auto",
+    });
+
+    gsap.to(icon, {
+      fontSize: "30px",
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.out",
+      position: "relative",
+      top: "auto",
+      right: "auto",
+    });
+
+    gsap.to(report, {
+      width: "auto",
+      height: "48px",
+      padding: "6px 35px 6px 200px",
+      justifyContent: "flex-end",
+      gap: "6px",
+      backgroundColor: "#FE7141",
+      duration: 0.5,
+      ease: "power3.out",
+      minWidth: "450px",
+      position: "relative",
+      borderRadius: "0px",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+    });
+
+    gsap.to(container, {
+      width: `${buttonWidth}px`,
+      height: `${buttonHeight}px`,
+      duration: 0.7,
+      ease: "power3.inOut",
+      backgroundColor: "#FE7141",
+      position: "fixed",
+      top: `${endY}px`,
+      left: `${endX}px`,
+      zIndex: 100,
+      borderRadius: "0px",
+      onComplete: () => {
+        gsap.set(container, {
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          width: "auto",
+          height: "auto",
+          zIndex: 10,
+          backgroundColor: "transparent",
+          overflow: "visible",
+        });
+        gsap.set(report, {
+          width: "auto",
+          height: "48px",
+          padding: "6px 35px 6px 200px",
+          justifyContent: "flex-end",
+          gap: "6px",
+          minWidth: "450px",
+          position: "relative",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+        });
+        gsap.set(logo, {
+          opacity: 1,
+          pointerEvents: "auto",
+        });
+        gsap.set(icon, {
+          position: "relative",
+          top: "auto",
+          right: "auto",
+        });
+        if (text.textContent !== "Read the Report") {
+          text.textContent = "Read the Report";
+        }
+      }
+    });
+
+    gsap.to(logo, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+      pointerEvents: "auto",
+    });
+
+    icon.textContent = "+";
+
+    if (text.textContent !== "Read the Report") {
+      text.textContent = "Read the Report";
+    }
+
+    setIsReportExpanded(false);
+  }
+};
+
+
   
 
 
@@ -1775,7 +1969,7 @@ useLayoutEffect(() => {
       }}
     >
 
-    {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -1842,7 +2036,7 @@ useLayoutEffect(() => {
       alignItems: isReportExpanded ? "flex-start" : "center",
     }}
   >
-    {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
+    {/* Teks "Read the Report" - di KIRI ATAS saat expanded, ukuran SAMA dengan tombol kecil */}
     <span
       ref={reportTextRef}
       style={{
@@ -1892,6 +2086,8 @@ useLayoutEffect(() => {
     </span>
   </div>
 </div>
+
+
 
 
       
