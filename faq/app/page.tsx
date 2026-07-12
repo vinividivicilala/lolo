@@ -893,7 +893,6 @@ useEffect(() => {
 }, [isReportExpanded]);
 
 
-
   const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -920,7 +919,7 @@ useEffect(() => {
       left: `${startX}px`,
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      zIndex: 100,
+      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
       backgroundColor: "#FE7141",
       overflow: "hidden",
       borderRadius: "0px",
@@ -955,7 +954,7 @@ useEffect(() => {
       position: "fixed",
       top: `${startY}px`,
       left: "0px",
-      zIndex: 100,
+      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
       borderRadius: "0px",
     });
 
@@ -986,7 +985,6 @@ useEffect(() => {
       textAlign: "left",
     });
 
-    // ICON - TOMBOL CLOSE DENGAN Z-INDEX 10000
     gsap.to(icon, {
       fontSize: "40px",
       fontWeight: 300,
@@ -1004,7 +1002,6 @@ useEffect(() => {
       padding: "10px 16px",
       borderRadius: "8px",
       border: "2px solid rgba(0,0,0,0.15)",
-      zIndex: 10000,
     });
 
     icon.textContent = "✕";
@@ -1047,7 +1044,6 @@ useEffect(() => {
       padding: "0",
       borderRadius: "0px",
       border: "none",
-      zIndex: 30,
     });
 
     gsap.to(report, {
@@ -1076,7 +1072,7 @@ useEffect(() => {
       position: "fixed",
       top: `${endY}px`,
       left: `${endX}px`,
-      zIndex: 100,
+      zIndex: 10000, // <-- Z-INDEX 10000 PADA PANEL
       borderRadius: "0px",
       onComplete: () => {
         gsap.set(container, {
@@ -1115,7 +1111,6 @@ useEffect(() => {
           padding: "0",
           borderRadius: "0px",
           border: "none",
-          zIndex: 30,
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1134,6 +1129,8 @@ useEffect(() => {
     setIsReportExpanded(false);
   }
 };
+
+
 
 
 
@@ -2015,7 +2012,7 @@ useEffect(() => {
 
     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-      <div
+   <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2107,7 +2104,7 @@ useEffect(() => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE - Z-INDEX 10000 AGAR DI ATAS SEMUA ELEMEN */}
+    {/* TOMBOL CLOSE - TETAP DI DALAM PANEL */}
     <span
       ref={reportIconRef}
       style={{
@@ -2119,7 +2116,7 @@ useEffect(() => {
         position: isReportExpanded ? "absolute" : "relative",
         top: isReportExpanded ? "45px" : "auto",
         right: isReportExpanded ? "50px" : "auto",
-        zIndex: isReportExpanded ? 10000 : 30,
+        zIndex: 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
@@ -2156,8 +2153,6 @@ useEffect(() => {
     </span>
   </div>
 </div>
-
-
 
 
 
