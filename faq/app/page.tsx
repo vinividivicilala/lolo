@@ -892,7 +892,9 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-const handleReportToggle = () => {
+
+
+  const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
@@ -984,7 +986,7 @@ const handleReportToggle = () => {
       textAlign: "left",
     });
 
-    // ICON - INI ADALAH TOMBOL CLOSE
+    // ICON - TOMBOL CLOSE DENGAN Z-INDEX 10000
     gsap.to(icon, {
       fontSize: "40px",
       fontWeight: 300,
@@ -1002,6 +1004,7 @@ const handleReportToggle = () => {
       padding: "10px 16px",
       borderRadius: "8px",
       border: "2px solid rgba(0,0,0,0.15)",
+      zIndex: 10000,
     });
 
     icon.textContent = "✕";
@@ -1044,6 +1047,7 @@ const handleReportToggle = () => {
       padding: "0",
       borderRadius: "0px",
       border: "none",
+      zIndex: 30,
     });
 
     gsap.to(report, {
@@ -1111,6 +1115,7 @@ const handleReportToggle = () => {
           padding: "0",
           borderRadius: "0px",
           border: "none",
+          zIndex: 30,
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1130,6 +1135,12 @@ const handleReportToggle = () => {
   }
 };
 
+
+
+
+
+
+  
 
   
 
@@ -2096,7 +2107,7 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE - ICON SUDAH ADA, TAMBAHKAN onClick */}
+    {/* TOMBOL CLOSE - Z-INDEX 10000 AGAR DI ATAS SEMUA ELEMEN */}
     <span
       ref={reportIconRef}
       style={{
@@ -2108,7 +2119,7 @@ const handleReportToggle = () => {
         position: isReportExpanded ? "absolute" : "relative",
         top: isReportExpanded ? "45px" : "auto",
         right: isReportExpanded ? "50px" : "auto",
-        zIndex: 30,
+        zIndex: isReportExpanded ? 10000 : 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
@@ -2123,7 +2134,7 @@ const handleReportToggle = () => {
         e.stopPropagation();
         e.preventDefault();
         if (isReportExpanded) {
-          handleReportToggle(); // <-- INI FUNGSI UNTUK MENUTUP PANEL
+          handleReportToggle(); // <-- FUNGSI UNTUK MENUTUP PANEL
         }
       }}
       onMouseEnter={(e) => {
@@ -2145,6 +2156,7 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
+
 
 
 
