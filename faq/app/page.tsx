@@ -892,8 +892,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-
- const handleReportToggle = () => {
+const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
@@ -903,7 +902,7 @@ useEffect(() => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
-    // EXPAND - menjadi full screen
+    // EXPAND - menjadi full screen (sesuai kode asli)
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -945,14 +944,15 @@ useEffect(() => {
       pointerEvents: "none",
     });
 
+    // EXPAND PANEL - SESUAI KODE ASLI (bukan full screen)
     gsap.to(container, {
-      width: "100vw",
-      height: "100vh",
+      width: `${expandWidth + buttonWidth}px`,
+      height: `${expandHeight}px`,
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: "0px",
+      top: `${startY}px`,
       left: "0px",
       zIndex: 10000,
       borderRadius: "0px",
@@ -972,6 +972,7 @@ useEffect(() => {
       justifyContent: "flex-start",
     });
 
+    // TEKS DI KIRI - POSISI SESUAI KODE ASLI
     gsap.to(text, {
       fontSize: "24px",
       fontWeight: 600,
@@ -979,14 +980,14 @@ useEffect(() => {
       ease: "power2.out",
       color: "#000000",
       scale: 1,
-      position: "fixed",
+      position: "absolute",
       top: "50px",
       left: "50px",
       textAlign: "left",
       zIndex: 10001,
     });
 
-    // TOMBOL CLOSE - DIBUAT JELAS DENGAN POSITION FIXED
+    // TOMBOL CLOSE DI KANAN - DENGAN DESIGN JELAS
     gsap.to(icon, {
       fontSize: "40px",
       fontWeight: 700,
@@ -994,9 +995,9 @@ useEffect(() => {
       scale: 1,
       duration: 0.4,
       ease: "back.out(1.7)",
-      position: "fixed",
-      top: "40px",
-      right: "40px",
+      position: "absolute",
+      top: "45px",
+      right: "50px",
       cursor: "pointer",
       color: "#000000",
       opacity: 1,
@@ -1016,7 +1017,7 @@ useEffect(() => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE - kembali ke ukuran kecil
+    // COLLAPSE - kembali ke ukuran kecil (sesuai kode asli)
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1142,9 +1143,6 @@ useEffect(() => {
     setIsReportExpanded(false);
   }
 };
-
-
-
 
 
 
@@ -2024,7 +2022,7 @@ useEffect(() => {
 
     {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-      <div
+     <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2079,9 +2077,9 @@ useEffect(() => {
       boxShadow: "none",
       gap: "6px",
       cursor: "pointer",
-      height: isReportExpanded ? "100vh" : "48px",
-      width: isReportExpanded ? "100vw" : "auto",
-      minWidth: isReportExpanded ? "100vw" : "450px",
+      height: isReportExpanded ? "100%" : "48px",
+      width: isReportExpanded ? "100%" : "auto",
+      minWidth: isReportExpanded ? "100%" : "450px",
       flexShrink: 0,
       position: "relative",
       zIndex: 20,
@@ -2091,6 +2089,7 @@ useEffect(() => {
     }}
     onClick={!isReportExpanded ? handleReportToggle : undefined}
   >
+    {/* TEKS DI KIRI */}
     <span
       ref={reportTextRef}
       style={{
@@ -2102,7 +2101,7 @@ useEffect(() => {
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "fixed" : "relative",
+        position: isReportExpanded ? "absolute" : "relative",
         top: isReportExpanded ? "50px" : "auto",
         left: isReportExpanded ? "50px" : "auto",
         zIndex: isReportExpanded ? 10001 : 2,
@@ -2116,7 +2115,7 @@ useEffect(() => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE - PASTI TERLIHAT */}
+    {/* TOMBOL CLOSE DI KANAN - TETAP DI DALAM PANEL */}
     <span
       ref={reportIconRef}
       style={{
@@ -2127,9 +2126,9 @@ useEffect(() => {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        position: isReportExpanded ? "fixed" : "relative",
-        top: isReportExpanded ? "40px" : "auto",
-        right: isReportExpanded ? "40px" : "auto",
+        position: isReportExpanded ? "absolute" : "relative",
+        top: isReportExpanded ? "45px" : "auto",
+        right: isReportExpanded ? "50px" : "auto",
         zIndex: isReportExpanded ? 10002 : 30,
         cursor: "pointer",
         pointerEvents: "auto",
@@ -2170,8 +2169,6 @@ useEffect(() => {
     </span>
   </div>
 </div>
-
-
 
 
       
