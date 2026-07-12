@@ -778,8 +778,7 @@ const [showCloseButton, setShowCloseButton] = useState(false);
   }, []);
 
 
-
-// GSAP Animation untuk Read the Report - VERSI FINAL
+// GSAP Animation untuk Read the Report - ROLLING TEXT
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -796,7 +795,7 @@ useEffect(() => {
   let hoverTimeout: NodeJS.Timeout | null = null;
   let isHovering = false;
 
-  // ROLLING TEXT - Saat hover dan tidak expanded
+  // ROLLING TEXT - Saat hover di "Read the Report"
   const startRollingText = () => {
     if (!isReportExpanded) {
       isHovering = true;
@@ -881,19 +880,25 @@ useEffect(() => {
     }
   };
 
-  report.addEventListener('mouseenter', startRollingText);
-  report.addEventListener('mouseleave', stopRollingText);
+  // Event listeners untuk hover
+  const textElement = text;
+  if (textElement) {
+    textElement.addEventListener('mouseenter', startRollingText);
+    textElement.addEventListener('mouseleave', stopRollingText);
+  }
 
   return () => {
-    report.removeEventListener('mouseenter', startRollingText);
-    report.removeEventListener('mouseleave', stopRollingText);
+    if (textElement) {
+      textElement.removeEventListener('mouseenter', startRollingText);
+      textElement.removeEventListener('mouseleave', stopRollingText);
+    }
     if (hoverTimeout) {
       clearInterval(hoverTimeout);
     }
   };
 }, [isReportExpanded]);
 
-// FUNGSI TOGGLE EXPANDED - ANIMASI DARI KIRI KE KANAN
+// FUNGSI TOGGLE EXPANDED - ANIMASI LANGSUNG KE KIRI DAN KE BAWAH
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -904,7 +909,7 @@ const handleReportToggle = () => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
-    // EXPAND - panel dari kanan ke kiri
+    // EXPAND - panel langsung ke kiri dan ke bawah
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -948,16 +953,16 @@ const handleReportToggle = () => {
       pointerEvents: "none",
     });
 
-    // ANIMASI EXPAND - dari kanan ke kiri
+    // ANIMASI EXPAND - langsung ke kiri dan ke bawah
     const timeline = gsap.timeline({
       defaults: { ease: "power3.inOut" }
     });
 
-    // Container expand dari kanan ke kiri
+    // Container langsung ke kiri dan ke bawah
     timeline.to(container, {
       width: `${expandWidth + buttonWidth}px`,
       height: `${expandHeight}px`,
-      duration: 0.7,
+      duration: 0.6,
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${startY}px`,
@@ -980,20 +985,22 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     }, 0);
 
-    // Teks "Read the Report" muncul dari kanan ke kiri
+    // Teks "Read the Report" dari kanan atas ke kiri atas
     timeline.fromTo(text, 
       {
         opacity: 0,
-        x: 200,
+        x: 300,
+        y: -50,
         scale: 0.8,
       },
       {
         opacity: 1,
         x: 0,
+        y: 0,
         scale: 1,
         fontSize: "28px",
         fontWeight: 700,
-        duration: 0.6,
+        duration: 0.5,
         ease: "back.out(1.7)",
         color: "#000000",
         position: "absolute",
@@ -1005,7 +1012,7 @@ const handleReportToggle = () => {
       0.1
     );
 
-    // Tombol Close (X) muncul di kanan
+    // Tombol Close (X) muncul di kanan atas
     timeline.fromTo(icon,
       {
         opacity: 0,
@@ -1018,7 +1025,7 @@ const handleReportToggle = () => {
         rotation: 0,
         fontSize: "40px",
         fontWeight: 700,
-        duration: 0.5,
+        duration: 0.4,
         ease: "back.out(1.7)",
         position: "absolute",
         top: "45px",
@@ -1043,24 +1050,25 @@ const handleReportToggle = () => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE - panel dari kiri ke kanan kembali ke tempat semula
+    // COLLAPSE - panel langsung ke atas (tempat semula)
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
 
-    // ANIMASI COLLAPSE - dari kiri ke kanan
+    // ANIMASI COLLAPSE - langsung ke atas
     const timeline = gsap.timeline({
       defaults: { ease: "power3.inOut" }
     });
 
-    // Teks "Read the Report" slide ke kanan dan fade out
+    // Teks "Read the Report" fade out dan ke kanan
     timeline.to(text, {
       opacity: 0,
-      x: 200,
+      x: 300,
+      y: -50,
       scale: 0.8,
-      duration: 0.4,
+      duration: 0.3,
       ease: "power2.out",
       fontSize: "18px",
       fontWeight: 600,
@@ -1100,7 +1108,7 @@ const handleReportToggle = () => {
       justifyContent: "flex-end",
       gap: "6px",
       backgroundColor: "#FE7141",
-      duration: 0.5,
+      duration: 0.4,
       minWidth: "450px",
       position: "relative",
       borderRadius: "0px",
@@ -1109,11 +1117,11 @@ const handleReportToggle = () => {
       alignItems: "center",
     }, 0.1);
 
-    // Container collapse ke ukuran kecil (kembali ke kanan)
+    // Container collapse ke ukuran kecil (kembali ke atas)
     timeline.to(container, {
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      duration: 0.7,
+      duration: 0.6,
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${endY}px`,
@@ -1164,6 +1172,7 @@ const handleReportToggle = () => {
           scale: 1,
           rotation: 0,
           x: 0,
+          y: 0,
         });
         gsap.set(text, {
           opacity: 1,
@@ -1196,6 +1205,7 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
+
 
   
 
@@ -2073,7 +2083,9 @@ const handleReportToggle = () => {
       }}
     >
 
-   {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+
+
+      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2162,6 +2174,7 @@ const handleReportToggle = () => {
         textAlign: isReportExpanded ? "left" : "center",
         transition: "all 0.3s ease",
         pointerEvents: isReportExpanded ? "none" : "auto",
+        cursor: "pointer",
       }}
     >
       Read the Report
@@ -2221,7 +2234,8 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-   
+
+  
 
       
 
