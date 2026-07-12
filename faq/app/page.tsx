@@ -776,8 +776,7 @@ const [isHoveringReport, setIsHoveringReport] = useState(false);
     }
   }, []);
 
-
-// GSAP Animation untuk Read the Report - VERSI PERBAIKAN
+// GSAP Animation untuk Read the Report - VERSI FINAL
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -893,7 +892,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi toggle expanded - VERSI PERBAIKAN DENGAN CLOSE BUTTON YANG JELAS
+// Fungsi toggle expanded - VERSI FINAL DENGAN CLOSE BUTTON
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -921,9 +920,9 @@ const handleReportToggle = () => {
       left: `${startX}px`,
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      zIndex: 1000,
+      zIndex: 9999,
       backgroundColor: "#FE7141",
-      overflow: "hidden",
+      overflow: "visible",
       borderRadius: "0px",
     });
 
@@ -950,15 +949,15 @@ const handleReportToggle = () => {
 
     // Expand container ke full screen
     gsap.to(container, {
-      width: `${expandWidth + buttonWidth}px`,
-      height: `${expandHeight}px`,
+      width: "100vw",
+      height: "100vh",
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: `${startY}px`,
+      top: "0px",
       left: "0px",
-      zIndex: 1000,
+      zIndex: 9999,
       borderRadius: "0px",
     });
 
@@ -978,37 +977,37 @@ const handleReportToggle = () => {
 
     // Teks di KIRI ATAS
     gsap.to(text, {
-      fontSize: "24px",
-      fontWeight: 600,
+      fontSize: "32px",
+      fontWeight: 700,
       duration: 0.4,
       ease: "power2.out",
       color: "#000000",
       scale: 1,
       position: "absolute",
-      top: "50px",
-      left: "50px",
+      top: "60px",
+      left: "60px",
       textAlign: "left",
     });
 
-    // Icon Close di KANAN ATAS - DIBUAT LEBIH JELAS DAN BESAR
+    // Icon Close di KANAN ATAS - DIBUAT SANGAT JELAS
     gsap.to(icon, {
-      fontSize: "32px",
+      fontSize: "28px",
       fontWeight: 700,
       rotation: 0,
       scale: 1,
       duration: 0.4,
       ease: "back.out(1.7)",
       position: "absolute",
-      top: "40px",
-      right: "40px",
+      top: "50px",
+      right: "50px",
       cursor: "pointer",
       color: "#000000",
       opacity: 1,
-      backgroundColor: "rgba(255,255,255,0.9)",
-      padding: "12px 18px",
+      backgroundColor: "#ffffff",
+      padding: "14px 22px",
       borderRadius: "12px",
-      border: "2px solid #000000",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+      border: "3px solid #000000",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -1016,6 +1015,7 @@ const handleReportToggle = () => {
       height: "auto",
       lineHeight: 1,
       fontFamily: "Inter, 'Inter Fallback'",
+      zIndex: 10000,
     });
 
     // Ubah icon menjadi X
@@ -1065,6 +1065,7 @@ const handleReportToggle = () => {
       width: "auto",
       height: "auto",
       lineHeight: 1,
+      zIndex: "auto",
     });
 
     // Kembalikan report ke ukuran normal
@@ -1095,7 +1096,7 @@ const handleReportToggle = () => {
       position: "fixed",
       top: `${endY}px`,
       left: `${endX}px`,
-      zIndex: 1000,
+      zIndex: 9999,
       borderRadius: "0px",
       onComplete: () => {
         // Reset style setelah animasi selesai
@@ -1139,6 +1140,7 @@ const handleReportToggle = () => {
           width: "auto",
           height: "auto",
           lineHeight: 1,
+          zIndex: "auto",
         });
         if (text.textContent !== "Read the Report") {
           text.textContent = "Read the Report";
@@ -1158,7 +1160,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
 
 
   
@@ -2033,6 +2034,7 @@ const handleReportToggle = () => {
         overflow: "hidden",
       }}
     >
+
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
@@ -2044,7 +2046,7 @@ const handleReportToggle = () => {
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    overflow: "hidden",
+    overflow: "visible",
     backgroundColor: "transparent",
   }}
 >
@@ -2105,18 +2107,18 @@ const handleReportToggle = () => {
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "24px" : "18px",
-        fontWeight: 600,
+        fontSize: isReportExpanded ? "32px" : "18px",
+        fontWeight: isReportExpanded ? 700 : 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
         lineHeight: 1.2,
         whiteSpace: "nowrap",
         display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
-        zIndex: 2,
+        position: isReportExpanded ? "fixed" : "relative",
+        top: isReportExpanded ? "60px" : "auto",
+        left: isReportExpanded ? "60px" : "auto",
+        zIndex: isReportExpanded ? 10000 : 2,
         padding: "0",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         textAlign: isReportExpanded ? "left" : "center",
@@ -2127,33 +2129,33 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded - DIBUAT JELAS */}
+    {/* Icon Close - di KANAN ATAS saat expanded - DIBUAT SANGAT JELAS */}
     <span
       ref={reportIconRef}
       style={{
-        fontSize: isReportExpanded ? "32px" : "30px",
+        fontSize: isReportExpanded ? "28px" : "30px",
         fontWeight: 700,
         color: "#000000",
         lineHeight: 1,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "40px" : "auto",
-        right: isReportExpanded ? "40px" : "auto",
-        zIndex: 30,
+        position: isReportExpanded ? "fixed" : "relative",
+        top: isReportExpanded ? "50px" : "auto",
+        right: isReportExpanded ? "50px" : "auto",
+        zIndex: isReportExpanded ? 10001 : 30,
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "12px 18px" : "0",
+        padding: isReportExpanded ? "14px 22px" : "0",
         borderRadius: isReportExpanded ? "12px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(255,255,255,0.95)" : "transparent",
-        border: isReportExpanded ? "2px solid #000000" : "none",
-        boxShadow: isReportExpanded ? "0 4px 20px rgba(0,0,0,0.15)" : "none",
+        backgroundColor: isReportExpanded ? "#ffffff" : "transparent",
+        border: isReportExpanded ? "3px solid #000000" : "none",
+        boxShadow: isReportExpanded ? "0 8px 30px rgba(0,0,0,0.2)" : "none",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         transition: "all 0.3s ease",
-        minWidth: isReportExpanded ? "56px" : "auto",
-        minHeight: isReportExpanded ? "56px" : "auto",
+        minWidth: isReportExpanded ? "60px" : "auto",
+        minHeight: isReportExpanded ? "60px" : "auto",
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -2162,18 +2164,16 @@ const handleReportToggle = () => {
       }}
       onMouseEnter={(e) => {
         if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "#ffffff";
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.borderColor = "#000000";
-          e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.25)";
+          e.currentTarget.style.backgroundColor = "#f0f0f0";
+          e.currentTarget.style.transform = "scale(1.08)";
+          e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)";
         }
       }}
       onMouseLeave={(e) => {
         if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.95)";
+          e.currentTarget.style.backgroundColor = "#ffffff";
           e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "#000000";
-          e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+          e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.2)";
         }
       }}
     >
@@ -2181,7 +2181,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
 
 
 
