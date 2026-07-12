@@ -904,8 +904,6 @@ const handleReportToggle = () => {
 
   if (!isReportExpanded) {
     // EXPAND
-    setShowCloseButton(true);
-    
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -987,8 +985,9 @@ const handleReportToggle = () => {
       textAlign: "left",
     });
 
-    // Hanya animasi icon, tanpa mengubah design asli
     gsap.to(icon, {
+      fontSize: "40px",
+      fontWeight: 300,
       rotation: 0,
       scale: 1,
       duration: 0.4,
@@ -1010,8 +1009,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(true);
   } else {
     // COLLAPSE
-    setShowCloseButton(false);
-    
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1086,7 +1083,7 @@ const handleReportToggle = () => {
           height: "auto",
           zIndex: 10,
           backgroundColor: "transparent",
-          overflow: "visible",
+          overflow: "hidden",
         });
         gsap.set(report, {
           width: "auto",
@@ -1132,9 +1129,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
-
-
   
   
 
@@ -2011,7 +2005,7 @@ const handleReportToggle = () => {
 
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-      <div
+     <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
@@ -2102,6 +2096,7 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
+    {/* INI TOMBOL CLOSE - DI DALAM PANEL BG OREN */}
     <span
       ref={reportIconRef}
       style={{
@@ -2127,18 +2122,20 @@ const handleReportToggle = () => {
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        handleReportToggle();
+        handleReportToggle(); // <-- INI FUNGSI UNTUK MENUTUP PANEL
       }}
       onMouseEnter={(e) => {
         if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
           e.currentTarget.style.transform = "scale(1.05)";
+          e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
         }
       }}
       onMouseLeave={(e) => {
         if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
           e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
         }
       }}
     >
@@ -2146,7 +2143,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
 
 
 
