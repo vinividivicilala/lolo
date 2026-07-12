@@ -777,20 +777,15 @@ const [isHoveringReport, setIsHoveringReport] = useState(false);
   }, []);
 
 
-
 // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
-  const container = reportContainerRef.current;
   const report = reportRef.current;
   const text = reportTextRef.current;
   const icon = reportIconRef.current;
-  const logo = logoRef.current;
 
-  if (!container || !report || !text || !icon || !logo) return;
-
-  console.log("GSAP Report initialized");
+  if (!report || !text || !icon) return;
 
   // Text variants untuk rolling
   const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
@@ -798,11 +793,10 @@ useEffect(() => {
   let hoverTimeout: NodeJS.Timeout | null = null;
   let isHovering = false;
 
-  // ROLLING TEXT - Hanya untuk tombol kecil (bukan expanded)
+  // ROLLING TEXT - Hanya saat hover dan tidak expanded
   const startRollingText = () => {
     if (!isReportExpanded) {
       isHovering = true;
-      setIsHoveringReport(true);
       textIndex = 0;
       
       gsap.to(text, {
@@ -846,7 +840,6 @@ useEffect(() => {
 
   const stopRollingText = () => {
     isHovering = false;
-    setIsHoveringReport(false);
     if (hoverTimeout) {
       clearInterval(hoverTimeout);
       hoverTimeout = null;
@@ -885,7 +878,7 @@ useEffect(() => {
     }
   };
 
-  // Event listeners untuk rolling di tombol kecil
+  // Event listeners untuk hover
   report.addEventListener('mouseenter', startRollingText);
   report.addEventListener('mouseleave', stopRollingText);
 
@@ -898,7 +891,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi handle toggle dengan GSAP
+// Fungsi toggle expanded
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -909,7 +902,7 @@ const handleReportToggle = () => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
-    // EXPAND
+    // EXPAND - menjadi full screen
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -918,9 +911,6 @@ const handleReportToggle = () => {
     
     const expandWidth = startX;
     const expandHeight = window.innerHeight - startY;
-
-    // Reset rolling text
-    setIsHoveringReport(false);
 
     gsap.set(container, {
       position: "fixed",
@@ -981,9 +971,9 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     });
 
-    // Teks di KIRI ATAS - ukuran SAMA dengan tombol kecil (18px)
+    // Teks di KIRI ATAS
     gsap.to(text, {
-      fontSize: "18px",
+      fontSize: "24px",
       fontWeight: 600,
       duration: 0.4,
       ease: "power2.out",
@@ -995,12 +985,12 @@ const handleReportToggle = () => {
       textAlign: "left",
     });
 
-    // Icon di KANAN ATAS - menjadi ✕ dengan ukuran lebih besar dan jelas
+    // Icon Close di KANAN ATAS
     gsap.to(icon, {
-      fontSize: "36px",
+      fontSize: "40px",
       fontWeight: 300,
       rotation: 0,
-      scale: 1.2,
+      scale: 1,
       duration: 0.4,
       ease: "back.out(1.7)",
       position: "absolute",
@@ -1010,16 +1000,16 @@ const handleReportToggle = () => {
       color: "#000000",
       opacity: 1,
       backgroundColor: "rgba(0,0,0,0.1)",
-      padding: "8px 12px",
+      padding: "10px 16px",
       borderRadius: "8px",
-      border: "2px solid rgba(0,0,0,0.1)",
+      border: "2px solid rgba(0,0,0,0.15)",
     });
 
     icon.textContent = "✕";
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE
+    // COLLAPSE - kembali ke ukuran kecil
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
@@ -1140,7 +1130,6 @@ const handleReportToggle = () => {
     setIsReportExpanded(false);
   }
 };
-
 
 
 
@@ -2021,7 +2010,6 @@ const handleReportToggle = () => {
     >
       {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 
-
       <div
   ref={reportContainerRef}
   style={{
@@ -2087,22 +2075,12 @@ const handleReportToggle = () => {
       flexDirection: isReportExpanded ? "column" : "row",
       alignItems: isReportExpanded ? "flex-start" : "center",
     }}
-    onMouseEnter={() => {
-      if (!isReportExpanded) {
-        setIsHoveringReport(true);
-      }
-    }}
-    onMouseLeave={() => {
-      if (!isReportExpanded) {
-        setIsHoveringReport(false);
-      }
-    }}
   >
     {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
     <span
       ref={reportTextRef}
       style={{
-        fontSize: "18px",
+        fontSize: isReportExpanded ? "24px" : "18px",
         fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
@@ -2123,11 +2101,11 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* Icon Close - di KANAN ATAS saat expanded, terlihat jelas dan bisa diklik */}
+    {/* Icon Close - di KANAN ATAS saat expanded */}
     <span
       ref={reportIconRef}
       style={{
-        fontSize: isReportExpanded ? "36px" : "30px",
+        fontSize: isReportExpanded ? "40px" : "30px",
         fontWeight: 300,
         color: "#000000",
         lineHeight: 1,
@@ -2139,23 +2117,22 @@ const handleReportToggle = () => {
         cursor: "pointer",
         pointerEvents: "auto",
         userSelect: "none",
-        padding: isReportExpanded ? "8px 12px" : "0",
+        padding: isReportExpanded ? "10px 16px" : "0",
         borderRadius: isReportExpanded ? "8px" : "0px",
         backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
-        border: isReportExpanded ? "2px solid rgba(0,0,0,0.1)" : "none",
+        border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
         alignSelf: isReportExpanded ? "flex-start" : "auto",
         transition: "all 0.3s ease",
       }}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        console.log("Close button clicked");
         handleReportToggle();
       }}
       onMouseEnter={(e) => {
         if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
-          e.currentTarget.style.transform = "scale(1.1)";
+          e.currentTarget.style.transform = "scale(1.05)";
           e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
         }
       }}
@@ -2163,34 +2140,16 @@ const handleReportToggle = () => {
         if (isReportExpanded) {
           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
           e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)";
+          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
         }
       }}
     >
       {isReportExpanded ? "✕" : "+"}
     </span>
-
-    {/* Konten tambahan saat expanded - DIKOSONGKAN */}
-    {isReportExpanded && (
-      <div
-        style={{
-          position: "absolute",
-          top: "120px",
-          left: "50px",
-          right: "50px",
-          bottom: "60px",
-          overflowY: "auto",
-          color: "#000000",
-          fontSize: "16px",
-          lineHeight: 1.8,
-          fontFamily: "Inter, 'Inter Fallback'",
-        }}
-      >
-        {/* Kosongkan konten - hanya background orange */}
-      </div>
-    )}
   </div>
 </div>
+
+
 
 
 
