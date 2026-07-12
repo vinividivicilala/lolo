@@ -891,7 +891,6 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// Fungsi toggle expanded
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -912,6 +911,7 @@ const handleReportToggle = () => {
     const expandWidth = startX;
     const expandHeight = window.innerHeight - startY;
 
+    // Reset posisi container
     gsap.set(container, {
       position: "fixed",
       top: `${startY}px`,
@@ -937,6 +937,7 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     });
 
+    // Sembunyikan logo
     gsap.to(logo, {
       opacity: 0,
       duration: 0.1,
@@ -944,19 +945,21 @@ const handleReportToggle = () => {
       pointerEvents: "none",
     });
 
+    // Expand container ke full screen
     gsap.to(container, {
-      width: `${expandWidth + buttonWidth}px`,
-      height: `${expandHeight}px`,
+      width: "100%",
+      height: "100%",
       duration: 0.8,
       ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
-      top: `${startY}px`,
+      top: "0px",
       left: "0px",
       zIndex: 100,
       borderRadius: "0px",
     });
 
+    // Expand report
     gsap.to(report, {
       width: "100%",
       height: "100%",
@@ -1010,12 +1013,21 @@ const handleReportToggle = () => {
     setIsReportExpanded(true);
   } else {
     // COLLAPSE - kembali ke ukuran kecil
-    const rect = report.getBoundingClientRect();
-    const endX = rect.left;
-    const endY = rect.top;
-    const buttonWidth = rect.width;
-    const buttonHeight = rect.height;
+    // Dapatkan posisi awal button (posisi semula)
+    const originalButton = reportRef.current;
+    if (!originalButton) return;
+    
+    // Ambil posisi logo untuk referensi
+    const logoRect = logo.getBoundingClientRect();
+    const logoWidth = logoRect.width;
+    
+    // Posisi target: di sebelah kanan logo
+    const targetX = logoRect.right;
+    const targetY = logoRect.top;
+    const targetWidth = window.innerWidth - targetX - 40; // sisa space dengan padding
+    const targetHeight = 48; // tinggi button normal
 
+    // Reset posisi text
     gsap.to(text, {
       fontSize: "18px",
       fontWeight: 600,
@@ -1029,6 +1041,7 @@ const handleReportToggle = () => {
       textAlign: "center",
     });
 
+    // Reset icon
     gsap.to(icon, {
       fontSize: "30px",
       fontWeight: 300,
@@ -1047,6 +1060,7 @@ const handleReportToggle = () => {
       border: "none",
     });
 
+    // Kembalikan report ke ukuran normal
     gsap.to(report, {
       width: "auto",
       height: "48px",
@@ -1062,19 +1076,33 @@ const handleReportToggle = () => {
       display: "flex",
       flexDirection: "row",
       alignItems: "center",
+      onComplete: () => {
+        // Reset posisi report setelah animasi
+        gsap.set(report, {
+          position: "relative",
+          top: "auto",
+          left: "auto",
+          width: "auto",
+          height: "48px",
+          padding: "6px 35px 6px 200px",
+          minWidth: "450px",
+        });
+      }
     });
 
+    // Kembalikan container ke posisi semula (inline dengan logo)
     gsap.to(container, {
-      width: `${buttonWidth}px`,
-      height: `${buttonHeight}px`,
+      width: "auto",
+      height: "auto",
       duration: 0.7,
       ease: "power3.inOut",
-      backgroundColor: "#FE7141",
-      position: "fixed",
-      top: `${endY}px`,
-      left: `${endX}px`,
-      zIndex: 100,
+      backgroundColor: "transparent",
+      position: "absolute",
+      top: "0px",
+      left: "0px",
+      zIndex: 10,
       borderRadius: "0px",
+      overflow: "visible",
       onComplete: () => {
         gsap.set(container, {
           position: "absolute",
@@ -1086,52 +1114,49 @@ const handleReportToggle = () => {
           backgroundColor: "transparent",
           overflow: "visible",
         });
-        gsap.set(report, {
-          width: "auto",
-          height: "48px",
-          padding: "6px 35px 6px 200px",
-          justifyContent: "flex-end",
-          gap: "6px",
-          minWidth: "450px",
-          position: "relative",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-        });
-        gsap.set(logo, {
+        
+        // Tampilkan logo kembali
+        gsap.to(logo, {
           opacity: 1,
+          duration: 0.3,
+          ease: "power2.out",
           pointerEvents: "auto",
         });
-        gsap.set(icon, {
-          position: "relative",
-          top: "auto",
-          right: "auto",
-          fontSize: "30px",
-          fontWeight: 300,
-          backgroundColor: "transparent",
-          padding: "0",
-          borderRadius: "0px",
-          border: "none",
-        });
-        if (text.textContent !== "Read the Report") {
-          text.textContent = "Read the Report";
+        
+        // Reset icon ke "+"
+        if (icon) {
+          icon.textContent = "+";
+          gsap.set(icon, {
+            position: "relative",
+            top: "auto",
+            right: "auto",
+            fontSize: "30px",
+            fontWeight: 300,
+            backgroundColor: "transparent",
+            padding: "0",
+            borderRadius: "0px",
+            border: "none",
+          });
         }
-        icon.textContent = "+";
+        
+        // Reset text
+        if (text && text.textContent !== "Read the Report") {
+          text.textContent = "Read the Report";
+          gsap.set(text, {
+            fontSize: "18px",
+            fontWeight: 600,
+            position: "relative",
+            top: "auto",
+            left: "auto",
+            textAlign: "center",
+          });
+        }
       }
-    });
-
-    gsap.to(logo, {
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.out",
-      pointerEvents: "auto",
     });
 
     setIsReportExpanded(false);
   }
 };
-
-
 
 
 
@@ -2052,104 +2077,101 @@ const handleReportToggle = () => {
     </span>
   </div>
 
-  {/* Read the Report - Background #FE7141 */}
-  <div
-    ref={reportRef}
+ {/* Read the Report - Background #FE7141 */}
+<div
+  ref={reportRef}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: isReportExpanded ? "flex-start" : "flex-end",
+    backgroundColor: "#FE7141",
+    padding: isReportExpanded ? "0" : "6px 35px 6px 200px",
+    borderRadius: "0px",
+    boxShadow: "none",
+    gap: "6px",
+    cursor: "pointer",
+    height: isReportExpanded ? "100%" : "48px",
+    width: isReportExpanded ? "100%" : "auto",
+    minWidth: isReportExpanded ? "100%" : "450px",
+    flexShrink: 0,
+    position: "relative",
+    zIndex: 20,
+    transition: "all 0.3s ease",
+    flexDirection: isReportExpanded ? "column" : "row",
+    alignItems: isReportExpanded ? "flex-start" : "center",
+  }}
+>
+  {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
+  <span
+    ref={reportTextRef}
     style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: isReportExpanded ? "flex-start" : "flex-end",
-      backgroundColor: "#FE7141",
-      padding: isReportExpanded ? "0" : "6px 35px 6px 200px",
-      borderRadius: "0px",
-      boxShadow: "none",
-      gap: "6px",
-      cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
-      flexShrink: 0,
-      position: "relative",
-      zIndex: 20,
+      fontSize: isReportExpanded ? "24px" : "18px",
+      fontWeight: 600,
+      color: "#000000",
+      letterSpacing: "-0.01em",
+      fontFamily: "Inter, 'Inter Fallback'",
+      lineHeight: 1.2,
+      whiteSpace: "nowrap",
+      display: "inline-block",
+      position: isReportExpanded ? "absolute" : "relative",
+      top: isReportExpanded ? "50px" : "auto",
+      left: isReportExpanded ? "50px" : "auto",
+      zIndex: 2,
+      padding: "0",
+      alignSelf: isReportExpanded ? "flex-start" : "auto",
+      textAlign: isReportExpanded ? "left" : "center",
       transition: "all 0.3s ease",
-      flexDirection: isReportExpanded ? "column" : "row",
-      alignItems: isReportExpanded ? "flex-start" : "center",
     }}
   >
-    {/* Teks "Read the Report" - di KIRI ATAS saat expanded */}
-    <span
-      ref={reportTextRef}
-      style={{
-        fontSize: isReportExpanded ? "24px" : "18px",
-        fontWeight: 600,
-        color: "#000000",
-        letterSpacing: "-0.01em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-        whiteSpace: "nowrap",
-        display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
-        zIndex: 2,
-        padding: "0",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        textAlign: isReportExpanded ? "left" : "center",
-        transition: "all 0.3s ease",
-      }}
-    >
-      Read the Report
-    </span>
-    
-    {/* Icon Close - di KANAN ATAS saat expanded */}
-    <span
-      ref={reportIconRef}
-      style={{
-        fontSize: isReportExpanded ? "40px" : "30px",
-        fontWeight: 300,
-        color: "#000000",
-        lineHeight: 1,
-        display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "45px" : "auto",
-        right: isReportExpanded ? "50px" : "auto",
-        zIndex: 30,
-        cursor: "pointer",
-        pointerEvents: "auto",
-        userSelect: "none",
-        padding: isReportExpanded ? "10px 16px" : "0",
-        borderRadius: isReportExpanded ? "8px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
-        border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        transition: "all 0.3s ease",
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleReportToggle();
-      }}
-      onMouseEnter={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
-        }
-      }}
-    >
-      {isReportExpanded ? "✕" : "+"}
-    </span>
-  </div>
+    Read the Report
+  </span>
+  
+  {/* Icon Close - di KANAN ATAS saat expanded */}
+  <span
+    ref={reportIconRef}
+    style={{
+      fontSize: isReportExpanded ? "40px" : "30px",
+      fontWeight: 300,
+      color: "#000000",
+      lineHeight: 1,
+      display: "inline-block",
+      position: isReportExpanded ? "absolute" : "relative",
+      top: isReportExpanded ? "45px" : "auto",
+      right: isReportExpanded ? "50px" : "auto",
+      zIndex: 30,
+      cursor: "pointer",
+      pointerEvents: "auto",
+      userSelect: "none",
+      padding: isReportExpanded ? "10px 16px" : "0",
+      borderRadius: isReportExpanded ? "8px" : "0px",
+      backgroundColor: isReportExpanded ? "rgba(0,0,0,0.1)" : "transparent",
+      border: isReportExpanded ? "2px solid rgba(0,0,0,0.15)" : "none",
+      alignSelf: isReportExpanded ? "flex-start" : "auto",
+      transition: "all 0.3s ease",
+    }}
+    onClick={(e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handleReportToggle(); // Panggil fungsi toggle
+    }}
+    onMouseEnter={(e) => {
+      if (isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)";
+        e.currentTarget.style.transform = "scale(1.05)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)";
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (isReportExpanded) {
+        e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.1)";
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
+      }
+    }}
+  >
+    {isReportExpanded ? "✕" : "+"}
+  </span>
 </div>
-
-
 
 
 
