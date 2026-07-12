@@ -733,7 +733,11 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [addUserButtonRef, plusIconRef]);
 
-// GSAP Animation untuk Read the Report
+
+
+
+
+  // GSAP Animation untuk Read the Report
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -1970,7 +1974,8 @@ const handleReportToggle = () => {
     >
 
      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-<div
+
+      <div
   ref={reportContainerRef}
   style={{
     position: "absolute",
