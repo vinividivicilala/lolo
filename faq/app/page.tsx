@@ -779,7 +779,7 @@ const [showCloseButton, setShowCloseButton] = useState(false);
 
 
 
-// GSAP Animation untuk Read the Report - MODIFIKASI
+// GSAP Animation untuk Read the Report - VERSI FINAL
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -796,6 +796,7 @@ useEffect(() => {
   let hoverTimeout: NodeJS.Timeout | null = null;
   let isHovering = false;
 
+  // ROLLING TEXT - Saat hover dan tidak expanded
   const startRollingText = () => {
     if (!isReportExpanded) {
       isHovering = true;
@@ -892,6 +893,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
+// FUNGSI TOGGLE EXPANDED - ANIMASI DARI KIRI KE KANAN
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -902,7 +904,7 @@ const handleReportToggle = () => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
-    // EXPAND - dari tombol + menjadi panel besar
+    // EXPAND - panel dari kanan ke kiri
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -946,16 +948,16 @@ const handleReportToggle = () => {
       pointerEvents: "none",
     });
 
-    // ANIMASI EXPAND - ke kiri dengan smooth
+    // ANIMASI EXPAND - dari kanan ke kiri
     const timeline = gsap.timeline({
       defaults: { ease: "power3.inOut" }
     });
 
-    // Container expand ke kiri
+    // Container expand dari kanan ke kiri
     timeline.to(container, {
       width: `${expandWidth + buttonWidth}px`,
       height: `${expandHeight}px`,
-      duration: 0.6,
+      duration: 0.7,
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${startY}px`,
@@ -978,12 +980,12 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     }, 0);
 
-    // Teks "Read the Report" muncul di kiri dengan efek fade + slide
+    // Teks "Read the Report" muncul dari kanan ke kiri
     timeline.fromTo(text, 
       {
         opacity: 0,
-        x: -30,
-        scale: 0.9,
+        x: 200,
+        scale: 0.8,
       },
       {
         opacity: 1,
@@ -991,7 +993,7 @@ const handleReportToggle = () => {
         scale: 1,
         fontSize: "28px",
         fontWeight: 700,
-        duration: 0.5,
+        duration: 0.6,
         ease: "back.out(1.7)",
         color: "#000000",
         position: "absolute",
@@ -1003,7 +1005,7 @@ const handleReportToggle = () => {
       0.1
     );
 
-    // Tombol Close (X) muncul di kanan dengan efek fade + scale
+    // Tombol Close (X) muncul di kanan
     timeline.fromTo(icon,
       {
         opacity: 0,
@@ -1041,24 +1043,24 @@ const handleReportToggle = () => {
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE - dari panel besar kembali ke tombol +
+    // COLLAPSE - panel dari kiri ke kanan kembali ke tempat semula
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
 
-    // ANIMASI COLLAPSE - ke bawah dengan smooth
+    // ANIMASI COLLAPSE - dari kiri ke kanan
     const timeline = gsap.timeline({
       defaults: { ease: "power3.inOut" }
     });
 
-    // Teks "Read the Report" fade out dan slide ke atas
+    // Teks "Read the Report" slide ke kanan dan fade out
     timeline.to(text, {
       opacity: 0,
-      y: -20,
+      x: 200,
       scale: 0.8,
-      duration: 0.3,
+      duration: 0.4,
       ease: "power2.out",
       fontSize: "18px",
       fontWeight: 600,
@@ -1069,7 +1071,7 @@ const handleReportToggle = () => {
       zIndex: 2,
     }, 0);
 
-    // Tombol Close (X) fade out dan shrink
+    // Tombol Close (X) fade out
     timeline.to(icon, {
       opacity: 0,
       scale: 0.5,
@@ -1107,11 +1109,11 @@ const handleReportToggle = () => {
       alignItems: "center",
     }, 0.1);
 
-    // Container collapse ke ukuran kecil
+    // Container collapse ke ukuran kecil (kembali ke kanan)
     timeline.to(container, {
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      duration: 0.6,
+      duration: 0.7,
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${endY}px`,
@@ -1161,9 +1163,11 @@ const handleReportToggle = () => {
           zIndex: 30,
           scale: 1,
           rotation: 0,
+          x: 0,
         });
         gsap.set(text, {
           opacity: 1,
+          x: 0,
           y: 0,
           scale: 1,
           fontSize: "18px",
@@ -1193,6 +1197,7 @@ const handleReportToggle = () => {
   }
 };
 
+  
 
 
   
@@ -2068,9 +2073,7 @@ const handleReportToggle = () => {
       }}
     >
 
-    {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+   {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2138,7 +2141,7 @@ const handleReportToggle = () => {
     }}
     onClick={!isReportExpanded ? handleReportToggle : undefined}
   >
-    {/* TEKS "Read the Report" di KIRI */}
+    {/* TEKS "Read the Report" di KIRI ATAS */}
     <span
       ref={reportTextRef}
       style={{
@@ -2164,7 +2167,7 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE di KANAN */}
+    {/* TOMBOL CLOSE di KANAN ATAS */}
     <span
       ref={reportIconRef}
       style={{
@@ -2218,7 +2221,6 @@ const handleReportToggle = () => {
     </span>
   </div>
 </div>
-
    
 
       
