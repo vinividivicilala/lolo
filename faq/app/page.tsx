@@ -172,6 +172,144 @@ const EditIcon = () => (
   </svg>
 );
 
+// Google Login Style Dot Indicator (tanpa shadow)
+const GoogleDot = ({ color = "#4ade80", isBlinking = false, size = 10 }: { color?: string; isBlinking?: boolean; size?: number }) => {
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+      {/* Pemancar - Pulse Ring */}
+      {isBlinking && (
+        <div
+          style={{
+            position: "absolute",
+            width: `${size * 2.5}px`,
+            height: `${size * 2.5}px`,
+            borderRadius: "50%",
+            backgroundColor: color,
+            opacity: 0.3,
+            animation: "pulseRing 1.5s ease-in-out infinite",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      
+      {/* Titik Bulat Kecil - Style Login Gmail */}
+      <div
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: "50%",
+          backgroundColor: color,
+          border: "2px solid #ffffff",
+          position: "relative",
+          zIndex: 2,
+        }}
+      />
+    </div>
+  );
+};
+
+// Online Status Indicator - Menggunakan GoogleDot
+const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const color = online ? "#4ade80" : "#999";
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <div
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        style={{ cursor: "pointer" }}
+      >
+        <GoogleDot color={color} isBlinking={online} size={8} />
+      </div>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          {online ? "Online" : (lastSeen || "Offline")}
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Read Status
+const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  if (!isMine) return null;
+  
+  const status = (() => {
+    if (msg.senderId !== auth?.currentUser?.uid) return null;
+    if (msg.read && msg.readAt) {
+      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+    }
+    return { icon: "✓", color: "#999", label: "Terkirim" };
+  })();
+  
+  if (!status) return null;
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <span 
+        style={{
+          fontSize: "10px",
+          color: status.color,
+          fontWeight: status.label === "Dibaca" ? 600 : 400,
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {status.icon}
+      </span>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          right: 0,
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          {status.label}
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            right: "10px",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -233,7 +371,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
           fontSize: "11px",
           whiteSpace: "nowrap",
           zIndex: 100,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           border: "1px solid rgba(255,255,255,0.05)",
         }}>
           Akun Resmi
@@ -242,117 +379,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
             top: "100%",
             left: "50%",
             transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Online Status Indicator
-const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <span 
-        style={{ 
-          display: "inline-block",
-          width: "8px",
-          height: "8px",
-          borderRadius: "50%",
-          backgroundColor: online ? "#4ade80" : "#999",
-          boxShadow: online ? "0 0 8px rgba(74, 222, 128, 0.4)" : "none",
-          flexShrink: 0,
-          transition: "all 0.3s ease",
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      />
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-          border: "1px solid rgba(255,255,255,0.05)",
-        }}>
-          {online ? "Online" : (lastSeen || "Offline")}
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Read Status
-const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  if (!isMine) return null;
-  
-  const status = (() => {
-    if (msg.senderId !== auth?.currentUser?.uid) return null;
-    if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
-    }
-    return { icon: "✓", color: "#999", label: "Terkirim" };
-  })();
-  
-  if (!status) return null;
-  
-  return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <span 
-        style={{
-          fontSize: "10px",
-          color: status.color,
-          fontWeight: status.label === "Dibaca" ? 600 : 400,
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        {status.icon}
-      </span>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          right: 0,
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-          border: "1px solid rgba(255,255,255,0.05)",
-        }}>
-          {status.label}
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            right: "10px",
             border: "6px solid transparent",
             borderTopColor: "#1a1a1a",
           }} />
@@ -402,6 +428,9 @@ export default function HomePage(): React.JSX.Element {
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
+  
+  // Privacy Policy
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
@@ -1417,9 +1446,6 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, [isChatOpen, user, isIncomingMessage]);
 
-  // Privacy Policy
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-
   if (loading) {
     return (
       <div style={{
@@ -2150,221 +2176,198 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page
-
-
-               <div
-    style={{
-      flex: 1,
-      overflowY: "auto",
-      padding: "28px 32px",
-      backgroundColor: "#ffffff",
-    }}
-  >
-    <div style={{ marginBottom: "28px" }}>
-      <div
-        style={{
-          display: "inline-block",
-          padding: "4px 14px",
-          backgroundColor: "#000000",
-          borderRadius: "20px",
-          marginBottom: "12px",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "10px",
-            fontWeight: 600,
-            color: "#ffffff",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            fontFamily: "Inter, 'Inter Fallback'",
-          }}
-        >
-          Update Sistem
-        </span>
-      </div>
-      <h2
-        style={{
-          fontSize: "22px",
-          fontWeight: 600,
-          color: "#000000",
-          margin: "0 0 4px 0",
-          fontFamily: "Inter, 'Inter Fallback'",
-        }}
-      >
-        Chat with Menuru
-      </h2>
-      <p
-        style={{
-          fontSize: "13px",
-          color: "#999",
-          margin: "0",
-          fontFamily: "Inter, 'Inter Fallback'",
-        }}
-      >
-        Riwayat pembaruan dan pengembangan
-      </p>
-    </div>
-
-    <div style={{ position: "relative", paddingLeft: "28px" }}>
-      <div
-        style={{
-          position: "absolute",
-          left: "6px",
-          top: "6px",
-          bottom: "6px",
-          width: "2px",
-          borderLeft: "2px dotted #d0d0d0",
-          zIndex: 0,
-        }}
-      />
-
-      {updates.map((item, index) => {
-        const isLive = item.status === "live";
-        const isComing = item.status === "coming";
-        const isDone = item.status === "done";
-        
-        const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-        const isBlinking = isLive || isComing;
-        
-        return (
-          <motion.div
-            key={item.id}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            style={{
-              position: "relative",
-              paddingBottom: index === updates.length - 1 ? "0" : "28px",
-              paddingLeft: "24px",
-              cursor: "pointer",
-            }}
-            onClick={() => setSelectedUpdateId(item.id)}
-          >
-            {/* BLINKING DOTS - Pemancar Kedap-kedip */}
-            <div
-              style={{
-                position: "absolute",
-                left: "-22px",
-                top: "4px",
-                width: "14px",
-                height: "14px",
-                zIndex: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Dot 1 - Kedap-kedip */}
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  backgroundColor: dotColor,
-                  border: "2px solid #ffffff",
-                  boxShadow: isBlinking ? `0 0 16px ${dotColor}` : "0 0 4px rgba(0,0,0,0.1)",
-                  animation: isBlinking ? "blinkingDot 1.2s ease-in-out infinite" : "none",
-                  position: "absolute",
-                }}
-              />
-              
-              {/* Dot 2 - Kedap-kedip dengan delay */}
-              {isBlinking && (
+                // Update List Page - Dengan Google Dot Style
                 <div
                   style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: dotColor,
-                    border: "2px solid #ffffff",
-                    boxShadow: `0 0 16px ${dotColor}`,
-                    animation: "blinkingDot 1.2s ease-in-out infinite 0.4s",
-                    position: "absolute",
-                    opacity: 0,
-                  }}
-                />
-              )}
-              
-              {/* Dot 3 - Kedap-kedip dengan delay lebih besar */}
-              {isBlinking && (
-                <div
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: dotColor,
-                    border: "2px solid #ffffff",
-                    boxShadow: `0 0 16px ${dotColor}`,
-                    animation: "blinkingDot 1.2s ease-in-out infinite 0.8s",
-                    position: "absolute",
-                    opacity: 0,
-                  }}
-                />
-              )}
-            </div>
-            
-            <div
-              style={{
-                position: "absolute",
-                left: "-6px",
-                top: "18px",
-                width: "20px",
-                height: "1px",
-                borderTop: "2px dotted #d0d0d0",
-                zIndex: 0,
-              }}
-            />
-            
-            <div style={{ padding: "0" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    color: "#000000",
-                    fontFamily: "Inter, 'Inter Fallback'",
-                    letterSpacing: "-0.01em",
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "28px 32px",
+                    backgroundColor: "#ffffff",
                   }}
                 >
-                  {item.title}
-                </div>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{
-                    flexShrink: 0,
-                    color: "#000000",
-                  }}
-                >
-                  <path
-                    d="M9 6L15 12L9 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
+                  <div style={{ marginBottom: "28px" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 14px",
+                        backgroundColor: "#000000",
+                        borderRadius: "20px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: "#ffffff",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          fontFamily: "Inter, 'Inter Fallback'",
+                        }}
+                      >
+                        Update Sistem
+                      </span>
+                    </div>
+                    <h2
+                      style={{
+                        fontSize: "22px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        margin: "0 0 4px 0",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Chat with Menuru
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        margin: "0",
+                        fontFamily: "Inter, 'Inter Fallback'",
+                      }}
+                    >
+                      Riwayat pembaruan dan pengembangan
+                    </p>
+                  </div>
 
+                  <div style={{ position: "relative", paddingLeft: "28px" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "6px",
+                        top: "6px",
+                        bottom: "6px",
+                        width: "2px",
+                        borderLeft: "2px dotted #d0d0d0",
+                        zIndex: 0,
+                      }}
+                    />
 
+                    {updates.map((item, index) => {
+                      const isLive = item.status === "live";
+                      const isComing = item.status === "coming";
+                      const isDone = item.status === "done";
+                      
+                      const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
+                      const isBlinking = isLive || isComing;
+                      
+                      return (
+                        <motion.div
+                          key={item.id}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          style={{
+                            position: "relative",
+                            paddingBottom: index === updates.length - 1 ? "0" : "28px",
+                            paddingLeft: "24px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setSelectedUpdateId(item.id)}
+                        >
+                          {/* Google Dot Style dengan Pemancar */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "-22px",
+                              top: "4px",
+                              width: "14px",
+                              height: "14px",
+                              zIndex: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {/* Pemancar - Pulse Ring */}
+                            {isBlinking && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  width: "35px",
+                                  height: "35px",
+                                  borderRadius: "50%",
+                                  backgroundColor: dotColor,
+                                  opacity: 0.25,
+                                  animation: "pulseRing 1.5s ease-in-out infinite",
+                                  pointerEvents: "none",
+                                }}
+                              />
+                            )}
+                            
+                            {/* Titik Bulat Kecil - Style Login Gmail */}
+                            <div
+                              style={{
+                                width: "10px",
+                                height: "10px",
+                                borderRadius: "50%",
+                                backgroundColor: dotColor,
+                                border: "2px solid #ffffff",
+                                position: "relative",
+                                zIndex: 3,
+                                animation: isBlinking ? "blinkDot 1.5s ease-in-out infinite" : "none",
+                              }}
+                            />
+                          </div>
+                          
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "-6px",
+                              top: "18px",
+                              width: "20px",
+                              height: "1px",
+                              borderTop: "2px dotted #d0d0d0",
+                              zIndex: 0,
+                            }}
+                          />
+                          
+                          <div style={{ padding: "0" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "12px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "18px",
+                                  fontWeight: 700,
+                                  color: "#000000",
+                                  fontFamily: "Inter, 'Inter Fallback'",
+                                  letterSpacing: "-0.01em",
+                                }}
+                              >
+                                {item.title}
+                              </div>
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{
+                                  flexShrink: 0,
+                                  color: "#000000",
+                                }}
+                              >
+                                <path
+                                  d="M9 6L15 12L9 18"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
 
-               
                   <div
                     style={{
                       marginTop: "20px",
@@ -4312,16 +4315,31 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
-    @keyframes blinkingDot {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.1;
-      transform: scale(0.5);
-    }
-  }
+        @keyframes pulseRing {
+          0% {
+            transform: scale(0.8);
+            opacity: 0.25;
+          }
+          50% {
+            transform: scale(1.4);
+            opacity: 0.1;
+          }
+          100% {
+            transform: scale(0.8);
+            opacity: 0.25;
+          }
+        }
+        
+        @keyframes blinkDot {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.4;
+            transform: scale(0.85);
+          }
+        }
       `}</style>
     </div>
   );
