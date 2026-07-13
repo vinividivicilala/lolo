@@ -2151,7 +2151,8 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : showUpdate ? (
                 // Update List Page
-  <div
+
+              <div
     style={{
       flex: 1,
       overflowY: "auto",
@@ -2224,7 +2225,7 @@ export default function HomePage(): React.JSX.Element {
         const isDone = item.status === "done";
         
         const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-        const pulseColor = isLive ? "rgba(59, 130, 246, 0.6)" : (isComing ? "rgba(239, 68, 68, 0.6)" : "rgba(0, 0, 0, 0.3)");
+        const pulseColor = isLive ? "rgba(59, 130, 246, 0.5)" : (isComing ? "rgba(239, 68, 68, 0.5)" : "rgba(0, 0, 0, 0.2)");
         const isPulsing = isLive || isComing;
         
         return (
@@ -2240,7 +2241,37 @@ export default function HomePage(): React.JSX.Element {
             }}
             onClick={() => setSelectedUpdateId(item.id)}
           >
-            {/* RIPPLE PULSE INDICATOR / PING EFFECT */}
+            {/* PULSE RING - 1 Ring Full Color */}
+            {isPulsing && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "-22px",
+                  top: "4px",
+                  width: "14px",
+                  height: "14px",
+                  zIndex: 1,
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-6px",
+                    left: "-6px",
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "50%",
+                    backgroundColor: pulseColor,
+                    opacity: 0.6,
+                    animation: "pulseRing 1.5s ease-in-out infinite",
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+            )}
+
+            {/* BLINK DOT - Titik bulat kecil berkedip */}
             <div
               style={{
                 position: "absolute",
@@ -2251,76 +2282,15 @@ export default function HomePage(): React.JSX.Element {
                 zIndex: 2,
               }}
             >
-              {/* Outer Ring 1 - Ping Effect */}
-              {isPulsing && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-8px",
-                    left: "-8px",
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "50%",
-                    backgroundColor: "transparent",
-                    border: `2px solid ${pulseColor}`,
-                    opacity: 0,
-                    animation: "pingRing 1.8s ease-out infinite",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
-              
-              {/* Outer Ring 2 - Ping Effect dengan delay */}
-              {isPulsing && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-8px",
-                    left: "-8px",
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "50%",
-                    backgroundColor: "transparent",
-                    border: `2px solid ${pulseColor}`,
-                    opacity: 0,
-                    animation: "pingRing 1.8s ease-out infinite 0.6s",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
-              
-              {/* Outer Ring 3 - Ping Effect dengan delay lebih besar */}
-              {isPulsing && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-8px",
-                    left: "-8px",
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "50%",
-                    backgroundColor: "transparent",
-                    border: `2px solid ${pulseColor}`,
-                    opacity: 0,
-                    animation: "pingRing 1.8s ease-out infinite 1.2s",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
-
-              {/* Core Dot */}
               <div
                 style={{
-                  position: "absolute",
-                  top: "0px",
-                  left: "0px",
                   width: "14px",
                   height: "14px",
                   borderRadius: "50%",
                   backgroundColor: dotColor,
                   border: "2px solid #ffffff",
                   boxShadow: isPulsing ? `0 0 12px ${pulseColor}` : "0 0 4px rgba(0,0,0,0.1)",
-                  zIndex: 3,
+                  animation: isPulsing ? "blinkDot 1.5s ease-in-out infinite" : "none",
                 }}
               />
             </div>
@@ -2382,6 +2352,7 @@ export default function HomePage(): React.JSX.Element {
         );
       })}
     </div>
+
                
                   <div
                     style={{
@@ -4330,25 +4301,29 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
-       @keyframes pingRing {
-    0% {
-      transform: scale(0.8);
+      @keyframes blinkDot {
+    0%, 100% {
       opacity: 1;
+      transform: scale(1);
     }
-    100% {
-      transform: scale(2.2);
-      opacity: 0;
+    50% {
+      opacity: 0.4;
+      transform: scale(0.85);
     }
   }
   
-  @keyframes pulseTransmitter {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+  @keyframes pulseRing {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.6;
     }
     50% {
       transform: scale(1.2);
-      box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0.6;
     }
   }
       `}</style>
