@@ -172,43 +172,50 @@ const EditIcon = () => (
   </svg>
 );
 
-// Google Login Style Dot Indicator (tanpa shadow)
-const GoogleDot = ({ color = "#4ade80", isBlinking = false, size = 10 }: { color?: string; isBlinking?: boolean; size?: number }) => {
+// Awwwards Style Dot Indicator (tanpa border putih, dengan 1 layer pemancar)
+const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-      {/* Pemancar - Pulse Ring */}
-      {isBlinking && (
+    <div style={{ 
+      position: "relative", 
+      display: "inline-flex", 
+      alignItems: "center", 
+      justifyContent: "center",
+      width: `${size}px`,
+      height: `${size}px`,
+    }}>
+      {/* Pemancar - 1 Layer Awwwards Style */}
+      {isActive && (
         <div
           style={{
             position: "absolute",
-            width: `${size * 2.5}px`,
-            height: `${size * 2.5}px`,
+            width: `${size * 2.8}px`,
+            height: `${size * 2.8}px`,
             borderRadius: "50%",
             backgroundColor: color,
-            opacity: 0.3,
-            animation: "pulseRing 1.5s ease-in-out infinite",
+            opacity: 0.20,
+            animation: "awwwardsPulse 2s ease-in-out infinite",
             pointerEvents: "none",
           }}
         />
       )}
       
-      {/* Titik Bulat Kecil - Style Login Gmail */}
+      {/* Titik Bulat Kecil - Tanpa Border */}
       <div
         style={{
           width: `${size}px`,
           height: `${size}px`,
           borderRadius: "50%",
           backgroundColor: color,
-          border: "2px solid #ffffff",
           position: "relative",
           zIndex: 2,
+          transition: "all 0.3s ease",
         }}
       />
     </div>
   );
 };
 
-// Online Status Indicator - Menggunakan GoogleDot
+// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
@@ -220,7 +227,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         onMouseLeave={() => setShowTooltip(false)}
         style={{ cursor: "pointer" }}
       >
-        <GoogleDot color={color} isBlinking={online} size={8} />
+        <AwwwardsDot color={color} isActive={online} size={8} />
       </div>
       {showTooltip && (
         <div style={{
@@ -2176,7 +2183,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page - Dengan Google Dot Style
+                // Update List Page - Dengan Awwwards Dot Style 1 Layer
                 <div
                   style={{
                     flex: 1,
@@ -2250,7 +2257,7 @@ export default function HomePage(): React.JSX.Element {
                       const isDone = item.status === "done";
                       
                       const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-                      const isBlinking = isLive || isComing;
+                      const isActive = isLive || isComing;
                       
                       return (
                         <motion.div
@@ -2265,7 +2272,7 @@ export default function HomePage(): React.JSX.Element {
                           }}
                           onClick={() => setSelectedUpdateId(item.id)}
                         >
-                          {/* Google Dot Style dengan Pemancar */}
+                          {/* Awwwards Dot Style dengan 1 Layer Pemancar */}
                           <div
                             style={{
                               position: "absolute",
@@ -2279,8 +2286,8 @@ export default function HomePage(): React.JSX.Element {
                               justifyContent: "center",
                             }}
                           >
-                            {/* Pemancar - Pulse Ring */}
-                            {isBlinking && (
+                            {/* Pemancar - 1 Layer Awwwards Style */}
+                            {isActive && (
                               <div
                                 style={{
                                   position: "absolute",
@@ -2288,24 +2295,22 @@ export default function HomePage(): React.JSX.Element {
                                   height: "35px",
                                   borderRadius: "50%",
                                   backgroundColor: dotColor,
-                                  opacity: 0.25,
-                                  animation: "pulseRing 1.5s ease-in-out infinite",
+                                  opacity: 0.20,
+                                  animation: "awwwardsPulse 2s ease-in-out infinite",
                                   pointerEvents: "none",
                                 }}
                               />
                             )}
                             
-                            {/* Titik Bulat Kecil - Style Login Gmail */}
+                            {/* Titik Bulat Kecil - Tanpa Border */}
                             <div
                               style={{
                                 width: "10px",
                                 height: "10px",
                                 borderRadius: "50%",
                                 backgroundColor: dotColor,
-                                border: "2px solid #ffffff",
                                 position: "relative",
                                 zIndex: 3,
-                                animation: isBlinking ? "blinkDot 1.5s ease-in-out infinite" : "none",
                               }}
                             />
                           </div>
@@ -4315,29 +4320,18 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
-        @keyframes pulseRing {
+        @keyframes awwwardsPulse {
           0% {
-            transform: scale(0.8);
+            transform: scale(0.7);
             opacity: 0.25;
           }
           50% {
-            transform: scale(1.4);
-            opacity: 0.1;
+            transform: scale(1.6);
+            opacity: 0.05;
           }
           100% {
-            transform: scale(0.8);
+            transform: scale(0.7);
             opacity: 0.25;
-          }
-        }
-        
-        @keyframes blinkDot {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.4;
-            transform: scale(0.85);
           }
         }
       `}</style>
