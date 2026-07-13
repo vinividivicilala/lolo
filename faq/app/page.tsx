@@ -56,8 +56,52 @@ if (typeof window !== "undefined") {
 
 const googleProvider = new GoogleAuthProvider();
 
-// Language Context
+// Language Type
 type Language = 'id' | 'en';
+
+// Get initial language from URL
+const getInitialLanguage = (): Language => {
+  if (typeof window === 'undefined') return 'id';
+  const path = window.location.pathname;
+  if (path.startsWith('/en/') || path === '/en') return 'en';
+  if (path.startsWith('/id/') || path === '/id') return 'id';
+  return 'id';
+};
+
+// Change language and update URL
+const changeLanguage = (lang: Language) => {
+  if (typeof window === 'undefined') return;
+  const currentPath = window.location.pathname;
+  const currentSearch = window.location.search;
+  const currentHash = window.location.hash;
+  
+  let newPath = currentPath;
+  
+  // Remove existing language prefix
+  if (currentPath.startsWith('/en/') || currentPath === '/en') {
+    newPath = currentPath.replace(/^\/en/, '');
+  } else if (currentPath.startsWith('/id/') || currentPath === '/id') {
+    newPath = currentPath.replace(/^\/id/, '');
+  }
+  
+  // If newPath is empty or just '/', set to '/'
+  if (!newPath || newPath === '') {
+    newPath = '/';
+  }
+  
+  // Add new language prefix
+  if (lang === 'en') {
+    newPath = `/en${newPath}`;
+  } else {
+    newPath = `/id${newPath}`;
+  }
+  
+  // Navigate to new URL
+  window.history.pushState({}, '', `${newPath}${currentSearch}${currentHash}`);
+  
+  // Dispatch popstate event to notify components
+  window.dispatchEvent(new PopStateEvent('popstate'));
+};
 
 // Translations
 const translations = {
@@ -124,6 +168,7 @@ const translations = {
     'forward': 'Teruskan',
     'share': 'Bagikan',
     'close': 'Tutup',
+    'more': 'Lainnya',
     
     // Modal
     'loginTitle': 'Masuk',
@@ -222,6 +267,7 @@ const translations = {
     'forward': 'Forward',
     'share': 'Share',
     'close': 'Close',
+    'more': 'More',
     
     // Modal
     'loginTitle': 'Login',
@@ -259,7 +305,7 @@ const translations = {
   }
 };
 
-// Language Selector Component
+// Language Selector Component with URL-based routing
 const LanguageSelector = ({ language, setLanguage }: { language: Language; setLanguage: (lang: Language) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -273,6 +319,12 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    changeLanguage(lang);
+    setIsOpen(false);
+  };
 
   return (
     <div ref={dropdownRef} style={{ position: "relative" }}>
@@ -326,15 +378,12 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
               border: "1px solid #e0e0e0",
               overflow: "hidden",
-              minWidth: "120px",
+              minWidth: "140px",
               zIndex: 1000,
             }}
           >
             <button
-              onClick={() => {
-                setLanguage('id');
-                setIsOpen(false);
-              }}
+              onClick={() => handleLanguageChange('id')}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -365,10 +414,7 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
               )}
             </button>
             <button
-              onClick={() => {
-                setLanguage('en');
-                setIsOpen(false);
-              }}
+              onClick={() => handleLanguageChange('en')}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -748,7 +794,7 @@ const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; langua
 };
 
 export default function HomePage(): React.JSX.Element {
-  const [language, setLanguage] = useState<Language>('id');
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const t = translations[language];
   
   const [user, setUser] = useState<any>(null);
@@ -861,9 +907,28 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
+  // Listen to popstate for browser back/forward
+  useEffect(() => {
+    const handlePopState = () => {
+      const newLang = getInitialLanguage();
+      setLanguage(newLang);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Update chatTexts when language changes
   useEffect(() => {
     setChatButtonText(t.chatWithMenuru);
+    // Update URL when language changes programmatically
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      const currentLang = getInitialLanguage();
+      if (currentLang !== language) {
+        changeLanguage(language);
+      }
+    }
   }, [language]);
 
   const MENURU_OFFICIAL: ChatUser = {
@@ -1743,7 +1808,7 @@ export default function HomePage(): React.JSX.Element {
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (timestamp: any) => {
