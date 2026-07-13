@@ -778,7 +778,8 @@ const [showCloseButton, setShowCloseButton] = useState(false);
   }, []);
 
 
-// GSAP Animation untuk Read the Report - ROLLING TEXT
+
+  // GSAP Animation untuk Read the Report - ROLLING TEXT
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -880,7 +881,7 @@ useEffect(() => {
     }
   };
 
-  // Event listeners untuk hover
+  // Event listeners untuk hover pada teks
   const textElement = text;
   if (textElement) {
     textElement.addEventListener('mouseenter', startRollingText);
@@ -898,7 +899,7 @@ useEffect(() => {
   };
 }, [isReportExpanded]);
 
-// FUNGSI TOGGLE EXPANDED - ANIMASI LANGSUNG KE KIRI DAN KE BAWAH
+// FUNGSI TOGGLE EXPANDED - SESUAI KODE ASLI
 const handleReportToggle = () => {
   const container = reportContainerRef.current;
   const report = reportRef.current;
@@ -909,7 +910,7 @@ const handleReportToggle = () => {
   if (!container || !report || !text || !icon || !logo) return;
 
   if (!isReportExpanded) {
-    // EXPAND - panel langsung ke kiri dan ke bawah
+    // EXPAND - sesuai kode asli
     const rect = report.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -919,7 +920,6 @@ const handleReportToggle = () => {
     const expandWidth = startX;
     const expandHeight = window.innerHeight - startY;
 
-    // Set posisi awal
     gsap.set(container, {
       position: "fixed",
       top: `${startY}px`,
@@ -928,7 +928,7 @@ const handleReportToggle = () => {
       height: `${buttonHeight}px`,
       zIndex: 10000,
       backgroundColor: "#FE7141",
-      overflow: "visible",
+      overflow: "hidden",
       borderRadius: "0px",
     });
 
@@ -945,183 +945,153 @@ const handleReportToggle = () => {
       justifyContent: "flex-start",
     });
 
-    // Sembunyikan logo
     gsap.to(logo, {
       opacity: 0,
-      duration: 0.2,
+      duration: 0.1,
       ease: "power2.out",
       pointerEvents: "none",
     });
 
-    // ANIMASI EXPAND - langsung ke kiri dan ke bawah
-    const timeline = gsap.timeline({
-      defaults: { ease: "power3.inOut" }
-    });
-
-    // Container langsung ke kiri dan ke bawah
-    timeline.to(container, {
+    // ANIMASI EXPAND - dari kanan ke kiri (sesuai kode asli)
+    gsap.to(container, {
       width: `${expandWidth + buttonWidth}px`,
       height: `${expandHeight}px`,
-      duration: 0.6,
+      duration: 0.8,
+      ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${startY}px`,
       left: "0px",
       zIndex: 10000,
       borderRadius: "0px",
-    }, 0);
+    });
 
-    // Report mengikuti
-    timeline.to(report, {
+    gsap.to(report, {
       width: "100%",
       height: "100%",
       padding: "0",
       backgroundColor: "#FE7141",
-      duration: 0.5,
+      duration: 0.6,
+      ease: "power3.out",
       borderRadius: "0px",
       display: "flex",
       flexDirection: "column",
       alignItems: "flex-start",
       justifyContent: "flex-start",
-    }, 0);
+    });
 
-    // Teks "Read the Report" dari kanan atas ke kiri atas
-    timeline.fromTo(text, 
-      {
-        opacity: 0,
-        x: 300,
-        y: -50,
-        scale: 0.8,
-      },
-      {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        scale: 1,
-        fontSize: "28px",
-        fontWeight: 700,
-        duration: 0.5,
-        ease: "back.out(1.7)",
-        color: "#000000",
-        position: "absolute",
-        top: "50px",
-        left: "50px",
-        textAlign: "left",
-        zIndex: 10001,
-      },
-      0.1
-    );
+    // Teks "Read the Report" di kiri atas
+    gsap.to(text, {
+      fontSize: "24px",
+      fontWeight: 600,
+      duration: 0.4,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
+      position: "absolute",
+      top: "50px",
+      left: "50px",
+      textAlign: "left",
+      zIndex: 10001,
+    });
 
-    // Tombol Close (X) muncul di kanan atas
-    timeline.fromTo(icon,
-      {
-        opacity: 0,
-        scale: 0.5,
-        rotation: -90,
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        rotation: 0,
-        fontSize: "40px",
-        fontWeight: 700,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        position: "absolute",
-        top: "45px",
-        right: "50px",
-        cursor: "pointer",
-        color: "#000000",
-        backgroundColor: "rgba(255,255,255,0.95)",
-        padding: "12px 20px",
-        borderRadius: "12px",
-        border: "3px solid #000000",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
-        zIndex: 10002,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        lineHeight: 1,
-      },
-      0.15
-    );
+    // Tombol Close di kanan atas
+    gsap.to(icon, {
+      fontSize: "40px",
+      fontWeight: 700,
+      rotation: 0,
+      scale: 1,
+      duration: 0.4,
+      ease: "back.out(1.7)",
+      position: "absolute",
+      top: "45px",
+      right: "50px",
+      cursor: "pointer",
+      color: "#000000",
+      opacity: 1,
+      backgroundColor: "rgba(255,255,255,0.95)",
+      padding: "12px 20px",
+      borderRadius: "12px",
+      border: "3px solid #000000",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+      zIndex: 10002,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      lineHeight: 1,
+    });
 
     icon.textContent = "✕";
 
     setIsReportExpanded(true);
   } else {
-    // COLLAPSE - panel langsung ke atas (tempat semula)
+    // COLLAPSE - dari kiri ke kanan ke atas (tempat semula)
     const rect = report.getBoundingClientRect();
     const endX = rect.left;
     const endY = rect.top;
     const buttonWidth = rect.width;
     const buttonHeight = rect.height;
 
-    // ANIMASI COLLAPSE - langsung ke atas
-    const timeline = gsap.timeline({
-      defaults: { ease: "power3.inOut" }
-    });
-
-    // Teks "Read the Report" fade out dan ke kanan
-    timeline.to(text, {
-      opacity: 0,
-      x: 300,
-      y: -50,
-      scale: 0.8,
-      duration: 0.3,
-      ease: "power2.out",
+    // Teks kembali ke posisi semula
+    gsap.to(text, {
       fontSize: "18px",
       fontWeight: 600,
+      duration: 0.3,
+      ease: "power2.out",
+      color: "#000000",
+      scale: 1,
       position: "relative",
       top: "auto",
       left: "auto",
       textAlign: "center",
       zIndex: 2,
-    }, 0);
+    });
 
-    // Tombol Close (X) fade out
-    timeline.to(icon, {
-      opacity: 0,
-      scale: 0.5,
-      rotation: 90,
-      duration: 0.3,
-      ease: "power2.out",
+    // Icon kembali ke posisi semula
+    gsap.to(icon, {
       fontSize: "30px",
       fontWeight: 300,
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.out",
       position: "relative",
       top: "auto",
       right: "auto",
       color: "#000000",
+      opacity: 1,
       backgroundColor: "transparent",
       padding: "0",
       borderRadius: "0px",
       border: "none",
       boxShadow: "none",
       zIndex: 30,
-    }, 0);
+    });
 
-    // Report collapse ke ukuran kecil
-    timeline.to(report, {
+    // Report kembali ke ukuran kecil
+    gsap.to(report, {
       width: "auto",
       height: "48px",
       padding: "6px 35px 6px 200px",
       justifyContent: "flex-end",
       gap: "6px",
       backgroundColor: "#FE7141",
-      duration: 0.4,
+      duration: 0.5,
+      ease: "power3.out",
       minWidth: "450px",
       position: "relative",
       borderRadius: "0px",
       display: "flex",
       flexDirection: "row",
       alignItems: "center",
-    }, 0.1);
+    });
 
-    // Container collapse ke ukuran kecil (kembali ke atas)
-    timeline.to(container, {
+    // Container kembali ke posisi semula (kanan ke atas)
+    gsap.to(container, {
       width: `${buttonWidth}px`,
       height: `${buttonHeight}px`,
-      duration: 0.6,
+      duration: 0.7,
+      ease: "power3.inOut",
       backgroundColor: "#FE7141",
       position: "fixed",
       top: `${endY}px`,
@@ -1129,7 +1099,6 @@ const handleReportToggle = () => {
       zIndex: 10000,
       borderRadius: "0px",
       onComplete: () => {
-        // Reset semua style setelah animasi selesai
         gsap.set(container, {
           position: "absolute",
           top: "0px",
@@ -1157,7 +1126,6 @@ const handleReportToggle = () => {
           pointerEvents: "auto",
         });
         gsap.set(icon, {
-          opacity: 1,
           position: "relative",
           top: "auto",
           right: "auto",
@@ -1169,21 +1137,13 @@ const handleReportToggle = () => {
           border: "none",
           boxShadow: "none",
           zIndex: 30,
-          scale: 1,
-          rotation: 0,
-          x: 0,
-          y: 0,
         });
         gsap.set(text, {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          scale: 1,
-          fontSize: "18px",
-          fontWeight: 600,
           position: "relative",
           top: "auto",
           left: "auto",
+          fontSize: "18px",
+          fontWeight: 600,
           textAlign: "center",
           zIndex: 2,
         });
@@ -1192,20 +1152,18 @@ const handleReportToggle = () => {
         }
         icon.textContent = "+";
       }
-    }, 0.1);
+    });
 
-    // Logo muncul kembali
-    timeline.to(logo, {
+    gsap.to(logo, {
       opacity: 1,
       duration: 0.3,
       ease: "power2.out",
       pointerEvents: "auto",
-    }, 0.3);
+    });
 
     setIsReportExpanded(false);
   }
 };
-
 
   
 
@@ -2083,9 +2041,7 @@ const handleReportToggle = () => {
       }}
     >
 
-
-
-      {/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
+{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
 <div
   ref={reportContainerRef}
   style={{
@@ -2096,7 +2052,7 @@ const handleReportToggle = () => {
     display: "flex",
     alignItems: "center",
     gap: "0px",
-    overflow: "visible",
+    overflow: "hidden",
     backgroundColor: "transparent",
   }}
 >
@@ -2153,12 +2109,11 @@ const handleReportToggle = () => {
     }}
     onClick={!isReportExpanded ? handleReportToggle : undefined}
   >
-    {/* TEKS "Read the Report" di KIRI ATAS */}
     <span
       ref={reportTextRef}
       style={{
-        fontSize: isReportExpanded ? "28px" : "18px",
-        fontWeight: isReportExpanded ? 700 : 600,
+        fontSize: isReportExpanded ? "24px" : "18px",
+        fontWeight: 600,
         color: "#000000",
         letterSpacing: "-0.01em",
         fontFamily: "Inter, 'Inter Fallback'",
@@ -2180,7 +2135,6 @@ const handleReportToggle = () => {
       Read the Report
     </span>
     
-    {/* TOMBOL CLOSE di KANAN ATAS */}
     <span
       ref={reportIconRef}
       style={{
