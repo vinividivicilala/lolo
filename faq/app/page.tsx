@@ -2151,169 +2151,238 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : showUpdate ? (
                 // Update List Page
+  <div
+    style={{
+      flex: 1,
+      overflowY: "auto",
+      padding: "28px 32px",
+      backgroundColor: "#ffffff",
+    }}
+  >
+    <div style={{ marginBottom: "28px" }}>
+      <div
+        style={{
+          display: "inline-block",
+          padding: "4px 14px",
+          backgroundColor: "#000000",
+          borderRadius: "20px",
+          marginBottom: "12px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "10px",
+            fontWeight: 600,
+            color: "#ffffff",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            fontFamily: "Inter, 'Inter Fallback'",
+          }}
+        >
+          Update Sistem
+        </span>
+      </div>
+      <h2
+        style={{
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#000000",
+          margin: "0 0 4px 0",
+          fontFamily: "Inter, 'Inter Fallback'",
+        }}
+      >
+        Chat with Menuru
+      </h2>
+      <p
+        style={{
+          fontSize: "13px",
+          color: "#999",
+          margin: "0",
+          fontFamily: "Inter, 'Inter Fallback'",
+        }}
+      >
+        Riwayat pembaruan dan pengembangan
+      </p>
+    </div>
+
+    <div style={{ position: "relative", paddingLeft: "28px" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: "6px",
+          top: "6px",
+          bottom: "6px",
+          width: "2px",
+          borderLeft: "2px dotted #d0d0d0",
+          zIndex: 0,
+        }}
+      />
+
+      {updates.map((item, index) => {
+        const isLive = item.status === "live";
+        const isComing = item.status === "coming";
+        const isDone = item.status === "done";
+        
+        const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
+        const pulseColor = isLive ? "rgba(59, 130, 246, 0.6)" : (isComing ? "rgba(239, 68, 68, 0.6)" : "rgba(0, 0, 0, 0.3)");
+        const isPulsing = isLive || isComing;
+        
+        return (
+          <motion.div
+            key={item.id}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              position: "relative",
+              paddingBottom: index === updates.length - 1 ? "0" : "28px",
+              paddingLeft: "24px",
+              cursor: "pointer",
+            }}
+            onClick={() => setSelectedUpdateId(item.id)}
+          >
+            {/* RIPPLE PULSE INDICATOR / PING EFFECT */}
+            <div
+              style={{
+                position: "absolute",
+                left: "-22px",
+                top: "4px",
+                width: "14px",
+                height: "14px",
+                zIndex: 2,
+              }}
+            >
+              {/* Outer Ring 1 - Ping Effect */}
+              {isPulsing && (
                 <div
                   style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "28px 32px",
-                    backgroundColor: "#ffffff",
+                    position: "absolute",
+                    top: "-8px",
+                    left: "-8px",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    backgroundColor: "transparent",
+                    border: `2px solid ${pulseColor}`,
+                    opacity: 0,
+                    animation: "pingRing 1.8s ease-out infinite",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              
+              {/* Outer Ring 2 - Ping Effect dengan delay */}
+              {isPulsing && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-8px",
+                    left: "-8px",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    backgroundColor: "transparent",
+                    border: `2px solid ${pulseColor}`,
+                    opacity: 0,
+                    animation: "pingRing 1.8s ease-out infinite 0.6s",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              
+              {/* Outer Ring 3 - Ping Effect dengan delay lebih besar */}
+              {isPulsing && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-8px",
+                    left: "-8px",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    backgroundColor: "transparent",
+                    border: `2px solid ${pulseColor}`,
+                    opacity: 0,
+                    animation: "pingRing 1.8s ease-out infinite 1.2s",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+
+              {/* Core Dot */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0px",
+                  left: "0px",
+                  width: "14px",
+                  height: "14px",
+                  borderRadius: "50%",
+                  backgroundColor: dotColor,
+                  border: "2px solid #ffffff",
+                  boxShadow: isPulsing ? `0 0 12px ${pulseColor}` : "0 0 4px rgba(0,0,0,0.1)",
+                  zIndex: 3,
+                }}
+              />
+            </div>
+            
+            <div
+              style={{
+                position: "absolute",
+                left: "-6px",
+                top: "18px",
+                width: "20px",
+                height: "1px",
+                borderTop: "2px dotted #d0d0d0",
+                zIndex: 0,
+              }}
+            />
+            
+            <div style={{ padding: "0" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    color: "#000000",
+                    fontFamily: "Inter, 'Inter Fallback'",
+                    letterSpacing: "-0.01em",
                   }}
                 >
-                  <div style={{ marginBottom: "28px" }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "4px 14px",
-                        backgroundColor: "#000000",
-                        borderRadius: "20px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: "#ffffff",
-                          letterSpacing: "0.05em",
-                          textTransform: "uppercase",
-                          fontFamily: "Inter, 'Inter Fallback'",
-                        }}
-                      >
-                        Update Sistem
-                      </span>
-                    </div>
-                    <h2
-                      style={{
-                        fontSize: "22px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        margin: "0 0 4px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                      }}
-                    >
-                      Chat with Menuru
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#999",
-                        margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
-                      }}
-                    >
-                      Riwayat pembaruan dan pengembangan
-                    </p>
-                  </div>
-
-                  <div style={{ position: "relative", paddingLeft: "28px" }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "6px",
-                        top: "6px",
-                        bottom: "6px",
-                        width: "2px",
-                        borderLeft: "2px dotted #d0d0d0",
-                        zIndex: 0,
-                      }}
-                    />
-
-                    {updates.map((item, index) => {
-                      const isLive = item.status === "live";
-                      const isComing = item.status === "coming";
-                      const isDone = item.status === "done";
-                      
-                      const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-                      const glowColor = isLive ? "rgba(59, 130, 246, 0.8)" : "none";
-                      const isPulsing = isLive;
-                      
-                      return (
-                        <motion.div
-                          key={item.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          style={{
-                            position: "relative",
-                            paddingBottom: index === updates.length - 1 ? "0" : "28px",
-                            paddingLeft: "24px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setSelectedUpdateId(item.id)}
-                        >
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: "-22px",
-                              top: "4px",
-                              width: "14px",
-                              height: "14px",
-                              borderRadius: "50%",
-                              backgroundColor: dotColor,
-                              border: "2px solid #ffffff",
-                              boxShadow: isPulsing ? `0 0 20px ${glowColor}, 0 0 40px ${glowColor}` : "0 0 4px rgba(0,0,0,0.1)",
-                              animation: isPulsing ? "pulseTransmitter 1.5s ease-in-out infinite" : "none",
-                              zIndex: 1,
-                            }}
-                          />
-                          
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: "-6px",
-                              top: "18px",
-                              width: "20px",
-                              height: "1px",
-                              borderTop: "2px dotted #d0d0d0",
-                              zIndex: 0,
-                            }}
-                          />
-                          
-                          <div style={{ padding: "0" }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                gap: "12px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                  color: "#000000",
-                                  fontFamily: "Inter, 'Inter Fallback'",
-                                  letterSpacing: "-0.01em",
-                                }}
-                              >
-                                {item.title}
-                              </div>
-                              <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                style={{
-                                  flexShrink: 0,
-                                  color: "#000000",
-                                }}
-                              >
-                                <path
-                                  d="M9 6L15 12L9 18"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-
+                  {item.title}
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{
+                    flexShrink: 0,
+                    color: "#000000",
+                  }}
+                >
+                  <path
+                    d="M9 6L15 12L9 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+               
                   <div
                     style={{
                       marginTop: "20px",
@@ -4261,16 +4330,27 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
-        @keyframes pulseTransmitter {
-          0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
-          }
-          50% {
-            transform: scale(1.2);
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
-          }
-        }
+       @keyframes pingRing {
+    0% {
+      transform: scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulseTransmitter {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+    }
+    50% {
+      transform: scale(1.2);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(59, 130, 246, 0.4);
+    }
+  }
       `}</style>
     </div>
   );
