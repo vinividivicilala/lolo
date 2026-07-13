@@ -2152,7 +2152,8 @@ export default function HomePage(): React.JSX.Element {
               ) : showUpdate ? (
                 // Update List Page
 
-              <div
+
+               <div
     style={{
       flex: 1,
       overflowY: "auto",
@@ -2225,8 +2226,7 @@ export default function HomePage(): React.JSX.Element {
         const isDone = item.status === "done";
         
         const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-        const pulseColor = isLive ? "rgba(59, 130, 246, 0.5)" : (isComing ? "rgba(239, 68, 68, 0.5)" : "rgba(0, 0, 0, 0.2)");
-        const isPulsing = isLive || isComing;
+        const isBlinking = isLive || isComing;
         
         return (
           <motion.div
@@ -2241,37 +2241,7 @@ export default function HomePage(): React.JSX.Element {
             }}
             onClick={() => setSelectedUpdateId(item.id)}
           >
-            {/* PULSE RING - 1 Ring Full Color */}
-            {isPulsing && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "-22px",
-                  top: "4px",
-                  width: "14px",
-                  height: "14px",
-                  zIndex: 1,
-                  pointerEvents: "none",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-6px",
-                    left: "-6px",
-                    width: "26px",
-                    height: "26px",
-                    borderRadius: "50%",
-                    backgroundColor: pulseColor,
-                    opacity: 0.6,
-                    animation: "pulseRing 1.5s ease-in-out infinite",
-                    pointerEvents: "none",
-                  }}
-                />
-              </div>
-            )}
-
-            {/* BLINK DOT - Titik bulat kecil berkedip */}
+            {/* BLINKING DOTS - Pemancar Kedap-kedip */}
             <div
               style={{
                 position: "absolute",
@@ -2280,19 +2250,58 @@ export default function HomePage(): React.JSX.Element {
                 width: "14px",
                 height: "14px",
                 zIndex: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
+              {/* Dot 1 - Kedap-kedip */}
               <div
                 style={{
-                  width: "14px",
-                  height: "14px",
+                  width: "10px",
+                  height: "10px",
                   borderRadius: "50%",
                   backgroundColor: dotColor,
                   border: "2px solid #ffffff",
-                  boxShadow: isPulsing ? `0 0 12px ${pulseColor}` : "0 0 4px rgba(0,0,0,0.1)",
-                  animation: isPulsing ? "blinkDot 1.5s ease-in-out infinite" : "none",
+                  boxShadow: isBlinking ? `0 0 16px ${dotColor}` : "0 0 4px rgba(0,0,0,0.1)",
+                  animation: isBlinking ? "blinkingDot 1.2s ease-in-out infinite" : "none",
+                  position: "absolute",
                 }}
               />
+              
+              {/* Dot 2 - Kedap-kedip dengan delay */}
+              {isBlinking && (
+                <div
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    backgroundColor: dotColor,
+                    border: "2px solid #ffffff",
+                    boxShadow: `0 0 16px ${dotColor}`,
+                    animation: "blinkingDot 1.2s ease-in-out infinite 0.4s",
+                    position: "absolute",
+                    opacity: 0,
+                  }}
+                />
+              )}
+              
+              {/* Dot 3 - Kedap-kedip dengan delay lebih besar */}
+              {isBlinking && (
+                <div
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    backgroundColor: dotColor,
+                    border: "2px solid #ffffff",
+                    boxShadow: `0 0 16px ${dotColor}`,
+                    animation: "blinkingDot 1.2s ease-in-out infinite 0.8s",
+                    position: "absolute",
+                    opacity: 0,
+                  }}
+                />
+              )}
             </div>
             
             <div
@@ -2352,6 +2361,8 @@ export default function HomePage(): React.JSX.Element {
         );
       })}
     </div>
+
+
 
                
                   <div
@@ -4301,29 +4312,14 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx>{`
-      @keyframes blinkDot {
+    @keyframes blinkingDot {
     0%, 100% {
       opacity: 1;
       transform: scale(1);
     }
     50% {
-      opacity: 0.4;
-      transform: scale(0.85);
-    }
-  }
-  
-  @keyframes pulseRing {
-    0% {
-      transform: scale(0.8);
-      opacity: 0.6;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 0.3;
-    }
-    100% {
-      transform: scale(0.8);
-      opacity: 0.6;
+      opacity: 0.1;
+      transform: scale(0.5);
     }
   }
       `}</style>
