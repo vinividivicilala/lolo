@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
-import gsap from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
-import Lenis from '@studio-freight/lenis';
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -102,12 +100,6 @@ interface ChatRoom {
   isPinned?: boolean;
 }
 
-interface Track {
-  artist: string;
-  title: string;
-  embedUrl: string;
-}
-
 interface UpdateItem {
   id: string;
   title: string;
@@ -177,20 +169,6 @@ const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Music Icons
-const MusicPlayIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-    <polygon points="5,3 19,12 5,21" />
-  </svg>
-);
-
-const MusicPauseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-    <rect x="6" y="4" width="4" height="16" />
-    <rect x="14" y="4" width="4" height="16" />
   </svg>
 );
 
@@ -418,73 +396,9 @@ export default function HomePage(): React.JSX.Element {
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [officialMessagesSent, setOfficialMessagesSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // GSAP Animation for Add User Button
-  const addUserButtonRef = useRef<HTMLButtonElement | null>(null);
-  const plusIconRef = useRef<HTMLSpanElement | null>(null);
-
-
-
-
-// Report GSAP Refs
-const reportContainerRef = useRef<HTMLDivElement | null>(null);
-const reportRef = useRef<HTMLDivElement | null>(null);
-const reportTextRef = useRef<HTMLSpanElement | null>(null);
-const reportIconRef = useRef<HTMLSpanElement | null>(null);
-const logoRef = useRef<HTMLDivElement | null>(null);
-const [isReportExpanded, setIsReportExpanded] = useState(false);
-const [isHoveringReport, setIsHoveringReport] = useState(false);
-
-
-const [showCloseButton, setShowCloseButton] = useState(false);
-
-
-
-
-
-
-
-  
-
-  // Lenis Scroll
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
-
-    lenis.on('scroll', (e: any) => {
-      console.log(e);
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
-  // Privacy Policy
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
@@ -556,38 +470,6 @@ const [showCloseButton, setShowCloseButton] = useState(false);
     }
   ];
 
-  // Music Player States
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState<Track>({
-    artist: "Feast",
-    title: "Nina",
-    embedUrl: "https://open.spotify.com/embed/track/0daEJMXc3b4ZMTnvtHpuTt?utm_source=generator&si=af642931b9f4461f"
-  });
-  const [showPlaylist, setShowPlaylist] = useState(false);
-  const [showMusicPlayer, setShowMusicPlayer] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Playlist Data dengan embed Spotify asli
-  const playlist: Track[] = [
-    { 
-      artist: "Feast", 
-      title: "Nina",
-      embedUrl: "https://open.spotify.com/embed/track/0daEJMXc3b4ZMTnvtHpuTt?utm_source=generator&si=af642931b9f4461f"
-    },
-    { 
-      artist: "Feast", 
-      title: "Kami Belum Tentu",
-      embedUrl: "https://open.spotify.com/embed/track/38yM3PwNtTSsb8UqEgqaUl?utm_source=generator&si=41bc38b2a7db4bcf"
-    }
-  ];
-
-  // Select Track from Playlist
-  const selectTrack = (track: Track) => {
-    setCurrentTrack(track);
-    setShowPlaylist(false);
-    setShowMusicPlayer(true);
-  };
-
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
     name: "Menuru Official",
@@ -627,11 +509,10 @@ const [showCloseButton, setShowCloseButton] = useState(false);
     }
   ];
 
-  // Broadcast messages to all users (tanpa sistem login)
+  // Broadcast messages to all users
   const broadcastMessages = async () => {
     if (!db) return;
     
-    // Cek apakah sudah pernah broadcast
     const broadcastRef = doc(db, "system", "broadcast");
     const broadcastSnap = await getDoc(broadcastRef);
     
@@ -641,7 +522,6 @@ const [showCloseButton, setShowCloseButton] = useState(false);
     }
     
     try {
-      // Get all users
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
@@ -683,7 +563,6 @@ const [showCloseButton, setShowCloseButton] = useState(false);
         });
       }
       
-      // Tandai sudah broadcast
       await setDoc(broadcastRef, {
         messagesSent: true,
         sentAt: serverTimestamp()
@@ -695,480 +574,10 @@ const [showCloseButton, setShowCloseButton] = useState(false);
     }
   };
 
-  // Panggil broadcast saat aplikasi pertama kali dijalankan (tanpa login)
   useEffect(() => {
     if (!db) return;
     broadcastMessages();
   }, []);
-
-  // GSAP Animation for Add User Button
-  useEffect(() => {
-    if (typeof window !== "undefined" && addUserButtonRef.current) {
-      import('gsap').then((gsapModule) => {
-        const gsap = gsapModule.default;
-        
-        const button = addUserButtonRef.current;
-        const plusIcon = plusIconRef.current;
-        
-        if (button && plusIcon) {
-          button.addEventListener('mouseenter', () => {
-            gsap.to(button, {
-              scale: 1.02,
-              duration: 0.3,
-              ease: "power2.out",
-              backgroundColor: "#000000",
-              color: "#ffffff",
-            });
-            gsap.to(plusIcon, {
-              rotation: 90,
-              duration: 0.4,
-              ease: "back.out(1.7)",
-              scale: 1.2,
-            });
-          });
-          
-          button.addEventListener('mouseleave', () => {
-            gsap.to(button, {
-              scale: 1,
-              duration: 0.3,
-              ease: "power2.out",
-              backgroundColor: "transparent",
-              color: "#000000",
-            });
-            gsap.to(plusIcon, {
-              rotation: 0,
-              duration: 0.4,
-              ease: "back.out(1.7)",
-              scale: 1,
-            });
-          });
-          
-          button.addEventListener('click', () => {
-            gsap.to(button, {
-              scale: 0.95,
-              duration: 0.15,
-              ease: "power2.out",
-              onComplete: () => {
-                gsap.to(button, {
-                  scale: 1,
-                  duration: 0.3,
-                  ease: "elastic.out(1, 0.5)",
-                });
-              }
-            });
-            
-            gsap.to(plusIcon, {
-              rotation: 90,
-              duration: 0.4,
-              ease: "back.out(1.7)",
-              scale: 1.3,
-              onComplete: () => {
-                gsap.to(plusIcon, {
-                  rotation: 90,
-                  duration: 0.3,
-                  ease: "power2.out",
-                  scale: 1,
-                });
-              }
-            });
-          });
-        }
-      });
-    }
-  }, []);
-
-
-  // GSAP Animation untuk Read the Report - ROLLING TEXT saat hover
-useEffect(() => {
-  if (typeof window === "undefined") return;
-
-  const text = reportTextRef.current;
-  const icon = reportIconRef.current;
-
-  if (!text || !icon) return;
-
-  // Text variants untuk rolling
-  const textVariants = ["Read the Report", "Baca Laporan", "Read More", "Lihat Laporan"];
-  let textIndex = 0;
-  let hoverTimeout: NodeJS.Timeout | null = null;
-  let isHovering = false;
-
-  // ROLLING TEXT - Saat hover di "Read the Report" (hanya saat tidak expanded)
-  const startRollingText = () => {
-    if (!isReportExpanded) {
-      isHovering = true;
-      textIndex = 0;
-      
-      gsap.to(text, {
-        scale: 1.05,
-        duration: 0.2,
-        ease: "power2.out",
-      });
-      gsap.to(icon, {
-        rotation: 90,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1.2,
-      });
-      
-      if (!hoverTimeout) {
-        hoverTimeout = setInterval(() => {
-          if (text && isHovering && !isReportExpanded) {
-            textIndex = (textIndex + 1) % textVariants.length;
-            gsap.to(text, {
-              opacity: 0,
-              y: -5,
-              duration: 0.15,
-              ease: "power2.out",
-              onComplete: () => {
-                if (text && isHovering && !isReportExpanded) {
-                  text.textContent = textVariants[textIndex];
-                  gsap.to(text, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.15,
-                    ease: "power2.out",
-                  });
-                }
-              }
-            });
-          }
-        }, 600);
-      }
-    }
-  };
-
-  const stopRollingText = () => {
-    isHovering = false;
-    if (hoverTimeout) {
-      clearInterval(hoverTimeout);
-      hoverTimeout = null;
-    }
-    if (!isReportExpanded) {
-      gsap.to(text, {
-        scale: 1,
-        duration: 0.2,
-        ease: "power2.out",
-      });
-      gsap.to(icon, {
-        rotation: 0,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-        scale: 1,
-      });
-      if (text && text.textContent !== textVariants[0]) {
-        gsap.to(text, {
-          opacity: 0,
-          y: -5,
-          duration: 0.15,
-          ease: "power2.out",
-          onComplete: () => {
-            if (text && !isReportExpanded) {
-              text.textContent = textVariants[0];
-              gsap.to(text, {
-                opacity: 1,
-                y: 0,
-                duration: 0.15,
-                ease: "power2.out",
-              });
-            }
-          }
-        });
-      }
-    }
-  };
-
-  // Event listeners untuk hover pada teks
-  text.addEventListener('mouseenter', startRollingText);
-  text.addEventListener('mouseleave', stopRollingText);
-
-  return () => {
-    text.removeEventListener('mouseenter', startRollingText);
-    text.removeEventListener('mouseleave', stopRollingText);
-    if (hoverTimeout) {
-      clearInterval(hoverTimeout);
-    }
-  };
-}, [isReportExpanded]);
-
-// FUNGSI TOGGLE EXPANDED - SESUAI KODE ASLI
-const handleReportToggle = () => {
-  const container = reportContainerRef.current;
-  const report = reportRef.current;
-  const text = reportTextRef.current;
-  const icon = reportIconRef.current;
-  const logo = logoRef.current;
-
-  if (!container || !report || !text || !icon || !logo) return;
-
-  if (!isReportExpanded) {
-    // EXPAND - panel dari kanan ke kiri (sesuai kode asli)
-    const rect = report.getBoundingClientRect();
-    const startX = rect.left;
-    const startY = rect.top;
-    const buttonWidth = rect.width;
-    const buttonHeight = rect.height;
-    
-    const expandWidth = startX;
-    const expandHeight = window.innerHeight - startY;
-
-    gsap.set(container, {
-      position: "fixed",
-      top: `${startY}px`,
-      left: `${startX}px`,
-      width: `${buttonWidth}px`,
-      height: `${buttonHeight}px`,
-      zIndex: 10000,
-      backgroundColor: "#FE7141",
-      overflow: "hidden",
-      borderRadius: "0px",
-    });
-
-    gsap.set(report, {
-      position: "relative",
-      width: "100%",
-      height: "100%",
-      padding: "0",
-      backgroundColor: "#FE7141",
-      borderRadius: "0px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-start",
-      justifyContent: "flex-start",
-    });
-
-    gsap.to(logo, {
-      opacity: 0,
-      duration: 0.1,
-      ease: "power2.out",
-      pointerEvents: "none",
-    });
-
-    // ANIMASI EXPAND - dari kanan ke kiri (sesuai kode asli)
-    gsap.to(container, {
-      width: `${expandWidth + buttonWidth}px`,
-      height: `${expandHeight}px`,
-      duration: 0.8,
-      ease: "power3.inOut",
-      backgroundColor: "#FE7141",
-      position: "fixed",
-      top: `${startY}px`,
-      left: "0px",
-      zIndex: 10000,
-      borderRadius: "0px",
-    });
-
-    gsap.to(report, {
-      width: "100%",
-      height: "100%",
-      padding: "0",
-      backgroundColor: "#FE7141",
-      duration: 0.6,
-      ease: "power3.out",
-      borderRadius: "0px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-start",
-      justifyContent: "flex-start",
-    });
-
-    // Teks "Read the Report" di kiri atas
-    gsap.to(text, {
-      fontSize: "28px",
-      fontWeight: 700,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-      color: "#000000",
-      position: "absolute",
-      top: "50px",
-      left: "50px",
-      textAlign: "left",
-      zIndex: 10001,
-      pointerEvents: "none",
-      opacity: 1,
-      x: 0,
-    });
-
-    // Tombol Close (X) di kanan atas
-    gsap.to(icon, {
-      fontSize: "40px",
-      fontWeight: 700,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-      position: "absolute",
-      top: "45px",
-      right: "50px",
-      cursor: "pointer",
-      color: "#000000",
-      opacity: 1,
-      backgroundColor: "rgba(255,255,255,0.95)",
-      padding: "12px 20px",
-      borderRadius: "12px",
-      border: "3px solid #000000",
-      boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
-      zIndex: 10002,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      lineHeight: 1,
-      scale: 1,
-      rotation: 0,
-    });
-
-    icon.textContent = "✕";
-
-    setIsReportExpanded(true);
-  } else {
-    // COLLAPSE - dari kiri ke kanan ke atas (tempat semula)
-    const rect = report.getBoundingClientRect();
-    const endX = rect.left;
-    const endY = rect.top;
-    const buttonWidth = rect.width;
-    const buttonHeight = rect.height;
-
-    // Teks kembali ke posisi semula
-    gsap.to(text, {
-      fontSize: "18px",
-      fontWeight: 600,
-      duration: 0.3,
-      ease: "power2.out",
-      color: "#000000",
-      position: "relative",
-      top: "auto",
-      left: "auto",
-      textAlign: "center",
-      zIndex: 2,
-      pointerEvents: "auto",
-      opacity: 1,
-      x: 0,
-    });
-
-    // Icon kembali ke posisi semula
-    gsap.to(icon, {
-      fontSize: "30px",
-      fontWeight: 300,
-      duration: 0.3,
-      ease: "power2.out",
-      position: "relative",
-      top: "auto",
-      right: "auto",
-      color: "#000000",
-      opacity: 1,
-      backgroundColor: "transparent",
-      padding: "0",
-      borderRadius: "0px",
-      border: "none",
-      boxShadow: "none",
-      zIndex: 30,
-      scale: 1,
-      rotation: 0,
-    });
-
-    // Report kembali ke ukuran kecil
-    gsap.to(report, {
-      width: "auto",
-      height: "48px",
-      padding: "6px 35px 6px 200px",
-      justifyContent: "flex-end",
-      gap: "6px",
-      backgroundColor: "#FE7141",
-      duration: 0.5,
-      ease: "power3.out",
-      minWidth: "450px",
-      position: "relative",
-      borderRadius: "0px",
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-    });
-
-    // Container kembali ke posisi semula (ke atas)
-    gsap.to(container, {
-      width: `${buttonWidth}px`,
-      height: `${buttonHeight}px`,
-      duration: 0.7,
-      ease: "power3.inOut",
-      backgroundColor: "#FE7141",
-      position: "fixed",
-      top: `${endY}px`,
-      left: `${endX}px`,
-      zIndex: 10000,
-      borderRadius: "0px",
-      onComplete: () => {
-        gsap.set(container, {
-          position: "absolute",
-          top: "0px",
-          left: "0px",
-          width: "auto",
-          height: "auto",
-          zIndex: 10,
-          backgroundColor: "transparent",
-          overflow: "visible",
-        });
-        gsap.set(report, {
-          width: "auto",
-          height: "48px",
-          padding: "6px 35px 6px 200px",
-          justifyContent: "flex-end",
-          gap: "6px",
-          minWidth: "450px",
-          position: "relative",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-        });
-        gsap.set(logo, {
-          opacity: 1,
-          pointerEvents: "auto",
-        });
-        gsap.set(icon, {
-          position: "relative",
-          top: "auto",
-          right: "auto",
-          fontSize: "30px",
-          fontWeight: 300,
-          backgroundColor: "transparent",
-          padding: "0",
-          borderRadius: "0px",
-          border: "none",
-          boxShadow: "none",
-          zIndex: 30,
-          scale: 1,
-          rotation: 0,
-          opacity: 1,
-        });
-        gsap.set(text, {
-          position: "relative",
-          top: "auto",
-          left: "auto",
-          fontSize: "18px",
-          fontWeight: 600,
-          textAlign: "center",
-          zIndex: 2,
-          opacity: 1,
-          x: 0,
-          pointerEvents: "auto",
-        });
-        if (text.textContent !== "Read the Report") {
-          text.textContent = "Read the Report";
-        }
-        icon.textContent = "+";
-      }
-    });
-
-    gsap.to(logo, {
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.out",
-      pointerEvents: "auto",
-    });
-
-    setIsReportExpanded(false);
-  }
-};
-  
-
-  
 
   // Auth Listener
   useEffect(() => {
@@ -2008,6 +1417,9 @@ const handleReportToggle = () => {
     return () => clearInterval(interval);
   }, [isChatOpen, user, isIncomingMessage]);
 
+  // Privacy Policy
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+
   if (loading) {
     return (
       <div style={{
@@ -2038,163 +1450,7 @@ const handleReportToggle = () => {
         overflow: "hidden",
       }}
     >
-
-
-{/* Logo Menuru'26 + Read the Report - Sejajar Sampingan */}
-<div
-  ref={reportContainerRef}
-  style={{
-    position: "absolute",
-    top: "0px",
-    left: "0px",
-    zIndex: 10,
-    display: "flex",
-    alignItems: "center",
-    gap: "0px",
-    overflow: "hidden",
-    backgroundColor: "transparent",
-  }}
->
-  {/* Logo Menuru'26 - Background Hitam */}
-  <div
-    ref={logoRef}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      backgroundColor: "#000000",
-      padding: "6px 18px",
-      borderRadius: "0px",
-      boxShadow: "none",
-      height: "48px",
-      flexShrink: 0,
-    }}
-  >
-    <span
-      style={{
-        fontSize: "30px",
-        fontWeight: 600,
-        color: "#ffffff",
-        letterSpacing: "-0.015em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-      }}
-    >
-      Menuru'26
-    </span>
-  </div>
-
-  {/* Read the Report - Background #FE7141 */}
-  <div
-    ref={reportRef}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: isReportExpanded ? "flex-start" : "flex-end",
-      backgroundColor: "#FE7141",
-      padding: isReportExpanded ? "0" : "6px 35px 6px 200px",
-      borderRadius: "0px",
-      boxShadow: "none",
-      gap: "6px",
-      cursor: "pointer",
-      height: isReportExpanded ? "100%" : "48px",
-      width: isReportExpanded ? "100%" : "auto",
-      minWidth: isReportExpanded ? "100%" : "450px",
-      flexShrink: 0,
-      position: "relative",
-      zIndex: 20,
-      transition: "all 0.3s ease",
-      flexDirection: isReportExpanded ? "column" : "row",
-      alignItems: isReportExpanded ? "flex-start" : "center",
-    }}
-    onClick={!isReportExpanded ? handleReportToggle : undefined}
-  >
-    {/* TEKS "Read the Report" di KIRI ATAS */}
-    <span
-      ref={reportTextRef}
-      style={{
-        fontSize: isReportExpanded ? "28px" : "18px",
-        fontWeight: isReportExpanded ? 700 : 600,
-        color: "#000000",
-        letterSpacing: "-0.01em",
-        fontFamily: "Inter, 'Inter Fallback'",
-        lineHeight: 1.2,
-        whiteSpace: "nowrap",
-        display: "inline-block",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "50px" : "auto",
-        left: isReportExpanded ? "50px" : "auto",
-        zIndex: isReportExpanded ? 10001 : 2,
-        padding: "0",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        textAlign: isReportExpanded ? "left" : "center",
-        transition: "all 0.3s ease",
-        pointerEvents: isReportExpanded ? "none" : "auto",
-        cursor: "pointer",
-      }}
-    >
-      Read the Report
-    </span>
-    
-    {/* TOMBOL CLOSE di KANAN ATAS */}
-    <span
-      ref={reportIconRef}
-      style={{
-        fontSize: isReportExpanded ? "40px" : "30px",
-        fontWeight: isReportExpanded ? 700 : 300,
-        color: "#000000",
-        lineHeight: 1,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: isReportExpanded ? "absolute" : "relative",
-        top: isReportExpanded ? "45px" : "auto",
-        right: isReportExpanded ? "50px" : "auto",
-        zIndex: isReportExpanded ? 10002 : 30,
-        cursor: "pointer",
-        pointerEvents: "auto",
-        userSelect: "none",
-        padding: isReportExpanded ? "12px 20px" : "0",
-        borderRadius: isReportExpanded ? "12px" : "0px",
-        backgroundColor: isReportExpanded ? "rgba(255,255,255,0.95)" : "transparent",
-        border: isReportExpanded ? "3px solid #000000" : "none",
-        boxShadow: isReportExpanded ? "0 8px 30px rgba(0,0,0,0.2)" : "none",
-        alignSelf: isReportExpanded ? "flex-start" : "auto",
-        transition: "all 0.3s ease",
-        minWidth: isReportExpanded ? "60px" : "auto",
-        minHeight: isReportExpanded ? "60px" : "auto",
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (isReportExpanded) {
-          handleReportToggle();
-        }
-      }}
-      onMouseEnter={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "#ffffff";
-          e.currentTarget.style.transform = "scale(1.08)";
-          e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isReportExpanded) {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.95)";
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.2)";
-        }
-      }}
-    >
-      {isReportExpanded ? "✕" : "+"}
-    </span>
-  </div>
-</div>
-      
-  
-
-      
-
-      {/* User Status & Music Widget - Pojok Kanan Atas */}
+      {/* User Status - Pojok Kanan Atas */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2209,97 +1465,6 @@ const handleReportToggle = () => {
           gap: "12px",
         }}
       >
-        {/* Music Widget */}
-        <motion.div
-          whileHover={{ scale: 1.02, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "6px 16px 6px 6px",
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            border: "1px solid #e0e0e0",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            transition: "all 0.3s ease",
-            maxWidth: "260px",
-            cursor: "pointer",
-          }}
-          onClick={() => setShowMusicPlayer(true)}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              overflow: "hidden",
-              flexShrink: 0,
-              backgroundColor: "#f0f0f0",
-              border: "1px solid #e8e8e8",
-              position: "relative",
-            }}
-          >
-            <img
-              src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
-              alt={currentTrack.artist}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0f0f0'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-size='18' fill='%23666' font-family='sans-serif'%3E🎵%3C/text%3E%3C/svg%3E";
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              overflow: "hidden",
-              minWidth: 0,
-            }}
-          >
-            <div style={{ overflow: "hidden", position: "relative" }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  animation: "marquee 12s linear infinite",
-                  paddingLeft: "100%",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#000000",
-                  letterSpacing: "-0.01em",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {currentTrack.artist} - {currentTrack.title}
-                <span style={{ paddingLeft: "50px", color: "#ccc" }}>●</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPlaylist(!showPlaylist);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#666",
-              cursor: "pointer",
-              padding: "4px 8px",
-              fontSize: "18px",
-              fontWeight: 300,
-              borderRadius: "4px",
-              transition: "all 0.2s ease",
-              lineHeight: 1,
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#f0f0f0"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-          >
-            ⋮
-          </button>
-        </motion.div>
-
-        {/* User Status */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -2404,238 +1569,6 @@ const handleReportToggle = () => {
           )}
         </motion.div>
       </motion.div>
-
-      {/* Music Player Modal */}
-      <AnimatePresence>
-        {showMusicPlayer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0,0,0,0.6)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            onClick={() => setShowMusicPlayer(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              style={{
-                backgroundColor: "#ffffff",
-                borderRadius: "12px",
-                padding: "24px",
-                maxWidth: "420px",
-                width: "90%",
-                border: "1px solid #e0e0e0",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                      overflow: "hidden",
-                      backgroundColor: "#f0f0f0",
-                      border: "1px solid #e8e8e8",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <img
-                      src={`https://ui-avatars.com/api/?name=${currentTrack.artist.replace(/ /g, '+')}&background=000000&color=ffffff&size=40&font-size=0.5`}
-                      alt={currentTrack.artist}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
-                      {currentTrack.title}
-                    </div>
-                    <div style={{ fontSize: "13px", color: "#666" }}>
-                      {currentTrack.artist}
-                    </div>
-                  </div>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowMusicPlayer(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#666",
-                    padding: "4px",
-                  }}
-                >
-                  <CloseIcon />
-                </motion.button>
-              </div>
-
-              <div style={{ borderRadius: "12px", overflow: "hidden" }}>
-                <iframe
-                  style={{ borderRadius: "12px", border: "none", width: "100%" }}
-                  src={currentTrack.embedUrl}
-                  height="352"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                />
-              </div>
-
-              <div style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
-                {playlist.map((track) => (
-                  <motion.button
-                    key={track.title}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setCurrentTrack(track);
-                      const iframe = document.querySelector('iframe[src*="open.spotify.com"]') as HTMLIFrameElement;
-                      if (iframe) {
-                        iframe.src = track.embedUrl;
-                      }
-                    }}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: "20px",
-                      border: currentTrack.title === track.title ? "2px solid #000" : "1px solid #e0e0e0",
-                      backgroundColor: currentTrack.title === track.title ? "#f0f0f0" : "transparent",
-                      color: "#000",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      fontFamily: "Inter, 'Inter Fallback'",
-                    }}
-                  >
-                    {track.title}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Playlist Dropdown */}
-      <AnimatePresence>
-        {showPlaylist && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 20 }}
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "#ffffff",
-              borderRadius: "12px",
-              padding: "24px 28px",
-              maxWidth: "380px",
-              width: "90%",
-              zIndex: 1000,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-              border: "1px solid #e0e0e0",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>
-                Daftar Lagu
-              </span>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowPlaylist(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#666",
-                  fontSize: "20px",
-                  padding: "0 4px",
-                }}
-              >
-                ✕
-              </motion.button>
-            </div>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              {playlist.map((track, index) => {
-                const isActive = currentTrack.title === track.title && currentTrack.artist === track.artist;
-                return (
-                  <motion.div
-                    key={index}
-                    whileHover={!isActive ? { backgroundColor: "#f8f8f8" } : {}}
-                    onClick={() => {
-                      selectTrack(track);
-                    }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      backgroundColor: isActive ? "#f0f0f0" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      border: isActive ? "1px solid #000" : "1px solid transparent",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "6px",
-                        backgroundColor: "#f0f0f0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        flexShrink: 0,
-                        color: "#666",
-                      }}
-                    >
-                      ♫
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#000" }}>
-                        {track.title}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>
-                        {track.artist}
-                      </div>
-                    </div>
-                    {isActive && (
-                      <span style={{ fontSize: "11px", color: "#000", fontWeight: 600 }}>
-                        ▶
-                      </span>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Login Modal */}
       <AnimatePresence>
@@ -4104,9 +3037,8 @@ const handleReportToggle = () => {
                     </div>
                   </div>
 
-                  {/* Chat Baru Button dengan GSAP Animation */}
+                  {/* Chat Baru Button */}
                   <motion.button
-                    ref={addUserButtonRef}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAddUser(!showAddUser)}
@@ -4124,7 +3056,6 @@ const handleReportToggle = () => {
                     }}
                   >
                     <span
-                      ref={plusIconRef}
                       style={{
                         fontSize: "32px",
                         fontWeight: 300,
@@ -5330,24 +4261,6 @@ const handleReportToggle = () => {
       </div>
 
       <style jsx>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
         @keyframes pulseTransmitter {
           0%, 100% {
             transform: scale(1);
