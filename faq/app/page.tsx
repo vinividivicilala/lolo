@@ -56,6 +56,355 @@ if (typeof window !== "undefined") {
 
 const googleProvider = new GoogleAuthProvider();
 
+// Language Context
+type Language = 'id' | 'en';
+
+// Translations
+const translations = {
+  id: {
+    // Header
+    'chatWithMenuru': 'Chat dengan Menuru',
+    'login': 'Masuk',
+    'logout': 'Keluar',
+    'profile': 'Profil',
+    'online': 'Online',
+    'offline': 'Offline',
+    'lastSeen': 'Terakhir online',
+    'typing': 'sedang mengetik...',
+    
+    // Chat
+    'messages': 'Pesan',
+    'noMessages': 'Belum ada pesan',
+    'typeMessage': 'Ketik pesan...',
+    'typeReply': 'Ketik balasan...',
+    'send': 'Kirim',
+    'newChat': 'Chat Baru',
+    'selectUser': 'Pilih user...',
+    'startChat': 'Mulai Chat',
+    'cancel': 'Batal',
+    'allUsersChatted': 'Semua user sudah di-chat',
+    'noChatHistory': 'Belum ada riwayat chat',
+    
+    // Profile
+    'note': 'Catatan',
+    'addNote': 'Tambah',
+    'editNote': 'Edit',
+    'save': 'Simpan',
+    'bio': 'Bio',
+    'addBio': 'Tambah',
+    'editBio': 'Edit',
+    'noBio': 'Belum ada bio',
+    'noNote': 'Belum ada catatan',
+    'sendMessage': 'Kirim Pesan',
+    'back': 'Kembali',
+    
+    // Pinned
+    'pinnedUsers': 'User Pinned',
+    'pinnedChats': 'Chat Pinned',
+    'pinnedMessages': 'Pesan Pinned',
+    'unpin': 'Lepas Pin',
+    'pin': 'Pin',
+    
+    // Update
+    'updateSystem': 'Update Sistem',
+    'updateHistory': 'Riwayat pembaruan dan pengembangan',
+    'updateDetail': 'Detail Update',
+    'live': 'Live',
+    'comingSoon': 'Coming Soon',
+    'done': 'Selesai',
+    'link': 'Link',
+    
+    // Privacy Policy
+    'privacyPolicy': 'Kebijakan Privasi',
+    'lastUpdated': 'Terakhir diperbarui',
+    
+    // Buttons
+    'reply': 'Balas',
+    'resend': 'Kirim Ulang',
+    'forward': 'Teruskan',
+    'share': 'Bagikan',
+    'close': 'Tutup',
+    
+    // Modal
+    'loginTitle': 'Masuk',
+    'email': 'Email',
+    'password': 'Kata Sandi',
+    'loginWithEmail': 'Masuk dengan Email',
+    'or': 'atau',
+    'loginWithGoogle': 'Masuk dengan Google',
+    'loginFailed': 'Login gagal. Silahkan coba lagi.',
+    'wrongCredentials': 'Email atau password salah.',
+    
+    // Announcement
+    'announcement': 'Pengumuman',
+    'announcementText': 'Fitur chat sedang dalam tahap pengembangan.',
+    
+    // Status
+    'read': 'Dibaca',
+    'sent': 'Terkirim',
+    'officialAccount': 'Akun Resmi',
+    
+    // Share Modal
+    'forwardMessage': 'Teruskan Pesan',
+    'from': 'Dari',
+    'selectUserToShare': 'Pilih user...',
+    'forwardButton': 'Teruskan',
+    
+    // Chat Button
+    'chatWithMenuru': 'Chat dengan Menuru',
+    'loginToChat': 'Masuk untuk Chat',
+    
+    // Update status labels
+    'statusLive': 'Live',
+    'statusComing': 'Coming Soon',
+    'statusDone': 'Done',
+  },
+  en: {
+    // Header
+    'chatWithMenuru': 'Chat with Menuru',
+    'login': 'Login',
+    'logout': 'Logout',
+    'profile': 'Profile',
+    'online': 'Online',
+    'offline': 'Offline',
+    'lastSeen': 'Last seen',
+    'typing': 'typing...',
+    
+    // Chat
+    'messages': 'Messages',
+    'noMessages': 'No messages yet',
+    'typeMessage': 'Type a message...',
+    'typeReply': 'Type a reply...',
+    'send': 'Send',
+    'newChat': 'New Chat',
+    'selectUser': 'Select user...',
+    'startChat': 'Start Chat',
+    'cancel': 'Cancel',
+    'allUsersChatted': 'All users are already in chat',
+    'noChatHistory': 'No chat history',
+    
+    // Profile
+    'note': 'Note',
+    'addNote': 'Add',
+    'editNote': 'Edit',
+    'save': 'Save',
+    'bio': 'Bio',
+    'addBio': 'Add',
+    'editBio': 'Edit',
+    'noBio': 'No bio yet',
+    'noNote': 'No note yet',
+    'sendMessage': 'Send Message',
+    'back': 'Back',
+    
+    // Pinned
+    'pinnedUsers': 'Pinned Users',
+    'pinnedChats': 'Pinned Chats',
+    'pinnedMessages': 'Pinned Messages',
+    'unpin': 'Unpin',
+    'pin': 'Pin',
+    
+    // Update
+    'updateSystem': 'Update System',
+    'updateHistory': 'Update and development history',
+    'updateDetail': 'Update Detail',
+    'live': 'Live',
+    'comingSoon': 'Coming Soon',
+    'done': 'Done',
+    'link': 'Link',
+    
+    // Privacy Policy
+    'privacyPolicy': 'Privacy Policy',
+    'lastUpdated': 'Last updated',
+    
+    // Buttons
+    'reply': 'Reply',
+    'resend': 'Resend',
+    'forward': 'Forward',
+    'share': 'Share',
+    'close': 'Close',
+    
+    // Modal
+    'loginTitle': 'Login',
+    'email': 'Email',
+    'password': 'Password',
+    'loginWithEmail': 'Login with Email',
+    'or': 'or',
+    'loginWithGoogle': 'Login with Google',
+    'loginFailed': 'Login failed. Please try again.',
+    'wrongCredentials': 'Wrong email or password.',
+    
+    // Announcement
+    'announcement': 'Announcement',
+    'announcementText': 'Chat feature is under development.',
+    
+    // Status
+    'read': 'Read',
+    'sent': 'Sent',
+    'officialAccount': 'Official Account',
+    
+    // Share Modal
+    'forwardMessage': 'Forward Message',
+    'from': 'From',
+    'selectUserToShare': 'Select user...',
+    'forwardButton': 'Forward',
+    
+    // Chat Button
+    'chatWithMenuru': 'Chat with Menuru',
+    'loginToChat': 'Login to Chat',
+    
+    // Update status labels
+    'statusLive': 'Live',
+    'statusComing': 'Coming Soon',
+    'statusDone': 'Done',
+  }
+};
+
+// Language Selector Component
+const LanguageSelector = ({ language, setLanguage }: { language: Language; setLanguage: (lang: Language) => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          background: "none",
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          padding: "6px 12px",
+          fontSize: "13px",
+          fontWeight: 500,
+          color: "#000",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          fontFamily: "Inter, 'Inter Fallback'",
+          backgroundColor: "#f5f5f5",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#e8e8e8";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#f5f5f5";
+        }}
+      >
+        <span style={{ fontSize: "16px" }}>{language === 'id' ? '🇮🇩' : '🇬🇧'}</span>
+        <span>{language === 'id' ? 'ID' : 'EN'}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              right: 0,
+              backgroundColor: "#ffffff",
+              borderRadius: "8px",
+              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+              border: "1px solid #e0e0e0",
+              overflow: "hidden",
+              minWidth: "120px",
+              zIndex: 1000,
+            }}
+          >
+            <button
+              onClick={() => {
+                setLanguage('id');
+                setIsOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "10px 16px",
+                width: "100%",
+                border: "none",
+                background: language === 'id' ? "#f0f0f0" : "transparent",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#000",
+                fontFamily: "Inter, 'Inter Fallback'",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f5f5f5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = language === 'id' ? "#f0f0f0" : "transparent";
+              }}
+            >
+              <span style={{ fontSize: "18px" }}>🇮🇩</span>
+              <span>Indonesia</span>
+              {language === 'id' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: "auto" }}>
+                  <path d="M20 6L9 17L4 12" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setLanguage('en');
+                setIsOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "10px 16px",
+                width: "100%",
+                border: "none",
+                background: language === 'en' ? "#f0f0f0" : "transparent",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#000",
+                fontFamily: "Inter, 'Inter Fallback'",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f5f5f5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = language === 'en' ? "#f0f0f0" : "transparent";
+              }}
+            >
+              <span style={{ fontSize: "18px" }}>🇬🇧</span>
+              <span>English</span>
+              {language === 'en' && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: "auto" }}>
+                  <path d="M20 6L9 17L4 12" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 interface ChatUser {
   id: string;
   name: string;
@@ -216,9 +565,10 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
 };
 
 // Online Status Indicator
-const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
+const OnlineIndicator = ({ online, lastSeen, language }: { online: boolean; lastSeen?: string; language: Language }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
+  const t = translations[language];
   
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
@@ -244,7 +594,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
         }}>
-          {online ? "Online" : (lastSeen || "Offline")}
+          {online ? t.online : (lastSeen || t.offline)}
           <div style={{
             position: "absolute",
             top: "100%",
@@ -260,17 +610,18 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
 };
 
 // Read Status
-const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; language: Language }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const t = translations[language];
   
   if (!isMine) return null;
   
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+      return { icon: "✓✓", color: "#0095f6", label: t.read };
     }
-    return { icon: "✓", color: "#999", label: "Terkirim" };
+    return { icon: "✓", color: "#999", label: t.sent };
   })();
   
   if (!status) return null;
@@ -281,7 +632,7 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
         style={{
           fontSize: "10px",
           color: status.color,
-          fontWeight: status.label === "Dibaca" ? 600 : 400,
+          fontWeight: status.label === t.read ? 600 : 400,
           cursor: "pointer",
         }}
         onMouseEnter={() => setShowTooltip(true)}
@@ -318,8 +669,9 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
 };
 
 // Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; language: Language }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const t = translations[language];
   
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
@@ -380,7 +732,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
         }}>
-          Akun Resmi
+          {t.officialAccount}
           <div style={{
             position: "absolute",
             top: "100%",
@@ -396,6 +748,9 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
 };
 
 export default function HomePage(): React.JSX.Element {
+  const [language, setLanguage] = useState<Language>('id');
+  const t = translations[language];
+  
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatUser | null>(null);
@@ -440,15 +795,15 @@ export default function HomePage(): React.JSX.Element {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   // Chat button text - rolling text
-  const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
+  const [chatButtonText, setChatButtonText] = useState(t.chatWithMenuru);
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
-    "Chat with Menuru",
-    "Chat with Menuru",
-    "Chat with Menuru",
-    "Chat with Menuru"
+    t.chatWithMenuru,
+    t.chatWithMenuru,
+    t.chatWithMenuru,
+    t.chatWithMenuru
   ];
   let chatTextIndex = 0;
 
@@ -456,90 +811,95 @@ export default function HomePage(): React.JSX.Element {
   const updates: UpdateItem[] = [
     {
       id: "1",
-      title: "Fitur Chat Real-time",
-      description: "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan.",
+      title: language === 'id' ? "Fitur Chat Real-time" : "Real-time Chat Feature",
+      description: language === 'id' ? "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan." : "Added real-time chat feature with Firebase. Users can send and receive messages instantly.",
       date: "10 Juli 2026",
       status: "live",
-      detail: "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator.",
+      detail: language === 'id' ? "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator." : "Real-time chat feature allows users to communicate directly without refreshing the page. Uses Firebase Realtime Database for instant message synchronization. Equipped with online status and typing indicators.",
       link: "https://menuru.com/update/chat-realtime",
       publishedBy: "Tim Menuru"
     },
     {
       id: "2",
-      title: "Privacy Policy & Update System",
-      description: "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan.",
+      title: language === 'id' ? "Privacy Policy & Update System" : "Privacy Policy & Update System",
+      description: language === 'id' ? "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan." : "Added Privacy Policy and Update System pages for service transparency.",
       date: "9 Juli 2026",
       status: "live",
-      detail: "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna.",
+      detail: language === 'id' ? "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna." : "Privacy Policy page explains how user data is collected and used. Update System displays feature update history transparently to users.",
       link: "https://menuru.com/update/privacy-policy",
       publishedBy: "Tim Menuru"
     },
     {
       id: "3",
-      title: "Fitur Pin Message",
-      description: "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas.",
+      title: language === 'id' ? "Fitur Pin Message" : "Pin Message Feature",
+      description: language === 'id' ? "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas." : "Users can pin important messages in chat. Pinned messages will appear at the top.",
       date: "8 Juli 2026",
       status: "coming",
-      detail: "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus.",
+      detail: language === 'id' ? "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus." : "Pin message feature allows users to pin important messages for easy access. Pinned messages will appear at the top of chat with a special indicator.",
       link: "https://menuru.com/update/pin-message",
       publishedBy: "Tim Menuru"
     },
     {
       id: "4",
-      title: "Fitur Reply & Share Message",
-      description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
+      title: language === 'id' ? "Fitur Reply & Share Message" : "Reply & Share Message Feature",
+      description: language === 'id' ? "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah." : "Users can reply to and forward messages to other users easily.",
       date: "7 Juli 2026",
       status: "done",
-      detail: "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah.",
+      detail: language === 'id' ? "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah." : "Reply feature allows users to reply to specific messages with clear context. Share feature allows users to forward messages to other contacts easily.",
       link: "https://menuru.com/update/reply-share",
       publishedBy: "Tim Menuru"
     },
     {
       id: "5",
-      title: "Online Status & Typing Indicator",
-      description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
+      title: language === 'id' ? "Online Status & Typing Indicator" : "Online Status & Typing Indicator",
+      description: language === 'id' ? "Menampilkan status online pengguna dan indikator ketika sedang mengetik." : "Shows user online status and typing indicator.",
       date: "6 Juli 2026",
       status: "done",
-      detail: "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif.",
+      detail: language === 'id' ? "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif." : "Shows user online status in real-time. Typing indicator appears when user is typing a message, providing a more interactive chat experience.",
       link: "https://menuru.com/update/online-status",
       publishedBy: "Tim Menuru"
     }
   ];
 
+  // Update chatTexts when language changes
+  useEffect(() => {
+    setChatButtonText(t.chatWithMenuru);
+  }, [language]);
+
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
-    name: "Menuru Official",
+    name: language === 'id' ? "Menuru Official" : "Menuru Official",
     email: "official@menuru.com",
     photoURL: "",
     isOfficial: true,
     isPinned: false,
-    bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
-    note: "Official Account"
+    bio: language === 'id' ? "Akun resmi Menuru Chat. Dikelola oleh tim Menuru." : "Official Menuru Chat account. Managed by the Menuru team.",
+    note: language === 'id' ? "Akun Resmi" : "Official Account"
   };
 
   const OFFICIAL_MESSAGES = [
     {
-      text: "Halo! Selamat datang di Menuru Chat 👋",
+      text: language === 'id' ? "Halo! Selamat datang di Menuru Chat 👋" : "Hello! Welcome to Menuru Chat 👋",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏",
+      text: language === 'id' ? "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏" : "We are currently improving the chat feature. Please be patient! 🙏",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
+      text: language === 'id' ? "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨" : "Pin message and chat history features will be improved soon ✨",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
+      text: language === 'id' ? "Jangan lupa baca Privacy Policy dan Update kami 👇" : "Don't forget to read our Privacy Policy and Updates 👇",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Terima kasih atas pengertiannya! 😊",
+      text: language === 'id' ? "Terima kasih atas pengertiannya! 😊" : "Thank you for your understanding! 😊",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     }
@@ -562,7 +922,7 @@ export default function HomePage(): React.JSX.Element {
       const usersSnap = await getDocs(usersRef);
       
       const broadcastMessage = {
-        text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
+        text: language === 'id' ? "Jangan lupa baca Privacy Policy dan Update kami 👇" : "Don't forget to read our Privacy Policy and Updates 👇",
         senderId: "official_menuru",
         senderName: "Menuru Official"
       };
@@ -613,7 +973,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!db) return;
     broadcastMessages();
-  }, []);
+  }, [language]);
 
   // Auth Listener
   useEffect(() => {
@@ -863,7 +1223,7 @@ export default function HomePage(): React.JSX.Element {
               const unreadDocs = unreadSnap.docs;
               for (const doc of unreadDocs) {
                 const msg = doc.data() as Message;
-                newMessages.push(`Pesan dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
+                newMessages.push(`${t.messages} dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
               }
             }
             
@@ -933,7 +1293,7 @@ export default function HomePage(): React.JSX.Element {
         rollingInterval.current = null;
       }
     };
-  }, [user, users]);
+  }, [user, users, language]);
 
   // Load messages
   useEffect(() => {
@@ -994,7 +1354,7 @@ export default function HomePage(): React.JSX.Element {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError("Login gagal. Silahkan coba lagi.");
+      setLoginError(t.loginFailed);
     }
   };
 
@@ -1008,7 +1368,7 @@ export default function HomePage(): React.JSX.Element {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError("Email atau password salah.");
+      setLoginError(t.wrongCredentials);
     }
   };
 
@@ -1239,7 +1599,7 @@ export default function HomePage(): React.JSX.Element {
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
-        text: `Diteruskan dari ${shareMessage.senderName}: ${shareMessage.text}`,
+        text: `${t.from} ${shareMessage.senderName}: ${shareMessage.text}`,
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: targetUser.id,
@@ -1394,11 +1754,11 @@ export default function HomePage(): React.JSX.Element {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (date.toDateString() === today.toDateString()) {
-      return "Hari ini";
+      return language === 'id' ? "Hari ini" : "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Kemarin";
+      return language === 'id' ? "Kemarin" : "Yesterday";
     } else {
-      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
     }
   };
 
@@ -1412,9 +1772,9 @@ export default function HomePage(): React.JSX.Element {
   const getLastSeen = (userId: string) => {
     const chatUser = users.find(u => u.id === userId);
     if (!chatUser || !chatUser.lastSeen) return "";
-    if (chatUser.id === user?.uid) return "Online";
+    if (chatUser.id === user?.uid) return t.online;
     const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
-    return `Terakhir online ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+    return `${t.lastSeen} ${date.toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getTypingStatus = (userId: string) => {
@@ -1451,7 +1811,7 @@ export default function HomePage(): React.JSX.Element {
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [isChatOpen, user, isIncomingMessage]);
+  }, [isChatOpen, user, isIncomingMessage, language]);
 
   if (loading) {
     return (
@@ -1498,6 +1858,9 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
+        {/* Language Selector */}
+        <LanguageSelector language={language} setLanguage={setLanguage} />
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1547,7 +1910,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 {user.displayName || user.email}
               </span>
-              <OnlineIndicator online={true} />
+              <OnlineIndicator online={true} language={language} />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -1570,7 +1933,7 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                Logout
+                {t.logout}
               </motion.button>
             </>
           ) : (
@@ -1597,7 +1960,7 @@ export default function HomePage(): React.JSX.Element {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              Login
+              {t.login}
             </motion.button>
           )}
         </motion.div>
@@ -1641,11 +2004,11 @@ export default function HomePage(): React.JSX.Element {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: "Inter, 'Inter Fallback'" }}>
-                Login
+                {t.loginTitle}
               </h2>
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={t.email}
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 style={{
@@ -1662,7 +2025,7 @@ export default function HomePage(): React.JSX.Element {
               />
               <input
                 type="password"
-                placeholder="Password"
+                placeholder={t.password}
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 style={{
@@ -1701,10 +2064,10 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: "Inter, 'Inter Fallback'",
                 }}
               >
-                Login with Email
+                {t.loginWithEmail}
               </motion.button>
               <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666" }}>
-                atau
+                {t.or}
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -1725,7 +2088,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: "Inter, 'Inter Fallback'",
                 }}
               >
-                Login with Google
+                {t.loginWithGoogle}
               </motion.button>
             </motion.div>
           </motion.div>
@@ -1769,7 +2132,7 @@ export default function HomePage(): React.JSX.Element {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
-                Teruskan Pesan
+                {t.forwardMessage}
               </h3>
               <div style={{ 
                 fontSize: "13px", 
@@ -1779,7 +2142,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "#f5f5f5",
                 borderRadius: "8px"
               }}>
-                <div style={{ fontWeight: 500, color: "#000" }}>Dari: {shareMessage.senderName}</div>
+                <div style={{ fontWeight: 500, color: "#000" }}>{t.from}: {shareMessage.senderName}</div>
                 <div>{shareMessage.text}</div>
               </div>
               <select
@@ -1798,10 +2161,10 @@ export default function HomePage(): React.JSX.Element {
                   color: "#000",
                 }}
               >
-                <option value="">Pilih user...</option>
+                <option value="">{t.selectUserToShare}</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} language={language} />}
                   </option>
                 ))}
               </select>
@@ -1825,7 +2188,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
-                  Teruskan
+                  {t.forwardButton}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -1846,7 +2209,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: "Inter, 'Inter Fallback'",
                   }}
                 >
-                  Batal
+                  {t.cancel}
                 </motion.button>
               </div>
             </motion.div>
@@ -1906,7 +2269,7 @@ export default function HomePage(): React.JSX.Element {
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))))}
+                    {selectedUpdateId && selectedUpdate ? t.updateDetail : (showUpdate ? t.updateSystem : (showPrivacyPolicy ? t.privacyPolicy : (showProfile ? t.profile : (selectedChat ? selectedChat.name : t.messages))))}
                   </span>
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                     <>
@@ -1916,6 +2279,7 @@ export default function HomePage(): React.JSX.Element {
                       <OnlineIndicator 
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
+                        language={language}
                       />
                     </>
                   )}
@@ -2007,7 +2371,7 @@ export default function HomePage(): React.JSX.Element {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>Kembali</span>
+                      <span>{t.back}</span>
                     </motion.button>
 
                     <div
@@ -2029,7 +2393,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: "Inter, 'Inter Fallback'",
                         }}
                       >
-                        {selectedUpdate.status === "live" ? "Live" : (selectedUpdate.status === "coming" ? "Coming Soon" : "Done")}
+                        {selectedUpdate.status === "live" ? t.statusLive : (selectedUpdate.status === "coming" ? t.statusComing : t.statusDone)}
                       </span>
                     </div>
 
@@ -2103,7 +2467,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: "Inter, 'Inter Fallback'",
                         }}
                       >
-                        Detail Update
+                        {t.updateDetail}
                       </h3>
                       <p
                         style={{
@@ -2133,7 +2497,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: "Inter, 'Inter Fallback'",
                         }}
                       >
-                        Link:
+                        {t.link}:
                       </span>
                       <a
                         href={selectedUpdate.link}
@@ -2183,7 +2547,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page - Dengan Awwwards Dot Style 1 Layer
+                // Update List Page
                 <div
                   style={{
                     flex: 1,
@@ -2212,7 +2576,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: "Inter, 'Inter Fallback'",
                         }}
                       >
-                        Update Sistem
+                        {t.updateSystem}
                       </span>
                     </div>
                     <h2
@@ -2234,7 +2598,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Riwayat pembaruan dan pengembangan
+                      {t.updateHistory}
                     </p>
                   </div>
 
@@ -2286,7 +2650,6 @@ export default function HomePage(): React.JSX.Element {
                               justifyContent: "center",
                             }}
                           >
-                            {/* Pemancar - 1 Layer Awwwards Style */}
                             {isActive && (
                               <div
                                 style={{
@@ -2302,7 +2665,6 @@ export default function HomePage(): React.JSX.Element {
                               />
                             )}
                             
-                            {/* Titik Bulat Kecil - Tanpa Border */}
                             <div
                               style={{
                                 width: "10px",
@@ -2433,7 +2795,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: "Inter, 'Inter Fallback'",
                         }}
                       >
-                        Kebijakan Privasi
+                        {t.privacyPolicy}
                       </span>
                     </div>
                     <h2
@@ -2455,7 +2817,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Terakhir diperbarui: 9 Juli 2026
+                      {t.lastUpdated}: 9 Juli 2026
                     </p>
                   </div>
 
@@ -2469,7 +2831,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      1. Informasi yang Kami Kumpulkan
+                      {language === 'id' ? "1. Informasi yang Kami Kumpulkan" : "1. Information We Collect"}
                     </h3>
                     <p
                       style={{
@@ -2480,7 +2842,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
+                      {language === 'id' ? "Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:" : "Chat with Menuru collects the following information to provide optimal chat service:"}
                     </p>
                     <ul
                       style={{
@@ -2492,10 +2854,10 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      <li>Nama dan email dari akun Google Anda</li>
-                      <li>Foto profil dari akun Google Anda</li>
-                      <li>Pesan dan riwayat chat yang Anda kirim</li>
-                      <li>Status online dan aktivitas chat</li>
+                      <li>{language === 'id' ? "Nama dan email dari akun Google Anda" : "Name and email from your Google account"}</li>
+                      <li>{language === 'id' ? "Foto profil dari akun Google Anda" : "Profile photo from your Google account"}</li>
+                      <li>{language === 'id' ? "Pesan dan riwayat chat yang Anda kirim" : "Messages and chat history you send"}</li>
+                      <li>{language === 'id' ? "Status online dan aktivitas chat" : "Online status and chat activity"}</li>
                     </ul>
                   </div>
 
@@ -2509,7 +2871,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      2. Bagaimana Kami Menggunakan Informasi
+                      {language === 'id' ? "2. Bagaimana Kami Menggunakan Informasi" : "2. How We Use Information"}
                     </h3>
                     <p
                       style={{
@@ -2520,7 +2882,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Informasi yang kami kumpulkan digunakan untuk:
+                      {language === 'id' ? "Informasi yang kami kumpulkan digunakan untuk:" : "The information we collect is used for:"}
                     </p>
                     <ul
                       style={{
@@ -2532,10 +2894,10 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      <li>Menyediakan dan memelihara layanan chat</li>
-                      <li>Mengirimkan pesan antar pengguna</li>
-                      <li>Menampilkan status online pengguna</li>
-                      <li>Menyimpan riwayat chat untuk akses di masa depan</li>
+                      <li>{language === 'id' ? "Menyediakan dan memelihara layanan chat" : "Providing and maintaining chat service"}</li>
+                      <li>{language === 'id' ? "Mengirimkan pesan antar pengguna" : "Sending messages between users"}</li>
+                      <li>{language === 'id' ? "Menampilkan status online pengguna" : "Displaying user online status"}</li>
+                      <li>{language === 'id' ? "Menyimpan riwayat chat untuk akses di masa depan" : "Storing chat history for future access"}</li>
                     </ul>
                   </div>
 
@@ -2549,7 +2911,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      3. Penyimpanan Data
+                      {language === 'id' ? "3. Penyimpanan Data" : "3. Data Storage"}
                     </h3>
                     <p
                       style={{
@@ -2560,7 +2922,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
+                      {language === 'id' ? "Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat." : "All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with."}
                     </p>
                   </div>
 
@@ -2574,7 +2936,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      4. Keamanan
+                      {language === 'id' ? "4. Keamanan" : "4. Security"}
                     </h3>
                     <p
                       style={{
@@ -2585,7 +2947,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
+                      {language === 'id' ? "Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS." : "We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS."}
                     </p>
                   </div>
 
@@ -2599,7 +2961,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      5. Hak Anda
+                      {language === 'id' ? "5. Hak Anda" : "5. Your Rights"}
                     </h3>
                     <p
                       style={{
@@ -2610,7 +2972,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Anda memiliki hak untuk:
+                      {language === 'id' ? "Anda memiliki hak untuk:" : "You have the right to:"}
                     </p>
                     <ul
                       style={{
@@ -2622,9 +2984,9 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      <li>Mengakses data pribadi Anda</li>
-                      <li>Menghapus akun dan data chat Anda</li>
-                      <li>Menonaktifkan notifikasi</li>
+                      <li>{language === 'id' ? "Mengakses data pribadi Anda" : "Access your personal data"}</li>
+                      <li>{language === 'id' ? "Menghapus akun dan data chat Anda" : "Delete your account and chat data"}</li>
+                      <li>{language === 'id' ? "Menonaktifkan notifikasi" : "Disable notifications"}</li>
                     </ul>
                   </div>
 
@@ -2638,7 +3000,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      6. Perubahan Kebijakan
+                      {language === 'id' ? "6. Perubahan Kebijakan" : "6. Policy Changes"}
                     </h3>
                     <p
                       style={{
@@ -2649,7 +3011,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
+                      {language === 'id' ? "Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat." : "We may update this privacy policy from time to time. Changes will be notified through the chat application."}
                     </p>
                   </div>
 
@@ -2663,7 +3025,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      7. Kontak
+                      {language === 'id' ? "7. Kontak" : "7. Contact"}
                     </h3>
                     <p
                       style={{
@@ -2674,7 +3036,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: "Inter, 'Inter Fallback'",
                       }}
                     >
-                      Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
+                      {language === 'id' ? "Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:" : "If you have questions about this privacy policy, please contact us at:"}
                     </p>
                     <p
                       style={{
@@ -2745,7 +3107,7 @@ export default function HomePage(): React.JSX.Element {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>Kembali</span>
+                      <span>{t.back}</span>
                     </motion.button>
 
                     <div style={{ width: "100%", marginBottom: "0px" }}>
@@ -2776,7 +3138,7 @@ export default function HomePage(): React.JSX.Element {
                               backgroundColor: "#c5e800",
                               marginRight: "4px",
                             }} />
-                            Catatan
+                            {t.note}
                           </span>
                           {profileUser.id === user?.uid && (
                             <motion.button
@@ -2796,7 +3158,7 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <EditIcon />
-                              {profileUser.note ? "Edit" : "Tambah"}
+                              {profileUser.note ? t.editNote : t.addNote}
                             </motion.button>
                           )}
                         </div>
@@ -2807,7 +3169,7 @@ export default function HomePage(): React.JSX.Element {
                               type="text"
                               value={noteInput}
                               onChange={(e) => setNoteInput(e.target.value)}
-                              placeholder="Tulis catatan..."
+                              placeholder={t.noNote}
                               style={{
                                 flex: 1,
                                 padding: "6px 10px",
@@ -2842,7 +3204,7 @@ export default function HomePage(): React.JSX.Element {
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              Simpan
+                              {t.save}
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -2859,7 +3221,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: "Inter, 'Inter Fallback'",
                               }}
                             >
-                              Batal
+                              {t.cancel}
                             </motion.button>
                           </div>
                         ) : (
@@ -2870,7 +3232,7 @@ export default function HomePage(): React.JSX.Element {
                             lineHeight: 1.4,
                             minHeight: "24px",
                           }}>
-                            {profileUser.note || "Belum ada catatan"}
+                            {profileUser.note || t.noNote}
                           </div>
                         )}
                       </div>
@@ -2901,7 +3263,7 @@ export default function HomePage(): React.JSX.Element {
                         )}
                         {profileUser.isOfficial && (
                           <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                            <InstagramVerifiedBadge size={16} />
+                            <InstagramVerifiedBadge size={16} language={language} />
                           </div>
                         )}
                       </motion.div>
@@ -2910,13 +3272,13 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000" }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
+                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} language={language} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999" }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} language={language} />
                           <span style={{ fontSize: "12px", color: "#666" }}>
-                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                            {getOnlineStatus(profileUser.id) ? t.online : getLastSeen(profileUser.id)}
                           </span>
                         </div>
                       </div>
@@ -2925,7 +3287,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ width: "100%", marginBottom: "16px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                         <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                          Bio
+                          {t.bio}
                         </span>
                         {profileUser.id === user?.uid && (
                           <motion.button
@@ -2945,7 +3307,7 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <EditIcon />
-                            {profileUser.bio ? "Edit" : "Tambah"}
+                            {profileUser.bio ? t.editBio : t.addBio}
                           </motion.button>
                         )}
                       </div>
@@ -2954,7 +3316,7 @@ export default function HomePage(): React.JSX.Element {
                           <textarea
                             value={bioInput}
                             onChange={(e) => setBioInput(e.target.value)}
-                            placeholder="Tulis bio..."
+                            placeholder={t.noBio}
                             rows={2}
                             style={{
                               width: "100%",
@@ -2985,7 +3347,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: "Inter, 'Inter Fallback'",
                               }}
                             >
-                              Simpan
+                              {t.save}
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -3002,7 +3364,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: "Inter, 'Inter Fallback'",
                               }}
                             >
-                              Batal
+                              {t.cancel}
                             </motion.button>
                           </div>
                         </div>
@@ -3015,7 +3377,7 @@ export default function HomePage(): React.JSX.Element {
                           color: profileUser.bio ? "#000" : "#ccc",
                           lineHeight: 1.5,
                         }}>
-                          {profileUser.bio || "Belum ada bio"}
+                          {profileUser.bio || t.noBio}
                         </div>
                       )}
                     </div>
@@ -3044,7 +3406,7 @@ export default function HomePage(): React.JSX.Element {
                         onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
                         onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
-                        Kirim Pesan
+                        {t.sendMessage}
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -3088,10 +3450,10 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ fontSize: "20px" }}>📢</div>
                     <div>
                       <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
-                        Pengumuman
+                        {t.announcement}
                       </div>
                       <div style={{ fontSize: "11px", color: "#666" }}>
-                        Fitur chat sedang dalam tahap pengembangan.
+                        {t.announcementText}
                       </div>
                     </div>
                   </div>
@@ -3135,7 +3497,7 @@ export default function HomePage(): React.JSX.Element {
                         letterSpacing: "-0.01em",
                       }}
                     >
-                      Chat Baru
+                      {t.newChat}
                     </span>
                   </motion.button>
                   
@@ -3155,7 +3517,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
-                          Pilih User untuk Chat
+                          {t.selectUser}
                         </div>
                         <select
                           value={selectedNewUser}
@@ -3173,16 +3535,16 @@ export default function HomePage(): React.JSX.Element {
                             color: "#000",
                           }}
                         >
-                          <option value="">Pilih user...</option>
+                          <option value="">{t.selectUser}</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                             </option>
                           ))}
                         </select>
                         {availableUsers.length === 0 && (
                           <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px" }}>
-                            Semua user sudah di-chat
+                            {t.allUsersChatted}
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -3204,7 +3566,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: "Inter, 'Inter Fallback'",
                             }}
                           >
-                            Mulai Chat
+                            {t.startChat}
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -3219,7 +3581,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: "Inter, 'Inter Fallback'",
                             }}
                           >
-                            Batal
+                            {t.cancel}
                           </motion.button>
                         </div>
                         {addUserStatus && (
@@ -3249,7 +3611,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                            User Pinned ({pinnedUsers.length})
+                            {t.pinnedUsers} ({pinnedUsers.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedUsers} />
@@ -3302,13 +3664,13 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                      {u.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999" }}>
                                       {u.email}
                                     </div>
                                   </div>
-                                  <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
+                                  <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} language={language} />
                                 </div>
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
@@ -3352,7 +3714,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                            Chat Pinned ({pinnedChats.length})
+                            {t.pinnedChats} ({pinnedChats.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedChats} />
@@ -3415,13 +3777,13 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999" }}>
-                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "Belum ada pesan"}
+                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : t.noMessages}
                                       </div>
                                     </div>
-                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} language={language} />
                                   </div>
                                   {room.unreadCount > 0 && (
                                     <div
@@ -3480,7 +3842,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>Belum ada riwayat chat</div>
+                        <div>{t.noChatHistory}</div>
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
@@ -3543,17 +3905,17 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
+                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} language={language} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                 {room.lastMessage ? (
                                   <>
-                                    {isLastMessageFromMe && "Anda: "}
+                                    {isLastMessageFromMe && `${t.messages}: `}
                                     {room.lastMessage}
                                   </>
                                 ) : (
-                                  "Belum ada pesan"
+                                  t.noMessages
                                 )}
                               </div>
                             </div>
@@ -3689,16 +4051,17 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff" }}>
                           {selectedChat.name}
                         </span>
-                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
+                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <OnlineIndicator 
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
+                          language={language}
                         />
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
-                            {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
+                            {getTypingStatus(selectedChat.id) ? t.typing : t.online}
                           </span>
                         ) : (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
@@ -3749,7 +4112,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
-                            Pesan Pinned ({pinnedMessages.length})
+                            {t.pinnedMessages} ({pinnedMessages.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedMessages} />
@@ -3781,7 +4144,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px" }}>
-                                      {isMine ? "Anda: " : `${msg.senderName}: `}
+                                      {isMine ? `${t.messages}: ` : `${msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000" }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -3813,7 +4176,7 @@ export default function HomePage(): React.JSX.Element {
                         <ReplyIcon />
                         <div>
                           <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
-                            Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
+                            {t.reply}: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
                           </div>
                           <div style={{ fontSize: "11px", color: "#666" }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -3868,7 +4231,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>Belum ada pesan</div>
+                        <div>{t.noMessages}</div>
                       </div>
                     ) : (
                       messages.map((msg, idx) => {
@@ -3923,7 +4286,7 @@ export default function HomePage(): React.JSX.Element {
                                     fontStyle: "italic",
                                   }}
                                 >
-                                  Diteruskan dari {msg.sharedFromName}
+                                  {t.from} {msg.sharedFromName}
                                 </div>
                               )}
                               
@@ -3940,7 +4303,7 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   <span style={{ fontWeight: 500, color: "#22c55e" }}>
-                                    {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
+                                    {isMine ? `${t.reply}: ${replySenderName}` : `${t.reply}: ${msg.replyToSender}`}
                                   </span>
                                   <span style={{ color: isMine ? "#000" : "#333" }}> {msg.replyToText}</span>
                                 </div>
@@ -3948,7 +4311,7 @@ export default function HomePage(): React.JSX.Element {
                               
                               {isBroadcastMessage ? (
                                 <span>
-                                  Jangan lupa baca{' '}
+                                  {language === 'id' ? "Jangan lupa baca" : "Don't forget to read"}{' '}
                                   <span
                                     onClick={() => setShowPrivacyPolicy(true)}
                                     style={{
@@ -3958,9 +4321,9 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500,
                                     }}
                                   >
-                                    Privacy Policy
+                                    {t.privacyPolicy}
                                   </span>
-                                  {' dan '}
+                                  {' '}{language === 'id' ? "dan" : "and"}{' '}
                                   <span
                                     onClick={() => setShowUpdate(true)}
                                     style={{
@@ -3970,9 +4333,9 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500,
                                     }}
                                   >
-                                    Update
+                                    {t.updateSystem}
                                   </span>
-                                  {' '}kami 👇
+                                  {' '}{language === 'id' ? "kami 👇" : "👇"}
                                 </span>
                               ) : (
                                 <span>{msg.text}</span>
@@ -3997,7 +4360,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
-                                <ReadStatus msg={msg} isMine={isMine} />
+                                <ReadStatus msg={msg} isMine={isMine} language={language} />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
@@ -4013,7 +4376,7 @@ export default function HomePage(): React.JSX.Element {
                                     transition: "all .2s ease",
                                     borderRadius: "4px",
                                   }}
-                                  title="More"
+                                  title={t.more}
                                 >
                                   <MoreIcon />
                                 </motion.button>
@@ -4063,7 +4426,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <ReplyIcon />
-                                        <span>Balas</span>
+                                        <span>{t.reply}</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4087,7 +4450,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <SendIcon />
-                                        <span>Kirim Ulang</span>
+                                        <span>{t.resend}</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4113,7 +4476,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <ShareIcon />
-                                        <span>Teruskan</span>
+                                        <span>{t.forward}</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4135,7 +4498,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <PinIcon filled={msg.isPinned || false} />
-                                        <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                        <span>{msg.isPinned ? t.unpin : t.pin}</span>
                                       </motion.button>
                                     </motion.div>
                                   )}
@@ -4158,7 +4521,7 @@ export default function HomePage(): React.JSX.Element {
                                 }}
                               >
                                 <PinIcon filled={true} />
-                                <span>Pinned • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                <span>{t.pin} • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
                               </div>
                             )}
                           </React.Fragment>
@@ -4180,7 +4543,7 @@ export default function HomePage(): React.JSX.Element {
                   >
                     <input
                       type="text"
-                      placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
+                      placeholder={replyTo ? t.typeReply : t.typeMessage}
                       value={message}
                       onChange={handleTyping}
                       onKeyPress={(e) => {
@@ -4237,7 +4600,7 @@ export default function HomePage(): React.JSX.Element {
                         e.currentTarget.style.backgroundColor = "#c5e800";
                       }}
                     >
-                      <span>Kirim</span>
+                      <span>{t.send}</span>
                       <SendIcon />
                     </motion.button>
                   </div>
@@ -4291,7 +4654,7 @@ export default function HomePage(): React.JSX.Element {
                   transition: "all 0.5s ease",
                 }}
               >
-                {user ? chatButtonText : "Login to Chat"}
+                {user ? chatButtonText : t.loginToChat}
               </motion.span>
               {totalUnread > 0 && (
                 <motion.span
