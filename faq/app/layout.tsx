@@ -1,4 +1,12 @@
 import type { Metadata, Viewport } from 'next'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-plus-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
+})
 
 export const metadata: Metadata = {
   title: 'Menuru Official | Home',
@@ -50,6 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      className={plusJakarta.className}
       style={{
         margin: 0,
         padding: 0,
@@ -57,57 +66,6 @@ export default function RootLayout({
       }}
     >
       <head>
-        {/* Neue Montreal Font - Single Font */}
-        <link
-          rel="preload"
-          href="/fonts/NeueMontreal-Regular.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              @font-face {
-                font-family: 'Neue Montreal';
-                src: url('/fonts/NeueMontreal-Regular.woff2') format('woff2'),
-                     url('/fonts/NeueMontreal-Regular.woff') format('woff');
-                font-weight: 400;
-                font-style: normal;
-                font-display: swap;
-              }
-              @font-face {
-                font-family: 'Neue Montreal';
-                src: url('/fonts/NeueMontreal-Medium.woff2') format('woff2'),
-                     url('/fonts/NeueMontreal-Medium.woff') format('woff');
-                font-weight: 500;
-                font-style: normal;
-                font-display: swap;
-              }
-              @font-face {
-                font-family: 'Neue Montreal';
-                src: url('/fonts/NeueMontreal-Bold.woff2') format('woff2'),
-                     url('/fonts/NeueMontreal-Bold.woff') format('woff');
-                font-weight: 700;
-                font-style: normal;
-                font-display: swap;
-              }
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
-              html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                font-family: 'Neue Montreal', sans-serif;
-              }
-            `,
-          }}
-        />
-
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -126,7 +84,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "'Neue Montreal', sans-serif",
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
