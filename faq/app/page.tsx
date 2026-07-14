@@ -59,6 +59,9 @@ const googleProvider = new GoogleAuthProvider();
 // Language Type
 type Language = 'id' | 'en';
 
+// Font Family
+const FONT_FAMILY = "'Neue Montreal', sans-serif";
+
 // Get initial language from URL
 const getInitialLanguage = (): Language => {
   if (typeof window === 'undefined') return 'id';
@@ -344,7 +347,7 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
           display: "flex",
           alignItems: "center",
           gap: "6px",
-          fontFamily: "Inter, 'Inter Fallback'",
+          fontFamily: FONT_FAMILY,
           backgroundColor: "#f5f5f5",
           transition: "all 0.2s ease",
         }}
@@ -395,7 +398,7 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
                 cursor: "pointer",
                 fontSize: "14px",
                 color: "#000",
-                fontFamily: "Inter, 'Inter Fallback'",
+                fontFamily: FONT_FAMILY,
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
@@ -426,7 +429,7 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language; setLa
                 cursor: "pointer",
                 fontSize: "14px",
                 color: "#000",
-                fontFamily: "Inter, 'Inter Fallback'",
+                fontFamily: FONT_FAMILY,
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
@@ -567,7 +570,7 @@ const EditIcon = () => (
   </svg>
 );
 
-// Awwwards Style Dot Indicator (tanpa border putih, dengan 1 layer pemancar)
+// Awwwards Style Dot Indicator
 const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
     <div style={{ 
@@ -578,7 +581,6 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
       width: `${size}px`,
       height: `${size}px`,
     }}>
-      {/* Pemancar - 1 Layer Awwwards Style */}
       {isActive && (
         <div
           style={{
@@ -594,7 +596,6 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
         />
       )}
       
-      {/* Titik Bulat Kecil - Tanpa Border */}
       <div
         style={{
           width: `${size}px`,
@@ -639,6 +640,7 @@ const OnlineIndicator = ({ online, lastSeen, language }: { online: boolean; last
           whiteSpace: "nowrap",
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
         }}>
           {online ? t.online : (lastSeen || t.offline)}
           <div style={{
@@ -680,6 +682,7 @@ const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; 
           color: status.color,
           fontWeight: status.label === t.read ? 600 : 400,
           cursor: "pointer",
+          fontFamily: FONT_FAMILY,
         }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -699,6 +702,7 @@ const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; 
           whiteSpace: "nowrap",
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
         }}>
           {status.label}
           <div style={{
@@ -777,6 +781,7 @@ const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; langua
           whiteSpace: "nowrap",
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
         }}>
           {t.officialAccount}
           <div style={{
@@ -921,9 +926,7 @@ export default function HomePage(): React.JSX.Element {
   // Update chatTexts when language changes
   useEffect(() => {
     setChatButtonText(t.chatWithMenuru);
-    // Update URL when language changes programmatically
     if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname;
       const currentLang = getInitialLanguage();
       if (currentLang !== language) {
         changeLanguage(language);
@@ -1886,14 +1889,13 @@ export default function HomePage(): React.JSX.Element {
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "#ffffff",
-        fontFamily: "Inter, 'Inter Fallback'"
+        fontFamily: FONT_FAMILY,
       }}>
-        <div style={{ fontSize: "18px", color: "#000" }}>Loading...</div>
+        <div style={{ fontSize: "18px", color: "#000", fontFamily: FONT_FAMILY }}>Loading...</div>
       </div>
     );
   }
 
-  // Get selected update item
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
   return (
@@ -1904,11 +1906,11 @@ export default function HomePage(): React.JSX.Element {
         margin: 0,
         padding: 0,
         position: "relative",
-        fontFamily: "Inter, 'Inter Fallback'",
+        fontFamily: FONT_FAMILY,
         overflow: "hidden",
       }}
     >
-      {/* BANNER DEVELOPMENT - Di atas tombol login dan bahasa */}
+      {/* BANNER DEVELOPMENT */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1929,7 +1931,6 @@ export default function HomePage(): React.JSX.Element {
           borderBottom: "none",
         }}
       >
-        {/* Icon SVG Hitam Putih - Construction/Development */}
         <svg
           width="20"
           height="20"
@@ -1985,7 +1986,7 @@ export default function HomePage(): React.JSX.Element {
             fontSize: "14px",
             fontWeight: 500,
             color: "#ffffff",
-            fontFamily: "Inter, 'Inter Fallback'",
+            fontFamily: FONT_FAMILY,
             letterSpacing: "0.02em",
             textAlign: "center",
           }}
@@ -1994,7 +1995,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </motion.div>
 
-      {/* User Status - Pojok Kanan Atas (diberi margin top karena banner) */}
+      {/* User Status */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2009,7 +2010,6 @@ export default function HomePage(): React.JSX.Element {
           gap: "12px",
         }}
       >
-        {/* Language Selector */}
         <LanguageSelector language={language} setLanguage={setLanguage} />
 
         <motion.div
@@ -2026,6 +2026,7 @@ export default function HomePage(): React.JSX.Element {
             fontSize: "14px",
             color: "#000",
             border: "1px solid #e0e0e0",
+            fontFamily: FONT_FAMILY,
           }}
         >
           {user ? (
@@ -2053,6 +2054,7 @@ export default function HomePage(): React.JSX.Element {
                   fontWeight: 500, 
                   color: "#000",
                   cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
                 }}
                 onClick={() => {
                   const selfUser = users.find(u => u.id === user.uid);
@@ -2075,7 +2077,7 @@ export default function HomePage(): React.JSX.Element {
                   padding: "4px 12px",
                   borderRadius: "20px",
                   transition: "all .2s ease",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#e0e0e0";
@@ -2102,7 +2104,7 @@ export default function HomePage(): React.JSX.Element {
                 padding: "4px 12px",
                 borderRadius: "20px",
                 transition: "all .2s ease",
-                fontFamily: "Inter, 'Inter Fallback'",
+                fontFamily: FONT_FAMILY,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#f0f0f0";
@@ -2151,10 +2153,11 @@ export default function HomePage(): React.JSX.Element {
                 width: "90%",
                 border: "1px solid #e0e0e0",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+                fontFamily: FONT_FAMILY,
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: "Inter, 'Inter Fallback'" }}>
+              <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: FONT_FAMILY }}>
                 {t.loginTitle}
               </h2>
               <input
@@ -2170,7 +2173,7 @@ export default function HomePage(): React.JSX.Element {
                   marginBottom: "12px",
                   fontSize: "14px",
                   outline: "none",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                   color: "#000",
                 }}
               />
@@ -2187,13 +2190,13 @@ export default function HomePage(): React.JSX.Element {
                   marginBottom: "16px",
                   fontSize: "14px",
                   outline: "none",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                   color: "#000",
                 }}
                 onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
               />
               {loginError && (
-                <div style={{ color: "#ef4444", fontSize: "12px", marginBottom: "12px" }}>
+                <div style={{ color: "#ef4444", fontSize: "12px", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
                   {loginError}
                 </div>
               )}
@@ -2212,12 +2215,12 @@ export default function HomePage(): React.JSX.Element {
                   fontWeight: 500,
                   cursor: "pointer",
                   transition: "all .2s ease",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                 }}
               >
                 {t.loginWithEmail}
               </motion.button>
-              <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666" }}>
+              <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY }}>
                 {t.or}
               </div>
               <motion.button
@@ -2236,7 +2239,7 @@ export default function HomePage(): React.JSX.Element {
                   cursor: "pointer",
                   marginTop: "8px",
                   transition: "all .2s ease",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                 }}
               >
                 {t.loginWithGoogle}
@@ -2279,10 +2282,11 @@ export default function HomePage(): React.JSX.Element {
                 maxWidth: "400px",
                 width: "90%",
                 border: "1px solid #e0e0e0",
+                fontFamily: FONT_FAMILY,
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
                 {t.forwardMessage}
               </h3>
               <div style={{ 
@@ -2291,10 +2295,11 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: "16px",
                 padding: "10px",
                 backgroundColor: "#f5f5f5",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                fontFamily: FONT_FAMILY,
               }}>
-                <div style={{ fontWeight: 500, color: "#000" }}>{t.from}: {shareMessage.senderName}</div>
-                <div>{shareMessage.text}</div>
+                <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>{t.from}: {shareMessage.senderName}</div>
+                <div style={{ fontFamily: FONT_FAMILY }}>{shareMessage.text}</div>
               </div>
               <select
                 value={selectedShareUser}
@@ -2306,7 +2311,7 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "8px",
                   fontSize: "13px",
                   outline: "none",
-                  fontFamily: "Inter, 'Inter Fallback'",
+                  fontFamily: FONT_FAMILY,
                   marginBottom: "12px",
                   backgroundColor: "#fff",
                   color: "#000",
@@ -2336,7 +2341,7 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: 500,
                     flex: 1,
                     transition: "all .2s ease",
-                    fontFamily: "Inter, 'Inter Fallback'",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   {t.forwardButton}
@@ -2357,7 +2362,7 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: "13px",
                     color: "#666",
                     cursor: "pointer",
-                    fontFamily: "Inter, 'Inter Fallback'",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   {t.cancel}
@@ -2398,9 +2403,10 @@ export default function HomePage(): React.JSX.Element {
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
+                fontFamily: FONT_FAMILY,
               }}
             >
-              {/* Header - Hitam dengan teks cerah */}
+              {/* Header */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -2418,13 +2424,14 @@ export default function HomePage(): React.JSX.Element {
                       fontWeight: 500,
                       color: "#ffffff",
                       letterSpacing: "-0.01em",
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     {selectedUpdateId && selectedUpdate ? t.updateDetail : (showUpdate ? t.updateSystem : (showPrivacyPolicy ? t.privacyPolicy : (showProfile ? t.profile : (selectedChat ? selectedChat.name : t.messages))))}
                   </span>
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                     <>
-                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
                         {selectedChat.email}
                       </span>
                       <OnlineIndicator 
@@ -2443,6 +2450,7 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: "4px",
                         fontSize: "10px",
                         fontWeight: 600,
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {totalUnread}
@@ -2497,6 +2505,7 @@ export default function HomePage(): React.JSX.Element {
                     overflowY: "auto",
                     padding: "28px 32px",
                     backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
@@ -2513,7 +2522,7 @@ export default function HomePage(): React.JSX.Element {
                         alignItems: "center",
                         gap: "6px",
                         fontSize: "13px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                         marginBottom: "16px",
                         padding: "4px 0",
                         transition: "color 0.2s ease",
@@ -2541,7 +2550,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#ffffff",
                           letterSpacing: "0.05em",
                           textTransform: "uppercase",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {selectedUpdate.status === "live" ? t.statusLive : (selectedUpdate.status === "coming" ? t.statusComing : t.statusDone)}
@@ -2554,7 +2563,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         margin: "0 0 8px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {selectedUpdate.title}
@@ -2572,7 +2581,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: "13px",
                           color: "#999",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {selectedUpdate.date}
@@ -2581,7 +2590,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: "13px",
                           color: "#999",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         • {selectedUpdate.publishedBy}
@@ -2594,7 +2603,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#000000",
                         lineHeight: 1.8,
                         margin: "0 0 16px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {selectedUpdate.description}
@@ -2607,6 +2616,7 @@ export default function HomePage(): React.JSX.Element {
                         padding: "16px 20px",
                         backgroundColor: "#f8f8f8",
                         borderRadius: "10px",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <h3
@@ -2615,7 +2625,7 @@ export default function HomePage(): React.JSX.Element {
                           fontWeight: 600,
                           color: "#000000",
                           marginBottom: "8px",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {t.updateDetail}
@@ -2626,7 +2636,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#333",
                           lineHeight: 1.8,
                           margin: 0,
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {selectedUpdate.detail}
@@ -2645,7 +2655,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: "14px",
                           color: "#666",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {t.link}:
@@ -2658,7 +2668,7 @@ export default function HomePage(): React.JSX.Element {
                           fontSize: "14px",
                           color: "#3b82f6",
                           textDecoration: "underline",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                           fontWeight: 500,
                         }}
                       >
@@ -2680,7 +2690,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: "11px",
                           color: "#999",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         Chat with Menuru v1.0
@@ -2689,7 +2699,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: "11px",
                           color: "#999",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         © 2026 Menuru
@@ -2705,6 +2715,7 @@ export default function HomePage(): React.JSX.Element {
                     overflowY: "auto",
                     padding: "28px 32px",
                     backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   <div style={{ marginBottom: "28px" }}>
@@ -2724,7 +2735,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#ffffff",
                           letterSpacing: "0.05em",
                           textTransform: "uppercase",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {t.updateSystem}
@@ -2736,7 +2747,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         margin: "0 0 4px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       Chat with Menuru
@@ -2746,7 +2757,7 @@ export default function HomePage(): React.JSX.Element {
                         fontSize: "13px",
                         color: "#999",
                         margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {t.updateHistory}
@@ -2787,7 +2798,6 @@ export default function HomePage(): React.JSX.Element {
                           }}
                           onClick={() => setSelectedUpdateId(item.id)}
                         >
-                          {/* Awwwards Dot Style dengan 1 Layer Pemancar */}
                           <div
                             style={{
                               position: "absolute",
@@ -2854,7 +2864,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "18px",
                                   fontWeight: 700,
                                   color: "#000000",
-                                  fontFamily: "Inter, 'Inter Fallback'",
+                                  fontFamily: FONT_FAMILY,
                                   letterSpacing: "-0.01em",
                                 }}
                               >
@@ -2900,7 +2910,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontSize: "11px",
                         color: "#999",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       Chat with Menuru v1.0
@@ -2909,7 +2919,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontSize: "11px",
                         color: "#999",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       © 2026 Menuru
@@ -2924,6 +2934,7 @@ export default function HomePage(): React.JSX.Element {
                     overflowY: "auto",
                     padding: "28px 32px",
                     backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   <div style={{ marginBottom: "24px" }}>
@@ -2943,7 +2954,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#ffffff",
                           letterSpacing: "0.05em",
                           textTransform: "uppercase",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         {t.privacyPolicy}
@@ -2955,7 +2966,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         margin: "0 0 4px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       Chat with Menuru
@@ -2965,7 +2976,7 @@ export default function HomePage(): React.JSX.Element {
                         fontSize: "13px",
                         color: "#999",
                         margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {t.lastUpdated}: 9 Juli 2026
@@ -2979,7 +2990,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "1. Informasi yang Kami Kumpulkan" : "1. Information We Collect"}
@@ -2990,7 +3001,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: "0 0 6px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:" : "Chat with Menuru collects the following information to provide optimal chat service:"}
@@ -3002,7 +3013,7 @@ export default function HomePage(): React.JSX.Element {
                         lineHeight: 1.9,
                         paddingLeft: "20px",
                         margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <li>{language === 'id' ? "Nama dan email dari akun Google Anda" : "Name and email from your Google account"}</li>
@@ -3019,7 +3030,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "2. Bagaimana Kami Menggunakan Informasi" : "2. How We Use Information"}
@@ -3030,7 +3041,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: "0 0 6px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Informasi yang kami kumpulkan digunakan untuk:" : "The information we collect is used for:"}
@@ -3042,7 +3053,7 @@ export default function HomePage(): React.JSX.Element {
                         lineHeight: 1.9,
                         paddingLeft: "20px",
                         margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <li>{language === 'id' ? "Menyediakan dan memelihara layanan chat" : "Providing and maintaining chat service"}</li>
@@ -3059,7 +3070,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "3. Penyimpanan Data" : "3. Data Storage"}
@@ -3070,7 +3081,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: 0,
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat." : "All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with."}
@@ -3084,7 +3095,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "4. Keamanan" : "4. Security"}
@@ -3095,7 +3106,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: 0,
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS." : "We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS."}
@@ -3109,7 +3120,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "5. Hak Anda" : "5. Your Rights"}
@@ -3120,7 +3131,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: "0 0 6px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Anda memiliki hak untuk:" : "You have the right to:"}
@@ -3132,7 +3143,7 @@ export default function HomePage(): React.JSX.Element {
                         lineHeight: 1.9,
                         paddingLeft: "20px",
                         margin: "0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <li>{language === 'id' ? "Mengakses data pribadi Anda" : "Access your personal data"}</li>
@@ -3148,7 +3159,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "6. Perubahan Kebijakan" : "6. Policy Changes"}
@@ -3159,7 +3170,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: 0,
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat." : "We may update this privacy policy from time to time. Changes will be notified through the chat application."}
@@ -3173,7 +3184,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 600,
                         color: "#000000",
                         marginBottom: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "7. Kontak" : "7. Contact"}
@@ -3184,7 +3195,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#666",
                         lineHeight: 1.7,
                         margin: "0 0 4px 0",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {language === 'id' ? "Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:" : "If you have questions about this privacy policy, please contact us at:"}
@@ -3195,7 +3206,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#000000",
                         marginTop: "4px",
                         fontWeight: 500,
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       support@menuru.com
@@ -3216,7 +3227,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontSize: "11px",
                         color: "#999",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       Chat with Menuru v1.0
@@ -3225,7 +3236,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         fontSize: "11px",
                         color: "#999",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       © 2026 Menuru
@@ -3234,7 +3245,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : showProfile && profileUser ? (
                 // Profile View
-                <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
+                <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -3249,7 +3260,7 @@ export default function HomePage(): React.JSX.Element {
                         alignItems: "center",
                         gap: "6px",
                         fontSize: "13px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                         marginBottom: "16px",
                         padding: "4px 0",
                         transition: "color 0.2s ease",
@@ -3269,6 +3280,7 @@ export default function HomePage(): React.JSX.Element {
                         position: "relative",
                         marginBottom: "8px",
                         maxWidth: "280px",
+                        fontFamily: FONT_FAMILY,
                       }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ 
@@ -3280,6 +3292,7 @@ export default function HomePage(): React.JSX.Element {
                             display: "flex",
                             alignItems: "center",
                             gap: "4px",
+                            fontFamily: FONT_FAMILY,
                           }}>
                             <span style={{ 
                               display: "inline-block",
@@ -3305,7 +3318,7 @@ export default function HomePage(): React.JSX.Element {
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                               }}
                             >
                               <EditIcon />
@@ -3330,7 +3343,7 @@ export default function HomePage(): React.JSX.Element {
                                 color: "#000",
                                 fontSize: "12px",
                                 outline: "none",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                               }}
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
@@ -3351,7 +3364,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontSize: "11px",
                                 fontWeight: 500,
                                 cursor: "pointer",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                                 whiteSpace: "nowrap",
                               }}
                             >
@@ -3369,7 +3382,7 @@ export default function HomePage(): React.JSX.Element {
                                 color: "#666",
                                 fontSize: "11px",
                                 cursor: "pointer",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                               }}
                             >
                               {t.cancel}
@@ -3382,6 +3395,7 @@ export default function HomePage(): React.JSX.Element {
                             fontSize: "13px",
                             lineHeight: 1.4,
                             minHeight: "24px",
+                            fontFamily: FONT_FAMILY,
                           }}>
                             {profileUser.note || t.noNote}
                           </div>
@@ -3410,7 +3424,7 @@ export default function HomePage(): React.JSX.Element {
                         {profileUser.photoURL ? (
                           <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (
-                          <span style={{ color: "#000" }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
                         {profileUser.isOfficial && (
                           <div style={{ position: "absolute", bottom: -2, right: -2 }}>
@@ -3420,15 +3434,15 @@ export default function HomePage(): React.JSX.Element {
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000" }}>
+                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
                           {profileUser.isOfficial && <InstagramVerifiedBadge size={16} language={language} />}
                         </div>
-                        <span style={{ fontSize: "13px", color: "#999" }}>{profileUser.email}</span>
+                        <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
                           <OnlineIndicator online={getOnlineStatus(profileUser.id)} language={language} />
-                          <span style={{ fontSize: "12px", color: "#666" }}>
+                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {getOnlineStatus(profileUser.id) ? t.online : getLastSeen(profileUser.id)}
                           </span>
                         </div>
@@ -3437,7 +3451,7 @@ export default function HomePage(): React.JSX.Element {
 
                     <div style={{ width: "100%", marginBottom: "16px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
                           {t.bio}
                         </span>
                         {profileUser.id === user?.uid && (
@@ -3454,7 +3468,7 @@ export default function HomePage(): React.JSX.Element {
                               display: "flex",
                               alignItems: "center",
                               gap: "4px",
-                              fontFamily: "Inter, 'Inter Fallback'",
+                              fontFamily: FONT_FAMILY,
                             }}
                           >
                             <EditIcon />
@@ -3478,7 +3492,7 @@ export default function HomePage(): React.JSX.Element {
                               color: "#000",
                               fontSize: "13px",
                               outline: "none",
-                              fontFamily: "Inter, 'Inter Fallback'",
+                              fontFamily: FONT_FAMILY,
                               resize: "vertical",
                             }}
                           />
@@ -3495,7 +3509,7 @@ export default function HomePage(): React.JSX.Element {
                                 color: "#fff",
                                 fontSize: "12px",
                                 cursor: "pointer",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                               }}
                             >
                               {t.save}
@@ -3512,7 +3526,7 @@ export default function HomePage(): React.JSX.Element {
                                 color: "#999",
                                 fontSize: "12px",
                                 cursor: "pointer",
-                                fontFamily: "Inter, 'Inter Fallback'",
+                                fontFamily: FONT_FAMILY,
                               }}
                             >
                               {t.cancel}
@@ -3527,6 +3541,7 @@ export default function HomePage(): React.JSX.Element {
                           fontSize: "13px",
                           color: profileUser.bio ? "#000" : "#ccc",
                           lineHeight: 1.5,
+                          fontFamily: FONT_FAMILY,
                         }}>
                           {profileUser.bio || t.noBio}
                         </div>
@@ -3551,7 +3566,7 @@ export default function HomePage(): React.JSX.Element {
                           fontSize: "14px",
                           fontWeight: 500,
                           cursor: "pointer",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                           transition: "opacity 0.2s ease",
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
@@ -3573,7 +3588,7 @@ export default function HomePage(): React.JSX.Element {
                           display: "flex",
                           alignItems: "center",
                           gap: "4px",
-                          fontFamily: "Inter, 'Inter Fallback'",
+                          fontFamily: FONT_FAMILY,
                           transition: "all 0.2s ease",
                         }}
                       >
@@ -3584,7 +3599,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : !selectedChat ? (
                 // Chat List View
-                <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px" }}>
+                <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   {/* Announcement */}
                   <div
                     style={{
@@ -3596,20 +3611,20 @@ export default function HomePage(): React.JSX.Element {
                       borderRadius: "8px",
                       marginBottom: "10px",
                       border: "none",
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     <div style={{ fontSize: "20px" }}>📢</div>
                     <div>
-                      <div style={{ fontSize: "12px", fontWeight: 500, color: "#000" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                         {t.announcement}
                       </div>
-                      <div style={{ fontSize: "11px", color: "#666" }}>
+                      <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                         {t.announcementText}
                       </div>
                     </div>
                   </div>
 
-                  {/* Chat Baru Button */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
@@ -3624,7 +3639,7 @@ export default function HomePage(): React.JSX.Element {
                       cursor: "pointer",
                       width: "100%",
                       marginBottom: "12px",
-                      fontFamily: "Inter, 'Inter Fallback'",
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     <span
@@ -3646,6 +3661,7 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: 500,
                         color: "#000000",
                         letterSpacing: "-0.01em",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       {t.newChat}
@@ -3665,9 +3681,10 @@ export default function HomePage(): React.JSX.Element {
                           borderRadius: "12px",
                           marginBottom: "12px",
                           overflow: "hidden",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
-                        <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: "Inter, 'Inter Fallback'" }}>
+                        <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
                           {t.selectUser}
                         </div>
                         <select
@@ -3680,7 +3697,7 @@ export default function HomePage(): React.JSX.Element {
                             borderRadius: "8px",
                             fontSize: "13px",
                             outline: "none",
-                            fontFamily: "Inter, 'Inter Fallback'",
+                            fontFamily: FONT_FAMILY,
                             marginBottom: "8px",
                             backgroundColor: "#fff",
                             color: "#000",
@@ -3694,7 +3711,7 @@ export default function HomePage(): React.JSX.Element {
                           ))}
                         </select>
                         {availableUsers.length === 0 && (
-                          <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px" }}>
+                          <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
                             {t.allUsersChatted}
                           </div>
                         )}
@@ -3714,7 +3731,7 @@ export default function HomePage(): React.JSX.Element {
                               cursor: selectedNewUser ? "pointer" : "not-allowed",
                               fontWeight: 500,
                               transition: "all .2s ease",
-                              fontFamily: "Inter, 'Inter Fallback'",
+                              fontFamily: FONT_FAMILY,
                             }}
                           >
                             {t.startChat}
@@ -3729,14 +3746,14 @@ export default function HomePage(): React.JSX.Element {
                               fontSize: "12px",
                               color: "#666",
                               cursor: "pointer",
-                              fontFamily: "Inter, 'Inter Fallback'",
+                              fontFamily: FONT_FAMILY,
                             }}
                           >
                             {t.cancel}
                           </motion.button>
                         </div>
                         {addUserStatus && (
-                          <div style={{ fontSize: "11px", color: "#000", marginTop: "8px" }}>
+                          <div style={{ fontSize: "11px", color: "#000", marginTop: "8px", fontFamily: FONT_FAMILY }}>
                             {addUserStatus}
                           </div>
                         )}
@@ -3757,11 +3774,12 @@ export default function HomePage(): React.JSX.Element {
                           cursor: "pointer",
                           backgroundColor: "transparent",
                           borderRadius: "6px",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
-                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                             {t.pinnedUsers} ({pinnedUsers.length})
                           </span>
                         </div>
@@ -3786,6 +3804,7 @@ export default function HomePage(): React.JSX.Element {
                                   padding: "6px 10px",
                                   borderRadius: "6px",
                                   backgroundColor: "#fafafa",
+                                  fontFamily: FONT_FAMILY,
                                 }}
                               >
                                 <div
@@ -3805,19 +3824,19 @@ export default function HomePage(): React.JSX.Element {
                                   {u.photoURL ? (
                                     <img src={u.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                   ) : (
-                                    <span style={{ color: "#000" }}>{u.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                    <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{u.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                                   )}
                                 </div>
                                 <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                   <div>
                                     <div 
-                                      style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
+                                      style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
                                       {u.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                                     </div>
-                                    <div style={{ fontSize: "9px", color: "#999" }}>
+                                    <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
                                     </div>
                                   </div>
@@ -3860,11 +3879,12 @@ export default function HomePage(): React.JSX.Element {
                           cursor: "pointer",
                           backgroundColor: "transparent",
                           borderRadius: "6px",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
-                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                             {t.pinnedChats} ({pinnedChats.length})
                           </span>
                         </div>
@@ -3896,6 +3916,7 @@ export default function HomePage(): React.JSX.Element {
                                     borderRadius: "6px",
                                     cursor: "pointer",
                                     backgroundColor: "#fafafa",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
                                   <div
@@ -3915,13 +3936,13 @@ export default function HomePage(): React.JSX.Element {
                                     {otherUser.photoURL ? (
                                       <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     ) : (
-                                      <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                      <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                                     )}
                                   </div>
                                   <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                     <div>
                                       <div 
-                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer" }}
+                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleOpenProfile(otherUser);
@@ -3930,7 +3951,7 @@ export default function HomePage(): React.JSX.Element {
                                         {otherUser.name}
                                         {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                                       </div>
-                                      <div style={{ fontSize: "9px", color: "#999" }}>
+                                      <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : t.noMessages}
                                       </div>
                                     </div>
@@ -3949,6 +3970,7 @@ export default function HomePage(): React.JSX.Element {
                                         height: "18px",
                                         minWidth: "18px",
                                         textAlign: "center",
+                                        fontFamily: FONT_FAMILY,
                                       }}
                                     >
                                       {room.unreadCount}
@@ -3990,6 +4012,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#999",
                           fontSize: "13px",
                           padding: "40px 0",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
@@ -4018,6 +4041,7 @@ export default function HomePage(): React.JSX.Element {
                               transition: "all .2s ease",
                               marginBottom: "2px",
                               backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
+                              fontFamily: FONT_FAMILY,
                             }}
                           >
                             <div
@@ -4042,11 +4066,11 @@ export default function HomePage(): React.JSX.Element {
                                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 />
                               ) : (
-                                <span style={{ color: "#000" }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
+                              <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                 <span 
                                   style={{ cursor: "pointer" }}
                                   onClick={(e) => {
@@ -4059,7 +4083,7 @@ export default function HomePage(): React.JSX.Element {
                                 {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} language={language} />
                               </div>
-                              <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {room.lastMessage ? (
                                   <>
                                     {isLastMessageFromMe && `${t.messages}: `}
@@ -4072,7 +4096,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
                               {room.lastMessageTime && (
-                                <span style={{ fontSize: "9px", color: "#bbb" }}>
+                                <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
                                   {formatTime(room.lastMessageTime)}
                                 </span>
                               )}
@@ -4090,6 +4114,7 @@ export default function HomePage(): React.JSX.Element {
                                       height: "18px",
                                       minWidth: "18px",
                                       textAlign: "center",
+                                      fontFamily: FONT_FAMILY,
                                     }}
                                   >
                                     {room.unreadCount}
@@ -4125,8 +4150,8 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : (
                 // Chat View
-                <div style={{ display: "flex", flexDirection: "column", height: "580px" }}>
-                  {/* Chat Header - Hitam dengan teks cerah */}
+                <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
+                  {/* Chat Header */}
                   <div
                     style={{
                       padding: "10px 16px",
@@ -4191,7 +4216,7 @@ export default function HomePage(): React.JSX.Element {
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
                       ) : (
-                        <span>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                        <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -4199,7 +4224,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
                         onClick={() => handleOpenProfile(selectedChat)}
                       >
-                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
                         </span>
                         {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
@@ -4211,11 +4236,11 @@ export default function HomePage(): React.JSX.Element {
                           language={language}
                         />
                         {getOnlineStatus(selectedChat.id) ? (
-                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getTypingStatus(selectedChat.id) ? t.typing : t.online}
                           </span>
                         ) : (
-                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getLastSeen(selectedChat.id)}
                           </span>
                         )}
@@ -4241,13 +4266,14 @@ export default function HomePage(): React.JSX.Element {
                     </motion.button>
                   </div>
 
-                  {/* Riwayat Pin Message */}
+                  {/* Pinned Messages */}
                   {pinnedMessages.length > 0 && (
                     <div
                       style={{
                         padding: "6px 14px",
                         backgroundColor: "rgba(0,0,0,0.02)",
                         borderBottom: "1px solid rgba(0,0,0,0.04)",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <div
@@ -4262,7 +4288,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
-                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                             {t.pinnedMessages} ({pinnedMessages.length})
                           </span>
                         </div>
@@ -4291,17 +4317,18 @@ export default function HomePage(): React.JSX.Element {
                                     display: "flex",
                                     justifyContent: "space-between",
                                     alignItems: "center",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
                                   <div style={{ flex: 1 }}>
-                                    <span style={{ color: "#999", fontSize: "9px" }}>
+                                    <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
                                       {isMine ? `${t.messages}: ` : `${msg.senderName}: `}
                                     </span>
-                                    <span style={{ color: "#000" }}>
+                                    <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
                                     </span>
                                   </div>
-                                  <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px" }}>
+                                  <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
                                     {formatTime(msg.pinnedAt || msg.timestamp)}
                                   </span>
                                 </div>
@@ -4321,15 +4348,16 @@ export default function HomePage(): React.JSX.Element {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <ReplyIcon />
                         <div>
-                          <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500 }}>
+                          <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                             {t.reply}: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
                           </div>
-                          <div style={{ fontSize: "11px", color: "#666" }}>
+                          <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
                           </div>
                         </div>
@@ -4347,6 +4375,7 @@ export default function HomePage(): React.JSX.Element {
                           padding: "4px 8px",
                           borderRadius: "4px",
                           transition: "all 0.2s ease",
+                          fontFamily: FONT_FAMILY,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
@@ -4370,6 +4399,7 @@ export default function HomePage(): React.JSX.Element {
                       display: "flex",
                       flexDirection: "column",
                       gap: "4px",
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     {messages.length === 0 ? (
@@ -4379,6 +4409,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#bbb",
                           fontSize: "13px",
                           marginTop: "60px",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
@@ -4405,6 +4436,7 @@ export default function HomePage(): React.JSX.Element {
                                   padding: "6px 0 10px 0",
                                   fontWeight: 400,
                                   letterSpacing: "0.03em",
+                                  fontFamily: FONT_FAMILY,
                                 }}
                               >
                                 {formatDate(msg.timestamp)}
@@ -4426,6 +4458,7 @@ export default function HomePage(): React.JSX.Element {
                                 position: "relative",
                                 border: msg.isPinned ? "1px solid #c5e800" : "none",
                                 boxShadow: msg.isPinned ? "0 0 20px rgba(197,232,0,0.1)" : "none",
+                                fontFamily: FONT_FAMILY,
                               }}
                             >
                               {msg.isShared && msg.sharedFromName && (
@@ -4435,6 +4468,7 @@ export default function HomePage(): React.JSX.Element {
                                     color: "rgba(0,0,0,0.4)",
                                     marginBottom: "4px",
                                     fontStyle: "italic",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
                                   {t.from} {msg.sharedFromName}
@@ -4451,17 +4485,18 @@ export default function HomePage(): React.JSX.Element {
                                     marginBottom: "6px",
                                     backgroundColor: isMine ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.04)",
                                     borderRadius: "4px",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  <span style={{ fontWeight: 500, color: "#22c55e" }}>
+                                  <span style={{ fontWeight: 500, color: "#22c55e", fontFamily: FONT_FAMILY }}>
                                     {isMine ? `${t.reply}: ${replySenderName}` : `${t.reply}: ${msg.replyToSender}`}
                                   </span>
-                                  <span style={{ color: isMine ? "#000" : "#333" }}> {msg.replyToText}</span>
+                                  <span style={{ color: isMine ? "#000" : "#333", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                 </div>
                               )}
                               
                               {isBroadcastMessage ? (
-                                <span>
+                                <span style={{ fontFamily: FONT_FAMILY }}>
                                   {language === 'id' ? "Jangan lupa baca" : "Don't forget to read"}{' '}
                                   <span
                                     onClick={() => setShowPrivacyPolicy(true)}
@@ -4470,6 +4505,7 @@ export default function HomePage(): React.JSX.Element {
                                       textDecoration: "underline",
                                       cursor: "pointer",
                                       fontWeight: 500,
+                                      fontFamily: FONT_FAMILY,
                                     }}
                                   >
                                     {t.privacyPolicy}
@@ -4482,6 +4518,7 @@ export default function HomePage(): React.JSX.Element {
                                       textDecoration: "underline",
                                       cursor: "pointer",
                                       fontWeight: 500,
+                                      fontFamily: FONT_FAMILY,
                                     }}
                                   >
                                     {t.updateSystem}
@@ -4489,7 +4526,7 @@ export default function HomePage(): React.JSX.Element {
                                   {' '}{language === 'id' ? "kami 👇" : "👇"}
                                 </span>
                               ) : (
-                                <span>{msg.text}</span>
+                                <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                               )}
                               
                               <div
@@ -4500,6 +4537,7 @@ export default function HomePage(): React.JSX.Element {
                                   marginTop: "6px",
                                   justifyContent: isMine ? "flex-end" : "flex-start",
                                   flexWrap: "wrap",
+                                  fontFamily: FONT_FAMILY,
                                 }}
                               >
                                 <span
@@ -4507,6 +4545,7 @@ export default function HomePage(): React.JSX.Element {
                                     fontSize: "9px",
                                     color: "rgba(0,0,0,0.4)",
                                     fontWeight: 400,
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
                                   {formatTime(msg.timestamp)}
@@ -4552,6 +4591,7 @@ export default function HomePage(): React.JSX.Element {
                                         boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
                                         zIndex: 50,
                                         border: "1px solid rgba(0,0,0,0.04)",
+                                        fontFamily: FONT_FAMILY,
                                       }}
                                     >
                                       <motion.button
@@ -4573,7 +4613,7 @@ export default function HomePage(): React.JSX.Element {
                                           cursor: "pointer",
                                           borderRadius: "6px",
                                           transition: "all .2s ease",
-                                          fontFamily: "Inter, 'Inter Fallback'",
+                                          fontFamily: FONT_FAMILY,
                                         }}
                                       >
                                         <ReplyIcon />
@@ -4597,7 +4637,7 @@ export default function HomePage(): React.JSX.Element {
                                           cursor: "pointer",
                                           borderRadius: "6px",
                                           transition: "all .2s ease",
-                                          fontFamily: "Inter, 'Inter Fallback'",
+                                          fontFamily: FONT_FAMILY,
                                         }}
                                       >
                                         <SendIcon />
@@ -4623,7 +4663,7 @@ export default function HomePage(): React.JSX.Element {
                                           cursor: "pointer",
                                           borderRadius: "6px",
                                           transition: "all .2s ease",
-                                          fontFamily: "Inter, 'Inter Fallback'",
+                                          fontFamily: FONT_FAMILY,
                                         }}
                                       >
                                         <ShareIcon />
@@ -4645,7 +4685,7 @@ export default function HomePage(): React.JSX.Element {
                                           cursor: "pointer",
                                           borderRadius: "6px",
                                           transition: "all .2s ease",
-                                          fontFamily: "Inter, 'Inter Fallback'",
+                                          fontFamily: FONT_FAMILY,
                                         }}
                                       >
                                         <PinIcon filled={msg.isPinned || false} />
@@ -4669,6 +4709,7 @@ export default function HomePage(): React.JSX.Element {
                                   alignItems: "center",
                                   gap: "4px",
                                   fontWeight: 500,
+                                  fontFamily: FONT_FAMILY,
                                 }}
                               >
                                 <PinIcon filled={true} />
@@ -4690,6 +4731,7 @@ export default function HomePage(): React.JSX.Element {
                       display: "flex",
                       gap: "8px",
                       backgroundColor: "#ffffff",
+                      fontFamily: FONT_FAMILY,
                     }}
                   >
                     <input
@@ -4710,7 +4752,7 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: "8px",
                         fontSize: "14px",
                         outline: "none",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                         transition: "all .2s ease",
                         backgroundColor: "#f5f5f5",
                         color: "#000",
@@ -4742,7 +4784,7 @@ export default function HomePage(): React.JSX.Element {
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
-                        fontFamily: "Inter, 'Inter Fallback'",
+                        fontFamily: FONT_FAMILY,
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = "#b0d000";
@@ -4778,7 +4820,7 @@ export default function HomePage(): React.JSX.Element {
             transition: "all .4s cubic-bezier(0.34, 1.56, 0.64, 1)",
             boxShadow: isChatOpen ? "none" : "0 4px 20px rgba(0,0,0,0.08)",
             userSelect: "none",
-            fontFamily: "Inter, 'Inter Fallback'",
+            fontFamily: FONT_FAMILY,
             position: "relative",
             maxWidth: "360px",
             overflow: "hidden",
@@ -4803,6 +4845,7 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   transition: "all 0.5s ease",
+                  fontFamily: FONT_FAMILY,
                 }}
               >
                 {user ? chatButtonText : t.loginToChat}
@@ -4823,6 +4866,7 @@ export default function HomePage(): React.JSX.Element {
                     height: "18px",
                     minWidth: "18px",
                     textAlign: "center",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   {totalUnread}
