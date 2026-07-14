@@ -60,7 +60,7 @@ const googleProvider = new GoogleAuthProvider();
 type Language = 'id' | 'en';
 
 // Font Family
-const FONT_FAMILY = "'Neue Montreal', sans-serif";
+const FONT_FAMILY = "'Plus Jakarta Sans', sans-serif";
 
 // Get initial language from URL
 const getInitialLanguage = (): Language => {
