@@ -1908,14 +1908,100 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* User Status - Pojok Kanan Atas */}
+      {/* BANNER DEVELOPMENT - Di atas tombol login dan bahasa */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          backgroundColor: "#0D3CFC",
+          padding: "10px 20px",
+          zIndex: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "12px",
+          borderBottom: "none",
+        }}
+      >
+        {/* Icon SVG Hitam Putih - Construction/Development */}
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            flexShrink: 0,
+            color: "#ffffff",
+          }}
+        >
+          <path
+            d="M12 2L2 7L12 12L22 7L12 2Z"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M2 17L12 22L22 17"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M2 12L12 17L22 12"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 7V12M12 12V17"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="2"
+            stroke="white"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M8 8L10 10M14 14L16 16"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        <span
+          style={{
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#ffffff",
+            fontFamily: "Inter, 'Inter Fallback'",
+            letterSpacing: "0.02em",
+            textAlign: "center",
+          }}
+        >
+          {language === 'id' ? "Website sedang dalam pengembangan, Terima kasih" : "Website is under development, Thank you"}
+        </span>
+      </motion.div>
+
+      {/* User Status - Pojok Kanan Atas (diberi margin top karena banner) */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{
           position: "absolute",
-          top: "40px",
+          top: "70px",
           right: "40px",
           zIndex: 10,
           display: "flex",
