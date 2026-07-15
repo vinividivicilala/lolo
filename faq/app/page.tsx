@@ -1911,7 +1911,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-    {/* BANNER DEVELOPMENT */}
+      {/* BANNER DEVELOPMENT */}
 <motion.div
   initial={{ opacity: 0, y: -20 }}
   animate={{ opacity: 1, y: 0 }}
@@ -1933,7 +1933,7 @@ export default function HomePage(): React.JSX.Element {
 >
   <span
     style={{
-      fontSize: "24px",
+      fontSize: "18px",
       fontWeight: 700,
       color: "#ffffff",
       fontFamily: FONT_FAMILY,
@@ -1944,6 +1944,37 @@ export default function HomePage(): React.JSX.Element {
     {language === 'id' ? "Website sedang dalam pengembangan, Terima kasih" : "Website is under development, Thank you"}
   </span>
 </motion.div>
+
+{/* Menuru - Sisi Kiri Bawah Banner */}
+<motion.div
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5, delay: 0.3 }}
+  style={{
+    position: "absolute",
+    top: "70px",
+    left: "40px",
+    zIndex: 15,
+    display: "flex",
+    alignItems: "center",
+  }}
+>
+  <span
+    style={{
+      fontSize: "28px",
+      fontWeight: 800,
+      color: "#000000",
+      fontFamily: FONT_FAMILY,
+      letterSpacing: "-0.03em",
+      background: "transparent",
+    }}
+  >
+    Menuru
+  </span>
+</motion.div>
+
+
+         
       {/* User Status */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
