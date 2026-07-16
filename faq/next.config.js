@@ -3,7 +3,8 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // ❌ HAPUS output: "standalone",
+  // output: "standalone",
 
   experimental: {
     serverActions: {
@@ -31,4 +32,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; // ✅ Tanpa withPWA
+module.exports = nextConfig;
