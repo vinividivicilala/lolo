@@ -65,7 +65,9 @@
      "@studio-freight/lenis": "^1.0.42",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
-     "smooth-scrollbar": "^8.8.4"
+     "smooth-scrollbar": "^8.8.4",
+     "geist": "^1.7.2"
+    
     
     
     
