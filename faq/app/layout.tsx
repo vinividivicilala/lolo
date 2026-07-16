@@ -1,4 +1,4 @@
-// ✅ GUNAKAN ini:
+import type { Metadata, Viewport } from 'next'
 import { GeistSans } from 'geist/font/sans'
 
 const geistSans = GeistSans({
@@ -10,7 +10,7 @@ const geistSans = GeistSans({
 export const metadata: Metadata = {
   title: 'Menuru Official | Home',
   description: 'Menuru Brand from Love yourself',
-  manifest: '/manifest.json',
+  // ❌ HAPUS manifest: '/manifest.json',
   icons: {
     icon: '/images/ai.jpg',
     apple: '/images/ai.jpg',
