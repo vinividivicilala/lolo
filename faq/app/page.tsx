@@ -443,9 +443,8 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Banner rolling text
+  // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
-  const [displayText, setDisplayText] = useState("");
   const bannerTexts = [
     "silahkan hubungin official menuru",
     "silahkan hubungin official menuru",
@@ -566,47 +565,14 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Banner rolling text animation - GSAP style
+  // Banner rolling text animation - GSAP style fade
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    let charIndex = 0;
-    let isDeleting = false;
-    let currentText = bannerTexts[0];
+    const interval = setInterval(() => {
+      setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
+    }, 3000);
 
-    const animateText = () => {
-      if (!isDeleting) {
-        // Typing
-        if (charIndex <= currentText.length) {
-          setDisplayText(currentText.substring(0, charIndex));
-          charIndex++;
-          interval = setTimeout(animateText, 50);
-        } else {
-          // Pause before deleting
-          isDeleting = true;
-          interval = setTimeout(animateText, 2000);
-        }
-      } else {
-        // Deleting
-        if (charIndex >= 0) {
-          setDisplayText(currentText.substring(0, charIndex));
-          charIndex--;
-          interval = setTimeout(animateText, 30);
-        } else {
-          // Move to next text
-          isDeleting = false;
-          const nextIndex = (bannerTextIndex + 1) % bannerTexts.length;
-          setBannerTextIndex(nextIndex);
-          currentText = bannerTexts[nextIndex];
-          charIndex = 0;
-          interval = setTimeout(animateText, 50);
-        }
-      }
-    };
-
-    interval = setTimeout(animateText, 500);
-
-    return () => clearTimeout(interval);
-  }, [bannerTextIndex]);
+    return () => clearInterval(interval);
+  }, []);
 
   // Broadcast messages to all users
   const broadcastMessages = async () => {
@@ -1534,7 +1500,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
+      {/* BANNER WITH GSAP STYLE ROLLING TEXT - FADE IN/OUT */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1558,30 +1524,25 @@ export default function HomePage(): React.JSX.Element {
         <span style={{ color: "#ffffff", display: "flex", alignItems: "center" }}>
           <ChatIcon />
         </span>
-        <span
-          style={{
-            fontSize: "18px",
-            fontWeight: 400,
-            color: "#ffffff",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.01em",
-            textAlign: "center",
-            minWidth: "280px",
-          }}
-        >
-          {displayText}
-          <span
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={bannerTextIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             style={{
-              display: "inline-block",
-              width: "2px",
-              height: "20px",
-              backgroundColor: "#ffffff",
-              marginLeft: "2px",
-              animation: "blink 0.8s step-end infinite",
-              verticalAlign: "text-bottom",
+              fontSize: "18px",
+              fontWeight: 400,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.01em",
+              textAlign: "center",
             }}
-          />
-        </span>
+          >
+            {bannerTexts[bannerTextIndex]}
+          </motion.span>
+        </AnimatePresence>
       </motion.div>
 
       {/* Menuru - Left Bottom */}
@@ -4504,10 +4465,6 @@ export default function HomePage(): React.JSX.Element {
             transform: scale(0.7);
             opacity: 0.25;
           }
-        }
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
         }
       `}</style>
     </div>
