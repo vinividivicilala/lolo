@@ -1925,7 +1925,7 @@ useEffect(() => {
   <span
     style={{
       fontSize: "18px",
-      fontWeight: 700,
+      fontWeight: 400,
       color: "#ffffff",
       fontFamily: FONT_FAMILY,
       letterSpacing: "-0.01em",
@@ -1952,8 +1952,8 @@ useEffect(() => {
 >
   <span
     style={{
-      fontSize: "28px",
-      fontWeight: 800,
+      fontSize: "30px",
+      fontWeight: 400,
       color: "#000000",
       fontFamily: FONT_FAMILY,
       letterSpacing: "-0.03em",
