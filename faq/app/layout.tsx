@@ -1,11 +1,10 @@
-import type { Metadata, Viewport } from 'next'
-import { GeistSans } from 'next/font/google'
+// ✅ GUNAKAN ini:
+import { GeistSans } from 'geist/font/sans'
 
 const geistSans = GeistSans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-geist-sans',
-  weight: ['400', '500', '600', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
@@ -84,7 +83,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'",
+          fontFamily: "GeistSans, 'GeistSans Fallback'",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
