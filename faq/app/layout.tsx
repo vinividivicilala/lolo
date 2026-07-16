@@ -1,16 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { GeistSans } from 'geist/font/sans'
-
-const geistSans = GeistSans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-geist-sans',
-})
 
 export const metadata: Metadata = {
   title: 'Menuru Official | Home',
   description: 'Menuru Brand from Love yourself',
-  // ❌ HAPUS manifest: '/manifest.json',
   icons: {
     icon: '/images/ai.jpg',
     apple: '/images/ai.jpg',
@@ -57,7 +49,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={geistSans.className}
       style={{
         margin: 0,
         padding: 0,
@@ -65,6 +56,12 @@ export default function RootLayout({
       }}
     >
       <head>
+        {/* Google Fonts CDN - Geist Sans */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+        
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -83,7 +80,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "GeistSans, 'GeistSans Fallback'",
+          fontFamily: "'Geist', 'Geist Fallback'",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
