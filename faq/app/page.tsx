@@ -60,7 +60,8 @@ const googleProvider = new GoogleAuthProvider();
 type Language = 'id' | 'en';
 
 // Font Family
-const FONT_FAMILY = "var(--font-geist), 'Geist', sans-serif";
+const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
+
 
 
 // Get initial language from URL
