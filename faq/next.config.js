@@ -24,10 +24,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // TAMBAHKAN INI:
-  outputFileTracingIncludes: {
-    '/': ['./app/**/*'],
-  },
+  // ❌ HAPUS outputFileTracingIncludes
+  // outputFileTracingIncludes: {
+  //   '/': ['./app/**/*'],
+  // },
 
   webpack: (config) => {
     config.resolve.alias["@"] = path.resolve(__dirname);
