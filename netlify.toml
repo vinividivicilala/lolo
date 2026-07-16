@@ -1,8 +1,6 @@
 [build]
-  base = "faq"
-  command = "npm run build"
-  publish = "faq/.next"
+base = "faq"
+command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "20"
-  NEXT_PRIVATE_STANDALONE = "false"
+NODE_VERSION = "20"
