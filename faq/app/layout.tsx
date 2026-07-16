@@ -1,18 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { GeistSans } from 'next/font/google'
 
-const geist = Geist({
+const geistSans = GeistSans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-geist',
+  variable: '--font-geist-sans',
   weight: ['400', '500', '600', '700', '800', '900'],
-})
-
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-geist-mono',
-  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -65,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable}`}
+      className={geistSans.className}
       style={{
         margin: 0,
         padding: 0,
@@ -91,7 +84,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "var(--font-geist), 'Geist', sans-serif",
+          fontFamily: "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
