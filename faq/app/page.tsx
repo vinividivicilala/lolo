@@ -27,8 +27,7 @@ import {
   getDocs,
   updateDoc,
   limit,
-  startAfter,
-  getCountFromServer
+  increment
 } from "firebase/firestore";
 
 // Firebase Config
@@ -93,6 +92,8 @@ interface Message {
   timestamp: any;
   read: boolean;
   readAt?: any;
+  delivered: boolean;
+  deliveredAt?: any;
   isPinned?: boolean;
   pinnedAt?: any;
   replyTo?: string;
@@ -105,6 +106,7 @@ interface Message {
   adminReplyTo?: string;
   targetUserId?: string;
   targetUserName?: string;
+  messageCount?: number;
 }
 
 interface ChatRoom {
@@ -116,6 +118,7 @@ interface ChatRoom {
   unreadCount: number;
   isPinned?: boolean;
   hasAdminReply?: boolean;
+  messageCount?: number;
 }
 
 interface UpdateItem {
@@ -283,41 +286,32 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status Component with ✓, ✓✓, ✓✓ blue
-const ReadStatusIndicator = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+// Read Status Component dengan 1, 2, 2 biru
+const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   if (!isMine) return null;
   
-  // Check if this is a message sent by current user
-  if (msg.senderId !== auth?.currentUser?.uid) return null;
+  const status = (() => {
+    if (msg.senderId !== auth?.currentUser?.uid) return null;
+    if (msg.read && msg.readAt) {
+      return { icon: "✓✓", color: "#0095f6", label: "Read" };
+    }
+    if (msg.delivered && msg.deliveredAt) {
+      return { icon: "✓✓", color: "#999", label: "Delivered" };
+    }
+    return { icon: "✓", color: "#999", label: "Sent" };
+  })();
   
-  let statusIcon = "✓";
-  let statusColor = "#999";
-  let statusLabel = "Sent";
-  
-  if (msg.read && msg.readAt) {
-    statusIcon = "✓✓";
-    statusColor = "#0095f6"; // Blue for read
-    statusLabel = "Read";
-  } else if (msg.read === true) {
-    // This is for backward compatibility
-    statusIcon = "✓✓";
-    statusColor = "#0095f6";
-    statusLabel = "Read";
-  } else {
-    statusIcon = "✓";
-    statusColor = "#999";
-    statusLabel = "Sent";
-  }
+  if (!status) return null;
   
   return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", marginLeft: "4px" }}>
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
       <span 
         style={{
           fontSize: "10px",
-          color: statusColor,
-          fontWeight: statusLabel === "Read" ? 600 : 400,
+          color: status.color,
+          fontWeight: status.label === "Read" ? 600 : 400,
           cursor: "pointer",
           fontFamily: FONT_FAMILY,
           letterSpacing: "0.5px",
@@ -325,7 +319,7 @@ const ReadStatusIndicator = ({ msg, isMine }: { msg: Message; isMine: boolean })
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {statusIcon}
+        {status.icon}
       </span>
       {showTooltip && (
         <div style={{
@@ -342,7 +336,7 @@ const ReadStatusIndicator = ({ msg, isMine }: { msg: Message; isMine: boolean })
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          {statusLabel}
+          {status.label}
           <div style={{
             position: "absolute",
             top: "100%",
@@ -352,62 +346,6 @@ const ReadStatusIndicator = ({ msg, isMine }: { msg: Message; isMine: boolean })
           }} />
         </div>
       )}
-    </div>
-  );
-};
-
-// Typing Indicator Component
-const TypingIndicator = ({ isTyping, name }: { isTyping: boolean; name?: string }) => {
-  if (!isTyping) return null;
-  
-  return (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "4px",
-      padding: "2px 0",
-      fontFamily: FONT_FAMILY,
-    }}>
-      <span style={{
-        fontSize: "11px",
-        color: "#666",
-        fontFamily: FONT_FAMILY,
-      }}>
-        {name ? `${name} is typing` : "typing"}
-      </span>
-      <span style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "2px",
-      }}>
-        <span style={{
-          display: "inline-block",
-          width: "4px",
-          height: "4px",
-          borderRadius: "50%",
-          backgroundColor: "#666",
-          animation: "typingDot 1.4s ease-in-out infinite",
-          animationDelay: "0s",
-        }} />
-        <span style={{
-          display: "inline-block",
-          width: "4px",
-          height: "4px",
-          borderRadius: "50%",
-          backgroundColor: "#666",
-          animation: "typingDot 1.4s ease-in-out infinite",
-          animationDelay: "0.2s",
-        }} />
-        <span style={{
-          display: "inline-block",
-          width: "4px",
-          height: "4px",
-          borderRadius: "50%",
-          backgroundColor: "#666",
-          animation: "typingDot 1.4s ease-in-out infinite",
-          animationDelay: "0.4s",
-        }} />
-      </span>
     </div>
   );
 };
@@ -451,7 +389,7 @@ export default function HomePage(): React.JSX.Element {
   const [selectedUserNameForReply, setSelectedUserNameForReply] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
   const [lastSendTime, setLastSendTime] = useState<number>(0);
-  const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
@@ -622,7 +560,8 @@ export default function HomePage(): React.JSX.Element {
           await setDoc(chatRef, {
             participants: [userId, MENURU_OFFICIAL.id],
             createdAt: serverTimestamp(),
-            isPinned: false
+            isPinned: false,
+            messageCount: 0
           });
         }
         
@@ -634,6 +573,9 @@ export default function HomePage(): React.JSX.Element {
           receiverId: userId,
           timestamp: serverTimestamp(),
           read: false,
+          readAt: null,
+          delivered: false,
+          deliveredAt: null,
           isPinned: false,
           pinnedAt: null,
           replyTo: null,
@@ -642,7 +584,13 @@ export default function HomePage(): React.JSX.Element {
           isShared: false,
           isAdminReply: false,
           targetUserId: userId,
-          targetUserName: userData.name || "User"
+          targetUserName: userData.name || "User",
+          messageCount: 1
+        });
+        
+        // Update message count
+        await updateDoc(chatRef, {
+          messageCount: increment(1)
         });
       }
       
@@ -755,11 +703,13 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [userId, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          messageCount: 0
         });
         
         const messagesRef = collection(db, "chats", chatId, "messages");
-        for (const msg of OFFICIAL_MESSAGES) {
+        for (let i = 0; i < OFFICIAL_MESSAGES.length; i++) {
+          const msg = OFFICIAL_MESSAGES[i];
           await addDoc(messagesRef, {
             text: msg.text,
             senderId: msg.senderId,
@@ -767,6 +717,9 @@ export default function HomePage(): React.JSX.Element {
             receiverId: userId,
             timestamp: serverTimestamp(),
             read: false,
+            readAt: null,
+            delivered: false,
+            deliveredAt: null,
             isPinned: false,
             pinnedAt: null,
             replyTo: null,
@@ -775,9 +728,14 @@ export default function HomePage(): React.JSX.Element {
             isShared: false,
             isAdminReply: false,
             targetUserId: userId,
-            targetUserName: user?.displayName || user?.email || "User"
+            targetUserName: user?.displayName || user?.email || "User",
+            messageCount: i + 1
           });
         }
+        
+        await updateDoc(chatRef, {
+          messageCount: OFFICIAL_MESSAGES.length
+        });
       }
     } catch (error) {
       console.error("Error sending official messages:", error);
@@ -925,7 +883,8 @@ export default function HomePage(): React.JSX.Element {
               lastMessageSenderId,
               unreadCount: Math.min(unreadCount, 99),
               isPinned: data.isPinned || false,
-              hasAdminReply
+              hasAdminReply,
+              messageCount: data.messageCount || 0
             });
           }
         }
@@ -986,41 +945,27 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages with read status
+  // Load messages with read receipts
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
-    const messagesRef = collection(db, "chats", chatId, "messages");
     
-    const q = query(messagesRef, orderBy("timestamp", "asc"));
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const messageList: Message[] = [];
-      const pinnedList: Message[] = [];
-      const uniqueIds = new Set<string>();
-      const unreadMessages: Message[] = [];
+    // For admin viewing official chat
+    if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
+      const adminMessagesRef = collection(db, "chats", chatId, "messages");
+      const qAdmin = query(adminMessagesRef, orderBy("timestamp", "asc"));
       
-      snapshot.forEach((doc) => {
-        if (!uniqueIds.has(doc.id)) {
-          uniqueIds.add(doc.id);
+      const unsubscribeAdmin = onSnapshot(qAdmin, async (snapshot) => {
+        const messageList: Message[] = [];
+        snapshot.forEach((doc) => {
           const msg = { id: doc.id, ...doc.data() } as Message;
           messageList.push(msg);
-          if (msg.isPinned) {
-            pinnedList.push(msg);
-          }
-          // Collect unread messages from other users
-          if (!msg.read && msg.senderId !== user.uid) {
-            unreadMessages.push(msg);
-          }
-        }
-      });
-      
-      // For admin viewing official chat, also fetch messages from all user chats
-      let finalMessages = messageList;
-      if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
-        const allMessages: Message[] = [];
+        });
+        
+        // Get messages from all users
         const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
+        let allMessages: Message[] = [];
         
         for (const targetUser of allUsers) {
           const userChatId = [targetUser.id, MENURU_OFFICIAL.id].sort().join("_");
@@ -1038,6 +983,7 @@ export default function HomePage(): React.JSX.Element {
           });
         }
         
+        // Combine and sort all messages
         const combinedMessages = [...messageList, ...allMessages];
         combinedMessages.sort((a, b) => {
           const timeA = a.timestamp?.seconds || 0;
@@ -1045,6 +991,7 @@ export default function HomePage(): React.JSX.Element {
           return timeA - timeB;
         });
         
+        // Filter out duplicate messages
         const uniqueMessages: Message[] = [];
         const messageIds = new Set<string>();
         for (const msg of combinedMessages) {
@@ -1053,15 +1000,57 @@ export default function HomePage(): React.JSX.Element {
             uniqueMessages.push(msg);
           }
         }
-        finalMessages = uniqueMessages.slice(-200);
-      } else {
-        finalMessages = messageList.slice(-200);
+        
+        const limitedMessages = uniqueMessages.slice(-200);
+        setMessages(limitedMessages);
+        setPinnedMessages(limitedMessages.filter(m => m.isPinned));
+        
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      });
+      
+      return () => unsubscribeAdmin();
+    }
+    
+    // Normal user chat
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const messageList: Message[] = [];
+      const pinnedList: Message[] = [];
+      const uniqueIds = new Set<string>();
+      
+      snapshot.forEach((doc) => {
+        if (!uniqueIds.has(doc.id)) {
+          uniqueIds.add(doc.id);
+          const msg = { id: doc.id, ...doc.data() } as Message;
+          messageList.push(msg);
+          if (msg.isPinned) {
+            pinnedList.push(msg);
+          }
+        }
+      });
+      
+      const limitedMessages = messageList.slice(-200);
+      setMessages(limitedMessages);
+      setPinnedMessages(pinnedList);
+      
+      // Mark messages as delivered and read
+      const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
+      const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
+      
+      // Mark as delivered
+      for (const msg of undeliveredMessages) {
+        const msgRef = doc(db, "chats", chatId, "messages", msg.id);
+        await updateDoc(msgRef, {
+          delivered: true,
+          deliveredAt: serverTimestamp()
+        });
       }
       
-      setMessages(finalMessages);
-      setPinnedMessages(finalMessages.filter(m => m.isPinned));
-      
-      // Mark messages as read for non-admin users
+      // Mark as read for normal users
       if (!isAdmin || selectedChat.id !== MENURU_OFFICIAL.id) {
         for (const msg of unreadMessages) {
           const msgRef = doc(db, "chats", chatId, "messages", msg.id);
@@ -1072,7 +1061,6 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
-      // Update unread count
       if (unreadMessages.length > 0) {
         setChatRooms(prev => prev.map(room => {
           if (room.id === chatId) {
@@ -1090,6 +1078,27 @@ export default function HomePage(): React.JSX.Element {
 
     return () => unsubscribe();
   }, [selectedChat, user, isAdmin, users]);
+
+  // Real-time typing listener
+  useEffect(() => {
+    if (!db || !user) return;
+    
+    const usersRef = collection(db, "users");
+    const q = query(usersRef);
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const typingSet = new Set<string>();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.typing && data.id !== user.uid) {
+          typingSet.add(data.id);
+        }
+      });
+      setTypingUsers(typingSet);
+    });
+    
+    return () => unsubscribe();
+  }, [user]);
 
   // Handle login
   const handleLogin = async () => {
@@ -1168,7 +1177,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing with real-time updates
+  // Handle typing with real-time update
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1176,9 +1185,8 @@ export default function HomePage(): React.JSX.Element {
     if (!selectedChat || !user || !db) return;
     
     const userRef = doc(db, "users", user.uid);
-    const isTyping = value.length > 0;
     await updateDoc(userRef, {
-      typing: isTyping
+      typing: value.length > 0
     });
     
     if (typingTimeout) {
@@ -1190,7 +1198,7 @@ export default function HomePage(): React.JSX.Element {
       await updateDoc(userRef2, {
         typing: false
       });
-    }, 2000);
+    }, 3000);
     
     setTypingTimeout(newTimeout);
   };
@@ -1270,12 +1278,11 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message - with cooldown and spam prevention
+  // Send message with read receipt
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
     
-    // Cooldown check
     const now = Date.now();
     if (now - lastSendTime < SEND_COOLDOWN) {
       return;
@@ -1288,7 +1295,7 @@ export default function HomePage(): React.JSX.Element {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
-      const targetId = MENURU_OFFICIAL.id;
+      const targetId = selectedChat.id;
       const chatId = [user.uid, targetId].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
@@ -1297,9 +1304,14 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetId],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          messageCount: 0
         });
       }
+      
+      // Get current message count
+      const chatData = chatSnap.data();
+      const currentCount = chatData?.messageCount || 0;
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       const msgData: any = {
@@ -1310,12 +1322,15 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         readAt: null,
+        delivered: false,
+        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: false,
         isAdminReply: false,
         targetUserId: user.uid,
-        targetUserName: user.displayName || user.email || "User"
+        targetUserName: user.displayName || user.email || "User",
+        messageCount: currentCount + 1
       };
       
       if (replyTo) {
@@ -1325,6 +1340,14 @@ export default function HomePage(): React.JSX.Element {
       }
       
       await addDoc(messagesRef, msgData);
+      
+      // Update message count in chat room
+      await updateDoc(chatRef, {
+        messageCount: increment(1),
+        lastMessage: message.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSenderId: user.uid
+      });
 
       setMessage("");
       setReplyTo(null);
@@ -1350,7 +1373,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Admin reply to specific user - with cooldown
+  // Admin reply to specific user
   const handleAdminReplyToUser = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
     if (isSending) return;
@@ -1372,9 +1395,13 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [selectedUserForReply, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          messageCount: 0
         });
       }
+      
+      const chatData = chatSnap.data();
+      const currentCount = chatData?.messageCount || 0;
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
@@ -1385,6 +1412,8 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         readAt: null,
+        delivered: false,
+        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: false,
@@ -1394,7 +1423,15 @@ export default function HomePage(): React.JSX.Element {
         targetUserName: selectedUserNameForReply || "User",
         replyTo: null,
         replyToText: `Balasan untuk ${selectedUserNameForReply || "User"}`,
-        replyToSender: "Admin"
+        replyToSender: "Admin",
+        messageCount: currentCount + 1
+      });
+      
+      await updateDoc(chatRef, {
+        messageCount: increment(1),
+        lastMessage: adminReplyMessage.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSenderId: MENURU_OFFICIAL.id
       });
       
       // Also add to admin's chat for visibility
@@ -1408,13 +1445,16 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: true,
         readAt: serverTimestamp(),
+        delivered: true,
+        deliveredAt: serverTimestamp(),
         isPinned: false,
         pinnedAt: null,
         isShared: false,
         isAdminReply: true,
         adminReplyTo: selectedUserForReply,
         targetUserId: selectedUserForReply,
-        targetUserName: selectedUserNameForReply || "User"
+        targetUserName: selectedUserNameForReply || "User",
+        messageCount: 0
       });
       
       setAdminReplyMessage("");
@@ -1450,7 +1490,8 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          messageCount: 0
         });
       }
       
@@ -1463,6 +1504,8 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         readAt: null,
+        delivered: false,
+        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: true,
@@ -1470,7 +1513,8 @@ export default function HomePage(): React.JSX.Element {
         sharedFromName: shareMessage.senderName,
         isAdminReply: false,
         targetUserId: targetUser.id,
-        targetUserName: targetUser.name
+        targetUserName: targetUser.name,
+        messageCount: 0
       });
       
       setShowShareModal(false);
@@ -1519,6 +1563,8 @@ export default function HomePage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
         readAt: null,
+        delivered: false,
+        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: false,
@@ -1527,7 +1573,8 @@ export default function HomePage(): React.JSX.Element {
         replyToSender: null,
         isAdminReply: false,
         targetUserId: user.uid,
-        targetUserName: user.displayName || user.email || "User"
+        targetUserName: user.displayName || user.email || "User",
+        messageCount: 0
       });
       
       setShowMessageMenu(null);
@@ -1599,7 +1646,8 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          messageCount: 0
         });
         setAddUserStatus(`Chat with ${targetUser.name} created!`);
       } else {
@@ -1654,10 +1702,7 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getTypingStatus = (userId: string) => {
-    const chatUser = users.find(u => u.id === userId);
-    if (!chatUser) return false;
-    if (chatUser.id === user?.uid) return false;
-    return chatUser.typing || false;
+    return typingUsers.has(userId);
   };
 
   const pinnedUsers = users.filter(u => u.isPinned);
@@ -1688,26 +1733,6 @@ export default function HomePage(): React.JSX.Element {
     }, 4000);
     return () => clearInterval(interval);
   }, [isChatOpen, user, isIncomingMessage]);
-
-  // Listen for typing status from other users
-  useEffect(() => {
-    if (!db || !user) return;
-    
-    const usersRef = collection(db, "users");
-    const q = query(usersRef);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const typingStatus: Record<string, boolean> = {};
-      snapshot.forEach((doc) => {
-        if (doc.id !== user.uid) {
-          const data = doc.data();
-          typingStatus[doc.id] = data.typing || false;
-        }
-      });
-      setTypingUsers(typingStatus);
-    });
-    
-    return () => unsubscribe();
-  }, [db, user]);
 
   if (loading) {
     return (
@@ -2253,8 +2278,8 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
-                      {selectedChat.id === MENURU_OFFICIAL.id && getTypingStatus(selectedChat.id) && (
-                        <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
+                      {getTypingStatus(selectedChat.id) && (
+                        <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY, animation: "blink 1s infinite" }}>
                           typing...
                         </span>
                       )}
@@ -2316,7 +2341,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page (same as before) */}
+              {/* Content - Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -2327,7 +2352,6 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {/* Update Detail Content - same as before */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -2528,7 +2552,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page (same as before)
+                // Update List Page
                 <div
                   style={{
                     flex: 1,
@@ -2747,7 +2771,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showPrivacyPolicy ? (
-                // Privacy Policy Page (same as before)
+                // Privacy Policy Page
                 <div
                   style={{
                     flex: 1,
@@ -2803,15 +2827,39 @@ export default function HomePage(): React.JSX.Element {
                     </p>
                   </div>
 
-                  {/* Privacy Policy Content */}
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       1. Information We Collect
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: "0 0 6px 0", fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       Chat with Menuru collects the following information to provide optimal chat service:
                     </p>
-                    <ul style={{ fontSize: "13px", color: "#666", lineHeight: 1.9, paddingLeft: "20px", margin: "0", fontFamily: FONT_FAMILY }}>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       <li>Name and email from your Google account</li>
                       <li>Profile photo from your Google account</li>
                       <li>Messages and chat history you send</li>
@@ -2820,13 +2868,38 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       2. How We Use Information
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: "0 0 6px 0", fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       The information we collect is used for:
                     </p>
-                    <ul style={{ fontSize: "13px", color: "#666", lineHeight: 1.9, paddingLeft: "20px", margin: "0", fontFamily: FONT_FAMILY }}>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       <li>Providing and maintaining chat service</li>
                       <li>Sending messages between users</li>
                       <li>Displaying user online status</li>
@@ -2835,31 +2908,88 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       3. Data Storage
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: 0, fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with.
                     </p>
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       4. Security
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: 0, fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS.
                     </p>
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       5. Your Rights
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: "0 0 6px 0", fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       You have the right to:
                     </p>
-                    <ul style={{ fontSize: "13px", color: "#666", lineHeight: 1.9, paddingLeft: "20px", margin: "0", fontFamily: FONT_FAMILY }}>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       <li>Access your personal data</li>
                       <li>Delete your account and chat data</li>
                       <li>Disable notifications</li>
@@ -2867,22 +2997,62 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       6. Policy Changes
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: 0, fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       We may update this privacy policy from time to time. Changes will be notified through the chat application.
                     </p>
                   </div>
 
                   <div style={{ marginBottom: "20px" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#000000", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       7. Contact
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, margin: "0 0 4px 0", fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 4px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       If you have questions about this privacy policy, please contact us at:
                     </p>
-                    <p style={{ fontSize: "13px", color: "#000000", marginTop: "4px", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#000000",
+                        marginTop: "4px",
+                        fontWeight: 500,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       support@menuru.com
                     </p>
                   </div>
@@ -2897,12 +3067,28 @@ export default function HomePage(): React.JSX.Element {
                       alignItems: "center",
                     }}
                   >
-                    <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>Chat with Menuru v1.0</span>
-                    <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>© 2026 Menuru</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru v1.0
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      © 2026 Menuru
+                    </span>
                   </div>
                 </div>
               ) : showProfile && profileUser ? (
-                // Profile View (same as before)
+                // Profile View
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
@@ -3251,7 +3437,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : !selectedChat ? (
-                // Chat List View (same as before)
+                // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   {/* Announcement */}
                   <div
@@ -3802,7 +3988,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View with Read Status and Typing Indicator
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -3948,19 +4134,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Typing Indicator */}
-                  {selectedChat && getTypingStatus(selectedChat.id) && selectedChat.id !== user.uid && (
-                    <div
-                      style={{
-                        padding: "4px 16px",
-                        borderBottom: "1px solid rgba(0,0,0,0.04)",
-                        backgroundColor: "#fafafa",
-                      }}
-                    >
-                      <TypingIndicator isTyping={true} name={selectedChat.name} />
-                    </div>
-                  )}
-
                   {/* Pinned Messages */}
                   {pinnedMessages.length > 0 && (
                     <div
@@ -4084,7 +4257,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages */}
+                  {/* Messages with Read Receipts */}
                   <div
                     style={{
                       flex: 1,
@@ -4126,8 +4299,8 @@ export default function HomePage(): React.JSX.Element {
                           ? (msg.targetUserName || msg.senderName)
                           : null;
                         
-                        // Check if this is a message from a user (not official)
                         const isUserMessage = msg.senderId !== MENURU_OFFICIAL.id && msg.senderId !== user?.uid;
+                        const msgNumber = msg.messageCount || (idx + 1);
                         
                         return (
                           <React.Fragment key={idx}>
@@ -4227,38 +4400,19 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {isBroadcastMessage ? (
-                                <span style={{ fontFamily: FONT_FAMILY }}>
-                                  Don't forget to read{' '}
-                                  <span
-                                    onClick={() => setShowPrivacyPolicy(true)}
-                                    style={{
-                                      color: "#0095f6",
-                                      textDecoration: "underline",
-                                      cursor: "pointer",
-                                      fontWeight: 500,
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    Privacy Policy
-                                  </span>
-                                  {' and '}
-                                  <span
-                                    onClick={() => setShowUpdate(true)}
-                                    style={{
-                                      color: "#0095f6",
-                                      textDecoration: "underline",
-                                      cursor: "pointer",
-                                      fontWeight: 500,
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    Update System
-                                  </span>
-                                </span>
-                              ) : (
+                              {/* Message with number */}
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                              )}
+                                {!isMine && !isAdminReply && (
+                                  <span style={{ 
+                                    fontSize: "9px", 
+                                    color: "rgba(0,0,0,0.3)", 
+                                    fontFamily: FONT_FAMILY,
+                                  }}>
+                                    #{msgNumber}
+                                  </span>
+                                )}
+                              </div>
                               
                               <div
                                 style={{
@@ -4281,10 +4435,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
-                                
-                                {/* Read Status with ✓, ✓✓, ✓✓ blue */}
-                                <ReadStatusIndicator msg={msg} isMine={isMine} />
-                                
+                                <ReadStatus msg={msg} isMine={isMine} />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
@@ -4499,7 +4650,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
-                      // Admin Reply to Specific User Input
+                      // Admin Reply Input
                       <>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
@@ -4751,15 +4902,9 @@ export default function HomePage(): React.JSX.Element {
             opacity: 0.25;
           }
         }
-        @keyframes typingDot {
-          0%, 60%, 100% {
-            transform: scale(0.8);
-            opacity: 0.4;
-          }
-          30% {
-            transform: scale(1.2);
-            opacity: 1;
-          }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
       `}</style>
     </div>
