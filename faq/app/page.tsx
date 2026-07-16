@@ -55,405 +55,8 @@ if (typeof window !== "undefined") {
 
 const googleProvider = new GoogleAuthProvider();
 
-// Language Type
-type Language = 'id' | 'en';
-
 // Font Family
 const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
-
-
-
-// Get initial language from URL
-const getInitialLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'id';
-  const path = window.location.pathname;
-  if (path.startsWith('/en/') || path === '/en') return 'en';
-  if (path.startsWith('/id/') || path === '/id') return 'id';
-  return 'id';
-};
-
-// Change language and update URL
-const changeLanguage = (lang: Language) => {
-  if (typeof window === 'undefined') return;
-  const currentPath = window.location.pathname;
-  const currentSearch = window.location.search;
-  const currentHash = window.location.hash;
-  
-  let newPath = currentPath;
-  
-  // Remove existing language prefix
-  if (currentPath.startsWith('/en/') || currentPath === '/en') {
-    newPath = currentPath.replace(/^\/en/, '');
-  } else if (currentPath.startsWith('/id/') || currentPath === '/id') {
-    newPath = currentPath.replace(/^\/id/, '');
-  }
-  
-  // If newPath is empty or just '/', set to '/'
-  if (!newPath || newPath === '') {
-    newPath = '/';
-  }
-  
-  // Add new language prefix
-  if (lang === 'en') {
-    newPath = `/en${newPath}`;
-  } else {
-    newPath = `/id${newPath}`;
-  }
-  
-  // Navigate to new URL
-  window.history.pushState({}, '', `${newPath}${currentSearch}${currentHash}`);
-  
-  // Dispatch popstate event to notify components
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
-
-// Translations
-const translations = {
-  id: {
-    // Header
-    'chatWithMenuru': 'Chat dengan Menuru',
-    'login': 'Masuk',
-    'logout': 'Keluar',
-    'profile': 'Profil',
-    'online': 'Online',
-    'offline': 'Offline',
-    'lastSeen': 'Terakhir online',
-    'typing': 'sedang mengetik...',
-    
-    // Chat
-    'messages': 'Pesan',
-    'noMessages': 'Belum ada pesan',
-    'typeMessage': 'Ketik pesan...',
-    'typeReply': 'Ketik balasan...',
-    'send': 'Kirim',
-    'newChat': 'Chat Baru',
-    'selectUser': 'Pilih user...',
-    'startChat': 'Mulai Chat',
-    'cancel': 'Batal',
-    'allUsersChatted': 'Semua user sudah di-chat',
-    'noChatHistory': 'Belum ada riwayat chat',
-    
-    // Profile
-    'note': 'Catatan',
-    'addNote': 'Tambah',
-    'editNote': 'Edit',
-    'save': 'Simpan',
-    'bio': 'Bio',
-    'addBio': 'Tambah',
-    'editBio': 'Edit',
-    'noBio': 'Belum ada bio',
-    'noNote': 'Belum ada catatan',
-    'sendMessage': 'Kirim Pesan',
-    'back': 'Kembali',
-    
-    // Pinned
-    'pinnedUsers': 'User Pinned',
-    'pinnedChats': 'Chat Pinned',
-    'pinnedMessages': 'Pesan Pinned',
-    'unpin': 'Lepas Pin',
-    'pin': 'Pin',
-    
-    // Update
-    'updateSystem': 'Update Sistem',
-    'updateHistory': 'Riwayat pembaruan dan pengembangan',
-    'updateDetail': 'Detail Update',
-    'live': 'Live',
-    'comingSoon': 'Coming Soon',
-    'done': 'Selesai',
-    'link': 'Link',
-    
-    // Privacy Policy
-    'privacyPolicy': 'Kebijakan Privasi',
-    'lastUpdated': 'Terakhir diperbarui',
-    
-    // Buttons
-    'reply': 'Balas',
-    'resend': 'Kirim Ulang',
-    'forward': 'Teruskan',
-    'share': 'Bagikan',
-    'close': 'Tutup',
-    'more': 'Lainnya',
-    
-    // Modal
-    'loginTitle': 'Masuk',
-    'email': 'Email',
-    'password': 'Kata Sandi',
-    'loginWithEmail': 'Masuk dengan Email',
-    'or': 'atau',
-    'loginWithGoogle': 'Masuk dengan Google',
-    'loginFailed': 'Login gagal. Silahkan coba lagi.',
-    'wrongCredentials': 'Email atau password salah.',
-    
-    // Announcement
-    'announcement': 'Pengumuman',
-    'announcementText': 'Fitur chat sedang dalam tahap pengembangan.',
-    
-    // Status
-    'read': 'Dibaca',
-    'sent': 'Terkirim',
-    'officialAccount': 'Akun Resmi',
-    
-    // Share Modal
-    'forwardMessage': 'Teruskan Pesan',
-    'from': 'Dari',
-    'selectUserToShare': 'Pilih user...',
-    'forwardButton': 'Teruskan',
-    
-    // Chat Button
-    'chatWithMenuru': 'Chat dengan Menuru',
-    'loginToChat': 'Masuk untuk Chat',
-    
-    // Update status labels
-    'statusLive': 'Live',
-    'statusComing': 'Coming Soon',
-    'statusDone': 'Done',
-  },
-  en: {
-    // Header
-    'chatWithMenuru': 'Chat with Menuru',
-    'login': 'Login',
-    'logout': 'Logout',
-    'profile': 'Profile',
-    'online': 'Online',
-    'offline': 'Offline',
-    'lastSeen': 'Last seen',
-    'typing': 'typing...',
-    
-    // Chat
-    'messages': 'Messages',
-    'noMessages': 'No messages yet',
-    'typeMessage': 'Type a message...',
-    'typeReply': 'Type a reply...',
-    'send': 'Send',
-    'newChat': 'New Chat',
-    'selectUser': 'Select user...',
-    'startChat': 'Start Chat',
-    'cancel': 'Cancel',
-    'allUsersChatted': 'All users are already in chat',
-    'noChatHistory': 'No chat history',
-    
-    // Profile
-    'note': 'Note',
-    'addNote': 'Add',
-    'editNote': 'Edit',
-    'save': 'Save',
-    'bio': 'Bio',
-    'addBio': 'Add',
-    'editBio': 'Edit',
-    'noBio': 'No bio yet',
-    'noNote': 'No note yet',
-    'sendMessage': 'Send Message',
-    'back': 'Back',
-    
-    // Pinned
-    'pinnedUsers': 'Pinned Users',
-    'pinnedChats': 'Pinned Chats',
-    'pinnedMessages': 'Pinned Messages',
-    'unpin': 'Unpin',
-    'pin': 'Pin',
-    
-    // Update
-    'updateSystem': 'Update System',
-    'updateHistory': 'Update and development history',
-    'updateDetail': 'Update Detail',
-    'live': 'Live',
-    'comingSoon': 'Coming Soon',
-    'done': 'Done',
-    'link': 'Link',
-    
-    // Privacy Policy
-    'privacyPolicy': 'Privacy Policy',
-    'lastUpdated': 'Last updated',
-    
-    // Buttons
-    'reply': 'Reply',
-    'resend': 'Resend',
-    'forward': 'Forward',
-    'share': 'Share',
-    'close': 'Close',
-    'more': 'More',
-    
-    // Modal
-    'loginTitle': 'Login',
-    'email': 'Email',
-    'password': 'Password',
-    'loginWithEmail': 'Login with Email',
-    'or': 'or',
-    'loginWithGoogle': 'Login with Google',
-    'loginFailed': 'Login failed. Please try again.',
-    'wrongCredentials': 'Wrong email or password.',
-    
-    // Announcement
-    'announcement': 'Announcement',
-    'announcementText': 'Chat feature is under development.',
-    
-    // Status
-    'read': 'Read',
-    'sent': 'Sent',
-    'officialAccount': 'Official Account',
-    
-    // Share Modal
-    'forwardMessage': 'Forward Message',
-    'from': 'From',
-    'selectUserToShare': 'Select user...',
-    'forwardButton': 'Forward',
-    
-    // Chat Button
-    'chatWithMenuru': 'Chat with Menuru',
-    'loginToChat': 'Login to Chat',
-    
-    // Update status labels
-    'statusLive': 'Live',
-    'statusComing': 'Coming Soon',
-    'statusDone': 'Done',
-  }
-};
-
-// Language Selector Component with URL-based routing
-const LanguageSelector = ({ language, setLanguage }: { language: Language; setLanguage: (lang: Language) => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLanguageChange = (lang: Language) => {
-    setLanguage(lang);
-    changeLanguage(lang);
-    setIsOpen(false);
-  };
-
-  return (
-    <div ref={dropdownRef} style={{ position: "relative" }}>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          background: "none",
-          border: "1px solid #e0e0e0",
-          borderRadius: "8px",
-          padding: "6px 12px",
-          fontSize: "13px",
-          fontWeight: 500,
-          color: "#000",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          fontFamily: FONT_FAMILY,
-          backgroundColor: "#f5f5f5",
-          transition: "all 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#e8e8e8";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#f5f5f5";
-        }}
-      >
-        <span style={{ fontSize: "16px" }}>{language === 'id' ? '🇮🇩' : '🇬🇧'}</span>
-        <span>{language === 'id' ? 'ID' : 'EN'}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
-          <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: "absolute",
-              top: "calc(100% + 8px)",
-              right: 0,
-              backgroundColor: "#ffffff",
-              borderRadius: "8px",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              border: "1px solid #e0e0e0",
-              overflow: "hidden",
-              minWidth: "140px",
-              zIndex: 1000,
-            }}
-          >
-            <button
-              onClick={() => handleLanguageChange('id')}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "10px 16px",
-                width: "100%",
-                border: "none",
-                background: language === 'id' ? "#f0f0f0" : "transparent",
-                cursor: "pointer",
-                fontSize: "14px",
-                color: "#000",
-                fontFamily: FONT_FAMILY,
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f5f5f5";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = language === 'id' ? "#f0f0f0" : "transparent";
-              }}
-            >
-              <span style={{ fontSize: "18px" }}>🇮🇩</span>
-              <span>Indonesia</span>
-              {language === 'id' && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: "auto" }}>
-                  <path d="M20 6L9 17L4 12" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </button>
-            <button
-              onClick={() => handleLanguageChange('en')}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "10px 16px",
-                width: "100%",
-                border: "none",
-                background: language === 'en' ? "#f0f0f0" : "transparent",
-                cursor: "pointer",
-                fontSize: "14px",
-                color: "#000",
-                fontFamily: FONT_FAMILY,
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f5f5f5";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = language === 'en' ? "#f0f0f0" : "transparent";
-              }}
-            >
-              <span style={{ fontSize: "18px" }}>🇬🇧</span>
-              <span>English</span>
-              {language === 'en' && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: "auto" }}>
-                  <path d="M20 6L9 17L4 12" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 interface ChatUser {
   id: string;
@@ -613,10 +216,9 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
 };
 
 // Online Status Indicator
-const OnlineIndicator = ({ online, lastSeen, language }: { online: boolean; lastSeen?: string; language: Language }) => {
+const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
-  const t = translations[language];
   
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
@@ -643,7 +245,7 @@ const OnlineIndicator = ({ online, lastSeen, language }: { online: boolean; last
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          {online ? t.online : (lastSeen || t.offline)}
+          {online ? "Online" : (lastSeen || "Offline")}
           <div style={{
             position: "absolute",
             top: "100%",
@@ -659,18 +261,17 @@ const OnlineIndicator = ({ online, lastSeen, language }: { online: boolean; last
 };
 
 // Read Status
-const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; language: Language }) => {
+const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const t = translations[language];
   
   if (!isMine) return null;
   
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: t.read };
+      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
     }
-    return { icon: "✓", color: "#999", label: t.sent };
+    return { icon: "✓", color: "#999", label: "Terkirim" };
   })();
   
   if (!status) return null;
@@ -681,7 +282,7 @@ const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; 
         style={{
           fontSize: "10px",
           color: status.color,
-          fontWeight: status.label === t.read ? 600 : 400,
+          fontWeight: status.label === "Dibaca" ? 600 : 400,
           cursor: "pointer",
           fontFamily: FONT_FAMILY,
         }}
@@ -720,9 +321,8 @@ const ReadStatus = ({ msg, isMine, language }: { msg: Message; isMine: boolean; 
 };
 
 // Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; language: Language }) => {
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const t = translations[language];
   
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
@@ -784,7 +384,7 @@ const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; langua
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          {t.officialAccount}
+          Akun Resmi
           <div style={{
             position: "absolute",
             top: "100%",
@@ -799,10 +399,157 @@ const InstagramVerifiedBadge = ({ size = 16, language }: { size?: number; langua
   );
 };
 
-export default function HomePage(): React.JSX.Element {
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
-  const t = translations[language];
+// Big Chat Icon
+const BigChatIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 10H16M8 14H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Banner Rolling Text Component
+const RollingTextBanner = () => {
+  const phrases = [
+    "Website sedang dalam pengembangan",
+    "Silahkan hubungi official Menuru",
+    "Fitur chat akan segera hadir",
+    "Terima kasih atas kunjungan Anda"
+  ];
   
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % phrases.length);
+        setIsAnimating(false);
+      }, 600);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <div style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      width: "100%",
+      backgroundColor: "#0D3CFC",
+      padding: "14px 20px",
+      zIndex: 20,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      overflow: "hidden",
+      height: "64px",
+    }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "16px",
+        position: "relative",
+        width: "100%",
+        maxWidth: "800px",
+      }}>
+        {/* Big Chat Icon with pulse animation */}
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{
+            color: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
+          <BigChatIcon />
+        </motion.div>
+        
+        {/* Rolling Text */}
+        <div style={{
+          position: "relative",
+          height: "32px",
+          overflow: "hidden",
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+        }}>
+          <motion.div
+            key={currentIndex}
+            initial={{ y: 20, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            transition={{ 
+              type: "spring",
+              damping: 25,
+              stiffness: 200,
+              duration: 0.6,
+            }}
+            style={{
+              position: "absolute",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "20px",
+                fontWeight: 500,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.01em",
+                textAlign: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {phrases[currentIndex]}
+            </span>
+          </motion.div>
+          
+          {/* Decorative dot indicators */}
+          <div style={{
+            position: "absolute",
+            bottom: "-8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            gap: "6px",
+          }}>
+            {phrases.map((_, idx) => (
+              <motion.div
+                key={idx}
+                animate={{
+                  scale: idx === currentIndex ? 1 : 0.7,
+                  opacity: idx === currentIndex ? 1 : 0.3,
+                }}
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  backgroundColor: "#ffffff",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatUser | null>(null);
@@ -846,16 +593,16 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text - rolling text
-  const [chatButtonText, setChatButtonText] = useState(t.chatWithMenuru);
+  // Chat button text
+  const [chatButtonText, setChatButtonText] = useState("Chat dengan Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
-    t.chatWithMenuru,
-    t.chatWithMenuru,
-    t.chatWithMenuru,
-    t.chatWithMenuru
+    "Chat dengan Menuru",
+    "Chat dengan Menuru",
+    "Chat dengan Menuru",
+    "Chat dengan Menuru"
   ];
   let chatTextIndex = 0;
 
@@ -863,112 +610,90 @@ export default function HomePage(): React.JSX.Element {
   const updates: UpdateItem[] = [
     {
       id: "1",
-      title: language === 'id' ? "Fitur Chat Real-time" : "Real-time Chat Feature",
-      description: language === 'id' ? "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan." : "Added real-time chat feature with Firebase. Users can send and receive messages instantly.",
+      title: "Fitur Chat Real-time",
+      description: "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan.",
       date: "10 Juli 2026",
       status: "live",
-      detail: language === 'id' ? "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator." : "Real-time chat feature allows users to communicate directly without refreshing the page. Uses Firebase Realtime Database for instant message synchronization. Equipped with online status and typing indicators.",
+      detail: "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator.",
       link: "https://menuru.com/update/chat-realtime",
       publishedBy: "Tim Menuru"
     },
     {
       id: "2",
-      title: language === 'id' ? "Privacy Policy & Update System" : "Privacy Policy & Update System",
-      description: language === 'id' ? "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan." : "Added Privacy Policy and Update System pages for service transparency.",
+      title: "Privacy Policy & Update System",
+      description: "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan.",
       date: "9 Juli 2026",
       status: "live",
-      detail: language === 'id' ? "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna." : "Privacy Policy page explains how user data is collected and used. Update System displays feature update history transparently to users.",
+      detail: "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna.",
       link: "https://menuru.com/update/privacy-policy",
       publishedBy: "Tim Menuru"
     },
     {
       id: "3",
-      title: language === 'id' ? "Fitur Pin Message" : "Pin Message Feature",
-      description: language === 'id' ? "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas." : "Users can pin important messages in chat. Pinned messages will appear at the top.",
+      title: "Fitur Pin Message",
+      description: "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas.",
       date: "8 Juli 2026",
       status: "coming",
-      detail: language === 'id' ? "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus." : "Pin message feature allows users to pin important messages for easy access. Pinned messages will appear at the top of chat with a special indicator.",
+      detail: "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus.",
       link: "https://menuru.com/update/pin-message",
       publishedBy: "Tim Menuru"
     },
     {
       id: "4",
-      title: language === 'id' ? "Fitur Reply & Share Message" : "Reply & Share Message Feature",
-      description: language === 'id' ? "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah." : "Users can reply to and forward messages to other users easily.",
+      title: "Fitur Reply & Share Message",
+      description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
       date: "7 Juli 2026",
       status: "done",
-      detail: language === 'id' ? "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah." : "Reply feature allows users to reply to specific messages with clear context. Share feature allows users to forward messages to other contacts easily.",
+      detail: "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah.",
       link: "https://menuru.com/update/reply-share",
       publishedBy: "Tim Menuru"
     },
     {
       id: "5",
-      title: language === 'id' ? "Online Status & Typing Indicator" : "Online Status & Typing Indicator",
-      description: language === 'id' ? "Menampilkan status online pengguna dan indikator ketika sedang mengetik." : "Shows user online status and typing indicator.",
+      title: "Online Status & Typing Indicator",
+      description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
       date: "6 Juli 2026",
       status: "done",
-      detail: language === 'id' ? "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif." : "Shows user online status in real-time. Typing indicator appears when user is typing a message, providing a more interactive chat experience.",
+      detail: "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif.",
       link: "https://menuru.com/update/online-status",
       publishedBy: "Tim Menuru"
     }
   ];
 
-  // Listen to popstate for browser back/forward
-  useEffect(() => {
-    const handlePopState = () => {
-      const newLang = getInitialLanguage();
-      setLanguage(newLang);
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // Update chatTexts when language changes
-  useEffect(() => {
-    setChatButtonText(t.chatWithMenuru);
-    if (typeof window !== 'undefined') {
-      const currentLang = getInitialLanguage();
-      if (currentLang !== language) {
-        changeLanguage(language);
-      }
-    }
-  }, [language]);
-
   const MENURU_OFFICIAL: ChatUser = {
     id: "official_menuru",
-    name: language === 'id' ? "Menuru Official" : "Menuru Official",
+    name: "Menuru Official",
     email: "official@menuru.com",
     photoURL: "",
     isOfficial: true,
     isPinned: false,
-    bio: language === 'id' ? "Akun resmi Menuru Chat. Dikelola oleh tim Menuru." : "Official Menuru Chat account. Managed by the Menuru team.",
-    note: language === 'id' ? "Akun Resmi" : "Official Account"
+    bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
+    note: "Akun Resmi"
   };
 
   const OFFICIAL_MESSAGES = [
     {
-      text: language === 'id' ? "Halo! Selamat datang di Menuru Chat 👋" : "Hello! Welcome to Menuru Chat 👋",
+      text: "Halo! Selamat datang di Menuru Chat 👋",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: language === 'id' ? "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏" : "We are currently improving the chat feature. Please be patient! 🙏",
+      text: "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: language === 'id' ? "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨" : "Pin message and chat history features will be improved soon ✨",
+      text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: language === 'id' ? "Jangan lupa baca Privacy Policy dan Update kami 👇" : "Don't forget to read our Privacy Policy and Updates 👇",
+      text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: language === 'id' ? "Terima kasih atas pengertiannya! 😊" : "Thank you for your understanding! 😊",
+      text: "Terima kasih atas pengertiannya! 😊",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     }
@@ -991,7 +716,7 @@ export default function HomePage(): React.JSX.Element {
       const usersSnap = await getDocs(usersRef);
       
       const broadcastMessage = {
-        text: language === 'id' ? "Jangan lupa baca Privacy Policy dan Update kami 👇" : "Don't forget to read our Privacy Policy and Updates 👇",
+        text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
         senderId: "official_menuru",
         senderName: "Menuru Official"
       };
@@ -1042,85 +767,83 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!db) return;
     broadcastMessages();
-  }, [language]);
+  }, []);
 
-// Auth Listener - Tanpa onDisconnect
-useEffect(() => {
-  if (!auth) return;
-  const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-    setUser(currentUser);
-    setLoading(false);
-    if (currentUser) {
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        const googlePhotoURL = currentUser.photoURL || "";
-        const googleName = currentUser.displayName || currentUser.email || "";
-        
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            id: currentUser.uid,
-            name: googleName,
-            email: currentUser.email || "",
-            photoURL: googlePhotoURL,
-            createdAt: serverTimestamp(),
-            isPinned: false,
-            isOfficial: false,
-            online: true,
-            lastSeen: serverTimestamp(),
-            typing: false,
-            bio: "",
-            note: ""
-          });
+  // Auth Listener
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
           
-          if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
-            await updateProfile(currentUser, {
-              photoURL: googlePhotoURL,
-              displayName: googleName
-            });
-          }
-        } else {
-          const userData = userSnap.data();
-          const currentPhotoURL = userData?.photoURL || "";
+          const googlePhotoURL = currentUser.photoURL || "";
+          const googleName = currentUser.displayName || currentUser.email || "";
           
-          if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
-            await updateDoc(userRef, {
-              photoURL: googlePhotoURL,
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              id: currentUser.uid,
               name: googleName,
+              email: currentUser.email || "",
+              photoURL: googlePhotoURL,
+              createdAt: serverTimestamp(),
+              isPinned: false,
+              isOfficial: false,
+              online: true,
+              lastSeen: serverTimestamp(),
+              typing: false,
+              bio: "",
+              note: ""
+            });
+            
+            if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
+              await updateProfile(currentUser, {
+                photoURL: googlePhotoURL,
+                displayName: googleName
+              });
+            }
+          } else {
+            const userData = userSnap.data();
+            const currentPhotoURL = userData?.photoURL || "";
+            
+            if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
+              await updateDoc(userRef, {
+                photoURL: googlePhotoURL,
+                name: googleName,
+                lastSeen: serverTimestamp()
+              });
+            }
+            
+            await updateDoc(userRef, {
+              online: true,
               lastSeen: serverTimestamp()
             });
           }
           
-          await updateDoc(userRef, {
-            online: true,
-            lastSeen: serverTimestamp()
-          });
+          const updatedSnap = await getDoc(userRef);
+          const updatedData = updatedSnap.data();
+          if (updatedData) {
+            setUser((prev: any) => ({
+              ...prev,
+              photoURL: updatedData.photoURL || prev.photoURL || "",
+              displayName: updatedData.name || prev.displayName || prev.email,
+              bio: updatedData.bio || "",
+              note: updatedData.note || ""
+            }));
+          }
           
-          // HAPUS onDisconnect di sini
+          await checkAndSendOfficialMessages(currentUser.uid);
+          
+        } catch (error) {
+          console.error("Error saving user:", error);
         }
-        
-        const updatedSnap = await getDoc(userRef);
-        const updatedData = updatedSnap.data();
-        if (updatedData) {
-          setUser((prev: any) => ({
-            ...prev,
-            photoURL: updatedData.photoURL || prev.photoURL || "",
-            displayName: updatedData.name || prev.displayName || prev.email,
-            bio: updatedData.bio || "",
-            note: updatedData.note || ""
-          }));
-        }
-        
-        await checkAndSendOfficialMessages(currentUser.uid);
-        
-      } catch (error) {
-        console.error("Error saving user:", error);
       }
-    }
-  });
-  return () => unsubscribe();
-}, []);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const checkAndSendOfficialMessages = async (userId: string) => {
     if (!db) return;
@@ -1283,7 +1006,7 @@ useEffect(() => {
               const unreadDocs = unreadSnap.docs;
               for (const doc of unreadDocs) {
                 const msg = doc.data() as Message;
-                newMessages.push(`${t.messages} dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
+                newMessages.push(`Pesan dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
               }
             }
             
@@ -1353,7 +1076,7 @@ useEffect(() => {
         rollingInterval.current = null;
       }
     };
-  }, [user, users, language]);
+  }, [user, users]);
 
   // Load messages
   useEffect(() => {
@@ -1414,7 +1137,7 @@ useEffect(() => {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError(t.loginFailed);
+      setLoginError("Login gagal. Silahkan coba lagi.");
     }
   };
 
@@ -1428,7 +1151,7 @@ useEffect(() => {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError(t.wrongCredentials);
+      setLoginError("Email atau password salah.");
     }
   };
 
@@ -1659,7 +1382,7 @@ useEffect(() => {
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
-        text: `${t.from} ${shareMessage.senderName}: ${shareMessage.text}`,
+        text: `Dari ${shareMessage.senderName}: ${shareMessage.text}`,
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: targetUser.id,
@@ -1803,7 +1526,7 @@ useEffect(() => {
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (timestamp: any) => {
@@ -1814,11 +1537,11 @@ useEffect(() => {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (date.toDateString() === today.toDateString()) {
-      return language === 'id' ? "Hari ini" : "Today";
+      return "Hari ini";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return language === 'id' ? "Kemarin" : "Yesterday";
+      return "Kemarin";
     } else {
-      return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     }
   };
 
@@ -1832,9 +1555,9 @@ useEffect(() => {
   const getLastSeen = (userId: string) => {
     const chatUser = users.find(u => u.id === userId);
     if (!chatUser || !chatUser.lastSeen) return "";
-    if (chatUser.id === user?.uid) return t.online;
+    if (chatUser.id === user?.uid) return "Online";
     const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
-    return `${t.lastSeen} ${date.toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    return `Terakhir online ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getTypingStatus = (userId: string) => {
@@ -1871,7 +1594,7 @@ useEffect(() => {
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [isChatOpen, user, isIncomingMessage, language]);
+  }, [isChatOpen, user, isIncomingMessage]);
 
   if (loading) {
     return (
@@ -1902,70 +1625,37 @@ useEffect(() => {
         overflow: "hidden",
       }}
     >
-      {/* BANNER DEVELOPMENT */}
-<motion.div
-  initial={{ opacity: 0, y: -20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5, delay: 0.1 }}
-  style={{
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    width: "100%",
-    backgroundColor: "#0D3CFC",
-    padding: "14px 20px",
-    zIndex: 20,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottom: "none",
-  }}
->
-  <span
-    style={{
-      fontSize: "18px",
-      fontWeight: 400,
-      color: "#ffffff",
-      fontFamily: FONT_FAMILY,
-      letterSpacing: "-0.01em",
-      textAlign: "center",
-    }}
-  >
-    {language === 'id' ? "Website sedang dalam pengembangan, Terima kasih" : "Website is under development, Thank you"}
-  </span>
-</motion.div>
+      {/* BANNER ROLLING TEXT - Modern GSAP Style */}
+      <RollingTextBanner />
 
-{/* Menuru - Sisi Kiri Bawah Banner */}
-<motion.div
-  initial={{ opacity: 0, x: -20 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.5, delay: 0.3 }}
-  style={{
-    position: "absolute",
-    top: "70px",
-    left: "40px",
-    zIndex: 15,
-    display: "flex",
-    alignItems: "center",
-  }}
->
-  <span
-    style={{
-      fontSize: "30px",
-      fontWeight: 400,
-      color: "#000000",
-      fontFamily: FONT_FAMILY,
-      letterSpacing: "-0.03em",
-      background: "transparent",
-    }}
-  >
-    Menuru
-  </span>
-</motion.div>
+      {/* Menuru - Sisi Kiri Bawah Banner */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        style={{
+          position: "absolute",
+          top: "76px",
+          left: "40px",
+          zIndex: 15,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "30px",
+            fontWeight: 400,
+            color: "#000000",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            background: "transparent",
+          }}
+        >
+          Menuru
+        </span>
+      </motion.div>
 
-
-         
       {/* User Status */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -1973,7 +1663,7 @@ useEffect(() => {
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{
           position: "absolute",
-          top: "70px",
+          top: "76px",
           right: "40px",
           zIndex: 10,
           display: "flex",
@@ -1981,8 +1671,6 @@ useEffect(() => {
           gap: "12px",
         }}
       >
-        <LanguageSelector language={language} setLanguage={setLanguage} />
-
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -2034,7 +1722,7 @@ useEffect(() => {
               >
                 {user.displayName || user.email}
               </span>
-              <OnlineIndicator online={true} language={language} />
+              <OnlineIndicator online={true} />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -2057,7 +1745,7 @@ useEffect(() => {
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                {t.logout}
+                Keluar
               </motion.button>
             </>
           ) : (
@@ -2084,7 +1772,7 @@ useEffect(() => {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              {t.login}
+              Masuk
             </motion.button>
           )}
         </motion.div>
@@ -2129,11 +1817,11 @@ useEffect(() => {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: FONT_FAMILY }}>
-                {t.loginTitle}
+                Masuk
               </h2>
               <input
                 type="email"
-                placeholder={t.email}
+                placeholder="Email"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 style={{
@@ -2150,7 +1838,7 @@ useEffect(() => {
               />
               <input
                 type="password"
-                placeholder={t.password}
+                placeholder="Kata Sandi"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 style={{
@@ -2189,10 +1877,10 @@ useEffect(() => {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {t.loginWithEmail}
+                Masuk dengan Email
               </motion.button>
               <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY }}>
-                {t.or}
+                atau
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -2213,7 +1901,7 @@ useEffect(() => {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {t.loginWithGoogle}
+                Masuk dengan Google
               </motion.button>
             </motion.div>
           </motion.div>
@@ -2258,7 +1946,7 @@ useEffect(() => {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                {t.forwardMessage}
+                Teruskan Pesan
               </h3>
               <div style={{ 
                 fontSize: "13px", 
@@ -2269,7 +1957,7 @@ useEffect(() => {
                 borderRadius: "8px",
                 fontFamily: FONT_FAMILY,
               }}>
-                <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>{t.from}: {shareMessage.senderName}</div>
+                <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>Dari: {shareMessage.senderName}</div>
                 <div style={{ fontFamily: FONT_FAMILY }}>{shareMessage.text}</div>
               </div>
               <select
@@ -2288,10 +1976,10 @@ useEffect(() => {
                   color: "#000",
                 }}
               >
-                <option value="">{t.selectUserToShare}</option>
+                <option value="">Pilih user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} language={language} />}
+                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -2315,7 +2003,7 @@ useEffect(() => {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {t.forwardButton}
+                  Teruskan
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -2336,7 +2024,7 @@ useEffect(() => {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {t.cancel}
+                  Batal
                 </motion.button>
               </div>
             </motion.div>
@@ -2398,7 +2086,7 @@ useEffect(() => {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {selectedUpdateId && selectedUpdate ? t.updateDetail : (showUpdate ? t.updateSystem : (showPrivacyPolicy ? t.privacyPolicy : (showProfile ? t.profile : (selectedChat ? selectedChat.name : t.messages))))}
+                    {selectedUpdateId && selectedUpdate ? "Detail Update" : (showUpdate ? "Update Sistem" : (showPrivacyPolicy ? "Kebijakan Privasi" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))))}
                   </span>
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                     <>
@@ -2408,7 +2096,6 @@ useEffect(() => {
                       <OnlineIndicator 
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
-                        language={language}
                       />
                     </>
                   )}
@@ -2502,7 +2189,7 @@ useEffect(() => {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>{t.back}</span>
+                      <span>Kembali</span>
                     </motion.button>
 
                     <div
@@ -2524,7 +2211,7 @@ useEffect(() => {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {selectedUpdate.status === "live" ? t.statusLive : (selectedUpdate.status === "coming" ? t.statusComing : t.statusDone)}
+                        {selectedUpdate.status === "live" ? "Live" : (selectedUpdate.status === "coming" ? "Coming Soon" : "Done")}
                       </span>
                     </div>
 
@@ -2599,7 +2286,7 @@ useEffect(() => {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {t.updateDetail}
+                        Detail Update
                       </h3>
                       <p
                         style={{
@@ -2629,7 +2316,7 @@ useEffect(() => {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {t.link}:
+                        Link:
                       </span>
                       <a
                         href={selectedUpdate.link}
@@ -2709,7 +2396,7 @@ useEffect(() => {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {t.updateSystem}
+                        Update Sistem
                       </span>
                     </div>
                     <h2
@@ -2731,7 +2418,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {t.updateHistory}
+                      Riwayat pembaruan dan pengembangan
                     </p>
                   </div>
 
@@ -2928,7 +2615,7 @@ useEffect(() => {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {t.privacyPolicy}
+                        Kebijakan Privasi
                       </span>
                     </div>
                     <h2
@@ -2950,7 +2637,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {t.lastUpdated}: 9 Juli 2026
+                      Terakhir diperbarui: 9 Juli 2026
                     </p>
                   </div>
 
@@ -2964,7 +2651,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "1. Informasi yang Kami Kumpulkan" : "1. Information We Collect"}
+                      1. Informasi yang Kami Kumpulkan
                     </h3>
                     <p
                       style={{
@@ -2975,7 +2662,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:" : "Chat with Menuru collects the following information to provide optimal chat service:"}
+                      Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
                     </p>
                     <ul
                       style={{
@@ -2987,10 +2674,10 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>{language === 'id' ? "Nama dan email dari akun Google Anda" : "Name and email from your Google account"}</li>
-                      <li>{language === 'id' ? "Foto profil dari akun Google Anda" : "Profile photo from your Google account"}</li>
-                      <li>{language === 'id' ? "Pesan dan riwayat chat yang Anda kirim" : "Messages and chat history you send"}</li>
-                      <li>{language === 'id' ? "Status online dan aktivitas chat" : "Online status and chat activity"}</li>
+                      <li>Nama dan email dari akun Google Anda</li>
+                      <li>Foto profil dari akun Google Anda</li>
+                      <li>Pesan dan riwayat chat yang Anda kirim</li>
+                      <li>Status online dan aktivitas chat</li>
                     </ul>
                   </div>
 
@@ -3004,7 +2691,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "2. Bagaimana Kami Menggunakan Informasi" : "2. How We Use Information"}
+                      2. Bagaimana Kami Menggunakan Informasi
                     </h3>
                     <p
                       style={{
@@ -3015,7 +2702,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Informasi yang kami kumpulkan digunakan untuk:" : "The information we collect is used for:"}
+                      Informasi yang kami kumpulkan digunakan untuk:
                     </p>
                     <ul
                       style={{
@@ -3027,10 +2714,10 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>{language === 'id' ? "Menyediakan dan memelihara layanan chat" : "Providing and maintaining chat service"}</li>
-                      <li>{language === 'id' ? "Mengirimkan pesan antar pengguna" : "Sending messages between users"}</li>
-                      <li>{language === 'id' ? "Menampilkan status online pengguna" : "Displaying user online status"}</li>
-                      <li>{language === 'id' ? "Menyimpan riwayat chat untuk akses di masa depan" : "Storing chat history for future access"}</li>
+                      <li>Menyediakan dan memelihara layanan chat</li>
+                      <li>Mengirimkan pesan antar pengguna</li>
+                      <li>Menampilkan status online pengguna</li>
+                      <li>Menyimpan riwayat chat untuk akses di masa depan</li>
                     </ul>
                   </div>
 
@@ -3044,7 +2731,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "3. Penyimpanan Data" : "3. Data Storage"}
+                      3. Penyimpanan Data
                     </h3>
                     <p
                       style={{
@@ -3055,7 +2742,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat." : "All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with."}
+                      Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
                     </p>
                   </div>
 
@@ -3069,7 +2756,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "4. Keamanan" : "4. Security"}
+                      4. Keamanan
                     </h3>
                     <p
                       style={{
@@ -3080,7 +2767,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS." : "We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS."}
+                      Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
                     </p>
                   </div>
 
@@ -3094,7 +2781,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "5. Hak Anda" : "5. Your Rights"}
+                      5. Hak Anda
                     </h3>
                     <p
                       style={{
@@ -3105,7 +2792,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Anda memiliki hak untuk:" : "You have the right to:"}
+                      Anda memiliki hak untuk:
                     </p>
                     <ul
                       style={{
@@ -3117,9 +2804,9 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>{language === 'id' ? "Mengakses data pribadi Anda" : "Access your personal data"}</li>
-                      <li>{language === 'id' ? "Menghapus akun dan data chat Anda" : "Delete your account and chat data"}</li>
-                      <li>{language === 'id' ? "Menonaktifkan notifikasi" : "Disable notifications"}</li>
+                      <li>Mengakses data pribadi Anda</li>
+                      <li>Menghapus akun dan data chat Anda</li>
+                      <li>Menonaktifkan notifikasi</li>
                     </ul>
                   </div>
 
@@ -3133,7 +2820,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "6. Perubahan Kebijakan" : "6. Policy Changes"}
+                      6. Perubahan Kebijakan
                     </h3>
                     <p
                       style={{
@@ -3144,7 +2831,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat." : "We may update this privacy policy from time to time. Changes will be notified through the chat application."}
+                      Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
                     </p>
                   </div>
 
@@ -3158,7 +2845,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "7. Kontak" : "7. Contact"}
+                      7. Kontak
                     </h3>
                     <p
                       style={{
@@ -3169,7 +2856,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {language === 'id' ? "Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:" : "If you have questions about this privacy policy, please contact us at:"}
+                      Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
                     </p>
                     <p
                       style={{
@@ -3240,7 +2927,7 @@ useEffect(() => {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>{t.back}</span>
+                      <span>Kembali</span>
                     </motion.button>
 
                     <div style={{ width: "100%", marginBottom: "0px" }}>
@@ -3273,7 +2960,7 @@ useEffect(() => {
                               backgroundColor: "#c5e800",
                               marginRight: "4px",
                             }} />
-                            {t.note}
+                            Catatan
                           </span>
                           {profileUser.id === user?.uid && (
                             <motion.button
@@ -3293,7 +2980,7 @@ useEffect(() => {
                               }}
                             >
                               <EditIcon />
-                              {profileUser.note ? t.editNote : t.addNote}
+                              {profileUser.note ? "Edit" : "Tambah"}
                             </motion.button>
                           )}
                         </div>
@@ -3304,7 +2991,7 @@ useEffect(() => {
                               type="text"
                               value={noteInput}
                               onChange={(e) => setNoteInput(e.target.value)}
-                              placeholder={t.noNote}
+                              placeholder="Belum ada catatan"
                               style={{
                                 flex: 1,
                                 padding: "6px 10px",
@@ -3339,7 +3026,7 @@ useEffect(() => {
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              {t.save}
+                              Simpan
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -3356,7 +3043,7 @@ useEffect(() => {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {t.cancel}
+                              Batal
                             </motion.button>
                           </div>
                         ) : (
@@ -3368,7 +3055,7 @@ useEffect(() => {
                             minHeight: "24px",
                             fontFamily: FONT_FAMILY,
                           }}>
-                            {profileUser.note || t.noNote}
+                            {profileUser.note || "Belum ada catatan"}
                           </div>
                         )}
                       </div>
@@ -3399,7 +3086,7 @@ useEffect(() => {
                         )}
                         {profileUser.isOfficial && (
                           <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                            <InstagramVerifiedBadge size={16} language={language} />
+                            <InstagramVerifiedBadge size={16} />
                           </div>
                         )}
                       </motion.div>
@@ -3408,13 +3095,13 @@ useEffect(() => {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} language={language} />}
+                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} language={language} />
+                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
                           <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                            {getOnlineStatus(profileUser.id) ? t.online : getLastSeen(profileUser.id)}
+                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
                           </span>
                         </div>
                       </div>
@@ -3423,7 +3110,7 @@ useEffect(() => {
                     <div style={{ width: "100%", marginBottom: "16px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                         <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                          {t.bio}
+                          Bio
                         </span>
                         {profileUser.id === user?.uid && (
                           <motion.button
@@ -3443,7 +3130,7 @@ useEffect(() => {
                             }}
                           >
                             <EditIcon />
-                            {profileUser.bio ? t.editBio : t.addBio}
+                            {profileUser.bio ? "Edit" : "Tambah"}
                           </motion.button>
                         )}
                       </div>
@@ -3452,7 +3139,7 @@ useEffect(() => {
                           <textarea
                             value={bioInput}
                             onChange={(e) => setBioInput(e.target.value)}
-                            placeholder={t.noBio}
+                            placeholder="Belum ada bio"
                             rows={2}
                             style={{
                               width: "100%",
@@ -3483,7 +3170,7 @@ useEffect(() => {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {t.save}
+                              Simpan
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -3500,7 +3187,7 @@ useEffect(() => {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {t.cancel}
+                              Batal
                             </motion.button>
                           </div>
                         </div>
@@ -3514,7 +3201,7 @@ useEffect(() => {
                           lineHeight: 1.5,
                           fontFamily: FONT_FAMILY,
                         }}>
-                          {profileUser.bio || t.noBio}
+                          {profileUser.bio || "Belum ada bio"}
                         </div>
                       )}
                     </div>
@@ -3543,7 +3230,7 @@ useEffect(() => {
                         onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
                         onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
-                        {t.sendMessage}
+                        Kirim Pesan
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -3588,10 +3275,10 @@ useEffect(() => {
                     <div style={{ fontSize: "20px" }}>📢</div>
                     <div>
                       <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                        {t.announcement}
+                        Pengumuman
                       </div>
                       <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        {t.announcementText}
+                        Fitur chat sedang dalam tahap pengembangan.
                       </div>
                     </div>
                   </div>
@@ -3635,7 +3322,7 @@ useEffect(() => {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {t.newChat}
+                      Chat Baru
                     </span>
                   </motion.button>
                   
@@ -3656,7 +3343,7 @@ useEffect(() => {
                         }}
                       >
                         <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                          {t.selectUser}
+                          Pilih user...
                         </div>
                         <select
                           value={selectedNewUser}
@@ -3674,16 +3361,16 @@ useEffect(() => {
                             color: "#000",
                           }}
                         >
-                          <option value="">{t.selectUser}</option>
+                          <option value="">Pilih user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
+                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
                         {availableUsers.length === 0 && (
                           <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                            {t.allUsersChatted}
+                            Semua user sudah di-chat
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -3705,7 +3392,7 @@ useEffect(() => {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {t.startChat}
+                            Mulai Chat
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -3720,7 +3407,7 @@ useEffect(() => {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {t.cancel}
+                            Batal
                           </motion.button>
                         </div>
                         {addUserStatus && (
@@ -3751,7 +3438,7 @@ useEffect(() => {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            {t.pinnedUsers} ({pinnedUsers.length})
+                            User Pinned ({pinnedUsers.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedUsers} />
@@ -3805,13 +3492,13 @@ useEffect(() => {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
+                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
                                     </div>
                                   </div>
-                                  <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} language={language} />
+                                  <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
                                 </div>
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
@@ -3856,7 +3543,7 @@ useEffect(() => {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            {t.pinnedChats} ({pinnedChats.length})
+                            Chat Pinned ({pinnedChats.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedChats} />
@@ -3920,13 +3607,13 @@ useEffect(() => {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
+                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : t.noMessages}
+                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "Belum ada pesan"}
                                       </div>
                                     </div>
-                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} language={language} />
+                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                                   </div>
                                   {room.unreadCount > 0 && (
                                     <div
@@ -3987,7 +3674,7 @@ useEffect(() => {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>{t.noChatHistory}</div>
+                        <div>Belum ada riwayat chat</div>
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
@@ -4051,17 +3738,17 @@ useEffect(() => {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
-                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} language={language} />
+                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {room.lastMessage ? (
                                   <>
-                                    {isLastMessageFromMe && `${t.messages}: `}
+                                    {isLastMessageFromMe && "Pesan: "}
                                     {room.lastMessage}
                                   </>
                                 ) : (
-                                  t.noMessages
+                                  "Belum ada pesan"
                                 )}
                               </div>
                             </div>
@@ -4198,17 +3885,16 @@ useEffect(() => {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
                         </span>
-                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} language={language} />}
+                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <OnlineIndicator 
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
-                          language={language}
                         />
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                            {getTypingStatus(selectedChat.id) ? t.typing : t.online}
+                            {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
                           </span>
                         ) : (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
@@ -4260,7 +3946,7 @@ useEffect(() => {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            {t.pinnedMessages} ({pinnedMessages.length})
+                            Pesan Pinned ({pinnedMessages.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedMessages} />
@@ -4293,7 +3979,7 @@ useEffect(() => {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                      {isMine ? `${t.messages}: ` : `${msg.senderName}: `}
+                                      {isMine ? "Pesan: " : `${msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -4326,7 +4012,7 @@ useEffect(() => {
                         <ReplyIcon />
                         <div>
                           <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                            {t.reply}: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
+                            Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
                           </div>
                           <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -4384,7 +4070,7 @@ useEffect(() => {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>{t.noMessages}</div>
+                        <div>Belum ada pesan</div>
                       </div>
                     ) : (
                       messages.map((msg, idx) => {
@@ -4442,7 +4128,7 @@ useEffect(() => {
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  {t.from} {msg.sharedFromName}
+                                  Dari {msg.sharedFromName}
                                 </div>
                               )}
                               
@@ -4460,7 +4146,7 @@ useEffect(() => {
                                   }}
                                 >
                                   <span style={{ fontWeight: 500, color: "#22c55e", fontFamily: FONT_FAMILY }}>
-                                    {isMine ? `${t.reply}: ${replySenderName}` : `${t.reply}: ${msg.replyToSender}`}
+                                    {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
                                   </span>
                                   <span style={{ color: isMine ? "#000" : "#333", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                 </div>
@@ -4468,7 +4154,7 @@ useEffect(() => {
                               
                               {isBroadcastMessage ? (
                                 <span style={{ fontFamily: FONT_FAMILY }}>
-                                  {language === 'id' ? "Jangan lupa baca" : "Don't forget to read"}{' '}
+                                  Jangan lupa baca{' '}
                                   <span
                                     onClick={() => setShowPrivacyPolicy(true)}
                                     style={{
@@ -4479,9 +4165,9 @@ useEffect(() => {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    {t.privacyPolicy}
+                                    Kebijakan Privasi
                                   </span>
-                                  {' '}{language === 'id' ? "dan" : "and"}{' '}
+                                  {' '}dan{' '}
                                   <span
                                     onClick={() => setShowUpdate(true)}
                                     style={{
@@ -4492,9 +4178,9 @@ useEffect(() => {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    {t.updateSystem}
+                                    Update Sistem
                                   </span>
-                                  {' '}{language === 'id' ? "kami 👇" : "👇"}
+                                  {' '}kami 👇
                                 </span>
                               ) : (
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
@@ -4521,7 +4207,7 @@ useEffect(() => {
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
-                                <ReadStatus msg={msg} isMine={isMine} language={language} />
+                                <ReadStatus msg={msg} isMine={isMine} />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
@@ -4537,7 +4223,7 @@ useEffect(() => {
                                     transition: "all .2s ease",
                                     borderRadius: "4px",
                                   }}
-                                  title={t.more}
+                                  title="Lainnya"
                                 >
                                   <MoreIcon />
                                 </motion.button>
@@ -4588,7 +4274,7 @@ useEffect(() => {
                                         }}
                                       >
                                         <ReplyIcon />
-                                        <span>{t.reply}</span>
+                                        <span>Balas</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4612,7 +4298,7 @@ useEffect(() => {
                                         }}
                                       >
                                         <SendIcon />
-                                        <span>{t.resend}</span>
+                                        <span>Kirim Ulang</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4638,7 +4324,7 @@ useEffect(() => {
                                         }}
                                       >
                                         <ShareIcon />
-                                        <span>{t.forward}</span>
+                                        <span>Teruskan</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4660,7 +4346,7 @@ useEffect(() => {
                                         }}
                                       >
                                         <PinIcon filled={msg.isPinned || false} />
-                                        <span>{msg.isPinned ? t.unpin : t.pin}</span>
+                                        <span>{msg.isPinned ? "Lepas Pin" : "Pin"}</span>
                                       </motion.button>
                                     </motion.div>
                                   )}
@@ -4684,7 +4370,7 @@ useEffect(() => {
                                 }}
                               >
                                 <PinIcon filled={true} />
-                                <span>{t.pin} • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
                               </div>
                             )}
                           </React.Fragment>
@@ -4707,7 +4393,7 @@ useEffect(() => {
                   >
                     <input
                       type="text"
-                      placeholder={replyTo ? t.typeReply : t.typeMessage}
+                      placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
                       value={message}
                       onChange={handleTyping}
                       onKeyPress={(e) => {
@@ -4764,7 +4450,7 @@ useEffect(() => {
                         e.currentTarget.style.backgroundColor = "#c5e800";
                       }}
                     >
-                      <span>{t.send}</span>
+                      <span>Kirim</span>
                       <SendIcon />
                     </motion.button>
                   </div>
@@ -4819,7 +4505,7 @@ useEffect(() => {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {user ? chatButtonText : t.loginToChat}
+                {user ? chatButtonText : "Masuk untuk Chat"}
               </motion.span>
               {totalUnread > 0 && (
                 <motion.span
