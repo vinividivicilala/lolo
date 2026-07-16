@@ -1,17 +1,7 @@
 // faq/app/not-found.tsx
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function NotFound() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // Redirect ke halaman utama
-    router.replace('/');
-  }, [router]);
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -25,22 +15,21 @@ export default function NotFound() {
     }}>
       <h1 style={{ fontSize: '48px', fontWeight: 700, margin: 0, color: '#000' }}>404</h1>
       <p style={{ fontSize: '16px', color: '#666', marginTop: '8px' }}>Halaman tidak ditemukan</p>
-      <button
-        onClick={() => router.push('/')}
+      <Link
+        href="/"
         style={{
           marginTop: '16px',
           padding: '8px 20px',
           backgroundColor: '#000',
           color: '#fff',
           borderRadius: '6px',
-          border: 'none',
-          cursor: 'pointer',
+          textDecoration: 'none',
           fontFamily: "'Geist', 'Geist Fallback'",
           fontSize: '14px',
         }}
       >
         Kembali ke Beranda
-      </button>
+      </Link>
     </div>
   );
 }
