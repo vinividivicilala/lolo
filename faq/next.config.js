@@ -3,8 +3,6 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // ❌ HAPUS output: "standalone",
-  // output: "standalone",
 
   experimental: {
     serverActions: {
@@ -24,6 +22,11 @@ const nextConfig = {
 
   typescript: {
     ignoreBuildErrors: true,
+  },
+
+  // TAMBAHKAN INI:
+  outputFileTracingIncludes: {
+    '/': ['./app/**/*'],
   },
 
   webpack: (config) => {
