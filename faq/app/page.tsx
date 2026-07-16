@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -25,7 +25,10 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  limit,
+  startAfter,
+  getCountFromServer
 } from "firebase/firestore";
 
 // Firebase Config
@@ -61,6 +64,9 @@ const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 // Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const OFFICIAL_EMAIL = "official@menuru.com";
+
+// Cooldown untuk prevent spam (5 detik)
+const SEND_COOLDOWN = 5000;
 
 interface ChatUser {
   id: string;
@@ -374,9 +380,12 @@ export default function HomePage(): React.JSX.Element {
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const [selectedUserForReply, setSelectedUserForReply] = useState<string | null>(null);
   const [selectedUserNameForReply, setSelectedUserNameForReply] = useState<string>("");
+  const [isSending, setIsSending] = useState(false);
+  const [lastSendTime, setLastSendTime] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
+  const messageIdsSet = useRef<Set<string>>(new Set());
 
   // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -510,22 +519,18 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // Check if current user is official
-  const isOfficialUser = user?.email === OFFICIAL_EMAIL;
-
-  // Broadcast messages to all users
+  // Broadcast messages to all users (only once)
   const broadcastMessages = async () => {
     if (!db) return;
     
-    const broadcastRef = doc(db, "system", "broadcast");
-    const broadcastSnap = await getDoc(broadcastRef);
-    
-    if (broadcastSnap.exists() && broadcastSnap.data().messagesSent) {
-      console.log("Messages already broadcasted");
-      return;
-    }
-    
     try {
+      const broadcastRef = doc(db, "system", "broadcast");
+      const broadcastSnap = await getDoc(broadcastRef);
+      
+      if (broadcastSnap.exists() && broadcastSnap.data().messagesSent) {
+        return;
+      }
+      
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
@@ -665,7 +670,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
     });
-    return () => unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const checkAndSendOfficialMessages = async (userId: string) => {
@@ -807,7 +812,7 @@ export default function HomePage(): React.JSX.Element {
           
           if (otherUser) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
-            const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
+            const qMsg = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
             const msgSnap = await getDocs(qMsg);
             
             let lastMessage = "";
@@ -824,6 +829,7 @@ export default function HomePage(): React.JSX.Element {
               hasAdminReply = lastMsg.isAdminReply || false;
             }
             
+            // Count unread messages
             const unreadQuery = query(
               messagesRef, 
               where("read", "==", false),
@@ -847,7 +853,7 @@ export default function HomePage(): React.JSX.Element {
               lastMessage,
               lastMessageTime,
               lastMessageSenderId,
-              unreadCount,
+              unreadCount: Math.min(unreadCount, 99),
               isPinned: data.isPinned || false,
               hasAdminReply
             });
@@ -865,11 +871,11 @@ export default function HomePage(): React.JSX.Element {
       });
       
       setChatRooms(rooms);
-      setTotalUnread(totalUnreadCount);
+      setTotalUnread(Math.min(totalUnreadCount, 99));
 
       if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
-        setIncomingMessagesList(newMessages);
+        setIncomingMessagesList(newMessages.slice(0, 5));
         setCurrentMessageIndex(0);
         setChatButtonText(newMessages[0]);
         
@@ -880,7 +886,7 @@ export default function HomePage(): React.JSX.Element {
         
         let index = 0;
         rollingInterval.current = setInterval(() => {
-          index = (index + 1) % newMessages.length;
+          index = (index + 1) % Math.min(newMessages.length, 5);
           setCurrentMessageIndex(index);
           setChatButtonText(newMessages[index]);
         }, 3000);
@@ -910,30 +916,28 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages - Modified to show all user messages for admin
+  // Load messages - Modified to show all user messages for admin with deduplication
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     
-    // For admin viewing official chat, we need to load all messages from all users
-    let q;
-    if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
-      q = query(messagesRef, orderBy("timestamp", "asc"));
-    } else {
-      q = query(messagesRef, orderBy("timestamp", "asc"));
-    }
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messageList: Message[] = [];
       const pinnedList: Message[] = [];
+      const uniqueIds = new Set<string>();
       
       snapshot.forEach((doc) => {
-        const msg = { id: doc.id, ...doc.data() } as Message;
-        messageList.push(msg);
-        if (msg.isPinned) {
-          pinnedList.push(msg);
+        if (!uniqueIds.has(doc.id)) {
+          uniqueIds.add(doc.id);
+          const msg = { id: doc.id, ...doc.data() } as Message;
+          messageList.push(msg);
+          if (msg.isPinned) {
+            pinnedList.push(msg);
+          }
         }
       });
       
@@ -950,7 +954,6 @@ export default function HomePage(): React.JSX.Element {
           
           userSnapshot.forEach((doc) => {
             const msg = { id: doc.id, ...doc.data() } as Message;
-            // Add target user info if not present
             if (!msg.targetUserId) {
               msg.targetUserId = targetUser.id;
               msg.targetUserName = targetUser.name;
@@ -959,7 +962,7 @@ export default function HomePage(): React.JSX.Element {
           });
         }
         
-        // Combine and sort all messages
+        // Combine and sort all messages with deduplication
         const combinedMessages = [...messageList, ...allMessages];
         combinedMessages.sort((a, b) => {
           const timeA = a.timestamp?.seconds || 0;
@@ -967,9 +970,9 @@ export default function HomePage(): React.JSX.Element {
           return timeA - timeB;
         });
         
-        // Filter out duplicate messages
+        // Filter out duplicate messages using Set
         const uniqueMessages: Message[] = [];
-        const messageIds = new Set();
+        const messageIds = new Set<string>();
         for (const msg of combinedMessages) {
           if (!messageIds.has(msg.id)) {
             messageIds.add(msg.id);
@@ -977,34 +980,16 @@ export default function HomePage(): React.JSX.Element {
           }
         }
         
-        setMessages(uniqueMessages);
-        setPinnedMessages(uniqueMessages.filter(m => m.isPinned));
+        // Limit messages to prevent spam
+        const limitedMessages = uniqueMessages.slice(-200);
+        
+        setMessages(limitedMessages);
+        setPinnedMessages(limitedMessages.filter(m => m.isPinned));
       } else {
-        setMessages(messageList);
+        // Limit messages for normal users
+        const limitedMessages = messageList.slice(-200);
+        setMessages(limitedMessages);
         setPinnedMessages(pinnedList);
-      }
-      
-      // Mark messages as read
-      const currentMessages = isAdmin && selectedChat.id === MENURU_OFFICIAL.id ? messages : messageList;
-      const unreadMessages = currentMessages.filter(m => !m.read && m.senderId !== user.uid);
-      if (!isAdmin || selectedChat.id !== MENURU_OFFICIAL.id) {
-        for (const msg of unreadMessages) {
-          const msgRef = doc(db, "chats", chatId, "messages", msg.id);
-          await updateDoc(msgRef, {
-            read: true,
-            readAt: serverTimestamp()
-          });
-        }
-      }
-      
-      if (unreadMessages.length > 0) {
-        setChatRooms(prev => prev.map(room => {
-          if (room.id === chatId) {
-            return { ...room, unreadCount: 0 };
-          }
-          return room;
-        }));
-        setTotalUnread(prev => Math.max(0, prev - unreadMessages.length));
       }
       
       setTimeout(() => {
@@ -1063,6 +1048,7 @@ export default function HomePage(): React.JSX.Element {
       setShowUpdate(false);
       setSelectedUpdateId(null);
       setAdminReplyMode(false);
+      messageIdsSet.current.clear();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1087,6 +1073,7 @@ export default function HomePage(): React.JSX.Element {
       setAdminReplyMessage("");
       setSelectedUserForReply(null);
       setSelectedUserNameForReply("");
+      messageIdsSet.current.clear();
     }
   };
 
@@ -1191,17 +1178,25 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message - User sends to official
+  // Send message - with cooldown and spam prevention
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
+    if (isSending) return;
+    
+    // Cooldown check
+    const now = Date.now();
+    if (now - lastSendTime < SEND_COOLDOWN) {
+      return;
+    }
+    
+    setIsSending(true);
+    setLastSendTime(now);
 
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
-      // Target is always official when user chats
       const targetId = MENURU_OFFICIAL.id;
-      
       const chatId = [user.uid, targetId].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
@@ -1255,15 +1250,27 @@ export default function HomePage(): React.JSX.Element {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setTimeout(() => {
+        setIsSending(false);
+      }, 1000);
     }
   };
 
-  // Admin reply to specific user
+  // Admin reply to specific user - with cooldown
   const handleAdminReplyToUser = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
+    if (isSending) return;
+    
+    const now = Date.now();
+    if (now - lastSendTime < SEND_COOLDOWN) {
+      return;
+    }
+    
+    setIsSending(true);
+    setLastSendTime(now);
     
     try {
-      // Send reply to the specific user's chat with official
       const chatId = [selectedUserForReply, MENURU_OFFICIAL.id].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
@@ -1322,12 +1329,19 @@ export default function HomePage(): React.JSX.Element {
       
     } catch (error) {
       console.error("Error sending admin reply:", error);
+    } finally {
+      setTimeout(() => {
+        setIsSending(false);
+      }, 1000);
     }
   };
 
   // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
+    if (isSending) return;
+    
+    setIsSending(true);
     
     try {
       const targetUser = users.find(u => u.id === selectedShareUser);
@@ -1368,6 +1382,10 @@ export default function HomePage(): React.JSX.Element {
       setSelectedShareUser("");
     } catch (error) {
       console.error("Error sharing message:", error);
+    } finally {
+      setTimeout(() => {
+        setIsSending(false);
+      }, 1000);
     }
   };
 
@@ -1389,6 +1407,9 @@ export default function HomePage(): React.JSX.Element {
   // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
+    if (isSending) return;
+    
+    setIsSending(true);
     
     try {
       const chatId = [user.uid, selectedChat.id].sort().join("_");
@@ -1415,6 +1436,10 @@ export default function HomePage(): React.JSX.Element {
       setShowMessageMenu(null);
     } catch (error) {
       console.error("Error resending message:", error);
+    } finally {
+      setTimeout(() => {
+        setIsSending(false);
+      }, 1000);
     }
   };
 
