@@ -97,8 +97,8 @@ interface Message {
   isShared?: boolean;
   isAdminReply?: boolean;
   adminReplyTo?: string;
-  originalSenderId?: string;
-  originalSenderName?: string;
+  targetUserId?: string;
+  targetUserName?: string;
 }
 
 interface ChatRoom {
@@ -537,6 +537,7 @@ export default function HomePage(): React.JSX.Element {
       
       for (const docSnap of usersSnap.docs) {
         const userId = docSnap.id;
+        const userData = docSnap.data();
         
         const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
         const chatRef = doc(db, "chats", chatId);
@@ -565,8 +566,8 @@ export default function HomePage(): React.JSX.Element {
           replyToSender: null,
           isShared: false,
           isAdminReply: false,
-          originalSenderId: broadcastMessage.senderId,
-          originalSenderName: broadcastMessage.senderName
+          targetUserId: userId,
+          targetUserName: userData.name || "User"
         });
       }
       
@@ -664,7 +665,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
     });
-    return () => unsubscribe();
+    return () => unsubscribe;
   }, []);
 
   const checkAndSendOfficialMessages = async (userId: string) => {
@@ -698,8 +699,8 @@ export default function HomePage(): React.JSX.Element {
             replyToSender: null,
             isShared: false,
             isAdminReply: false,
-            originalSenderId: msg.senderId,
-            originalSenderName: msg.senderName
+            targetUserId: userId,
+            targetUserName: user?.displayName || user?.email || "User"
           });
         }
       }
@@ -909,13 +910,20 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages - Modified for admin to see all user messages
+  // Load messages - Modified to show all user messages for admin
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
-    const q = query(messagesRef, orderBy("timestamp", "asc"));
+    
+    // For admin viewing official chat, we need to load all messages from all users
+    let q;
+    if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
+      q = query(messagesRef, orderBy("timestamp", "asc"));
+    } else {
+      q = query(messagesRef, orderBy("timestamp", "asc"));
+    }
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messageList: Message[] = [];
@@ -929,12 +937,56 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      setMessages(messageList);
-      setPinnedMessages(pinnedList);
+      // For admin viewing official chat, also fetch messages from all user chats
+      if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
+        const allMessages: Message[] = [];
+        const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
+        
+        for (const targetUser of allUsers) {
+          const userChatId = [targetUser.id, MENURU_OFFICIAL.id].sort().join("_");
+          const userMessagesRef = collection(db, "chats", userChatId, "messages");
+          const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
+          const userSnapshot = await getDocs(userQ);
+          
+          userSnapshot.forEach((doc) => {
+            const msg = { id: doc.id, ...doc.data() } as Message;
+            // Add target user info if not present
+            if (!msg.targetUserId) {
+              msg.targetUserId = targetUser.id;
+              msg.targetUserName = targetUser.name;
+            }
+            allMessages.push(msg);
+          });
+        }
+        
+        // Combine and sort all messages
+        const combinedMessages = [...messageList, ...allMessages];
+        combinedMessages.sort((a, b) => {
+          const timeA = a.timestamp?.seconds || 0;
+          const timeB = b.timestamp?.seconds || 0;
+          return timeA - timeB;
+        });
+        
+        // Filter out duplicate messages
+        const uniqueMessages: Message[] = [];
+        const messageIds = new Set();
+        for (const msg of combinedMessages) {
+          if (!messageIds.has(msg.id)) {
+            messageIds.add(msg.id);
+            uniqueMessages.push(msg);
+          }
+        }
+        
+        setMessages(uniqueMessages);
+        setPinnedMessages(uniqueMessages.filter(m => m.isPinned));
+      } else {
+        setMessages(messageList);
+        setPinnedMessages(pinnedList);
+      }
       
-      // Only mark messages as read if user is not admin
-      // Admin sees all messages but doesn't mark them as read
-      const unreadMessages = messageList.filter(m => !m.read && m.senderId !== user.uid);
+      // Mark messages as read
+      const currentMessages = isAdmin && selectedChat.id === MENURU_OFFICIAL.id ? messages : messageList;
+      const unreadMessages = currentMessages.filter(m => !m.read && m.senderId !== user.uid);
       if (!isAdmin || selectedChat.id !== MENURU_OFFICIAL.id) {
         for (const msg of unreadMessages) {
           const msgRef = doc(db, "chats", chatId, "messages", msg.id);
@@ -961,7 +1013,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [selectedChat, user, isAdmin]);
+  }, [selectedChat, user, isAdmin, users]);
 
   // Handle login
   const handleLogin = async () => {
@@ -1139,7 +1191,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message - Modified for user to send to official
+  // Send message - User sends to official
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
@@ -1147,10 +1199,8 @@ export default function HomePage(): React.JSX.Element {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
-      // If user is chatting with official, send to official
-      // If admin is replying, send to specific user
-      let targetId = selectedChat.id;
-      let targetName = selectedChat.name;
+      // Target is always official when user chats
+      const targetId = MENURU_OFFICIAL.id;
       
       const chatId = [user.uid, targetId].sort().join("_");
       
@@ -1176,8 +1226,8 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isShared: false,
         isAdminReply: false,
-        originalSenderId: user.uid,
-        originalSenderName: user.displayName || user.email || "User"
+        targetUserId: user.uid,
+        targetUserName: user.displayName || user.email || "User"
       };
       
       if (replyTo) {
@@ -1213,13 +1263,6 @@ export default function HomePage(): React.JSX.Element {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
     
     try {
-      // Get the target user
-      const targetUser = users.find(u => u.id === selectedUserForReply);
-      if (!targetUser) return;
-      
-      // Get the admin user
-      const adminUser = user;
-      
       // Send reply to the specific user's chat with official
       const chatId = [selectedUserForReply, MENURU_OFFICIAL.id].sort().join("_");
       
@@ -1246,11 +1289,30 @@ export default function HomePage(): React.JSX.Element {
         isShared: false,
         isAdminReply: true,
         adminReplyTo: selectedUserForReply,
-        originalSenderId: MENURU_OFFICIAL.id,
-        originalSenderName: "Menuru Official",
+        targetUserId: selectedUserForReply,
+        targetUserName: selectedUserNameForReply || "User",
         replyTo: null,
-        replyToText: `Balasan untuk ${targetUser.name}: ${adminReplyMessage.trim()}`,
+        replyToText: `Balasan untuk ${selectedUserNameForReply || "User"}`,
         replyToSender: "Admin"
+      });
+      
+      // Also add to admin's chat for visibility
+      const adminChatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
+      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
+      await addDoc(adminMessagesRef, {
+        text: `[Balasan untuk ${selectedUserNameForReply || "User"}] ${adminReplyMessage.trim()}`,
+        senderId: MENURU_OFFICIAL.id,
+        senderName: "Menuru Official",
+        receiverId: user.uid,
+        timestamp: serverTimestamp(),
+        read: true,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: false,
+        isAdminReply: true,
+        adminReplyTo: selectedUserForReply,
+        targetUserId: selectedUserForReply,
+        targetUserName: selectedUserNameForReply || "User"
       });
       
       setAdminReplyMessage("");
@@ -1297,8 +1359,8 @@ export default function HomePage(): React.JSX.Element {
         sharedFrom: shareMessage.senderId,
         sharedFromName: shareMessage.senderName,
         isAdminReply: false,
-        originalSenderId: user.uid,
-        originalSenderName: user.displayName || user.email || "User"
+        targetUserId: targetUser.id,
+        targetUserName: targetUser.name
       });
       
       setShowShareModal(false);
@@ -1346,8 +1408,8 @@ export default function HomePage(): React.JSX.Element {
         replyToText: null,
         replyToSender: null,
         isAdminReply: false,
-        originalSenderId: user.uid,
-        originalSenderName: user.displayName || user.email || "User"
+        targetUserId: user.uid,
+        targetUserName: user.displayName || user.email || "User"
       });
       
       setShowMessageMenu(null);
@@ -3956,7 +4018,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                      {isMine ? "You: " : `${msg.originalSenderName || msg.senderName}: `}
+                                      {isMine ? "You: " : `${msg.targetUserName || msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -4062,8 +4124,11 @@ export default function HomePage(): React.JSX.Element {
                         
                         // Show original sender name for admin viewing all messages
                         const displaySenderName = isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isMine && !isAdminReply
-                          ? (msg.originalSenderName || msg.senderName)
+                          ? (msg.targetUserName || msg.senderName)
                           : null;
+                        
+                        // Check if this is a message from a user (not official)
+                        const isUserMessage = msg.senderId !== MENURU_OFFICIAL.id && msg.senderId !== user?.uid;
                         
                         return (
                           <React.Fragment key={idx}>
@@ -4101,7 +4166,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {displaySenderName && (
+                              {displaySenderName && isUserMessage && (
                                 <div
                                   style={{
                                     fontSize: "11px",
@@ -4358,14 +4423,14 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && !isMine && (
+                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && !isMine && isUserMessage && (
                                         <motion.button
                                           whileHover={{ backgroundColor: "#f5f5f5" }}
                                           onClick={() => {
                                             setAdminReplyMode(true);
-                                            setSelectedUserForReply(msg.originalSenderId || msg.senderId);
-                                            setSelectedUserNameForReply(msg.originalSenderName || msg.senderName);
-                                            setAdminReplyMessage(`Balasan untuk ${msg.originalSenderName || msg.senderName}: ${msg.text}`);
+                                            setSelectedUserForReply(msg.targetUserId || msg.senderId);
+                                            setSelectedUserNameForReply(msg.targetUserName || msg.senderName);
+                                            setAdminReplyMessage(`Balasan untuk ${msg.targetUserName || msg.senderName}: ${msg.text}`);
                                             setShowMessageMenu(null);
                                           }}
                                           style={{
