@@ -25,8 +25,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  deleteDoc
+  updateDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -70,12 +69,12 @@ interface ChatUser {
   createdAt?: any;
   isPinned?: boolean;
   isOfficial?: boolean;
-  isAdmin?: boolean;
   online?: boolean;
   lastSeen?: any;
   typing?: boolean;
   bio?: string;
   note?: string;
+  isAdmin?: boolean;
 }
 
 interface Message {
@@ -97,7 +96,6 @@ interface Message {
   isShared?: boolean;
   isAdminReply?: boolean;
   adminReplyTo?: string;
-  adminReplyToUser?: string;
 }
 
 interface ChatRoom {
@@ -108,6 +106,7 @@ interface ChatRoom {
   lastMessageSenderId?: string;
   unreadCount: number;
   isPinned?: boolean;
+  hasAdminReply?: boolean;
 }
 
 interface UpdateItem {
@@ -186,14 +185,6 @@ const EditIcon = () => (
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Admin Badge
-const AdminBadge = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="#FFD700" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="#FFD700" />
-    <path d="M9 12L11.5 14.5L16 10" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -343,85 +334,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          marginLeft: "4px",
-          display: "inline-block",
-          verticalAlign: "-2px",
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <path
-          fill="#0095F6"
-          d="
-            M12 2.2
-            C13.6 3.8 16.2 3.8 17.8 2.2
-            C18.6 3.8 20.2 5.4 21.8 6.2
-            C20.2 7.8 20.2 10.4 21.8 12
-            C20.2 13.6 20.2 16.2 21.8 17.8
-            C20.2 18.6 18.6 20.2 17.8 21.8
-            C16.2 20.2 13.6 20.2 12 21.8
-            C10.4 20.2 7.8 20.2 6.2 21.8
-            C5.4 20.2 3.8 18.6 2.2 17.8
-            C3.8 16.2 3.8 13.6 2.2 12
-            C3.8 10.4 3.8 7.8 2.2 6.2
-            C3.8 5.4 5.4 3.8 6.2 2.2
-            C7.8 3.8 10.4 3.8 12 2.2
-            Z
-          "
-        />
-        <path
-          d="M9.2 12.3l2 2 4.6-4.6"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          Official Account
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -455,11 +367,11 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
+  const [adminReplyToUser, setAdminReplyToUser] = useState<string | null>(null);
+  const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
-  const [adminStatus, setAdminStatus] = useState("");
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -487,15 +399,6 @@ export default function HomePage(): React.JSX.Element {
     "Chat with Menuru"
   ];
   let chatTextIndex = 0;
-
-  // Admin status messages
-  const adminStatusMessages = [
-    "Admin sedang online",
-    "Admin akan segera membalas",
-    "Tunggu sebentar, admin sedang mengetik...",
-    "Admin siap membantu Anda",
-    "Admin aktif, silahkan chat"
-  ];
 
   // Update Data
   const updates: UpdateItem[] = [
@@ -564,27 +467,27 @@ export default function HomePage(): React.JSX.Element {
 
   const OFFICIAL_MESSAGES = [
     {
-      text: "Hello! Welcome to Menuru Chat 👋",
+      text: "Hello! Welcome to Menuru Chat",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "We are currently improving the chat feature. Please be patient! 🙏",
+      text: "We are currently improving the chat feature. Please be patient!",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Pin message and chat history features will be improved soon ✨",
+      text: "Pin message and chat history features will be improved soon",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Don't forget to read our Privacy Policy and Updates 👇",
+      text: "Don't forget to read our Privacy Policy and Updates",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Thank you for your understanding! 😊",
+      text: "Thank you for your understanding!",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     }
@@ -599,17 +502,8 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
-  // Admin status rolling
-  useEffect(() => {
-    if (user?.email === ADMIN_EMAIL) {
-      let index = 0;
-      const interval = setInterval(() => {
-        setAdminStatus(adminStatusMessages[index % adminStatusMessages.length]);
-        index++;
-      }, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+  // Check if current user is admin
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   // Broadcast messages to all users
   const broadcastMessages = async () => {
@@ -628,7 +522,7 @@ export default function HomePage(): React.JSX.Element {
       const usersSnap = await getDocs(usersRef);
       
       const broadcastMessage = {
-        text: "Don't forget to read our Privacy Policy and Updates 👇",
+        text: "Don't forget to read our Privacy Policy and Updates",
         senderId: "official_menuru",
         senderName: "Menuru Official"
       };
@@ -695,7 +589,7 @@ export default function HomePage(): React.JSX.Element {
           
           const googlePhotoURL = currentUser.photoURL || "";
           const googleName = currentUser.displayName || currentUser.email || "";
-          const isAdmin = currentUser.email === ADMIN_EMAIL;
+          const isAdminUser = currentUser.email === ADMIN_EMAIL;
           
           if (!userSnap.exists()) {
             await setDoc(userRef, {
@@ -706,12 +600,12 @@ export default function HomePage(): React.JSX.Element {
               createdAt: serverTimestamp(),
               isPinned: false,
               isOfficial: false,
-              isAdmin: isAdmin,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
               bio: "",
-              note: ""
+              note: "",
+              isAdmin: isAdminUser
             });
             
             if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
@@ -728,14 +622,15 @@ export default function HomePage(): React.JSX.Element {
               await updateDoc(userRef, {
                 photoURL: googlePhotoURL,
                 name: googleName,
-                lastSeen: serverTimestamp()
+                lastSeen: serverTimestamp(),
+                isAdmin: isAdminUser
               });
             }
             
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp(),
-              isAdmin: isAdmin
+              isAdmin: isAdminUser
             });
           }
           
@@ -747,7 +642,8 @@ export default function HomePage(): React.JSX.Element {
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
-              note: updatedData.note || ""
+              note: updatedData.note || "",
+              isAdmin: updatedData.isAdmin || false
             }));
           }
           
@@ -833,12 +729,12 @@ export default function HomePage(): React.JSX.Element {
             photoURL: user.photoURL || "",
             isPinned: false,
             isOfficial: false,
-            isAdmin: user.email === ADMIN_EMAIL,
             online: true,
             lastSeen: null,
             typing: false,
             bio: user.bio || "",
-            note: user.note || ""
+            note: user.note || "",
+            isAdmin: user.isAdmin || false
           };
           
           const selfExists = userList.some(u => u.id === user.uid);
@@ -853,14 +749,14 @@ export default function HomePage(): React.JSX.Element {
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
                 note: user.note || userList[index].note || "",
-                isAdmin: user.email === ADMIN_EMAIL
+                isAdmin: user.isAdmin || false
               };
             }
           }
           
           const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
-            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false });
+            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
           }
           
           userList.sort((a, b) => {
@@ -905,12 +801,14 @@ export default function HomePage(): React.JSX.Element {
             let lastMessageTime = null;
             let lastMessageSenderId = "";
             let unreadCount = 0;
+            let hasAdminReply = false;
             
             if (!msgSnap.empty) {
               const lastMsg = msgSnap.docs[0].data() as Message;
               lastMessage = lastMsg.text;
               lastMessageTime = lastMsg.timestamp;
               lastMessageSenderId = lastMsg.senderId;
+              hasAdminReply = lastMsg.isAdminReply || false;
             }
             
             const unreadQuery = query(
@@ -937,7 +835,8 @@ export default function HomePage(): React.JSX.Element {
               lastMessageTime,
               lastMessageSenderId,
               unreadCount,
-              isPinned: data.isPinned || false
+              isPinned: data.isPinned || false,
+              hasAdminReply
             });
           }
         }
@@ -1115,6 +1014,7 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
+      setAdminReplyToUser(null);
     }
   };
 
@@ -1250,7 +1150,7 @@ export default function HomePage(): React.JSX.Element {
         isPinned: false,
         pinnedAt: null,
         isShared: false,
-        isAdminReply: user.email === ADMIN_EMAIL
+        isAdminReply: isAdmin || false
       };
       
       if (replyTo) {
@@ -1259,10 +1159,15 @@ export default function HomePage(): React.JSX.Element {
         msgData.replyToSender = replyTo.senderName;
       }
       
+      if (adminReplyToUser) {
+        msgData.adminReplyTo = adminReplyToUser;
+      }
+      
       await addDoc(messagesRef, msgData);
 
       setMessage("");
       setReplyTo(null);
+      setAdminReplyToUser(null);
       
       if (rollingInterval.current) {
         clearInterval(rollingInterval.current);
@@ -1278,6 +1183,49 @@ export default function HomePage(): React.JSX.Element {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  // Admin reply to user
+  const handleAdminReply = async (userId: string, userMessage: string) => {
+    if (!isAdmin || !adminReplyMessage.trim() || !db) return;
+    
+    try {
+      const chatId = [user.uid, userId].sort().join("_");
+      
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [user.uid, userId],
+          createdAt: serverTimestamp(),
+          isPinned: false
+        });
+      }
+      
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      await addDoc(messagesRef, {
+        text: adminReplyMessage.trim(),
+        senderId: user.uid,
+        senderName: "Admin Menuru",
+        receiverId: userId,
+        timestamp: serverTimestamp(),
+        read: false,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: false,
+        isAdminReply: true,
+        adminReplyTo: userId,
+        replyTo: null,
+        replyToText: userMessage,
+        replyToSender: "User"
+      });
+      
+      setAdminReplyMessage("");
+      setAdminReplyToUser(null);
+      
+    } catch (error) {
+      console.error("Error sending admin reply:", error);
     }
   };
 
@@ -1431,9 +1379,9 @@ export default function HomePage(): React.JSX.Element {
           createdAt: serverTimestamp(),
           isPinned: false
         });
-        setAddUserStatus(`✅ Chat with ${targetUser.name} created!`);
+        setAddUserStatus(`Chat with ${targetUser.name} created!`);
       } else {
-        setAddUserStatus(`ℹ️ Chat with ${targetUser.name} already exists.`);
+        setAddUserStatus(`Chat with ${targetUser.name} already exists.`);
       }
       
       setSelectedNewUser("");
@@ -1441,7 +1389,7 @@ export default function HomePage(): React.JSX.Element {
       
     } catch (error) {
       console.error("Error adding user:", error);
-      setAddUserStatus("❌ Failed to add user.");
+      setAddUserStatus("Failed to add user.");
     }
   };
 
@@ -1536,9 +1484,6 @@ export default function HomePage(): React.JSX.Element {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
-  // Check if current user is admin
-  const isAdmin = user?.email === ADMIN_EMAIL;
-
   return (
     <div
       style={{
@@ -1551,7 +1496,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* BANNER WITH GSAP STYLE ROLLING TEXT - FADE IN/OUT */}
+      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1689,19 +1634,9 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {isAdmin && <AdminBadge />}
+                {isAdmin && " (Admin)"}
               </span>
               <OnlineIndicator online={true} />
-              {isAdmin && (
-                <span style={{
-                  fontSize: "10px",
-                  color: "#FFD700",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                }}>
-                  ⭐ Admin
-                </span>
-              )}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -1958,8 +1893,7 @@ export default function HomePage(): React.JSX.Element {
                 <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
-                    {u.isAdmin && <AdminBadge />}
+                    {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""}
                   </option>
                 ))}
               </select>
@@ -2077,7 +2011,11 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
-                      {selectedChat.isAdmin && <AdminBadge />}
+                      {selectedChat.id === user.uid && isAdmin && (
+                        <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
+                          Admin Online
+                        </span>
+                      )}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3065,24 +3003,13 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {profileUser.isOfficial && (
-                          <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                            <InstagramVerifiedBadge size={16} />
-                          </div>
-                        )}
-                        {profileUser.isAdmin && (
-                          <div style={{ position: "absolute", top: -2, right: -2 }}>
-                            <AdminBadge />
-                          </div>
-                        )}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
+                            {profileUser.isAdmin && " (Admin)"}
                           </span>
-                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
-                          {profileUser.isAdmin && <AdminBadge />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3090,11 +3017,6 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
                           </span>
-                          {profileUser.isAdmin && (
-                            <span style={{ fontSize: "10px", color: "#FFD700", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                              ⭐ Admin
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -3250,165 +3172,6 @@ export default function HomePage(): React.JSX.Element {
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  {/* Admin Status Indicator */}
-                  {isAdmin && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        padding: "10px 14px",
-                        backgroundColor: "rgba(255,215,0,0.1)",
-                        borderRadius: "8px",
-                        marginBottom: "10px",
-                        border: "1px solid rgba(255,215,0,0.2)",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <AdminBadge />
-                      <div>
-                        <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                          Admin Panel
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                          {adminStatus || "Admin sedang online"}
-                        </div>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowAdminPanel(!showAdminPanel)}
-                        style={{
-                          marginLeft: "auto",
-                          padding: "4px 12px",
-                          backgroundColor: "#000",
-                          border: "none",
-                          borderRadius: "4px",
-                          color: "#fff",
-                          fontSize: "10px",
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {showAdminPanel ? "Close" : "Open"}
-                      </motion.button>
-                    </motion.div>
-                  )}
-
-                  {/* Admin Panel - Show all users chat */}
-                  {isAdmin && showAdminPanel && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        padding: "12px",
-                        backgroundColor: "#f8f8f8",
-                        borderRadius: "8px",
-                        marginBottom: "12px",
-                        overflow: "hidden",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <div style={{ fontSize: "12px", fontWeight: 600, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                        📋 All User Chats
-                      </div>
-                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                        {chatRooms.map((room) => {
-                          const otherId = room.participants.find(id => id !== user.uid);
-                          const otherUser = users.find(u => u.id === otherId);
-                          if (!otherUser || otherUser.isAdmin) return null;
-                          return (
-                            <motion.div
-                              key={room.id}
-                              whileHover={{ scale: 1.02 }}
-                              onClick={() => {
-                                setSelectedChat(otherUser);
-                                setShowAdminPanel(false);
-                              }}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "10px",
-                                padding: "8px 12px",
-                                borderRadius: "6px",
-                                cursor: "pointer",
-                                backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.1)" : "transparent",
-                                marginBottom: "4px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: "28px",
-                                  height: "28px",
-                                  borderRadius: "4px",
-                                  backgroundColor: "#f0f0f0",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "12px",
-                                  overflow: "hidden",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {otherUser.photoURL ? (
-                                  <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                                )}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: "11px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                                  {otherUser.name}
-                                  <span style={{ fontSize: "9px", color: "#999", marginLeft: "4px", fontFamily: FONT_FAMILY }}>
-                                    {otherUser.email}
-                                  </span>
-                                </div>
-                                <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                  {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "No messages"}
-                                </div>
-                              </div>
-                              {room.unreadCount > 0 && (
-                                <div
-                                  style={{
-                                    backgroundColor: "#c5e800",
-                                    color: "#000",
-                                    padding: "0 6px",
-                                    borderRadius: "4px",
-                                    fontSize: "8px",
-                                    fontWeight: 600,
-                                    lineHeight: "16px",
-                                    height: "16px",
-                                    minWidth: "16px",
-                                    textAlign: "center",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  {room.unreadCount}
-                                </div>
-                              )}
-                              <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
-                            </motion.div>
-                          );
-                        })}
-                        {chatRooms.filter(room => {
-                          const otherId = room.participants.find(id => id !== user.uid);
-                          const otherUser = users.find(u => u.id === otherId);
-                          return otherUser && !otherUser.isAdmin;
-                        }).length === 0 && (
-                          <div style={{ fontSize: "11px", color: "#999", textAlign: "center", padding: "12px 0", fontFamily: FONT_FAMILY }}>
-                            No user chats yet
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-
                   {/* Announcement */}
                   <div
                     style={{
@@ -3515,8 +3278,7 @@ export default function HomePage(): React.JSX.Element {
                           <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
-                              {u.isAdmin && <AdminBadge />}
+                              {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""}
                             </option>
                           ))}
                         </select>
@@ -3644,8 +3406,7 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                      {u.isAdmin && <AdminBadge />}
+                                      {u.isAdmin && " (Admin)"}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3760,11 +3521,11 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                        {otherUser.isAdmin && <AdminBadge />}
+                                        {otherUser.isAdmin && " (Admin)"}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
+                                        {room.hasAdminReply && " [Admin replied]"}
                                       </div>
                                     </div>
                                     <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
@@ -3880,11 +3641,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {otherUser.isAdmin && (
-                                <div style={{ position: "absolute", top: -2, right: -2 }}>
-                                  <AdminBadge />
-                                </div>
-                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3896,16 +3652,16 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   {otherUser.name}
+                                  {otherUser.isAdmin && " (Admin)"}
                                 </span>
-                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                {otherUser.isAdmin && <AdminBadge />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {room.lastMessage ? (
                                   <>
-                                    {isLastMessageFromMe && "Messages: "}
+                                    {isLastMessageFromMe ? "You: " : ""}
                                     {room.lastMessage}
+                                    {room.hasAdminReply && " [Admin replied]"}
                                   </>
                                 ) : (
                                   "No messages"
@@ -4036,11 +3792,6 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {selectedChat.isAdmin && (
-                        <div style={{ position: "absolute", top: -2, right: -2 }}>
-                          <AdminBadge />
-                        </div>
-                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -4049,24 +3800,26 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
+                          {selectedChat.isAdmin && " (Admin)"}
                         </span>
-                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
-                        {selectedChat.isAdmin && <AdminBadge />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <OnlineIndicator 
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
+                        {isAdmin && selectedChat.email !== ADMIN_EMAIL && (
+                          <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
+                            Admin Online - tunggu sebentar
+                          </span>
+                        )}
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
-                            {selectedChat.isAdmin && " ⭐ Admin"}
                           </span>
                         ) : (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getLastSeen(selectedChat.id)}
-                            {selectedChat.isAdmin && " ⭐ Admin"}
                           </span>
                         )}
                       </div>
@@ -4091,22 +3844,24 @@ export default function HomePage(): React.JSX.Element {
                     </motion.button>
                   </div>
 
-                  {/* Admin Reply Status in Chat */}
-                  {isAdmin && selectedChat && !selectedChat.isAdmin && (
+                  {/* Admin Reply Indicator */}
+                  {isAdmin && selectedChat && selectedChat.email !== ADMIN_EMAIL && (
                     <div
                       style={{
-                        padding: "6px 14px",
-                        backgroundColor: "rgba(255,215,0,0.08)",
-                        borderBottom: "1px solid rgba(255,215,0,0.1)",
+                        padding: "8px 16px",
+                        backgroundColor: "rgba(74, 222, 128, 0.1)",
+                        borderBottom: "1px solid rgba(74, 222, 128, 0.2)",
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
+                        gap: "10px",
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <AdminBadge />
+                      <span style={{ fontSize: "12px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
+                        Admin Mode
+                      </span>
                       <span style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        {adminStatus || "Admin sedang online"}
+                        Anda sedang membalas chat user ini
                       </span>
                     </div>
                   )}
@@ -4167,8 +3922,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                      {isMine ? "Messages: " : `${msg.senderName}: `}
-                                      {msg.isAdminReply && " ⭐ Admin"}
+                                      {isMine ? "You: " : `${msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -4202,7 +3956,6 @@ export default function HomePage(): React.JSX.Element {
                         <div>
                           <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                             Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
-                            {replyTo.isAdminReply && " ⭐ Admin"}
                           </div>
                           <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -4271,6 +4024,7 @@ export default function HomePage(): React.JSX.Element {
                         
                         const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
+                        const isAdminReply = msg.isAdminReply || false;
                         
                         return (
                           <React.Fragment key={idx}>
@@ -4298,8 +4052,8 @@ export default function HomePage(): React.JSX.Element {
                                 maxWidth: "80%",
                                 padding: "10px 14px",
                                 borderRadius: "12px",
-                                backgroundColor: isMine ? "#c5e800" : (msg.isAdminReply ? "rgba(255,215,0,0.15)" : "#f0f0f0"),
-                                color: "#000000",
+                                backgroundColor: isAdminReply ? "#4ade80" : (isMine ? "#c5e800" : "#f0f0f0"),
+                                color: isAdminReply ? "#000" : (isMine ? "#000000" : "#000000"),
                                 fontSize: "14px",
                                 lineHeight: 1.5,
                                 position: "relative",
@@ -4308,24 +4062,6 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {msg.isAdminReply && !isMine && (
-                                <div
-                                  style={{
-                                    fontSize: "9px",
-                                    color: "#FFD700",
-                                    fontWeight: 500,
-                                    marginBottom: "4px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  <AdminBadge />
-                                  <span>Admin Reply</span>
-                                </div>
-                              )}
-                              
                               {msg.isShared && msg.sharedFromName && (
                                 <div
                                   style={{
@@ -4355,9 +4091,22 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <span style={{ fontWeight: 500, color: "#22c55e", fontFamily: FONT_FAMILY }}>
                                     {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
-                                    {msg.isAdminReply && " ⭐ Admin"}
                                   </span>
                                   <span style={{ color: isMine ? "#000" : "#333", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                </div>
+                              )}
+                              
+                              {isAdminReply && !isMine && (
+                                <div
+                                  style={{
+                                    fontSize: "10px",
+                                    color: "#000",
+                                    fontWeight: 500,
+                                    marginBottom: "4px",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  Admin
                                 </div>
                               )}
                               
@@ -4389,7 +4138,6 @@ export default function HomePage(): React.JSX.Element {
                                   >
                                     Update System
                                   </span>
-                                  {' 👇'}
                                 </span>
                               ) : (
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
@@ -4557,6 +4305,34 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
+                                      {isAdmin && !isMine && !msg.isAdminReply && (
+                                        <motion.button
+                                          whileHover={{ backgroundColor: "#f5f5f5" }}
+                                          onClick={() => {
+                                            setAdminReplyToUser(msg.senderId);
+                                            setAdminReplyMessage(`Balasan untuk: ${msg.text}`);
+                                            setShowMessageMenu(null);
+                                          }}
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                            padding: "6px 12px",
+                                            width: "100%",
+                                            background: "none",
+                                            border: "none",
+                                            color: "#4ade80",
+                                            fontSize: "12px",
+                                            cursor: "pointer",
+                                            borderRadius: "6px",
+                                            transition: "all .2s ease",
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          <ReplyIcon />
+                                          <span>Admin Reply</span>
+                                        </motion.button>
+                                      )}
                                     </motion.div>
                                   )}
                                 </AnimatePresence>
@@ -4600,68 +4376,161 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    <input
-                      type="text"
-                      placeholder={replyTo ? "Type a reply..." : "Type a message..."}
-                      value={message}
-                      onChange={handleTyping}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "10px 16px",
-                        border: "1px solid #e8e8e8",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        fontFamily: FONT_FAMILY,
-                        transition: "all .2s ease",
-                        backgroundColor: "#f5f5f5",
-                        color: "#000",
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = "#c5e800";
-                        e.currentTarget.style.backgroundColor = "#ffffff";
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = "#e8e8e8";
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                      }}
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleSendMessage}
-                      style={{
-                        backgroundColor: "#c5e800",
-                        border: "none",
-                        padding: "10px 20px",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        color: "#000",
-                        cursor: "pointer",
-                        transition: "all .2s ease",
-                        whiteSpace: "nowrap",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#b0d000";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "#c5e800";
-                      }}
-                    >
-                      <span>Send</span>
-                      <SendIcon />
-                    </motion.button>
+                    {adminReplyToUser ? (
+                      // Admin Reply Input
+                      <>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
+                            Admin Reply to user
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Type admin reply..."
+                            value={adminReplyMessage}
+                            onChange={(e) => setAdminReplyMessage(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleAdminReply(selectedChat.id, adminReplyMessage);
+                              }
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px 16px",
+                              border: "1px solid #4ade80",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              transition: "all .2s ease",
+                              backgroundColor: "#f5f5f5",
+                              color: "#000",
+                            }}
+                            onFocus={(e) => {
+                              e.currentTarget.style.borderColor = "#4ade80";
+                              e.currentTarget.style.backgroundColor = "#ffffff";
+                            }}
+                            onBlur={(e) => {
+                              e.currentTarget.style.borderColor = "#4ade80";
+                              e.currentTarget.style.backgroundColor = "#f5f5f5";
+                            }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "flex-end" }}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleAdminReply(selectedChat.id, adminReplyMessage)}
+                            disabled={!adminReplyMessage.trim()}
+                            style={{
+                              backgroundColor: adminReplyMessage.trim() ? "#4ade80" : "#ccc",
+                              border: "none",
+                              padding: "10px 20px",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontWeight: 500,
+                              color: adminReplyMessage.trim() ? "#000" : "#666",
+                              cursor: adminReplyMessage.trim() ? "pointer" : "not-allowed",
+                              transition: "all .2s ease",
+                              whiteSpace: "nowrap",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            <span>Send Reply</span>
+                            <SendIcon />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              setAdminReplyToUser(null);
+                              setAdminReplyMessage("");
+                            }}
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "1px solid #ddd",
+                              padding: "10px 14px",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              color: "#666",
+                              cursor: "pointer",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            Cancel
+                          </motion.button>
+                        </div>
+                      </>
+                    ) : (
+                      // Normal Chat Input
+                      <>
+                        <input
+                          type="text"
+                          placeholder={replyTo ? "Type a reply..." : "Type a message..."}
+                          value={message}
+                          onChange={handleTyping}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendMessage();
+                            }
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: "10px 16px",
+                            border: "1px solid #e8e8e8",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            outline: "none",
+                            fontFamily: FONT_FAMILY,
+                            transition: "all .2s ease",
+                            backgroundColor: "#f5f5f5",
+                            color: "#000",
+                          }}
+                          onFocus={(e) => {
+                            e.currentTarget.style.borderColor = "#c5e800";
+                            e.currentTarget.style.backgroundColor = "#ffffff";
+                          }}
+                          onBlur={(e) => {
+                            e.currentTarget.style.borderColor = "#e8e8e8";
+                            e.currentTarget.style.backgroundColor = "#f5f5f5";
+                          }}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleSendMessage}
+                          style={{
+                            backgroundColor: "#c5e800",
+                            border: "none",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            color: "#000",
+                            cursor: "pointer",
+                            transition: "all .2s ease",
+                            whiteSpace: "nowrap",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#b0d000";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#c5e800";
+                          }}
+                        >
+                          <span>Send</span>
+                          <SendIcon />
+                        </motion.button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
