@@ -10,7 +10,7 @@
     "strict": false,
 
     /* ===== React & JSX ===== */
-    "jsx": "react-jsx",
+    "jsx": "preserve"",
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
