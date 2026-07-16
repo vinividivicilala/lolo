@@ -10,7 +10,7 @@
     "strict": false,
 
     /* ===== React & JSX ===== */
-    "jsx": "preserve"",
+    "jsx": "preserve",  // ← HAPUS tanda petik ganda di akhir
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -25,12 +25,11 @@
 
     /* ===== Base URL ===== */
     "baseUrl": ".",
-   "paths": {
-  "@/*": ["./*"]
-}
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
 
-  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -40,4 +39,3 @@
   ],
   "exclude": ["node_modules"]
 }
-
