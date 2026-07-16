@@ -174,6 +174,13 @@ const EditIcon = () => (
   </svg>
 );
 
+// Chat Icon SVG
+const ChatIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // Awwwards Style Dot Indicator
 const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
@@ -269,9 +276,9 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Dibaca" };
+      return { icon: "✓✓", color: "#0095f6", label: "Read" };
     }
-    return { icon: "✓", color: "#999", label: "Terkirim" };
+    return { icon: "✓", color: "#999", label: "Sent" };
   })();
   
   if (!status) return null;
@@ -282,7 +289,7 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
         style={{
           fontSize: "10px",
           color: status.color,
-          fontWeight: status.label === "Dibaca" ? 600 : 400,
+          fontWeight: status.label === "Read" ? 600 : 400,
           cursor: "pointer",
           fontFamily: FONT_FAMILY,
         }}
@@ -384,7 +391,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          Akun Resmi
+          Official Account
           <div style={{
             position: "absolute",
             top: "100%",
@@ -396,175 +403,6 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
         </div>
       )}
     </div>
-  );
-};
-
-// Banner Rolling Text Component - Modern GSAP Style
-const RollingTextBanner = () => {
-  const phrases = [
-    "Website sedang dalam pengembangan",
-    "Silahkan hubungi official Menuru",
-    "Fitur chat akan segera hadir",
-    "Terima kasih atas kunjungan Anda"
-  ];
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % phrases.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      style={{
-        position: "relative",
-        width: "100%",
-        backgroundColor: "#0D3CFC",
-        padding: "16px 24px",
-        zIndex: 10,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-        minHeight: "72px",
-        borderBottom: "2px solid rgba(255,255,255,0.08)",
-      }}
-    >
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "20px",
-        width: "100%",
-        maxWidth: "900px",
-      }}>
-        {/* Big Chat Icon with pulse animation */}
-        <motion.div
-          animate={{
-            scale: [1, 1.12, 1],
-            rotate: [0, -3, 3, -3, 0],
-          }}
-          transition={{
-            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-          }}
-          style={{
-            color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            flexShrink: 0,
-            opacity: 0.95,
-          }}
-        >
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M8 10H16M8 14H12" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </motion.div>
-        
-        {/* Rolling Text */}
-        <div style={{
-          position: "relative",
-          height: "40px",
-          overflow: "hidden",
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-        }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              initial={{ y: 30, opacity: 0, scale: 0.92 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -30, opacity: 0, scale: 0.92 }}
-              transition={{ 
-                type: "spring",
-                damping: 28,
-                stiffness: 180,
-                duration: 0.5,
-              }}
-              style={{
-                position: "absolute",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 500,
-                  color: "#ffffff",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.01em",
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  textShadow: "0 2px 20px rgba(0,0,0,0.1)",
-                }}
-              >
-                {phrases[currentIndex]}
-              </span>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Decorative dot indicators */}
-      <div style={{
-        position: "absolute",
-        bottom: "8px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        display: "flex",
-        gap: "8px",
-      }}>
-        {phrases.map((_, idx) => (
-          <motion.div
-            key={idx}
-            animate={{
-              scale: idx === currentIndex ? 1 : 0.6,
-              opacity: idx === currentIndex ? 1 : 0.25,
-              width: idx === currentIndex ? "20px" : "8px",
-            }}
-            transition={{ duration: 0.3 }}
-            style={{
-              height: "4px",
-              borderRadius: "4px",
-              backgroundColor: "#ffffff",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Subtle gradient overlay edges for smooth transition */}
-      <div style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "60px",
-        height: "100%",
-        background: "linear-gradient(to right, #0D3CFC, transparent)",
-        pointerEvents: "none",
-        opacity: 0.3,
-      }} />
-      <div style={{
-        position: "absolute",
-        top: 0,
-        right: 0,
-        width: "60px",
-        height: "100%",
-        background: "linear-gradient(to left, #0D3CFC, transparent)",
-        pointerEvents: "none",
-        opacity: 0.3,
-      }} />
-    </motion.div>
   );
 };
 
@@ -605,6 +443,16 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Banner rolling text
+  const [bannerTextIndex, setBannerTextIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const bannerTexts = [
+    "silahkan hubungin official menuru",
+    "silahkan hubungin official menuru",
+    "silahkan hubungin official menuru",
+    "silahkan hubungin official menuru"
+  ];
+
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
@@ -612,16 +460,16 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text
-  const [chatButtonText, setChatButtonText] = useState("Chat dengan Menuru");
+  // Chat button text - rolling text
+  const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isIncomingMessage, setIsIncomingMessage] = useState(false);
   const chatTexts = [
-    "Chat dengan Menuru",
-    "Chat dengan Menuru",
-    "Chat dengan Menuru",
-    "Chat dengan Menuru"
+    "Chat with Menuru",
+    "Chat with Menuru",
+    "Chat with Menuru",
+    "Chat with Menuru"
   ];
   let chatTextIndex = 0;
 
@@ -629,53 +477,53 @@ export default function HomePage(): React.JSX.Element {
   const updates: UpdateItem[] = [
     {
       id: "1",
-      title: "Fitur Chat Real-time",
-      description: "Menambahkan fitur chat real-time dengan Firebase. Pengguna dapat mengirim dan menerima pesan secara instan.",
-      date: "10 Juli 2026",
+      title: "Real-time Chat Feature",
+      description: "Added real-time chat feature with Firebase. Users can send and receive messages instantly.",
+      date: "10 July 2026",
       status: "live",
-      detail: "Fitur chat real-time memungkinkan pengguna untuk berkomunikasi secara langsung tanpa perlu refresh halaman. Menggunakan Firebase Realtime Database untuk sinkronisasi pesan secara instan. Dilengkapi dengan indikator status online dan typing indicator.",
+      detail: "Real-time chat feature allows users to communicate directly without refreshing the page. Uses Firebase Realtime Database for instant message synchronization. Equipped with online status and typing indicators.",
       link: "https://menuru.com/update/chat-realtime",
-      publishedBy: "Tim Menuru"
+      publishedBy: "Menuru Team"
     },
     {
       id: "2",
       title: "Privacy Policy & Update System",
-      description: "Menambahkan halaman Privacy Policy dan Update System untuk transparansi layanan.",
-      date: "9 Juli 2026",
+      description: "Added Privacy Policy and Update System pages for service transparency.",
+      date: "9 July 2026",
       status: "live",
-      detail: "Halaman Privacy Policy menjelaskan bagaimana data pengguna dikumpulkan dan digunakan. Update System menampilkan riwayat pembaruan fitur secara transparan kepada pengguna.",
+      detail: "Privacy Policy page explains how user data is collected and used. Update System displays feature update history transparently to users.",
       link: "https://menuru.com/update/privacy-policy",
-      publishedBy: "Tim Menuru"
+      publishedBy: "Menuru Team"
     },
     {
       id: "3",
-      title: "Fitur Pin Message",
-      description: "Pengguna dapat menyematkan pesan penting di dalam chat. Pesan yang disematkan akan muncul di bagian atas.",
-      date: "8 Juli 2026",
+      title: "Pin Message Feature",
+      description: "Users can pin important messages in chat. Pinned messages will appear at the top.",
+      date: "8 July 2026",
       status: "coming",
-      detail: "Fitur pin message memungkinkan pengguna untuk menyematkan pesan penting agar mudah diakses. Pesan yang dipin akan muncul di bagian atas chat dengan indikator khusus.",
+      detail: "Pin message feature allows users to pin important messages for easy access. Pinned messages will appear at the top of chat with a special indicator.",
       link: "https://menuru.com/update/pin-message",
-      publishedBy: "Tim Menuru"
+      publishedBy: "Menuru Team"
     },
     {
       id: "4",
-      title: "Fitur Reply & Share Message",
-      description: "Pengguna dapat membalas dan meneruskan pesan ke pengguna lain dengan mudah.",
-      date: "7 Juli 2026",
+      title: "Reply & Share Message Feature",
+      description: "Users can reply to and forward messages to other users easily.",
+      date: "7 July 2026",
       status: "done",
-      detail: "Fitur reply memungkinkan pengguna untuk membalas pesan tertentu dengan konteks yang jelas. Fitur share memungkinkan pengguna meneruskan pesan ke kontak lain dengan mudah.",
+      detail: "Reply feature allows users to reply to specific messages with clear context. Share feature allows users to forward messages to other contacts easily.",
       link: "https://menuru.com/update/reply-share",
-      publishedBy: "Tim Menuru"
+      publishedBy: "Menuru Team"
     },
     {
       id: "5",
       title: "Online Status & Typing Indicator",
-      description: "Menampilkan status online pengguna dan indikator ketika sedang mengetik.",
-      date: "6 Juli 2026",
+      description: "Shows user online status and typing indicator.",
+      date: "6 July 2026",
       status: "done",
-      detail: "Menampilkan status online pengguna secara real-time. Indikator typing muncul ketika pengguna sedang mengetik pesan, memberikan pengalaman chat yang lebih interaktif.",
+      detail: "Shows user online status in real-time. Typing indicator appears when user is typing a message, providing a more interactive chat experience.",
       link: "https://menuru.com/update/online-status",
-      publishedBy: "Tim Menuru"
+      publishedBy: "Menuru Team"
     }
   ];
 
@@ -686,37 +534,79 @@ export default function HomePage(): React.JSX.Element {
     photoURL: "",
     isOfficial: true,
     isPinned: false,
-    bio: "Akun resmi Menuru Chat. Dikelola oleh tim Menuru.",
-    note: "Akun Resmi"
+    bio: "Official Menuru Chat account. Managed by the Menuru team.",
+    note: "Official Account"
   };
 
   const OFFICIAL_MESSAGES = [
     {
-      text: "Halo! Selamat datang di Menuru Chat 👋",
+      text: "Hello! Welcome to Menuru Chat 👋",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Kami sedang melakukan perbaikan fitur chat. Mohon bersabar ya! 🙏",
+      text: "We are currently improving the chat feature. Please be patient! 🙏",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Fitur pin message dan riwayat chat akan segera ditingkatkan ✨",
+      text: "Pin message and chat history features will be improved soon ✨",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
+      text: "Don't forget to read our Privacy Policy and Updates 👇",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     },
     {
-      text: "Terima kasih atas pengertiannya! 😊",
+      text: "Thank you for your understanding! 😊",
       senderId: "official_menuru",
       senderName: "Menuru Official"
     }
   ];
+
+  // Banner rolling text animation - GSAP style
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let charIndex = 0;
+    let isDeleting = false;
+    let currentText = bannerTexts[0];
+
+    const animateText = () => {
+      if (!isDeleting) {
+        // Typing
+        if (charIndex <= currentText.length) {
+          setDisplayText(currentText.substring(0, charIndex));
+          charIndex++;
+          interval = setTimeout(animateText, 50);
+        } else {
+          // Pause before deleting
+          isDeleting = true;
+          interval = setTimeout(animateText, 2000);
+        }
+      } else {
+        // Deleting
+        if (charIndex >= 0) {
+          setDisplayText(currentText.substring(0, charIndex));
+          charIndex--;
+          interval = setTimeout(animateText, 30);
+        } else {
+          // Move to next text
+          isDeleting = false;
+          const nextIndex = (bannerTextIndex + 1) % bannerTexts.length;
+          setBannerTextIndex(nextIndex);
+          currentText = bannerTexts[nextIndex];
+          charIndex = 0;
+          interval = setTimeout(animateText, 50);
+        }
+      }
+    };
+
+    interval = setTimeout(animateText, 500);
+
+    return () => clearTimeout(interval);
+  }, [bannerTextIndex]);
 
   // Broadcast messages to all users
   const broadcastMessages = async () => {
@@ -735,7 +625,7 @@ export default function HomePage(): React.JSX.Element {
       const usersSnap = await getDocs(usersRef);
       
       const broadcastMessage = {
-        text: "Jangan lupa baca Privacy Policy dan Update kami 👇",
+        text: "Don't forget to read our Privacy Policy and Updates 👇",
         senderId: "official_menuru",
         senderName: "Menuru Official"
       };
@@ -929,7 +819,7 @@ export default function HomePage(): React.JSX.Element {
           
           const selfUser: ChatUser = {
             id: user.uid,
-            name: user.displayName || user.email || "Saya",
+            name: user.displayName || user.email || "Me",
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
@@ -1025,7 +915,7 @@ export default function HomePage(): React.JSX.Element {
               const unreadDocs = unreadSnap.docs;
               for (const doc of unreadDocs) {
                 const msg = doc.data() as Message;
-                newMessages.push(`Pesan dari ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
+                newMessages.push(`Message from ${otherUser.name}: ${msg.text.substring(0, 25)}${msg.text.length > 25 ? '...' : ''}`);
               }
             }
             
@@ -1156,7 +1046,7 @@ export default function HomePage(): React.JSX.Element {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError("Login gagal. Silahkan coba lagi.");
+      setLoginError("Login failed. Please try again.");
     }
   };
 
@@ -1170,7 +1060,7 @@ export default function HomePage(): React.JSX.Element {
       setLoginError("");
     } catch (error) {
       console.error("Login error:", error);
-      setLoginError("Email atau password salah.");
+      setLoginError("Wrong email or password.");
     }
   };
 
@@ -1401,7 +1291,7 @@ export default function HomePage(): React.JSX.Element {
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
-        text: `Dari ${shareMessage.senderName}: ${shareMessage.text}`,
+        text: `From ${shareMessage.senderName}: ${shareMessage.text}`,
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: targetUser.id,
@@ -1513,7 +1403,7 @@ export default function HomePage(): React.JSX.Element {
     try {
       const targetUser = users.find(u => u.id === selectedNewUser);
       if (!targetUser) {
-        setAddUserStatus("User tidak ditemukan");
+        setAddUserStatus("User not found");
         return;
       }
       
@@ -1527,9 +1417,9 @@ export default function HomePage(): React.JSX.Element {
           createdAt: serverTimestamp(),
           isPinned: false
         });
-        setAddUserStatus(`✅ Chat dengan ${targetUser.name} berhasil dibuat!`);
+        setAddUserStatus(`✅ Chat with ${targetUser.name} created!`);
       } else {
-        setAddUserStatus(`ℹ️ Chat dengan ${targetUser.name} sudah ada.`);
+        setAddUserStatus(`ℹ️ Chat with ${targetUser.name} already exists.`);
       }
       
       setSelectedNewUser("");
@@ -1537,7 +1427,7 @@ export default function HomePage(): React.JSX.Element {
       
     } catch (error) {
       console.error("Error adding user:", error);
-      setAddUserStatus("❌ Gagal menambahkan user.");
+      setAddUserStatus("❌ Failed to add user.");
     }
   };
 
@@ -1545,7 +1435,7 @@ export default function HomePage(): React.JSX.Element {
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (timestamp: any) => {
@@ -1556,11 +1446,11 @@ export default function HomePage(): React.JSX.Element {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (date.toDateString() === today.toDateString()) {
-      return "Hari ini";
+      return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Kemarin";
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
     }
   };
 
@@ -1576,7 +1466,7 @@ export default function HomePage(): React.JSX.Element {
     if (!chatUser || !chatUser.lastSeen) return "";
     if (chatUser.id === user?.uid) return "Online";
     const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
-    return `Terakhir online ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+    return `Last seen ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getTypingStatus = (userId: string) => {
@@ -1642,20 +1532,66 @@ export default function HomePage(): React.JSX.Element {
         position: "relative",
         fontFamily: FONT_FAMILY,
         overflow: "hidden",
-        paddingTop: "72px",
       }}
     >
-      {/* BANNER ROLLING TEXT - Modern GSAP Style */}
-      <RollingTextBanner />
+      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          backgroundColor: "#0D3CFC",
+          padding: "14px 20px",
+          zIndex: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "none",
+          gap: "12px",
+        }}
+      >
+        <span style={{ color: "#ffffff", display: "flex", alignItems: "center" }}>
+          <ChatIcon />
+        </span>
+        <span
+          style={{
+            fontSize: "18px",
+            fontWeight: 400,
+            color: "#ffffff",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.01em",
+            textAlign: "center",
+            minWidth: "280px",
+          }}
+        >
+          {displayText}
+          <span
+            style={{
+              display: "inline-block",
+              width: "2px",
+              height: "20px",
+              backgroundColor: "#ffffff",
+              marginLeft: "2px",
+              animation: "blink 0.8s step-end infinite",
+              verticalAlign: "text-bottom",
+            }}
+          />
+        </span>
+      </motion.div>
 
-      {/* Menuru - Sisi Kiri Bawah Banner */}
+      {/* Menuru - Left Bottom */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
         style={{
           position: "absolute",
-          top: "90px",
+          top: "70px",
           left: "40px",
           zIndex: 15,
           display: "flex",
@@ -1683,7 +1619,7 @@ export default function HomePage(): React.JSX.Element {
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{
           position: "absolute",
-          top: "90px",
+          top: "70px",
           right: "40px",
           zIndex: 10,
           display: "flex",
@@ -1765,7 +1701,7 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                Keluar
+                Logout
               </motion.button>
             </>
           ) : (
@@ -1792,7 +1728,7 @@ export default function HomePage(): React.JSX.Element {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              Masuk
+              Login
             </motion.button>
           )}
         </motion.div>
@@ -1837,7 +1773,7 @@ export default function HomePage(): React.JSX.Element {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: FONT_FAMILY }}>
-                Masuk
+                Login
               </h2>
               <input
                 type="email"
@@ -1858,7 +1794,7 @@ export default function HomePage(): React.JSX.Element {
               />
               <input
                 type="password"
-                placeholder="Kata Sandi"
+                placeholder="Password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 style={{
@@ -1897,10 +1833,10 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Masuk dengan Email
+                Login with Email
               </motion.button>
               <div style={{ marginTop: "12px", textAlign: "center", fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY }}>
-                atau
+                or
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -1921,7 +1857,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Masuk dengan Google
+                Login with Google
               </motion.button>
             </motion.div>
           </motion.div>
@@ -1966,7 +1902,7 @@ export default function HomePage(): React.JSX.Element {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                Teruskan Pesan
+                Forward Message
               </h3>
               <div style={{ 
                 fontSize: "13px", 
@@ -1977,7 +1913,7 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "8px",
                 fontFamily: FONT_FAMILY,
               }}>
-                <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>Dari: {shareMessage.senderName}</div>
+                <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>From: {shareMessage.senderName}</div>
                 <div style={{ fontFamily: FONT_FAMILY }}>{shareMessage.text}</div>
               </div>
               <select
@@ -1996,7 +1932,7 @@ export default function HomePage(): React.JSX.Element {
                   color: "#000",
                 }}
               >
-                <option value="">Pilih user...</option>
+                <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
@@ -2023,7 +1959,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  Teruskan
+                  Forward
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -2044,7 +1980,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  Batal
+                  Cancel
                 </motion.button>
               </div>
             </motion.div>
@@ -2106,7 +2042,7 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {selectedUpdateId && selectedUpdate ? "Detail Update" : (showUpdate ? "Update Sistem" : (showPrivacyPolicy ? "Kebijakan Privasi" : (showProfile ? "Profil" : (selectedChat ? selectedChat.name : "Pesan"))))}
+                    {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? selectedChat.name : "Messages"))))}
                   </span>
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                     <>
@@ -2209,7 +2145,7 @@ export default function HomePage(): React.JSX.Element {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>Kembali</span>
+                      <span>Back</span>
                     </motion.button>
 
                     <div
@@ -2306,7 +2242,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        Detail Update
+                        Update Detail
                       </h3>
                       <p
                         style={{
@@ -2416,7 +2352,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        Update Sistem
+                        Update System
                       </span>
                     </div>
                     <h2
@@ -2438,7 +2374,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Riwayat pembaruan dan pengembangan
+                      Update and development history
                     </p>
                   </div>
 
@@ -2635,7 +2571,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        Kebijakan Privasi
+                        Privacy Policy
                       </span>
                     </div>
                     <h2
@@ -2657,7 +2593,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Terakhir diperbarui: 9 Juli 2026
+                      Last updated: 9 July 2026
                     </p>
                   </div>
 
@@ -2671,7 +2607,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      1. Informasi yang Kami Kumpulkan
+                      1. Information We Collect
                     </h3>
                     <p
                       style={{
@@ -2682,7 +2618,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Chat with Menuru mengumpulkan informasi berikut untuk memberikan layanan chat yang optimal:
+                      Chat with Menuru collects the following information to provide optimal chat service:
                     </p>
                     <ul
                       style={{
@@ -2694,10 +2630,10 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>Nama dan email dari akun Google Anda</li>
-                      <li>Foto profil dari akun Google Anda</li>
-                      <li>Pesan dan riwayat chat yang Anda kirim</li>
-                      <li>Status online dan aktivitas chat</li>
+                      <li>Name and email from your Google account</li>
+                      <li>Profile photo from your Google account</li>
+                      <li>Messages and chat history you send</li>
+                      <li>Online status and chat activity</li>
                     </ul>
                   </div>
 
@@ -2711,7 +2647,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      2. Bagaimana Kami Menggunakan Informasi
+                      2. How We Use Information
                     </h3>
                     <p
                       style={{
@@ -2722,7 +2658,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Informasi yang kami kumpulkan digunakan untuk:
+                      The information we collect is used for:
                     </p>
                     <ul
                       style={{
@@ -2734,10 +2670,10 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>Menyediakan dan memelihara layanan chat</li>
-                      <li>Mengirimkan pesan antar pengguna</li>
-                      <li>Menampilkan status online pengguna</li>
-                      <li>Menyimpan riwayat chat untuk akses di masa depan</li>
+                      <li>Providing and maintaining chat service</li>
+                      <li>Sending messages between users</li>
+                      <li>Displaying user online status</li>
+                      <li>Storing chat history for future access</li>
                     </ul>
                   </div>
 
@@ -2751,7 +2687,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      3. Penyimpanan Data
+                      3. Data Storage
                     </h3>
                     <p
                       style={{
@@ -2762,7 +2698,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Semua data chat disimpan di database Firebase Cloud Firestore. Data Anda aman dan hanya dapat diakses oleh Anda dan pengguna yang Anda ajak chat.
+                      All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with.
                     </p>
                   </div>
 
@@ -2776,7 +2712,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      4. Keamanan
+                      4. Security
                     </h3>
                     <p
                       style={{
@@ -2787,7 +2723,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Kami menggunakan Firebase Authentication untuk keamanan akun dan Firestore Security Rules untuk melindungi data chat Anda. Semua komunikasi dienkripsi melalui HTTPS.
+                      We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS.
                     </p>
                   </div>
 
@@ -2801,7 +2737,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      5. Hak Anda
+                      5. Your Rights
                     </h3>
                     <p
                       style={{
@@ -2812,7 +2748,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Anda memiliki hak untuk:
+                      You have the right to:
                     </p>
                     <ul
                       style={{
@@ -2824,9 +2760,9 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <li>Mengakses data pribadi Anda</li>
-                      <li>Menghapus akun dan data chat Anda</li>
-                      <li>Menonaktifkan notifikasi</li>
+                      <li>Access your personal data</li>
+                      <li>Delete your account and chat data</li>
+                      <li>Disable notifications</li>
                     </ul>
                   </div>
 
@@ -2840,7 +2776,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      6. Perubahan Kebijakan
+                      6. Policy Changes
                     </h3>
                     <p
                       style={{
@@ -2851,7 +2787,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Kami dapat memperbarui kebijakan privasi ini dari waktu ke waktu. Perubahan akan diinformasikan melalui aplikasi chat.
+                      We may update this privacy policy from time to time. Changes will be notified through the chat application.
                     </p>
                   </div>
 
@@ -2865,7 +2801,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      7. Kontak
+                      7. Contact
                     </h3>
                     <p
                       style={{
@@ -2876,7 +2812,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui:
+                      If you have questions about this privacy policy, please contact us at:
                     </p>
                     <p
                       style={{
@@ -2947,7 +2883,7 @@ export default function HomePage(): React.JSX.Element {
                       onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                     >
                       <BackIcon />
-                      <span>Kembali</span>
+                      <span>Back</span>
                     </motion.button>
 
                     <div style={{ width: "100%", marginBottom: "0px" }}>
@@ -2980,7 +2916,7 @@ export default function HomePage(): React.JSX.Element {
                               backgroundColor: "#c5e800",
                               marginRight: "4px",
                             }} />
-                            Catatan
+                            Note
                           </span>
                           {profileUser.id === user?.uid && (
                             <motion.button
@@ -3000,7 +2936,7 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               <EditIcon />
-                              {profileUser.note ? "Edit" : "Tambah"}
+                              {profileUser.note ? "Edit" : "Add"}
                             </motion.button>
                           )}
                         </div>
@@ -3011,7 +2947,7 @@ export default function HomePage(): React.JSX.Element {
                               type="text"
                               value={noteInput}
                               onChange={(e) => setNoteInput(e.target.value)}
-                              placeholder="Belum ada catatan"
+                              placeholder="No note yet"
                               style={{
                                 flex: 1,
                                 padding: "6px 10px",
@@ -3046,7 +2982,7 @@ export default function HomePage(): React.JSX.Element {
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              Simpan
+                              Save
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -3063,7 +2999,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              Batal
+                              Cancel
                             </motion.button>
                           </div>
                         ) : (
@@ -3075,7 +3011,7 @@ export default function HomePage(): React.JSX.Element {
                             minHeight: "24px",
                             fontFamily: FONT_FAMILY,
                           }}>
-                            {profileUser.note || "Belum ada catatan"}
+                            {profileUser.note || "No note yet"}
                           </div>
                         )}
                       </div>
@@ -3150,7 +3086,7 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <EditIcon />
-                            {profileUser.bio ? "Edit" : "Tambah"}
+                            {profileUser.bio ? "Edit" : "Add"}
                           </motion.button>
                         )}
                       </div>
@@ -3159,7 +3095,7 @@ export default function HomePage(): React.JSX.Element {
                           <textarea
                             value={bioInput}
                             onChange={(e) => setBioInput(e.target.value)}
-                            placeholder="Belum ada bio"
+                            placeholder="No bio yet"
                             rows={2}
                             style={{
                               width: "100%",
@@ -3190,7 +3126,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              Simpan
+                              Save
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -3207,7 +3143,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              Batal
+                              Cancel
                             </motion.button>
                           </div>
                         </div>
@@ -3221,7 +3157,7 @@ export default function HomePage(): React.JSX.Element {
                           lineHeight: 1.5,
                           fontFamily: FONT_FAMILY,
                         }}>
-                          {profileUser.bio || "Belum ada bio"}
+                          {profileUser.bio || "No bio yet"}
                         </div>
                       )}
                     </div>
@@ -3250,7 +3186,7 @@ export default function HomePage(): React.JSX.Element {
                         onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
                         onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
-                        Kirim Pesan
+                        Send Message
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -3295,10 +3231,10 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ fontSize: "20px" }}>📢</div>
                     <div>
                       <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                        Pengumuman
+                        Announcement
                       </div>
                       <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        Fitur chat sedang dalam tahap pengembangan.
+                        Chat feature is under development.
                       </div>
                     </div>
                   </div>
@@ -3342,7 +3278,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Chat Baru
+                      New Chat
                     </span>
                   </motion.button>
                   
@@ -3363,7 +3299,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                          Pilih user...
+                          Select user
                         </div>
                         <select
                           value={selectedNewUser}
@@ -3381,7 +3317,7 @@ export default function HomePage(): React.JSX.Element {
                             color: "#000",
                           }}
                         >
-                          <option value="">Pilih user...</option>
+                          <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
@@ -3390,7 +3326,7 @@ export default function HomePage(): React.JSX.Element {
                         </select>
                         {availableUsers.length === 0 && (
                           <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                            Semua user sudah di-chat
+                            All users are already in chat
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -3412,7 +3348,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            Mulai Chat
+                            Start Chat
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -3427,7 +3363,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            Batal
+                            Cancel
                           </motion.button>
                         </div>
                         {addUserStatus && (
@@ -3458,7 +3394,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            User Pinned ({pinnedUsers.length})
+                            Pinned Users ({pinnedUsers.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedUsers} />
@@ -3563,7 +3499,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            Chat Pinned ({pinnedChats.length})
+                            Pinned Chats ({pinnedChats.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedChats} />
@@ -3630,7 +3566,7 @@ export default function HomePage(): React.JSX.Element {
                                         {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "Belum ada pesan"}
+                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
                                       </div>
                                     </div>
                                     <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
@@ -3694,7 +3630,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>Belum ada riwayat chat</div>
+                        <div>No chat history</div>
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
@@ -3764,11 +3700,11 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {room.lastMessage ? (
                                   <>
-                                    {isLastMessageFromMe && "Pesan: "}
+                                    {isLastMessageFromMe && "Messages: "}
                                     {room.lastMessage}
                                   </>
                                 ) : (
-                                  "Belum ada pesan"
+                                  "No messages"
                                 )}
                               </div>
                             </div>
@@ -3914,7 +3850,7 @@ export default function HomePage(): React.JSX.Element {
                         />
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                            {getTypingStatus(selectedChat.id) ? "sedang mengetik..." : "Online"}
+                            {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
                           </span>
                         ) : (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
@@ -3966,7 +3902,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            Pesan Pinned ({pinnedMessages.length})
+                            Pinned Messages ({pinnedMessages.length})
                           </span>
                         </div>
                         <PinDropdownIcon isOpen={showPinnedMessages} />
@@ -3999,7 +3935,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                      {isMine ? "Pesan: " : `${msg.senderName}: `}
+                                      {isMine ? "Messages: " : `${msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -4032,7 +3968,7 @@ export default function HomePage(): React.JSX.Element {
                         <ReplyIcon />
                         <div>
                           <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                            Balas: {replyTo.senderName === user?.displayName ? "Anda" : replyTo.senderName}
+                            Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
                           </div>
                           <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -4090,7 +4026,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                        <div>Belum ada pesan</div>
+                        <div>No messages yet</div>
                       </div>
                     ) : (
                       messages.map((msg, idx) => {
@@ -4099,7 +4035,7 @@ export default function HomePage(): React.JSX.Element {
                         const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
                           formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
                         
-                        const replySenderName = msg.replyToSender === user?.displayName ? "Anda" : msg.replyToSender;
+                        const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                         
                         return (
@@ -4148,7 +4084,7 @@ export default function HomePage(): React.JSX.Element {
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  Dari {msg.sharedFromName}
+                                  From {msg.sharedFromName}
                                 </div>
                               )}
                               
@@ -4166,7 +4102,7 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   <span style={{ fontWeight: 500, color: "#22c55e", fontFamily: FONT_FAMILY }}>
-                                    {isMine ? `Balas: ${replySenderName}` : `Balas: ${msg.replyToSender}`}
+                                    {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
                                   </span>
                                   <span style={{ color: isMine ? "#000" : "#333", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                 </div>
@@ -4174,7 +4110,7 @@ export default function HomePage(): React.JSX.Element {
                               
                               {isBroadcastMessage ? (
                                 <span style={{ fontFamily: FONT_FAMILY }}>
-                                  Jangan lupa baca{' '}
+                                  Don't forget to read{' '}
                                   <span
                                     onClick={() => setShowPrivacyPolicy(true)}
                                     style={{
@@ -4185,9 +4121,9 @@ export default function HomePage(): React.JSX.Element {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    Kebijakan Privasi
+                                    Privacy Policy
                                   </span>
-                                  {' '}dan{' '}
+                                  {' and '}
                                   <span
                                     onClick={() => setShowUpdate(true)}
                                     style={{
@@ -4198,9 +4134,9 @@ export default function HomePage(): React.JSX.Element {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    Update Sistem
+                                    Update System
                                   </span>
-                                  {' '}kami 👇
+                                  {' 👇'}
                                 </span>
                               ) : (
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
@@ -4243,7 +4179,7 @@ export default function HomePage(): React.JSX.Element {
                                     transition: "all .2s ease",
                                     borderRadius: "4px",
                                   }}
-                                  title="Lainnya"
+                                  title="More"
                                 >
                                   <MoreIcon />
                                 </motion.button>
@@ -4294,7 +4230,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <ReplyIcon />
-                                        <span>Balas</span>
+                                        <span>Reply</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4318,7 +4254,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <SendIcon />
-                                        <span>Kirim Ulang</span>
+                                        <span>Resend</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4344,7 +4280,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <ShareIcon />
-                                        <span>Teruskan</span>
+                                        <span>Forward</span>
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ backgroundColor: "#f5f5f5" }}
@@ -4366,7 +4302,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <PinIcon filled={msg.isPinned || false} />
-                                        <span>{msg.isPinned ? "Lepas Pin" : "Pin"}</span>
+                                        <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
                                     </motion.div>
                                   )}
@@ -4413,7 +4349,7 @@ export default function HomePage(): React.JSX.Element {
                   >
                     <input
                       type="text"
-                      placeholder={replyTo ? "Ketik balasan..." : "Ketik pesan..."}
+                      placeholder={replyTo ? "Type a reply..." : "Type a message..."}
                       value={message}
                       onChange={handleTyping}
                       onKeyPress={(e) => {
@@ -4470,7 +4406,7 @@ export default function HomePage(): React.JSX.Element {
                         e.currentTarget.style.backgroundColor = "#c5e800";
                       }}
                     >
-                      <span>Kirim</span>
+                      <span>Send</span>
                       <SendIcon />
                     </motion.button>
                   </div>
@@ -4525,7 +4461,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {user ? chatButtonText : "Masuk untuk Chat"}
+                {user ? chatButtonText : "Login to Chat"}
               </motion.span>
               {totalUnread > 0 && (
                 <motion.span
@@ -4568,6 +4504,10 @@ export default function HomePage(): React.JSX.Element {
             transform: scale(0.7);
             opacity: 0.25;
           }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
         }
       `}</style>
     </div>
