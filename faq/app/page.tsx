@@ -446,9 +446,7 @@ export default function HomePage(): React.JSX.Element {
   // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
   const bannerTexts = [
-    "silahkan hubungin official menuru",
-    "silahkan hubungin official menuru",
-    "silahkan hubungin official menuru",
+    "Website sedang dalam pengembangan, Terima kasih",
     "silahkan hubungin official menuru"
   ];
 
@@ -569,7 +567,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
