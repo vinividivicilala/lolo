@@ -60,6 +60,7 @@ const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 
 // Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const OFFICIAL_EMAIL = "official@menuru.com";
 
 interface ChatUser {
   id: string;
@@ -367,7 +368,7 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [adminReplyToUser, setAdminReplyToUser] = useState<string | null>(null);
+  const [adminReplyMode, setAdminReplyMode] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -504,6 +505,9 @@ export default function HomePage(): React.JSX.Element {
 
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
+
+  // Check if current user is official
+  const isOfficialUser = user?.email === OFFICIAL_EMAIL;
 
   // Broadcast messages to all users
   const broadcastMessages = async () => {
@@ -994,6 +998,7 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
+      setAdminReplyMode(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1014,7 +1019,8 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setAdminReplyToUser(null);
+      setAdminReplyMode(false);
+      setAdminReplyMessage("");
     }
   };
 
@@ -1150,7 +1156,7 @@ export default function HomePage(): React.JSX.Element {
         isPinned: false,
         pinnedAt: null,
         isShared: false,
-        isAdminReply: isAdmin || false
+        isAdminReply: false
       };
       
       if (replyTo) {
@@ -1159,15 +1165,10 @@ export default function HomePage(): React.JSX.Element {
         msgData.replyToSender = replyTo.senderName;
       }
       
-      if (adminReplyToUser) {
-        msgData.adminReplyTo = adminReplyToUser;
-      }
-      
       await addDoc(messagesRef, msgData);
 
       setMessage("");
       setReplyTo(null);
-      setAdminReplyToUser(null);
       
       if (rollingInterval.current) {
         clearInterval(rollingInterval.current);
@@ -1186,43 +1187,49 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Admin reply to user
-  const handleAdminReply = async (userId: string, userMessage: string) => {
+  // Admin reply to official message - broadcast to all users
+  const handleAdminReply = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !db) return;
     
     try {
-      const chatId = [user.uid, userId].sort().join("_");
+      // Get all users
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
       
-      const chatRef = doc(db, "chats", chatId);
-      const chatSnap = await getDoc(chatRef);
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [user.uid, userId],
-          createdAt: serverTimestamp(),
-          isPinned: false
+      // Send reply to all users
+      for (const docSnap of usersSnap.docs) {
+        const userId = docSnap.id;
+        
+        const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+        
+        const chatRef = doc(db, "chats", chatId);
+        const chatSnap = await getDoc(chatRef);
+        if (!chatSnap.exists()) {
+          await setDoc(chatRef, {
+            participants: [userId, MENURU_OFFICIAL.id],
+            createdAt: serverTimestamp(),
+            isPinned: false
+          });
+        }
+        
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        await addDoc(messagesRef, {
+          text: adminReplyMessage.trim(),
+          senderId: MENURU_OFFICIAL.id,
+          senderName: "Menuru Official",
+          receiverId: userId,
+          timestamp: serverTimestamp(),
+          read: false,
+          isPinned: false,
+          pinnedAt: null,
+          isShared: false,
+          isAdminReply: true,
+          adminReplyTo: userId
         });
       }
       
-      const messagesRef = collection(db, "chats", chatId, "messages");
-      await addDoc(messagesRef, {
-        text: adminReplyMessage.trim(),
-        senderId: user.uid,
-        senderName: "Admin Menuru",
-        receiverId: userId,
-        timestamp: serverTimestamp(),
-        read: false,
-        isPinned: false,
-        pinnedAt: null,
-        isShared: false,
-        isAdminReply: true,
-        adminReplyTo: userId,
-        replyTo: null,
-        replyToText: userMessage,
-        replyToSender: "User"
-      });
-      
       setAdminReplyMessage("");
-      setAdminReplyToUser(null);
+      setAdminReplyMode(false);
       
     } catch (error) {
       console.error("Error sending admin reply:", error);
@@ -2011,11 +2018,6 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
-                      {selectedChat.id === user.uid && isAdmin && (
-                        <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                          Admin Online
-                        </span>
-                      )}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3278,7 +3280,7 @@ export default function HomePage(): React.JSX.Element {
                           <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""}
+                              {u.name}
                             </option>
                           ))}
                         </select>
@@ -3521,7 +3523,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isAdmin && " (Admin)"}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3652,7 +3653,6 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   {otherUser.name}
-                                  {otherUser.isAdmin && " (Admin)"}
                                 </span>
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
@@ -3808,9 +3808,9 @@ export default function HomePage(): React.JSX.Element {
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
-                        {isAdmin && selectedChat.email !== ADMIN_EMAIL && (
+                        {selectedChat.id === MENURU_OFFICIAL.id && isAdmin && (
                           <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Admin Online - tunggu sebentar
+                            Admin Online - balas pesan di sini
                           </span>
                         )}
                         {getOnlineStatus(selectedChat.id) ? (
@@ -3844,8 +3844,8 @@ export default function HomePage(): React.JSX.Element {
                     </motion.button>
                   </div>
 
-                  {/* Admin Reply Indicator */}
-                  {isAdmin && selectedChat && selectedChat.email !== ADMIN_EMAIL && (
+                  {/* Admin Reply Mode Indicator */}
+                  {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode && (
                     <div
                       style={{
                         padding: "8px 16px",
@@ -3858,10 +3858,10 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       <span style={{ fontSize: "12px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                        Admin Mode
+                        Admin Reply Mode
                       </span>
                       <span style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        Anda sedang membalas chat user ini
+                        Balasan akan dikirim ke semua user
                       </span>
                     </div>
                   )}
@@ -4305,11 +4305,11 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {isAdmin && !isMine && !msg.isAdminReply && (
+                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && (
                                         <motion.button
                                           whileHover={{ backgroundColor: "#f5f5f5" }}
                                           onClick={() => {
-                                            setAdminReplyToUser(msg.senderId);
+                                            setAdminReplyMode(true);
                                             setAdminReplyMessage(`Balasan untuk: ${msg.text}`);
                                             setShowMessageMenu(null);
                                           }}
@@ -4330,7 +4330,7 @@ export default function HomePage(): React.JSX.Element {
                                           }}
                                         >
                                           <ReplyIcon />
-                                          <span>Admin Reply</span>
+                                          <span>Balas Semua User</span>
                                         </motion.button>
                                       )}
                                     </motion.div>
@@ -4376,22 +4376,22 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {adminReplyToUser ? (
-                      // Admin Reply Input
+                    {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
+                      // Admin Reply to All Users Input
                       <>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Admin Reply to user
+                            Balas ke semua user
                           </div>
                           <input
                             type="text"
-                            placeholder="Type admin reply..."
+                            placeholder="Ketik balasan admin..."
                             value={adminReplyMessage}
                             onChange={(e) => setAdminReplyMessage(e.target.value)}
                             onKeyPress={(e) => {
                               if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
-                                handleAdminReply(selectedChat.id, adminReplyMessage);
+                                handleAdminReply();
                               }
                             }}
                             style={{
@@ -4420,7 +4420,7 @@ export default function HomePage(): React.JSX.Element {
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => handleAdminReply(selectedChat.id, adminReplyMessage)}
+                            onClick={handleAdminReply}
                             disabled={!adminReplyMessage.trim()}
                             style={{
                               backgroundColor: adminReplyMessage.trim() ? "#4ade80" : "#ccc",
@@ -4439,14 +4439,14 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            <span>Send Reply</span>
+                            <span>Kirim ke Semua</span>
                             <SendIcon />
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => {
-                              setAdminReplyToUser(null);
+                              setAdminReplyMode(false);
                               setAdminReplyMessage("");
                             }}
                             style={{
@@ -4460,7 +4460,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            Cancel
+                            Batal
                           </motion.button>
                         </div>
                       </>
