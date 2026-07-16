@@ -25,7 +25,8 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -58,6 +59,9 @@ const googleProvider = new GoogleAuthProvider();
 // Font Family
 const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 
+// Admin Email
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+
 interface ChatUser {
   id: string;
   name: string;
@@ -66,6 +70,7 @@ interface ChatUser {
   createdAt?: any;
   isPinned?: boolean;
   isOfficial?: boolean;
+  isAdmin?: boolean;
   online?: boolean;
   lastSeen?: any;
   typing?: boolean;
@@ -90,6 +95,9 @@ interface Message {
   sharedFrom?: string;
   sharedFromName?: string;
   isShared?: boolean;
+  isAdminReply?: boolean;
+  adminReplyTo?: string;
+  adminReplyToUser?: string;
 }
 
 interface ChatRoom {
@@ -178,6 +186,14 @@ const EditIcon = () => (
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Admin Badge
+const AdminBadge = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="#FFD700" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="#FFD700" />
+    <path d="M9 12L11.5 14.5L16 10" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -442,6 +458,8 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
+  const [adminStatus, setAdminStatus] = useState("");
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -469,6 +487,15 @@ export default function HomePage(): React.JSX.Element {
     "Chat with Menuru"
   ];
   let chatTextIndex = 0;
+
+  // Admin status messages
+  const adminStatusMessages = [
+    "Admin sedang online",
+    "Admin akan segera membalas",
+    "Tunggu sebentar, admin sedang mengetik...",
+    "Admin siap membantu Anda",
+    "Admin aktif, silahkan chat"
+  ];
 
   // Update Data
   const updates: UpdateItem[] = [
@@ -572,6 +599,18 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
+  // Admin status rolling
+  useEffect(() => {
+    if (user?.email === ADMIN_EMAIL) {
+      let index = 0;
+      const interval = setInterval(() => {
+        setAdminStatus(adminStatusMessages[index % adminStatusMessages.length]);
+        index++;
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   // Broadcast messages to all users
   const broadcastMessages = async () => {
     if (!db) return;
@@ -622,7 +661,8 @@ export default function HomePage(): React.JSX.Element {
           replyTo: null,
           replyToText: null,
           replyToSender: null,
-          isShared: false
+          isShared: false,
+          isAdminReply: false
         });
       }
       
@@ -655,6 +695,7 @@ export default function HomePage(): React.JSX.Element {
           
           const googlePhotoURL = currentUser.photoURL || "";
           const googleName = currentUser.displayName || currentUser.email || "";
+          const isAdmin = currentUser.email === ADMIN_EMAIL;
           
           if (!userSnap.exists()) {
             await setDoc(userRef, {
@@ -665,6 +706,7 @@ export default function HomePage(): React.JSX.Element {
               createdAt: serverTimestamp(),
               isPinned: false,
               isOfficial: false,
+              isAdmin: isAdmin,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
@@ -692,7 +734,8 @@ export default function HomePage(): React.JSX.Element {
             
             await updateDoc(userRef, {
               online: true,
-              lastSeen: serverTimestamp()
+              lastSeen: serverTimestamp(),
+              isAdmin: isAdmin
             });
           }
           
@@ -747,7 +790,8 @@ export default function HomePage(): React.JSX.Element {
             replyTo: null,
             replyToText: null,
             replyToSender: null,
-            isShared: false
+            isShared: false,
+            isAdminReply: false
           });
         }
       }
@@ -776,7 +820,8 @@ export default function HomePage(): React.JSX.Element {
                 typing: data.typing || false,
                 bio: data.bio || "",
                 note: data.note || "",
-                photoURL: data.photoURL || ""
+                photoURL: data.photoURL || "",
+                isAdmin: data.isAdmin || false
               } as ChatUser);
             }
           });
@@ -788,6 +833,7 @@ export default function HomePage(): React.JSX.Element {
             photoURL: user.photoURL || "",
             isPinned: false,
             isOfficial: false,
+            isAdmin: user.email === ADMIN_EMAIL,
             online: true,
             lastSeen: null,
             typing: false,
@@ -806,7 +852,8 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: user.photoURL || userList[index].photoURL || "",
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
-                note: user.note || userList[index].note || ""
+                note: user.note || userList[index].note || "",
+                isAdmin: user.email === ADMIN_EMAIL
               };
             }
           }
@@ -1202,7 +1249,8 @@ export default function HomePage(): React.JSX.Element {
         read: false,
         isPinned: false,
         pinnedAt: null,
-        isShared: false
+        isShared: false,
+        isAdminReply: user.email === ADMIN_EMAIL
       };
       
       if (replyTo) {
@@ -1265,7 +1313,8 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isShared: true,
         sharedFrom: shareMessage.senderId,
-        sharedFromName: shareMessage.senderName
+        sharedFromName: shareMessage.senderName,
+        isAdminReply: false
       });
       
       setShowShareModal(false);
@@ -1311,7 +1360,8 @@ export default function HomePage(): React.JSX.Element {
         isShared: false,
         replyTo: null,
         replyToText: null,
-        replyToSender: null
+        replyToSender: null,
+        isAdminReply: false
       });
       
       setShowMessageMenu(null);
@@ -1486,6 +1536,9 @@ export default function HomePage(): React.JSX.Element {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
+  // Check if current user is admin
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   return (
     <div
       style={{
@@ -1636,8 +1689,19 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
+                {isAdmin && <AdminBadge />}
               </span>
               <OnlineIndicator online={true} />
+              {isAdmin && (
+                <span style={{
+                  fontSize: "10px",
+                  color: "#FFD700",
+                  fontWeight: 500,
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  ⭐ Admin
+                </span>
+              )}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -1895,6 +1959,7 @@ export default function HomePage(): React.JSX.Element {
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    {u.isAdmin && <AdminBadge />}
                   </option>
                 ))}
               </select>
@@ -2012,6 +2077,7 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
+                      {selectedChat.isAdmin && <AdminBadge />}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3004,6 +3070,11 @@ export default function HomePage(): React.JSX.Element {
                             <InstagramVerifiedBadge size={16} />
                           </div>
                         )}
+                        {profileUser.isAdmin && (
+                          <div style={{ position: "absolute", top: -2, right: -2 }}>
+                            <AdminBadge />
+                          </div>
+                        )}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -3011,6 +3082,7 @@ export default function HomePage(): React.JSX.Element {
                             {profileUser.name}
                           </span>
                           {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
+                          {profileUser.isAdmin && <AdminBadge />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3018,6 +3090,11 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
                           </span>
+                          {profileUser.isAdmin && (
+                            <span style={{ fontSize: "10px", color: "#FFD700", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                              ⭐ Admin
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -3173,6 +3250,165 @@ export default function HomePage(): React.JSX.Element {
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
+                  {/* Admin Status Indicator */}
+                  {isAdmin && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        backgroundColor: "rgba(255,215,0,0.1)",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
+                        border: "1px solid rgba(255,215,0,0.2)",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <AdminBadge />
+                      <div>
+                        <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                          Admin Panel
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
+                          {adminStatus || "Admin sedang online"}
+                        </div>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowAdminPanel(!showAdminPanel)}
+                        style={{
+                          marginLeft: "auto",
+                          padding: "4px 12px",
+                          backgroundColor: "#000",
+                          border: "none",
+                          borderRadius: "4px",
+                          color: "#fff",
+                          fontSize: "10px",
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {showAdminPanel ? "Close" : "Open"}
+                      </motion.button>
+                    </motion.div>
+                  )}
+
+                  {/* Admin Panel - Show all users chat */}
+                  {isAdmin && showAdminPanel && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        padding: "12px",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                        marginBottom: "12px",
+                        overflow: "hidden",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <div style={{ fontSize: "12px", fontWeight: 600, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                        📋 All User Chats
+                      </div>
+                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                        {chatRooms.map((room) => {
+                          const otherId = room.participants.find(id => id !== user.uid);
+                          const otherUser = users.find(u => u.id === otherId);
+                          if (!otherUser || otherUser.isAdmin) return null;
+                          return (
+                            <motion.div
+                              key={room.id}
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => {
+                                setSelectedChat(otherUser);
+                                setShowAdminPanel(false);
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                                padding: "8px 12px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.1)" : "transparent",
+                                marginBottom: "4px",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "28px",
+                                  height: "28px",
+                                  borderRadius: "4px",
+                                  backgroundColor: "#f0f0f0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "12px",
+                                  overflow: "hidden",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {otherUser.photoURL ? (
+                                  <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                )}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: "11px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                                  {otherUser.name}
+                                  <span style={{ fontSize: "9px", color: "#999", marginLeft: "4px", fontFamily: FONT_FAMILY }}>
+                                    {otherUser.email}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
+                                  {room.lastMessage ? room.lastMessage.substring(0, 30) + (room.lastMessage.length > 30 ? "..." : "") : "No messages"}
+                                </div>
+                              </div>
+                              {room.unreadCount > 0 && (
+                                <div
+                                  style={{
+                                    backgroundColor: "#c5e800",
+                                    color: "#000",
+                                    padding: "0 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "8px",
+                                    fontWeight: 600,
+                                    lineHeight: "16px",
+                                    height: "16px",
+                                    minWidth: "16px",
+                                    textAlign: "center",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  {room.unreadCount}
+                                </div>
+                              )}
+                              <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                            </motion.div>
+                          );
+                        })}
+                        {chatRooms.filter(room => {
+                          const otherId = room.participants.find(id => id !== user.uid);
+                          const otherUser = users.find(u => u.id === otherId);
+                          return otherUser && !otherUser.isAdmin;
+                        }).length === 0 && (
+                          <div style={{ fontSize: "11px", color: "#999", textAlign: "center", padding: "12px 0", fontFamily: FONT_FAMILY }}>
+                            No user chats yet
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Announcement */}
                   <div
                     style={{
@@ -3280,6 +3516,7 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                              {u.isAdmin && <AdminBadge />}
                             </option>
                           ))}
                         </select>
@@ -3408,6 +3645,7 @@ export default function HomePage(): React.JSX.Element {
                                     >
                                       {u.name}
                                       {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                      {u.isAdmin && <AdminBadge />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3523,6 +3761,7 @@ export default function HomePage(): React.JSX.Element {
                                       >
                                         {otherUser.name}
                                         {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                        {otherUser.isAdmin && <AdminBadge />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3641,6 +3880,11 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
+                              {otherUser.isAdmin && (
+                                <div style={{ position: "absolute", top: -2, right: -2 }}>
+                                  <AdminBadge />
+                                </div>
+                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3654,6 +3898,7 @@ export default function HomePage(): React.JSX.Element {
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                {otherUser.isAdmin && <AdminBadge />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3791,6 +4036,11 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
+                      {selectedChat.isAdmin && (
+                        <div style={{ position: "absolute", top: -2, right: -2 }}>
+                          <AdminBadge />
+                        </div>
+                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -3801,6 +4051,7 @@ export default function HomePage(): React.JSX.Element {
                           {selectedChat.name}
                         </span>
                         {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
+                        {selectedChat.isAdmin && <AdminBadge />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <OnlineIndicator 
@@ -3810,10 +4061,12 @@ export default function HomePage(): React.JSX.Element {
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
+                            {selectedChat.isAdmin && " ⭐ Admin"}
                           </span>
                         ) : (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getLastSeen(selectedChat.id)}
+                            {selectedChat.isAdmin && " ⭐ Admin"}
                           </span>
                         )}
                       </div>
@@ -3837,6 +4090,26 @@ export default function HomePage(): React.JSX.Element {
                       <PinIcon filled={selectedChat.isPinned || false} />
                     </motion.button>
                   </div>
+
+                  {/* Admin Reply Status in Chat */}
+                  {isAdmin && selectedChat && !selectedChat.isAdmin && (
+                    <div
+                      style={{
+                        padding: "6px 14px",
+                        backgroundColor: "rgba(255,215,0,0.08)",
+                        borderBottom: "1px solid rgba(255,215,0,0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <AdminBadge />
+                      <span style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
+                        {adminStatus || "Admin sedang online"}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Pinned Messages */}
                   {pinnedMessages.length > 0 && (
@@ -3895,6 +4168,7 @@ export default function HomePage(): React.JSX.Element {
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
                                       {isMine ? "Messages: " : `${msg.senderName}: `}
+                                      {msg.isAdminReply && " ⭐ Admin"}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -3928,6 +4202,7 @@ export default function HomePage(): React.JSX.Element {
                         <div>
                           <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                             Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
+                            {replyTo.isAdminReply && " ⭐ Admin"}
                           </div>
                           <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                             {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
@@ -4023,7 +4298,7 @@ export default function HomePage(): React.JSX.Element {
                                 maxWidth: "80%",
                                 padding: "10px 14px",
                                 borderRadius: "12px",
-                                backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
+                                backgroundColor: isMine ? "#c5e800" : (msg.isAdminReply ? "rgba(255,215,0,0.15)" : "#f0f0f0"),
                                 color: "#000000",
                                 fontSize: "14px",
                                 lineHeight: 1.5,
@@ -4033,6 +4308,24 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
+                              {msg.isAdminReply && !isMine && (
+                                <div
+                                  style={{
+                                    fontSize: "9px",
+                                    color: "#FFD700",
+                                    fontWeight: 500,
+                                    marginBottom: "4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  <AdminBadge />
+                                  <span>Admin Reply</span>
+                                </div>
+                              )}
+                              
                               {msg.isShared && msg.sharedFromName && (
                                 <div
                                   style={{
@@ -4062,6 +4355,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <span style={{ fontWeight: 500, color: "#22c55e", fontFamily: FONT_FAMILY }}>
                                     {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
+                                    {msg.isAdminReply && " ⭐ Admin"}
                                   </span>
                                   <span style={{ color: isMine ? "#000" : "#333", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                 </div>
