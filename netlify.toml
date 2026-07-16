@@ -4,9 +4,5 @@
   publish = "faq/.next"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "20"
   NEXT_PRIVATE_STANDALONE = "false"
-
-# Hapus plugin nextjs karena menyebabkan error
-# [[plugins]]
-#   package = "@netlify/plugin-nextjs"
