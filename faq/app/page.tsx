@@ -399,15 +399,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Big Chat Icon
-const BigChatIcon = () => (
-  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M8 10H16M8 14H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Banner Rolling Text Component
+// Banner Rolling Text Component - Modern GSAP Style
 const RollingTextBanner = () => {
   const phrases = [
     "Website sedang dalam pengembangan",
@@ -417,135 +409,162 @@ const RollingTextBanner = () => {
   ];
   
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % phrases.length);
-        setIsAnimating(false);
-      }, 600);
+      setCurrentIndex((prev) => (prev + 1) % phrases.length);
     }, 3000);
-    
     return () => clearInterval(interval);
   }, []);
   
   return (
-    <div style={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      width: "100%",
-      backgroundColor: "#0D3CFC",
-      padding: "14px 20px",
-      zIndex: 20,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      overflow: "hidden",
-      height: "64px",
-    }}>
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{
+        position: "relative",
+        width: "100%",
+        backgroundColor: "#0D3CFC",
+        padding: "16px 24px",
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        minHeight: "72px",
+        borderBottom: "2px solid rgba(255,255,255,0.08)",
+      }}
+    >
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "16px",
-        position: "relative",
+        gap: "20px",
         width: "100%",
-        maxWidth: "800px",
+        maxWidth: "900px",
       }}>
         {/* Big Chat Icon with pulse animation */}
         <motion.div
           animate={{
-            scale: [1, 1.1, 1],
+            scale: [1, 1.12, 1],
+            rotate: [0, -3, 3, -3, 0],
           }}
           transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
+            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 3, repeat: Infinity, ease: "easeInOut" },
           }}
           style={{
             color: "#ffffff",
             display: "flex",
             alignItems: "center",
             flexShrink: 0,
+            opacity: 0.95,
           }}
         >
-          <BigChatIcon />
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 10H16M8 14H12" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </motion.div>
         
         {/* Rolling Text */}
         <div style={{
           position: "relative",
-          height: "32px",
+          height: "40px",
           overflow: "hidden",
           flex: 1,
           display: "flex",
           alignItems: "center",
         }}>
-          <motion.div
-            key={currentIndex}
-            initial={{ y: 20, opacity: 0, scale: 0.95 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            transition={{ 
-              type: "spring",
-              damping: 25,
-              stiffness: 200,
-              duration: 0.6,
-            }}
-            style={{
-              position: "absolute",
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ y: 30, opacity: 0, scale: 0.92 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -30, opacity: 0, scale: 0.92 }}
+              transition={{ 
+                type: "spring",
+                damping: 28,
+                stiffness: 180,
+                duration: 0.5,
+              }}
               style={{
-                fontSize: "20px",
-                fontWeight: 500,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.01em",
-                textAlign: "center",
-                whiteSpace: "nowrap",
+                position: "absolute",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {phrases[currentIndex]}
-            </span>
-          </motion.div>
-          
-          {/* Decorative dot indicators */}
-          <div style={{
-            position: "absolute",
-            bottom: "-8px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "6px",
-          }}>
-            {phrases.map((_, idx) => (
-              <motion.div
-                key={idx}
-                animate={{
-                  scale: idx === currentIndex ? 1 : 0.7,
-                  opacity: idx === currentIndex ? 1 : 0.3,
-                }}
+              <span
                 style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  backgroundColor: "#ffffff",
+                  fontSize: "22px",
+                  fontWeight: 500,
+                  color: "#ffffff",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.01em",
+                  textAlign: "center",
+                  whiteSpace: "nowrap",
+                  textShadow: "0 2px 20px rgba(0,0,0,0.1)",
                 }}
-              />
-            ))}
-          </div>
+              >
+                {phrases[currentIndex]}
+              </span>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+
+      {/* Decorative dot indicators */}
+      <div style={{
+        position: "absolute",
+        bottom: "8px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex",
+        gap: "8px",
+      }}>
+        {phrases.map((_, idx) => (
+          <motion.div
+            key={idx}
+            animate={{
+              scale: idx === currentIndex ? 1 : 0.6,
+              opacity: idx === currentIndex ? 1 : 0.25,
+              width: idx === currentIndex ? "20px" : "8px",
+            }}
+            transition={{ duration: 0.3 }}
+            style={{
+              height: "4px",
+              borderRadius: "4px",
+              backgroundColor: "#ffffff",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Subtle gradient overlay edges for smooth transition */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "60px",
+        height: "100%",
+        background: "linear-gradient(to right, #0D3CFC, transparent)",
+        pointerEvents: "none",
+        opacity: 0.3,
+      }} />
+      <div style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: "60px",
+        height: "100%",
+        background: "linear-gradient(to left, #0D3CFC, transparent)",
+        pointerEvents: "none",
+        opacity: 0.3,
+      }} />
+    </motion.div>
   );
 };
 
@@ -1623,6 +1642,7 @@ export default function HomePage(): React.JSX.Element {
         position: "relative",
         fontFamily: FONT_FAMILY,
         overflow: "hidden",
+        paddingTop: "72px",
       }}
     >
       {/* BANNER ROLLING TEXT - Modern GSAP Style */}
@@ -1635,7 +1655,7 @@ export default function HomePage(): React.JSX.Element {
         transition={{ duration: 0.5, delay: 0.3 }}
         style={{
           position: "absolute",
-          top: "76px",
+          top: "90px",
           left: "40px",
           zIndex: 15,
           display: "flex",
@@ -1663,7 +1683,7 @@ export default function HomePage(): React.JSX.Element {
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{
           position: "absolute",
-          top: "76px",
+          top: "90px",
           right: "40px",
           zIndex: 10,
           display: "flex",
