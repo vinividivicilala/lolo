@@ -25,8 +25,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  onDisconnect
+  updateDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -1045,92 +1044,83 @@ export default function HomePage(): React.JSX.Element {
     broadcastMessages();
   }, [language]);
 
-  // Auth Listener
-  useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-      if (currentUser) {
-        try {
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
+// Auth Listener - Tanpa onDisconnect
+useEffect(() => {
+  if (!auth) return;
+  const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    setUser(currentUser);
+    setLoading(false);
+    if (currentUser) {
+      try {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        const googlePhotoURL = currentUser.photoURL || "";
+        const googleName = currentUser.displayName || currentUser.email || "";
+        
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            id: currentUser.uid,
+            name: googleName,
+            email: currentUser.email || "",
+            photoURL: googlePhotoURL,
+            createdAt: serverTimestamp(),
+            isPinned: false,
+            isOfficial: false,
+            online: true,
+            lastSeen: serverTimestamp(),
+            typing: false,
+            bio: "",
+            note: ""
+          });
           
-          const googlePhotoURL = currentUser.photoURL || "";
-          const googleName = currentUser.displayName || currentUser.email || "";
-          
-          if (!userSnap.exists()) {
-            await setDoc(userRef, {
-              id: currentUser.uid,
-              name: googleName,
-              email: currentUser.email || "",
+          if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
+            await updateProfile(currentUser, {
               photoURL: googlePhotoURL,
-              createdAt: serverTimestamp(),
-              isPinned: false,
-              isOfficial: false,
-              online: true,
-              lastSeen: serverTimestamp(),
-              typing: false,
-              bio: "",
-              note: ""
+              displayName: googleName
             });
-            
-            if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
-              await updateProfile(currentUser, {
-                photoURL: googlePhotoURL,
-                displayName: googleName
-              });
-            }
-          } else {
-            const userData = userSnap.data();
-            const currentPhotoURL = userData?.photoURL || "";
-            
-            if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
-              await updateDoc(userRef, {
-                photoURL: googlePhotoURL,
-                name: googleName,
-                lastSeen: serverTimestamp()
-              });
-            }
-            
+          }
+        } else {
+          const userData = userSnap.data();
+          const currentPhotoURL = userData?.photoURL || "";
+          
+          if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
             await updateDoc(userRef, {
-              online: true,
+              photoURL: googlePhotoURL,
+              name: googleName,
               lastSeen: serverTimestamp()
             });
-            
-            try {
-              const disconnectRef = doc(db, "users", currentUser.uid);
-              await onDisconnect(disconnectRef).update({
-                online: false,
-                lastSeen: serverTimestamp(),
-                typing: false
-              });
-            } catch (err) {
-              console.log("Disconnect handler not available, skipping");
-            }
           }
           
-          const updatedSnap = await getDoc(userRef);
-          const updatedData = updatedSnap.data();
-          if (updatedData) {
-            setUser((prev: any) => ({
-              ...prev,
-              photoURL: updatedData.photoURL || prev.photoURL || "",
-              displayName: updatedData.name || prev.displayName || prev.email,
-              bio: updatedData.bio || "",
-              note: updatedData.note || ""
-            }));
-          }
+          await updateDoc(userRef, {
+            online: true,
+            lastSeen: serverTimestamp()
+          });
           
-          await checkAndSendOfficialMessages(currentUser.uid);
-          
-        } catch (error) {
-          console.error("Error saving user:", error);
+          // HAPUS onDisconnect di sini
         }
+        
+        const updatedSnap = await getDoc(userRef);
+        const updatedData = updatedSnap.data();
+        if (updatedData) {
+          setUser((prev: any) => ({
+            ...prev,
+            photoURL: updatedData.photoURL || prev.photoURL || "",
+            displayName: updatedData.name || prev.displayName || prev.email,
+            bio: updatedData.bio || "",
+            note: updatedData.note || ""
+          }));
+        }
+        
+        await checkAndSendOfficialMessages(currentUser.uid);
+        
+      } catch (error) {
+        console.error("Error saving user:", error);
       }
-    });
-    return () => unsubscribe();
-  }, []);
+    }
+  });
+  return () => unsubscribe();
+}, []);
 
   const checkAndSendOfficialMessages = async (userId: string) => {
     if (!db) return;
