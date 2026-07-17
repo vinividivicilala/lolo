@@ -64,9 +64,10 @@ const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const OFFICIAL_EMAIL = "official@menuru.com";
 const OFFICIAL_ID = "official_menuru";
+const OFFICIAL_PASSWORD = "menuruofficial123";
 
-// Cooldown untuk prevent spam (3 detik)
-const SEND_COOLDOWN = 3000;
+// Cooldown untuk prevent spam (5 detik)
+const SEND_COOLDOWN = 5000;
 
 interface ChatUser {
   id: string;
@@ -194,12 +195,14 @@ const EditIcon = () => (
   </svg>
 );
 
+// Chat Icon SVG
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
+// Awwwards Style Dot Indicator
 const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
     <div style={{ 
@@ -240,6 +243,7 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
   );
 };
 
+// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
@@ -391,9 +395,8 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
   const messageIdsSet = useRef<Set<string>>(new Set());
-  const allMessagesMap = useRef<Map<string, Message>>(new Map());
 
-  // Banner rolling text
+  // Banner rolling text - GSAP style fade in/out
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih",
@@ -407,7 +410,7 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text
+  // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -513,15 +516,19 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
+  // Banner rolling text animation - GSAP style fade
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
     }, 4000);
+
     return () => clearInterval(interval);
   }, []);
 
+  // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
-  const isOfficialUser = user?.email === OFFICIAL_EMAIL;
+  // Check if current user is official (bisa login)
+  const isOfficial = user?.email === OFFICIAL_EMAIL;
 
   // Broadcast messages to all users (only once)
   const broadcastMessages = async () => {
@@ -548,13 +555,13 @@ export default function HomePage(): React.JSX.Element {
         const userId = docSnap.id;
         const userData = docSnap.data();
         
-        const chatId = [userId, OFFICIAL_ID].sort().join("_");
+        const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
         const chatRef = doc(db, "chats", chatId);
         const chatSnap = await getDoc(chatRef);
         
         if (!chatSnap.exists()) {
           await setDoc(chatRef, {
-            participants: [userId, OFFICIAL_ID],
+            participants: [userId, MENURU_OFFICIAL.id],
             createdAt: serverTimestamp(),
             isPinned: false,
             messageCount: 0
@@ -619,6 +626,7 @@ export default function HomePage(): React.JSX.Element {
           const googlePhotoURL = currentUser.photoURL || "";
           const googleName = currentUser.displayName || currentUser.email || "";
           const isAdminUser = currentUser.email === ADMIN_EMAIL;
+          const isOfficialUser = currentUser.email === OFFICIAL_EMAIL;
           
           if (!userSnap.exists()) {
             await setDoc(userRef, {
@@ -628,7 +636,7 @@ export default function HomePage(): React.JSX.Element {
               photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: false,
+              isOfficial: isOfficialUser,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
@@ -652,14 +660,16 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: googlePhotoURL,
                 name: googleName,
                 lastSeen: serverTimestamp(),
-                isAdmin: isAdminUser
+                isAdmin: isAdminUser,
+                isOfficial: isOfficialUser
               });
             }
             
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp(),
-              isAdmin: isAdminUser
+              isAdmin: isAdminUser,
+              isOfficial: isOfficialUser
             });
           }
           
@@ -672,11 +682,15 @@ export default function HomePage(): React.JSX.Element {
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
               note: updatedData.note || "",
-              isAdmin: updatedData.isAdmin || false
+              isAdmin: updatedData.isAdmin || false,
+              isOfficial: updatedData.isOfficial || false
             }));
           }
           
-          await checkAndSendOfficialMessages(currentUser.uid);
+          // Jika user bukan official, kirim pesan welcome
+          if (!isOfficialUser) {
+            await checkAndSendOfficialMessages(currentUser.uid);
+          }
           
         } catch (error) {
           console.error("Error saving user:", error);
@@ -690,13 +704,13 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
     
     try {
-      const chatId = [userId, OFFICIAL_ID].sort().join("_");
+      const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [userId, OFFICIAL_ID],
+          participants: [userId, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
@@ -758,7 +772,8 @@ export default function HomePage(): React.JSX.Element {
                 bio: data.bio || "",
                 note: data.note || "",
                 photoURL: data.photoURL || "",
-                isAdmin: data.isAdmin || false
+                isAdmin: data.isAdmin || false,
+                isOfficial: data.isOfficial || false
               } as ChatUser);
             }
           });
@@ -769,7 +784,7 @@ export default function HomePage(): React.JSX.Element {
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
-            isOfficial: false,
+            isOfficial: user.isOfficial || false,
             online: true,
             lastSeen: null,
             typing: false,
@@ -790,14 +805,18 @@ export default function HomePage(): React.JSX.Element {
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
                 note: user.note || userList[index].note || "",
-                isAdmin: user.isAdmin || false
+                isAdmin: user.isAdmin || false,
+                isOfficial: user.isOfficial || false
               };
             }
           }
           
-          const officialExists = userList.some(u => u.id === OFFICIAL_ID);
-          if (!officialExists) {
-            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
+          // Tambahkan official jika user bukan official
+          if (!isOfficial) {
+            const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
+            if (!officialExists) {
+              userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
+            }
           }
           
           userList.sort((a, b) => {
@@ -813,7 +832,7 @@ export default function HomePage(): React.JSX.Element {
       }
     };
     loadUsers();
-  }, [user]);
+  }, [user, isOfficial]);
 
   // Load chat rooms
   useEffect(() => {
@@ -939,91 +958,10 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // ============ LOAD MESSAGES ============
-  // Khusus untuk Admin yang chat dengan Menuru Official
-  // Admin melihat SEMUA pesan dari SEMUA user yang chat dengan Menuru Official
+  // Load messages dengan read receipts untuk semua chat termasuk official
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
-    // Jika admin dan chat dengan Menuru Official
-    if (isAdmin && selectedChat.id === OFFICIAL_ID) {
-      // Bersihkan map sebelumnya
-      allMessagesMap.current.clear();
-      
-      // Listener untuk chat admin dengan official
-      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
-      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
-      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
-      
-      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
-          if (change.type === 'added' || change.type === 'modified') {
-            allMessagesMap.current.set(msg.id, msg);
-          } else if (change.type === 'removed') {
-            allMessagesMap.current.delete(msg.id);
-          }
-        });
-        
-        // Update messages
-        updateAdminMessages();
-      });
-      
-      // Listener untuk setiap user yang chat dengan official
-      const allUsers = users.filter(u => u.id !== user.uid && u.id !== OFFICIAL_ID);
-      const unsubscribes: (() => void)[] = [];
-      
-      for (const targetUser of allUsers) {
-        const userChatId = [targetUser.id, OFFICIAL_ID].sort().join("_");
-        const userMessagesRef = collection(db, "chats", userChatId, "messages");
-        const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
-        
-        const unsubscribe = onSnapshot(userQ, (snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            const msg = { id: change.doc.id, ...change.doc.data() } as Message;
-            if (!msg.targetUserId) {
-              msg.targetUserId = targetUser.id;
-              msg.targetUserName = targetUser.name;
-            }
-            
-            if (change.type === 'added' || change.type === 'modified') {
-              allMessagesMap.current.set(msg.id, msg);
-            } else if (change.type === 'removed') {
-              allMessagesMap.current.delete(msg.id);
-            }
-          });
-          
-          updateAdminMessages();
-        });
-        
-        unsubscribes.push(unsubscribe);
-      }
-      
-      const updateAdminMessages = () => {
-        const sortedMessages = Array.from(allMessagesMap.current.values())
-          .sort((a, b) => {
-            const timeA = a.timestamp?.seconds || 0;
-            const timeB = b.timestamp?.seconds || 0;
-            return timeA - timeB;
-          })
-          .slice(-300);
-        
-        setMessages(sortedMessages);
-        setPinnedMessages(sortedMessages.filter(m => m.isPinned));
-        
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      };
-      
-      return () => {
-        unsubscribeAdmin();
-        unsubscribes.forEach(unsub => unsub());
-        allMessagesMap.current.clear();
-      };
-    }
-    
-    // ============ USER BIASA CHAT ============
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -1052,6 +990,7 @@ export default function HomePage(): React.JSX.Element {
       const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
       const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
       
+      // Mark sebagai delivered
       for (const msg of undeliveredMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1060,6 +999,7 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
+      // Mark sebagai read untuk semua user (termasuk official)
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1084,7 +1024,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [selectedChat, user, isAdmin, users]);
+  }, [selectedChat, user]);
 
   // Real-time typing listener untuk semua user
   useEffect(() => {
@@ -1094,26 +1034,26 @@ export default function HomePage(): React.JSX.Element {
     const q = query(usersRef);
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const typingMap = new Map<string, boolean>();
+      const typingSet = new Set<string>();
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.id && data.id !== user.uid) {
-          typingMap.set(data.id, data.typing || false);
+        if (data.typing && data.id !== user.uid) {
+          typingSet.add(data.id);
         }
       });
-      
+      // Update users dengan typing status
       setUsers(prev => prev.map(u => {
-        if (typingMap.has(u.id)) {
-          return { ...u, typing: typingMap.get(u.id) };
+        if (typingSet.has(u.id)) {
+          return { ...u, typing: true };
         }
-        return u;
+        return { ...u, typing: false };
       }));
     });
     
     return () => unsubscribe();
   }, [user]);
 
-  // Handle login
+  // Handle login - support login dengan akun official
   const handleLogin = async () => {
     if (!auth) return;
     try {
@@ -1162,7 +1102,6 @@ export default function HomePage(): React.JSX.Element {
       setSelectedUpdateId(null);
       setAdminReplyMode(false);
       messageIdsSet.current.clear();
-      allMessagesMap.current.clear();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1188,11 +1127,10 @@ export default function HomePage(): React.JSX.Element {
       setSelectedUserForReply(null);
       setSelectedUserNameForReply("");
       messageIdsSet.current.clear();
-      allMessagesMap.current.clear();
     }
   };
 
-  // Handle typing
+  // Handle typing dengan real-time update
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1218,6 +1156,7 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
+  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -1234,6 +1173,7 @@ export default function HomePage(): React.JSX.Element {
     setEditNote(false);
   };
 
+  // Handle save bio
   const handleSaveBio = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1262,6 +1202,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Handle save note
   const handleSaveNote = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1290,9 +1231,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // ============ SEND MESSAGE ============
-  // User biasa kirim pesan ke official
-  // Admin juga bisa kirim pesan ke official (tapi ini untuk testing)
+  // Send message dengan read receipt
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1385,8 +1324,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // ============ ADMIN REPLY ============
-  // Admin membalas user tertentu melalui Menuru Official
+  // Admin reply to specific user
   const handleAdminReplyToUser = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
     if (isSending) return;
@@ -1400,14 +1338,13 @@ export default function HomePage(): React.JSX.Element {
     setLastSendTime(now);
     
     try {
-      // Kirim balasan ke chat user dengan official
-      const chatId = [selectedUserForReply, OFFICIAL_ID].sort().join("_");
+      const chatId = [selectedUserForReply, MENURU_OFFICIAL.id].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [selectedUserForReply, OFFICIAL_ID],
+          participants: [selectedUserForReply, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
@@ -1420,7 +1357,7 @@ export default function HomePage(): React.JSX.Element {
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
         text: adminReplyMessage.trim(),
-        senderId: OFFICIAL_ID, // Kirim sebagai Menuru Official
+        senderId: MENURU_OFFICIAL.id,
         senderName: "Menuru Official",
         receiverId: selectedUserForReply,
         timestamp: serverTimestamp(),
@@ -1445,15 +1382,15 @@ export default function HomePage(): React.JSX.Element {
         messageCount: increment(1),
         lastMessage: adminReplyMessage.trim(),
         lastMessageTime: serverTimestamp(),
-        lastMessageSenderId: OFFICIAL_ID
+        lastMessageSenderId: MENURU_OFFICIAL.id
       });
       
       // Juga tambahkan ke chat admin untuk visibilitas
-      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
+      const adminChatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
       const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
       await addDoc(adminMessagesRef, {
         text: `[Balasan untuk ${selectedUserNameForReply || "User"}] ${adminReplyMessage.trim()}`,
-        senderId: OFFICIAL_ID,
+        senderId: MENURU_OFFICIAL.id,
         senderName: "Menuru Official",
         receiverId: user.uid,
         timestamp: serverTimestamp(),
@@ -1485,6 +1422,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
     if (isSending) return;
@@ -1542,6 +1480,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1556,6 +1495,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
     if (isSending) return;
@@ -1598,6 +1538,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Pin/Unpin chat room
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1617,6 +1558,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Pin/Unpin user
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1636,6 +1578,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1671,6 +1614,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1721,6 +1665,7 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
+  // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -1731,6 +1676,7 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Animate chat button text
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isChatOpen && user && !isIncomingMessage) {
@@ -1770,7 +1716,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* BANNER */}
+      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1909,6 +1855,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 {user.displayName || user.email}
                 {isAdmin && " (Admin)"}
+                {isOfficial && " (Official)"}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -1966,7 +1913,7 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
-      {/* Login Modal */}
+      {/* Login Modal - Support login official */}
       <AnimatePresence>
         {showLogin && (
           <motion.div
@@ -2007,6 +1954,9 @@ export default function HomePage(): React.JSX.Element {
               <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: FONT_FAMILY }}>
                 Login
               </h2>
+              <div style={{ fontSize: "12px", color: "#666", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+                Login dengan official@menuru.com untuk akses official
+              </div>
               <input
                 type="email"
                 placeholder="Email"
@@ -2167,7 +2117,7 @@ export default function HomePage(): React.JSX.Element {
                 <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""}
+                    {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""} {u.isOfficial ? "(Official)" : ""}
                   </option>
                 ))}
               </select>
@@ -2348,7 +2298,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Update Detail Page */}
+              {/* Content - Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -3283,6 +3233,7 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                             {profileUser.isAdmin && " (Admin)"}
+                            {profileUser.isOfficial && " (Official)"}
                           </span>
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
@@ -3552,7 +3503,7 @@ export default function HomePage(): React.JSX.Element {
                           <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name}
+                              {u.name} {u.isOfficial ? "(Official)" : ""}
                             </option>
                           ))}
                         </select>
@@ -3681,6 +3632,7 @@ export default function HomePage(): React.JSX.Element {
                                     >
                                       {u.name}
                                       {u.isAdmin && " (Admin)"}
+                                      {u.isOfficial && " (Official)"}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3795,6 +3747,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
+                                        {otherUser.isOfficial && " (Official)"}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3925,6 +3878,7 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   {otherUser.name}
+                                  {otherUser.isOfficial && " (Official)"}
                                 </span>
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
@@ -3995,7 +3949,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // ============ CHAT VIEW ============
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -4076,6 +4030,7 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
                           {selectedChat.isAdmin && " (Admin)"}
+                          {selectedChat.isOfficial && " (Official)"}
                         </span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4083,7 +4038,7 @@ export default function HomePage(): React.JSX.Element {
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
-                        {selectedChat.id === OFFICIAL_ID && isAdmin && (
+                        {selectedChat.id === MENURU_OFFICIAL.id && isAdmin && (
                           <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
                             Admin - Lihat semua pesan user
                           </span>
@@ -4120,7 +4075,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   {/* Admin Reply Mode Indicator */}
-                  {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode && (
+                  {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode && (
                     <div
                       style={{
                         padding: "8px 16px",
@@ -4264,7 +4219,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages dengan Read Receipts */}
+                  {/* Messages dengan Read Receipts dan Typing Indicator */}
                   <div
                     style={{
                       flex: 1,
@@ -4301,16 +4256,13 @@ export default function HomePage(): React.JSX.Element {
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                         const isAdminReply = msg.isAdminReply || false;
                         
-                        // Untuk admin: tampilkan nama pengirim asli
-                        const displaySenderName = isAdmin && selectedChat?.id === OFFICIAL_ID && !isMine && !isAdminReply
+                        // Show original sender name for admin viewing all messages
+                        const displaySenderName = isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isMine && !isAdminReply
                           ? (msg.targetUserName || msg.senderName)
                           : null;
                         
-                        const isUserMessage = msg.senderId !== OFFICIAL_ID && msg.senderId !== user?.uid;
+                        const isUserMessage = msg.senderId !== MENURU_OFFICIAL.id && msg.senderId !== user?.uid;
                         const msgNumber = msg.messageCount || (idx + 1);
-                        
-                        // Cek apakah pesan ini dari Menuru Official (balasan admin)
-                        const isOfficialMessage = msg.senderId === OFFICIAL_ID;
                         
                         return (
                           <React.Fragment key={idx}>
@@ -4348,7 +4300,6 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {/* Tampilkan nama pengirim untuk admin */}
                               {displaySenderName && isUserMessage && (
                                 <div
                                   style={{
@@ -4411,19 +4362,49 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {/* Pesan dengan nomor */}
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                {!isMine && !isAdminReply && (
-                                  <span style={{ 
-                                    fontSize: "9px", 
-                                    color: "rgba(0,0,0,0.3)", 
-                                    fontFamily: FONT_FAMILY,
-                                  }}>
-                                    #{msgNumber}
+                              {isBroadcastMessage ? (
+                                <span style={{ fontFamily: FONT_FAMILY }}>
+                                  Don't forget to read{' '}
+                                  <span
+                                    onClick={() => setShowPrivacyPolicy(true)}
+                                    style={{
+                                      color: "#0095f6",
+                                      textDecoration: "underline",
+                                      cursor: "pointer",
+                                      fontWeight: 500,
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    Privacy Policy
                                   </span>
-                                )}
-                              </div>
+                                  {' and '}
+                                  <span
+                                    onClick={() => setShowUpdate(true)}
+                                    style={{
+                                      color: "#0095f6",
+                                      textDecoration: "underline",
+                                      cursor: "pointer",
+                                      fontWeight: 500,
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    Update System
+                                  </span>
+                                </span>
+                              ) : (
+                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
+                                  {!isMine && !isAdminReply && (
+                                    <span style={{ 
+                                      fontSize: "9px", 
+                                      color: "rgba(0,0,0,0.3)", 
+                                      fontFamily: FONT_FAMILY,
+                                    }}>
+                                      #{msgNumber}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                               
                               <div
                                 style={{
@@ -4587,8 +4568,7 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {/* Tombol Balas User Ini - khusus untuk admin di chat official */}
-                                      {isAdmin && selectedChat?.id === OFFICIAL_ID && !isAdminReply && !isMine && isUserMessage && (
+                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && !isMine && isUserMessage && (
                                         <motion.button
                                           whileHover={{ backgroundColor: "#f5f5f5" }}
                                           onClick={() => {
@@ -4683,8 +4663,8 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode ? (
-                      // ============ ADMIN REPLY INPUT ============
+                    {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
+                      // Admin Reply Input
                       <div style={{ display: "flex", gap: "8px" }}>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
@@ -4774,7 +4754,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       </div>
                     ) : (
-                      // ============ NORMAL CHAT INPUT ============
+                      // Normal Chat Input
                       <div style={{ display: "flex", gap: "8px" }}>
                         <input
                           type="text"
