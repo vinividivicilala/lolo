@@ -107,8 +107,6 @@ interface Message {
   targetUserId?: string;
   targetUserName?: string;
   messageCount?: number;
-  // Untuk tracking typing per user
-  typing?: boolean;
 }
 
 interface ChatRoom {
@@ -352,35 +350,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Typing indicator component
-const TypingIndicator = ({ users, currentUser }: { users: ChatUser[]; currentUser: any }) => {
-  const typingUsersList = users.filter(u => u.typing && u.id !== currentUser?.uid);
-  
-  if (typingUsersList.length === 0) return null;
-  
-  const names = typingUsersList.map(u => u.name).join(', ');
-  
-  return (
-    <div style={{
-      padding: "4px 16px",
-      fontSize: "12px",
-      color: "#666",
-      fontFamily: FONT_FAMILY,
-      fontStyle: "italic",
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-    }}>
-      <span style={{ display: "flex", gap: "3px" }}>
-        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0s" }}>•</span>
-        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.2s" }}>•</span>
-        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.4s" }}>•</span>
-      </span>
-      <span>{names} typing...</span>
-    </div>
-  );
-};
-
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -420,7 +389,6 @@ export default function HomePage(): React.JSX.Element {
   const [selectedUserNameForReply, setSelectedUserNameForReply] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
   const [lastSendTime, setLastSendTime] = useState<number>(0);
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
@@ -974,13 +942,13 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages dengan read receipts untuk semua chat termasuk official
+  // Load messages - Admin melihat semua pesan user di official chat
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     
-    // Untuk admin yang melihat official chat, kita perlu menggabungkan pesan dari semua user
+    // Jika admin dan chat yang dipilih adalah Official
     if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
       // Admin melihat pesan dari semua user di official chat
       const adminMessagesRef = collection(db, "chats", chatId, "messages");
@@ -1043,7 +1011,7 @@ export default function HomePage(): React.JSX.Element {
       return () => unsubscribeAdmin();
     }
     
-    // Normal user chat - dengan read receipts termasuk official chat
+    // Normal user chat - dengan read receipts
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -1080,7 +1048,7 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Mark sebagai read untuk user biasa
+      // Mark sebagai read
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1107,7 +1075,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user, isAdmin, users]);
 
-  // Real-time typing listener untuk semua user termasuk official
+  // Real-time typing listener untuk semua user
   useEffect(() => {
     if (!db || !user) return;
     
@@ -1115,18 +1083,22 @@ export default function HomePage(): React.JSX.Element {
     const q = query(usersRef);
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const typingSet = new Set<string>();
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.typing && data.id !== user.uid) {
-          typingSet.add(data.id);
+        if (data.id && data.typing) {
+          // Update user typing status
+          setUsers(prev => prev.map(u => {
+            if (u.id === data.id) {
+              return { ...u, typing: data.typing };
+            }
+            return u;
+          }));
         }
       });
-      setTypingUsers(typingSet);
     });
     
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   // Handle login
   const handleLogin = async () => {
@@ -1205,7 +1177,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing dengan real-time update untuk official chat juga
+  // Handle typing dengan real-time update
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1306,7 +1278,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message dengan read receipt untuk semua chat termasuk official
+  // Send message dengan read receipt
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1728,7 +1700,9 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const getTypingStatus = (userId: string) => {
-    return typingUsers.has(userId);
+    const chatUser = users.find(u => u.id === userId);
+    if (!chatUser) return false;
+    return chatUser.typing || false;
   };
 
   const pinnedUsers = users.filter(u => u.isPinned);
@@ -4425,7 +4399,6 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {/* Pesan dengan nomor urut */}
                               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                                 {!isMine && !isAdminReply && (
@@ -4460,7 +4433,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
-                                {/* Read Status - centang 1, 2, 2 biru */}
                                 <ReadStatus msg={msg} isMine={isMine} />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
