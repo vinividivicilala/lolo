@@ -65,7 +65,7 @@ const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const OFFICIAL_EMAIL = "official@menuru.com";
 
 // Cooldown untuk prevent spam (5 detik)
-const SEND_COOLDOWN = 5000;
+const SEND_COOLDOWN = 3000;
 
 interface ChatUser {
   id: string;
@@ -132,7 +132,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons
+// SVG Icons - (sama seperti sebelumnya, disimpan singkat)
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -193,7 +193,6 @@ const EditIcon = () => (
   </svg>
 );
 
-// Chat Icon SVG
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -942,7 +941,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages - Admin melihat semua pesan user di official chat
+  // IMPORTANT: Load messages - Khusus untuk Menuru Official dengan real-time
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
@@ -951,64 +950,84 @@ export default function HomePage(): React.JSX.Element {
     // Jika admin dan chat yang dipilih adalah Official
     if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
       // Admin melihat pesan dari semua user di official chat
-      const adminMessagesRef = collection(db, "chats", chatId, "messages");
-      const qAdmin = query(adminMessagesRef, orderBy("timestamp", "asc"));
+      // Kita gunakan listener terpisah untuk setiap chat user
+      const allUnsubscribe: (() => void)[] = [];
+      const allMessagesMap = new Map<string, Message>();
       
-      const unsubscribeAdmin = onSnapshot(qAdmin, async (snapshot) => {
-        const messageList: Message[] = [];
-        snapshot.forEach((doc) => {
-          const msg = { id: doc.id, ...doc.data() } as Message;
-          messageList.push(msg);
-        });
+      // Ambil semua user yang bukan admin dan bukan official
+      const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
+      
+      // Untuk setiap user, buat listener
+      for (const targetUser of allUsers) {
+        const userChatId = [targetUser.id, MENURU_OFFICIAL.id].sort().join("_");
+        const userMessagesRef = collection(db, "chats", userChatId, "messages");
+        const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
         
-        // Ambil pesan dari semua user yang chat dengan official
-        const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
-        let allMessages: Message[] = [];
-        
-        for (const targetUser of allUsers) {
-          const userChatId = [targetUser.id, MENURU_OFFICIAL.id].sort().join("_");
-          const userMessagesRef = collection(db, "chats", userChatId, "messages");
-          const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
-          const userSnapshot = await getDocs(userQ);
-          
-          userSnapshot.forEach((doc) => {
-            const msg = { id: doc.id, ...doc.data() } as Message;
+        const unsubscribe = onSnapshot(userQ, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const msg = { id: change.doc.id, ...change.doc.data() } as Message;
             if (!msg.targetUserId) {
               msg.targetUserId = targetUser.id;
               msg.targetUserName = targetUser.name;
             }
-            allMessages.push(msg);
+            
+            if (change.type === 'added' || change.type === 'modified') {
+              allMessagesMap.set(msg.id, msg);
+            } else if (change.type === 'removed') {
+              allMessagesMap.delete(msg.id);
+            }
           });
-        }
-        
-        // Gabungkan dan sortir semua pesan
-        const combinedMessages = [...messageList, ...allMessages];
-        combinedMessages.sort((a, b) => {
-          const timeA = a.timestamp?.seconds || 0;
-          const timeB = b.timestamp?.seconds || 0;
-          return timeA - timeB;
+          
+          // Sort dan set messages
+          const sortedMessages = Array.from(allMessagesMap.values())
+            .sort((a, b) => {
+              const timeA = a.timestamp?.seconds || 0;
+              const timeB = b.timestamp?.seconds || 0;
+              return timeA - timeB;
+            })
+            .slice(-200);
+          
+          setMessages(sortedMessages);
+          setPinnedMessages(sortedMessages.filter(m => m.isPinned));
+          
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
         });
         
-        // Filter duplikat
-        const uniqueMessages: Message[] = [];
-        const messageIds = new Set<string>();
-        for (const msg of combinedMessages) {
-          if (!messageIds.has(msg.id)) {
-            messageIds.add(msg.id);
-            uniqueMessages.push(msg);
+        allUnsubscribe.push(unsubscribe);
+      }
+      
+      // Juga listen ke chat admin sendiri dengan official
+      const adminMessagesRef = collection(db, "chats", chatId, "messages");
+      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
+      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
+          if (change.type === 'added' || change.type === 'modified') {
+            allMessagesMap.set(msg.id, msg);
+          } else if (change.type === 'removed') {
+            allMessagesMap.delete(msg.id);
           }
-        }
+        });
         
-        const limitedMessages = uniqueMessages.slice(-200);
-        setMessages(limitedMessages);
-        setPinnedMessages(limitedMessages.filter(m => m.isPinned));
+        const sortedMessages = Array.from(allMessagesMap.values())
+          .sort((a, b) => {
+            const timeA = a.timestamp?.seconds || 0;
+            const timeB = b.timestamp?.seconds || 0;
+            return timeA - timeB;
+          })
+          .slice(-200);
         
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
+        setMessages(sortedMessages);
+        setPinnedMessages(sortedMessages.filter(m => m.isPinned));
       });
       
-      return () => unsubscribeAdmin();
+      allUnsubscribe.push(unsubscribeAdmin);
+      
+      return () => {
+        allUnsubscribe.forEach(unsub => unsub());
+      };
     }
     
     // Normal user chat - dengan read receipts
@@ -1083,22 +1102,25 @@ export default function HomePage(): React.JSX.Element {
     const q = query(usersRef);
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      const typingMap = new Map<string, boolean>();
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.id && data.typing) {
-          // Update user typing status
-          setUsers(prev => prev.map(u => {
-            if (u.id === data.id) {
-              return { ...u, typing: data.typing };
-            }
-            return u;
-          }));
+        if (data.id && data.id !== user.uid) {
+          typingMap.set(data.id, data.typing || false);
         }
       });
+      
+      // Update users dengan typing status
+      setUsers(prev => prev.map(u => {
+        if (typingMap.has(u.id)) {
+          return { ...u, typing: typingMap.get(u.id) };
+        }
+        return u;
+      }));
     });
     
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // Handle login
   const handleLogin = async () => {
@@ -2089,7 +2111,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Share Modal */}
+      {/* Share Modal - sama seperti sebelumnya */}
       <AnimatePresence>
         {showShareModal && shareMessage && (
           <motion.div
@@ -3988,7 +4010,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View dengan fitur lengkap seperti user biasa
+                // Chat View dengan fitur lengkap
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
