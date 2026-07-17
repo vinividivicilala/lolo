@@ -107,6 +107,8 @@ interface Message {
   targetUserId?: string;
   targetUserName?: string;
   messageCount?: number;
+  // Untuk tracking typing per user
+  typing?: boolean;
 }
 
 interface ChatRoom {
@@ -350,6 +352,35 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
+// Typing indicator component
+const TypingIndicator = ({ users, currentUser }: { users: ChatUser[]; currentUser: any }) => {
+  const typingUsersList = users.filter(u => u.typing && u.id !== currentUser?.uid);
+  
+  if (typingUsersList.length === 0) return null;
+  
+  const names = typingUsersList.map(u => u.name).join(', ');
+  
+  return (
+    <div style={{
+      padding: "4px 16px",
+      fontSize: "12px",
+      color: "#666",
+      fontFamily: FONT_FAMILY,
+      fontStyle: "italic",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+    }}>
+      <span style={{ display: "flex", gap: "3px" }}>
+        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0s" }}>•</span>
+        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.2s" }}>•</span>
+        <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.4s" }}>•</span>
+      </span>
+      <span>{names} typing...</span>
+    </div>
+  );
+};
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -588,7 +619,6 @@ export default function HomePage(): React.JSX.Element {
           messageCount: 1
         });
         
-        // Update message count
         await updateDoc(chatRef, {
           messageCount: increment(1)
         });
@@ -857,7 +887,6 @@ export default function HomePage(): React.JSX.Element {
               hasAdminReply = lastMsg.isAdminReply || false;
             }
             
-            // Count unread messages
             const unreadQuery = query(
               messagesRef, 
               where("read", "==", false),
@@ -945,13 +974,13 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages with read receipts - khusus untuk admin melihat semua pesan user
+  // Load messages dengan read receipts untuk semua chat termasuk official
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     
-    // Jika admin dan chat yang dipilih adalah Official
+    // Untuk admin yang melihat official chat, kita perlu menggabungkan pesan dari semua user
     if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
       // Admin melihat pesan dari semua user di official chat
       const adminMessagesRef = collection(db, "chats", chatId, "messages");
@@ -1014,7 +1043,7 @@ export default function HomePage(): React.JSX.Element {
       return () => unsubscribeAdmin();
     }
     
-    // Normal user chat - dengan read receipts
+    // Normal user chat - dengan read receipts termasuk official chat
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -1051,15 +1080,13 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Mark sebagai read (hanya untuk user biasa, admin melihat semua)
-      if (!isAdmin || selectedChat.id !== MENURU_OFFICIAL.id) {
-        for (const msg of unreadMessages) {
-          const msgRef = doc(db, "chats", chatId, "messages", msg.id);
-          await updateDoc(msgRef, {
-            read: true,
-            readAt: serverTimestamp()
-          });
-        }
+      // Mark sebagai read untuk user biasa
+      for (const msg of unreadMessages) {
+        const msgRef = doc(db, "chats", chatId, "messages", msg.id);
+        await updateDoc(msgRef, {
+          read: true,
+          readAt: serverTimestamp()
+        });
       }
       
       if (unreadMessages.length > 0) {
@@ -1080,7 +1107,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user, isAdmin, users]);
 
-  // Real-time typing listener
+  // Real-time typing listener untuk semua user termasuk official
   useEffect(() => {
     if (!db || !user) return;
     
@@ -1178,7 +1205,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing dengan real-time update
+  // Handle typing dengan real-time update untuk official chat juga
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1279,7 +1306,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message dengan read receipt
+  // Send message dengan read receipt untuk semua chat termasuk official
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1310,7 +1337,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Get current message count
       const chatData = chatSnap.data();
       const currentCount = chatData?.messageCount || 0;
       
@@ -1342,7 +1368,6 @@ export default function HomePage(): React.JSX.Element {
       
       await addDoc(messagesRef, msgData);
       
-      // Update message count di chat room
       await updateDoc(chatRef, {
         messageCount: increment(1),
         lastMessage: message.trim(),
@@ -3989,7 +4014,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View dengan fitur lengkap
+                // Chat View dengan fitur lengkap seperti user biasa
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -4258,7 +4283,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages dengan Read Receipts */}
+                  {/* Messages dengan Read Receipts dan Typing Indicator */}
                   <div
                     style={{
                       flex: 1,
@@ -4295,7 +4320,6 @@ export default function HomePage(): React.JSX.Element {
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                         const isAdminReply = msg.isAdminReply || false;
                         
-                        // Show original sender name for admin viewing all messages
                         const displaySenderName = isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isMine && !isAdminReply
                           ? (msg.targetUserName || msg.senderName)
                           : null;
@@ -4401,7 +4425,7 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {/* Message dengan nomor */}
+                              {/* Pesan dengan nomor urut */}
                               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                                 {!isMine && !isAdminReply && (
@@ -4436,6 +4460,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
+                                {/* Read Status - centang 1, 2, 2 biru */}
                                 <ReadStatus msg={msg} isMine={isMine} />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
@@ -4639,20 +4664,42 @@ export default function HomePage(): React.JSX.Element {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Input */}
+                  {/* Input dengan Typing Indicator */}
                   <div
                     style={{
                       padding: "10px 14px 14px",
                       borderTop: "1px solid rgba(0,0,0,0.04)",
                       display: "flex",
-                      gap: "8px",
+                      flexDirection: "column",
+                      gap: "4px",
                       backgroundColor: "#ffffff",
                       fontFamily: FONT_FAMILY,
                     }}
                   >
+                    {/* Typing indicator */}
+                    {selectedChat && (getTypingStatus(selectedChat.id)) && (
+                      <div style={{
+                        padding: "2px 4px",
+                        fontSize: "11px",
+                        color: "#666",
+                        fontFamily: FONT_FAMILY,
+                        fontStyle: "italic",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}>
+                        <span style={{ display: "flex", gap: "3px" }}>
+                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0s" }}>•</span>
+                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.2s" }}>•</span>
+                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.4s" }}>•</span>
+                        </span>
+                        <span>{selectedChat.name} typing...</span>
+                      </div>
+                    )}
+
                     {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
                       // Admin Reply Input
-                      <>
+                      <div style={{ display: "flex", gap: "8px" }}>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
                             Balas ke {selectedUserNameForReply}
@@ -4739,10 +4786,10 @@ export default function HomePage(): React.JSX.Element {
                             Batal
                           </motion.button>
                         </div>
-                      </>
+                      </div>
                     ) : (
                       // Normal Chat Input
-                      <>
+                      <div style={{ display: "flex", gap: "8px" }}>
                         <input
                           type="text"
                           placeholder={replyTo ? "Type a reply..." : "Type a message..."}
@@ -4805,7 +4852,7 @@ export default function HomePage(): React.JSX.Element {
                           <span>Send</span>
                           <SendIcon />
                         </motion.button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -4906,6 +4953,16 @@ export default function HomePage(): React.JSX.Element {
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
+        }
+        @keyframes typingDot {
+          0%, 60%, 100% {
+            opacity: 0.3;
+            transform: translateY(0);
+          }
+          30% {
+            opacity: 1;
+            transform: translateY(-4px);
+          }
         }
       `}</style>
     </div>
