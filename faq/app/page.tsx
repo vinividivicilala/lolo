@@ -432,7 +432,7 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Official Chat States
+  // Official Chat States - FIXED
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
   const [officialMessageInput, setOfficialMessageInput] = useState("");
   const [officialTypingUsers, setOfficialTypingUsers] = useState<{ [key: string]: boolean }>({});
@@ -1061,7 +1061,7 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle typing for official chat - UNIFIED for all users
+  // Handle typing for official chat - FIXED
   const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setOfficialMessageInput(value);
@@ -1223,9 +1223,12 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to official chat - UNIFIED for all users
+  // Send message to official chat - FIXED
   const handleSendOfficialMessage = async () => {
-    if (!user || !officialMessageInput.trim() || !db) return;
+    if (!user || !officialMessageInput.trim() || !db) {
+      console.log("Cannot send: no user, empty message, or no db");
+      return;
+    }
 
     try {
       const userRef = doc(db, "users", user.uid);
@@ -1255,6 +1258,8 @@ export default function HomePage(): React.JSX.Element {
 
       setOfficialMessageInput("");
       setOfficialReplyTo(null);
+      
+      console.log("Message sent successfully!");
       
     } catch (error) {
       console.error("Error sending official message:", error);
@@ -4030,7 +4035,7 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
 
-                  {/* Official Chat View - UNIFIED for all users */}
+                  {/* Official Chat View - FIXED */}
                   {isOfficialChatSelected ? (
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                       <div
@@ -4045,7 +4050,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body - above messages */}
+                        {/* Typing indicator in body */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4337,7 +4342,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Unified Input for all users in official chat */}
+                      {/* Input for official chat - FIXED */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -4350,7 +4355,7 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator in body - left bottom above input */}
+                        {/* Typing indicator above input */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4873,7 +4878,6 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator in body - left bottom above input for regular chat */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
