@@ -945,14 +945,15 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages with read receipts
+  // Load messages with read receipts - khusus untuk admin melihat semua pesan user
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     
-    // For admin viewing official chat
+    // Jika admin dan chat yang dipilih adalah Official
     if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
+      // Admin melihat pesan dari semua user di official chat
       const adminMessagesRef = collection(db, "chats", chatId, "messages");
       const qAdmin = query(adminMessagesRef, orderBy("timestamp", "asc"));
       
@@ -963,7 +964,7 @@ export default function HomePage(): React.JSX.Element {
           messageList.push(msg);
         });
         
-        // Get messages from all users
+        // Ambil pesan dari semua user yang chat dengan official
         const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
         let allMessages: Message[] = [];
         
@@ -983,7 +984,7 @@ export default function HomePage(): React.JSX.Element {
           });
         }
         
-        // Combine and sort all messages
+        // Gabungkan dan sortir semua pesan
         const combinedMessages = [...messageList, ...allMessages];
         combinedMessages.sort((a, b) => {
           const timeA = a.timestamp?.seconds || 0;
@@ -991,7 +992,7 @@ export default function HomePage(): React.JSX.Element {
           return timeA - timeB;
         });
         
-        // Filter out duplicate messages
+        // Filter duplikat
         const uniqueMessages: Message[] = [];
         const messageIds = new Set<string>();
         for (const msg of combinedMessages) {
@@ -1013,7 +1014,7 @@ export default function HomePage(): React.JSX.Element {
       return () => unsubscribeAdmin();
     }
     
-    // Normal user chat
+    // Normal user chat - dengan read receipts
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -1037,11 +1038,11 @@ export default function HomePage(): React.JSX.Element {
       setMessages(limitedMessages);
       setPinnedMessages(pinnedList);
       
-      // Mark messages as delivered and read
+      // Mark messages sebagai delivered dan read
       const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
       const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
       
-      // Mark as delivered
+      // Mark sebagai delivered
       for (const msg of undeliveredMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1050,7 +1051,7 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Mark as read for normal users
+      // Mark sebagai read (hanya untuk user biasa, admin melihat semua)
       if (!isAdmin || selectedChat.id !== MENURU_OFFICIAL.id) {
         for (const msg of unreadMessages) {
           const msgRef = doc(db, "chats", chatId, "messages", msg.id);
@@ -1177,7 +1178,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing with real-time update
+  // Handle typing dengan real-time update
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1278,7 +1279,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message with read receipt
+  // Send message dengan read receipt
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1341,7 +1342,7 @@ export default function HomePage(): React.JSX.Element {
       
       await addDoc(messagesRef, msgData);
       
-      // Update message count in chat room
+      // Update message count di chat room
       await updateDoc(chatRef, {
         messageCount: increment(1),
         lastMessage: message.trim(),
@@ -1434,7 +1435,7 @@ export default function HomePage(): React.JSX.Element {
         lastMessageSenderId: MENURU_OFFICIAL.id
       });
       
-      // Also add to admin's chat for visibility
+      // Juga tambahkan ke chat admin untuk visibilitas
       const adminChatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
       const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
       await addDoc(adminMessagesRef, {
@@ -3988,7 +3989,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View
+                // Chat View dengan fitur lengkap
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -4257,7 +4258,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages with Read Receipts */}
+                  {/* Messages dengan Read Receipts */}
                   <div
                     style={{
                       flex: 1,
@@ -4400,7 +4401,7 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {/* Message with number */}
+                              {/* Message dengan nomor */}
                               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                                 {!isMine && !isAdminReply && (
