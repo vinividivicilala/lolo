@@ -1268,7 +1268,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle admin reply to official chat
+  // Handle admin reply to official chat - FIXED
   const handleAdminReply = async () => {
     if (!user || !isAdmin || !officialReplyText.trim() || !db) return;
 
@@ -1560,6 +1560,10 @@ export default function HomePage(): React.JSX.Element {
         }
       }
     });
+    // Add admin typing status if official typing
+    if (isOfficialTyping && isAdmin) {
+      typingList.push({ name: "Admin", id: "admin" });
+    }
     return typingList;
   };
 
@@ -4103,27 +4107,6 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {/* Typing indicator in body - left bottom */}
-                            {typingUsersList.length > 0 && (
-                              <div
-                                style={{
-                                  position: "sticky",
-                                  bottom: 0,
-                                  textAlign: "left",
-                                  fontSize: "12px",
-                                  color: "#999",
-                                  padding: "8px 0 4px 0",
-                                  fontStyle: "italic",
-                                  fontFamily: FONT_FAMILY,
-                                  backgroundColor: "#ffffff",
-                                  borderTop: "1px solid rgba(0,0,0,0.04)",
-                                  marginTop: "auto",
-                                }}
-                              >
-                                {typingUsersList.map(u => u.name).join(", ")} typing...
-                              </div>
-                            )}
-
                             {/* All messages from all users */}
                             {officialMessages.length === 0 ? (
                               <div
@@ -4411,7 +4394,7 @@ export default function HomePage(): React.JSX.Element {
                             <div ref={messagesEndRef} />
                           </div>
 
-                          {/* Admin reply input - like regular chat */}
+                          {/* Admin reply input - FIXED: can type and send */}
                           <div
                             style={{
                               padding: "10px 14px 14px",
@@ -4422,6 +4405,25 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
+                            {/* Typing indicator in body - left bottom near input */}
+                            {typingUsersList.length > 0 && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  bottom: "60px",
+                                  left: "14px",
+                                  fontSize: "12px",
+                                  color: "#999",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  pointerEvents: "none",
+                                  zIndex: 5,
+                                }}
+                              >
+                                {typingUsersList.map(u => u.name).join(", ")} typing...
+                              </div>
+                            )}
                             <input
                               type="text"
                               placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a reply to users..."}
@@ -4501,27 +4503,6 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {/* Typing indicator in body - left bottom */}
-                            {typingUsersList.length > 0 && (
-                              <div
-                                style={{
-                                  position: "sticky",
-                                  bottom: 0,
-                                  textAlign: "left",
-                                  fontSize: "12px",
-                                  color: "#999",
-                                  padding: "8px 0 4px 0",
-                                  fontStyle: "italic",
-                                  fontFamily: FONT_FAMILY,
-                                  backgroundColor: "#ffffff",
-                                  borderTop: "1px solid rgba(0,0,0,0.04)",
-                                  marginTop: "auto",
-                                }}
-                              >
-                                {typingUsersList.map(u => u.name).join(", ")} typing...
-                              </div>
-                            )}
-
                             {officialMessages.filter(m => m.senderId === user.uid || m.officialReplyTo === user.uid || m.senderId === "official_menuru").length === 0 ? (
                               <div
                                 style={{
@@ -4816,6 +4797,25 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
+                            {/* Typing indicator in body - left bottom near input for regular user */}
+                            {typingUsersList.length > 0 && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  bottom: "60px",
+                                  left: "14px",
+                                  fontSize: "12px",
+                                  color: "#999",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  pointerEvents: "none",
+                                  zIndex: 5,
+                                }}
+                              >
+                                {typingUsersList.map(u => u.name).join(", ")} typing...
+                              </div>
+                            )}
                             <input
                               type="text"
                               placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a message..."}
@@ -5320,6 +5320,25 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
+                        {/* Typing indicator in body - left bottom near input for regular chat */}
+                        {typingUsersList.length > 0 && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              bottom: "60px",
+                              left: "14px",
+                              fontSize: "12px",
+                              color: "#999",
+                              fontStyle: "italic",
+                              fontFamily: FONT_FAMILY,
+                              backgroundColor: "transparent",
+                              pointerEvents: "none",
+                              zIndex: 5,
+                            }}
+                          >
+                            {typingUsersList.map(u => u.name).join(", ")} typing...
+                          </div>
+                        )}
                         <input
                           type="text"
                           placeholder={replyTo ? "Type a reply..." : "Type a message..."}
