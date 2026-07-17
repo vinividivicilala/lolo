@@ -63,8 +63,9 @@ const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 // Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const OFFICIAL_EMAIL = "official@menuru.com";
+const OFFICIAL_ID = "official_menuru";
 
-// Cooldown untuk prevent spam (5 detik)
+// Cooldown untuk prevent spam (3 detik)
 const SEND_COOLDOWN = 3000;
 
 interface ChatUser {
@@ -132,7 +133,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons - (sama seperti sebelumnya, disimpan singkat)
+// SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -199,7 +200,6 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Awwwards Style Dot Indicator
 const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
     <div style={{ 
@@ -240,7 +240,6 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
   );
 };
 
-// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
@@ -392,8 +391,9 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
   const messageIdsSet = useRef<Set<string>>(new Set());
+  const allMessagesMap = useRef<Map<string, Message>>(new Map());
 
-  // Banner rolling text - GSAP style fade in/out
+  // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih",
@@ -407,7 +407,7 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text - rolling text
+  // Chat button text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -513,17 +513,15 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Banner rolling text animation - GSAP style fade
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
     }, 4000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
+  const isOfficialUser = user?.email === OFFICIAL_EMAIL;
 
   // Broadcast messages to all users (only once)
   const broadcastMessages = async () => {
@@ -550,13 +548,13 @@ export default function HomePage(): React.JSX.Element {
         const userId = docSnap.id;
         const userData = docSnap.data();
         
-        const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+        const chatId = [userId, OFFICIAL_ID].sort().join("_");
         const chatRef = doc(db, "chats", chatId);
         const chatSnap = await getDoc(chatRef);
         
         if (!chatSnap.exists()) {
           await setDoc(chatRef, {
-            participants: [userId, MENURU_OFFICIAL.id],
+            participants: [userId, OFFICIAL_ID],
             createdAt: serverTimestamp(),
             isPinned: false,
             messageCount: 0
@@ -692,13 +690,13 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
     
     try {
-      const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+      const chatId = [userId, OFFICIAL_ID].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [userId, MENURU_OFFICIAL.id],
+          participants: [userId, OFFICIAL_ID],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
@@ -797,7 +795,7 @@ export default function HomePage(): React.JSX.Element {
             }
           }
           
-          const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
+          const officialExists = userList.some(u => u.id === OFFICIAL_ID);
           if (!officialExists) {
             userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
           }
@@ -941,25 +939,42 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // IMPORTANT: Load messages - Khusus untuk Menuru Official dengan real-time
+  // ============ LOAD MESSAGES ============
+  // Khusus untuk Admin yang chat dengan Menuru Official
+  // Admin melihat SEMUA pesan dari SEMUA user yang chat dengan Menuru Official
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
-    const chatId = [user.uid, selectedChat.id].sort().join("_");
-    
-    // Jika admin dan chat yang dipilih adalah Official
-    if (isAdmin && selectedChat.id === MENURU_OFFICIAL.id) {
-      // Admin melihat pesan dari semua user di official chat
-      // Kita gunakan listener terpisah untuk setiap chat user
-      const allUnsubscribe: (() => void)[] = [];
-      const allMessagesMap = new Map<string, Message>();
+    // Jika admin dan chat dengan Menuru Official
+    if (isAdmin && selectedChat.id === OFFICIAL_ID) {
+      // Bersihkan map sebelumnya
+      allMessagesMap.current.clear();
       
-      // Ambil semua user yang bukan admin dan bukan official
-      const allUsers = users.filter(u => u.id !== user.uid && u.id !== MENURU_OFFICIAL.id);
+      // Listener untuk chat admin dengan official
+      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
+      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
+      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
       
-      // Untuk setiap user, buat listener
+      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
+          if (change.type === 'added' || change.type === 'modified') {
+            allMessagesMap.current.set(msg.id, msg);
+          } else if (change.type === 'removed') {
+            allMessagesMap.current.delete(msg.id);
+          }
+        });
+        
+        // Update messages
+        updateAdminMessages();
+      });
+      
+      // Listener untuk setiap user yang chat dengan official
+      const allUsers = users.filter(u => u.id !== user.uid && u.id !== OFFICIAL_ID);
+      const unsubscribes: (() => void)[] = [];
+      
       for (const targetUser of allUsers) {
-        const userChatId = [targetUser.id, MENURU_OFFICIAL.id].sort().join("_");
+        const userChatId = [targetUser.id, OFFICIAL_ID].sort().join("_");
         const userMessagesRef = collection(db, "chats", userChatId, "messages");
         const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
         
@@ -972,65 +987,44 @@ export default function HomePage(): React.JSX.Element {
             }
             
             if (change.type === 'added' || change.type === 'modified') {
-              allMessagesMap.set(msg.id, msg);
+              allMessagesMap.current.set(msg.id, msg);
             } else if (change.type === 'removed') {
-              allMessagesMap.delete(msg.id);
+              allMessagesMap.current.delete(msg.id);
             }
           });
           
-          // Sort dan set messages
-          const sortedMessages = Array.from(allMessagesMap.values())
-            .sort((a, b) => {
-              const timeA = a.timestamp?.seconds || 0;
-              const timeB = b.timestamp?.seconds || 0;
-              return timeA - timeB;
-            })
-            .slice(-200);
-          
-          setMessages(sortedMessages);
-          setPinnedMessages(sortedMessages.filter(m => m.isPinned));
-          
-          setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          }, 100);
+          updateAdminMessages();
         });
         
-        allUnsubscribe.push(unsubscribe);
+        unsubscribes.push(unsubscribe);
       }
       
-      // Juga listen ke chat admin sendiri dengan official
-      const adminMessagesRef = collection(db, "chats", chatId, "messages");
-      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
-      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
-          if (change.type === 'added' || change.type === 'modified') {
-            allMessagesMap.set(msg.id, msg);
-          } else if (change.type === 'removed') {
-            allMessagesMap.delete(msg.id);
-          }
-        });
-        
-        const sortedMessages = Array.from(allMessagesMap.values())
+      const updateAdminMessages = () => {
+        const sortedMessages = Array.from(allMessagesMap.current.values())
           .sort((a, b) => {
             const timeA = a.timestamp?.seconds || 0;
             const timeB = b.timestamp?.seconds || 0;
             return timeA - timeB;
           })
-          .slice(-200);
+          .slice(-300);
         
         setMessages(sortedMessages);
         setPinnedMessages(sortedMessages.filter(m => m.isPinned));
-      });
-      
-      allUnsubscribe.push(unsubscribeAdmin);
+        
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      };
       
       return () => {
-        allUnsubscribe.forEach(unsub => unsub());
+        unsubscribeAdmin();
+        unsubscribes.forEach(unsub => unsub());
+        allMessagesMap.current.clear();
       };
     }
     
-    // Normal user chat - dengan read receipts
+    // ============ USER BIASA CHAT ============
+    const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -1058,7 +1052,6 @@ export default function HomePage(): React.JSX.Element {
       const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
       const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
       
-      // Mark sebagai delivered
       for (const msg of undeliveredMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1067,7 +1060,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Mark sebagai read
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1110,7 +1102,6 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update users dengan typing status
       setUsers(prev => prev.map(u => {
         if (typingMap.has(u.id)) {
           return { ...u, typing: typingMap.get(u.id) };
@@ -1171,6 +1162,7 @@ export default function HomePage(): React.JSX.Element {
       setSelectedUpdateId(null);
       setAdminReplyMode(false);
       messageIdsSet.current.clear();
+      allMessagesMap.current.clear();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1196,10 +1188,11 @@ export default function HomePage(): React.JSX.Element {
       setSelectedUserForReply(null);
       setSelectedUserNameForReply("");
       messageIdsSet.current.clear();
+      allMessagesMap.current.clear();
     }
   };
 
-  // Handle typing dengan real-time update
+  // Handle typing
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1225,7 +1218,6 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -1242,7 +1234,6 @@ export default function HomePage(): React.JSX.Element {
     setEditNote(false);
   };
 
-  // Handle save bio
   const handleSaveBio = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1271,7 +1262,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle save note
   const handleSaveNote = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1300,7 +1290,9 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message dengan read receipt
+  // ============ SEND MESSAGE ============
+  // User biasa kirim pesan ke official
+  // Admin juga bisa kirim pesan ke official (tapi ini untuk testing)
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1393,7 +1385,8 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Admin reply to specific user
+  // ============ ADMIN REPLY ============
+  // Admin membalas user tertentu melalui Menuru Official
   const handleAdminReplyToUser = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
     if (isSending) return;
@@ -1407,13 +1400,14 @@ export default function HomePage(): React.JSX.Element {
     setLastSendTime(now);
     
     try {
-      const chatId = [selectedUserForReply, MENURU_OFFICIAL.id].sort().join("_");
+      // Kirim balasan ke chat user dengan official
+      const chatId = [selectedUserForReply, OFFICIAL_ID].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [selectedUserForReply, MENURU_OFFICIAL.id],
+          participants: [selectedUserForReply, OFFICIAL_ID],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
@@ -1426,7 +1420,7 @@ export default function HomePage(): React.JSX.Element {
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
         text: adminReplyMessage.trim(),
-        senderId: MENURU_OFFICIAL.id,
+        senderId: OFFICIAL_ID, // Kirim sebagai Menuru Official
         senderName: "Menuru Official",
         receiverId: selectedUserForReply,
         timestamp: serverTimestamp(),
@@ -1451,15 +1445,15 @@ export default function HomePage(): React.JSX.Element {
         messageCount: increment(1),
         lastMessage: adminReplyMessage.trim(),
         lastMessageTime: serverTimestamp(),
-        lastMessageSenderId: MENURU_OFFICIAL.id
+        lastMessageSenderId: OFFICIAL_ID
       });
       
       // Juga tambahkan ke chat admin untuk visibilitas
-      const adminChatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
+      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
       const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
       await addDoc(adminMessagesRef, {
         text: `[Balasan untuk ${selectedUserNameForReply || "User"}] ${adminReplyMessage.trim()}`,
-        senderId: MENURU_OFFICIAL.id,
+        senderId: OFFICIAL_ID,
         senderName: "Menuru Official",
         receiverId: user.uid,
         timestamp: serverTimestamp(),
@@ -1491,7 +1485,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
     if (isSending) return;
@@ -1549,7 +1542,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1564,7 +1556,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
     if (isSending) return;
@@ -1607,7 +1598,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin chat room
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1627,7 +1617,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin user
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1647,7 +1636,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1683,7 +1671,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1734,7 +1721,6 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
-  // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -1745,7 +1731,6 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Animate chat button text
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isChatOpen && user && !isIncomingMessage) {
@@ -1785,7 +1770,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
+      {/* BANNER */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2111,7 +2096,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Share Modal - sama seperti sebelumnya */}
+      {/* Share Modal */}
       <AnimatePresence>
         {showShareModal && shareMessage && (
           <motion.div
@@ -2363,7 +2348,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page */}
+              {/* Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -4010,7 +3995,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View dengan fitur lengkap
+                // ============ CHAT VIEW ============
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -4098,7 +4083,7 @@ export default function HomePage(): React.JSX.Element {
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
-                        {selectedChat.id === MENURU_OFFICIAL.id && isAdmin && (
+                        {selectedChat.id === OFFICIAL_ID && isAdmin && (
                           <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
                             Admin - Lihat semua pesan user
                           </span>
@@ -4135,7 +4120,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   {/* Admin Reply Mode Indicator */}
-                  {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode && (
+                  {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode && (
                     <div
                       style={{
                         padding: "8px 16px",
@@ -4279,7 +4264,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages dengan Read Receipts dan Typing Indicator */}
+                  {/* Messages dengan Read Receipts */}
                   <div
                     style={{
                       flex: 1,
@@ -4316,12 +4301,16 @@ export default function HomePage(): React.JSX.Element {
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                         const isAdminReply = msg.isAdminReply || false;
                         
-                        const displaySenderName = isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isMine && !isAdminReply
+                        // Untuk admin: tampilkan nama pengirim asli
+                        const displaySenderName = isAdmin && selectedChat?.id === OFFICIAL_ID && !isMine && !isAdminReply
                           ? (msg.targetUserName || msg.senderName)
                           : null;
                         
-                        const isUserMessage = msg.senderId !== MENURU_OFFICIAL.id && msg.senderId !== user?.uid;
+                        const isUserMessage = msg.senderId !== OFFICIAL_ID && msg.senderId !== user?.uid;
                         const msgNumber = msg.messageCount || (idx + 1);
+                        
+                        // Cek apakah pesan ini dari Menuru Official (balasan admin)
+                        const isOfficialMessage = msg.senderId === OFFICIAL_ID;
                         
                         return (
                           <React.Fragment key={idx}>
@@ -4359,6 +4348,7 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
+                              {/* Tampilkan nama pengirim untuk admin */}
                               {displaySenderName && isUserMessage && (
                                 <div
                                   style={{
@@ -4421,6 +4411,7 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
+                              {/* Pesan dengan nomor */}
                               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                 <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                                 {!isMine && !isAdminReply && (
@@ -4596,7 +4587,8 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && !isMine && isUserMessage && (
+                                      {/* Tombol Balas User Ini - khusus untuk admin di chat official */}
+                                      {isAdmin && selectedChat?.id === OFFICIAL_ID && !isAdminReply && !isMine && isUserMessage && (
                                         <motion.button
                                           whileHover={{ backgroundColor: "#f5f5f5" }}
                                           onClick={() => {
@@ -4691,8 +4683,8 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
-                      // Admin Reply Input
+                    {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode ? (
+                      // ============ ADMIN REPLY INPUT ============
                       <div style={{ display: "flex", gap: "8px" }}>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
@@ -4782,7 +4774,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       </div>
                     ) : (
-                      // Normal Chat Input
+                      // ============ NORMAL CHAT INPUT ============
                       <div style={{ display: "flex", gap: "8px" }}>
                         <input
                           type="text"
