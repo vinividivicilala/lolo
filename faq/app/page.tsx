@@ -60,14 +60,13 @@ const googleProvider = new GoogleAuthProvider();
 // Font Family
 const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 
-// Admin Email
+// Admin Email - Akun yang mengendalikan Menuru Official
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const OFFICIAL_EMAIL = "official@menuru.com";
 const OFFICIAL_ID = "official_menuru";
-const OFFICIAL_PASSWORD = "menuruofficial123";
+const OFFICIAL_EMAIL = "official@menuru.com";
 
-// Cooldown untuk prevent spam (5 detik)
-const SEND_COOLDOWN = 5000;
+// Cooldown
+const SEND_COOLDOWN = 3000;
 
 interface ChatUser {
   id: string;
@@ -195,14 +194,12 @@ const EditIcon = () => (
   </svg>
 );
 
-// Chat Icon SVG
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-// Awwwards Style Dot Indicator
 const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
   return (
     <div style={{ 
@@ -243,7 +240,6 @@ const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color
   );
 };
 
-// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
@@ -288,7 +284,6 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status Component dengan 1, 2, 2 biru
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -396,21 +391,17 @@ export default function HomePage(): React.JSX.Element {
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
   const messageIdsSet = useRef<Set<string>>(new Set());
 
-  // Banner rolling text - GSAP style fade in/out
+  // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih",
     "silahkan hubungin official menuru"
   ];
 
-  // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
-  
-  // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text - rolling text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -423,45 +414,44 @@ export default function HomePage(): React.JSX.Element {
   ];
   let chatTextIndex = 0;
 
-  // Update Data
   const updates: UpdateItem[] = [
     {
       id: "1",
       title: "Real-time Chat Feature",
-      description: "Added real-time chat feature with Firebase. Users can send and receive messages instantly.",
+      description: "Added real-time chat feature with Firebase.",
       date: "10 July 2026",
       status: "live",
-      detail: "Real-time chat feature allows users to communicate directly without refreshing the page. Uses Firebase Realtime Database for instant message synchronization. Equipped with online status and typing indicators.",
+      detail: "Real-time chat feature allows users to communicate directly without refreshing the page.",
       link: "https://menuru.com/update/chat-realtime",
       publishedBy: "Menuru Team"
     },
     {
       id: "2",
       title: "Privacy Policy & Update System",
-      description: "Added Privacy Policy and Update System pages for service transparency.",
+      description: "Added Privacy Policy and Update System pages.",
       date: "9 July 2026",
       status: "live",
-      detail: "Privacy Policy page explains how user data is collected and used. Update System displays feature update history transparently to users.",
+      detail: "Privacy Policy page explains how user data is collected and used.",
       link: "https://menuru.com/update/privacy-policy",
       publishedBy: "Menuru Team"
     },
     {
       id: "3",
       title: "Pin Message Feature",
-      description: "Users can pin important messages in chat. Pinned messages will appear at the top.",
+      description: "Users can pin important messages in chat.",
       date: "8 July 2026",
       status: "coming",
-      detail: "Pin message feature allows users to pin important messages for easy access. Pinned messages will appear at the top of chat with a special indicator.",
+      detail: "Pin message feature allows users to pin important messages for easy access.",
       link: "https://menuru.com/update/pin-message",
       publishedBy: "Menuru Team"
     },
     {
       id: "4",
       title: "Reply & Share Message Feature",
-      description: "Users can reply to and forward messages to other users easily.",
+      description: "Users can reply to and forward messages.",
       date: "7 July 2026",
       status: "done",
-      detail: "Reply feature allows users to reply to specific messages with clear context. Share feature allows users to forward messages to other contacts easily.",
+      detail: "Reply feature allows users to reply to specific messages with clear context.",
       link: "https://menuru.com/update/reply-share",
       publishedBy: "Menuru Team"
     },
@@ -471,7 +461,7 @@ export default function HomePage(): React.JSX.Element {
       description: "Shows user online status and typing indicator.",
       date: "6 July 2026",
       status: "done",
-      detail: "Shows user online status in real-time. Typing indicator appears when user is typing a message, providing a more interactive chat experience.",
+      detail: "Shows user online status in real-time. Typing indicator appears when user is typing.",
       link: "https://menuru.com/update/online-status",
       publishedBy: "Menuru Team"
     }
@@ -488,49 +478,51 @@ export default function HomePage(): React.JSX.Element {
     note: "Official Account"
   };
 
-  const OFFICIAL_MESSAGES = [
-    {
-      text: "Hello! Welcome to Menuru Chat",
-      senderId: "official_menuru",
-      senderName: "Menuru Official"
-    },
-    {
-      text: "We are currently improving the chat feature. Please be patient!",
-      senderId: "official_menuru",
-      senderName: "Menuru Official"
-    },
-    {
-      text: "Pin message and chat history features will be improved soon",
-      senderId: "official_menuru",
-      senderName: "Menuru Official"
-    },
-    {
-      text: "Don't forget to read our Privacy Policy and Updates",
-      senderId: "official_menuru",
-      senderName: "Menuru Official"
-    },
-    {
-      text: "Thank you for your understanding!",
-      senderId: "official_menuru",
-      senderName: "Menuru Official"
-    }
-  ];
-
-  // Banner rolling text animation - GSAP style fade
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
     }, 4000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
-  // Check if current user is official (bisa login)
-  const isOfficial = user?.email === OFFICIAL_EMAIL;
 
-  // Broadcast messages to all users (only once)
+  // ============ FUNGSI UNTUK MEMBUAT AKUN OFFICIAL DI DATABASE ============
+  const createOfficialAccount = async () => {
+    if (!db) return;
+    try {
+      const officialRef = doc(db, "users", OFFICIAL_ID);
+      const officialSnap = await getDoc(officialRef);
+      
+      if (!officialSnap.exists()) {
+        await setDoc(officialRef, {
+          id: OFFICIAL_ID,
+          name: "Menuru Official",
+          email: OFFICIAL_EMAIL,
+          photoURL: "",
+          createdAt: serverTimestamp(),
+          isPinned: false,
+          isOfficial: true,
+          online: true,
+          lastSeen: serverTimestamp(),
+          typing: false,
+          bio: "Official Menuru Chat account",
+          note: "Official Account",
+          isAdmin: false
+        });
+        console.log("Official account created");
+      }
+    } catch (error) {
+      console.error("Error creating official account:", error);
+    }
+  };
+
+  // Buat akun official saat app pertama kali jalan
+  useEffect(() => {
+    createOfficialAccount();
+  }, []);
+
+  // Broadcast messages to all users
   const broadcastMessages = async () => {
     if (!db) return;
     
@@ -545,23 +537,17 @@ export default function HomePage(): React.JSX.Element {
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
-      const broadcastMessage = {
-        text: "Don't forget to read our Privacy Policy and Updates",
-        senderId: "official_menuru",
-        senderName: "Menuru Official"
-      };
-      
       for (const docSnap of usersSnap.docs) {
         const userId = docSnap.id;
         const userData = docSnap.data();
         
-        const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+        const chatId = [userId, OFFICIAL_ID].sort().join("_");
         const chatRef = doc(db, "chats", chatId);
         const chatSnap = await getDoc(chatRef);
         
         if (!chatSnap.exists()) {
           await setDoc(chatRef, {
-            participants: [userId, MENURU_OFFICIAL.id],
+            participants: [userId, OFFICIAL_ID],
             createdAt: serverTimestamp(),
             isPinned: false,
             messageCount: 0
@@ -570,9 +556,9 @@ export default function HomePage(): React.JSX.Element {
         
         const messagesRef = collection(db, "chats", chatId, "messages");
         await addDoc(messagesRef, {
-          text: broadcastMessage.text,
-          senderId: broadcastMessage.senderId,
-          senderName: broadcastMessage.senderName,
+          text: "Don't forget to read our Privacy Policy and Updates",
+          senderId: OFFICIAL_ID,
+          senderName: "Menuru Official",
           receiverId: userId,
           timestamp: serverTimestamp(),
           read: false,
@@ -600,8 +586,6 @@ export default function HomePage(): React.JSX.Element {
         messagesSent: true,
         sentAt: serverTimestamp()
       });
-      
-      console.log("Broadcast messages sent to all users");
     } catch (error) {
       console.error("Error broadcasting messages:", error);
     }
@@ -626,7 +610,6 @@ export default function HomePage(): React.JSX.Element {
           const googlePhotoURL = currentUser.photoURL || "";
           const googleName = currentUser.displayName || currentUser.email || "";
           const isAdminUser = currentUser.email === ADMIN_EMAIL;
-          const isOfficialUser = currentUser.email === OFFICIAL_EMAIL;
           
           if (!userSnap.exists()) {
             await setDoc(userRef, {
@@ -636,7 +619,7 @@ export default function HomePage(): React.JSX.Element {
               photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: isOfficialUser,
+              isOfficial: false,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
@@ -660,16 +643,14 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: googlePhotoURL,
                 name: googleName,
                 lastSeen: serverTimestamp(),
-                isAdmin: isAdminUser,
-                isOfficial: isOfficialUser
+                isAdmin: isAdminUser
               });
             }
             
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp(),
-              isAdmin: isAdminUser,
-              isOfficial: isOfficialUser
+              isAdmin: isAdminUser
             });
           }
           
@@ -682,13 +663,12 @@ export default function HomePage(): React.JSX.Element {
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
               note: updatedData.note || "",
-              isAdmin: updatedData.isAdmin || false,
-              isOfficial: updatedData.isOfficial || false
+              isAdmin: updatedData.isAdmin || false
             }));
           }
           
-          // Jika user bukan official, kirim pesan welcome
-          if (!isOfficialUser) {
+          // Kirim pesan official untuk user biasa (bukan admin)
+          if (!isAdminUser) {
             await checkAndSendOfficialMessages(currentUser.uid);
           }
           
@@ -704,21 +684,29 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
     
     try {
-      const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
+      const chatId = [userId, OFFICIAL_ID].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [userId, MENURU_OFFICIAL.id],
+          participants: [userId, OFFICIAL_ID],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
         });
         
         const messagesRef = collection(db, "chats", chatId, "messages");
-        for (let i = 0; i < OFFICIAL_MESSAGES.length; i++) {
-          const msg = OFFICIAL_MESSAGES[i];
+        const welcomeMessages = [
+          { text: "Hello! Welcome to Menuru Chat", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
+          { text: "We are currently improving the chat feature. Please be patient!", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
+          { text: "Pin message and chat history features will be improved soon", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
+          { text: "Don't forget to read our Privacy Policy and Updates", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
+          { text: "Thank you for your understanding!", senderId: OFFICIAL_ID, senderName: "Menuru Official" }
+        ];
+        
+        for (let i = 0; i < welcomeMessages.length; i++) {
+          const msg = welcomeMessages[i];
           await addDoc(messagesRef, {
             text: msg.text,
             senderId: msg.senderId,
@@ -743,7 +731,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         await updateDoc(chatRef, {
-          messageCount: OFFICIAL_MESSAGES.length
+          messageCount: welcomeMessages.length
         });
       }
     } catch (error) {
@@ -751,7 +739,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Load users
+  // Load users - TAMBAHKAN OFFICIAL KE LIST
   useEffect(() => {
     if (!db || !user) return;
     const loadUsers = async () => {
@@ -784,7 +772,7 @@ export default function HomePage(): React.JSX.Element {
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
-            isOfficial: user.isOfficial || false,
+            isOfficial: false,
             online: true,
             lastSeen: null,
             typing: false,
@@ -811,12 +799,10 @@ export default function HomePage(): React.JSX.Element {
             }
           }
           
-          // Tambahkan official jika user bukan official
-          if (!isOfficial) {
-            const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
-            if (!officialExists) {
-              userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
-            }
+          // TAMBAHKAN OFFICIAL KE LIST jika belum ada
+          const officialExists = userList.some(u => u.id === OFFICIAL_ID);
+          if (!officialExists) {
+            userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
           }
           
           userList.sort((a, b) => {
@@ -832,7 +818,7 @@ export default function HomePage(): React.JSX.Element {
       }
     };
     loadUsers();
-  }, [user, isOfficial]);
+  }, [user]);
 
   // Load chat rooms
   useEffect(() => {
@@ -958,10 +944,87 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages dengan read receipts untuk semua chat termasuk official
+  // ============ LOAD MESSAGES - ADMIN LIHAT SEMUA PESAN USER DI OFFICIAL ============
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
+    // Jika admin dan chat dengan Menuru Official
+    if (isAdmin && selectedChat.id === OFFICIAL_ID) {
+      // Admin melihat pesan dari semua user di official chat
+      const allMessagesMap = new Map<string, Message>();
+      
+      // Listener untuk chat admin dengan official
+      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
+      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
+      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
+      
+      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
+          if (change.type === 'added' || change.type === 'modified') {
+            allMessagesMap.set(msg.id, msg);
+          } else if (change.type === 'removed') {
+            allMessagesMap.delete(msg.id);
+          }
+        });
+        updateAdminMessages();
+      });
+      
+      // Listener untuk setiap user yang chat dengan official
+      const allUsers = users.filter(u => u.id !== user.uid && u.id !== OFFICIAL_ID);
+      const unsubscribes: (() => void)[] = [];
+      
+      for (const targetUser of allUsers) {
+        const userChatId = [targetUser.id, OFFICIAL_ID].sort().join("_");
+        const userMessagesRef = collection(db, "chats", userChatId, "messages");
+        const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
+        
+        const unsubscribe = onSnapshot(userQ, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const msg = { id: change.doc.id, ...change.doc.data() } as Message;
+            if (!msg.targetUserId) {
+              msg.targetUserId = targetUser.id;
+              msg.targetUserName = targetUser.name;
+            }
+            
+            if (change.type === 'added' || change.type === 'modified') {
+              allMessagesMap.set(msg.id, msg);
+            } else if (change.type === 'removed') {
+              allMessagesMap.delete(msg.id);
+            }
+          });
+          
+          updateAdminMessages();
+        });
+        
+        unsubscribes.push(unsubscribe);
+      }
+      
+      const updateAdminMessages = () => {
+        const sortedMessages = Array.from(allMessagesMap.values())
+          .sort((a, b) => {
+            const timeA = a.timestamp?.seconds || 0;
+            const timeB = b.timestamp?.seconds || 0;
+            return timeA - timeB;
+          })
+          .slice(-300);
+        
+        setMessages(sortedMessages);
+        setPinnedMessages(sortedMessages.filter(m => m.isPinned));
+        
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      };
+      
+      return () => {
+        unsubscribeAdmin();
+        unsubscribes.forEach(unsub => unsub());
+        allMessagesMap.clear();
+      };
+    }
+    
+    // ============ USER BIASA / ADMIN CHAT DENGAN USER LAIN ============
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -990,7 +1053,6 @@ export default function HomePage(): React.JSX.Element {
       const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
       const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
       
-      // Mark sebagai delivered
       for (const msg of undeliveredMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -999,7 +1061,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
       
-      // Mark sebagai read untuk semua user (termasuk official)
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1024,9 +1085,9 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [selectedChat, user]);
+  }, [selectedChat, user, isAdmin, users]);
 
-  // Real-time typing listener untuk semua user
+  // Real-time typing listener
   useEffect(() => {
     if (!db || !user) return;
     
@@ -1034,17 +1095,17 @@ export default function HomePage(): React.JSX.Element {
     const q = query(usersRef);
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const typingSet = new Set<string>();
+      const typingMap = new Map<string, boolean>();
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.typing && data.id !== user.uid) {
-          typingSet.add(data.id);
+        if (data.id && data.id !== user.uid) {
+          typingMap.set(data.id, data.typing || false);
         }
       });
-      // Update users dengan typing status
+      
       setUsers(prev => prev.map(u => {
-        if (typingSet.has(u.id)) {
-          return { ...u, typing: true };
+        if (typingMap.has(u.id)) {
+          return { ...u, typing: typingMap.get(u.id) };
         }
         return { ...u, typing: false };
       }));
@@ -1053,7 +1114,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user]);
 
-  // Handle login - support login dengan akun official
+  // Handle login
   const handleLogin = async () => {
     if (!auth) return;
     try {
@@ -1130,7 +1191,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing dengan real-time update
+  // Handle typing
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1156,7 +1217,6 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -1173,7 +1233,6 @@ export default function HomePage(): React.JSX.Element {
     setEditNote(false);
   };
 
-  // Handle save bio
   const handleSaveBio = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1202,7 +1261,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle save note
   const handleSaveNote = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1231,7 +1289,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message dengan read receipt
+  // ============ SEND MESSAGE ============
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
     if (isSending) return;
@@ -1324,7 +1382,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Admin reply to specific user
+  // ============ ADMIN REPLY SEBAGAI MENURU OFFICIAL ============
   const handleAdminReplyToUser = async () => {
     if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
     if (isSending) return;
@@ -1338,13 +1396,14 @@ export default function HomePage(): React.JSX.Element {
     setLastSendTime(now);
     
     try {
-      const chatId = [selectedUserForReply, MENURU_OFFICIAL.id].sort().join("_");
+      // Kirim balasan sebagai Menuru Official
+      const chatId = [selectedUserForReply, OFFICIAL_ID].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [selectedUserForReply, MENURU_OFFICIAL.id],
+          participants: [selectedUserForReply, OFFICIAL_ID],
           createdAt: serverTimestamp(),
           isPinned: false,
           messageCount: 0
@@ -1357,7 +1416,7 @@ export default function HomePage(): React.JSX.Element {
       const messagesRef = collection(db, "chats", chatId, "messages");
       await addDoc(messagesRef, {
         text: adminReplyMessage.trim(),
-        senderId: MENURU_OFFICIAL.id,
+        senderId: OFFICIAL_ID,
         senderName: "Menuru Official",
         receiverId: selectedUserForReply,
         timestamp: serverTimestamp(),
@@ -1382,15 +1441,15 @@ export default function HomePage(): React.JSX.Element {
         messageCount: increment(1),
         lastMessage: adminReplyMessage.trim(),
         lastMessageTime: serverTimestamp(),
-        lastMessageSenderId: MENURU_OFFICIAL.id
+        lastMessageSenderId: OFFICIAL_ID
       });
       
-      // Juga tambahkan ke chat admin untuk visibilitas
-      const adminChatId = [user.uid, MENURU_OFFICIAL.id].sort().join("_");
+      // Tambahkan ke chat admin agar terlihat
+      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
       const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
       await addDoc(adminMessagesRef, {
         text: `[Balasan untuk ${selectedUserNameForReply || "User"}] ${adminReplyMessage.trim()}`,
-        senderId: MENURU_OFFICIAL.id,
+        senderId: OFFICIAL_ID,
         senderName: "Menuru Official",
         receiverId: user.uid,
         timestamp: serverTimestamp(),
@@ -1422,7 +1481,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
     if (isSending) return;
@@ -1480,7 +1538,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1495,7 +1552,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
     if (isSending) return;
@@ -1538,7 +1594,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin chat room
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1558,7 +1613,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin user
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1578,7 +1632,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1614,7 +1667,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1665,7 +1717,6 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
-  // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -1676,7 +1727,6 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Animate chat button text
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isChatOpen && user && !isIncomingMessage) {
@@ -1716,7 +1766,7 @@ export default function HomePage(): React.JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* BANNER WITH GSAP STYLE ROLLING TEXT */}
+      {/* BANNER */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1855,7 +1905,6 @@ export default function HomePage(): React.JSX.Element {
               >
                 {user.displayName || user.email}
                 {isAdmin && " (Admin)"}
-                {isOfficial && " (Official)"}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -1913,7 +1962,7 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
-      {/* Login Modal - Support login official */}
+      {/* Login Modal */}
       <AnimatePresence>
         {showLogin && (
           <motion.div
@@ -1955,7 +2004,7 @@ export default function HomePage(): React.JSX.Element {
                 Login
               </h2>
               <div style={{ fontSize: "12px", color: "#666", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                Login dengan official@menuru.com untuk akses official
+                Login dengan akun admin untuk mengelola Menuru Official
               </div>
               <input
                 type="email"
@@ -2117,7 +2166,7 @@ export default function HomePage(): React.JSX.Element {
                 <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.email === ADMIN_EMAIL ? "(Admin)" : ""} {u.isOfficial ? "(Official)" : ""}
+                    {u.name} {u.isOfficial ? "(Official)" : ""}
                   </option>
                 ))}
               </select>
@@ -2298,1106 +2347,26 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page */}
+              {/* Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "28px 32px",
-                    backgroundColor: "#ffffff",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedUpdateId(null)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#666",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        fontSize: "13px",
-                        fontFamily: FONT_FAMILY,
-                        marginBottom: "16px",
-                        padding: "4px 0",
-                        transition: "color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
-                      onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
-                    >
-                      <BackIcon />
-                      <span>Back</span>
-                    </motion.button>
-
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "4px 14px",
-                        backgroundColor: selectedUpdate.status === "live" ? "#3b82f6" : (selectedUpdate.status === "coming" ? "#ef4444" : "#000000"),
-                        borderRadius: "20px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: "#ffffff",
-                          letterSpacing: "0.05em",
-                          textTransform: "uppercase",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {selectedUpdate.status === "live" ? "Live" : (selectedUpdate.status === "coming" ? "Coming Soon" : "Done")}
-                      </span>
-                    </div>
-
-                    <h2
-                      style={{
-                        fontSize: "22px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        margin: "0 0 8px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {selectedUpdate.title}
-                    </h2>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: "#999",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {selectedUpdate.date}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: "#999",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        • {selectedUpdate.publishedBy}
-                      </span>
-                    </div>
-
-                    <p
-                      style={{
-                        fontSize: "15px",
-                        color: "#000000",
-                        lineHeight: 1.8,
-                        margin: "0 0 16px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {selectedUpdate.description}
-                    </p>
-
-                    <div
-                      style={{
-                        width: "100%",
-                        marginBottom: "16px",
-                        padding: "16px 20px",
-                        backgroundColor: "#f8f8f8",
-                        borderRadius: "10px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <h3
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#000000",
-                          marginBottom: "8px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Update Detail
-                      </h3>
-                      <p
-                        style={{
-                          fontSize: "14px",
-                          color: "#333",
-                          lineHeight: 1.8,
-                          margin: 0,
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {selectedUpdate.detail}
-                      </p>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          color: "#666",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Link:
-                      </span>
-                      <a
-                        href={selectedUpdate.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: "14px",
-                          color: "#3b82f6",
-                          textDecoration: "underline",
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: 500,
-                        }}
-                      >
-                        {selectedUpdate.link}
-                      </a>
-                    </div>
-
-                    <div
-                      style={{
-                        width: "100%",
-                        paddingTop: "14px",
-                        borderTop: "1px solid #f0f0f0",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "#999",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Chat with Menuru v1.0
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "#999",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        © 2026 Menuru
-                      </span>
-                    </div>
-                  </div>
+                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Update Detail</div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "28px 32px",
-                    backgroundColor: "#ffffff",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  <div style={{ marginBottom: "28px" }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "4px 14px",
-                        backgroundColor: "#000000",
-                        borderRadius: "20px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: "#ffffff",
-                          letterSpacing: "0.05em",
-                          textTransform: "uppercase",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Update System
-                      </span>
-                    </div>
-                    <h2
-                      style={{
-                        fontSize: "22px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        margin: "0 0 4px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Chat with Menuru
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#999",
-                        margin: "0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Update and development history
-                    </p>
-                  </div>
-
-                  <div style={{ position: "relative", paddingLeft: "28px" }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "6px",
-                        top: "6px",
-                        bottom: "6px",
-                        width: "2px",
-                        borderLeft: "2px dotted #d0d0d0",
-                        zIndex: 0,
-                      }}
-                    />
-
-                    {updates.map((item, index) => {
-                      const isLive = item.status === "live";
-                      const isComing = item.status === "coming";
-                      const isDone = item.status === "done";
-                      
-                      const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
-                      const isActive = isLive || isComing;
-                      
-                      return (
-                        <motion.div
-                          key={item.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          style={{
-                            position: "relative",
-                            paddingBottom: index === updates.length - 1 ? "0" : "28px",
-                            paddingLeft: "24px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setSelectedUpdateId(item.id)}
-                        >
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: "-22px",
-                              top: "4px",
-                              width: "14px",
-                              height: "14px",
-                              zIndex: 2,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {isActive && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  width: "35px",
-                                  height: "35px",
-                                  borderRadius: "50%",
-                                  backgroundColor: dotColor,
-                                  opacity: 0.20,
-                                  animation: "awwwardsPulse 2s ease-in-out infinite",
-                                  pointerEvents: "none",
-                                }}
-                              />
-                            )}
-                            
-                            <div
-                              style={{
-                                width: "10px",
-                                height: "10px",
-                                borderRadius: "50%",
-                                backgroundColor: dotColor,
-                                position: "relative",
-                                zIndex: 3,
-                              }}
-                            />
-                          </div>
-                          
-                          <div
-                            style={{
-                              position: "absolute",
-                              left: "-6px",
-                              top: "18px",
-                              width: "20px",
-                              height: "1px",
-                              borderTop: "2px dotted #d0d0d0",
-                              zIndex: 0,
-                            }}
-                          />
-                          
-                          <div style={{ padding: "0" }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                gap: "12px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontSize: "18px",
-                                  fontWeight: 700,
-                                  color: "#000000",
-                                  fontFamily: FONT_FAMILY,
-                                  letterSpacing: "-0.01em",
-                                }}
-                              >
-                                {item.title}
-                              </div>
-                              <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                style={{
-                                  flexShrink: 0,
-                                  color: "#000000",
-                                }}
-                              >
-                                <path
-                                  d="M9 6L15 12L9 18"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: "20px",
-                      paddingTop: "14px",
-                      borderTop: "1px solid #f0f0f0",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Chat with Menuru v1.0
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      © 2026 Menuru
-                    </span>
-                  </div>
+                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Update List</div>
                 </div>
               ) : showPrivacyPolicy ? (
-                // Privacy Policy Page
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "28px 32px",
-                    backgroundColor: "#ffffff",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  <div style={{ marginBottom: "24px" }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "4px 14px",
-                        backgroundColor: "#000000",
-                        borderRadius: "20px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: "#ffffff",
-                          letterSpacing: "0.05em",
-                          textTransform: "uppercase",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Privacy Policy
-                      </span>
-                    </div>
-                    <h2
-                      style={{
-                        fontSize: "22px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        margin: "0 0 4px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Chat with Menuru
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#999",
-                        margin: "0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Last updated: 9 July 2026
-                    </p>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      1. Information We Collect
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: "0 0 6px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Chat with Menuru collects the following information to provide optimal chat service:
-                    </p>
-                    <ul
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.9,
-                        paddingLeft: "20px",
-                        margin: "0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <li>Name and email from your Google account</li>
-                      <li>Profile photo from your Google account</li>
-                      <li>Messages and chat history you send</li>
-                      <li>Online status and chat activity</li>
-                    </ul>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      2. How We Use Information
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: "0 0 6px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      The information we collect is used for:
-                    </p>
-                    <ul
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.9,
-                        paddingLeft: "20px",
-                        margin: "0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <li>Providing and maintaining chat service</li>
-                      <li>Sending messages between users</li>
-                      <li>Displaying user online status</li>
-                      <li>Storing chat history for future access</li>
-                    </ul>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      3. Data Storage
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: 0,
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with.
-                    </p>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      4. Security
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: 0,
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS.
-                    </p>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      5. Your Rights
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: "0 0 6px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      You have the right to:
-                    </p>
-                    <ul
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.9,
-                        paddingLeft: "20px",
-                        margin: "0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <li>Access your personal data</li>
-                      <li>Delete your account and chat data</li>
-                      <li>Disable notifications</li>
-                    </ul>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      6. Policy Changes
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: 0,
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      We may update this privacy policy from time to time. Changes will be notified through the chat application.
-                    </p>
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <h3
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        marginBottom: "6px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      7. Contact
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.7,
-                        margin: "0 0 4px 0",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      If you have questions about this privacy policy, please contact us at:
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#000000",
-                        marginTop: "4px",
-                        fontWeight: 500,
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      support@menuru.com
-                    </p>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      paddingTop: "14px",
-                      borderTop: "1px solid #f0f0f0",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Chat with Menuru v1.0
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      © 2026 Menuru
-                    </span>
-                  </div>
+                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Privacy Policy</div>
                 </div>
               ) : showProfile && profileUser ? (
-                // Profile View
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleCloseProfile}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#666",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        fontSize: "13px",
-                        fontFamily: FONT_FAMILY,
-                        marginBottom: "16px",
-                        padding: "4px 0",
-                        transition: "color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
-                      onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
-                    >
-                      <BackIcon />
-                      <span>Back</span>
-                    </motion.button>
-
-                    <div style={{ width: "100%", marginBottom: "0px" }}>
-                      <div style={{ 
-                        backgroundColor: "#f5f5f5", 
-                        borderRadius: "8px",
-                        padding: "8px 14px",
-                        position: "relative",
-                        marginBottom: "8px",
-                        maxWidth: "280px",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ 
-                            fontSize: "10px", 
-                            color: "#666", 
-                            fontWeight: 500, 
-                            letterSpacing: "0.05em", 
-                            textTransform: "uppercase",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            <span style={{ 
-                              display: "inline-block",
-                              width: "6px",
-                              height: "6px",
-                              borderRadius: "50%",
-                              backgroundColor: "#c5e800",
-                              marginRight: "4px",
-                            }} />
-                            Note
-                          </span>
-                          {profileUser.id === user?.uid && (
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditNote(!editNote)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#666",
-                                fontSize: "10px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <EditIcon />
-                              {profileUser.note ? "Edit" : "Add"}
-                            </motion.button>
-                          )}
-                        </div>
-
-                        {editNote && profileUser.id === user?.uid ? (
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
-                            <input
-                              type="text"
-                              value={noteInput}
-                              onChange={(e) => setNoteInput(e.target.value)}
-                              placeholder="No note yet"
-                              style={{
-                                flex: 1,
-                                padding: "6px 10px",
-                                backgroundColor: "#fff",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#000",
-                                fontSize: "12px",
-                                outline: "none",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleSaveNote();
-                                }
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSaveNote}
-                              style={{
-                                padding: "4px 12px",
-                                backgroundColor: "#c5e800",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "#000",
-                                fontSize: "11px",
-                                fontWeight: 500,
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Save
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditNote(false)}
-                              style={{
-                                padding: "4px 10px",
-                                backgroundColor: "transparent",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#666",
-                                fontSize: "11px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Cancel
-                            </motion.button>
-                          </div>
-                        ) : (
-                          <div style={{ 
-                            padding: "4px 0",
-                            color: profileUser.note ? "#000" : "#999",
-                            fontSize: "13px",
-                            lineHeight: 1.4,
-                            minHeight: "24px",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {profileUser.note || "No note yet"}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        style={{
-                          width: "64px",
-                          height: "64px",
-                          borderRadius: "8px",
-                          backgroundColor: "#f0f0f0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "28px",
-                          overflow: "hidden",
-                          border: "1px solid #e8e8e8",
-                          flexShrink: 0,
-                          position: "relative",
-                        }}
-                      >
-                        {profileUser.photoURL ? (
-                          <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                        )}
-                      </motion.div>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                            {profileUser.name}
-                            {profileUser.isAdmin && " (Admin)"}
-                            {profileUser.isOfficial && " (Official)"}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ width: "100%", marginBottom: "16px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                          Bio
-                        </span>
-                        {profileUser.id === user?.uid && (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setEditBio(!editBio)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "#999",
-                              fontSize: "10px",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              fontFamily: FONT_FAMILY,
-                            }}
-                          >
-                            <EditIcon />
-                            {profileUser.bio ? "Edit" : "Add"}
-                          </motion.button>
-                        )}
-                      </div>
-                      {editBio && profileUser.id === user?.uid ? (
-                        <div>
-                          <textarea
-                            value={bioInput}
-                            onChange={(e) => setBioInput(e.target.value)}
-                            placeholder="No bio yet"
-                            rows={2}
-                            style={{
-                              width: "100%",
-                              padding: "8px 12px",
-                              backgroundColor: "#f5f5f5",
-                              border: "1px solid #e8e8e8",
-                              borderRadius: "6px",
-                              color: "#000",
-                              fontSize: "13px",
-                              outline: "none",
-                              fontFamily: FONT_FAMILY,
-                              resize: "vertical",
-                            }}
-                          />
-                          <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSaveBio}
-                              style={{
-                                padding: "4px 14px",
-                                backgroundColor: "#000",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "#fff",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Save
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditBio(false)}
-                              style={{
-                                padding: "4px 14px",
-                                backgroundColor: "transparent",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#999",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Cancel
-                            </motion.button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div style={{ 
-                          padding: "8px 12px", 
-                          backgroundColor: "#f8f8f8", 
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          color: profileUser.bio ? "#000" : "#ccc",
-                          lineHeight: 1.5,
-                          fontFamily: FONT_FAMILY,
-                        }}>
-                          {profileUser.bio || "No bio yet"}
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          handleCloseProfile();
-                          setSelectedChat(profileUser);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          backgroundColor: "#000",
-                          border: "none",
-                          borderRadius: "8px",
-                          color: "#fff",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          transition: "opacity 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                      >
-                        Send Message
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
-                        style={{
-                          padding: "10px 16px",
-                          backgroundColor: "transparent",
-                          border: "1px solid #e0e0e0",
-                          borderRadius: "8px",
-                          color: profileUser.isPinned ? "#000" : "#999",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontFamily: FONT_FAMILY,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <PinIcon filled={profileUser.isPinned || false} />
-                      </motion.button>
-                    </div>
-                  </div>
+                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Profile</div>
                 </div>
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  {/* Announcement */}
                   <div
                     style={{
                       display: "flex",
@@ -3949,7 +2918,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View
+                // ============ CHAT VIEW ============
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -4029,7 +2998,6 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
-                          {selectedChat.isAdmin && " (Admin)"}
                           {selectedChat.isOfficial && " (Official)"}
                         </span>
                       </div>
@@ -4038,9 +3006,9 @@ export default function HomePage(): React.JSX.Element {
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
-                        {selectedChat.id === MENURU_OFFICIAL.id && isAdmin && (
+                        {selectedChat.id === OFFICIAL_ID && isAdmin && (
                           <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Admin - Lihat semua pesan user
+                            Admin - Balas sebagai Official
                           </span>
                         )}
                         {getOnlineStatus(selectedChat.id) ? (
@@ -4075,7 +3043,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
 
                   {/* Admin Reply Mode Indicator */}
-                  {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode && (
+                  {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode && (
                     <div
                       style={{
                         padding: "8px 16px",
@@ -4088,10 +3056,10 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       <span style={{ fontSize: "12px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                        Balas ke {selectedUserNameForReply || "User"}
+                        Balas sebagai Menuru Official ke {selectedUserNameForReply || "User"}
                       </span>
                       <span style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        Balasan akan dikirim ke user ini
+                        Balasan akan langsung muncul dari akun Official
                       </span>
                     </div>
                   )}
@@ -4219,7 +3187,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Messages dengan Read Receipts dan Typing Indicator */}
+                  {/* Messages */}
                   <div
                     style={{
                       flex: 1,
@@ -4256,12 +3224,12 @@ export default function HomePage(): React.JSX.Element {
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
                         const isAdminReply = msg.isAdminReply || false;
                         
-                        // Show original sender name for admin viewing all messages
-                        const displaySenderName = isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isMine && !isAdminReply
+                        // Untuk admin: tampilkan nama pengirim asli
+                        const displaySenderName = isAdmin && selectedChat?.id === OFFICIAL_ID && !isMine && !isAdminReply
                           ? (msg.targetUserName || msg.senderName)
                           : null;
                         
-                        const isUserMessage = msg.senderId !== MENURU_OFFICIAL.id && msg.senderId !== user?.uid;
+                        const isUserMessage = msg.senderId !== OFFICIAL_ID && msg.senderId !== user?.uid;
                         const msgNumber = msg.messageCount || (idx + 1);
                         
                         return (
@@ -4568,7 +3536,8 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && !isAdminReply && !isMine && isUserMessage && (
+                                      {/* Tombol Balas sebagai Official - khusus admin */}
+                                      {isAdmin && selectedChat?.id === OFFICIAL_ID && !isAdminReply && !isMine && isUserMessage && (
                                         <motion.button
                                           whileHover={{ backgroundColor: "#f5f5f5" }}
                                           onClick={() => {
@@ -4595,7 +3564,7 @@ export default function HomePage(): React.JSX.Element {
                                           }}
                                         >
                                           <ReplyIcon />
-                                          <span>Balas User Ini</span>
+                                          <span>Balas sebagai Official</span>
                                         </motion.button>
                                       )}
                                     </motion.div>
@@ -4630,7 +3599,7 @@ export default function HomePage(): React.JSX.Element {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Input dengan Typing Indicator */}
+                  {/* Input */}
                   <div
                     style={{
                       padding: "10px 14px 14px",
@@ -4663,12 +3632,12 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {isAdmin && selectedChat?.id === MENURU_OFFICIAL.id && adminReplyMode ? (
-                      // Admin Reply Input
+                    {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode ? (
+                      // Admin Reply Input - Balas sebagai Official
                       <div style={{ display: "flex", gap: "8px" }}>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                           <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Balas ke {selectedUserNameForReply}
+                            Balas sebagai Menuru Official ke {selectedUserNameForReply}
                           </div>
                           <input
                             type="text"
@@ -4903,32 +3872,17 @@ export default function HomePage(): React.JSX.Element {
 
       <style jsx>{`
         @keyframes awwwardsPulse {
-          0% {
-            transform: scale(0.7);
-            opacity: 0.25;
-          }
-          50% {
-            transform: scale(1.6);
-            opacity: 0.05;
-          }
-          100% {
-            transform: scale(0.7);
-            opacity: 0.25;
-          }
+          0% { transform: scale(0.7); opacity: 0.25; }
+          50% { transform: scale(1.6); opacity: 0.05; }
+          100% { transform: scale(0.7); opacity: 0.25; }
         }
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
         @keyframes typingDot {
-          0%, 60%, 100% {
-            opacity: 0.3;
-            transform: translateY(0);
-          }
-          30% {
-            opacity: 1;
-            transform: translateY(-4px);
-          }
+          0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+          30% { opacity: 1; transform: translateY(-4px); }
         }
       `}</style>
     </div>
