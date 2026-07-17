@@ -435,9 +435,9 @@ export default function HomePage(): React.JSX.Element {
 
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
-  const [selectedOfficialUser, setSelectedOfficialUser] = useState<string | null>(null);
   const [officialReplyText, setOfficialReplyText] = useState("");
   const [officialTypingUsers, setOfficialTypingUsers] = useState<{ [key: string]: boolean }>({});
+  const [officialReplyTo, setOfficialReplyTo] = useState<Message | null>(null);
 
   // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -710,21 +710,40 @@ export default function HomePage(): React.JSX.Element {
     const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
     const q = query(officialChatRef, orderBy("timestamp", "asc"));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const msgList: Message[] = [];
-      const typingUsers: { [key: string]: boolean } = {};
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
         msgList.push(msg);
-        
-        // Track typing status from users (only for admin view)
-        if (msg.senderId !== user?.uid && msg.senderId !== "official_menuru") {
-          // Typing status is handled separately via users collection
-        }
       });
       
       setOfficialMessages(msgList);
+      
+      // Mark messages as read for current user
+      const unreadMessages = msgList.filter(m => 
+        !m.read && 
+        m.senderId !== user.uid && 
+        (m.receiverId === user.uid || m.senderId === "official_menuru")
+      );
+      
+      for (const msg of unreadMessages) {
+        const msgRef = doc(db, "official_chat", OFFICIAL_CHAT_ID, "messages", msg.id);
+        await updateDoc(msgRef, {
+          read: true,
+          readAt: serverTimestamp()
+        });
+      }
+      
+      if (unreadMessages.length > 0) {
+        setChatRooms(prev => prev.map(room => {
+          if (room.id === OFFICIAL_CHAT_ID) {
+            return { ...room, unreadCount: 0 };
+          }
+          return room;
+        }));
+        setTotalUnread(prev => Math.max(0, prev - unreadMessages.length));
+      }
     });
 
     return () => unsubscribe();
@@ -815,13 +834,20 @@ export default function HomePage(): React.JSX.Element {
       }
       
       // Add official chat room
-      const officialUnread = officialMessages.filter(m => !m.read && m.senderId !== user.uid).length;
+      const officialUnread = officialMessages.filter(m => 
+        !m.read && 
+        m.senderId !== user.uid && 
+        (m.receiverId === user.uid || m.senderId === "official_menuru")
+      ).length;
+      
+      const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
+      
       rooms.push({
         id: OFFICIAL_CHAT_ID,
         participants: ["official_menuru", user.uid],
-        lastMessage: officialMessages.length > 0 ? officialMessages[officialMessages.length - 1].text : "Chat with Menuru Official",
-        lastMessageTime: officialMessages.length > 0 ? officialMessages[officialMessages.length - 1].timestamp : null,
-        lastMessageSenderId: officialMessages.length > 0 ? officialMessages[officialMessages.length - 1].senderId : "",
+        lastMessage: officialLastMsg ? officialLastMsg.text : "Chat with Menuru Official",
+        lastMessageTime: officialLastMsg ? officialLastMsg.timestamp : null,
+        lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
         unreadCount: officialUnread,
         isPinned: false
       });
@@ -838,10 +864,9 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       
       // Count total unread including official chat
-      const officialUnreadCount = officialMessages.filter(m => !m.read && m.senderId !== user.uid).length;
-      setTotalUnread(totalUnreadCount + officialUnreadCount);
+      setTotalUnread(totalUnreadCount + officialUnread);
 
-      if (totalUnreadCount + officialUnreadCount > 0 && newMessages.length > 0) {
+      if (totalUnreadCount + officialUnread > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
         setIncomingMessagesList(newMessages);
         setCurrentMessageIndex(0);
@@ -1008,12 +1033,12 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setSelectedOfficialUser(null);
+      setOfficialReplyTo(null);
       setOfficialReplyText("");
     }
   };
 
-  // Handle typing
+  // Handle typing for regular chat
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1039,12 +1064,12 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle official typing
+  // Handle typing for official chat
   const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setOfficialReplyText(value);
     
-    if (!selectedOfficialUser || !user || !db) return;
+    if (!user || !db) return;
     
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
@@ -1206,9 +1231,12 @@ export default function HomePage(): React.JSX.Element {
     if (!user || !message.trim() || !db) return;
 
     try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { typing: false });
+      
       const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
       
-      await addDoc(officialChatRef, {
+      const msgData: any = {
         text: message.trim(),
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
@@ -1219,10 +1247,18 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isOfficialReply: false,
         officialReplyTo: null
-      });
+      };
+      
+      if (officialReplyTo) {
+        msgData.replyTo = officialReplyTo.id;
+        msgData.replyToText = officialReplyTo.text;
+        msgData.replyToSender = officialReplyTo.senderName;
+      }
+      
+      await addDoc(officialChatRef, msgData);
 
       setMessage("");
-      setReplyTo(null);
+      setOfficialReplyTo(null);
       
     } catch (error) {
       console.error("Error sending official message:", error);
@@ -1231,34 +1267,44 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle admin reply to official chat
   const handleAdminReply = async () => {
-    if (!user || !isAdmin || !selectedOfficialUser || !officialReplyText.trim() || !db) return;
+    if (!user || !isAdmin || !officialReplyText.trim() || !db) return;
 
     try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { typing: false });
+      
       const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
+      
+      // Get the last message from a user to reply to (without dropdown)
+      const lastUserMessage = officialMessages
+        .filter(m => m.senderId !== user.uid && m.senderId !== "official_menuru")
+        .pop();
+      
+      const targetUserId = lastUserMessage ? lastUserMessage.senderId : null;
       
       const msgData: any = {
         text: officialReplyText.trim(),
         senderId: user.uid,
         senderName: user.displayName || user.email || "Admin",
-        receiverId: selectedOfficialUser,
+        receiverId: targetUserId || "all_users",
         timestamp: serverTimestamp(),
         read: false,
         isPinned: false,
         pinnedAt: null,
         isOfficialReply: true,
-        officialReplyTo: selectedOfficialUser
+        officialReplyTo: targetUserId
       };
       
-      if (replyTo) {
-        msgData.replyTo = replyTo.id;
-        msgData.replyToText = replyTo.text;
-        msgData.replyToSender = replyTo.senderName;
+      if (officialReplyTo) {
+        msgData.replyTo = officialReplyTo.id;
+        msgData.replyToText = officialReplyTo.text;
+        msgData.replyToSender = officialReplyTo.senderName;
       }
       
       await addDoc(officialChatRef, msgData);
 
       setOfficialReplyText("");
-      setReplyTo(null);
+      setOfficialReplyTo(null);
       
     } catch (error) {
       console.error("Error sending admin reply:", error);
@@ -1499,32 +1545,14 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
-  // Get unique users from official messages for admin
-  const getOfficialUsers = () => {
-    const uniqueUsers: { [key: string]: ChatUser } = {};
-    officialMessages.forEach(msg => {
-      if (msg.senderId !== user?.uid && msg.senderId !== "official_menuru") {
-        if (!uniqueUsers[msg.senderId]) {
-          const foundUser = users.find(u => u.id === msg.senderId);
-          if (foundUser) {
-            uniqueUsers[msg.senderId] = foundUser;
-          }
-        }
-      }
-    });
-    return Object.values(uniqueUsers);
-  };
-
-  const officialUsers = getOfficialUsers();
-
-  // Get typing users in official chat
+  // Get typing users in official chat for body display
   const getOfficialTypingUsers = () => {
-    const typingList: string[] = [];
+    const typingList: { name: string; id: string }[] = [];
     Object.keys(officialTypingUsers).forEach(userId => {
       if (officialTypingUsers[userId] && userId !== user?.uid) {
         const foundUser = users.find(u => u.id === userId);
         if (foundUser) {
-          typingList.push(foundUser.name);
+          typingList.push({ name: foundUser.name, id: userId });
         }
       }
     });
@@ -2107,18 +2135,6 @@ export default function HomePage(): React.JSX.Element {
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && isOfficialChatSelected && (
                     <>
                       <InstagramVerifiedBadge size={14} />
-                      {typingUsersList.length > 0 && (
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.6)",
-                            fontFamily: FONT_FAMILY,
-                            fontStyle: "italic",
-                          }}
-                        >
-                          {typingUsersList.join(", ")} typing...
-                        </span>
-                      )}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3940,7 +3956,7 @@ export default function HomePage(): React.JSX.Element {
                       onClick={() => {
                         setSelectedChat(null);
                         setReplyTo(null);
-                        setSelectedOfficialUser(null);
+                        setOfficialReplyTo(null);
                         setOfficialReplyText("");
                       }}
                       style={{
@@ -4029,11 +4045,6 @@ export default function HomePage(): React.JSX.Element {
                         {isOfficialChatSelected ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             Official Account
-                            {typingUsersList.length > 0 && (
-                              <span style={{ marginLeft: "8px", fontStyle: "italic" }}>
-                                {typingUsersList.join(", ")} typing...
-                              </span>
-                            )}
                           </span>
                         ) : (
                           getOnlineStatus(selectedChat.id) ? (
@@ -4088,41 +4099,19 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {/* User selector for admin reply */}
-                            {officialUsers.length > 0 && (
+                            {/* Typing indicator in body */}
+                            {typingUsersList.length > 0 && (
                               <div
                                 style={{
-                                  padding: "12px",
-                                  backgroundColor: "#f8f8f8",
-                                  borderRadius: "8px",
-                                  marginBottom: "12px",
+                                  textAlign: "center",
+                                  fontSize: "12px",
+                                  color: "#999",
+                                  padding: "4px 0",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
                                 }}
                               >
-                                <div style={{ fontSize: "12px", color: "#666", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
-                                  Select user to reply:
-                                </div>
-                                <select
-                                  value={selectedOfficialUser || ""}
-                                  onChange={(e) => setSelectedOfficialUser(e.target.value)}
-                                  style={{
-                                    width: "100%",
-                                    padding: "8px 12px",
-                                    border: "1px solid #e0e0e0",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    outline: "none",
-                                    fontFamily: FONT_FAMILY,
-                                    backgroundColor: "#fff",
-                                    color: "#000",
-                                  }}
-                                >
-                                  <option value="">Select user...</option>
-                                  {officialUsers.map((u) => (
-                                    <option key={u.id} value={u.id}>
-                                      {u.name} ({u.email})
-                                    </option>
-                                  ))}
-                                </select>
+                                {typingUsersList.map(u => u.name).join(", ")} typing...
                               </div>
                             )}
 
@@ -4287,7 +4276,7 @@ export default function HomePage(): React.JSX.Element {
                                               <motion.button
                                                 whileHover={{ backgroundColor: "#f5f5f5" }}
                                                 onClick={() => {
-                                                  setReplyTo(msg);
+                                                  setOfficialReplyTo(msg);
                                                   setShowMessageMenu(null);
                                                 }}
                                                 style={{
@@ -4413,82 +4402,80 @@ export default function HomePage(): React.JSX.Element {
                             <div ref={messagesEndRef} />
                           </div>
 
-                          {/* Admin reply input */}
-                          {officialUsers.length > 0 && selectedOfficialUser && (
-                            <div
+                          {/* Admin reply input - like regular chat */}
+                          <div
+                            style={{
+                              padding: "10px 14px 14px",
+                              borderTop: "1px solid rgba(0,0,0,0.04)",
+                              display: "flex",
+                              gap: "8px",
+                              backgroundColor: "#ffffff",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            <input
+                              type="text"
+                              placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a reply to users..."}
+                              value={officialReplyText}
+                              onChange={handleOfficialTyping}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleAdminReply();
+                                }
+                              }}
                               style={{
-                                padding: "10px 14px 14px",
-                                borderTop: "1px solid rgba(0,0,0,0.04)",
+                                flex: 1,
+                                padding: "10px 16px",
+                                border: "1px solid #e8e8e8",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                outline: "none",
+                                fontFamily: FONT_FAMILY,
+                                transition: "all .2s ease",
+                                backgroundColor: "#f5f5f5",
+                                color: "#000",
+                              }}
+                              onFocus={(e) => {
+                                e.currentTarget.style.borderColor = "#c5e800";
+                                e.currentTarget.style.backgroundColor = "#ffffff";
+                              }}
+                              onBlur={(e) => {
+                                e.currentTarget.style.borderColor = "#e8e8e8";
+                                e.currentTarget.style.backgroundColor = "#f5f5f5";
+                              }}
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleAdminReply}
+                              style={{
+                                backgroundColor: "#c5e800",
+                                border: "none",
+                                padding: "10px 20px",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                color: "#000",
+                                cursor: "pointer",
+                                transition: "all .2s ease",
+                                whiteSpace: "nowrap",
                                 display: "flex",
-                                gap: "8px",
-                                backgroundColor: "#ffffff",
+                                alignItems: "center",
+                                gap: "6px",
                                 fontFamily: FONT_FAMILY,
                               }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#b0d000";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#c5e800";
+                              }}
                             >
-                              <input
-                                type="text"
-                                placeholder={`Reply to ${officialUsers.find(u => u.id === selectedOfficialUser)?.name || "user"}...`}
-                                value={officialReplyText}
-                                onChange={handleOfficialTyping}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleAdminReply();
-                                  }
-                                }}
-                                style={{
-                                  flex: 1,
-                                  padding: "10px 16px",
-                                  border: "1px solid #e8e8e8",
-                                  borderRadius: "8px",
-                                  fontSize: "14px",
-                                  outline: "none",
-                                  fontFamily: FONT_FAMILY,
-                                  transition: "all .2s ease",
-                                  backgroundColor: "#f5f5f5",
-                                  color: "#000",
-                                }}
-                                onFocus={(e) => {
-                                  e.currentTarget.style.borderColor = "#c5e800";
-                                  e.currentTarget.style.backgroundColor = "#ffffff";
-                                }}
-                                onBlur={(e) => {
-                                  e.currentTarget.style.borderColor = "#e8e8e8";
-                                  e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                }}
-                              />
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleAdminReply}
-                                style={{
-                                  backgroundColor: "#c5e800",
-                                  border: "none",
-                                  padding: "10px 20px",
-                                  borderRadius: "8px",
-                                  fontSize: "14px",
-                                  fontWeight: 500,
-                                  color: "#000",
-                                  cursor: "pointer",
-                                  transition: "all .2s ease",
-                                  whiteSpace: "nowrap",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = "#b0d000";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = "#c5e800";
-                                }}
-                              >
-                                <span>Reply</span>
-                                <SendIcon />
-                              </motion.button>
-                            </div>
-                          )}
+                              <span>Reply</span>
+                              <SendIcon />
+                            </motion.button>
+                          </div>
                         </div>
                       ) : (
                         // Regular User View - only see their own messages and admin replies
@@ -4505,6 +4492,22 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
+                            {/* Typing indicator in body */}
+                            {typingUsersList.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "12px",
+                                  color: "#999",
+                                  padding: "4px 0",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                {typingUsersList.map(u => u.name).join(", ")} typing...
+                              </div>
+                            )}
+
                             {officialMessages.filter(m => m.senderId === user.uid || m.officialReplyTo === user.uid || m.senderId === "official_menuru").length === 0 ? (
                               <div
                                 style={{
@@ -4662,7 +4665,7 @@ export default function HomePage(): React.JSX.Element {
                                                 <motion.button
                                                   whileHover={{ backgroundColor: "#f5f5f5" }}
                                                   onClick={() => {
-                                                    setReplyTo(msg);
+                                                    setOfficialReplyTo(msg);
                                                     setShowMessageMenu(null);
                                                   }}
                                                   style={{
@@ -4801,7 +4804,7 @@ export default function HomePage(): React.JSX.Element {
                           >
                             <input
                               type="text"
-                              placeholder={replyTo ? "Type a reply..." : "Type a message..."}
+                              placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a message..."}
                               value={message}
                               onChange={handleTyping}
                               onKeyPress={(e) => {
