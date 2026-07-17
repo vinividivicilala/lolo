@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -25,9 +25,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  limit,
-  increment
+  updateDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -60,13 +58,8 @@ const googleProvider = new GoogleAuthProvider();
 // Font Family
 const FONT_FAMILY = "var(--font-geist-sans), 'GeistSans', 'GeistSans Fallback'";
 
-// Admin Email - Akun yang mengendalikan Menuru Official
+// Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const OFFICIAL_ID = "official_menuru";
-const OFFICIAL_EMAIL = "official@menuru.com";
-
-// Cooldown
-const SEND_COOLDOWN = 3000;
 
 interface ChatUser {
   id: string;
@@ -93,8 +86,6 @@ interface Message {
   timestamp: any;
   read: boolean;
   readAt?: any;
-  delivered: boolean;
-  deliveredAt?: any;
   isPinned?: boolean;
   pinnedAt?: any;
   replyTo?: string;
@@ -103,11 +94,6 @@ interface Message {
   sharedFrom?: string;
   sharedFromName?: string;
   isShared?: boolean;
-  isAdminReply?: boolean;
-  adminReplyTo?: string;
-  targetUserId?: string;
-  targetUserName?: string;
-  messageCount?: number;
 }
 
 interface ChatRoom {
@@ -118,8 +104,6 @@ interface ChatRoom {
   lastMessageSenderId?: string;
   unreadCount: number;
   isPinned?: boolean;
-  hasAdminReply?: boolean;
-  messageCount?: number;
 }
 
 interface UpdateItem {
@@ -194,52 +178,93 @@ const EditIcon = () => (
   </svg>
 );
 
+// Chat Icon SVG
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const AwwwardsDot = ({ color = "#4ade80", isActive = false, size = 10 }: { color?: string; isActive?: boolean; size?: number }) => {
+// Instagram Verified Badge
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
   return (
-    <div style={{ 
-      position: "relative", 
-      display: "inline-flex", 
-      alignItems: "center", 
-      justifyContent: "center",
-      width: `${size}px`,
-      height: `${size}px`,
-    }}>
-      {isActive && (
-        <div
-          style={{
-            position: "absolute",
-            width: `${size * 2.8}px`,
-            height: `${size * 2.8}px`,
-            borderRadius: "50%",
-            backgroundColor: color,
-            opacity: 0.20,
-            animation: "awwwardsPulse 2s ease-in-out infinite",
-            pointerEvents: "none",
-          }}
-        />
-      )}
-      
-      <div
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
         style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          borderRadius: "50%",
-          backgroundColor: color,
-          position: "relative",
-          zIndex: 2,
-          transition: "all 0.3s ease",
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "middle",
+          cursor: "pointer",
         }}
-      />
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Official Account
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
     </div>
   );
 };
 
+// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const color = online ? "#4ade80" : "#999";
@@ -251,7 +276,29 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         onMouseLeave={() => setShowTooltip(false)}
         style={{ cursor: "pointer" }}
       >
-        <AwwwardsDot color={color} isActive={online} size={8} />
+        <div style={{
+          width: "8px",
+          height: "8px",
+          borderRadius: "50%",
+          backgroundColor: color,
+          position: "relative",
+          transition: "all 0.3s ease",
+        }}>
+          {online && (
+            <div style={{
+              position: "absolute",
+              width: "22px",
+              height: "22px",
+              borderRadius: "50%",
+              backgroundColor: color,
+              opacity: 0.20,
+              animation: "awwwardsPulse 2s ease-in-out infinite",
+              pointerEvents: "none",
+              top: "-7px",
+              left: "-7px",
+            }} />
+          )}
+        </div>
       </div>
       {showTooltip && (
         <div style={{
@@ -284,6 +331,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
+// Read Status
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -293,9 +341,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
       return { icon: "✓✓", color: "#0095f6", label: "Read" };
-    }
-    if (msg.delivered && msg.deliveredAt) {
-      return { icon: "✓✓", color: "#999", label: "Delivered" };
     }
     return { icon: "✓", color: "#999", label: "Sent" };
   })();
@@ -311,7 +356,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
           fontWeight: status.label === "Read" ? 600 : 400,
           cursor: "pointer",
           fontFamily: FONT_FAMILY,
-          letterSpacing: "0.5px",
         }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -380,16 +424,9 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [adminReplyMode, setAdminReplyMode] = useState(false);
-  const [adminReplyMessage, setAdminReplyMessage] = useState("");
-  const [selectedUserForReply, setSelectedUserForReply] = useState<string | null>(null);
-  const [selectedUserNameForReply, setSelectedUserNameForReply] = useState<string>("");
-  const [isSending, setIsSending] = useState(false);
-  const [lastSendTime, setLastSendTime] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
-  const messageIdsSet = useRef<Set<string>>(new Set());
 
   // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -398,10 +435,14 @@ export default function HomePage(): React.JSX.Element {
     "silahkan hubungin official menuru"
   ];
 
+  // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
+  
+  // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
+  // Chat button text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -414,44 +455,45 @@ export default function HomePage(): React.JSX.Element {
   ];
   let chatTextIndex = 0;
 
+  // Update Data
   const updates: UpdateItem[] = [
     {
       id: "1",
       title: "Real-time Chat Feature",
-      description: "Added real-time chat feature with Firebase.",
+      description: "Added real-time chat feature with Firebase. Users can send and receive messages instantly.",
       date: "10 July 2026",
       status: "live",
-      detail: "Real-time chat feature allows users to communicate directly without refreshing the page.",
+      detail: "Real-time chat feature allows users to communicate directly without refreshing the page. Uses Firebase Realtime Database for instant message synchronization. Equipped with online status and typing indicators.",
       link: "https://menuru.com/update/chat-realtime",
       publishedBy: "Menuru Team"
     },
     {
       id: "2",
       title: "Privacy Policy & Update System",
-      description: "Added Privacy Policy and Update System pages.",
+      description: "Added Privacy Policy and Update System pages for service transparency.",
       date: "9 July 2026",
       status: "live",
-      detail: "Privacy Policy page explains how user data is collected and used.",
+      detail: "Privacy Policy page explains how user data is collected and used. Update System displays feature update history transparently to users.",
       link: "https://menuru.com/update/privacy-policy",
       publishedBy: "Menuru Team"
     },
     {
       id: "3",
       title: "Pin Message Feature",
-      description: "Users can pin important messages in chat.",
+      description: "Users can pin important messages in chat. Pinned messages will appear at the top.",
       date: "8 July 2026",
       status: "coming",
-      detail: "Pin message feature allows users to pin important messages for easy access.",
+      detail: "Pin message feature allows users to pin important messages for easy access. Pinned messages will appear at the top of chat with a special indicator.",
       link: "https://menuru.com/update/pin-message",
       publishedBy: "Menuru Team"
     },
     {
       id: "4",
       title: "Reply & Share Message Feature",
-      description: "Users can reply to and forward messages.",
+      description: "Users can reply to and forward messages to other users easily.",
       date: "7 July 2026",
       status: "done",
-      detail: "Reply feature allows users to reply to specific messages with clear context.",
+      detail: "Reply feature allows users to reply to specific messages with clear context. Share feature allows users to forward messages to other contacts easily.",
       link: "https://menuru.com/update/reply-share",
       publishedBy: "Menuru Team"
     },
@@ -461,7 +503,7 @@ export default function HomePage(): React.JSX.Element {
       description: "Shows user online status and typing indicator.",
       date: "6 July 2026",
       status: "done",
-      detail: "Shows user online status in real-time. Typing indicator appears when user is typing.",
+      detail: "Shows user online status in real-time. Typing indicator appears when user is typing a message, providing a more interactive chat experience.",
       link: "https://menuru.com/update/online-status",
       publishedBy: "Menuru Team"
     }
@@ -478,6 +520,35 @@ export default function HomePage(): React.JSX.Element {
     note: "Official Account"
   };
 
+  const OFFICIAL_MESSAGES = [
+    {
+      text: "Hello! Welcome to Menuru Chat",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    },
+    {
+      text: "We are currently improving the chat feature. Please be patient",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    },
+    {
+      text: "Pin message and chat history features will be improved soon",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    },
+    {
+      text: "Don't forget to read our Privacy Policy and Updates",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    },
+    {
+      text: "Thank you for your understanding",
+      senderId: "official_menuru",
+      senderName: "Menuru Official"
+    }
+  ];
+
+  // Banner rolling text animation
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerTextIndex((prev) => (prev + 1) % bannerTexts.length);
@@ -485,100 +556,60 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
-
-  // ============ FUNGSI UNTUK MEMBUAT AKUN OFFICIAL DI DATABASE ============
-  const createOfficialAccount = async () => {
-    if (!db) return;
-    try {
-      const officialRef = doc(db, "users", OFFICIAL_ID);
-      const officialSnap = await getDoc(officialRef);
-      
-      if (!officialSnap.exists()) {
-        await setDoc(officialRef, {
-          id: OFFICIAL_ID,
-          name: "Menuru Official",
-          email: OFFICIAL_EMAIL,
-          photoURL: "",
-          createdAt: serverTimestamp(),
-          isPinned: false,
-          isOfficial: true,
-          online: true,
-          lastSeen: serverTimestamp(),
-          typing: false,
-          bio: "Official Menuru Chat account",
-          note: "Official Account",
-          isAdmin: false
-        });
-        console.log("Official account created");
-      }
-    } catch (error) {
-      console.error("Error creating official account:", error);
-    }
-  };
-
-  // Buat akun official saat app pertama kali jalan
-  useEffect(() => {
-    createOfficialAccount();
-  }, []);
 
   // Broadcast messages to all users
   const broadcastMessages = async () => {
     if (!db) return;
     
+    const broadcastRef = doc(db, "system", "broadcast");
+    const broadcastSnap = await getDoc(broadcastRef);
+    
+    if (broadcastSnap.exists() && broadcastSnap.data().messagesSent) {
+      console.log("Messages already broadcasted");
+      return;
+    }
+    
     try {
-      const broadcastRef = doc(db, "system", "broadcast");
-      const broadcastSnap = await getDoc(broadcastRef);
-      
-      if (broadcastSnap.exists() && broadcastSnap.data().messagesSent) {
-        return;
-      }
-      
       const usersRef = collection(db, "users");
       const usersSnap = await getDocs(usersRef);
       
+      const broadcastMessage = {
+        text: "Don't forget to read our Privacy Policy and Updates",
+        senderId: "official_menuru",
+        senderName: "Menuru Official"
+      };
+      
       for (const docSnap of usersSnap.docs) {
         const userId = docSnap.id;
-        const userData = docSnap.data();
         
-        const chatId = [userId, OFFICIAL_ID].sort().join("_");
+        const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
         const chatRef = doc(db, "chats", chatId);
         const chatSnap = await getDoc(chatRef);
         
         if (!chatSnap.exists()) {
           await setDoc(chatRef, {
-            participants: [userId, OFFICIAL_ID],
+            participants: [userId, MENURU_OFFICIAL.id],
             createdAt: serverTimestamp(),
-            isPinned: false,
-            messageCount: 0
+            isPinned: false
           });
         }
         
         const messagesRef = collection(db, "chats", chatId, "messages");
         await addDoc(messagesRef, {
-          text: "Don't forget to read our Privacy Policy and Updates",
-          senderId: OFFICIAL_ID,
-          senderName: "Menuru Official",
+          text: broadcastMessage.text,
+          senderId: broadcastMessage.senderId,
+          senderName: broadcastMessage.senderName,
           receiverId: userId,
           timestamp: serverTimestamp(),
           read: false,
-          readAt: null,
-          delivered: false,
-          deliveredAt: null,
           isPinned: false,
           pinnedAt: null,
           replyTo: null,
           replyToText: null,
           replyToSender: null,
-          isShared: false,
-          isAdminReply: false,
-          targetUserId: userId,
-          targetUserName: userData.name || "User",
-          messageCount: 1
-        });
-        
-        await updateDoc(chatRef, {
-          messageCount: increment(1)
+          isShared: false
         });
       }
       
@@ -586,6 +617,8 @@ export default function HomePage(): React.JSX.Element {
         messagesSent: true,
         sentAt: serverTimestamp()
       });
+      
+      console.log("Broadcast messages sent to all users");
     } catch (error) {
       console.error("Error broadcasting messages:", error);
     }
@@ -619,13 +652,13 @@ export default function HomePage(): React.JSX.Element {
               photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: false,
+              isOfficial: isAdminUser,
+              isAdmin: isAdminUser,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
               bio: "",
-              note: "",
-              isAdmin: isAdminUser
+              note: ""
             });
             
             if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
@@ -643,14 +676,14 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: googlePhotoURL,
                 name: googleName,
                 lastSeen: serverTimestamp(),
+                isOfficial: isAdminUser,
                 isAdmin: isAdminUser
               });
             }
             
             await updateDoc(userRef, {
               online: true,
-              lastSeen: serverTimestamp(),
-              isAdmin: isAdminUser
+              lastSeen: serverTimestamp()
             });
           }
           
@@ -662,15 +695,11 @@ export default function HomePage(): React.JSX.Element {
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
-              note: updatedData.note || "",
-              isAdmin: updatedData.isAdmin || false
+              note: updatedData.note || ""
             }));
           }
           
-          // Kirim pesan official untuk user biasa (bukan admin)
-          if (!isAdminUser) {
-            await checkAndSendOfficialMessages(currentUser.uid);
-          }
+          await checkAndSendOfficialMessages(currentUser.uid);
           
         } catch (error) {
           console.error("Error saving user:", error);
@@ -684,29 +713,19 @@ export default function HomePage(): React.JSX.Element {
     if (!db) return;
     
     try {
-      const chatId = [userId, OFFICIAL_ID].sort().join("_");
+      const chatId = [userId, MENURU_OFFICIAL.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [userId, OFFICIAL_ID],
+          participants: [userId, MENURU_OFFICIAL.id],
           createdAt: serverTimestamp(),
-          isPinned: false,
-          messageCount: 0
+          isPinned: false
         });
         
         const messagesRef = collection(db, "chats", chatId, "messages");
-        const welcomeMessages = [
-          { text: "Hello! Welcome to Menuru Chat", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
-          { text: "We are currently improving the chat feature. Please be patient!", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
-          { text: "Pin message and chat history features will be improved soon", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
-          { text: "Don't forget to read our Privacy Policy and Updates", senderId: OFFICIAL_ID, senderName: "Menuru Official" },
-          { text: "Thank you for your understanding!", senderId: OFFICIAL_ID, senderName: "Menuru Official" }
-        ];
-        
-        for (let i = 0; i < welcomeMessages.length; i++) {
-          const msg = welcomeMessages[i];
+        for (const msg of OFFICIAL_MESSAGES) {
           await addDoc(messagesRef, {
             text: msg.text,
             senderId: msg.senderId,
@@ -714,32 +733,21 @@ export default function HomePage(): React.JSX.Element {
             receiverId: userId,
             timestamp: serverTimestamp(),
             read: false,
-            readAt: null,
-            delivered: false,
-            deliveredAt: null,
             isPinned: false,
             pinnedAt: null,
             replyTo: null,
             replyToText: null,
             replyToSender: null,
-            isShared: false,
-            isAdminReply: false,
-            targetUserId: userId,
-            targetUserName: user?.displayName || user?.email || "User",
-            messageCount: i + 1
+            isShared: false
           });
         }
-        
-        await updateDoc(chatRef, {
-          messageCount: welcomeMessages.length
-        });
       }
     } catch (error) {
       console.error("Error sending official messages:", error);
     }
   };
 
-  // Load users - TAMBAHKAN OFFICIAL KE LIST
+  // Load users
   useEffect(() => {
     if (!db || !user) return;
     const loadUsers = async () => {
@@ -760,8 +768,8 @@ export default function HomePage(): React.JSX.Element {
                 bio: data.bio || "",
                 note: data.note || "",
                 photoURL: data.photoURL || "",
-                isAdmin: data.isAdmin || false,
-                isOfficial: data.isOfficial || false
+                isOfficial: data.isOfficial || false,
+                isAdmin: data.isAdmin || false
               } as ChatUser);
             }
           });
@@ -772,13 +780,13 @@ export default function HomePage(): React.JSX.Element {
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
-            isOfficial: false,
+            isOfficial: isAdmin,
+            isAdmin: isAdmin,
             online: true,
             lastSeen: null,
             typing: false,
             bio: user.bio || "",
-            note: user.note || "",
-            isAdmin: user.isAdmin || false
+            note: user.note || ""
           };
           
           const selfExists = userList.some(u => u.id === user.uid);
@@ -793,14 +801,13 @@ export default function HomePage(): React.JSX.Element {
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
                 note: user.note || userList[index].note || "",
-                isAdmin: user.isAdmin || false,
-                isOfficial: user.isOfficial || false
+                isOfficial: isAdmin,
+                isAdmin: isAdmin
               };
             }
           }
           
-          // TAMBAHKAN OFFICIAL KE LIST jika belum ada
-          const officialExists = userList.some(u => u.id === OFFICIAL_ID);
+          const officialExists = userList.some(u => u.id === MENURU_OFFICIAL.id);
           if (!officialExists) {
             userList.push({ ...MENURU_OFFICIAL, online: true, typing: false, isAdmin: false });
           }
@@ -840,21 +847,19 @@ export default function HomePage(): React.JSX.Element {
           
           if (otherUser) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
-            const qMsg = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
+            const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
             
             let lastMessage = "";
             let lastMessageTime = null;
             let lastMessageSenderId = "";
             let unreadCount = 0;
-            let hasAdminReply = false;
             
             if (!msgSnap.empty) {
               const lastMsg = msgSnap.docs[0].data() as Message;
               lastMessage = lastMsg.text;
               lastMessageTime = lastMsg.timestamp;
               lastMessageSenderId = lastMsg.senderId;
-              hasAdminReply = lastMsg.isAdminReply || false;
             }
             
             const unreadQuery = query(
@@ -880,10 +885,8 @@ export default function HomePage(): React.JSX.Element {
               lastMessage,
               lastMessageTime,
               lastMessageSenderId,
-              unreadCount: Math.min(unreadCount, 99),
-              isPinned: data.isPinned || false,
-              hasAdminReply,
-              messageCount: data.messageCount || 0
+              unreadCount,
+              isPinned: data.isPinned || false
             });
           }
         }
@@ -899,11 +902,11 @@ export default function HomePage(): React.JSX.Element {
       });
       
       setChatRooms(rooms);
-      setTotalUnread(Math.min(totalUnreadCount, 99));
+      setTotalUnread(totalUnreadCount);
 
       if (totalUnreadCount > 0 && newMessages.length > 0) {
         setIsIncomingMessage(true);
-        setIncomingMessagesList(newMessages.slice(0, 5));
+        setIncomingMessagesList(newMessages);
         setCurrentMessageIndex(0);
         setChatButtonText(newMessages[0]);
         
@@ -914,7 +917,7 @@ export default function HomePage(): React.JSX.Element {
         
         let index = 0;
         rollingInterval.current = setInterval(() => {
-          index = (index + 1) % Math.min(newMessages.length, 5);
+          index = (index + 1) % newMessages.length;
           setCurrentMessageIndex(index);
           setChatButtonText(newMessages[index]);
         }, 3000);
@@ -944,87 +947,10 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // ============ LOAD MESSAGES - ADMIN LIHAT SEMUA PESAN USER DI OFFICIAL ============
+  // Load messages
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
-    // Jika admin dan chat dengan Menuru Official
-    if (isAdmin && selectedChat.id === OFFICIAL_ID) {
-      // Admin melihat pesan dari semua user di official chat
-      const allMessagesMap = new Map<string, Message>();
-      
-      // Listener untuk chat admin dengan official
-      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
-      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
-      const adminQ = query(adminMessagesRef, orderBy("timestamp", "asc"));
-      
-      const unsubscribeAdmin = onSnapshot(adminQ, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const msg = { id: change.doc.id, ...change.doc.data() } as Message;
-          if (change.type === 'added' || change.type === 'modified') {
-            allMessagesMap.set(msg.id, msg);
-          } else if (change.type === 'removed') {
-            allMessagesMap.delete(msg.id);
-          }
-        });
-        updateAdminMessages();
-      });
-      
-      // Listener untuk setiap user yang chat dengan official
-      const allUsers = users.filter(u => u.id !== user.uid && u.id !== OFFICIAL_ID);
-      const unsubscribes: (() => void)[] = [];
-      
-      for (const targetUser of allUsers) {
-        const userChatId = [targetUser.id, OFFICIAL_ID].sort().join("_");
-        const userMessagesRef = collection(db, "chats", userChatId, "messages");
-        const userQ = query(userMessagesRef, orderBy("timestamp", "asc"));
-        
-        const unsubscribe = onSnapshot(userQ, (snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            const msg = { id: change.doc.id, ...change.doc.data() } as Message;
-            if (!msg.targetUserId) {
-              msg.targetUserId = targetUser.id;
-              msg.targetUserName = targetUser.name;
-            }
-            
-            if (change.type === 'added' || change.type === 'modified') {
-              allMessagesMap.set(msg.id, msg);
-            } else if (change.type === 'removed') {
-              allMessagesMap.delete(msg.id);
-            }
-          });
-          
-          updateAdminMessages();
-        });
-        
-        unsubscribes.push(unsubscribe);
-      }
-      
-      const updateAdminMessages = () => {
-        const sortedMessages = Array.from(allMessagesMap.values())
-          .sort((a, b) => {
-            const timeA = a.timestamp?.seconds || 0;
-            const timeB = b.timestamp?.seconds || 0;
-            return timeA - timeB;
-          })
-          .slice(-300);
-        
-        setMessages(sortedMessages);
-        setPinnedMessages(sortedMessages.filter(m => m.isPinned));
-        
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      };
-      
-      return () => {
-        unsubscribeAdmin();
-        unsubscribes.forEach(unsub => unsub());
-        allMessagesMap.clear();
-      };
-    }
-    
-    // ============ USER BIASA / ADMIN CHAT DENGAN USER LAIN ============
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -1032,35 +958,19 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messageList: Message[] = [];
       const pinnedList: Message[] = [];
-      const uniqueIds = new Set<string>();
       
       snapshot.forEach((doc) => {
-        if (!uniqueIds.has(doc.id)) {
-          uniqueIds.add(doc.id);
-          const msg = { id: doc.id, ...doc.data() } as Message;
-          messageList.push(msg);
-          if (msg.isPinned) {
-            pinnedList.push(msg);
-          }
+        const msg = { id: doc.id, ...doc.data() } as Message;
+        messageList.push(msg);
+        if (msg.isPinned) {
+          pinnedList.push(msg);
         }
       });
       
-      const limitedMessages = messageList.slice(-200);
-      setMessages(limitedMessages);
+      setMessages(messageList);
       setPinnedMessages(pinnedList);
       
-      // Mark messages sebagai delivered dan read
-      const unreadMessages = limitedMessages.filter(m => !m.read && m.senderId !== user.uid);
-      const undeliveredMessages = limitedMessages.filter(m => !m.delivered && m.senderId !== user.uid);
-      
-      for (const msg of undeliveredMessages) {
-        const msgRef = doc(db, "chats", chatId, "messages", msg.id);
-        await updateDoc(msgRef, {
-          delivered: true,
-          deliveredAt: serverTimestamp()
-        });
-      }
-      
+      const unreadMessages = messageList.filter(m => !m.read && m.senderId !== user.uid);
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
         await updateDoc(msgRef, {
@@ -1085,34 +995,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [selectedChat, user, isAdmin, users]);
-
-  // Real-time typing listener
-  useEffect(() => {
-    if (!db || !user) return;
-    
-    const usersRef = collection(db, "users");
-    const q = query(usersRef);
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const typingMap = new Map<string, boolean>();
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.id && data.id !== user.uid) {
-          typingMap.set(data.id, data.typing || false);
-        }
-      });
-      
-      setUsers(prev => prev.map(u => {
-        if (typingMap.has(u.id)) {
-          return { ...u, typing: typingMap.get(u.id) };
-        }
-        return { ...u, typing: false };
-      }));
-    });
-    
-    return () => unsubscribe();
-  }, [user]);
+  }, [selectedChat, user]);
 
   // Handle login
   const handleLogin = async () => {
@@ -1161,8 +1044,6 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setAdminReplyMode(false);
-      messageIdsSet.current.clear();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1183,11 +1064,6 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setAdminReplyMode(false);
-      setAdminReplyMessage("");
-      setSelectedUserForReply(null);
-      setSelectedUserNameForReply("");
-      messageIdsSet.current.clear();
     }
   };
 
@@ -1212,11 +1088,12 @@ export default function HomePage(): React.JSX.Element {
       await updateDoc(userRef2, {
         typing: false
       });
-    }, 3000);
+    }, 2000);
     
     setTypingTimeout(newTimeout);
   };
 
+  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -1233,6 +1110,7 @@ export default function HomePage(): React.JSX.Element {
     setEditNote(false);
   };
 
+  // Handle save bio
   const handleSaveBio = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1261,6 +1139,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Handle save note
   const handleSaveNote = async () => {
     if (!profileUser || !db) return;
     try {
@@ -1289,58 +1168,37 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // ============ SEND MESSAGE ============
+  // Send message
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
-    if (isSending) return;
-    
-    const now = Date.now();
-    if (now - lastSendTime < SEND_COOLDOWN) {
-      return;
-    }
-    
-    setIsSending(true);
-    setLastSendTime(now);
 
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
       
-      const targetId = selectedChat.id;
-      const chatId = [user.uid, targetId].sort().join("_");
+      const chatId = [user.uid, selectedChat.id].sort().join("_");
       
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [user.uid, targetId],
+          participants: [user.uid, selectedChat.id],
           createdAt: serverTimestamp(),
-          isPinned: false,
-          messageCount: 0
+          isPinned: false
         });
       }
-      
-      const chatData = chatSnap.data();
-      const currentCount = chatData?.messageCount || 0;
       
       const messagesRef = collection(db, "chats", chatId, "messages");
       const msgData: any = {
         text: message.trim(),
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
-        receiverId: targetId,
+        receiverId: selectedChat.id,
         timestamp: serverTimestamp(),
         read: false,
-        readAt: null,
-        delivered: false,
-        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
-        isShared: false,
-        isAdminReply: false,
-        targetUserId: user.uid,
-        targetUserName: user.displayName || user.email || "User",
-        messageCount: currentCount + 1
+        isShared: false
       };
       
       if (replyTo) {
@@ -1350,13 +1208,6 @@ export default function HomePage(): React.JSX.Element {
       }
       
       await addDoc(messagesRef, msgData);
-      
-      await updateDoc(chatRef, {
-        messageCount: increment(1),
-        lastMessage: message.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSenderId: user.uid
-      });
 
       setMessage("");
       setReplyTo(null);
@@ -1375,117 +1226,12 @@ export default function HomePage(): React.JSX.Element {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-    } finally {
-      setTimeout(() => {
-        setIsSending(false);
-      }, 1000);
     }
   };
 
-  // ============ ADMIN REPLY SEBAGAI MENURU OFFICIAL ============
-  const handleAdminReplyToUser = async () => {
-    if (!isAdmin || !adminReplyMessage.trim() || !selectedUserForReply || !db) return;
-    if (isSending) return;
-    
-    const now = Date.now();
-    if (now - lastSendTime < SEND_COOLDOWN) {
-      return;
-    }
-    
-    setIsSending(true);
-    setLastSendTime(now);
-    
-    try {
-      // Kirim balasan sebagai Menuru Official
-      const chatId = [selectedUserForReply, OFFICIAL_ID].sort().join("_");
-      
-      const chatRef = doc(db, "chats", chatId);
-      const chatSnap = await getDoc(chatRef);
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [selectedUserForReply, OFFICIAL_ID],
-          createdAt: serverTimestamp(),
-          isPinned: false,
-          messageCount: 0
-        });
-      }
-      
-      const chatData = chatSnap.data();
-      const currentCount = chatData?.messageCount || 0;
-      
-      const messagesRef = collection(db, "chats", chatId, "messages");
-      await addDoc(messagesRef, {
-        text: adminReplyMessage.trim(),
-        senderId: OFFICIAL_ID,
-        senderName: "Menuru Official",
-        receiverId: selectedUserForReply,
-        timestamp: serverTimestamp(),
-        read: false,
-        readAt: null,
-        delivered: false,
-        deliveredAt: null,
-        isPinned: false,
-        pinnedAt: null,
-        isShared: false,
-        isAdminReply: true,
-        adminReplyTo: selectedUserForReply,
-        targetUserId: selectedUserForReply,
-        targetUserName: selectedUserNameForReply || "User",
-        replyTo: null,
-        replyToText: `Balasan untuk ${selectedUserNameForReply || "User"}`,
-        replyToSender: "Admin",
-        messageCount: currentCount + 1
-      });
-      
-      await updateDoc(chatRef, {
-        messageCount: increment(1),
-        lastMessage: adminReplyMessage.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSenderId: OFFICIAL_ID
-      });
-      
-      // Tambahkan ke chat admin agar terlihat
-      const adminChatId = [user.uid, OFFICIAL_ID].sort().join("_");
-      const adminMessagesRef = collection(db, "chats", adminChatId, "messages");
-      await addDoc(adminMessagesRef, {
-        text: `[Balasan untuk ${selectedUserNameForReply || "User"}] ${adminReplyMessage.trim()}`,
-        senderId: OFFICIAL_ID,
-        senderName: "Menuru Official",
-        receiverId: user.uid,
-        timestamp: serverTimestamp(),
-        read: true,
-        readAt: serverTimestamp(),
-        delivered: true,
-        deliveredAt: serverTimestamp(),
-        isPinned: false,
-        pinnedAt: null,
-        isShared: false,
-        isAdminReply: true,
-        adminReplyTo: selectedUserForReply,
-        targetUserId: selectedUserForReply,
-        targetUserName: selectedUserNameForReply || "User",
-        messageCount: 0
-      });
-      
-      setAdminReplyMessage("");
-      setAdminReplyMode(false);
-      setSelectedUserForReply(null);
-      setSelectedUserNameForReply("");
-      
-    } catch (error) {
-      console.error("Error sending admin reply:", error);
-    } finally {
-      setTimeout(() => {
-        setIsSending(false);
-      }, 1000);
-    }
-  };
-
+  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
-    if (isSending) return;
-    
-    setIsSending(true);
     
     try {
       const targetUser = users.find(u => u.id === selectedShareUser);
@@ -1499,8 +1245,7 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
           createdAt: serverTimestamp(),
-          isPinned: false,
-          messageCount: 0
+          isPinned: false
         });
       }
       
@@ -1512,18 +1257,11 @@ export default function HomePage(): React.JSX.Element {
         receiverId: targetUser.id,
         timestamp: serverTimestamp(),
         read: false,
-        readAt: null,
-        delivered: false,
-        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: true,
         sharedFrom: shareMessage.senderId,
-        sharedFromName: shareMessage.senderName,
-        isAdminReply: false,
-        targetUserId: targetUser.id,
-        targetUserName: targetUser.name,
-        messageCount: 0
+        sharedFromName: shareMessage.senderName
       });
       
       setShowShareModal(false);
@@ -1531,13 +1269,10 @@ export default function HomePage(): React.JSX.Element {
       setSelectedShareUser("");
     } catch (error) {
       console.error("Error sharing message:", error);
-    } finally {
-      setTimeout(() => {
-        setIsSending(false);
-      }, 1000);
     }
   };
 
+  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1552,11 +1287,9 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
-    if (isSending) return;
-    
-    setIsSending(true);
     
     try {
       const chatId = [user.uid, selectedChat.id].sort().join("_");
@@ -1569,31 +1302,21 @@ export default function HomePage(): React.JSX.Element {
         receiverId: selectedChat.id,
         timestamp: serverTimestamp(),
         read: false,
-        readAt: null,
-        delivered: false,
-        deliveredAt: null,
         isPinned: false,
         pinnedAt: null,
         isShared: false,
         replyTo: null,
         replyToText: null,
-        replyToSender: null,
-        isAdminReply: false,
-        targetUserId: user.uid,
-        targetUserName: user.displayName || user.email || "User",
-        messageCount: 0
+        replyToSender: null
       });
       
       setShowMessageMenu(null);
     } catch (error) {
       console.error("Error resending message:", error);
-    } finally {
-      setTimeout(() => {
-        setIsSending(false);
-      }, 1000);
     }
   };
 
+  // Pin/Unpin chat room
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1613,6 +1336,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Pin/Unpin user
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1632,6 +1356,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1650,12 +1375,11 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
           createdAt: serverTimestamp(),
-          isPinned: false,
-          messageCount: 0
+          isPinned: false
         });
-        setAddUserStatus(`Chat with ${targetUser.name} created!`);
+        setAddUserStatus(`Chat with ${targetUser.name} created`);
       } else {
-        setAddUserStatus(`Chat with ${targetUser.name} already exists.`);
+        setAddUserStatus(`Chat with ${targetUser.name} already exists`);
       }
       
       setSelectedNewUser("");
@@ -1663,10 +1387,11 @@ export default function HomePage(): React.JSX.Element {
       
     } catch (error) {
       console.error("Error adding user:", error);
-      setAddUserStatus("Failed to add user.");
+      setAddUserStatus("Failed to add user");
     }
   };
 
+  // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1707,6 +1432,7 @@ export default function HomePage(): React.JSX.Element {
   const getTypingStatus = (userId: string) => {
     const chatUser = users.find(u => u.id === userId);
     if (!chatUser) return false;
+    if (chatUser.id === user?.uid) return false;
     return chatUser.typing || false;
   };
 
@@ -1717,6 +1443,7 @@ export default function HomePage(): React.JSX.Element {
     u.id !== user?.uid && !chatRooms.some(room => room.participants.includes(u.id))
   );
 
+  // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -1727,6 +1454,7 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Animate chat button text
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isChatOpen && user && !isIncomingMessage) {
@@ -2003,9 +1731,6 @@ export default function HomePage(): React.JSX.Element {
               <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#000", marginBottom: "20px", fontFamily: FONT_FAMILY }}>
                 Login
               </h2>
-              <div style={{ fontSize: "12px", color: "#666", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                Login dengan akun admin untuk mengelola Menuru Official
-              </div>
               <input
                 type="email"
                 placeholder="Email"
@@ -2166,7 +1891,7 @@ export default function HomePage(): React.JSX.Element {
                 <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.isOfficial ? "(Official)" : ""}
+                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -2284,11 +2009,6 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
-                      {getTypingStatus(selectedChat.id) && (
-                        <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY, animation: "blink 1s infinite" }}>
-                          typing...
-                        </span>
-                      )}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -2347,26 +2067,1111 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Update Detail Page */}
+              {/* Content - Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
-                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Update Detail</div>
+                <div
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "28px 32px",
+                    backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedUpdateId(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#666",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "13px",
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: "16px",
+                        padding: "4px 0",
+                        transition: "color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
+                      onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
+                    >
+                      <BackIcon />
+                      <span>Back</span>
+                    </motion.button>
+
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 14px",
+                        backgroundColor: selectedUpdate.status === "live" ? "#3b82f6" : (selectedUpdate.status === "coming" ? "#ef4444" : "#000000"),
+                        borderRadius: "20px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: "#ffffff",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {selectedUpdate.status === "live" ? "Live" : (selectedUpdate.status === "coming" ? "Coming Soon" : "Done")}
+                      </span>
+                    </div>
+
+                    <h2
+                      style={{
+                        fontSize: "22px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        margin: "0 0 8px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {selectedUpdate.title}
+                    </h2>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          color: "#999",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {selectedUpdate.date}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          color: "#999",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        • {selectedUpdate.publishedBy}
+                      </span>
+                    </div>
+
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        color: "#000000",
+                        lineHeight: 1.8,
+                        margin: "0 0 16px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {selectedUpdate.description}
+                    </p>
+
+                    <div
+                      style={{
+                        width: "100%",
+                        marginBottom: "16px",
+                        padding: "16px 20px",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "10px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#000000",
+                          marginBottom: "8px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Update Detail
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "#333",
+                          lineHeight: 1.8,
+                          margin: 0,
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {selectedUpdate.detail}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "#666",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Link:
+                      </span>
+                      <a
+                        href={selectedUpdate.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: "14px",
+                          color: "#3b82f6",
+                          textDecoration: "underline",
+                          fontFamily: FONT_FAMILY,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {selectedUpdate.link}
+                      </a>
+                    </div>
+
+                    <div
+                      style={{
+                        width: "100%",
+                        paddingTop: "14px",
+                        borderTop: "1px solid #f0f0f0",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#999",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Chat with Menuru v1.0
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#999",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        © 2026 Menuru
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ) : showUpdate ? (
-                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Update List</div>
+                // Update List Page
+                <div
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "28px 32px",
+                    backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  <div style={{ marginBottom: "28px" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 14px",
+                        backgroundColor: "#000000",
+                        borderRadius: "20px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: "#ffffff",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Update System
+                      </span>
+                    </div>
+                    <h2
+                      style={{
+                        fontSize: "22px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        margin: "0 0 4px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Update and development history
+                    </p>
+                  </div>
+
+                  <div style={{ position: "relative", paddingLeft: "28px" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "6px",
+                        top: "6px",
+                        bottom: "6px",
+                        width: "2px",
+                        borderLeft: "2px dotted #d0d0d0",
+                        zIndex: 0,
+                      }}
+                    />
+
+                    {updates.map((item, index) => {
+                      const isLive = item.status === "live";
+                      const isComing = item.status === "coming";
+                      const isDone = item.status === "done";
+                      
+                      const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
+                      const isActive = isLive || isComing;
+                      
+                      return (
+                        <motion.div
+                          key={item.id}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          style={{
+                            position: "relative",
+                            paddingBottom: index === updates.length - 1 ? "0" : "28px",
+                            paddingLeft: "24px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setSelectedUpdateId(item.id)}
+                        >
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "-22px",
+                              top: "4px",
+                              width: "14px",
+                              height: "14px",
+                              zIndex: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {isActive && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  width: "35px",
+                                  height: "35px",
+                                  borderRadius: "50%",
+                                  backgroundColor: dotColor,
+                                  opacity: 0.20,
+                                  animation: "awwwardsPulse 2s ease-in-out infinite",
+                                  pointerEvents: "none",
+                                }}
+                              />
+                            )}
+                            
+                            <div
+                              style={{
+                                width: "10px",
+                                height: "10px",
+                                borderRadius: "50%",
+                                backgroundColor: dotColor,
+                                position: "relative",
+                                zIndex: 3,
+                              }}
+                            />
+                          </div>
+                          
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "-6px",
+                              top: "18px",
+                              width: "20px",
+                              height: "1px",
+                              borderTop: "2px dotted #d0d0d0",
+                              zIndex: 0,
+                            }}
+                          />
+                          
+                          <div style={{ padding: "0" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "12px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "18px",
+                                  fontWeight: 700,
+                                  color: "#000000",
+                                  fontFamily: FONT_FAMILY,
+                                  letterSpacing: "-0.01em",
+                                }}
+                              >
+                                {item.title}
+                              </div>
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{
+                                  flexShrink: 0,
+                                  color: "#000000",
+                                }}
+                              >
+                                <path
+                                  d="M9 6L15 12L9 18"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "20px",
+                      paddingTop: "14px",
+                      borderTop: "1px solid #f0f0f0",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru v1.0
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      © 2026 Menuru
+                    </span>
+                  </div>
                 </div>
               ) : showPrivacyPolicy ? (
-                <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Privacy Policy</div>
+                // Privacy Policy Page
+                <div
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "28px 32px",
+                    backgroundColor: "#ffffff",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  <div style={{ marginBottom: "24px" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 14px",
+                        backgroundColor: "#000000",
+                        borderRadius: "20px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: "#ffffff",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Privacy Policy
+                      </span>
+                    </div>
+                    <h2
+                      style={{
+                        fontSize: "22px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        margin: "0 0 4px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Last updated: 9 July 2026
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      1. Information We Collect
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru collects the following information to provide optimal chat service:
+                    </p>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <li>Name and email from your Google account</li>
+                      <li>Profile photo from your Google account</li>
+                      <li>Messages and chat history you send</li>
+                      <li>Online status and chat activity</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      2. How We Use Information
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      The information we collect is used for:
+                    </p>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <li>Providing and maintaining chat service</li>
+                      <li>Sending messages between users</li>
+                      <li>Displaying user online status</li>
+                      <li>Storing chat history for future access</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      3. Data Storage
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      All chat data is stored in Firebase Cloud Firestore database. Your data is secure and can only be accessed by you and the users you chat with.
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      4. Security
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      We use Firebase Authentication for account security and Firestore Security Rules to protect your chat data. All communication is encrypted via HTTPS.
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      5. Your Rights
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 6px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      You have the right to:
+                    </p>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.9,
+                        paddingLeft: "20px",
+                        margin: "0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <li>Access your personal data</li>
+                      <li>Delete your account and chat data</li>
+                      <li>Disable notifications</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      6. Policy Changes
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: 0,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      We may update this privacy policy from time to time. Changes will be notified through the chat application.
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#000000",
+                        marginBottom: "6px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      7. Contact
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        lineHeight: 1.7,
+                        margin: "0 0 4px 0",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      If you have questions about this privacy policy, please contact us at:
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#000000",
+                        marginTop: "4px",
+                        fontWeight: 500,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      support@menuru.com
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      paddingTop: "14px",
+                      borderTop: "1px solid #f0f0f0",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Chat with Menuru v1.0
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      © 2026 Menuru
+                    </span>
+                  </div>
                 </div>
               ) : showProfile && profileUser ? (
+                // Profile View
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Profile</div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleCloseProfile}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#666",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "13px",
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: "16px",
+                        padding: "4px 0",
+                        transition: "color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
+                      onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
+                    >
+                      <BackIcon />
+                      <span>Back</span>
+                    </motion.button>
+
+                    <div style={{ width: "100%", marginBottom: "0px" }}>
+                      <div style={{ 
+                        backgroundColor: "#f5f5f5", 
+                        borderRadius: "8px",
+                        padding: "8px 14px",
+                        position: "relative",
+                        marginBottom: "8px",
+                        maxWidth: "280px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ 
+                            fontSize: "10px", 
+                            color: "#666", 
+                            fontWeight: 500, 
+                            letterSpacing: "0.05em", 
+                            textTransform: "uppercase",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            <span style={{ 
+                              display: "inline-block",
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#c5e800",
+                              marginRight: "4px",
+                            }} />
+                            Note
+                          </span>
+                          {profileUser.id === user?.uid && (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditNote(!editNote)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#666",
+                                fontSize: "10px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              <EditIcon />
+                              {profileUser.note ? "Edit" : "Add"}
+                            </motion.button>
+                          )}
+                        </div>
+
+                        {editNote && profileUser.id === user?.uid ? (
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+                            <input
+                              type="text"
+                              value={noteInput}
+                              onChange={(e) => setNoteInput(e.target.value)}
+                              placeholder="No note yet"
+                              style={{
+                                flex: 1,
+                                padding: "6px 10px",
+                                backgroundColor: "#fff",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#000",
+                                fontSize: "12px",
+                                outline: "none",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveNote();
+                                }
+                              }}
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleSaveNote}
+                              style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#c5e800",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "#000",
+                                fontSize: "11px",
+                                fontWeight: 500,
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Save
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditNote(false)}
+                              style={{
+                                padding: "4px 10px",
+                                backgroundColor: "transparent",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#666",
+                                fontSize: "11px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                        ) : (
+                          <div style={{ 
+                            padding: "4px 0",
+                            color: profileUser.note ? "#000" : "#999",
+                            fontSize: "13px",
+                            lineHeight: 1.4,
+                            minHeight: "24px",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {profileUser.note || "No note yet"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        style={{
+                          width: "64px",
+                          height: "64px",
+                          borderRadius: "8px",
+                          backgroundColor: "#f0f0f0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "28px",
+                          overflow: "hidden",
+                          border: "1px solid #e8e8e8",
+                          flexShrink: 0,
+                          position: "relative",
+                        }}
+                      >
+                        {profileUser.photoURL ? (
+                          <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                        )}
+                        {profileUser.isOfficial && (
+                          <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                            <InstagramVerifiedBadge size={16} />
+                          </div>
+                        )}
+                      </motion.div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                            {profileUser.name}
+                          </span>
+                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
+                          {profileUser.isAdmin && <span style={{ fontSize: "12px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "4px" }}>Admin</span>}
+                        </div>
+                        <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
+                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ width: "100%", marginBottom: "16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
+                          Bio
+                        </span>
+                        {profileUser.id === user?.uid && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setEditBio(!editBio)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#999",
+                              fontSize: "10px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            <EditIcon />
+                            {profileUser.bio ? "Edit" : "Add"}
+                          </motion.button>
+                        )}
+                      </div>
+                      {editBio && profileUser.id === user?.uid ? (
+                        <div>
+                          <textarea
+                            value={bioInput}
+                            onChange={(e) => setBioInput(e.target.value)}
+                            placeholder="No bio yet"
+                            rows={2}
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              backgroundColor: "#f5f5f5",
+                              border: "1px solid #e8e8e8",
+                              borderRadius: "6px",
+                              color: "#000",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              resize: "vertical",
+                            }}
+                          />
+                          <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleSaveBio}
+                              style={{
+                                padding: "4px 14px",
+                                backgroundColor: "#000",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "#fff",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Save
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditBio(false)}
+                              style={{
+                                padding: "4px 14px",
+                                backgroundColor: "transparent",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#999",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ 
+                          padding: "8px 12px", 
+                          backgroundColor: "#f8f8f8", 
+                          borderRadius: "6px",
+                          fontSize: "13px",
+                          color: profileUser.bio ? "#000" : "#ccc",
+                          lineHeight: 1.5,
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {profileUser.bio || "No bio yet"}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          handleCloseProfile();
+                          setSelectedChat(profileUser);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: "10px",
+                          backgroundColor: "#000",
+                          border: "none",
+                          borderRadius: "8px",
+                          color: "#fff",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          transition: "opacity 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                      >
+                        Send Message
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
+                        style={{
+                          padding: "10px 16px",
+                          backgroundColor: "transparent",
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "8px",
+                          color: profileUser.isPinned ? "#000" : "#999",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontFamily: FONT_FAMILY,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <PinIcon filled={profileUser.isPinned || false} />
+                      </motion.button>
+                    </div>
+                  </div>
                 </div>
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
+                  {/* Announcement */}
                   <div
                     style={{
                       display: "flex",
@@ -2472,7 +3277,7 @@ export default function HomePage(): React.JSX.Element {
                           <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.isOfficial ? "(Official)" : ""}
+                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -2600,8 +3405,8 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isAdmin && " (Admin)"}
-                                      {u.isOfficial && " (Official)"}
+                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                      {u.isAdmin && <span style={{ fontSize: "9px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -2716,11 +3521,11 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && " (Official)"}
+                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                        {otherUser.isAdmin && <span style={{ fontSize: "9px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
-                                        {room.hasAdminReply && " [Admin replied]"}
                                       </div>
                                     </div>
                                     <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
@@ -2836,6 +3641,11 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
+                              {otherUser.isOfficial && (
+                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                                  <InstagramVerifiedBadge size={12} />
+                                </div>
+                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -2847,16 +3657,16 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   {otherUser.name}
-                                  {otherUser.isOfficial && " (Official)"}
                                 </span>
+                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
+                                {otherUser.isAdmin && <span style={{ fontSize: "10px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {room.lastMessage ? (
                                   <>
-                                    {isLastMessageFromMe ? "You: " : ""}
+                                    {isLastMessageFromMe && "Messages: "}
                                     {room.lastMessage}
-                                    {room.hasAdminReply && " [Admin replied]"}
                                   </>
                                 ) : (
                                   "No messages"
@@ -2918,7 +3728,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // ============ CHAT VIEW ============
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -2937,9 +3747,6 @@ export default function HomePage(): React.JSX.Element {
                       onClick={() => {
                         setSelectedChat(null);
                         setReplyTo(null);
-                        setAdminReplyMode(false);
-                        setSelectedUserForReply(null);
-                        setSelectedUserNameForReply("");
                       }}
                       style={{
                         background: "none",
@@ -2990,6 +3797,11 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
+                      {selectedChat.isOfficial && (
+                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                          <InstagramVerifiedBadge size={12} />
+                        </div>
+                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -2998,19 +3810,15 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {selectedChat.name}
-                          {selectedChat.isOfficial && " (Official)"}
                         </span>
+                        {selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
+                        {selectedChat.isAdmin && <span style={{ fontSize: "10px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <OnlineIndicator 
                           online={getOnlineStatus(selectedChat.id)} 
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
-                        {selectedChat.id === OFFICIAL_ID && isAdmin && (
-                          <span style={{ fontSize: "9px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Admin - Balas sebagai Official
-                          </span>
-                        )}
                         {getOnlineStatus(selectedChat.id) ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
@@ -3041,28 +3849,6 @@ export default function HomePage(): React.JSX.Element {
                       <PinIcon filled={selectedChat.isPinned || false} />
                     </motion.button>
                   </div>
-
-                  {/* Admin Reply Mode Indicator */}
-                  {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode && (
-                    <div
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: "rgba(74, 222, 128, 0.1)",
-                        borderBottom: "1px solid rgba(74, 222, 128, 0.2)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <span style={{ fontSize: "12px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                        Balas sebagai Menuru Official ke {selectedUserNameForReply || "User"}
-                      </span>
-                      <span style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                        Balasan akan langsung muncul dari akun Official
-                      </span>
-                    </div>
-                  )}
 
                   {/* Pinned Messages */}
                   {pinnedMessages.length > 0 && (
@@ -3120,7 +3906,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <div style={{ flex: 1 }}>
                                     <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                      {isMine ? "You: " : `${msg.targetUserName || msg.senderName}: `}
+                                      {isMine ? "Messages: " : `${msg.senderName}: `}
                                     </span>
                                     <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
                                       {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
@@ -3222,15 +4008,6 @@ export default function HomePage(): React.JSX.Element {
                         
                         const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
                         const isBroadcastMessage = msg.senderId === "official_menuru" && msg.text.includes("Privacy Policy");
-                        const isAdminReply = msg.isAdminReply || false;
-                        
-                        // Untuk admin: tampilkan nama pengirim asli
-                        const displaySenderName = isAdmin && selectedChat?.id === OFFICIAL_ID && !isMine && !isAdminReply
-                          ? (msg.targetUserName || msg.senderName)
-                          : null;
-                        
-                        const isUserMessage = msg.senderId !== OFFICIAL_ID && msg.senderId !== user?.uid;
-                        const msgNumber = msg.messageCount || (idx + 1);
                         
                         return (
                           <React.Fragment key={idx}>
@@ -3258,8 +4035,8 @@ export default function HomePage(): React.JSX.Element {
                                 maxWidth: "80%",
                                 padding: "10px 14px",
                                 borderRadius: "12px",
-                                backgroundColor: isAdminReply ? "#4ade80" : (isMine ? "#c5e800" : "#f0f0f0"),
-                                color: isAdminReply ? "#000" : (isMine ? "#000000" : "#000000"),
+                                backgroundColor: isMine ? "#c5e800" : "#f0f0f0",
+                                color: "#000000",
                                 fontSize: "14px",
                                 lineHeight: 1.5,
                                 position: "relative",
@@ -3268,20 +4045,6 @@ export default function HomePage(): React.JSX.Element {
                                 fontFamily: FONT_FAMILY,
                               }}
                             >
-                              {displaySenderName && isUserMessage && (
-                                <div
-                                  style={{
-                                    fontSize: "11px",
-                                    color: "#666",
-                                    fontWeight: 600,
-                                    marginBottom: "4px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  {displaySenderName}
-                                </div>
-                              )}
-                              
                               {msg.isShared && msg.sharedFromName && (
                                 <div
                                   style={{
@@ -3316,20 +4079,6 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                               )}
                               
-                              {isAdminReply && !isMine && (
-                                <div
-                                  style={{
-                                    fontSize: "10px",
-                                    color: "#000",
-                                    fontWeight: 500,
-                                    marginBottom: "4px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  Admin
-                                </div>
-                              )}
-                              
                               {isBroadcastMessage ? (
                                 <span style={{ fontFamily: FONT_FAMILY }}>
                                   Don't forget to read{' '}
@@ -3360,18 +4109,7 @@ export default function HomePage(): React.JSX.Element {
                                   </span>
                                 </span>
                               ) : (
-                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                  {!isMine && !isAdminReply && (
-                                    <span style={{ 
-                                      fontSize: "9px", 
-                                      color: "rgba(0,0,0,0.3)", 
-                                      fontFamily: FONT_FAMILY,
-                                    }}>
-                                      #{msgNumber}
-                                    </span>
-                                  )}
-                                </div>
+                                <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
                               )}
                               
                               <div
@@ -3536,37 +4274,6 @@ export default function HomePage(): React.JSX.Element {
                                         <PinIcon filled={msg.isPinned || false} />
                                         <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                       </motion.button>
-                                      {/* Tombol Balas sebagai Official - khusus admin */}
-                                      {isAdmin && selectedChat?.id === OFFICIAL_ID && !isAdminReply && !isMine && isUserMessage && (
-                                        <motion.button
-                                          whileHover={{ backgroundColor: "#f5f5f5" }}
-                                          onClick={() => {
-                                            setAdminReplyMode(true);
-                                            setSelectedUserForReply(msg.targetUserId || msg.senderId);
-                                            setSelectedUserNameForReply(msg.targetUserName || msg.senderName);
-                                            setAdminReplyMessage(`Balasan untuk ${msg.targetUserName || msg.senderName}: ${msg.text}`);
-                                            setShowMessageMenu(null);
-                                          }}
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px",
-                                            padding: "6px 12px",
-                                            width: "100%",
-                                            background: "none",
-                                            border: "none",
-                                            color: "#4ade80",
-                                            fontSize: "12px",
-                                            cursor: "pointer",
-                                            borderRadius: "6px",
-                                            transition: "all .2s ease",
-                                            fontFamily: FONT_FAMILY,
-                                          }}
-                                        >
-                                          <ReplyIcon />
-                                          <span>Balas sebagai Official</span>
-                                        </motion.button>
-                                      )}
                                     </motion.div>
                                   )}
                                 </AnimatePresence>
@@ -3605,190 +4312,73 @@ export default function HomePage(): React.JSX.Element {
                       padding: "10px 14px 14px",
                       borderTop: "1px solid rgba(0,0,0,0.04)",
                       display: "flex",
-                      flexDirection: "column",
-                      gap: "4px",
+                      gap: "8px",
                       backgroundColor: "#ffffff",
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {/* Typing indicator */}
-                    {selectedChat && (getTypingStatus(selectedChat.id)) && (
-                      <div style={{
-                        padding: "2px 4px",
-                        fontSize: "11px",
-                        color: "#666",
+                    <input
+                      type="text"
+                      placeholder={replyTo ? "Type a reply..." : "Type a message..."}
+                      value={message}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "10px 16px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        outline: "none",
                         fontFamily: FONT_FAMILY,
-                        fontStyle: "italic",
+                        transition: "all .2s ease",
+                        backgroundColor: "#f5f5f5",
+                        color: "#000",
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = "#c5e800";
+                        e.currentTarget.style.backgroundColor = "#ffffff";
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = "#e8e8e8";
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSendMessage}
+                      style={{
+                        backgroundColor: "#c5e800",
+                        border: "none",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                        color: "#000",
+                        cursor: "pointer",
+                        transition: "all .2s ease",
+                        whiteSpace: "nowrap",
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
-                      }}>
-                        <span style={{ display: "flex", gap: "3px" }}>
-                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0s" }}>•</span>
-                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.2s" }}>•</span>
-                          <span style={{ animation: "typingDot 1.4s infinite", animationDelay: "0.4s" }}>•</span>
-                        </span>
-                        <span>{selectedChat.name} typing...</span>
-                      </div>
-                    )}
-
-                    {isAdmin && selectedChat?.id === OFFICIAL_ID && adminReplyMode ? (
-                      // Admin Reply Input - Balas sebagai Official
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
-                          <div style={{ fontSize: "11px", color: "#4ade80", fontFamily: FONT_FAMILY }}>
-                            Balas sebagai Menuru Official ke {selectedUserNameForReply}
-                          </div>
-                          <input
-                            type="text"
-                            placeholder="Ketik balasan admin..."
-                            value={adminReplyMessage}
-                            onChange={(e) => setAdminReplyMessage(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleAdminReplyToUser();
-                              }
-                            }}
-                            style={{
-                              width: "100%",
-                              padding: "10px 16px",
-                              border: "1px solid #4ade80",
-                              borderRadius: "8px",
-                              fontSize: "14px",
-                              outline: "none",
-                              fontFamily: FONT_FAMILY,
-                              transition: "all .2s ease",
-                              backgroundColor: "#f5f5f5",
-                              color: "#000",
-                            }}
-                            onFocus={(e) => {
-                              e.currentTarget.style.borderColor = "#4ade80";
-                              e.currentTarget.style.backgroundColor = "#ffffff";
-                            }}
-                            onBlur={(e) => {
-                              e.currentTarget.style.borderColor = "#4ade80";
-                              e.currentTarget.style.backgroundColor = "#f5f5f5";
-                            }}
-                          />
-                        </div>
-                        <div style={{ display: "flex", gap: "6px", alignItems: "flex-end" }}>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleAdminReplyToUser}
-                            disabled={!adminReplyMessage.trim() || !selectedUserForReply}
-                            style={{
-                              backgroundColor: adminReplyMessage.trim() && selectedUserForReply ? "#4ade80" : "#ccc",
-                              border: "none",
-                              padding: "10px 20px",
-                              borderRadius: "8px",
-                              fontSize: "14px",
-                              fontWeight: 500,
-                              color: adminReplyMessage.trim() && selectedUserForReply ? "#000" : "#666",
-                              cursor: adminReplyMessage.trim() && selectedUserForReply ? "pointer" : "not-allowed",
-                              transition: "all .2s ease",
-                              whiteSpace: "nowrap",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              fontFamily: FONT_FAMILY,
-                            }}
-                          >
-                            <span>Kirim</span>
-                            <SendIcon />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                              setAdminReplyMode(false);
-                              setAdminReplyMessage("");
-                              setSelectedUserForReply(null);
-                              setSelectedUserNameForReply("");
-                            }}
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "1px solid #ddd",
-                              padding: "10px 14px",
-                              borderRadius: "8px",
-                              fontSize: "13px",
-                              color: "#666",
-                              cursor: "pointer",
-                              fontFamily: FONT_FAMILY,
-                            }}
-                          >
-                            Batal
-                          </motion.button>
-                        </div>
-                      </div>
-                    ) : (
-                      // Normal Chat Input
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <input
-                          type="text"
-                          placeholder={replyTo ? "Type a reply..." : "Type a message..."}
-                          value={message}
-                          onChange={handleTyping}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSendMessage();
-                            }
-                          }}
-                          style={{
-                            flex: 1,
-                            padding: "10px 16px",
-                            border: "1px solid #e8e8e8",
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                            outline: "none",
-                            fontFamily: FONT_FAMILY,
-                            transition: "all .2s ease",
-                            backgroundColor: "#f5f5f5",
-                            color: "#000",
-                          }}
-                          onFocus={(e) => {
-                            e.currentTarget.style.borderColor = "#c5e800";
-                            e.currentTarget.style.backgroundColor = "#ffffff";
-                          }}
-                          onBlur={(e) => {
-                            e.currentTarget.style.borderColor = "#e8e8e8";
-                            e.currentTarget.style.backgroundColor = "#f5f5f5";
-                          }}
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleSendMessage}
-                          style={{
-                            backgroundColor: "#c5e800",
-                            border: "none",
-                            padding: "10px 20px",
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            color: "#000",
-                            cursor: "pointer",
-                            transition: "all .2s ease",
-                            whiteSpace: "nowrap",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontFamily: FONT_FAMILY,
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "#b0d000";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "#c5e800";
-                          }}
-                        >
-                          <span>Send</span>
-                          <SendIcon />
-                        </motion.button>
-                      </div>
-                    )}
+                        fontFamily: FONT_FAMILY,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#b0d000";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#c5e800";
+                      }}
+                    >
+                      <span>Send</span>
+                      <SendIcon />
+                    </motion.button>
                   </div>
                 </div>
               )}
@@ -3872,17 +4462,18 @@ export default function HomePage(): React.JSX.Element {
 
       <style jsx>{`
         @keyframes awwwardsPulse {
-          0% { transform: scale(0.7); opacity: 0.25; }
-          50% { transform: scale(1.6); opacity: 0.05; }
-          100% { transform: scale(0.7); opacity: 0.25; }
-        }
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-        @keyframes typingDot {
-          0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-          30% { opacity: 1; transform: translateY(-4px); }
+          0% {
+            transform: scale(0.7);
+            opacity: 0.25;
+          }
+          50% {
+            transform: scale(1.6);
+            opacity: 0.05;
+          }
+          100% {
+            transform: scale(0.7);
+            opacity: 0.25;
+          }
         }
       `}</style>
     </div>
