@@ -438,6 +438,7 @@ export default function HomePage(): React.JSX.Element {
   const [officialReplyText, setOfficialReplyText] = useState("");
   const [officialTypingUsers, setOfficialTypingUsers] = useState<{ [key: string]: boolean }>({});
   const [officialReplyTo, setOfficialReplyTo] = useState<Message | null>(null);
+  const [isOfficialTyping, setIsOfficialTyping] = useState(false);
 
   // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -758,7 +759,7 @@ export default function HomePage(): React.JSX.Element {
       const typingMap: { [key: string]: boolean } = {};
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.typing && data.id !== user?.uid && data.id !== "official_menuru") {
+        if (data.typing && data.id !== user?.uid) {
           typingMap[data.id] = true;
         }
       });
@@ -1068,6 +1069,7 @@ export default function HomePage(): React.JSX.Element {
   const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setOfficialReplyText(value);
+    setIsOfficialTyping(value.length > 0);
     
     if (!user || !db) return;
     
@@ -1085,6 +1087,7 @@ export default function HomePage(): React.JSX.Element {
       await updateDoc(userRef2, {
         typing: false
       });
+      setIsOfficialTyping(false);
     }, 2000);
     
     setTypingTimeout(newTimeout);
@@ -1226,7 +1229,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to official chat
+  // Send message to official chat (from user)
   const handleSendOfficialMessage = async () => {
     if (!user || !message.trim() || !db) return;
 
@@ -1272,10 +1275,11 @@ export default function HomePage(): React.JSX.Element {
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
+      setIsOfficialTyping(false);
       
       const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
       
-      // Get the last message from a user to reply to (without dropdown)
+      // Get the last message from a user to reply to
       const lastUserMessage = officialMessages
         .filter(m => m.senderId !== user.uid && m.senderId !== "official_menuru")
         .pop();
@@ -4099,16 +4103,21 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {/* Typing indicator in body */}
+                            {/* Typing indicator in body - left bottom */}
                             {typingUsersList.length > 0 && (
                               <div
                                 style={{
-                                  textAlign: "center",
+                                  position: "sticky",
+                                  bottom: 0,
+                                  textAlign: "left",
                                   fontSize: "12px",
                                   color: "#999",
-                                  padding: "4px 0",
+                                  padding: "8px 0 4px 0",
                                   fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
+                                  backgroundColor: "#ffffff",
+                                  borderTop: "1px solid rgba(0,0,0,0.04)",
+                                  marginTop: "auto",
                                 }}
                               >
                                 {typingUsersList.map(u => u.name).join(", ")} typing...
@@ -4492,16 +4501,21 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            {/* Typing indicator in body */}
+                            {/* Typing indicator in body - left bottom */}
                             {typingUsersList.length > 0 && (
                               <div
                                 style={{
-                                  textAlign: "center",
+                                  position: "sticky",
+                                  bottom: 0,
+                                  textAlign: "left",
                                   fontSize: "12px",
                                   color: "#999",
-                                  padding: "4px 0",
+                                  padding: "8px 0 4px 0",
                                   fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
+                                  backgroundColor: "#ffffff",
+                                  borderTop: "1px solid rgba(0,0,0,0.04)",
+                                  marginTop: "auto",
                                 }}
                               >
                                 {typingUsersList.map(u => u.name).join(", ")} typing...
