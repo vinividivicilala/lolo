@@ -121,7 +121,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons - Pin Icon yang benar
+// SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -1409,7 +1409,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat - FIX: cek duplikat
+  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1420,7 +1420,6 @@ export default function HomePage(): React.JSX.Element {
         return;
       }
       
-      // Cek apakah chat sudah ada
       const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -1493,8 +1492,6 @@ export default function HomePage(): React.JSX.Element {
   const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
-  
-  // FIX: Available users should exclude users already in chat
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
     !chatRooms.some(room => room.participants.includes(u.id)) &&
@@ -1709,7 +1706,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {isAdmin && " (Admin)"}
                 {isAdmin && <InstagramVerifiedBadge size={14} />}
               </span>
               <OnlineIndicator online={true} />
@@ -1969,7 +1965,9 @@ export default function HomePage(): React.JSX.Element {
                 <option value="">Select user...</option>
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    {u.name}
+                    {u.isAdmin && <InstagramVerifiedBadge size={14} />}
+                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -2087,11 +2085,6 @@ export default function HomePage(): React.JSX.Element {
                         online={getOnlineStatus(selectedChat.id)} 
                         lastSeen={getLastSeen(selectedChat.id)}
                       />
-                    </>
-                  )}
-                  {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && isOfficialChatSelected && (
-                    <>
-                      <InstagramVerifiedBadge size={14} />
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3091,7 +3084,6 @@ export default function HomePage(): React.JSX.Element {
                             {profileUser.name}
                           </span>
                           {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
-                          {profileUser.isAdmin && <span style={{ fontSize: "12px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "4px" }}>Admin</span>}
                           {profileUser.isAdmin && <InstagramVerifiedBadge size={14} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
@@ -3361,7 +3353,7 @@ export default function HomePage(): React.JSX.Element {
                           <option value="">Select user...</option>
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
-                              {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                              {u.name}
                               {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
@@ -3490,7 +3482,6 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isOfficial && <InstagramVerifiedBadge size={12} />}
                                       {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
@@ -3606,7 +3597,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
                                         {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
@@ -3678,7 +3668,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
-                        // Show official chat room
+                        // Show official chat room - no icon, just text
                         if (room.id === OFFICIAL_CHAT_ID) {
                           return (
                             <motion.div
@@ -3713,18 +3703,13 @@ export default function HomePage(): React.JSX.Element {
                                   fontSize: "16px",
                                   flexShrink: 0,
                                   overflow: "hidden",
-                                  position: "relative",
                                 }}
                               >
-                                <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>🏢</span>
-                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                                  <InstagramVerifiedBadge size={12} />
-                                </div>
+                                <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>💬</span>
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
-                                  <InstagramVerifiedBadge size={12} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3809,11 +3794,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {otherUser.isOfficial && (
-                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                                  <InstagramVerifiedBadge size={12} />
-                                </div>
-                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3826,7 +3806,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
                                 {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
@@ -3959,7 +3938,7 @@ export default function HomePage(): React.JSX.Element {
                       onClick={() => handleOpenProfile(selectedChat)}
                     >
                       {isOfficialChatSelected ? (
-                        <span style={{ fontFamily: FONT_FAMILY }}>🏢</span>
+                        <span style={{ fontFamily: FONT_FAMILY }}>💬</span>
                       ) : selectedChat.photoURL ? (
                         <img 
                           src={selectedChat.photoURL} 
@@ -3968,16 +3947,6 @@ export default function HomePage(): React.JSX.Element {
                         />
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                      )}
-                      {isOfficialChatSelected && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={12} />
-                        </div>
-                      )}
-                      {!isOfficialChatSelected && selectedChat.isOfficial && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={12} />
-                        </div>
                       )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -3988,9 +3957,8 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {isOfficialChatSelected ? (
@@ -4055,7 +4023,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body - Multiple users */}
+                        {/* Typing indicator in body */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4128,7 +4096,6 @@ export default function HomePage(): React.JSX.Element {
                                     fontSize: "14px",
                                     lineHeight: 1.5,
                                     position: "relative",
-                                    // Hilangkan border kuning untuk pin, hanya gunakan shadow
                                     boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
                                     fontFamily: FONT_FAMILY,
                                   }}
@@ -4143,6 +4110,7 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
+                                      {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4376,7 +4344,7 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator above input - Multiple users */}
+                        {/* Typing indicator above input */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
