@@ -113,6 +113,7 @@ interface ChatRoom {
   unreadCount: number;
   isPinned?: boolean;
   typingUsers?: string[];
+  isBlocked?: boolean;
 }
 
 interface UpdateItem {
@@ -766,6 +767,13 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
+  // Fungsi cek block dengan aman
+  const isUserBlocked = (userId: string) => {
+    if (!user || !userId) return false;
+    const currentUserData = users.find(u => u.id === user.uid);
+    return (currentUserData?.blocked || []).includes(userId);
+  };
+
   // Auth Listener
   useEffect(() => {
     if (!auth) return;
@@ -1144,20 +1152,11 @@ export default function HomePage(): React.JSX.Element {
       let totalUnreadCount = 0;
       const newMessages: string[] = [];
       
-      // Get current user's blocked list
-      const currentUserData = users.find(u => u.id === user.uid);
-      const blockedUsers = currentUserData?.blocked || [];
-      
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const otherId = data.participants.find((id: string) => id !== user.uid);
           const otherUser = users.find(u => u.id === otherId);
-          
-          // Skip if other user is blocked by current user
-          if (otherId && blockedUsers.includes(otherId)) {
-            continue;
-          }
           
           if (otherUser) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
@@ -1193,15 +1192,18 @@ export default function HomePage(): React.JSX.Element {
               }
             }
             
+            const isBlocked = isUserBlocked(otherId);
+            
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
-              lastMessage,
-              lastMessageTime,
-              lastMessageSenderId,
-              unreadCount,
+              lastMessage: isBlocked ? "User has been blocked" : lastMessage,
+              lastMessageTime: lastMessageTime,
+              lastMessageSenderId: lastMessageSenderId,
+              unreadCount: isBlocked ? 0 : unreadCount,
               isPinned: data.isPinned || false,
-              typingUsers: []
+              typingUsers: [],
+              isBlocked: isBlocked
             });
           }
         }
@@ -1227,7 +1229,8 @@ export default function HomePage(): React.JSX.Element {
           lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
           unreadCount: officialUnreadCount,
           isPinned: false,
-          typingUsers: []
+          typingUsers: [],
+          isBlocked: false
         });
       }
       
@@ -1298,9 +1301,8 @@ export default function HomePage(): React.JSX.Element {
     }
 
     // Check if selected chat user is blocked
-    const currentUserData = users.find(u => u.id === user.uid);
-    const blockedUsers = currentUserData?.blocked || [];
-    if (selectedChat.id && blockedUsers.includes(selectedChat.id)) {
+    if (isUserBlocked(selectedChat.id)) {
+      setMessages([]);
       return;
     }
 
@@ -1431,6 +1433,9 @@ export default function HomePage(): React.JSX.Element {
     
     if (!selectedChat || !user || !db) return;
     
+    // Don't send typing if blocked
+    if (isUserBlocked(selectedChat.id)) return;
+    
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
       typing: value.length > 0
@@ -1478,12 +1483,10 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle open profile - dengan cek block
   const handleOpenProfile = (chatUser: ChatUser) => {
-    // Check if user is blocked
-    const currentUserData = users.find(u => u.id === user.uid);
-    const blockedUsers = currentUserData?.blocked || [];
+    if (!chatUser || !user) return;
     
-    if (chatUser.id && blockedUsers.includes(chatUser.id)) {
-      // Show blocked page
+    // Check if user is blocked
+    if (isUserBlocked(chatUser.id)) {
       setProfileUser(chatUser);
       setShowProfile(true);
       return;
@@ -1566,7 +1569,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
-    if (!db || !user) return;
+    if (!db || !user || !userId) return;
     
     try {
       const userRef = doc(db, "users", user.uid);
@@ -1644,12 +1647,6 @@ export default function HomePage(): React.JSX.Element {
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
     }
-  };
-
-  // Check if user is blocked
-  const isUserBlocked = (userId: string) => {
-    const currentUserData = users.find(u => u.id === user.uid);
-    return (currentUserData?.blocked || []).includes(userId);
   };
 
   // Send message to regular user - dengan cek block
@@ -3105,7 +3102,8 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      © 2026 Menuru                    </span>
+                      © 2026 Menuru
+                    </span>
                   </div>
                 </div>
               ) : showPrivacyPolicy ? (
@@ -4178,7 +4176,53 @@ export default function HomePage(): React.JSX.Element {
                               const otherUser = users.find(u => u.id === otherId);
                               if (!otherUser) return null;
                               // Skip if blocked
-                              if (isUserBlocked(otherId)) return null;
+                              if (isUserBlocked(otherId)) {
+                                // Tampilkan tetap tapi dengan indikator blocked
+                                return (
+                                  <div
+                                    key={room.id}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "6px 10px",
+                                      borderRadius: "6px",
+                                      backgroundColor: "#fafafa",
+                                      opacity: 0.6,
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "6px",
+                                        backgroundColor: "#f0f0f0",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "14px",
+                                        overflow: "hidden",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {otherUser.photoURL ? (
+                                        <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                      ) : (
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                      )}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ fontSize: "12px", fontWeight: 500, color: "#999", fontFamily: FONT_FAMILY }}>
+                                        {otherUser.name}
+                                      </div>
+                                      <div style={{ fontSize: "9px", color: "#ccc", fontFamily: FONT_FAMILY }}>
+                                        Blocked
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
                               return (
                                 <motion.div
                                   key={room.id}
@@ -4383,8 +4427,8 @@ export default function HomePage(): React.JSX.Element {
                         const otherUser = users.find(u => u.id === otherId);
                         if (!otherUser) return null;
                         
-                        // Skip if blocked
-                        if (isUserBlocked(otherId)) return null;
+                        // Check if blocked - tetap tampilkan tapi dengan indikator
+                        const isBlocked = isUserBlocked(otherId);
                         
                         const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                         const typingDisplay = getTypingUsersDisplay(room);
@@ -4393,17 +4437,22 @@ export default function HomePage(): React.JSX.Element {
                           <motion.div
                             key={room.id}
                             whileHover={{ scale: 1.02 }}
-                            onClick={() => setSelectedChat(otherUser)}
+                            onClick={() => {
+                              if (!isBlocked) {
+                                setSelectedChat(otherUser);
+                              }
+                            }}
                             style={{
                               display: "flex",
                               alignItems: "center",
                               gap: "10px",
                               padding: "10px 12px",
                               borderRadius: "8px",
-                              cursor: "pointer",
+                              cursor: isBlocked ? "not-allowed" : "pointer",
                               transition: "all .2s ease",
                               marginBottom: "2px",
-                              backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
+                              backgroundColor: isBlocked ? "#f5f5f5" : (room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent"),
+                              opacity: isBlocked ? 0.6 : 1,
                               fontFamily: FONT_FAMILY,
                             }}
                           >
@@ -4433,21 +4482,25 @@ export default function HomePage(): React.JSX.Element {
                               )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
+                              <div style={{ fontSize: "14px", fontWeight: 500, color: isBlocked ? "#999" : "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                 <span 
-                                  style={{ cursor: "pointer" }}
+                                  style={{ cursor: isBlocked ? "not-allowed" : "pointer" }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleOpenProfile(otherUser);
+                                    if (!isBlocked) {
+                                      handleOpenProfile(otherUser);
+                                    }
                                   }}
                                 >
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
                               </div>
-                              <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
-                                {typingDisplay ? (
+                              <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
+                                {isBlocked ? (
+                                  <span style={{ color: "#ef4444" }}>Blocked</span>
+                                ) : typingDisplay ? (
                                   <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                 ) : (
                                   room.lastMessage ? (
@@ -4462,31 +4515,31 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                              {room.lastMessageTime && (
+                              {room.lastMessageTime && !isBlocked && (
                                 <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
                                   {formatTime(room.lastMessageTime)}
                                 </span>
                               )}
-                              <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                                {room.unreadCount > 0 && (
-                                  <div
-                                    style={{
-                                      backgroundColor: "#c5e800",
-                                      color: "#000",
-                                      padding: "0 6px",
-                                      borderRadius: "4px",
-                                      fontSize: "9px",
-                                      fontWeight: 600,
-                                      lineHeight: "18px",
-                                      height: "18px",
-                                      minWidth: "18px",
-                                      textAlign: "center",
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    {room.unreadCount}
-                                  </div>
-                                )}
+                              {room.unreadCount > 0 && !isBlocked && (
+                                <div
+                                  style={{
+                                    backgroundColor: "#c5e800",
+                                    color: "#000",
+                                    padding: "0 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "9px",
+                                    fontWeight: 600,
+                                    lineHeight: "18px",
+                                    height: "18px",
+                                    minWidth: "18px",
+                                    textAlign: "center",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  {room.unreadCount}
+                                </div>
+                              )}
+                              {!isBlocked && (
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
@@ -4507,7 +4560,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <PinIcon filled={room.isPinned || false} />
                                 </motion.button>
-                              </div>
+                              )}
                             </div>
                           </motion.div>
                         );
@@ -4516,9 +4569,9 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View
+                // Chat View - dengan cek block
                 <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                  {/* Chat Header */}
+                  {/* Chat Header - tetap tampil tapi dengan indikator blocked */}
                   <div
                     style={{
                       padding: "10px 16px",
@@ -4577,7 +4630,11 @@ export default function HomePage(): React.JSX.Element {
                         position: "relative",
                         cursor: "pointer",
                       }}
-                      onClick={() => handleOpenProfile(selectedChat)}
+                      onClick={() => {
+                        if (!isUserBlocked(selectedChat.id)) {
+                          handleOpenProfile(selectedChat);
+                        }
+                      }}
                     >
                       {isOfficialChatSelected ? (
                         <span style={{ fontFamily: FONT_FAMILY }}>💬</span>
@@ -4594,10 +4651,19 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
                         style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
-                        onClick={() => handleOpenProfile(selectedChat)}
+                        onClick={() => {
+                          if (!isUserBlocked(selectedChat.id)) {
+                            handleOpenProfile(selectedChat);
+                          }
+                        }}
                       >
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
+                          {isUserBlocked(selectedChat.id) && (
+                            <span style={{ fontSize: "10px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
+                              (Blocked)
+                            </span>
+                          )}
                         </span>
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
@@ -4605,30 +4671,28 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {isOfficialChatSelected ? (
                           <OnlineIndicator online={true} />
+                        ) : isUserBlocked(selectedChat.id) ? (
+                          <span style={{ fontSize: "9px", color: "#ef4444", fontFamily: FONT_FAMILY }}>Blocked</span>
                         ) : (
-                          <OnlineIndicator 
-                            online={getOnlineStatus(selectedChat.id)} 
-                            lastSeen={getLastSeen(selectedChat.id)}
-                          />
-                        )}
-                        {isOfficialChatSelected ? (
-                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                            Official Account
-                          </span>
-                        ) : (
-                          getOnlineStatus(selectedChat.id) ? (
-                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                              {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                              {getLastSeen(selectedChat.id)}
-                            </span>
-                          )
+                          <>
+                            <OnlineIndicator 
+                              online={getOnlineStatus(selectedChat.id)} 
+                              lastSeen={getLastSeen(selectedChat.id)}
+                            />
+                            {getOnlineStatus(selectedChat.id) ? (
+                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                {getLastSeen(selectedChat.id)}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
-                    {!isOfficialChatSelected && (
+                    {!isOfficialChatSelected && !isUserBlocked(selectedChat.id) && (
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -5153,7 +5217,7 @@ export default function HomePage(): React.JSX.Element {
                     // Regular Chat View - dengan cek block
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
-                      {pinnedMessages.length > 0 && (
+                      {pinnedMessages.length > 0 && !isUserBlocked(selectedChat.id) && (
                         <div
                           style={{
                             padding: "6px 14px",
@@ -5230,7 +5294,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
 
                       {/* Reply Indicator */}
-                      {replyTo && (
+                      {replyTo && !isUserBlocked(selectedChat.id) && (
                         <div
                           style={{
                             padding: "4px 14px",
@@ -5279,7 +5343,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages */}
+                      {/* Messages - tampilkan pesan blocked jika user diblok */}
                       <div
                         style={{
                           flex: 1,
@@ -5293,308 +5357,330 @@ export default function HomePage(): React.JSX.Element {
                           minHeight: 0,
                         }}
                       >
-                        {/* Typing indicator di body untuk regular chat - DOUBLE/TRIPLE */}
-                        {regularTypingUsers.length > 0 && (
+                        {isUserBlocked(selectedChat.id) ? (
                           <div
                             style={{
                               textAlign: "center",
-                              fontSize: "12px",
-                              color: "#000000",
-                              padding: "4px 0",
-                              fontStyle: "italic",
-                              fontFamily: FONT_FAMILY,
-                              backgroundColor: "transparent",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {regularTypingUsers.join(", ")} typing...
-                          </div>
-                        )}
-
-                        {messages.length === 0 ? (
-                          <div
-                            style={{
-                              textAlign: "center",
-                              color: "#bbb",
-                              fontSize: "13px",
+                              color: "#999",
+                              fontSize: "14px",
                               marginTop: "60px",
                               fontFamily: FONT_FAMILY,
                             }}
                           >
-                            <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                            <div>No messages yet</div>
+                            <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔒</div>
+                            <div style={{ fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                              This user has been blocked
+                            </div>
+                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#bbb", fontFamily: FONT_FAMILY }}>
+                              You can unblock them from their profile
+                            </div>
                           </div>
                         ) : (
-                          messages.map((msg, idx) => {
-                            const isMine = msg.senderId === user?.uid;
-                            const chatId = [user.uid, selectedChat.id].sort().join("_");
-                            const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
-                              formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
-                            
-                            const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
-                            const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
-                            
-                            return (
-                              <React.Fragment key={idx}>
-                                {showDate && (
-                                  <div
-                                    style={{
-                                      textAlign: "center",
-                                      color: "#ccc",
-                                      fontSize: "10px",
-                                      padding: "6px 0 10px 0",
-                                      fontWeight: 400,
-                                      letterSpacing: "0.03em",
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    {formatDate(msg.timestamp)}
-                                  </div>
-                                )}
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  transition={{ duration: 0.2 }}
-                                  style={{
-                                    alignSelf: isMine ? "flex-end" : "flex-start",
-                                    maxWidth: "80%",
-                                    padding: "10px 14px",
-                                    borderRadius: "12px",
-                                    backgroundColor: messageColor,
-                                    color: "#ffffff",
-                                    fontSize: "14px",
-                                    lineHeight: 1.5,
-                                    position: "relative",
-                                    boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  {msg.isShared && msg.sharedFromName && (
-                                    <div
+                          <>
+                            {/* Typing indicator di body untuk regular chat - DOUBLE/TRIPLE */}
+                            {regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "12px",
+                                  color: "#000000",
+                                  padding: "4px 0",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {regularTypingUsers.join(", ")} typing...
+                              </div>
+                            )}
+
+                            {messages.length === 0 ? (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  color: "#bbb",
+                                  fontSize: "13px",
+                                  marginTop: "60px",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
+                                <div>No messages yet</div>
+                              </div>
+                            ) : (
+                              messages.map((msg, idx) => {
+                                const isMine = msg.senderId === user?.uid;
+                                const chatId = [user.uid, selectedChat.id].sort().join("_");
+                                const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
+                                  formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                                
+                                const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
+                                const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
+                                
+                                return (
+                                  <React.Fragment key={idx}>
+                                    {showDate && (
+                                      <div
+                                        style={{
+                                          textAlign: "center",
+                                          color: "#ccc",
+                                          fontSize: "10px",
+                                          padding: "6px 0 10px 0",
+                                          fontWeight: 400,
+                                          letterSpacing: "0.03em",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {formatDate(msg.timestamp)}
+                                      </div>
+                                    )}
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                                      transition={{ duration: 0.2 }}
                                       style={{
-                                        fontSize: "10px",
-                                        color: "rgba(255,255,255,0.7)",
-                                        marginBottom: "4px",
-                                        fontStyle: "italic",
+                                        alignSelf: isMine ? "flex-end" : "flex-start",
+                                        maxWidth: "80%",
+                                        padding: "10px 14px",
+                                        borderRadius: "12px",
+                                        backgroundColor: messageColor,
+                                        color: "#ffffff",
+                                        fontSize: "14px",
+                                        lineHeight: 1.5,
+                                        position: "relative",
+                                        boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
-                                      From {msg.sharedFromName}
-                                    </div>
-                                  )}
-                                  
-                                  {msg.replyTo && msg.replyToText && (
-                                    <div
-                                      style={{
-                                        fontSize: "11px",
-                                        color: "rgba(255,255,255,0.7)",
-                                        padding: "4px 8px",
-                                        borderLeft: `2px solid rgba(255,255,255,0.3)`,
-                                        marginBottom: "6px",
-                                        backgroundColor: "rgba(255,255,255,0.1)",
-                                        borderRadius: "4px",
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                                        {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
-                                      </span>
-                                      <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
-                                    </div>
-                                  )}
-                                  
-                                  <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                  
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "4px",
-                                      marginTop: "6px",
-                                      justifyContent: isMine ? "flex-end" : "flex-start",
-                                      flexWrap: "wrap",
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "9px",
-                                        color: "rgba(255,255,255,0.6)",
-                                        fontWeight: 400,
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      {formatTime(msg.timestamp)}
-                                    </span>
-                                    <ReadStatus msg={msg} isMine={isMine} />
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
-                                      style={{
-                                        background: "none",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        color: "rgba(255,255,255,0.4)",
-                                        padding: "2px 4px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        transition: "all .2s ease",
-                                        borderRadius: "4px",
-                                      }}
-                                      title="More"
-                                    >
-                                      <MoreIcon />
-                                    </motion.button>
-                                    
-                                    <AnimatePresence>
-                                      {showMessageMenu === msg.id && (
-                                        <motion.div
-                                          ref={menuRef}
-                                          initial={{ opacity: 0, scale: 0.9, y: 5 }}
-                                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                                          exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                          transition={{ duration: 0.15 }}
+                                      {msg.isShared && msg.sharedFromName && (
+                                        <div
                                           style={{
-                                            position: "absolute",
-                                            bottom: "calc(100% + 6px)",
-                                            right: isMine ? 0 : "auto",
-                                            left: isMine ? "auto" : 0,
-                                            backgroundColor: "#ffffff",
-                                            borderRadius: "8px",
-                                            padding: "4px",
-                                            minWidth: "140px",
-                                            boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                                            zIndex: 50,
-                                            border: "1px solid rgba(0,0,0,0.04)",
+                                            fontSize: "10px",
+                                            color: "rgba(255,255,255,0.7)",
+                                            marginBottom: "4px",
+                                            fontStyle: "italic",
                                             fontFamily: FONT_FAMILY,
                                           }}
                                         >
-                                          <motion.button
-                                            whileHover={{ backgroundColor: "#f5f5f5" }}
-                                            onClick={() => {
-                                              setReplyTo(msg);
-                                              setShowMessageMenu(null);
-                                            }}
-                                            style={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              gap: "8px",
-                                              padding: "6px 12px",
-                                              width: "100%",
-                                              background: "none",
-                                              border: "none",
-                                              color: "#000",
-                                              fontSize: "12px",
-                                              cursor: "pointer",
-                                              borderRadius: "6px",
-                                              transition: "all .2s ease",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <ReplyIcon />
-                                            <span>Reply</span>
-                                          </motion.button>
-                                          <motion.button
-                                            whileHover={{ backgroundColor: "#f5f5f5" }}
-                                            onClick={() => {
-                                              handleResendMessage(msg);
-                                            }}
-                                            style={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              gap: "8px",
-                                              padding: "6px 12px",
-                                              width: "100%",
-                                              background: "none",
-                                              border: "none",
-                                              color: "#000",
-                                              fontSize: "12px",
-                                              cursor: "pointer",
-                                              borderRadius: "6px",
-                                              transition: "all .2s ease",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <SendIcon />
-                                            <span>Resend</span>
-                                          </motion.button>
-                                          <motion.button
-                                            whileHover={{ backgroundColor: "#f5f5f5" }}
-                                            onClick={() => {
-                                              setShareMessage(msg);
-                                              setShowShareModal(true);
-                                              setShowMessageMenu(null);
-                                            }}
-                                            style={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              gap: "8px",
-                                              padding: "6px 12px",
-                                              width: "100%",
-                                              background: "none",
-                                              border: "none",
-                                              color: "#000",
-                                              fontSize: "12px",
-                                              cursor: "pointer",
-                                              borderRadius: "6px",
-                                              transition: "all .2s ease",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <ShareIcon />
-                                            <span>Forward</span>
-                                          </motion.button>
-                                          <motion.button
-                                            whileHover={{ backgroundColor: "#f5f5f5" }}
-                                            onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
-                                            style={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              gap: "8px",
-                                              padding: "6px 12px",
-                                              width: "100%",
-                                              background: "none",
-                                              border: "none",
-                                              color: msg.isPinned ? "#c5e800" : "#000",
-                                              fontSize: "12px",
-                                              cursor: "pointer",
-                                              borderRadius: "6px",
-                                              transition: "all .2s ease",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <PinIcon filled={msg.isPinned || false} />
-                                            <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
-                                          </motion.button>
-                                        </motion.div>
+                                          From {msg.sharedFromName}
+                                        </div>
                                       )}
-                                    </AnimatePresence>
-                                  </div>
-                                </motion.div>
-                                {msg.isPinned && (
-                                  <div
-                                    style={{
-                                      alignSelf: isMine ? "flex-end" : "flex-start",
-                                      fontSize: "9px",
-                                      color: "#999",
-                                      marginTop: "-2px",
-                                      marginBottom: "4px",
-                                      padding: "0 4px",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "4px",
-                                      fontWeight: 500,
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    <PinIcon filled={true} />
-                                    <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
-                                  </div>
-                                )}
-                              </React.Fragment>
-                            );
-                          })
+                                      
+                                      {msg.replyTo && msg.replyToText && (
+                                        <div
+                                          style={{
+                                            fontSize: "11px",
+                                            color: "rgba(255,255,255,0.7)",
+                                            padding: "4px 8px",
+                                            borderLeft: `2px solid rgba(255,255,255,0.3)`,
+                                            marginBottom: "6px",
+                                            backgroundColor: "rgba(255,255,255,0.1)",
+                                            borderRadius: "4px",
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                                            {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
+                                          </span>
+                                          <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                        </div>
+                                      )}
+                                      
+                                      <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
+                                      
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          marginTop: "6px",
+                                          justifyContent: isMine ? "flex-end" : "flex-start",
+                                          flexWrap: "wrap",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            fontSize: "9px",
+                                            color: "rgba(255,255,255,0.6)",
+                                            fontWeight: 400,
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          {formatTime(msg.timestamp)}
+                                        </span>
+                                        <ReadStatus msg={msg} isMine={isMine} />
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
+                                          whileTap={{ scale: 0.9 }}
+                                          onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
+                                          style={{
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            color: "rgba(255,255,255,0.4)",
+                                            padding: "2px 4px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            transition: "all .2s ease",
+                                            borderRadius: "4px",
+                                          }}
+                                          title="More"
+                                        >
+                                          <MoreIcon />
+                                        </motion.button>
+                                        
+                                        <AnimatePresence>
+                                          {showMessageMenu === msg.id && (
+                                            <motion.div
+                                              ref={menuRef}
+                                              initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                                              exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                                              transition={{ duration: 0.15 }}
+                                              style={{
+                                                position: "absolute",
+                                                bottom: "calc(100% + 6px)",
+                                                right: isMine ? 0 : "auto",
+                                                left: isMine ? "auto" : 0,
+                                                backgroundColor: "#ffffff",
+                                                borderRadius: "8px",
+                                                padding: "4px",
+                                                minWidth: "140px",
+                                                boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                                                zIndex: 50,
+                                                border: "1px solid rgba(0,0,0,0.04)",
+                                                fontFamily: FONT_FAMILY,
+                                              }}
+                                            >
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  setReplyTo(msg);
+                                                  setShowMessageMenu(null);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <ReplyIcon />
+                                                <span>Reply</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  handleResendMessage(msg);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <SendIcon />
+                                                <span>Resend</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  setShareMessage(msg);
+                                                  setShowShareModal(true);
+                                                  setShowMessageMenu(null);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <ShareIcon />
+                                                <span>Forward</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: msg.isPinned ? "#c5e800" : "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <PinIcon filled={msg.isPinned || false} />
+                                                <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                              </motion.button>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+                                      </div>
+                                    </motion.div>
+                                    {msg.isPinned && (
+                                      <div
+                                        style={{
+                                          alignSelf: isMine ? "flex-end" : "flex-start",
+                                          fontSize: "9px",
+                                          color: "#999",
+                                          marginTop: "-2px",
+                                          marginBottom: "4px",
+                                          padding: "0 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          fontWeight: 500,
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        <PinIcon filled={true} />
+                                        <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                      </div>
+                                    )}
+                                  </React.Fragment>
+                                );
+                              })
+                            )}
+                          </>
                         )}
                         <div ref={messagesEndRef} />
                       </div>
@@ -5614,7 +5700,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         {/* Typing indicator di atas input untuk regular chat - DOUBLE/TRIPLE */}
-                        {regularTypingUsers.length > 0 && (
+                        {!isUserBlocked(selectedChat.id) && regularTypingUsers.length > 0 && (
                           <div
                             style={{
                               textAlign: "left",
