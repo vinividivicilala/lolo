@@ -390,88 +390,193 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Komponen StoryItem - dipisahkan untuk menghindari React hooks error
-const StoryItem = ({ num, isHovering, setIsHovering, currentImage, setCurrentImage, images, onImageClick }: any) => {
+// Komponen Stories - untuk semua user
+const StoriesSection = ({ userEmail }: { userEmail: string }) => {
+  const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
+  const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
+  const images = [10, 11, 12, 13, 14, 15];
+
+  // Inisialisasi state Stories
   useEffect(() => {
-    if (!isHovering) return;
-    const interval = setInterval(() => {
-      setCurrentImage((prev: number) => {
-        const currentIndex = images.indexOf(prev);
-        const nextIndex = (currentIndex + 1) % images.length;
-        return images[nextIndex];
-      });
-    }, 800);
-    return () => clearInterval(interval);
-  }, [isHovering, images, setCurrentImage]);
+    const initialImages: { [key: number]: number } = {};
+    const initialHover: { [key: number]: boolean } = {};
+    images.forEach(num => {
+      initialImages[num] = num;
+      initialHover[num] = false;
+    });
+    setStoryImages(initialImages);
+    setStoryHover(initialHover);
+  }, []);
+
+  // Effect untuk Stories hover - gonta-ganti foto
+  useEffect(() => {
+    const intervals: { [key: number]: NodeJS.Timeout } = {};
+    
+    Object.keys(storyHover).forEach(key => {
+      const num = parseInt(key);
+      if (storyHover[num]) {
+        intervals[num] = setInterval(() => {
+          setStoryImages(prev => {
+            const currentIndex = images.indexOf(prev[num]);
+            const nextIndex = (currentIndex + 1) % images.length;
+            return { ...prev, [num]: images[nextIndex] };
+          });
+        }, 800);
+      }
+    });
+    
+    return () => {
+      Object.values(intervals).forEach(interval => clearInterval(interval));
+    };
+  }, [storyHover]);
+
+  // Fungsi untuk membuka foto besar
+  const openFullImage = (imageNumber: number) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    `;
+    overlay.onclick = () => overlay.remove();
+    
+    const img = document.createElement('img');
+    img.src = `/images/${imageNumber}.jpg`;
+    img.style.cssText = `
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      object-fit: contain;
+    `;
+    img.onerror = () => {
+      img.style.display = 'none';
+      const text = document.createElement('div');
+      text.textContent = `${imageNumber}.jpg`;
+      text.style.cssText = `
+        color: #fff;
+        font-size: 24px;
+        font-family: ${FONT_FAMILY};
+      `;
+      overlay.appendChild(text);
+    };
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+  };
 
   return (
-    <div
-      style={{
-        aspectRatio: "3/4",
-        backgroundColor: "#f0f0f0",
-        borderRadius: "12px",
-        overflow: "hidden",
-        border: "2px solid #e8e8e8",
-        position: "relative",
-        cursor: "pointer",
-        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      }}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        setCurrentImage(num);
-      }}
-      onClick={onImageClick}
-    >
-      <img
-        src={`/images/${currentImage}.jpg`}
-        alt={`Stories ${currentImage}`}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          transition: "transform 0.5s ease",
-        }}
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-          const parent = e.currentTarget.parentElement;
-          if (parent) {
-            parent.style.backgroundColor = "#f0f0f0";
-            parent.style.display = "flex";
-            parent.style.alignItems = "center";
-            parent.style.justifyContent = "center";
-            const span = document.createElement("span");
-            span.textContent = `${num}.jpg`;
-            span.style.color = "#999";
-            span.style.fontSize = "12px";
-            span.style.fontFamily = FONT_FAMILY;
-            parent.appendChild(span);
-          }
-        }}
-      />
-      <div style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "40%",
-        background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute",
-        bottom: "8px",
-        left: "8px",
-        color: "rgba(255,255,255,0.8)",
-        fontSize: "11px",
-        fontWeight: 500,
-        fontFamily: FONT_FAMILY,
-        backgroundColor: "rgba(0,0,0,0.3)",
-        padding: "2px 8px",
-        borderRadius: "10px",
-        pointerEvents: "none",
+    <div style={{ width: "100%", marginBottom: "20px" }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center", 
+        marginBottom: "12px",
+        borderBottom: "1px solid #f0f0f0",
+        paddingBottom: "8px",
       }}>
-        {num}
+        <span style={{ 
+          fontSize: "18px", 
+          fontWeight: 700, 
+          color: "#000000", 
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.02em",
+        }}>
+          Stories
+        </span>
+        <span style={{ 
+          fontSize: "12px", 
+          color: "#999", 
+          fontFamily: FONT_FAMILY,
+        }}>
+          {images.length} photos
+        </span>
+      </div>
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(3, 1fr)", 
+        gap: "10px",
+      }}>
+        {images.map((num) => (
+          <div
+            key={num}
+            style={{
+              aspectRatio: "3/4",
+              backgroundColor: "#f0f0f0",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "2px solid #e8e8e8",
+              position: "relative",
+              cursor: "pointer",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onMouseEnter={() => {
+              setStoryHover(prev => ({ ...prev, [num]: true }));
+            }}
+            onMouseLeave={() => {
+              setStoryHover(prev => ({ ...prev, [num]: false }));
+              setStoryImages(prev => ({ ...prev, [num]: num }));
+            }}
+            onClick={() => openFullImage(storyImages[num] || num)}
+          >
+            <img
+              src={`/images/${storyImages[num] || num}.jpg`}
+              alt={`Stories ${num}`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transition: "transform 0.5s ease",
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.style.backgroundColor = "#f0f0f0";
+                  parent.style.display = "flex";
+                  parent.style.alignItems = "center";
+                  parent.style.justifyContent = "center";
+                  const span = document.createElement("span");
+                  span.textContent = `${num}.jpg`;
+                  span.style.color = "#999";
+                  span.style.fontSize = "12px";
+                  span.style.fontFamily = FONT_FAMILY;
+                  parent.appendChild(span);
+                }
+              }}
+            />
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "40%",
+              background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              position: "absolute",
+              bottom: "8px",
+              left: "8px",
+              color: "rgba(255,255,255,0.8)",
+              fontSize: "11px",
+              fontWeight: 500,
+              fontFamily: FONT_FAMILY,
+              backgroundColor: "rgba(0,0,0,0.3)",
+              padding: "2px 8px",
+              borderRadius: "10px",
+              pointerEvents: "none",
+            }}>
+              {num}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -513,10 +618,6 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
-
-  // State untuk Stories
-  const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
-  const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
 
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
@@ -1758,82 +1859,6 @@ export default function HomePage(): React.JSX.Element {
     }, 4000);
     return () => clearInterval(interval);
   }, [isChatOpen, user, isIncomingMessage]);
-
-  // Fungsi untuk membuka foto besar
-  const openFullImage = (imageNumber: number) => {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    `;
-    overlay.onclick = () => overlay.remove();
-    
-    const img = document.createElement('img');
-    img.src = `/images/${imageNumber}.jpg`;
-    img.style.cssText = `
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 8px;
-      object-fit: contain;
-    `;
-    img.onerror = () => {
-      img.style.display = 'none';
-      const text = document.createElement('div');
-      text.textContent = `${imageNumber}.jpg`;
-      text.style.cssText = `
-        color: #fff;
-        font-size: 24px;
-        font-family: ${FONT_FAMILY};
-      `;
-      overlay.appendChild(text);
-    };
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-  };
-
-  // Inisialisasi state Stories
-  useEffect(() => {
-    const initialImages: { [key: number]: number } = {};
-    const initialHover: { [key: number]: boolean } = {};
-    [10, 11, 12, 13, 14, 15].forEach(num => {
-      initialImages[num] = num;
-      initialHover[num] = false;
-    });
-    setStoryImages(initialImages);
-    setStoryHover(initialHover);
-  }, []);
-
-  // Effect untuk Stories hover
-  useEffect(() => {
-    const images = [10, 11, 12, 13, 14, 15];
-    const intervals: { [key: number]: NodeJS.Timeout } = {};
-    
-    Object.keys(storyHover).forEach(key => {
-      const num = parseInt(key);
-      if (storyHover[num]) {
-        intervals[num] = setInterval(() => {
-          setStoryImages(prev => {
-            const currentIndex = images.indexOf(prev[num]);
-            const nextIndex = (currentIndex + 1) % images.length;
-            return { ...prev, [num]: images[nextIndex] };
-          });
-        }, 800);
-      }
-    });
-    
-    return () => {
-      Object.values(intervals).forEach(interval => clearInterval(interval));
-    };
-  }, [storyHover]);
 
   if (loading) {
     return (
@@ -3485,108 +3510,9 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* STORIES - HANYA UNTUK ADMIN - 4 baris dengan 2 foto di sisipkan */}
-                    {profileUser.id === user?.uid && profileUser.email === ADMIN_EMAIL && (
-                      <div style={{ width: "100%", marginBottom: "20px" }}>
-                        <div style={{ 
-                          display: "flex", 
-                          justifyContent: "space-between", 
-                          alignItems: "center", 
-                          marginBottom: "12px",
-                          borderBottom: "1px solid #f0f0f0",
-                          paddingBottom: "8px",
-                        }}>
-                          <span style={{ 
-                            fontSize: "18px", 
-                            fontWeight: 700, 
-                            color: "#000000", 
-                            fontFamily: FONT_FAMILY,
-                            letterSpacing: "-0.02em",
-                          }}>
-                            Stories
-                          </span>
-                        </div>
-                        <div style={{ 
-                          display: "grid", 
-                          gridTemplateColumns: "repeat(4, 1fr)", 
-                          gap: "10px",
-                        }}>
-                          {[10, 11, 12, 13, 14, 15].map((num) => (
-                            <div
-                              key={num}
-                              style={{
-                                aspectRatio: "3/4",
-                                backgroundColor: "#f0f0f0",
-                                borderRadius: "12px",
-                                overflow: "hidden",
-                                border: "2px solid #e8e8e8",
-                                position: "relative",
-                                cursor: "pointer",
-                                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                              }}
-                              onMouseEnter={() => {
-                                setStoryHover(prev => ({ ...prev, [num]: true }));
-                              }}
-                              onMouseLeave={() => {
-                                setStoryHover(prev => ({ ...prev, [num]: false }));
-                                setStoryImages(prev => ({ ...prev, [num]: num }));
-                              }}
-                              onClick={() => openFullImage(storyImages[num] || num)}
-                            >
-                              <img
-                                src={`/images/${storyImages[num] || num}.jpg`}
-                                alt={`Stories ${num}`}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  transition: "transform 0.5s ease",
-                                }}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                  const parent = e.currentTarget.parentElement;
-                                  if (parent) {
-                                    parent.style.backgroundColor = "#f0f0f0";
-                                    parent.style.display = "flex";
-                                    parent.style.alignItems = "center";
-                                    parent.style.justifyContent = "center";
-                                    const span = document.createElement("span");
-                                    span.textContent = `${num}.jpg`;
-                                    span.style.color = "#999";
-                                    span.style.fontSize = "12px";
-                                    span.style.fontFamily = FONT_FAMILY;
-                                    parent.appendChild(span);
-                                  }
-                                }}
-                              />
-                              <div style={{
-                                position: "absolute",
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: "40%",
-                                background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
-                                pointerEvents: "none",
-                              }} />
-                              <div style={{
-                                position: "absolute",
-                                bottom: "8px",
-                                left: "8px",
-                                color: "rgba(255,255,255,0.8)",
-                                fontSize: "11px",
-                                fontWeight: 500,
-                                fontFamily: FONT_FAMILY,
-                                backgroundColor: "rgba(0,0,0,0.3)",
-                                padding: "2px 8px",
-                                borderRadius: "10px",
-                                pointerEvents: "none",
-                              }}>
-                                {num}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                    {/* STORIES - UNTUK SEMUA USER */}
+                    {profileUser && (
+                      <StoriesSection userEmail={profileUser.email} />
                     )}
 
                     <div style={{ display: "flex", gap: "8px", width: "100%" }}>
