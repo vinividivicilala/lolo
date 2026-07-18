@@ -121,10 +121,13 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons - PIN ICON ASLI
+// SVG Icons - PIN ICON AWWWARDS STYLE
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
+    {filled && (
+      <circle cx="12" cy="12" r="8" fill="currentColor" opacity="0.1" />
+    )}
   </svg>
 );
 
@@ -201,7 +204,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
         style={{
-          marginLeft: "4px",
+          marginLeft: "2px",
           display: "inline-block",
           verticalAlign: "middle",
           cursor: "pointer",
@@ -253,7 +256,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          Official Account
+          Verified Account
           <div style={{
             position: "absolute",
             top: "100%",
@@ -1409,7 +1412,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat - FIXED: no duplicates
+  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1420,7 +1423,6 @@ export default function HomePage(): React.JSX.Element {
         return;
       }
       
-      // Check if chat already exists
       const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -1495,14 +1497,13 @@ export default function HomePage(): React.JSX.Element {
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
   
-  // FIXED: Available users - exclude users already in chat and self
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
     u.id !== "official_menuru" &&
     !chatRooms.some(room => room.participants.includes(u.id))
   );
 
-  // Get typing users in official chat for body display
+  // Get typing users in official chat
   const getOfficialTypingUsers = () => {
     const typingList: { name: string; id: string }[] = [];
     Object.keys(officialTypingUsers).forEach(userId => {
@@ -1556,12 +1557,10 @@ export default function HomePage(): React.JSX.Element {
   }
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
-  
-  // Check if selected chat is official chat room
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
 
-  // Check if user is admin for badge
-  const isAdminUser = selectedChat?.isAdmin || false;
+  // Check if selected user is admin
+  const isSelectedUserAdmin = selectedChat?.isAdmin || false;
 
   return (
     <div
@@ -2098,7 +2097,6 @@ export default function HomePage(): React.JSX.Element {
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && isOfficialChatSelected && (
                     <>
                       <InstagramVerifiedBadge size={14} />
-                      {/* Typing indicator in header for official chat */}
                       {typingUsersList.length > 0 && (
                         <span
                           style={{
@@ -4007,7 +4005,7 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isAdmin && <span style={{ fontSize: "10px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
+                        {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {isOfficialChatSelected ? (
@@ -4021,6 +4019,11 @@ export default function HomePage(): React.JSX.Element {
                         {isOfficialChatSelected ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             Official Account
+                            {typingUsersList.length > 0 && (
+                              <span style={{ marginLeft: "8px", fontStyle: "italic" }}>
+                                {typingUsersList.map(u => u.name).join(", ")} typing...
+                              </span>
+                            )}
                           </span>
                         ) : (
                           getOnlineStatus(selectedChat.id) ? (
@@ -4072,7 +4075,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body - CENTER */}
+                        {/* Typing indicator in body */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4156,9 +4159,14 @@ export default function HomePage(): React.JSX.Element {
                                       marginBottom: "4px",
                                       fontFamily: FONT_FAMILY,
                                       fontWeight: 500,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "4px",
                                     }}
                                   >
                                     {isMine ? "You" : msg.senderName}
+                                    {/* Badge Verified untuk Admin di Official Chat */}
+                                    {!isMine && selectedChat?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                   </div>
                                   
                                   {msg.replyTo && msg.replyToText && (
@@ -4478,7 +4486,7 @@ export default function HomePage(): React.JSX.Element {
                   ) : (
                     // Regular Chat View
                     <>
-                      {/* Pinned Messages - NO BORDER YELLOW */}
+                      {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && (
                         <div
                           style={{
