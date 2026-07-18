@@ -121,7 +121,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons - Hanya untuk pin icon
+// SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -183,7 +183,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge - HANYA UNTUK ADMIN
+// Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -664,7 +664,7 @@ export default function HomePage(): React.JSX.Element {
             }
           }
           
-          // Add official user - isOfficial true tapi TANPA badge di avatar
+          // Add official user
           const officialExists = userList.some(u => u.id === "official_menuru");
           if (!officialExists) {
             userList.push({ 
@@ -758,7 +758,6 @@ export default function HomePage(): React.JSX.Element {
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.typing && data.id !== user?.uid) {
-          // Cek apakah user ini sedang chat di room official
           const userInOfficial = chatRooms.some(room => 
             room.id === OFFICIAL_CHAT_ID && room.participants.includes(data.id)
           );
@@ -1978,6 +1977,7 @@ export default function HomePage(): React.JSX.Element {
                   <option key={u.id} value={u.id}>
                     {u.name}
                     {u.isAdmin && <InstagramVerifiedBadge size={14} />}
+                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -3081,20 +3081,14 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {/* HANYA ADMIN yang dapat badge verified di avatar */}
-                        {profileUser.isAdmin && (
-                          <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                            <InstagramVerifiedBadge size={16} />
-                          </div>
-                        )}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {/* HANYA ADMIN yang dapat badge verified */}
                           {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3363,6 +3357,7 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
+                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3417,7 +3412,7 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </AnimatePresence>
 
-                  {/* Pinned Users */}
+                  {/* Pinned Users - tanpa dropdown icon */}
                   {pinnedUsers.length > 0 && (
                     <div style={{ marginBottom: "10px" }}>
                       <div
@@ -3439,7 +3434,9 @@ export default function HomePage(): React.JSX.Element {
                             Pinned Users ({pinnedUsers.length})
                           </span>
                         </div>
-                        <PinDropdownIcon isOpen={showPinnedUsers} />
+                        <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                          {showPinnedUsers ? "▼" : "▶"}
+                        </span>
                       </div>
                       <AnimatePresence>
                         {showPinnedUsers && (
@@ -3522,7 +3519,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Pinned Chats */}
+                  {/* Pinned Chats - tanpa dropdown icon */}
                   {pinnedChats.length > 0 && (
                     <div style={{ marginBottom: "10px" }}>
                       <div
@@ -3544,7 +3541,9 @@ export default function HomePage(): React.JSX.Element {
                             Pinned Chats ({pinnedChats.length})
                           </span>
                         </div>
-                        <PinDropdownIcon isOpen={showPinnedChats} />
+                        <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                          {showPinnedChats ? "▼" : "▶"}
+                        </span>
                       </div>
                       <AnimatePresence>
                         {showPinnedChats && (
@@ -3717,6 +3716,7 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
+                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3801,7 +3801,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {/* HANYA ADMIN yang dapat badge verified di avatar user lain */}
                               {otherUser.isAdmin && (
                                 <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                                   <InstagramVerifiedBadge size={12} />
@@ -3961,7 +3960,7 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {/* HANYA ADMIN yang dapat badge verified di avatar */}
+                      {/* Verified badge di avatar hanya untuk admin, bukan official */}
                       {!isOfficialChatSelected && selectedChat.isAdmin && (
                         <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                           <InstagramVerifiedBadge size={12} />
@@ -3976,8 +3975,10 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {/* HANYA ADMIN yang dapat badge verified di header */}
+                        {/* Verified badge di samping nama untuk admin dan official */}
+                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                        {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {isOfficialChatSelected ? (
@@ -4030,7 +4031,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Official Chat View */}
                   {isOfficialChatSelected ? (
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      {/* Pinned Messages di Official Chat */}
+                      {/* Pinned Messages di Official Chat - tanpa dropdown icon berwarna */}
                       {officialPinnedMessages.length > 0 && (
                         <div
                           style={{
@@ -4056,7 +4057,9 @@ export default function HomePage(): React.JSX.Element {
                                 Pinned Messages ({officialPinnedMessages.length})
                               </span>
                             </div>
-                            <PinDropdownIcon isOpen={showOfficialPinnedMessages} />
+                            <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                              {showOfficialPinnedMessages ? "▼" : "▶"}
+                            </span>
                           </div>
                           <AnimatePresence>
                             {showOfficialPinnedMessages && (
@@ -4203,6 +4206,7 @@ export default function HomePage(): React.JSX.Element {
                                     }}>
                                       {msg.senderName}
                                       {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                      {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4401,7 +4405,7 @@ export default function HomePage(): React.JSX.Element {
                                     style={{
                                       alignSelf: isMine ? "flex-end" : "flex-start",
                                       fontSize: "9px",
-                                      color: "#c5e800",
+                                      color: "#999",
                                       marginTop: "-2px",
                                       marginBottom: "4px",
                                       padding: "0 4px",
@@ -4549,7 +4553,9 @@ export default function HomePage(): React.JSX.Element {
                                 Pinned Messages ({pinnedMessages.length})
                               </span>
                             </div>
-                            <PinDropdownIcon isOpen={showPinnedMessages} />
+                            <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                              {showPinnedMessages ? "▼" : "▶"}
+                            </span>
                           </div>
                           <AnimatePresence>
                             {showPinnedMessages && (
@@ -4925,7 +4931,7 @@ export default function HomePage(): React.JSX.Element {
                                     style={{
                                       alignSelf: isMine ? "flex-end" : "flex-start",
                                       fontSize: "9px",
-                                      color: "#c5e800",
+                                      color: "#999",
                                       marginTop: "-2px",
                                       marginBottom: "4px",
                                       padding: "0 4px",
