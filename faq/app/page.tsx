@@ -25,8 +25,7 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc,
-  onSnapshotsInSync
+  updateDoc
 } from "firebase/firestore";
 
 // Firebase Config
@@ -331,8 +330,8 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status
-const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+// Read Status untuk official chat - centang 1, 2, 2 biru
+const OfficialReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   if (!isMine) return null;
@@ -701,7 +700,7 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load official chat messages - SEPERTI ROOM CHAT BIASA
+  // Load official chat messages - dengan format pesan seperti room chat biasa
   useEffect(() => {
     if (!db || !user) return;
 
@@ -715,6 +714,7 @@ export default function HomePage(): React.JSX.Element {
       let lastMessage = "";
       let lastMessageTime = null;
       let lastMessageSenderId = "";
+      let lastMessageSenderName = "";
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
@@ -728,15 +728,15 @@ export default function HomePage(): React.JSX.Element {
         }
         // Track last message - format seperti room chat biasa
         if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
-          // Format pesan terakhir seperti room chat biasa: "Menuru Official (from NamaUser): pesan"
-          const senderName = msg.senderId === "official_menuru" ? "Menuru Official" : msg.senderName;
-          if (msg.senderId !== "official_menuru") {
-            lastMessage = `Menuru Official (from ${senderName}): ${msg.text}`;
-          } else {
+          if (msg.senderId === "official_menuru") {
             lastMessage = msg.text;
+          } else {
+            // Format: "Menuru Official (from NamaUser): pesan"
+            lastMessage = `Menuru Official (from ${msg.senderName}): ${msg.text}`;
           }
           lastMessageTime = msg.timestamp;
           lastMessageSenderId = msg.senderId;
+          lastMessageSenderName = msg.senderName;
         }
       });
       
@@ -815,21 +815,22 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status - TERPISAH PER USER
+  // Listen for typing status - semua user yang typing muncul bersamaan
   useEffect(() => {
     if (!db || !user) return;
 
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const typingList: string[] = [];
+      const allTypingUsers: { [key: string]: boolean } = {};
       
       snapshot.forEach((doc) => {
         const data = doc.data();
-        // Cek user yang sedang mengetik di official chat
         if (data.typing && data.id !== user?.uid) {
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
             typingList.push(foundUser.name);
+            allTypingUsers[data.id] = true;
           }
         }
       });
@@ -839,16 +840,14 @@ export default function HomePage(): React.JSX.Element {
       // Update chat rooms dengan typing users
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
-          // Untuk official chat, tampilkan semua user yang sedang mengetik
+          // Untuk official chat, tampilkan SEMUA user yang sedang mengetik
           return { ...room, typingUsers: typingList };
         } else {
           // Untuk regular chat, cek user spesifik
           const otherId = room.participants.find(id => id !== user.uid);
-          if (otherId) {
+          if (otherId && allTypingUsers[otherId]) {
             const foundUser = users.find(u => u.id === otherId);
-            if (foundUser && foundUser.typing) {
-              return { ...room, typingUsers: [foundUser.name] };
-            }
+            return { ...room, typingUsers: foundUser ? [foundUser.name] : [] };
           }
           return { ...room, typingUsers: [] };
         }
@@ -930,11 +929,10 @@ export default function HomePage(): React.JSX.Element {
         const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
         let lastMessage = "Chat with Menuru Official";
         if (officialLastMsg) {
-          const senderName = officialLastMsg.senderId === "official_menuru" ? "Menuru Official" : officialLastMsg.senderName;
-          if (officialLastMsg.senderId !== "official_menuru") {
-            lastMessage = `Menuru Official (from ${senderName}): ${officialLastMsg.text}`;
-          } else {
+          if (officialLastMsg.senderId === "official_menuru") {
             lastMessage = officialLastMsg.text;
+          } else {
+            lastMessage = `Menuru Official (from ${officialLastMsg.senderName}): ${officialLastMsg.text}`;
           }
         }
         rooms.push({
@@ -1161,7 +1159,7 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle typing for official chat - TERPISAH
+  // Handle typing for official chat
   const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setOfficialMessageInput(value);
@@ -1323,7 +1321,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to official chat - SEPERTI ROOM CHAT BIASA
+  // Send message to official chat
   const handleSendOfficialMessage = async () => {
     if (!user || !officialMessageInput.trim() || !db) {
       return;
@@ -1665,7 +1663,7 @@ export default function HomePage(): React.JSX.Element {
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
 
-  // Get typing users for official chat display
+  // Get typing users for official chat display - semua user yang typing muncul bersamaan
   const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
 
   return (
@@ -2267,7 +2265,6 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {/* ... konten update detail ... */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -2477,7 +2474,6 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {/* ... konten update system ... */}
                   <div style={{ marginBottom: "28px" }}>
                     <div
                       style={{
@@ -2696,7 +2692,6 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {/* ... konten privacy policy ... */}
                   <div style={{ marginBottom: "24px" }}>
                     <div
                       style={{
@@ -3005,7 +3000,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : showProfile && profileUser ? (
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  {/* ... konten profile ... */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -4105,8 +4099,7 @@ export default function HomePage(): React.JSX.Element {
                         )}
                         {isOfficialChatSelected ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                            Official Account
-                          </span>
+                            Official Account                          </span>
                         ) : (
                           getOnlineStatus(selectedChat.id) ? (
                             <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
@@ -4370,7 +4363,7 @@ export default function HomePage(): React.JSX.Element {
                                       {formatTime(msg.timestamp)}
                                     </span>
                                     {isMine && (
-                                      <ReadStatus msg={msg} isMine={isMine} />
+                                      <OfficialReadStatus msg={msg} isMine={isMine} />
                                     )}
                                     <motion.button
                                       whileHover={{ scale: 1.1 }}
