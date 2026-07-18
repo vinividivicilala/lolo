@@ -430,11 +430,11 @@ export default function HomePage(): React.JSX.Element {
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
   const [officialMessageInput, setOfficialMessageInput] = useState("");
-  const [officialTypingUsers, setOfficialTypingUsers] = useState<{ [key: string]: boolean }>({});
   const [officialReplyTo, setOfficialReplyTo] = useState<Message | null>(null);
   const [officialPinnedMessages, setOfficialPinnedMessages] = useState<Message[]>([]);
   const [showOfficialPinnedMessages, setShowOfficialPinnedMessages] = useState(false);
   const [officialUnreadCount, setOfficialUnreadCount] = useState(0);
+  const [officialTypingUsers, setOfficialTypingUsers] = useState<string[]>([]);
 
   // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -726,7 +726,7 @@ export default function HomePage(): React.JSX.Element {
           unreadCount++;
         }
         // Track last message
-        if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > lastMessageTime?.seconds)) {
+        if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
           lastMessage = msg.text;
           lastMessageTime = msg.timestamp;
           lastMessageSenderId = msg.senderId;
@@ -782,7 +782,8 @@ export default function HomePage(): React.JSX.Element {
             lastMessageTime: lastMessageTime,
             lastMessageSenderId: lastMessageSenderId,
             unreadCount: unreadCount,
-            isPinned: false
+            isPinned: false,
+            typingUsers: []
           });
         }
         
@@ -814,32 +815,37 @@ export default function HomePage(): React.JSX.Element {
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const typingMap: { [key: string]: boolean } = {};
-      const userTypingList: string[] = [];
+      const officialTypingList: string[] = [];
       
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.typing && data.id !== user?.uid) {
           typingMap[data.id] = true;
-          userTypingList.push(data.id);
+          
+          // For official chat - all users typing are shown
+          const isOfficial = data.isOfficial || false;
+          if (isOfficial || true) {
+            const foundUser = users.find(u => u.id === data.id);
+            if (foundUser) {
+              officialTypingList.push(foundUser.name);
+            }
+          }
         }
       });
       
-      setOfficialTypingUsers(typingMap);
+      setOfficialTypingUsers(officialTypingList);
       
       // Update chat rooms with typing users
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
-          // For official chat, all typing users are shown
-          const typingUsers = userTypingList.filter(id => {
-            const foundUser = users.find(u => u.id === id);
-            return foundUser && (foundUser.isOfficial || true);
-          });
-          return { ...room, typingUsers };
+          // For official chat, show all typing users
+          return { ...room, typingUsers: officialTypingList };
         } else {
           // For regular chat, only check if the specific user is typing
           const otherId = room.participants.find(id => id !== user.uid);
           if (otherId && typingMap[otherId]) {
-            return { ...room, typingUsers: [otherId] };
+            const foundUser = users.find(u => u.id === otherId);
+            return { ...room, typingUsers: foundUser ? [foundUser.name] : [] };
           }
           return { ...room, typingUsers: [] };
         }
@@ -930,18 +936,6 @@ export default function HomePage(): React.JSX.Element {
           typingUsers: []
         });
       }
-      
-      // Preserve typing users from existing rooms
-      const existingRooms = chatRooms.reduce((acc, room) => {
-        acc[room.id] = room.typingUsers || [];
-        return acc;
-      }, {} as { [key: string]: string[] });
-      
-      rooms.forEach(room => {
-        if (existingRooms[room.id]) {
-          room.typingUsers = existingRooms[room.id];
-        }
-      });
       
       rooms.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
@@ -1603,37 +1597,16 @@ export default function HomePage(): React.JSX.Element {
   // Get typing users for display in list
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    const typingNames = room.typingUsers.map(id => {
-      const foundUser = users.find(u => u.id === id);
-      return foundUser ? foundUser.name : null;
-    }).filter(Boolean);
-    if (typingNames.length === 0) return null;
-    return typingNames.join(", ");
+    return room.typingUsers.join(", ");
   };
-
-  // Get typing users in official chat
-  const getOfficialTypingUsers = () => {
-    const typingList: { name: string; id: string }[] = [];
-    Object.keys(officialTypingUsers).forEach(userId => {
-      if (officialTypingUsers[userId] && userId !== user?.uid) {
-        const foundUser = users.find(u => u.id === userId);
-        if (foundUser) {
-          typingList.push({ name: foundUser.name, id: userId });
-        }
-      }
-    });
-    return typingList;
-  };
-
-  const typingUsersList = getOfficialTypingUsers();
 
   // Get typing users in regular chat
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
-    const typingList: { name: string; id: string }[] = [];
+    const typingList: string[] = [];
     const selectedUser = users.find(u => u.id === selectedChat.id);
     if (selectedUser && selectedUser.typing && selectedUser.id !== user?.uid) {
-      typingList.push({ name: selectedUser.name, id: selectedUser.id });
+      typingList.push(selectedUser.name);
     }
     return typingList;
   };
@@ -1679,6 +1652,9 @@ export default function HomePage(): React.JSX.Element {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
+
+  // Get typing users for official chat display
+  const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
 
   return (
     <div
@@ -2144,7 +2120,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Chat Box */}
+      {/* Chat Box - hanya bagian yang perlu diubah untuk menampilkan typing indicator */}
       <div
         style={{
           position: "fixed",
@@ -2177,7 +2153,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: FONT_FAMILY,
               }}
             >
-              {/* Header */}
+              {/* Header - sama seperti sebelumnya */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -2268,7 +2244,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page */}
+              {/* Content - Update Detail Page, Update System, Privacy Policy, Profile - sama seperti sebelumnya */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -2279,6 +2255,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
+                  {/* ... konten update detail ... */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -2479,7 +2456,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showUpdate ? (
-                // Update List Page
                 <div
                   style={{
                     flex: 1,
@@ -2489,6 +2465,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
+                  {/* ... konten update system ... */}
                   <div style={{ marginBottom: "28px" }}>
                     <div
                       style={{
@@ -2698,7 +2675,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showPrivacyPolicy ? (
-                // Privacy Policy Page
                 <div
                   style={{
                     flex: 1,
@@ -2708,6 +2684,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
+                  {/* ... konten privacy policy ... */}
                   <div style={{ marginBottom: "24px" }}>
                     <div
                       style={{
@@ -3016,6 +2993,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : showProfile && profileUser ? (
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
+                  {/* ... konten profile ... */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -4247,7 +4225,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         {/* Typing indicator di body - MULTI USER untuk official chat */}
-                        {typingUsersList.length > 0 && (
+                        {officialTypingDisplay && (
                           <div
                             style={{
                               textAlign: "center",
@@ -4260,7 +4238,7 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: 500,
                             }}
                           >
-                            {typingUsersList.map(u => u.name).join(", ")} typing...
+                            {officialTypingDisplay} typing...
                           </div>
                         )}
 
@@ -4569,7 +4547,7 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         {/* Typing indicator di atas input - MULTI USER untuk official chat */}
-                        {typingUsersList.length > 0 && (
+                        {officialTypingDisplay && (
                           <div
                             style={{
                               textAlign: "left",
@@ -4583,7 +4561,7 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: 500,
                             }}
                           >
-                            {typingUsersList.map(u => u.name).join(", ")} typing...
+                            {officialTypingDisplay} typing...
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -4810,7 +4788,7 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: 500,
                             }}
                           >
-                            {regularTypingUsers.map(u => u.name).join(", ")} typing...
+                            {regularTypingUsers.join(", ")} typing...
                           </div>
                         )}
 
@@ -5131,7 +5109,7 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: 500,
                             }}
                           >
-                            {regularTypingUsers.map(u => u.name).join(", ")} typing...
+                            {regularTypingUsers.join(", ")} typing...
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
