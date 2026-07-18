@@ -25,7 +25,8 @@ import {
   getDoc,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  onSnapshotsInSync
 } from "firebase/firestore";
 
 // Firebase Config
@@ -700,7 +701,7 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load official chat messages
+  // Load official chat messages - SEPERTI ROOM CHAT BIASA
   useEffect(() => {
     if (!db || !user) return;
 
@@ -725,9 +726,15 @@ export default function HomePage(): React.JSX.Element {
         if (!msg.read && msg.senderId !== user.uid) {
           unreadCount++;
         }
-        // Track last message
+        // Track last message - format seperti room chat biasa
         if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
-          lastMessage = msg.text;
+          // Format pesan terakhir seperti room chat biasa: "Menuru Official (from NamaUser): pesan"
+          const senderName = msg.senderId === "official_menuru" ? "Menuru Official" : msg.senderName;
+          if (msg.senderId !== "official_menuru") {
+            lastMessage = `Menuru Official (from ${senderName}): ${msg.text}`;
+          } else {
+            lastMessage = msg.text;
+          }
           lastMessageTime = msg.timestamp;
           lastMessageSenderId = msg.senderId;
         }
@@ -757,7 +764,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
-      // Update chat rooms with official chat data
+      // Update chat rooms with official chat data - SAMA SEPERTI ROOM CHAT BIASA
       setChatRooms(prev => {
         const updatedRooms = prev.map(room => {
           if (room.id === OFFICIAL_CHAT_ID) {
@@ -808,44 +815,40 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status in all chats
+  // Listen for typing status - TERPISAH PER USER
   useEffect(() => {
     if (!db || !user) return;
 
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      const typingMap: { [key: string]: boolean } = {};
-      const officialTypingList: string[] = [];
+      const typingList: string[] = [];
       
       snapshot.forEach((doc) => {
         const data = doc.data();
+        // Cek user yang sedang mengetik di official chat
         if (data.typing && data.id !== user?.uid) {
-          typingMap[data.id] = true;
-          
-          // For official chat - all users typing are shown
-          const isOfficial = data.isOfficial || false;
-          if (isOfficial || true) {
-            const foundUser = users.find(u => u.id === data.id);
-            if (foundUser) {
-              officialTypingList.push(foundUser.name);
-            }
+          const foundUser = users.find(u => u.id === data.id);
+          if (foundUser) {
+            typingList.push(foundUser.name);
           }
         }
       });
       
-      setOfficialTypingUsers(officialTypingList);
+      setOfficialTypingUsers(typingList);
       
-      // Update chat rooms with typing users
+      // Update chat rooms dengan typing users
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
-          // For official chat, show all typing users
-          return { ...room, typingUsers: officialTypingList };
+          // Untuk official chat, tampilkan semua user yang sedang mengetik
+          return { ...room, typingUsers: typingList };
         } else {
-          // For regular chat, only check if the specific user is typing
+          // Untuk regular chat, cek user spesifik
           const otherId = room.participants.find(id => id !== user.uid);
-          if (otherId && typingMap[otherId]) {
+          if (otherId) {
             const foundUser = users.find(u => u.id === otherId);
-            return { ...room, typingUsers: foundUser ? [foundUser.name] : [] };
+            if (foundUser && foundUser.typing) {
+              return { ...room, typingUsers: [foundUser.name] };
+            }
           }
           return { ...room, typingUsers: [] };
         }
@@ -925,10 +928,19 @@ export default function HomePage(): React.JSX.Element {
       const hasOfficial = rooms.some(r => r.id === OFFICIAL_CHAT_ID);
       if (!hasOfficial) {
         const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
+        let lastMessage = "Chat with Menuru Official";
+        if (officialLastMsg) {
+          const senderName = officialLastMsg.senderId === "official_menuru" ? "Menuru Official" : officialLastMsg.senderName;
+          if (officialLastMsg.senderId !== "official_menuru") {
+            lastMessage = `Menuru Official (from ${senderName}): ${officialLastMsg.text}`;
+          } else {
+            lastMessage = officialLastMsg.text;
+          }
+        }
         rooms.push({
           id: OFFICIAL_CHAT_ID,
           participants: ["official_menuru", user.uid],
-          lastMessage: officialLastMsg ? officialLastMsg.text : "Chat with Menuru Official",
+          lastMessage: lastMessage,
           lastMessageTime: officialLastMsg ? officialLastMsg.timestamp : null,
           lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
           unreadCount: officialUnreadCount,
@@ -1149,7 +1161,7 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle typing for official chat
+  // Handle typing for official chat - TERPISAH
   const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setOfficialMessageInput(value);
@@ -1311,7 +1323,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to official chat
+  // Send message to official chat - SEPERTI ROOM CHAT BIASA
   const handleSendOfficialMessage = async () => {
     if (!user || !officialMessageInput.trim() || !db) {
       return;
@@ -2120,7 +2132,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Chat Box - hanya bagian yang perlu diubah untuk menampilkan typing indicator */}
+      {/* Chat Box */}
       <div
         style={{
           position: "fixed",
@@ -2153,7 +2165,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: FONT_FAMILY,
               }}
             >
-              {/* Header - sama seperti sebelumnya */}
+              {/* Header */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -4532,7 +4544,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for official chat - dengan typing indicator di atas input */}
+                      {/* Input for official chat */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -4546,7 +4558,7 @@ export default function HomePage(): React.JSX.Element {
                           flexShrink: 0,
                         }}
                       >
-                        {/* Typing indicator di atas input - MULTI USER untuk official chat */}
+                        {/* Typing indicator di atas input */}
                         {officialTypingDisplay && (
                           <div
                             style={{
