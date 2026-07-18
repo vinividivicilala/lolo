@@ -1997,6 +1997,7 @@ export default function HomePage(): React.JSX.Element {
                   justifyContent: "space-between",
                   alignItems: "center",
                   backgroundColor: "#000000",
+                  flexShrink: 0,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -3335,7 +3336,6 @@ export default function HomePage(): React.JSX.Element {
                   </AnimatePresence>
 
                   {/* Pinned Users - tanpa icon */}
-
                   {pinnedUsers.length > 0 && (
                     <div style={{ marginBottom: "10px" }}>
                       <div
@@ -3805,8 +3805,8 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View
-                <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
+                // Chat View - dengan perbaikan tinggi
+                <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                   {/* Chat Header */}
                   <div
                     style={{
@@ -3816,6 +3816,7 @@ export default function HomePage(): React.JSX.Element {
                       alignItems: "center",
                       gap: "10px",
                       backgroundColor: "#000000",
+                      flexShrink: 0,
                     }}
                   >
                     <motion.button
@@ -3940,8 +3941,8 @@ export default function HomePage(): React.JSX.Element {
 
                   {/* Official Chat View */}
                   {isOfficialChatSelected ? (
-                    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      {/* Pinned Messages di Official Chat - tanpa icon */}
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                      {/* Pinned Messages di Official Chat */}
                       {officialPinnedMessages.length > 0 && (
                         <div
                           style={{
@@ -3949,6 +3950,7 @@ export default function HomePage(): React.JSX.Element {
                             backgroundColor: "rgba(0,0,0,0.02)",
                             borderBottom: "1px solid rgba(0,0,0,0.04)",
                             fontFamily: FONT_FAMILY,
+                            flexShrink: 0,
                           }}
                         >
                           <div
@@ -4016,6 +4018,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
+                      {/* Messages Area */}
                       <div
                         style={{
                           flex: 1,
@@ -4026,6 +4029,7 @@ export default function HomePage(): React.JSX.Element {
                           flexDirection: "column",
                           gap: "4px",
                           fontFamily: FONT_FAMILY,
+                          minHeight: 0,
                         }}
                       >
                         {/* Typing indicator in body - MULTI USER */}
@@ -4332,7 +4336,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for official chat - AKTIF */}
+                      {/* Input for official chat - FIXED AT BOTTOM */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -4343,6 +4347,7 @@ export default function HomePage(): React.JSX.Element {
                           backgroundColor: "#ffffff",
                           fontFamily: FONT_FAMILY,
                           position: "relative",
+                          flexShrink: 0,
                         }}
                       >
                         {/* Typing indicator above input - MULTI USER */}
@@ -4431,7 +4436,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   ) : (
                     // Regular Chat View
-                    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && (
                         <div
@@ -4440,6 +4445,7 @@ export default function HomePage(): React.JSX.Element {
                             backgroundColor: "rgba(0,0,0,0.02)",
                             borderBottom: "1px solid rgba(0,0,0,0.04)",
                             fontFamily: FONT_FAMILY,
+                            flexShrink: 0,
                           }}
                         >
                           <div
@@ -4516,6 +4522,7 @@ export default function HomePage(): React.JSX.Element {
                             justifyContent: "space-between",
                             alignItems: "center",
                             fontFamily: FONT_FAMILY,
+                            flexShrink: 0,
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4567,6 +4574,7 @@ export default function HomePage(): React.JSX.Element {
                           flexDirection: "column",
                           gap: "4px",
                           fontFamily: FONT_FAMILY,
+                          minHeight: 0,
                         }}
                       >
                         {/* Typing indicator in body for regular chat */}
@@ -4873,7 +4881,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input */}
+                      {/* Input for regular chat */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -4884,6 +4892,7 @@ export default function HomePage(): React.JSX.Element {
                           backgroundColor: "#ffffff",
                           fontFamily: FONT_FAMILY,
                           position: "relative",
+                          flexShrink: 0,
                         }}
                       >
                         {/* Typing indicator above input for regular chat */}
