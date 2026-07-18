@@ -108,6 +108,7 @@ interface ChatRoom {
   lastMessageSenderId?: string;
   unreadCount: number;
   isPinned?: boolean;
+  typingUsers?: string[];
 }
 
 interface UpdateItem {
@@ -710,6 +711,9 @@ export default function HomePage(): React.JSX.Element {
       const msgList: Message[] = [];
       const pinnedList: Message[] = [];
       let unreadCount = 0;
+      let lastMessage = "";
+      let lastMessageTime = null;
+      let lastMessageSenderId = "";
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
@@ -720,6 +724,12 @@ export default function HomePage(): React.JSX.Element {
         // Count unread messages not from current user
         if (!msg.read && msg.senderId !== user.uid) {
           unreadCount++;
+        }
+        // Track last message
+        if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > lastMessageTime?.seconds)) {
+          lastMessage = msg.text;
+          lastMessageTime = msg.timestamp;
+          lastMessageSenderId = msg.senderId;
         }
       });
       
@@ -744,25 +754,50 @@ export default function HomePage(): React.JSX.Element {
         
         if (unreadMessages.length > 0) {
           setOfficialUnreadCount(0);
-          // Update total unread
-          setTotalUnread(prev => Math.max(0, prev - unreadMessages.length));
         }
       }
       
       // Update chat rooms with official chat data
-      setChatRooms(prev => prev.map(room => {
-        if (room.id === OFFICIAL_CHAT_ID) {
-          const lastMsg = msgList.length > 0 ? msgList[msgList.length - 1] : null;
-          return {
-            ...room,
-            lastMessage: lastMsg ? lastMsg.text : "Chat with Menuru Official",
-            lastMessageTime: lastMsg ? lastMsg.timestamp : null,
-            lastMessageSenderId: lastMsg ? lastMsg.senderId : "",
-            unreadCount: unreadCount
-          };
+      setChatRooms(prev => {
+        const updatedRooms = prev.map(room => {
+          if (room.id === OFFICIAL_CHAT_ID) {
+            return {
+              ...room,
+              lastMessage: lastMessage || "Chat with Menuru Official",
+              lastMessageTime: lastMessageTime,
+              lastMessageSenderId: lastMessageSenderId,
+              unreadCount: unreadCount
+            };
+          }
+          return room;
+        });
+        
+        // If official room not in list, add it
+        const hasOfficial = updatedRooms.some(r => r.id === OFFICIAL_CHAT_ID);
+        if (!hasOfficial) {
+          updatedRooms.push({
+            id: OFFICIAL_CHAT_ID,
+            participants: ["official_menuru", user.uid],
+            lastMessage: lastMessage || "Chat with Menuru Official",
+            lastMessageTime: lastMessageTime,
+            lastMessageSenderId: lastMessageSenderId,
+            unreadCount: unreadCount,
+            isPinned: false
+          });
         }
-        return room;
-      }));
+        
+        // Sort rooms
+        updatedRooms.sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          if (a.lastMessageTime && b.lastMessageTime) {
+            return b.lastMessageTime.seconds - a.lastMessageTime.seconds;
+          }
+          return 0;
+        });
+        
+        return updatedRooms;
+      });
       
       // Update total unread
       const otherRoomsUnread = chatRooms.filter(r => r.id !== OFFICIAL_CHAT_ID).reduce((sum, r) => sum + r.unreadCount, 0);
@@ -772,25 +807,47 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status in official chat
+  // Listen for typing status in all chats
   useEffect(() => {
     if (!db || !user) return;
 
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const typingMap: { [key: string]: boolean } = {};
+      const userTypingList: string[] = [];
+      
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.typing && data.id !== user?.uid) {
-          // All users in official chat can see typing indicators
           typingMap[data.id] = true;
+          userTypingList.push(data.id);
         }
       });
+      
       setOfficialTypingUsers(typingMap);
+      
+      // Update chat rooms with typing users
+      setChatRooms(prev => prev.map(room => {
+        if (room.id === OFFICIAL_CHAT_ID) {
+          // For official chat, all typing users are shown
+          const typingUsers = userTypingList.filter(id => {
+            const foundUser = users.find(u => u.id === id);
+            return foundUser && (foundUser.isOfficial || true);
+          });
+          return { ...room, typingUsers };
+        } else {
+          // For regular chat, only check if the specific user is typing
+          const otherId = room.participants.find(id => id !== user.uid);
+          if (otherId && typingMap[otherId]) {
+            return { ...room, typingUsers: [otherId] };
+          }
+          return { ...room, typingUsers: [] };
+        }
+      }));
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, users]);
 
   // Load chat rooms
   useEffect(() => {
@@ -851,23 +908,39 @@ export default function HomePage(): React.JSX.Element {
               lastMessageTime,
               lastMessageSenderId,
               unreadCount,
-              isPinned: data.isPinned || false
+              isPinned: data.isPinned || false,
+              typingUsers: []
             });
           }
         }
       }
       
-      // Add official chat room with latest data
-      const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
+      // Add official chat room if not exists
+      const hasOfficial = rooms.some(r => r.id === OFFICIAL_CHAT_ID);
+      if (!hasOfficial) {
+        const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
+        rooms.push({
+          id: OFFICIAL_CHAT_ID,
+          participants: ["official_menuru", user.uid],
+          lastMessage: officialLastMsg ? officialLastMsg.text : "Chat with Menuru Official",
+          lastMessageTime: officialLastMsg ? officialLastMsg.timestamp : null,
+          lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
+          unreadCount: officialUnreadCount,
+          isPinned: false,
+          typingUsers: []
+        });
+      }
       
-      rooms.push({
-        id: OFFICIAL_CHAT_ID,
-        participants: ["official_menuru", user.uid],
-        lastMessage: officialLastMsg ? officialLastMsg.text : "Chat with Menuru Official",
-        lastMessageTime: officialLastMsg ? officialLastMsg.timestamp : null,
-        lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
-        unreadCount: officialUnreadCount,
-        isPinned: false
+      // Preserve typing users from existing rooms
+      const existingRooms = chatRooms.reduce((acc, room) => {
+        acc[room.id] = room.typingUsers || [];
+        return acc;
+      }, {} as { [key: string]: string[] });
+      
+      rooms.forEach(room => {
+        if (existingRooms[room.id]) {
+          room.typingUsers = existingRooms[room.id];
+        }
       });
       
       rooms.sort((a, b) => {
@@ -1526,6 +1599,17 @@ export default function HomePage(): React.JSX.Element {
     !chatRooms.some(room => room.participants.includes(u.id)) &&
     u.id !== "official_menuru"
   );
+
+  // Get typing users for display in list
+  const getTypingUsersDisplay = (room: ChatRoom) => {
+    if (!room.typingUsers || room.typingUsers.length === 0) return null;
+    const typingNames = room.typingUsers.map(id => {
+      const foundUser = users.find(u => u.id === id);
+      return foundUser ? foundUser.name : null;
+    }).filter(Boolean);
+    if (typingNames.length === 0) return null;
+    return typingNames.join(", ");
+  };
 
   // Get typing users in official chat
   const getOfficialTypingUsers = () => {
@@ -3707,6 +3791,7 @@ export default function HomePage(): React.JSX.Element {
                     ) : (
                       unpinnedChats.map((room) => {
                         if (room.id === OFFICIAL_CHAT_ID) {
+                          const typingDisplay = getTypingUsersDisplay(room);
                           return (
                             <motion.div
                               key={room.id}
@@ -3751,7 +3836,11 @@ export default function HomePage(): React.JSX.Element {
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
-                                  {room.lastMessage || "Chat with Menuru Official"}
+                                  {typingDisplay ? (
+                                    <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
+                                  ) : (
+                                    room.lastMessage || "Chat with Menuru Official"
+                                  )}
                                 </div>
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
@@ -3789,6 +3878,7 @@ export default function HomePage(): React.JSX.Element {
                         if (!otherUser) return null;
                         
                         const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
+                        const typingDisplay = getTypingUsersDisplay(room);
                         
                         return (
                           <motion.div
@@ -3853,13 +3943,17 @@ export default function HomePage(): React.JSX.Element {
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
-                                {room.lastMessage ? (
-                                  <>
-                                    {isLastMessageFromMe && "Messages: "}
-                                    {room.lastMessage}
-                                  </>
+                                {typingDisplay ? (
+                                  <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                 ) : (
-                                  "No messages"
+                                  room.lastMessage ? (
+                                    <>
+                                      {isLastMessageFromMe && "Messages: "}
+                                      {room.lastMessage}
+                                    </>
+                                  ) : (
+                                    "No messages"
+                                  )
                                 )}
                               </div>
                             </div>
