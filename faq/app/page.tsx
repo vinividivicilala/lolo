@@ -121,7 +121,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons
+// SVG Icons - Pin Icon yang benar (bukan bintang)
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -189,7 +189,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
+// Instagram Verified Badge - hanya untuk official account
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -553,7 +553,7 @@ export default function HomePage(): React.JSX.Element {
               photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: isAdminUser,
+              isOfficial: false,
               isAdmin: isAdminUser,
               online: true,
               lastSeen: serverTimestamp(),
@@ -577,7 +577,7 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: googlePhotoURL,
                 name: googleName,
                 lastSeen: serverTimestamp(),
-                isOfficial: isAdminUser,
+                isOfficial: false,
                 isAdmin: isAdminUser
               });
             }
@@ -641,7 +641,7 @@ export default function HomePage(): React.JSX.Element {
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
-            isOfficial: isAdmin,
+            isOfficial: false,
             isAdmin: isAdmin,
             online: true,
             lastSeen: null,
@@ -662,7 +662,7 @@ export default function HomePage(): React.JSX.Element {
                 name: user.displayName || userList[index].name || "",
                 bio: user.bio || userList[index].bio || "",
                 note: user.note || userList[index].note || "",
-                isOfficial: isAdmin,
+                isOfficial: false,
                 isAdmin: isAdmin
               };
             }
@@ -1641,7 +1641,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </motion.div>
 
-      {/* User Status */}
+      {/* User Status - Tanpa badge verified untuk admin */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1706,7 +1706,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {isAdmin && <InstagramVerifiedBadge size={14} />}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -1966,8 +1965,7 @@ export default function HomePage(): React.JSX.Element {
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
-                    {u.isAdmin && <InstagramVerifiedBadge size={14} />}
-                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    {u.isAdmin && " (Admin)"}
                   </option>
                 ))}
               </select>
@@ -2890,7 +2888,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showProfile && profileUser ? (
-                // Profile View
+                // Profile View - Tanpa badge verified untuk admin
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
@@ -3072,7 +3070,8 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {profileUser.isOfficial && (
+                        {/* Hanya official yang dapat badge verified */}
+                        {profileUser.isOfficial && !profileUser.isAdmin && (
                           <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                             <InstagramVerifiedBadge size={16} />
                           </div>
@@ -3083,8 +3082,8 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
-                          {profileUser.isAdmin && <InstagramVerifiedBadge size={14} />}
+                          {/* Hanya official yang dapat badge verified */}
+                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3354,7 +3353,6 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
-                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3482,7 +3480,6 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3597,7 +3594,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3668,7 +3664,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
-                        // Show official chat room - no icon, just text
+                        // Show official chat room
                         if (room.id === OFFICIAL_CHAT_ID) {
                           return (
                             <motion.div
@@ -3710,6 +3706,7 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
+                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3806,7 +3803,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3948,6 +3944,12 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
+                      {/* Hanya official yang dapat badge verified di avatar */}
+                      {isOfficialChatSelected && (
+                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                          <InstagramVerifiedBadge size={12} />
+                        </div>
+                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -3957,7 +3959,7 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                        {/* Hanya official yang dapat badge verified */}
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4023,17 +4025,18 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body */}
+                        {/* Typing indicator in body - Multiple users dengan warna hitam */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
                               textAlign: "center",
                               fontSize: "12px",
-                              color: "#999",
+                              color: "#000000",
                               padding: "4px 0",
                               fontStyle: "italic",
                               fontFamily: FONT_FAMILY,
                               backgroundColor: "transparent",
+                              fontWeight: 500,
                             }}
                           >
                             {typingUsersList.map(u => u.name).join(", ")} typing...
@@ -4110,7 +4113,6 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
-                                      {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4331,10 +4333,10 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for official chat */}
+                      {/* Input for official chat - lebih tinggi */}
                       <div
                         style={{
-                          padding: "10px 14px 14px",
+                          padding: "12px 14px 16px",
                           borderTop: "1px solid rgba(0,0,0,0.04)",
                           display: "flex",
                           flexDirection: "column",
@@ -4344,18 +4346,19 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator above input */}
+                        {/* Typing indicator above input - warna hitam */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
                               textAlign: "left",
                               fontSize: "12px",
-                              color: "#999",
+                              color: "#000000",
                               fontStyle: "italic",
                               fontFamily: FONT_FAMILY,
                               padding: "2px 4px",
                               backgroundColor: "transparent",
                               marginBottom: "2px",
+                              fontWeight: 500,
                             }}
                           >
                             {typingUsersList.map(u => u.name).join(", ")} typing...
@@ -4857,7 +4860,7 @@ export default function HomePage(): React.JSX.Element {
                       {/* Input */}
                       <div
                         style={{
-                          padding: "10px 14px 14px",
+                          padding: "12px 14px 16px",
                           borderTop: "1px solid rgba(0,0,0,0.04)",
                           display: "flex",
                           flexDirection: "column",
@@ -4872,12 +4875,13 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               textAlign: "left",
                               fontSize: "12px",
-                              color: "#999",
+                              color: "#000000",
                               fontStyle: "italic",
                               fontFamily: FONT_FAMILY,
                               padding: "2px 4px",
                               backgroundColor: "transparent",
                               marginBottom: "2px",
+                              fontWeight: 500,
                             }}
                           >
                             {typingUsersList.map(u => u.name).join(", ")} typing...
