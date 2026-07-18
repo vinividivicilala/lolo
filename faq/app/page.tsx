@@ -121,7 +121,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons
+// SVG Icons - Pin Icon yang benar (bukan bintang)
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -437,6 +437,7 @@ export default function HomePage(): React.JSX.Element {
   const [officialMessageInput, setOfficialMessageInput] = useState("");
   const [officialTypingUsers, setOfficialTypingUsers] = useState<{ [key: string]: boolean }>({});
   const [officialReplyTo, setOfficialReplyTo] = useState<Message | null>(null);
+  const [officialPinnedMessages, setOfficialPinnedMessages] = useState<Message[]>([]);
 
   // Banner rolling text
   const [bannerTextIndex, setBannerTextIndex] = useState(0);
@@ -711,13 +712,18 @@ export default function HomePage(): React.JSX.Element {
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const msgList: Message[] = [];
+      const pinnedList: Message[] = [];
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
         msgList.push(msg);
+        if (msg.isPinned) {
+          pinnedList.push(msg);
+        }
       });
       
       setOfficialMessages(msgList);
+      setOfficialPinnedMessages(pinnedList);
       
       // Mark messages as read for current user
       const unreadMessages = msgList.filter(m => 
@@ -1306,7 +1312,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin message
+  // Pin/Unpin message - FIX: menggunakan PinIcon
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean, isOfficial: boolean = false) => {
     if (!db) return;
     try {
@@ -1321,6 +1327,15 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
       setShowMessageMenu(null);
+      
+      // Update pinned messages list for official chat
+      if (isOfficial) {
+        const updatedMsgs = officialMessages.map(msg => 
+          msg.id === messageId ? { ...msg, isPinned: !currentPinned, pinnedAt: !currentPinned ? new Date() : null } : msg
+        );
+        setOfficialMessages(updatedMsgs);
+        setOfficialPinnedMessages(updatedMsgs.filter(m => m.isPinned));
+      }
     } catch (error) {
       console.error("Error pinning message:", error);
     }
@@ -1641,7 +1656,7 @@ export default function HomePage(): React.JSX.Element {
         </span>
       </motion.div>
 
-      {/* User Status - Admin dengan badge verified */}
+      {/* User Status */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1967,6 +1982,7 @@ export default function HomePage(): React.JSX.Element {
                   <option key={u.id} value={u.id}>
                     {u.name}
                     {u.isAdmin && <InstagramVerifiedBadge size={14} />}
+                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -2889,7 +2905,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showProfile && profileUser ? (
-                // Profile View - Admin dengan badge verified, Official tanpa badge di foto
+                // Profile View
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <motion.button
@@ -3071,14 +3087,19 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
+                        {profileUser.isOfficial && (
+                          <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                            <InstagramVerifiedBadge size={16} />
+                          </div>
+                        )}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {/* Badge verified untuk admin, bukan untuk official */}
                           {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                          {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3348,6 +3369,7 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
+                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3661,7 +3683,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     ) : (
                       unpinnedChats.map((room) => {
-                        // Show official chat room - tanpa badge verified di avatar
+                        // Show official chat room
                         if (room.id === OFFICIAL_CHAT_ID) {
                           return (
                             <motion.div
@@ -3703,6 +3725,7 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
+                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3787,6 +3810,11 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
+                              {otherUser.isOfficial && (
+                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                                  <InstagramVerifiedBadge size={12} />
+                                </div>
+                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3800,6 +3828,7 @@ export default function HomePage(): React.JSX.Element {
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3868,7 +3897,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View - Official Chat View
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", height: "580px", fontFamily: FONT_FAMILY }}>
                   {/* Chat Header */}
                   <div
@@ -3941,7 +3970,16 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {/* Official chat tidak pakai badge verified di avatar */}
+                      {isOfficialChatSelected && (
+                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                          <InstagramVerifiedBadge size={12} />
+                        </div>
+                      )}
+                      {!isOfficialChatSelected && selectedChat.isOfficial && (
+                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                          <InstagramVerifiedBadge size={12} />
+                        </div>
+                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -3951,7 +3989,8 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {/* Admin dapat badge verified di header chat, official tidak */}
+                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
+                        {!isOfficialChatSelected && selectedChat.isOfficial && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4005,6 +4044,80 @@ export default function HomePage(): React.JSX.Element {
                   {/* Official Chat View */}
                   {isOfficialChatSelected ? (
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                      {/* Pinned Messages di Official Chat */}
+                      {officialPinnedMessages.length > 0 && (
+                        <div
+                          style={{
+                            padding: "6px 14px",
+                            backgroundColor: "rgba(0,0,0,0.02)",
+                            borderBottom: "1px solid rgba(0,0,0,0.04)",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div
+                            onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              cursor: "pointer",
+                              color: "#999",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <PinIcon filled={true} />
+                              <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                                Pinned Messages ({officialPinnedMessages.length})
+                              </span>
+                            </div>
+                            <PinDropdownIcon isOpen={showPinnedMessages} />
+                          </div>
+                          <AnimatePresence>
+                            {showPinnedMessages && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}
+                              >
+                                {officialPinnedMessages.map((msg) => {
+                                  const isMine = msg.senderId === user?.uid;
+                                  return (
+                                    <div
+                                      key={msg.id}
+                                      style={{
+                                        padding: "4px 8px",
+                                        marginBottom: "2px",
+                                        borderRadius: "4px",
+                                        backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
+                                        fontSize: "11px",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <div style={{ flex: 1 }}>
+                                        <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
+                                          {isMine ? "Messages: " : `${msg.senderName}: `}
+                                        </span>
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
+                                          {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
+                                        </span>
+                                      </div>
+                                      <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
+                                        {formatTime(msg.pinnedAt || msg.timestamp)}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+
                       <div
                         style={{
                           flex: 1,
@@ -4017,7 +4130,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body - Multiple users */}
+                        {/* Typing indicator in body */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4057,7 +4170,6 @@ export default function HomePage(): React.JSX.Element {
                             const showDate = idx === 0 || !officialMessages[idx-1]?.timestamp || 
                               formatDate(msg.timestamp) !== formatDate(officialMessages[idx-1]?.timestamp);
                             
-                            // Warna pesan: pengirim = biru (#4A90D9), penerima = merah (#FF6B6B)
                             const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
                             
                             return (
@@ -4095,7 +4207,6 @@ export default function HomePage(): React.JSX.Element {
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  {/* Tampilkan nama pengirim di official chat */}
                                   {!isMine && (
                                     <div style={{ 
                                       fontSize: "11px", 
@@ -4106,6 +4217,7 @@ export default function HomePage(): React.JSX.Element {
                                     }}>
                                       {msg.senderName}
                                       {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                      {users.find(u => u.id === msg.senderId)?.isOfficial && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4326,10 +4438,10 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for official chat - lebih tinggi */}
+                      {/* Input for official chat - tinggi normal */}
                       <div
                         style={{
-                          padding: "12px 14px 16px",
+                          padding: "10px 14px 14px",
                           borderTop: "1px solid rgba(0,0,0,0.04)",
                           display: "flex",
                           flexDirection: "column",
@@ -4425,8 +4537,132 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   ) : (
                     // Regular Chat View - sama seperti sebelumnya
-                    // ... (kode regular chat view)
+                    // ... (kode regular chat view tetap sama)
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                      {/* Pinned Messages */}
+                      {pinnedMessages.length > 0 && (
+                        <div
+                          style={{
+                            padding: "6px 14px",
+                            backgroundColor: "rgba(0,0,0,0.02)",
+                            borderBottom: "1px solid rgba(0,0,0,0.04)",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div
+                            onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              cursor: "pointer",
+                              color: "#999",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <PinIcon filled={true} />
+                              <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                                Pinned Messages ({pinnedMessages.length})
+                              </span>
+                            </div>
+                            <PinDropdownIcon isOpen={showPinnedMessages} />
+                          </div>
+                          <AnimatePresence>
+                            {showPinnedMessages && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}
+                              >
+                                {pinnedMessages.map((msg) => {
+                                  const isMine = msg.senderId === user?.uid;
+                                  return (
+                                    <div
+                                      key={msg.id}
+                                      style={{
+                                        padding: "4px 8px",
+                                        marginBottom: "2px",
+                                        borderRadius: "4px",
+                                        backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
+                                        fontSize: "11px",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <div style={{ flex: 1 }}>
+                                        <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
+                                          {isMine ? "Messages: " : `${msg.senderName}: `}
+                                        </span>
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
+                                          {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
+                                        </span>
+                                      </div>
+                                      <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
+                                        {formatTime(msg.pinnedAt || msg.timestamp)}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+
+                      {/* Reply Indicator */}
+                      {replyTo && (
+                        <div
+                          style={{
+                            padding: "4px 14px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <ReplyIcon />
+                            <div>
+                              <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                                Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
+                                {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
+                              </div>
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setReplyTo(null)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#999",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              padding: "4px 8px",
+                              borderRadius: "4px",
+                              transition: "all 0.2s ease",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "transparent";
+                            }}
+                          >
+                            ✕
+                          </motion.button>
+                        </div>
+                      )}
+
+                      {/* Messages */}
                       <div
                         style={{
                           flex: 1,
@@ -4730,7 +4966,7 @@ export default function HomePage(): React.JSX.Element {
                       {/* Input */}
                       <div
                         style={{
-                          padding: "12px 14px 16px",
+                          padding: "10px 14px 14px",
                           borderTop: "1px solid rgba(0,0,0,0.04)",
                           display: "flex",
                           flexDirection: "column",
