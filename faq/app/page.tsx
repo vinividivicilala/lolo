@@ -121,13 +121,10 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons - PIN ICON AWWWARDS STYLE
+// SVG Icons - Pin Icon yang benar
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
-    {filled && (
-      <circle cx="12" cy="12" r="8" fill="currentColor" opacity="0.1" />
-    )}
   </svg>
 );
 
@@ -204,7 +201,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
         style={{
-          marginLeft: "2px",
+          marginLeft: "4px",
           display: "inline-block",
           verticalAlign: "middle",
           cursor: "pointer",
@@ -256,7 +253,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
           border: "1px solid rgba(255,255,255,0.05)",
           fontFamily: FONT_FAMILY,
         }}>
-          Verified Account
+          Official Account
           <div style={{
             position: "absolute",
             top: "100%",
@@ -1412,7 +1409,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat
+  // Add existing user to chat - FIX: cek duplikat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1423,6 +1420,7 @@ export default function HomePage(): React.JSX.Element {
         return;
       }
       
+      // Cek apakah chat sudah ada
       const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -1436,7 +1434,6 @@ export default function HomePage(): React.JSX.Element {
         setAddUserStatus(`Chat with ${targetUser.name} created`);
       } else {
         setAddUserStatus(`Chat with ${targetUser.name} already exists`);
-        return;
       }
       
       setSelectedNewUser("");
@@ -1497,17 +1494,18 @@ export default function HomePage(): React.JSX.Element {
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
   
+  // FIX: Available users should exclude users already in chat
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
-    u.id !== "official_menuru" &&
-    !chatRooms.some(room => room.participants.includes(u.id))
+    !chatRooms.some(room => room.participants.includes(u.id)) &&
+    u.id !== "official_menuru"
   );
 
-  // Get typing users in official chat
+  // Get typing users in official chat for body display
   const getOfficialTypingUsers = () => {
     const typingList: { name: string; id: string }[] = [];
     Object.keys(officialTypingUsers).forEach(userId => {
-      if (officialTypingUsers[userId] && userId !== user?.uid && userId !== "official_menuru") {
+      if (officialTypingUsers[userId] && userId !== user?.uid) {
         const foundUser = users.find(u => u.id === userId);
         if (foundUser) {
           typingList.push({ name: foundUser.name, id: userId });
@@ -1557,10 +1555,9 @@ export default function HomePage(): React.JSX.Element {
   }
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
+  
+  // Check if selected chat is official chat room
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
-
-  // Check if selected user is admin
-  const isSelectedUserAdmin = selectedChat?.isAdmin || false;
 
   return (
     <div
@@ -1705,9 +1702,6 @@ export default function HomePage(): React.JSX.Element {
                   color: "#000",
                   cursor: "pointer",
                   fontFamily: FONT_FAMILY,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
                 }}
                 onClick={() => {
                   const selfUser = users.find(u => u.id === user.uid);
@@ -1715,6 +1709,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
+                {isAdmin && " (Admin)"}
                 {isAdmin && <InstagramVerifiedBadge size={14} />}
               </span>
               <OnlineIndicator online={true} />
@@ -2097,18 +2092,6 @@ export default function HomePage(): React.JSX.Element {
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && isOfficialChatSelected && (
                     <>
                       <InstagramVerifiedBadge size={14} />
-                      {typingUsersList.length > 0 && (
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.6)",
-                            fontFamily: FONT_FAMILY,
-                            fontStyle: "italic",
-                          }}
-                        >
-                          {typingUsersList.map(u => u.name).join(", ")} typing...
-                        </span>
-                      )}
                     </>
                   )}
                   {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
@@ -3109,6 +3092,7 @@ export default function HomePage(): React.JSX.Element {
                           </span>
                           {profileUser.isOfficial && <InstagramVerifiedBadge size={16} />}
                           {profileUser.isAdmin && <span style={{ fontSize: "12px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "4px" }}>Admin</span>}
+                          {profileUser.isAdmin && <InstagramVerifiedBadge size={14} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3378,6 +3362,7 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name} {u.isOfficial && <InstagramVerifiedBadge size={12} />}
+                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3506,7 +3491,7 @@ export default function HomePage(): React.JSX.Element {
                                     >
                                       {u.name}
                                       {u.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                      {u.isAdmin && <span style={{ fontSize: "9px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
+                                      {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3622,7 +3607,7 @@ export default function HomePage(): React.JSX.Element {
                                       >
                                         {otherUser.name}
                                         {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                        {otherUser.isAdmin && <span style={{ fontSize: "9px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
+                                        {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3842,7 +3827,7 @@ export default function HomePage(): React.JSX.Element {
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isOfficial && <InstagramVerifiedBadge size={12} />}
-                                {otherUser.isAdmin && <span style={{ fontSize: "10px", color: "#0095f6", fontFamily: FONT_FAMILY, marginLeft: "2px" }}>Admin</span>}
+                                {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -4019,11 +4004,6 @@ export default function HomePage(): React.JSX.Element {
                         {isOfficialChatSelected ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                             Official Account
-                            {typingUsersList.length > 0 && (
-                              <span style={{ marginLeft: "8px", fontStyle: "italic" }}>
-                                {typingUsersList.map(u => u.name).join(", ")} typing...
-                              </span>
-                            )}
                           </span>
                         ) : (
                           getOnlineStatus(selectedChat.id) ? (
@@ -4075,14 +4055,14 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body */}
+                        {/* Typing indicator in body - Multiple users */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
                               textAlign: "center",
                               fontSize: "12px",
                               color: "#999",
-                              padding: "6px 0",
+                              padding: "4px 0",
                               fontStyle: "italic",
                               fontFamily: FONT_FAMILY,
                               backgroundColor: "transparent",
@@ -4114,8 +4094,8 @@ export default function HomePage(): React.JSX.Element {
                             const showDate = idx === 0 || !officialMessages[idx-1]?.timestamp || 
                               formatDate(msg.timestamp) !== formatDate(officialMessages[idx-1]?.timestamp);
                             
-                            // Warna: pengirim biru (#0095f6), penerima merah (#ff6b6b)
-                            const msgColor = isMine ? "#0095f6" : "#ff6b6b";
+                            // Warna pesan: pengirim = biru (#4A90D9), penerima = merah (#FF6B6B)
+                            const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
                             
                             return (
                               <React.Fragment key={idx}>
@@ -4143,37 +4123,34 @@ export default function HomePage(): React.JSX.Element {
                                     maxWidth: "80%",
                                     padding: "10px 14px",
                                     borderRadius: "12px",
-                                    backgroundColor: msgColor,
+                                    backgroundColor: messageColor,
                                     color: "#ffffff",
                                     fontSize: "14px",
                                     lineHeight: 1.5,
                                     position: "relative",
+                                    // Hilangkan border kuning untuk pin, hanya gunakan shadow
+                                    boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  {/* Nama pengirim */}
-                                  <div
-                                    style={{
-                                      fontSize: "10px",
-                                      color: "rgba(255,255,255,0.7)",
+                                  {/* Tampilkan nama pengirim di official chat */}
+                                  {!isMine && (
+                                    <div style={{ 
+                                      fontSize: "11px", 
+                                      color: "rgba(255,255,255,0.8)", 
                                       marginBottom: "4px",
                                       fontFamily: FONT_FAMILY,
-                                      fontWeight: 500,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "4px",
-                                    }}
-                                  >
-                                    {isMine ? "You" : msg.senderName}
-                                    {/* Badge Verified untuk Admin di Official Chat */}
-                                    {!isMine && selectedChat?.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                  </div>
+                                      fontWeight: 500
+                                    }}>
+                                      {msg.senderName}
+                                    </div>
+                                  )}
                                   
                                   {msg.replyTo && msg.replyToText && (
                                     <div
                                       style={{
                                         fontSize: "11px",
-                                        color: "rgba(255,255,255,0.6)",
+                                        color: "rgba(255,255,255,0.7)",
                                         padding: "4px 8px",
                                         borderLeft: "2px solid rgba(255,255,255,0.3)",
                                         marginBottom: "6px",
@@ -4182,15 +4159,14 @@ export default function HomePage(): React.JSX.Element {
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
-                                      <span style={{ fontWeight: 500, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>
+                                      <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
                                         Reply: {msg.replyToSender}
                                       </span>
-                                      <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                      <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                     </div>
                                   )}
                                   
                                   <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                  
                                   <div
                                     style={{
                                       display: "flex",
@@ -4205,7 +4181,7 @@ export default function HomePage(): React.JSX.Element {
                                     <span
                                       style={{
                                         fontSize: "9px",
-                                        color: "rgba(255,255,255,0.5)",
+                                        color: "rgba(255,255,255,0.6)",
                                         fontWeight: 400,
                                         fontFamily: FONT_FAMILY,
                                       }}
@@ -4223,7 +4199,7 @@ export default function HomePage(): React.JSX.Element {
                                         background: "none",
                                         border: "none",
                                         cursor: "pointer",
-                                        color: "rgba(255,255,255,0.3)",
+                                        color: "rgba(255,255,255,0.4)",
                                         padding: "2px 4px",
                                         display: "flex",
                                         alignItems: "center",
@@ -4400,7 +4376,7 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator above input */}
+                        {/* Typing indicator above input - Multiple users */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4525,7 +4501,6 @@ export default function HomePage(): React.JSX.Element {
                               >
                                 {pinnedMessages.map((msg) => {
                                   const isMine = msg.senderId === user?.uid;
-                                  const msgColor = isMine ? "#0095f6" : "#ff6b6b";
                                   return (
                                     <div
                                       key={msg.id}
@@ -4533,7 +4508,7 @@ export default function HomePage(): React.JSX.Element {
                                         padding: "4px 8px",
                                         marginBottom: "2px",
                                         borderRadius: "4px",
-                                        backgroundColor: isMine ? "rgba(0,149,246,0.08)" : "rgba(255,107,107,0.08)",
+                                        backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
                                         fontSize: "11px",
                                         display: "flex",
                                         justifyContent: "space-between",
@@ -4610,7 +4585,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages - Regular Chat */}
+                      {/* Messages */}
                       <div
                         style={{
                           flex: 1,
@@ -4644,7 +4619,7 @@ export default function HomePage(): React.JSX.Element {
                               formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
                             
                             const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
-                            const msgColor = isMine ? "#0095f6" : "#ff6b6b";
+                            const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
                             
                             return (
                               <React.Fragment key={idx}>
@@ -4672,11 +4647,12 @@ export default function HomePage(): React.JSX.Element {
                                     maxWidth: "80%",
                                     padding: "10px 14px",
                                     borderRadius: "12px",
-                                    backgroundColor: msgColor,
+                                    backgroundColor: messageColor,
                                     color: "#ffffff",
                                     fontSize: "14px",
                                     lineHeight: 1.5,
                                     position: "relative",
+                                    boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
@@ -4698,19 +4674,19 @@ export default function HomePage(): React.JSX.Element {
                                     <div
                                       style={{
                                         fontSize: "11px",
-                                        color: "rgba(255,255,255,0.6)",
+                                        color: "rgba(255,255,255,0.7)",
                                         padding: "4px 8px",
-                                        borderLeft: "2px solid rgba(255,255,255,0.3)",
+                                        borderLeft: `2px solid rgba(255,255,255,0.3)`,
                                         marginBottom: "6px",
                                         backgroundColor: "rgba(255,255,255,0.1)",
                                         borderRadius: "4px",
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
-                                      <span style={{ fontWeight: 500, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>
+                                      <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
                                         {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
                                       </span>
-                                      <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                      <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
                                     </div>
                                   )}
                                   
@@ -4730,7 +4706,7 @@ export default function HomePage(): React.JSX.Element {
                                     <span
                                       style={{
                                         fontSize: "9px",
-                                        color: "rgba(255,255,255,0.5)",
+                                        color: "rgba(255,255,255,0.6)",
                                         fontWeight: 400,
                                         fontFamily: FONT_FAMILY,
                                       }}
@@ -4746,7 +4722,7 @@ export default function HomePage(): React.JSX.Element {
                                         background: "none",
                                         border: "none",
                                         cursor: "pointer",
-                                        color: "rgba(255,255,255,0.3)",
+                                        color: "rgba(255,255,255,0.4)",
                                         padding: "2px 4px",
                                         display: "flex",
                                         alignItems: "center",
@@ -4910,7 +4886,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input - Regular Chat */}
+                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
