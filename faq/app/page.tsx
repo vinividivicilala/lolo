@@ -121,7 +121,7 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons
+// SVG Icons - Hanya untuk pin icon
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -143,12 +143,6 @@ const BackIcon = () => (
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const PinDropdownIcon = ({ isOpen = false }: { isOpen?: boolean }) => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
-    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -189,7 +183,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
+// Instagram Verified Badge - HANYA UNTUK ADMIN
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -670,7 +664,7 @@ export default function HomePage(): React.JSX.Element {
             }
           }
           
-          // Add official user - dengan isOfficial true
+          // Add official user - isOfficial true tapi TANPA badge di avatar
           const officialExists = userList.some(u => u.id === "official_menuru");
           if (!officialExists) {
             userList.push({ 
@@ -763,7 +757,6 @@ export default function HomePage(): React.JSX.Element {
       const typingMap: { [key: string]: boolean } = {};
       snapshot.forEach((doc) => {
         const data = doc.data();
-        // Hanya track typing jika user sedang di chat yang sama
         if (data.typing && data.id !== user?.uid) {
           // Cek apakah user ini sedang chat di room official
           const userInOfficial = chatRooms.some(room => 
@@ -1985,7 +1978,6 @@ export default function HomePage(): React.JSX.Element {
                   <option key={u.id} value={u.id}>
                     {u.name}
                     {u.isAdmin && <InstagramVerifiedBadge size={14} />}
-                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -3089,7 +3081,8 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {profileUser.isOfficial && !profileUser.isAdmin && (
+                        {/* HANYA ADMIN yang dapat badge verified di avatar */}
+                        {profileUser.isAdmin && (
                           <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                             <InstagramVerifiedBadge size={16} />
                           </div>
@@ -3100,8 +3093,8 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
+                          {/* HANYA ADMIN yang dapat badge verified */}
                           {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
-                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3724,7 +3717,6 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
-                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3809,7 +3801,8 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {otherUser.isOfficial && !otherUser.isAdmin && (
+                              {/* HANYA ADMIN yang dapat badge verified di avatar user lain */}
+                              {otherUser.isAdmin && (
                                 <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                                   <InstagramVerifiedBadge size={12} />
                                 </div>
@@ -3827,7 +3820,6 @@ export default function HomePage(): React.JSX.Element {
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3969,12 +3961,8 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {isOfficialChatSelected && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={12} />
-                        </div>
-                      )}
-                      {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && (
+                      {/* HANYA ADMIN yang dapat badge verified di avatar */}
+                      {!isOfficialChatSelected && selectedChat.isAdmin && (
                         <div style={{ position: "absolute", bottom: -2, right: -2 }}>
                           <InstagramVerifiedBadge size={12} />
                         </div>
@@ -3988,8 +3976,7 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                        {/* HANYA ADMIN yang dapat badge verified di header */}
                         {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4129,7 +4116,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        {/* Typing indicator in body - hanya untuk user di room ini */}
+                        {/* Typing indicator in body - MULTI USER */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4216,7 +4203,6 @@ export default function HomePage(): React.JSX.Element {
                                     }}>
                                       {msg.senderName}
                                       {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                      {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4437,7 +4423,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for official chat */}
+                      {/* Input for official chat - AKTIF */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -4450,7 +4436,7 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {/* Typing indicator above input */}
+                        {/* Typing indicator above input - MULTI USER */}
                         {typingUsersList.length > 0 && (
                           <div
                             style={{
@@ -4535,7 +4521,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   ) : (
-                    // Regular Chat View
+                    // Regular Chat View - sama seperti sebelumnya
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && (
@@ -4974,23 +4960,6 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
-                        {typingUsersList.length > 0 && (
-                          <div
-                            style={{
-                              textAlign: "left",
-                              fontSize: "12px",
-                              color: "#000000",
-                              fontStyle: "italic",
-                              fontFamily: FONT_FAMILY,
-                              padding: "2px 4px",
-                              backgroundColor: "transparent",
-                              marginBottom: "2px",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {typingUsersList.map(u => u.name).join(", ")} typing...
-                          </div>
-                        )}
                         <div style={{ display: "flex", gap: "8px" }}>
                           <input
                             type="text"
