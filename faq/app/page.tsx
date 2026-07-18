@@ -184,7 +184,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
+// Instagram Verified Badge - HANYA untuk official account, BUKAN admin
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -330,7 +330,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status untuk regular chat
+// Read Status untuk regular chat - warna stabilo
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -339,9 +339,9 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Read" };
+      return { icon: "✓✓", color: "#c5e800", label: "Read" };
     }
-    return { icon: "✓", color: "#999", label: "Sent" };
+    return { icon: "✓", color: "#c5e800", label: "Sent" };
   })();
   
   if (!status) return null;
@@ -390,7 +390,7 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Read Status untuk official chat - warna abu-abu untuk sent, biru untuk read
+// Read Status untuk official chat - warna stabilo TERANG
 const OfficialReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -399,9 +399,9 @@ const OfficialReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) 
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Read" };
+      return { icon: "✓✓", color: "#c5e800", label: "Read" };
     }
-    return { icon: "✓", color: "#999", label: "Sent" };
+    return { icon: "✓", color: "#c5e800", label: "Sent" };
   })();
   
   if (!status) return null;
@@ -760,7 +760,7 @@ export default function HomePage(): React.JSX.Element {
     loadUsers();
   }, [user]);
 
-  // Load official chat messages - dengan format pesan seperti room chat biasa
+  // Load official chat messages
   useEffect(() => {
     if (!db || !user) return;
 
@@ -791,7 +791,6 @@ export default function HomePage(): React.JSX.Element {
           if (msg.senderId === "official_menuru") {
             lastMessage = msg.text;
           } else {
-            // Format: "Menuru Official (from NamaUser): pesan"
             lastMessage = `Menuru Official (from ${msg.senderName}): ${msg.text}`;
           }
           lastMessageTime = msg.timestamp;
@@ -824,7 +823,6 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
-      // Update chat rooms with official chat data - SAMA SEPERTI ROOM CHAT BIASA
       setChatRooms(prev => {
         const updatedRooms = prev.map(room => {
           if (room.id === OFFICIAL_CHAT_ID) {
@@ -839,7 +837,6 @@ export default function HomePage(): React.JSX.Element {
           return room;
         });
         
-        // If official room not in list, add it
         const hasOfficial = updatedRooms.some(r => r.id === OFFICIAL_CHAT_ID);
         if (!hasOfficial) {
           updatedRooms.push({
@@ -854,7 +851,6 @@ export default function HomePage(): React.JSX.Element {
           });
         }
         
-        // Sort rooms
         updatedRooms.sort((a, b) => {
           if (a.isPinned && !b.isPinned) return -1;
           if (!a.isPinned && b.isPinned) return 1;
@@ -867,7 +863,6 @@ export default function HomePage(): React.JSX.Element {
         return updatedRooms;
       });
       
-      // Update total unread
       const otherRoomsUnread = chatRooms.filter(r => r.id !== OFFICIAL_CHAT_ID).reduce((sum, r) => sum + r.unreadCount, 0);
       setTotalUnread(otherRoomsUnread + unreadCount);
     });
@@ -897,13 +892,10 @@ export default function HomePage(): React.JSX.Element {
       
       setOfficialTypingUsers(typingList);
       
-      // Update chat rooms dengan typing users
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
-          // Untuk official chat, tampilkan SEMUA user yang sedang mengetik
           return { ...room, typingUsers: typingList };
         } else {
-          // Untuk regular chat, cek user spesifik
           const otherId = room.participants.find(id => id !== user.uid);
           if (otherId && allTypingUsers[otherId]) {
             const foundUser = users.find(u => u.id === otherId);
@@ -983,7 +975,6 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
-      // Add official chat room if not exists
       const hasOfficial = rooms.some(r => r.id === OFFICIAL_CHAT_ID);
       if (!hasOfficial) {
         const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
@@ -1018,7 +1009,6 @@ export default function HomePage(): React.JSX.Element {
       
       setChatRooms(rooms);
       
-      // Update total unread
       const otherRoomsUnread = rooms.filter(r => r.id !== OFFICIAL_CHAT_ID).reduce((sum, r) => sum + r.unreadCount, 0);
       const total = otherRoomsUnread + officialUnreadCount;
       setTotalUnread(total);
@@ -1876,7 +1866,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {isAdmin && <InstagramVerifiedBadge size={14} />}
+                {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -2136,8 +2126,8 @@ export default function HomePage(): React.JSX.Element {
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
-                    {u.isAdmin && <InstagramVerifiedBadge size={14} />}
-                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
+                    {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
+                    {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -2315,8 +2305,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* Content - Update Detail Page, Update System, Privacy Policy, Profile */}
-              {/* [Konten sama seperti sebelumnya - tidak diubah] */}
-              
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -3242,13 +3230,14 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
+                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                          {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                           {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
@@ -3359,6 +3348,62 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
                     </div>
+
+                    {/* TAMBAHKAN FOTO images/10.jpg sampai 15.jpg di bawah bio */}
+                    {profileUser.id === user?.uid && profileUser.email === ADMIN_EMAIL && (
+                      <div style={{ width: "100%", marginBottom: "16px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
+                            Gallery
+                          </span>
+                        </div>
+                        <div style={{ 
+                          display: "grid", 
+                          gridTemplateColumns: "repeat(3, 1fr)", 
+                          gap: "8px",
+                        }}>
+                          {[10, 11, 12, 13, 14, 15].map((num) => (
+                            <div
+                              key={num}
+                              style={{
+                                aspectRatio: "3/4",
+                                backgroundColor: "#f0f0f0",
+                                borderRadius: "6px",
+                                overflow: "hidden",
+                                border: "1px solid #e8e8e8",
+                                position: "relative",
+                              }}
+                            >
+                              <img
+                                src={`/images/${num}.jpg`}
+                                alt={`Gallery ${num}`}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.style.backgroundColor = "#f0f0f0";
+                                    parent.style.display = "flex";
+                                    parent.style.alignItems = "center";
+                                    parent.style.justifyContent = "center";
+                                    const span = document.createElement("span");
+                                    span.textContent = `${num}.jpg`;
+                                    span.style.color = "#999";
+                                    span.style.fontSize = "12px";
+                                    span.style.fontFamily = FONT_FAMILY;
+                                    parent.appendChild(span);
+                                  }
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                       <motion.button
@@ -3518,7 +3563,8 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
-                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
+                              {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3648,7 +3694,8 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
+                                      {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3765,7 +3812,8 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
+                                        {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3968,11 +4016,7 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {otherUser.isAdmin && (
-                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                                  <InstagramVerifiedBadge size={12} />
-                                </div>
-                              )}
+                              {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3985,7 +4029,8 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
+                                {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -4132,11 +4177,7 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {!isOfficialChatSelected && selectedChat.isAdmin && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={12} />
-                        </div>
-                      )}
+                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -4146,8 +4187,8 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
+                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4378,7 +4419,7 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
-                                      {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                                       {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
