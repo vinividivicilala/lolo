@@ -330,7 +330,67 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status untuk official chat - centang 1, 2, 2 biru
+// Read Status untuk regular chat
+const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  if (!isMine) return null;
+  
+  const status = (() => {
+    if (msg.senderId !== auth?.currentUser?.uid) return null;
+    if (msg.read && msg.readAt) {
+      return { icon: "✓✓", color: "#0095f6", label: "Read" };
+    }
+    return { icon: "✓", color: "#999", label: "Sent" };
+  })();
+  
+  if (!status) return null;
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <span 
+        style={{
+          fontSize: "10px",
+          color: status.color,
+          fontWeight: status.label === "Read" ? 600 : 400,
+          cursor: "pointer",
+          fontFamily: FONT_FAMILY,
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {status.icon}
+      </span>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          right: 0,
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
+        }}>
+          {status.label}
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            right: "10px",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Read Status untuk official chat - warna abu-abu untuk sent, biru untuk read
 const OfficialReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -2254,7 +2314,9 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page, Update System, Privacy Policy, Profile - sama seperti sebelumnya */}
+              {/* Content - Update Detail Page, Update System, Privacy Policy, Profile */}
+              {/* [Konten sama seperti sebelumnya - tidak diubah] */}
+              
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -4099,7 +4161,8 @@ export default function HomePage(): React.JSX.Element {
                         )}
                         {isOfficialChatSelected ? (
                           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                            Official Account                          </span>
+                            Official Account
+                          </span>
                         ) : (
                           getOnlineStatus(selectedChat.id) ? (
                             <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
