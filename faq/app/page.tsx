@@ -80,7 +80,7 @@ interface ChatUser {
   typing?: boolean;
   bio?: string;
   note?: string;
-  blockedUsers?: string[];
+  blocked?: string[];
   blockedBy?: string[];
 }
 
@@ -188,7 +188,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
+// Instagram Verified Badge - HANYA untuk official account
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -394,6 +394,238 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
+// Komponen Stories - untuk semua user
+const StoriesSection = ({ userEmail }: { userEmail: string }) => {
+  const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
+  const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
+  const images = [10, 11, 12, 13, 14, 15];
+
+  useEffect(() => {
+    const initialImages: { [key: number]: number } = {};
+    const initialHover: { [key: number]: boolean } = {};
+    images.forEach(num => {
+      initialImages[num] = num;
+      initialHover[num] = false;
+    });
+    setStoryImages(initialImages);
+    setStoryHover(initialHover);
+  }, []);
+
+  useEffect(() => {
+    const intervals: { [key: number]: NodeJS.Timeout } = {};
+    
+    Object.keys(storyHover).forEach(key => {
+      const num = parseInt(key);
+      if (storyHover[num]) {
+        intervals[num] = setInterval(() => {
+          setStoryImages(prev => {
+            const currentIndex = images.indexOf(prev[num]);
+            const nextIndex = (currentIndex + 1) % images.length;
+            return { ...prev, [num]: images[nextIndex] };
+          });
+        }, 800);
+      }
+    });
+    
+    return () => {
+      Object.values(intervals).forEach(interval => clearInterval(interval));
+    };
+  }, [storyHover]);
+
+  const openFullImage = (imageNumber: number) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    `;
+    overlay.onclick = () => overlay.remove();
+    
+    const img = document.createElement('img');
+    img.src = `/images/${imageNumber}.jpg`;
+    img.style.cssText = `
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      object-fit: contain;
+    `;
+    img.onerror = () => {
+      img.style.display = 'none';
+      const text = document.createElement('div');
+      text.textContent = `${imageNumber}.jpg`;
+      text.style.cssText = `
+        color: #fff;
+        font-size: 24px;
+        font-family: ${FONT_FAMILY};
+      `;
+      overlay.appendChild(text);
+    };
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+  };
+
+  return (
+    <div style={{ width: "100%", marginBottom: "20px" }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center", 
+        marginBottom: "12px",
+        borderBottom: "1px solid #f0f0f0",
+        paddingBottom: "8px",
+      }}>
+        <span style={{ 
+          fontSize: "18px", 
+          fontWeight: 700, 
+          color: "#000000", 
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.02em",
+        }}>
+          Stories
+        </span>
+        <span style={{ 
+          fontSize: "12px", 
+          color: "#999", 
+          fontFamily: FONT_FAMILY,
+        }}>
+          {images.length} photos
+        </span>
+      </div>
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(3, 1fr)", 
+        gap: "10px",
+      }}>
+        {images.map((num) => (
+          <div
+            key={num}
+            style={{
+              aspectRatio: "3/4",
+              backgroundColor: "#f0f0f0",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "2px solid #e8e8e8",
+              position: "relative",
+              cursor: "pointer",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onMouseEnter={() => {
+              setStoryHover(prev => ({ ...prev, [num]: true }));
+            }}
+            onMouseLeave={() => {
+              setStoryHover(prev => ({ ...prev, [num]: false }));
+              setStoryImages(prev => ({ ...prev, [num]: num }));
+            }}
+            onClick={() => openFullImage(storyImages[num] || num)}
+          >
+            <img
+              src={`/images/${storyImages[num] || num}.jpg`}
+              alt={`Stories ${num}`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transition: "transform 0.5s ease",
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.style.backgroundColor = "#f0f0f0";
+                  parent.style.display = "flex";
+                  parent.style.alignItems = "center";
+                  parent.style.justifyContent = "center";
+                  const span = document.createElement("span");
+                  span.textContent = `${num}.jpg`;
+                  span.style.color = "#999";
+                  span.style.fontSize = "12px";
+                  span.style.fontFamily = FONT_FAMILY;
+                  parent.appendChild(span);
+                }
+              }}
+            />
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "40%",
+              background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              position: "absolute",
+              bottom: "8px",
+              left: "8px",
+              color: "rgba(255,255,255,0.8)",
+              fontSize: "11px",
+              fontWeight: 500,
+              fontFamily: FONT_FAMILY,
+              backgroundColor: "rgba(0,0,0,0.3)",
+              padding: "2px 8px",
+              borderRadius: "10px",
+              pointerEvents: "none",
+            }}>
+              {num}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Komponen 404 Not Found untuk user yang diblok
+const BlockedUserPage = ({ userName }: { userName: string }) => {
+  return (
+    <div style={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      height: "100%",
+      padding: "40px 20px",
+      textAlign: "center",
+      fontFamily: FONT_FAMILY,
+    }}>
+      <div style={{ 
+        fontSize: "72px", 
+        fontWeight: 700, 
+        color: "#000000",
+        letterSpacing: "-0.05em",
+        lineHeight: 1,
+        marginBottom: "16px",
+      }}>
+        404
+      </div>
+      <div style={{ 
+        fontSize: "20px", 
+        fontWeight: 500, 
+        color: "#333",
+        marginBottom: "8px",
+        fontFamily: FONT_FAMILY,
+      }}>
+        Profile Not Found
+      </div>
+      <div style={{ 
+        fontSize: "14px", 
+        color: "#999",
+        fontFamily: FONT_FAMILY,
+      }}>
+        {userName} is not available or has been blocked
+      </div>
+    </div>
+  );
+};
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -427,12 +659,11 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
-  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
-  const [showBlockError, setShowBlockError] = useState(false);
-  const [blockErrorMessage, setBlockErrorMessage] = useState("");
+  const [showBlockDropdown, setShowBlockDropdown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
+  const blockDropdownRef = useRef<HTMLDivElement>(null);
 
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
@@ -565,7 +796,7 @@ export default function HomePage(): React.JSX.Element {
               typing: false,
               bio: "",
               note: "",
-              blockedUsers: [],
+              blocked: [],
               blockedBy: []
             });
             
@@ -603,11 +834,10 @@ export default function HomePage(): React.JSX.Element {
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
               bio: updatedData.bio || "",
-              note: updatedData.note || ""
+              note: updatedData.note || "",
+              blocked: updatedData.blocked || [],
+              blockedBy: updatedData.blockedBy || []
             }));
-            if (updatedData.blockedUsers) {
-              setBlockedUsers(updatedData.blockedUsers);
-            }
           }
           
         } catch (error) {
@@ -641,7 +871,7 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: data.photoURL || "",
                 isOfficial: data.isOfficial || false,
                 isAdmin: data.isAdmin || false,
-                blockedUsers: data.blockedUsers || [],
+                blocked: data.blocked || [],
                 blockedBy: data.blockedBy || []
               } as ChatUser);
             }
@@ -660,8 +890,8 @@ export default function HomePage(): React.JSX.Element {
             typing: false,
             bio: user.bio || "",
             note: user.note || "",
-            blockedUsers: blockedUsers || [],
-            blockedBy: []
+            blocked: user.blocked || [],
+            blockedBy: user.blockedBy || []
           };
           
           const selfExists = userList.some(u => u.id === user.uid);
@@ -678,7 +908,8 @@ export default function HomePage(): React.JSX.Element {
                 note: user.note || userList[index].note || "",
                 isOfficial: false,
                 isAdmin: isAdmin,
-                blockedUsers: blockedUsers || []
+                blocked: user.blocked || [],
+                blockedBy: user.blockedBy || []
               };
             }
           }
@@ -697,7 +928,7 @@ export default function HomePage(): React.JSX.Element {
               typing: false,
               bio: "Official Menuru Chat account. Managed by the Menuru team.",
               note: "Official Account",
-              blockedUsers: [],
+              blocked: [],
               blockedBy: []
             });
           }
@@ -717,7 +948,7 @@ export default function HomePage(): React.JSX.Element {
       }
     };
     loadUsers();
-  }, [user, blockedUsers]);
+  }, [user]);
 
   // Load official chat messages
   useEffect(() => {
@@ -913,16 +1144,22 @@ export default function HomePage(): React.JSX.Element {
       let totalUnreadCount = 0;
       const newMessages: string[] = [];
       
+      // Get current user's blocked list
+      const currentUserData = users.find(u => u.id === user.uid);
+      const blockedUsers = currentUserData?.blocked || [];
+      
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const otherId = data.participants.find((id: string) => id !== user.uid);
           const otherUser = users.find(u => u.id === otherId);
           
+          // Skip if other user is blocked by current user
+          if (otherId && blockedUsers.includes(otherId)) {
+            continue;
+          }
+          
           if (otherUser) {
-            // Check if user is blocked
-            const isBlocked = blockedUsers.includes(otherId) || (otherUser.blockedBy && otherUser.blockedBy.includes(user.uid));
-            
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -945,7 +1182,7 @@ export default function HomePage(): React.JSX.Element {
               where("senderId", "!=", user.uid)
             );
             const unreadSnap = await getDocs(unreadQuery);
-            unreadCount = isBlocked ? 0 : unreadSnap.size;
+            unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
             if (unreadCount > 0 && otherUser) {
@@ -959,10 +1196,10 @@ export default function HomePage(): React.JSX.Element {
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
-              lastMessage: isBlocked ? "🔒 User is blocked" : lastMessage,
-              lastMessageTime: lastMessageTime,
-              lastMessageSenderId: lastMessageSenderId,
-              unreadCount: unreadCount,
+              lastMessage,
+              lastMessageTime,
+              lastMessageSenderId,
+              unreadCount,
               isPinned: data.isPinned || false,
               typingUsers: []
             });
@@ -970,6 +1207,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
+      // Add official chat room if not exists
       const hasOfficial = rooms.some(r => r.id === OFFICIAL_CHAT_ID);
       if (!hasOfficial) {
         const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
@@ -1049,7 +1287,7 @@ export default function HomePage(): React.JSX.Element {
         rollingInterval.current = null;
       }
     };
-  }, [user, users, officialMessages, officialUnreadCount, blockedUsers]);
+  }, [user, users, officialMessages, officialUnreadCount]);
 
   // Load messages for regular chat
   useEffect(() => {
@@ -1059,18 +1297,12 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
 
-    // Check if user is blocked
-    const isBlocked = blockedUsers.includes(selectedChat.id) || 
-      (selectedChat.blockedBy && selectedChat.blockedBy.includes(user.uid));
-
-    if (isBlocked) {
-      setMessages([]);
-      setShowBlockError(true);
-      setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
+    // Check if selected chat user is blocked
+    const currentUserData = users.find(u => u.id === user.uid);
+    const blockedUsers = currentUserData?.blocked || [];
+    if (selectedChat.id && blockedUsers.includes(selectedChat.id)) {
       return;
     }
-
-    setShowBlockError(false);
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
@@ -1116,7 +1348,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [selectedChat, user, blockedUsers]);
+  }, [selectedChat, user]);
 
   // Handle login
   const handleLogin = async () => {
@@ -1188,7 +1420,7 @@ export default function HomePage(): React.JSX.Element {
       setSelectedUpdateId(null);
       setOfficialReplyTo(null);
       setOfficialMessageInput("");
-      setShowBlockError(false);
+      setShowBlockDropdown(false);
     }
   };
 
@@ -1198,16 +1430,6 @@ export default function HomePage(): React.JSX.Element {
     setMessage(value);
     
     if (!selectedChat || !user || !db) return;
-    
-    // Check if user is blocked
-    const isBlocked = blockedUsers.includes(selectedChat.id) || 
-      (selectedChat.blockedBy && selectedChat.blockedBy.includes(user.uid));
-    
-    if (isBlocked) {
-      setShowBlockError(true);
-      setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
-      return;
-    }
     
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, {
@@ -1254,18 +1476,16 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile
-  const handleOpenProfile = async (chatUser: ChatUser) => {
+  // Handle open profile - dengan cek block
+  const handleOpenProfile = (chatUser: ChatUser) => {
     // Check if user is blocked
-    const isBlocked = blockedUsers.includes(chatUser.id) || 
-      (chatUser.blockedBy && chatUser.blockedBy.includes(user.uid));
+    const currentUserData = users.find(u => u.id === user.uid);
+    const blockedUsers = currentUserData?.blocked || [];
     
-    if (isBlocked && chatUser.id !== user?.uid) {
-      // Show 404 Not Found
-      setProfileUser(null);
-      setShowProfile(false);
-      setShowBlockError(true);
-      setBlockErrorMessage("404 - User Not Found");
+    if (chatUser.id && blockedUsers.includes(chatUser.id)) {
+      // Show blocked page
+      setProfileUser(chatUser);
+      setShowProfile(true);
       return;
     }
     
@@ -1275,7 +1495,7 @@ export default function HomePage(): React.JSX.Element {
     setNoteInput(chatUser.note || "");
     setEditBio(false);
     setEditNote(false);
-    setShowBlockError(false);
+    setShowBlockDropdown(false);
   };
 
   const handleCloseProfile = () => {
@@ -1283,7 +1503,7 @@ export default function HomePage(): React.JSX.Element {
     setProfileUser(null);
     setEditBio(false);
     setEditNote(false);
-    setShowBlockError(false);
+    setShowBlockDropdown(false);
   };
 
   // Handle save bio
@@ -1344,9 +1564,9 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Block/Unblock user
+  // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
-    if (!user || !db) return;
+    if (!db || !user) return;
     
     try {
       const userRef = doc(db, "users", user.uid);
@@ -1354,54 +1574,90 @@ export default function HomePage(): React.JSX.Element {
       if (isBlocked) {
         // Unblock user
         await updateDoc(userRef, {
-          blockedUsers: arrayRemove(userId)
+          blocked: arrayRemove(userId)
         });
-        setBlockedUsers(prev => prev.filter(id => id !== userId));
         
-        // Remove from blockedBy of the other user
-        const otherUserRef = doc(db, "users", userId);
-        await updateDoc(otherUserRef, {
+        // Remove from blockedBy of target user
+        const targetRef = doc(db, "users", userId);
+        await updateDoc(targetRef, {
           blockedBy: arrayRemove(user.uid)
         });
         
-        setShowBlockError(false);
+        setUser((prev: any) => ({
+          ...prev,
+          blocked: (prev.blocked || []).filter((id: string) => id !== userId)
+        }));
+        
+        // Update users list
+        setUsers(prev => prev.map(u => {
+          if (u.id === user.uid) {
+            return { ...u, blocked: (u.blocked || []).filter((id: string) => id !== userId) };
+          }
+          if (u.id === userId) {
+            return { ...u, blockedBy: (u.blockedBy || []).filter((id: string) => id !== user.uid) };
+          }
+          return u;
+        }));
+        
       } else {
         // Block user
         await updateDoc(userRef, {
-          blockedUsers: arrayUnion(userId)
+          blocked: arrayUnion(userId)
         });
-        setBlockedUsers(prev => [...prev, userId]);
         
-        // Add to blockedBy of the other user
-        const otherUserRef = doc(db, "users", userId);
-        await updateDoc(otherUserRef, {
+        // Add to blockedBy of target user
+        const targetRef = doc(db, "users", userId);
+        await updateDoc(targetRef, {
           blockedBy: arrayUnion(user.uid)
         });
         
-        // Close chat if currently open with this user
-        if (selectedChat?.id === userId) {
+        setUser((prev: any) => ({
+          ...prev,
+          blocked: [...(prev.blocked || []), userId]
+        }));
+        
+        // Update users list
+        setUsers(prev => prev.map(u => {
+          if (u.id === user.uid) {
+            return { ...u, blocked: [...(u.blocked || []), userId] };
+          }
+          if (u.id === userId) {
+            return { ...u, blockedBy: [...(u.blockedBy || []), user.uid] };
+          }
+          return u;
+        }));
+        
+        // If currently viewing blocked user's profile, close it
+        if (profileUser && profileUser.id === userId) {
+          handleCloseProfile();
+        }
+        
+        // If currently chatting with blocked user, close chat
+        if (selectedChat && selectedChat.id === userId) {
           setSelectedChat(null);
           setMessages([]);
-          setShowBlockError(true);
-          setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
         }
       }
+      
+      setShowBlockDropdown(false);
+      
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
     }
   };
 
-  // Send message to regular user
+  // Check if user is blocked
+  const isUserBlocked = (userId: string) => {
+    const currentUserData = users.find(u => u.id === user.uid);
+    return (currentUserData?.blocked || []).includes(userId);
+  };
+
+  // Send message to regular user - dengan cek block
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
     // Check if user is blocked
-    const isBlocked = blockedUsers.includes(selectedChat.id) || 
-      (selectedChat.blockedBy && selectedChat.blockedBy.includes(user.uid));
-
-    if (isBlocked) {
-      setShowBlockError(true);
-      setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
+    if (isUserBlocked(selectedChat.id)) {
       return;
     }
 
@@ -1457,7 +1713,6 @@ export default function HomePage(): React.JSX.Element {
         clearTimeout(typingTimeout);
         setTypingTimeout(null);
       }
-      setShowBlockError(false);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -1503,23 +1758,21 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Share message
+  // Share message - dengan cek block
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
+    
+    // Check if target user is blocked
+    if (isUserBlocked(selectedShareUser)) {
+      setShowShareModal(false);
+      setShareMessage(null);
+      setSelectedShareUser("");
+      return;
+    }
     
     try {
       const targetUser = users.find(u => u.id === selectedShareUser);
       if (!targetUser) return;
-      
-      // Check if target user is blocked
-      const isBlocked = blockedUsers.includes(targetUser.id) || 
-        (targetUser.blockedBy && targetUser.blockedBy.includes(user.uid));
-      
-      if (isBlocked) {
-        setShowBlockError(true);
-        setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
-        return;
-      }
       
       const chatId = [user.uid, targetUser.id].sort().join("_");
       
@@ -1589,12 +1842,7 @@ export default function HomePage(): React.JSX.Element {
     if (!selectedChat || !user || !db) return;
     
     // Check if user is blocked
-    const isBlocked = blockedUsers.includes(selectedChat.id) || 
-      (selectedChat.blockedBy && selectedChat.blockedBy.includes(user.uid));
-    
-    if (isBlocked && !isOfficial) {
-      setShowBlockError(true);
-      setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
+    if (!isOfficial && isUserBlocked(selectedChat.id)) {
       return;
     }
     
@@ -1677,25 +1925,20 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat
+  // Add existing user to chat - dengan cek block
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
+    
+    // Check if user is blocked
+    if (isUserBlocked(selectedNewUser)) {
+      setAddUserStatus("User is blocked");
+      return;
+    }
     
     try {
       const targetUser = users.find(u => u.id === selectedNewUser);
       if (!targetUser) {
         setAddUserStatus("User not found");
-        return;
-      }
-      
-      // Check if target user is blocked
-      const isBlocked = blockedUsers.includes(targetUser.id) || 
-        (targetUser.blockedBy && targetUser.blockedBy.includes(user.uid));
-      
-      if (isBlocked) {
-        setAddUserStatus("⚠️ User is blocked");
-        setShowBlockError(true);
-        setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
         return;
       }
       
@@ -1771,12 +2014,13 @@ export default function HomePage(): React.JSX.Element {
   const pinnedUsers = users.filter(u => u.isPinned);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
+  
+  // Filter available users - exclude blocked users
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
     !chatRooms.some(room => room.participants.includes(u.id)) &&
     u.id !== "official_menuru" &&
-    !blockedUsers.includes(u.id) &&
-    !(u.blockedBy && u.blockedBy.includes(user?.uid))
+    !isUserBlocked(u.id)
   );
 
   // Get typing users for display in list
@@ -1803,6 +2047,9 @@ export default function HomePage(): React.JSX.Element {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMessageMenu(null);
+      }
+      if (blockDropdownRef.current && !blockDropdownRef.current.contains(event.target as Node)) {
+        setShowBlockDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1841,10 +2088,8 @@ export default function HomePage(): React.JSX.Element {
   // Get typing users for official chat display
   const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
 
-  // Check if selected chat is blocked
-  const isSelectedBlocked = selectedChat ? 
-    (blockedUsers.includes(selectedChat.id) || (selectedChat.blockedBy && selectedChat.blockedBy.includes(user?.uid))) : 
-    false;
+  // Check if profile user is blocked
+  const isProfileBlocked = profileUser && isUserBlocked(profileUser.id);
 
   return (
     <div
@@ -2252,14 +2497,11 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <option value="">Select user...</option>
-                {users
-                  .filter(u => 
-                    u.id !== user.uid && 
-                    u.id !== shareMessage.senderId &&
-                    !blockedUsers.includes(u.id) &&
-                    !(u.blockedBy && u.blockedBy.includes(user?.uid))
-                  )
-                  .map((u) => (
+                {users.filter(u => 
+                  u.id !== user.uid && 
+                  u.id !== shareMessage.senderId &&
+                  !isUserBlocked(u.id)
+                ).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
                     {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={14} />}
@@ -2315,7 +2557,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Chat Box - HANYA BAGIAN YANG DIUBAH */}
+      {/* Chat Box */}
       <div
         style={{
           position: "fixed",
@@ -2370,9 +2612,9 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {showBlockError ? "⚠️ Blocked" : (selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? (isOfficialChatSelected ? "Menuru Official" : selectedChat.name) : "Messages")))))}
+                    {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? (isOfficialChatSelected ? "Menuru Official" : selectedChat.name) : "Messages"))))}
                   </span>
-                  {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !isOfficialChatSelected && !showBlockError && (
+                  {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !isOfficialChatSelected && (
                     <>
                       <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
                         {selectedChat.email}
@@ -2399,99 +2641,47 @@ export default function HomePage(): React.JSX.Element {
                     </span>
                   )}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  {/* Block/Unblock button di header */}
-                  {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !isOfficialChatSelected && !showBlockError && selectedChat.id !== user?.uid && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleBlockUser(selectedChat.id, blockedUsers.includes(selectedChat.id))}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: blockedUsers.includes(selectedChat.id) ? "#4ade80" : "rgba(255,255,255,0.5)",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        padding: "4px 10px",
-                        borderRadius: "4px",
-                        transition: "all .2s ease",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }}
-                    >
-                      {blockedUsers.includes(selectedChat.id) ? "🔓 Unblock" : "🚫 Block"}
-                    </motion.button>
-                  )}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => {
-                      if (selectedUpdateId) {
-                        setSelectedUpdateId(null);
-                      } else if (showUpdate) {
-                        setShowUpdate(false);
-                      } else if (showPrivacyPolicy) {
-                        setShowPrivacyPolicy(false);
-                      } else if (showProfile) {
-                        handleCloseProfile();
-                      } else {
-                        setIsChatOpen(false);
-                      }
-                      setShowBlockError(false);
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "rgba(255,255,255,0.5)",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                      transition: "all .2s ease",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                      e.currentTarget.style.color = "#ffffff";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-                    }}
-                  >
-                    <CloseIcon />
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Block Error Message */}
-              {showBlockError && (
-                <div
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    if (selectedUpdateId) {
+                      setSelectedUpdateId(null);
+                    } else if (showUpdate) {
+                      setShowUpdate(false);
+                    } else if (showPrivacyPolicy) {
+                      setShowPrivacyPolicy(false);
+                    } else if (showProfile) {
+                      handleCloseProfile();
+                    } else {
+                      setIsChatOpen(false);
+                    }
+                  }}
                   style={{
-                    padding: "16px 20px",
-                    backgroundColor: "#fef2f2",
-                    borderBottom: "1px solid #fecaca",
-                    textAlign: "center",
-                    fontFamily: FONT_FAMILY,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.5)",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    transition: "all .2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                    e.currentTarget.style.color = "#ffffff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.5)";
                   }}
                 >
-                  <span style={{ fontSize: "14px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                    {blockErrorMessage === "404 - User Not Found" ? "404 Not Found" : "⚠️ " + blockErrorMessage}
-                  </span>
-                  {blockErrorMessage === "404 - User Not Found" && (
-                    <div style={{ fontSize: "12px", color: "#666", marginTop: "4px", fontFamily: FONT_FAMILY }}>
-                      The requested user could not be found.
-                    </div>
-                  )}
-                </div>
-              )}
+                  <CloseIcon />
+                </motion.button>
+              </div>
 
-              {/* Content - Update Detail Page, Update System, Privacy Policy - sama seperti sebelumnya */}
+              {/* Content - Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -2915,8 +3105,7 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      © 2026 Menuru
-                    </span>
+                      © 2026 Menuru                    </span>
                   </div>
                 </div>
               ) : showPrivacyPolicy ? (
@@ -3236,74 +3425,111 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showProfile && profileUser ? (
+                // Profile view - dengan cek block
+                isProfileBlocked ? (
+                  <BlockedUserPage userName={profileUser.name} />
+                ) : (
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleCloseProfile}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#666",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        fontSize: "13px",
-                        fontFamily: FONT_FAMILY,
-                        marginBottom: "16px",
-                        padding: "4px 0",
-                        transition: "color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
-                      onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
-                    >
-                      <BackIcon />
-                      <span>Back</span>
-                    </motion.button>
-
-                    {/* Block/Unblock button di profile */}
-                    {profileUser.id !== user?.uid && (
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
                       <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          handleBlockUser(profileUser.id, blockedUsers.includes(profileUser.id));
-                          if (!blockedUsers.includes(profileUser.id)) {
-                            handleCloseProfile();
-                          }
-                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleCloseProfile}
                         style={{
-                          width: "100%",
-                          padding: "10px",
-                          backgroundColor: blockedUsers.includes(profileUser.id) ? "#dc2626" : "#000000",
+                          background: "none",
                           border: "none",
-                          borderRadius: "8px",
-                          color: "#fff",
-                          fontSize: "14px",
-                          fontWeight: 500,
+                          color: "#666",
                           cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontSize: "13px",
                           fontFamily: FONT_FAMILY,
-                          marginBottom: "16px",
-                          transition: "all 0.2s ease",
+                          padding: "4px 0",
+                          transition: "color 0.2s ease",
                         }}
-                        onMouseEnter={(e) => {
-                          if (!blockedUsers.includes(profileUser.id)) {
-                            e.currentTarget.style.backgroundColor = "#333";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!blockedUsers.includes(profileUser.id)) {
-                            e.currentTarget.style.backgroundColor = "#000000";
-                          }
-                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
+                        onMouseLeave={(e) => e.currentTarget.style.color = "#666"}
                       >
-                        {blockedUsers.includes(profileUser.id) ? "🔓 Unblock User" : "🚫 Block User"}
+                        <BackIcon />
+                        <span>Back</span>
                       </motion.button>
-                    )}
 
-                    <div style={{ width: "100%", marginBottom: "0px" }}>
+                      {/* Block/Unblock dropdown - hanya untuk user lain */}
+                      {profileUser.id !== user.uid && (
+                        <div ref={blockDropdownRef} style={{ position: "relative" }}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowBlockDropdown(!showBlockDropdown)}
+                            style={{
+                              padding: "6px 14px",
+                              backgroundColor: isUserBlocked(profileUser.id) ? "#ef4444" : "#000",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "6px",
+                              fontSize: "13px",
+                              cursor: "pointer",
+                              fontFamily: FONT_FAMILY,
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            {isUserBlocked(profileUser.id) ? "Unblock" : "Block"}
+                          </motion.button>
+                          
+                          <AnimatePresence>
+                            {showBlockDropdown && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                style={{
+                                  position: "absolute",
+                                  top: "calc(100% + 4px)",
+                                  right: 0,
+                                  backgroundColor: "#ffffff",
+                                  borderRadius: "8px",
+                                  padding: "4px",
+                                  minWidth: "140px",
+                                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                                  zIndex: 60,
+                                  border: "1px solid #f0f0f0",
+                                }}
+                              >
+                                <motion.button
+                                  whileHover={{ backgroundColor: "#f5f5f5" }}
+                                  onClick={() => {
+                                    const isBlocked = isUserBlocked(profileUser.id);
+                                    handleBlockUser(profileUser.id, isBlocked);
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    padding: "8px 14px",
+                                    width: "100%",
+                                    background: "none",
+                                    border: "none",
+                                    color: isUserBlocked(profileUser.id) ? "#22c55e" : "#ef4444",
+                                    fontSize: "13px",
+                                    cursor: "pointer",
+                                    borderRadius: "6px",
+                                    transition: "all 0.2s ease",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  <span>{isUserBlocked(profileUser.id) ? "Unblock User" : "Block User"}</span>
+                                </motion.button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
                       <div style={{ 
                         backgroundColor: "#f5f5f5", 
                         borderRadius: "8px",
@@ -3574,34 +3800,49 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
+                    {/* STORIES - UNTUK SEMUA USER */}
+                    {profileUser && (
+                      <StoriesSection userEmail={profileUser.email} />
+                    )}
+
                     <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                      {profileUser.id !== user?.uid && !blockedUsers.includes(profileUser.id) && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            handleCloseProfile();
-                            setSelectedChat(profileUser);
-                          }}
-                          style={{
-                            flex: 1,
-                            padding: "10px",
-                            backgroundColor: "#000",
-                            border: "none",
-                            borderRadius: "8px",
-                            color: "#fff",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            fontFamily: FONT_FAMILY,
-                            transition: "opacity 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                          onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                        >
-                          Send Message
-                        </motion.button>
-                      )}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          // Check if user is blocked before sending
+                          if (isUserBlocked(profileUser.id)) {
+                            return;
+                          }
+                          handleCloseProfile();
+                          setSelectedChat(profileUser);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: "10px",
+                          backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
+                          border: "none",
+                          borderRadius: "8px",
+                          color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
+                          fontFamily: FONT_FAMILY,
+                          transition: "opacity 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isUserBlocked(profileUser.id)) {
+                            e.currentTarget.style.opacity = "0.8";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isUserBlocked(profileUser.id)) {
+                            e.currentTarget.style.opacity = "1";
+                          }
+                        }}
+                      >
+                        {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
+                      </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -3625,8 +3866,9 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
+                )
               ) : !selectedChat ? (
-                // Chat List View - sama seperti sebelumnya
+                // Chat List View - dengan filter block
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div
                     style={{
@@ -3740,7 +3982,7 @@ export default function HomePage(): React.JSX.Element {
                         </select>
                         {availableUsers.length === 0 && (
                           <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                            {blockedUsers.length > 0 ? "All available users are blocked" : "All users are already in chat"}
+                            All users are already in chat
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
@@ -3808,7 +4050,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                            Pinned Users ({pinnedUsers.filter(u => !blockedUsers.includes(u.id) && !(u.blockedBy && u.blockedBy.includes(user?.uid))).length})
+                            Pinned Users ({pinnedUsers.length})
                           </span>
                         </div>
                         <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
@@ -3824,9 +4066,7 @@ export default function HomePage(): React.JSX.Element {
                             transition={{ duration: 0.3 }}
                             style={{ padding: "4px 0", marginTop: "2px", overflow: "hidden" }}
                           >
-                            {pinnedUsers
-                              .filter(u => !blockedUsers.includes(u.id) && !(u.blockedBy && u.blockedBy.includes(user?.uid)))
-                              .map((u) => (
+                            {pinnedUsers.map((u) => (
                               <div
                                 key={u.id}
                                 style={{
@@ -3890,22 +4130,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <PinIcon filled={true} />
                                 </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => handleBlockUser(u.id, blockedUsers.includes(u.id))}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    color: blockedUsers.includes(u.id) ? "#4ade80" : "#999",
-                                    padding: "2px 4px",
-                                    fontSize: "10px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  {blockedUsers.includes(u.id) ? "🔓" : "🚫"}
-                                </motion.button>
                               </div>
                             ))}
                           </motion.div>
@@ -3953,27 +4177,21 @@ export default function HomePage(): React.JSX.Element {
                               const otherId = room.participants.find(id => id !== user.uid);
                               const otherUser = users.find(u => u.id === otherId);
                               if (!otherUser) return null;
-                              const isBlocked = blockedUsers.includes(otherId) || (otherUser.blockedBy && otherUser.blockedBy.includes(user?.uid));
+                              // Skip if blocked
+                              if (isUserBlocked(otherId)) return null;
                               return (
                                 <motion.div
                                   key={room.id}
                                   whileHover={{ scale: 1.02 }}
-                                  onClick={() => {
-                                    if (!isBlocked) {
-                                      setSelectedChat(otherUser);
-                                    } else {
-                                      setShowBlockError(true);
-                                      setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
-                                    }
-                                  }}
+                                  onClick={() => setSelectedChat(otherUser)}
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "10px",
                                     padding: "6px 10px",
                                     borderRadius: "6px",
-                                    cursor: isBlocked ? "not-allowed" : "pointer",
-                                    backgroundColor: isBlocked ? "#fef2f2" : "#fafafa",
+                                    cursor: "pointer",
+                                    backgroundColor: "#fafafa",
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
@@ -4000,25 +4218,22 @@ export default function HomePage(): React.JSX.Element {
                                   <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                     <div>
                                       <div 
-                                        style={{ fontSize: "12px", fontWeight: 500, color: isBlocked ? "#999" : "#000", cursor: isBlocked ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}
+                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          if (!isBlocked) {
-                                            handleOpenProfile(otherUser);
-                                          }
+                                          handleOpenProfile(otherUser);
                                         }}
                                       >
                                         {otherUser.name}
                                         {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                        {isBlocked && <span style={{ fontSize: "10px", color: "#dc2626", marginLeft: "4px" }}>🔒</span>}
                                       </div>
-                                      <div style={{ fontSize: "9px", color: isBlocked ? "#999" : "#999", fontFamily: FONT_FAMILY }}>
-                                        {isBlocked ? "🔒 User is blocked" : (room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages")}
+                                      <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
+                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
                                       </div>
                                     </div>
                                     <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                                   </div>
-                                  {room.unreadCount > 0 && !isBlocked && (
+                                  {room.unreadCount > 0 && (
                                     <div
                                       style={{
                                         backgroundColor: "#c5e800",
@@ -4037,27 +4252,25 @@ export default function HomePage(): React.JSX.Element {
                                       {room.unreadCount}
                                     </div>
                                   )}
-                                  {!isBlocked && (
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handlePinChat(room.id, true);
-                                      }}
-                                      style={{
-                                        background: "none",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        color: "#c5e800",
-                                        padding: "2px 4px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <PinIcon filled={true} />
-                                    </motion.button>
-                                  )}
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePinChat(room.id, true);
+                                    }}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "#c5e800",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <PinIcon filled={true} />
+                                  </motion.button>
                                 </motion.div>
                               );
                             })}
@@ -4170,32 +4383,27 @@ export default function HomePage(): React.JSX.Element {
                         const otherUser = users.find(u => u.id === otherId);
                         if (!otherUser) return null;
                         
+                        // Skip if blocked
+                        if (isUserBlocked(otherId)) return null;
+                        
                         const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                         const typingDisplay = getTypingUsersDisplay(room);
-                        const isBlocked = blockedUsers.includes(otherId) || (otherUser.blockedBy && otherUser.blockedBy.includes(user?.uid));
                         
                         return (
                           <motion.div
                             key={room.id}
                             whileHover={{ scale: 1.02 }}
-                            onClick={() => {
-                              if (!isBlocked) {
-                                setSelectedChat(otherUser);
-                              } else {
-                                setShowBlockError(true);
-                                setBlockErrorMessage("Maaf akun ini tidak bisa di chat");
-                              }
-                            }}
+                            onClick={() => setSelectedChat(otherUser)}
                             style={{
                               display: "flex",
                               alignItems: "center",
                               gap: "10px",
                               padding: "10px 12px",
                               borderRadius: "8px",
-                              cursor: isBlocked ? "not-allowed" : "pointer",
+                              cursor: "pointer",
                               transition: "all .2s ease",
                               marginBottom: "2px",
-                              backgroundColor: isBlocked ? "#fef2f2" : (room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent"),
+                              backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
                               fontFamily: FONT_FAMILY,
                             }}
                           >
@@ -4223,45 +4431,23 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {isBlocked && (
-                                <div style={{
-                                  position: "absolute",
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  backgroundColor: "rgba(0,0,0,0.3)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "20px",
-                                  color: "#fff",
-                                }}>
-                                  🔒
-                                </div>
-                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "14px", fontWeight: 500, color: isBlocked ? "#999" : "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
+                              <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                 <span 
-                                  style={{ cursor: isBlocked ? "not-allowed" : "pointer" }}
+                                  style={{ cursor: "pointer" }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (!isBlocked) {
-                                      handleOpenProfile(otherUser);
-                                    }
+                                    handleOpenProfile(otherUser);
                                   }}
                                 >
                                   {otherUser.name}
                                 </span>
                                 {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
-                                {isBlocked && <span style={{ fontSize: "10px", color: "#dc2626" }}>🔒</span>}
                               </div>
-                              <div style={{ fontSize: "11px", color: isBlocked ? "#999" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
-                                {isBlocked ? (
-                                  "🔒 User is blocked"
-                                ) : typingDisplay ? (
+                              <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
+                                {typingDisplay ? (
                                   <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                 ) : (
                                   room.lastMessage ? (
@@ -4276,31 +4462,31 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                              {room.lastMessageTime && !isBlocked && (
+                              {room.lastMessageTime && (
                                 <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
                                   {formatTime(room.lastMessageTime)}
                                 </span>
                               )}
-                              {room.unreadCount > 0 && !isBlocked && (
-                                <div
-                                  style={{
-                                    backgroundColor: "#c5e800",
-                                    color: "#000",
-                                    padding: "0 6px",
-                                    borderRadius: "4px",
-                                    fontSize: "9px",
-                                    fontWeight: 600,
-                                    lineHeight: "18px",
-                                    height: "18px",
-                                    minWidth: "18px",
-                                    textAlign: "center",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  {room.unreadCount}
-                                </div>
-                              )}
-                              {!isBlocked && (
+                              <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                                {room.unreadCount > 0 && (
+                                  <div
+                                    style={{
+                                      backgroundColor: "#c5e800",
+                                      color: "#000",
+                                      padding: "0 6px",
+                                      borderRadius: "4px",
+                                      fontSize: "9px",
+                                      fontWeight: 600,
+                                      lineHeight: "18px",
+                                      height: "18px",
+                                      minWidth: "18px",
+                                      textAlign: "center",
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    {room.unreadCount}
+                                  </div>
+                                )}
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
@@ -4321,7 +4507,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   <PinIcon filled={room.isPinned || false} />
                                 </motion.button>
-                              )}
+                              </div>
                             </div>
                           </motion.div>
                         );
@@ -4330,7 +4516,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View - dengan block error
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                   {/* Chat Header */}
                   <div
@@ -4352,7 +4538,6 @@ export default function HomePage(): React.JSX.Element {
                         setReplyTo(null);
                         setOfficialReplyTo(null);
                         setOfficialMessageInput("");
-                        setShowBlockError(false);
                       }}
                       style={{
                         background: "none",
@@ -4390,13 +4575,9 @@ export default function HomePage(): React.JSX.Element {
                         overflow: "hidden",
                         color: "#fff",
                         position: "relative",
-                        cursor: isSelectedBlocked ? "not-allowed" : "pointer",
+                        cursor: "pointer",
                       }}
-                      onClick={() => {
-                        if (!isSelectedBlocked) {
-                          handleOpenProfile(selectedChat);
-                        }
-                      }}
+                      onClick={() => handleOpenProfile(selectedChat)}
                     >
                       {isOfficialChatSelected ? (
                         <span style={{ fontFamily: FONT_FAMILY }}>💬</span>
@@ -4409,42 +4590,14 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {isSelectedBlocked && (
-                        <div style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: "rgba(0,0,0,0.3)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "14px",
-                          color: "#fff",
-                        }}>
-                          🔒
-                        </div>
-                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
-                        style={{ 
-                          display: "flex", 
-                          alignItems: "center", 
-                          gap: "4px", 
-                          cursor: isSelectedBlocked ? "not-allowed" : "pointer",
-                          color: isSelectedBlocked ? "#999" : "#ffffff"
-                        }}
-                        onClick={() => {
-                          if (!isSelectedBlocked) {
-                            handleOpenProfile(selectedChat);
-                          }
-                        }}
+                        style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                        onClick={() => handleOpenProfile(selectedChat)}
                       >
-                        <span style={{ fontSize: "14px", fontWeight: 500, color: isSelectedBlocked ? "#999" : "#ffffff", fontFamily: FONT_FAMILY }}>
+                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
-                          {isSelectedBlocked && " 🔒"}
                         </span>
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
@@ -4475,28 +4628,6 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
                     </div>
-                    {!isOfficialChatSelected && selectedChat.id !== user?.uid && (
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleBlockUser(selectedChat.id, blockedUsers.includes(selectedChat.id))}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: blockedUsers.includes(selectedChat.id) ? "#4ade80" : "rgba(255,255,255,0.3)",
-                          cursor: "pointer",
-                          padding: "4px 6px",
-                          borderRadius: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          transition: "all .2s ease",
-                          fontSize: "10px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {blockedUsers.includes(selectedChat.id) ? "🔓 Unblock" : "🚫 Block"}
-                      </motion.button>
-                    )}
                     {!isOfficialChatSelected && (
                       <motion.button
                         whileHover={{ scale: 1.1 }}
@@ -4519,53 +4650,8 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
 
-                  {/* Blocked Chat View */}
-                  {isSelectedBlocked ? (
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "40px",
-                        backgroundColor: "#fef2f2",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔒</div>
-                      <div style={{ fontSize: "18px", fontWeight: 600, color: "#dc2626", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                        Maaf akun ini tidak bisa di chat
-                      </div>
-                      <div style={{ fontSize: "14px", color: "#666", textAlign: "center", fontFamily: FONT_FAMILY }}>
-                        Anda telah memblokir atau di blokir oleh user ini.
-                        <br />
-                        Untuk membuka blokir, klik tombol "Unblock" di atas.
-                      </div>
-                      {blockedUsers.includes(selectedChat.id) && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleBlockUser(selectedChat.id, true)}
-                          style={{
-                            marginTop: "16px",
-                            padding: "10px 24px",
-                            backgroundColor: "#22c55e",
-                            border: "none",
-                            borderRadius: "8px",
-                            color: "#fff",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            fontFamily: FONT_FAMILY,
-                          }}
-                        >
-                          🔓 Unblock User
-                        </motion.button>
-                      )}
-                    </div>
-                  ) : isOfficialChatSelected ? (
-                    // Official Chat View - sama seperti sebelumnya
+                  {/* Official Chat View */}
+                  {isOfficialChatSelected ? (
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages di Official Chat */}
                       {officialPinnedMessages.length > 0 && (
@@ -5064,7 +5150,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   ) : (
-                    // Regular Chat View - dengan block check
+                    // Regular Chat View - dengan cek block
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && (
@@ -5513,7 +5599,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for regular chat */}
+                      {/* Input for regular chat - disabled jika user diblok */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5548,15 +5634,16 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ display: "flex", gap: "8px" }}>
                           <input
                             type="text"
-                            placeholder={replyTo ? "Type a reply..." : "Type a message..."}
+                            placeholder={isUserBlocked(selectedChat.id) ? "This user has been blocked" : (replyTo ? "Type a reply..." : "Type a message...")}
                             value={message}
                             onChange={handleTyping}
                             onKeyPress={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
+                              if (e.key === 'Enter' && !e.shiftKey && !isUserBlocked(selectedChat.id)) {
                                 e.preventDefault();
                                 handleSendMessage();
                               }
                             }}
+                            disabled={isUserBlocked(selectedChat.id)}
                             style={{
                               flex: 1,
                               padding: "10px 16px",
@@ -5566,31 +5653,37 @@ export default function HomePage(): React.JSX.Element {
                               outline: "none",
                               fontFamily: FONT_FAMILY,
                               transition: "all .2s ease",
-                              backgroundColor: "#f5f5f5",
-                              color: "#000",
+                              backgroundColor: isUserBlocked(selectedChat.id) ? "#f5f5f5" : "#f5f5f5",
+                              color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
+                              cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "text",
                             }}
                             onFocus={(e) => {
-                              e.currentTarget.style.borderColor = "#c5e800";
-                              e.currentTarget.style.backgroundColor = "#ffffff";
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.borderColor = "#c5e800";
+                                e.currentTarget.style.backgroundColor = "#ffffff";
+                              }
                             }}
                             onBlur={(e) => {
-                              e.currentTarget.style.borderColor = "#e8e8e8";
-                              e.currentTarget.style.backgroundColor = "#f5f5f5";
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.borderColor = "#e8e8e8";
+                                e.currentTarget.style.backgroundColor = "#f5f5f5";
+                              }
                             }}
                           />
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleSendMessage}
+                            disabled={isUserBlocked(selectedChat.id)}
                             style={{
-                              backgroundColor: "#c5e800",
+                              backgroundColor: isUserBlocked(selectedChat.id) ? "#ccc" : "#c5e800",
                               border: "none",
                               padding: "10px 20px",
                               borderRadius: "8px",
                               fontSize: "14px",
                               fontWeight: 500,
-                              color: "#000",
-                              cursor: "pointer",
+                              color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
+                              cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "pointer",
                               transition: "all .2s ease",
                               whiteSpace: "nowrap",
                               display: "flex",
@@ -5599,10 +5692,14 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = "#b0d000";
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.backgroundColor = "#b0d000";
+                              }
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = "#c5e800";
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.backgroundColor = "#c5e800";
+                              }
                             }}
                           >
                             <span>Send</span>
