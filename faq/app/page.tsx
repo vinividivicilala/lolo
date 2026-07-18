@@ -184,7 +184,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge - HANYA untuk official account, BUKAN admin
+// Instagram Verified Badge - HANYA untuk official account
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -330,68 +330,8 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status untuk regular chat - warna stabilo
+// Read Status - warna stabilo
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  if (!isMine) return null;
-  
-  const status = (() => {
-    if (msg.senderId !== auth?.currentUser?.uid) return null;
-    if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#c5e800", label: "Read" };
-    }
-    return { icon: "✓", color: "#c5e800", label: "Sent" };
-  })();
-  
-  if (!status) return null;
-  
-  return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <span 
-        style={{
-          fontSize: "10px",
-          color: status.color,
-          fontWeight: status.label === "Read" ? 600 : 400,
-          cursor: "pointer",
-          fontFamily: FONT_FAMILY,
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        {status.icon}
-      </span>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          right: 0,
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          {status.label}
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            right: "10px",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Read Status untuk official chat - warna stabilo TERANG
-const OfficialReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   if (!isMine) return null;
@@ -510,7 +450,7 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text
+  // Chat button text - menampilkan semua pesan dari official chat
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -776,6 +716,9 @@ export default function HomePage(): React.JSX.Element {
       let lastMessageSenderId = "";
       let lastMessageSenderName = "";
       
+      // Kumpulkan semua pesan untuk ditampilkan di tombol
+      const allMessages: string[] = [];
+      
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
         msgList.push(msg);
@@ -785,6 +728,12 @@ export default function HomePage(): React.JSX.Element {
         // Count unread messages not from current user
         if (!msg.read && msg.senderId !== user.uid) {
           unreadCount++;
+          // Tambahkan ke daftar pesan untuk tombol
+          if (msg.senderId === "official_menuru") {
+            allMessages.push(`Menuru Official: ${msg.text}`);
+          } else {
+            allMessages.push(`${msg.senderName}: ${msg.text}`);
+          }
         }
         // Track last message - format seperti room chat biasa
         if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
@@ -802,6 +751,36 @@ export default function HomePage(): React.JSX.Element {
       setOfficialMessages(msgList);
       setOfficialPinnedMessages(pinnedList);
       setOfficialUnreadCount(unreadCount);
+      
+      // Update incoming messages untuk tombol
+      if (allMessages.length > 0) {
+        setIncomingMessagesList(allMessages);
+        setCurrentMessageIndex(0);
+        setChatButtonText(allMessages[0]);
+        setIsIncomingMessage(true);
+        
+        if (rollingInterval.current) {
+          clearInterval(rollingInterval.current);
+          rollingInterval.current = null;
+        }
+        
+        let index = 0;
+        rollingInterval.current = setInterval(() => {
+          index = (index + 1) % allMessages.length;
+          setCurrentMessageIndex(index);
+          setChatButtonText(allMessages[index]);
+        }, 3000);
+        
+        setTimeout(() => {
+          if (rollingInterval.current) {
+            clearInterval(rollingInterval.current);
+            rollingInterval.current = null;
+          }
+          setIsIncomingMessage(false);
+          setChatButtonText(chatTexts[chatTextIndex % chatTexts.length]);
+          chatTextIndex++;
+        }, 12000);
+      }
       
       // Mark messages as read for current user when in official chat
       if (selectedChat?.id === "official_menuru") {
@@ -870,7 +849,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status - semua user yang typing muncul bersamaan
+  // Listen for typing status - semua user yang typing muncul bersamaan (double/triple)
   useEffect(() => {
     if (!db || !user) return;
 
@@ -892,10 +871,13 @@ export default function HomePage(): React.JSX.Element {
       
       setOfficialTypingUsers(typingList);
       
+      // Update chat rooms dengan typing users - untuk semua room
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
+          // Untuk official chat, tampilkan SEMUA user yang sedang mengetik
           return { ...room, typingUsers: typingList };
         } else {
+          // Untuk regular chat, cek user spesifik di room tersebut
           const otherId = room.participants.find(id => id !== user.uid);
           if (otherId && allTypingUsers[otherId]) {
             const foundUser = users.find(u => u.id === otherId);
@@ -1713,7 +1695,7 @@ export default function HomePage(): React.JSX.Element {
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
 
-  // Get typing users for official chat display - semua user yang typing muncul bersamaan
+  // Get typing users for official chat display - semua user yang typing muncul bersamaan (double/triple)
   const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
 
   return (
@@ -1866,7 +1848,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -2126,7 +2107,6 @@ export default function HomePage(): React.JSX.Element {
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
-                    {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                     {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
@@ -3230,14 +3210,12 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                       </motion.div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                           {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
@@ -3349,58 +3327,165 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* TAMBAHKAN FOTO images/10.jpg sampai 15.jpg di bawah bio */}
+                    {/* STORIES - HANYA UNTUK ADMIN */}
                     {profileUser.id === user?.uid && profileUser.email === ADMIN_EMAIL && (
-                      <div style={{ width: "100%", marginBottom: "16px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                          <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                            Gallery
+                      <div style={{ width: "100%", marginBottom: "20px" }}>
+                        <div style={{ 
+                          display: "flex", 
+                          justifyContent: "space-between", 
+                          alignItems: "center", 
+                          marginBottom: "12px",
+                          borderBottom: "1px solid #f0f0f0",
+                          paddingBottom: "8px",
+                        }}>
+                          <span style={{ 
+                            fontSize: "18px", 
+                            fontWeight: 700, 
+                            color: "#000000", 
+                            fontFamily: FONT_FAMILY,
+                            letterSpacing: "-0.02em",
+                          }}>
+                            Stories
                           </span>
                         </div>
                         <div style={{ 
                           display: "grid", 
                           gridTemplateColumns: "repeat(3, 1fr)", 
-                          gap: "8px",
+                          gap: "10px",
                         }}>
-                          {[10, 11, 12, 13, 14, 15].map((num) => (
-                            <div
-                              key={num}
-                              style={{
-                                aspectRatio: "3/4",
-                                backgroundColor: "#f0f0f0",
-                                borderRadius: "6px",
-                                overflow: "hidden",
-                                border: "1px solid #e8e8e8",
-                                position: "relative",
-                              }}
-                            >
-                              <img
-                                src={`/images/${num}.jpg`}
-                                alt={`Gallery ${num}`}
+                          {[10, 11, 12, 13, 14, 15].map((num) => {
+                            const [currentImage, setCurrentImage] = useState(num);
+                            const [isHovering, setIsHovering] = useState(false);
+                            const imageRef = useRef<HTMLDivElement>(null);
+                            const images = [10, 11, 12, 13, 14, 15];
+                            
+                            useEffect(() => {
+                              if (!isHovering) return;
+                              const interval = setInterval(() => {
+                                setCurrentImage(prev => {
+                                  const currentIndex = images.indexOf(prev);
+                                  const nextIndex = (currentIndex + 1) % images.length;
+                                  return images[nextIndex];
+                                });
+                              }, 800);
+                              return () => clearInterval(interval);
+                            }, [isHovering]);
+                            
+                            return (
+                              <div
+                                key={num}
+                                ref={imageRef}
                                 style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
+                                  aspectRatio: "3/4",
+                                  backgroundColor: "#f0f0f0",
+                                  borderRadius: "12px",
+                                  overflow: "hidden",
+                                  border: "2px solid #e8e8e8",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
                                 }}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                  const parent = e.currentTarget.parentElement;
-                                  if (parent) {
-                                    parent.style.backgroundColor = "#f0f0f0";
-                                    parent.style.display = "flex";
-                                    parent.style.alignItems = "center";
-                                    parent.style.justifyContent = "center";
-                                    const span = document.createElement("span");
-                                    span.textContent = `${num}.jpg`;
-                                    span.style.color = "#999";
-                                    span.style.fontSize = "12px";
-                                    span.style.fontFamily = FONT_FAMILY;
-                                    parent.appendChild(span);
-                                  }
+                                onMouseEnter={() => setIsHovering(true)}
+                                onMouseLeave={() => {
+                                  setIsHovering(false);
+                                  setCurrentImage(num);
                                 }}
-                              />
-                            </div>
-                          ))}
+                                onClick={() => {
+                                  // Buka foto besar
+                                  const overlay = document.createElement('div');
+                                  overlay.style.cssText = `
+                                    position: fixed;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 100%;
+                                    background: rgba(0,0,0,0.9);
+                                    z-index: 9999;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                  `;
+                                  overlay.onclick = () => overlay.remove();
+                                  
+                                  const img = document.createElement('img');
+                                  img.src = `/images/${currentImage}.jpg`;
+                                  img.style.cssText = `
+                                    max-width: 90%;
+                                    max-height: 90%;
+                                    border-radius: 8px;
+                                    object-fit: contain;
+                                  `;
+                                  img.onerror = () => {
+                                    img.style.display = 'none';
+                                    const text = document.createElement('div');
+                                    text.textContent = `${currentImage}.jpg`;
+                                    text.style.cssText = `
+                                      color: #fff;
+                                      font-size: 24px;
+                                      font-family: ${FONT_FAMILY};
+                                    `;
+                                    overlay.appendChild(text);
+                                  };
+                                  overlay.appendChild(img);
+                                  document.body.appendChild(overlay);
+                                }}
+                              >
+                                <img
+                                  src={`/images/${currentImage}.jpg`}
+                                  alt={`Stories ${currentImage}`}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    transition: "transform 0.5s ease",
+                                  }}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.style.backgroundColor = "#f0f0f0";
+                                      parent.style.display = "flex";
+                                      parent.style.alignItems = "center";
+                                      parent.style.justifyContent = "center";
+                                      const span = document.createElement("span");
+                                      span.textContent = `${num}.jpg`;
+                                      span.style.color = "#999";
+                                      span.style.fontSize = "12px";
+                                      span.style.fontFamily = FONT_FAMILY;
+                                      parent.appendChild(span);
+                                    }
+                                  }}
+                                />
+                                {/* Gradient overlay bottom */}
+                                <div style={{
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: "40%",
+                                  background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+                                  pointerEvents: "none",
+                                }} />
+                                {/* Nomor foto */}
+                                <div style={{
+                                  position: "absolute",
+                                  bottom: "8px",
+                                  left: "8px",
+                                  color: "rgba(255,255,255,0.8)",
+                                  fontSize: "11px",
+                                  fontWeight: 500,
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "rgba(0,0,0,0.3)",
+                                  padding: "2px 8px",
+                                  borderRadius: "10px",
+                                  pointerEvents: "none",
+                                }}>
+                                  {num}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -3563,7 +3648,6 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
-                              {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
                               {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
@@ -3694,7 +3778,6 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
                                       {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
@@ -3812,7 +3895,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
                                         {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
@@ -4016,7 +4098,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -4029,7 +4110,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {/* ADMIN TIDAK PAKAI VERIFIED BADGE */}
                                 {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
@@ -4177,7 +4257,6 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI AVATAR */}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -4187,7 +4266,6 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                         {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                         {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
@@ -4419,7 +4497,6 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
-                                      {/* ADMIN TIDAK PAKAI VERIFIED BADGE DI SINI */}
                                       {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
@@ -4467,7 +4544,7 @@ export default function HomePage(): React.JSX.Element {
                                       {formatTime(msg.timestamp)}
                                     </span>
                                     {isMine && (
-                                      <OfficialReadStatus msg={msg} isMine={isMine} />
+                                      <ReadStatus msg={msg} isMine={isMine} />
                                     )}
                                     <motion.button
                                       whileHover={{ scale: 1.1 }}
@@ -4883,7 +4960,7 @@ export default function HomePage(): React.JSX.Element {
                           minHeight: 0,
                         }}
                       >
-                        {/* Typing indicator di body untuk regular chat */}
+                        {/* Typing indicator di body untuk regular chat - DOUBLE/TRIPLE */}
                         {regularTypingUsers.length > 0 && (
                           <div
                             style={{
@@ -5203,7 +5280,7 @@ export default function HomePage(): React.JSX.Element {
                           flexShrink: 0,
                         }}
                       >
-                        {/* Typing indicator di atas input untuk regular chat */}
+                        {/* Typing indicator di atas input untuk regular chat - DOUBLE/TRIPLE */}
                         {regularTypingUsers.length > 0 && (
                           <div
                             style={{
