@@ -390,6 +390,93 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
+// Komponen StoryItem - dipisahkan untuk menghindari React hooks error
+const StoryItem = ({ num, isHovering, setIsHovering, currentImage, setCurrentImage, images, onImageClick }: any) => {
+  useEffect(() => {
+    if (!isHovering) return;
+    const interval = setInterval(() => {
+      setCurrentImage((prev: number) => {
+        const currentIndex = images.indexOf(prev);
+        const nextIndex = (currentIndex + 1) % images.length;
+        return images[nextIndex];
+      });
+    }, 800);
+    return () => clearInterval(interval);
+  }, [isHovering, images, setCurrentImage]);
+
+  return (
+    <div
+      style={{
+        aspectRatio: "3/4",
+        backgroundColor: "#f0f0f0",
+        borderRadius: "12px",
+        overflow: "hidden",
+        border: "2px solid #e8e8e8",
+        position: "relative",
+        cursor: "pointer",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+      }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setCurrentImage(num);
+      }}
+      onClick={onImageClick}
+    >
+      <img
+        src={`/images/${currentImage}.jpg`}
+        alt={`Stories ${currentImage}`}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transition: "transform 0.5s ease",
+        }}
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+          const parent = e.currentTarget.parentElement;
+          if (parent) {
+            parent.style.backgroundColor = "#f0f0f0";
+            parent.style.display = "flex";
+            parent.style.alignItems = "center";
+            parent.style.justifyContent = "center";
+            const span = document.createElement("span");
+            span.textContent = `${num}.jpg`;
+            span.style.color = "#999";
+            span.style.fontSize = "12px";
+            span.style.fontFamily = FONT_FAMILY;
+            parent.appendChild(span);
+          }
+        }}
+      />
+      <div style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: "40%",
+        background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute",
+        bottom: "8px",
+        left: "8px",
+        color: "rgba(255,255,255,0.8)",
+        fontSize: "11px",
+        fontWeight: 500,
+        fontFamily: FONT_FAMILY,
+        backgroundColor: "rgba(0,0,0,0.3)",
+        padding: "2px 8px",
+        borderRadius: "10px",
+        pointerEvents: "none",
+      }}>
+        {num}
+      </div>
+    </div>
+  );
+};
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -427,6 +514,10 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // State untuk Stories
+  const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
+  const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
+
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
   const [officialMessageInput, setOfficialMessageInput] = useState("");
@@ -450,7 +541,7 @@ export default function HomePage(): React.JSX.Element {
   // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Chat button text - menampilkan semua pesan dari official chat
+  // Chat button text
   const [chatButtonText, setChatButtonText] = useState("Chat with Menuru");
   const [incomingMessagesList, setIncomingMessagesList] = useState<string[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -716,7 +807,6 @@ export default function HomePage(): React.JSX.Element {
       let lastMessageSenderId = "";
       let lastMessageSenderName = "";
       
-      // Kumpulkan semua pesan untuk ditampilkan di tombol
       const allMessages: string[] = [];
       
       snapshot.forEach((doc) => {
@@ -725,17 +815,14 @@ export default function HomePage(): React.JSX.Element {
         if (msg.isPinned) {
           pinnedList.push(msg);
         }
-        // Count unread messages not from current user
         if (!msg.read && msg.senderId !== user.uid) {
           unreadCount++;
-          // Tambahkan ke daftar pesan untuk tombol
           if (msg.senderId === "official_menuru") {
             allMessages.push(`Menuru Official: ${msg.text}`);
           } else {
             allMessages.push(`${msg.senderName}: ${msg.text}`);
           }
         }
-        // Track last message - format seperti room chat biasa
         if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
           if (msg.senderId === "official_menuru") {
             lastMessage = msg.text;
@@ -752,7 +839,6 @@ export default function HomePage(): React.JSX.Element {
       setOfficialPinnedMessages(pinnedList);
       setOfficialUnreadCount(unreadCount);
       
-      // Update incoming messages untuk tombol
       if (allMessages.length > 0) {
         setIncomingMessagesList(allMessages);
         setCurrentMessageIndex(0);
@@ -782,7 +868,6 @@ export default function HomePage(): React.JSX.Element {
         }, 12000);
       }
       
-      // Mark messages as read for current user when in official chat
       if (selectedChat?.id === "official_menuru") {
         const unreadMessages = msgList.filter(m => 
           !m.read && 
@@ -849,7 +934,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status - semua user yang typing muncul bersamaan (double/triple)
+  // Listen for typing status
   useEffect(() => {
     if (!db || !user) return;
 
@@ -871,13 +956,10 @@ export default function HomePage(): React.JSX.Element {
       
       setOfficialTypingUsers(typingList);
       
-      // Update chat rooms dengan typing users - untuk semua room
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
-          // Untuk official chat, tampilkan SEMUA user yang sedang mengetik
           return { ...room, typingUsers: typingList };
         } else {
-          // Untuk regular chat, cek user spesifik di room tersebut
           const otherId = room.participants.find(id => id !== user.uid);
           if (otherId && allTypingUsers[otherId]) {
             const foundUser = users.find(u => u.id === otherId);
@@ -1677,6 +1759,82 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, [isChatOpen, user, isIncomingMessage]);
 
+  // Fungsi untuk membuka foto besar
+  const openFullImage = (imageNumber: number) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    `;
+    overlay.onclick = () => overlay.remove();
+    
+    const img = document.createElement('img');
+    img.src = `/images/${imageNumber}.jpg`;
+    img.style.cssText = `
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      object-fit: contain;
+    `;
+    img.onerror = () => {
+      img.style.display = 'none';
+      const text = document.createElement('div');
+      text.textContent = `${imageNumber}.jpg`;
+      text.style.cssText = `
+        color: #fff;
+        font-size: 24px;
+        font-family: ${FONT_FAMILY};
+      `;
+      overlay.appendChild(text);
+    };
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+  };
+
+  // Inisialisasi state Stories
+  useEffect(() => {
+    const initialImages: { [key: number]: number } = {};
+    const initialHover: { [key: number]: boolean } = {};
+    [10, 11, 12, 13, 14, 15].forEach(num => {
+      initialImages[num] = num;
+      initialHover[num] = false;
+    });
+    setStoryImages(initialImages);
+    setStoryHover(initialHover);
+  }, []);
+
+  // Effect untuk Stories hover
+  useEffect(() => {
+    const images = [10, 11, 12, 13, 14, 15];
+    const intervals: { [key: number]: NodeJS.Timeout } = {};
+    
+    Object.keys(storyHover).forEach(key => {
+      const num = parseInt(key);
+      if (storyHover[num]) {
+        intervals[num] = setInterval(() => {
+          setStoryImages(prev => {
+            const currentIndex = images.indexOf(prev[num]);
+            const nextIndex = (currentIndex + 1) % images.length;
+            return { ...prev, [num]: images[nextIndex] };
+          });
+        }, 800);
+      }
+    });
+    
+    return () => {
+      Object.values(intervals).forEach(interval => clearInterval(interval));
+    };
+  }, [storyHover]);
+
   if (loading) {
     return (
       <div style={{
@@ -1695,7 +1853,7 @@ export default function HomePage(): React.JSX.Element {
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
 
-  // Get typing users for official chat display - semua user yang typing muncul bersamaan (double/triple)
+  // Get typing users for official chat display
   const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
 
   return (
@@ -2284,7 +2442,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page, Update System, Privacy Policy, Profile */}
+              {/* Content - Update Detail Page */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -3327,7 +3485,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* STORIES - HANYA UNTUK ADMIN */}
+                    {/* STORIES - HANYA UNTUK ADMIN - 4 baris dengan 2 foto di sisipkan */}
                     {profileUser.id === user?.uid && profileUser.email === ADMIN_EMAIL && (
                       <div style={{ width: "100%", marginBottom: "20px" }}>
                         <div style={{ 
@@ -3350,142 +3508,83 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                         <div style={{ 
                           display: "grid", 
-                          gridTemplateColumns: "repeat(3, 1fr)", 
+                          gridTemplateColumns: "repeat(4, 1fr)", 
                           gap: "10px",
                         }}>
-                          {[10, 11, 12, 13, 14, 15].map((num) => {
-                            const [currentImage, setCurrentImage] = useState(num);
-                            const [isHovering, setIsHovering] = useState(false);
-                            const imageRef = useRef<HTMLDivElement>(null);
-                            const images = [10, 11, 12, 13, 14, 15];
-                            
-                            useEffect(() => {
-                              if (!isHovering) return;
-                              const interval = setInterval(() => {
-                                setCurrentImage(prev => {
-                                  const currentIndex = images.indexOf(prev);
-                                  const nextIndex = (currentIndex + 1) % images.length;
-                                  return images[nextIndex];
-                                });
-                              }, 800);
-                              return () => clearInterval(interval);
-                            }, [isHovering]);
-                            
-                            return (
-                              <div
-                                key={num}
-                                ref={imageRef}
+                          {[10, 11, 12, 13, 14, 15].map((num) => (
+                            <div
+                              key={num}
+                              style={{
+                                aspectRatio: "3/4",
+                                backgroundColor: "#f0f0f0",
+                                borderRadius: "12px",
+                                overflow: "hidden",
+                                border: "2px solid #e8e8e8",
+                                position: "relative",
+                                cursor: "pointer",
+                                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                              }}
+                              onMouseEnter={() => {
+                                setStoryHover(prev => ({ ...prev, [num]: true }));
+                              }}
+                              onMouseLeave={() => {
+                                setStoryHover(prev => ({ ...prev, [num]: false }));
+                                setStoryImages(prev => ({ ...prev, [num]: num }));
+                              }}
+                              onClick={() => openFullImage(storyImages[num] || num)}
+                            >
+                              <img
+                                src={`/images/${storyImages[num] || num}.jpg`}
+                                alt={`Stories ${num}`}
                                 style={{
-                                  aspectRatio: "3/4",
-                                  backgroundColor: "#f0f0f0",
-                                  borderRadius: "12px",
-                                  overflow: "hidden",
-                                  border: "2px solid #e8e8e8",
-                                  position: "relative",
-                                  cursor: "pointer",
-                                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  transition: "transform 0.5s ease",
                                 }}
-                                onMouseEnter={() => setIsHovering(true)}
-                                onMouseLeave={() => {
-                                  setIsHovering(false);
-                                  setCurrentImage(num);
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.style.backgroundColor = "#f0f0f0";
+                                    parent.style.display = "flex";
+                                    parent.style.alignItems = "center";
+                                    parent.style.justifyContent = "center";
+                                    const span = document.createElement("span");
+                                    span.textContent = `${num}.jpg`;
+                                    span.style.color = "#999";
+                                    span.style.fontSize = "12px";
+                                    span.style.fontFamily = FONT_FAMILY;
+                                    parent.appendChild(span);
+                                  }
                                 }}
-                                onClick={() => {
-                                  // Buka foto besar
-                                  const overlay = document.createElement('div');
-                                  overlay.style.cssText = `
-                                    position: fixed;
-                                    top: 0;
-                                    left: 0;
-                                    width: 100%;
-                                    height: 100%;
-                                    background: rgba(0,0,0,0.9);
-                                    z-index: 9999;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    cursor: pointer;
-                                  `;
-                                  overlay.onclick = () => overlay.remove();
-                                  
-                                  const img = document.createElement('img');
-                                  img.src = `/images/${currentImage}.jpg`;
-                                  img.style.cssText = `
-                                    max-width: 90%;
-                                    max-height: 90%;
-                                    border-radius: 8px;
-                                    object-fit: contain;
-                                  `;
-                                  img.onerror = () => {
-                                    img.style.display = 'none';
-                                    const text = document.createElement('div');
-                                    text.textContent = `${currentImage}.jpg`;
-                                    text.style.cssText = `
-                                      color: #fff;
-                                      font-size: 24px;
-                                      font-family: ${FONT_FAMILY};
-                                    `;
-                                    overlay.appendChild(text);
-                                  };
-                                  overlay.appendChild(img);
-                                  document.body.appendChild(overlay);
-                                }}
-                              >
-                                <img
-                                  src={`/images/${currentImage}.jpg`}
-                                  alt={`Stories ${currentImage}`}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    transition: "transform 0.5s ease",
-                                  }}
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                    const parent = e.currentTarget.parentElement;
-                                    if (parent) {
-                                      parent.style.backgroundColor = "#f0f0f0";
-                                      parent.style.display = "flex";
-                                      parent.style.alignItems = "center";
-                                      parent.style.justifyContent = "center";
-                                      const span = document.createElement("span");
-                                      span.textContent = `${num}.jpg`;
-                                      span.style.color = "#999";
-                                      span.style.fontSize = "12px";
-                                      span.style.fontFamily = FONT_FAMILY;
-                                      parent.appendChild(span);
-                                    }
-                                  }}
-                                />
-                                {/* Gradient overlay bottom */}
-                                <div style={{
-                                  position: "absolute",
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  height: "40%",
-                                  background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
-                                  pointerEvents: "none",
-                                }} />
-                                {/* Nomor foto */}
-                                <div style={{
-                                  position: "absolute",
-                                  bottom: "8px",
-                                  left: "8px",
-                                  color: "rgba(255,255,255,0.8)",
-                                  fontSize: "11px",
-                                  fontWeight: 500,
-                                  fontFamily: FONT_FAMILY,
-                                  backgroundColor: "rgba(0,0,0,0.3)",
-                                  padding: "2px 8px",
-                                  borderRadius: "10px",
-                                  pointerEvents: "none",
-                                }}>
-                                  {num}
-                                </div>
+                              />
+                              <div style={{
+                                position: "absolute",
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: "40%",
+                                background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+                                pointerEvents: "none",
+                              }} />
+                              <div style={{
+                                position: "absolute",
+                                bottom: "8px",
+                                left: "8px",
+                                color: "rgba(255,255,255,0.8)",
+                                fontSize: "11px",
+                                fontWeight: 500,
+                                fontFamily: FONT_FAMILY,
+                                backgroundColor: "rgba(0,0,0,0.3)",
+                                padding: "2px 8px",
+                                borderRadius: "10px",
+                                pointerEvents: "none",
+                              }}>
+                                {num}
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -3540,7 +3639,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : !selectedChat ? (
-                // Chat List View
+                // Chat List View - sama seperti sebelumnya
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div
                     style={{
@@ -4397,7 +4496,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages Area with typing indicator */}
+                      {/* Messages Area dengan typing indicator */}
                       <div
                         style={{
                           flex: 1,
