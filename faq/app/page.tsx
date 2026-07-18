@@ -122,12 +122,6 @@ interface UpdateItem {
 }
 
 // SVG Icons
-const PinIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
-  </svg>
-);
-
 const CloseIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -182,85 +176,6 @@ const ChatIcon = () => (
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-// Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          marginLeft: "4px",
-          display: "inline-block",
-          verticalAlign: "middle",
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <path
-          fill="#0095F6"
-          d="
-            M12 2.2
-            C13.6 3.8 16.2 3.8 17.8 2.2
-            C18.6 3.8 20.2 5.4 21.8 6.2
-            C20.2 7.8 20.2 10.4 21.8 12
-            C20.2 13.6 20.2 16.2 21.8 17.8
-            C20.2 18.6 18.6 20.2 17.8 21.8
-            C16.2 20.2 13.6 20.2 12 21.8
-            C10.4 20.2 7.8 20.2 6.2 21.8
-            C5.4 20.2 3.8 18.6 2.2 17.8
-            C3.8 16.2 3.8 13.6 2.2 12
-            C3.8 10.4 3.8 7.8 2.2 6.2
-            C3.8 5.4 5.4 3.8 6.2 2.2
-            C7.8 3.8 10.4 3.8 12 2.2
-            Z
-          "
-        />
-        <path
-          d="M9.2 12.3l2 2 4.6-4.6"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          Official Account
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
 
 // Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
@@ -403,8 +318,6 @@ export default function HomePage(): React.JSX.Element {
   const [showLogin, setShowLogin] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [totalUnread, setTotalUnread] = useState(0);
-  const [showPinnedUsers, setShowPinnedUsers] = useState(false);
-  const [showPinnedChats, setShowPinnedChats] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
   const [selectedNewUser, setSelectedNewUser] = useState("");
   const [addUserStatus, setAddUserStatus] = useState("");
@@ -758,10 +671,11 @@ export default function HomePage(): React.JSX.Element {
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.typing && data.id !== user?.uid) {
-          const userInOfficial = chatRooms.some(room => 
+          // Check if user is in official chat
+          const isInOfficial = chatRooms.some(room => 
             room.id === OFFICIAL_CHAT_ID && room.participants.includes(data.id)
           );
-          if (userInOfficial || data.id === "official_menuru") {
+          if (isInOfficial || data.id === "official_menuru") {
             typingMap[data.id] = true;
           }
         }
@@ -1381,7 +1295,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin chat room
+  // Pin/Unpin chat room - tanpa icon
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1401,7 +1315,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin user
+  // Pin/Unpin user - tanpa icon
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1525,6 +1439,20 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const typingUsersList = getOfficialTypingUsers();
+
+  // Get typing users in regular chat
+  const getRegularTypingUsers = () => {
+    if (!selectedChat) return [];
+    const typingList: { name: string; id: string }[] = [];
+    // Check if selected chat user is typing
+    const selectedUser = users.find(u => u.id === selectedChat.id);
+    if (selectedUser && selectedUser.typing && selectedUser.id !== user?.uid) {
+      typingList.push({ name: selectedUser.name, id: selectedUser.id });
+    }
+    return typingList;
+  };
+
+  const regularTypingUsers = getRegularTypingUsers();
 
   // Close menu
   useEffect(() => {
@@ -1716,7 +1644,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
-                {isAdmin && <InstagramVerifiedBadge size={14} />}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -1976,8 +1903,6 @@ export default function HomePage(): React.JSX.Element {
                 {users.filter(u => u.id !== user.uid && u.id !== shareMessage.senderId).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
-                    {u.isAdmin && <InstagramVerifiedBadge size={14} />}
-                    {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -3087,8 +3012,6 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
-                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3243,7 +3166,7 @@ export default function HomePage(): React.JSX.Element {
                           transition: "all 0.2s ease",
                         }}
                       >
-                        <PinIcon filled={profileUser.isPinned || false} />
+                        {profileUser.isPinned ? "Unpin" : "Pin"}
                       </motion.button>
                     </div>
                   </div>
@@ -3357,7 +3280,6 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
-                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3412,7 +3334,8 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </AnimatePresence>
 
-                  {/* Pinned Users - tanpa dropdown icon */}
+                  {/* Pinned Users - tanpa icon */}
+
                   {pinnedUsers.length > 0 && (
                     <div style={{ marginBottom: "10px" }}>
                       <div
@@ -3429,7 +3352,6 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                             Pinned Users ({pinnedUsers.length})
                           </span>
@@ -3487,7 +3409,6 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3503,13 +3424,15 @@ export default function HomePage(): React.JSX.Element {
                                     background: "none",
                                     border: "none",
                                     cursor: "pointer",
-                                    color: "#c5e800",
+                                    color: "#000",
                                     padding: "2px 4px",
                                     display: "flex",
                                     alignItems: "center",
+                                    fontSize: "10px",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  <PinIcon filled={true} />
+                                  Unpin
                                 </motion.button>
                               </div>
                             ))}
@@ -3519,7 +3442,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Pinned Chats - tanpa dropdown icon */}
+                  {/* Pinned Chats - tanpa icon */}
                   {pinnedChats.length > 0 && (
                     <div style={{ marginBottom: "10px" }}>
                       <div
@@ -3536,7 +3459,6 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <PinIcon filled={true} />
                           <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                             Pinned Chats ({pinnedChats.length})
                           </span>
@@ -3604,7 +3526,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                         {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
@@ -3642,13 +3563,15 @@ export default function HomePage(): React.JSX.Element {
                                       background: "none",
                                       border: "none",
                                       cursor: "pointer",
-                                      color: "#c5e800",
+                                      color: "#000",
                                       padding: "2px 4px",
                                       display: "flex",
                                       alignItems: "center",
+                                      fontSize: "10px",
+                                      fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    <PinIcon filled={true} />
+                                    Unpin
                                   </motion.button>
                                 </motion.div>
                               );
@@ -3716,7 +3639,6 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
-                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3801,11 +3723,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {otherUser.isAdmin && (
-                                <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                                  <InstagramVerifiedBadge size={12} />
-                                </div>
-                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3818,7 +3735,6 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                 </span>
-                                {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
                               </div>
                               <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -3869,14 +3785,16 @@ export default function HomePage(): React.JSX.Element {
                                     background: "none",
                                     border: "none",
                                     cursor: "pointer",
-                                    color: room.isPinned ? "#c5e800" : "#ddd",
+                                    color: room.isPinned ? "#000" : "#ddd",
                                     padding: "2px 4px",
                                     display: "flex",
                                     alignItems: "center",
                                     transition: "all .2s ease",
+                                    fontSize: "10px",
+                                    fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  <PinIcon filled={room.isPinned || false} />
+                                  {room.isPinned ? "Unpin" : "Pin"}
                                 </motion.button>
                               </div>
                             </div>
@@ -3960,12 +3878,6 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                       )}
-                      {/* Verified badge di avatar hanya untuk admin, bukan official */}
-                      {!isOfficialChatSelected && selectedChat.isAdmin && (
-                        <div style={{ position: "absolute", bottom: -2, right: -2 }}>
-                          <InstagramVerifiedBadge size={12} />
-                        </div>
-                      )}
                     </motion.div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                       <div 
@@ -3975,10 +3887,6 @@ export default function HomePage(): React.JSX.Element {
                         <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                         </span>
-                        {/* Verified badge di samping nama untuk admin dan official */}
-                        {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
-                        {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {isOfficialChatSelected ? (
@@ -4021,9 +3929,11 @@ export default function HomePage(): React.JSX.Element {
                           display: "flex",
                           alignItems: "center",
                           transition: "all .2s ease",
+                          fontSize: "10px",
+                          fontFamily: FONT_FAMILY,
                         }}
                       >
-                        <PinIcon filled={selectedChat.isPinned || false} />
+                        {selectedChat.isPinned ? "Unpin" : "Pin"}
                       </motion.button>
                     )}
                   </div>
@@ -4031,7 +3941,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Official Chat View */}
                   {isOfficialChatSelected ? (
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      {/* Pinned Messages di Official Chat - tanpa dropdown icon berwarna */}
+                      {/* Pinned Messages di Official Chat - tanpa icon */}
                       {officialPinnedMessages.length > 0 && (
                         <div
                           style={{
@@ -4052,7 +3962,6 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <PinIcon filled={true} />
                               <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                                 Pinned Messages ({officialPinnedMessages.length})
                               </span>
@@ -4205,8 +4114,6 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
-                                      {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                      {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -4392,8 +4299,7 @@ export default function HomePage(): React.JSX.Element {
                                               fontFamily: FONT_FAMILY,
                                             }}
                                           >
-                                            <PinIcon filled={msg.isPinned || false} />
-                                            <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                            {msg.isPinned ? "Unpin" : "Pin"}
                                           </motion.button>
                                         </motion.div>
                                       )}
@@ -4416,8 +4322,7 @@ export default function HomePage(): React.JSX.Element {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    <PinIcon filled={true} />
-                                    <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                    Pin • {formatTime(msg.pinnedAt || msg.timestamp)}
                                   </div>
                                 )}
                               </React.Fragment>
@@ -4525,7 +4430,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   ) : (
-                    // Regular Chat View - sama seperti sebelumnya
+                    // Regular Chat View
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && (
@@ -4548,7 +4453,6 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <PinIcon filled={true} />
                               <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                                 Pinned Messages ({pinnedMessages.length})
                               </span>
@@ -4665,6 +4569,24 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
+                        {/* Typing indicator in body for regular chat */}
+                        {regularTypingUsers.length > 0 && (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              fontSize: "12px",
+                              color: "#000000",
+                              padding: "4px 0",
+                              fontStyle: "italic",
+                              fontFamily: FONT_FAMILY,
+                              backgroundColor: "transparent",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {regularTypingUsers.map(u => u.name).join(", ")} typing...
+                          </div>
+                        )}
+
                         {messages.length === 0 ? (
                           <div
                             style={{
@@ -4918,8 +4840,7 @@ export default function HomePage(): React.JSX.Element {
                                               fontFamily: FONT_FAMILY,
                                             }}
                                           >
-                                            <PinIcon filled={msg.isPinned || false} />
-                                            <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                            {msg.isPinned ? "Unpin" : "Pin"}
                                           </motion.button>
                                         </motion.div>
                                       )}
@@ -4942,8 +4863,7 @@ export default function HomePage(): React.JSX.Element {
                                       fontFamily: FONT_FAMILY,
                                     }}
                                   >
-                                    <PinIcon filled={true} />
-                                    <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                    Pin • {formatTime(msg.pinnedAt || msg.timestamp)}
                                   </div>
                                 )}
                               </React.Fragment>
@@ -4966,6 +4886,24 @@ export default function HomePage(): React.JSX.Element {
                           position: "relative",
                         }}
                       >
+                        {/* Typing indicator above input for regular chat */}
+                        {regularTypingUsers.length > 0 && (
+                          <div
+                            style={{
+                              textAlign: "left",
+                              fontSize: "12px",
+                              color: "#000000",
+                              fontStyle: "italic",
+                              fontFamily: FONT_FAMILY,
+                              padding: "2px 4px",
+                              backgroundColor: "transparent",
+                              marginBottom: "2px",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {regularTypingUsers.map(u => u.name).join(", ")} typing...
+                          </div>
+                        )}
                         <div style={{ display: "flex", gap: "8px" }}>
                           <input
                             type="text"
