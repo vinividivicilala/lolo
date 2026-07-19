@@ -736,6 +736,14 @@ export default function HomePage(): React.JSX.Element {
     return (currentUserData?.blocked || []).includes(userId);
   };
 
+  // Fungsi cek apakah user di-block oleh orang lain
+  const isBlockedByOther = (userId: string) => {
+    if (!user || !userId) return false;
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return false;
+    return (targetUser.blocked || []).includes(user.uid);
+  };
+
   // Auth Listener
   useEffect(() => {
     if (!auth) return;
@@ -2031,6 +2039,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Check if profile user is blocked
   const isProfileBlocked = profileUser && isUserBlocked(profileUser.id);
+  const isBlockedByOtherUser = profileUser && isBlockedByOther(profileUser.id);
 
   return (
     <div
@@ -3471,8 +3480,8 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* Jika user diblok, tampilkan peringatan di profile */}
-                    {isProfileBlocked ? (
+                    {/* Peringatan block di profile */}
+                    {isProfileBlocked && (
                       <div style={{ 
                         width: "100%", 
                         marginTop: "16px",
@@ -3490,344 +3499,342 @@ export default function HomePage(): React.JSX.Element {
                           Silahkan buka block untuk melanjutkan chat
                         </div>
                       </div>
-                    ) : (
-                      <>
-                        <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
-                          <div style={{ 
-                            backgroundColor: "#f5f5f5", 
-                            borderRadius: "8px",
-                            padding: "8px 14px",
-                            position: "relative",
-                            marginBottom: "8px",
-                            maxWidth: "280px",
+                    )}
+
+                    <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
+                      <div style={{ 
+                        backgroundColor: "#f5f5f5", 
+                        borderRadius: "8px",
+                        padding: "8px 14px",
+                        position: "relative",
+                        marginBottom: "8px",
+                        maxWidth: "280px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ 
+                            fontSize: "10px", 
+                            color: "#666", 
+                            fontWeight: 500, 
+                            letterSpacing: "0.05em", 
+                            textTransform: "uppercase",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
                             fontFamily: FONT_FAMILY,
                           }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ 
-                                fontSize: "10px", 
-                                color: "#666", 
-                                fontWeight: 500, 
-                                letterSpacing: "0.05em", 
-                                textTransform: "uppercase",
+                            <span style={{ 
+                              display: "inline-block",
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#c5e800",
+                              marginRight: "4px",
+                            }} />
+                            Note
+                          </span>
+                          {profileUser.id === user?.uid && (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditNote(!editNote)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#666",
+                                fontSize: "10px",
+                                cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
                                 fontFamily: FONT_FAMILY,
-                              }}>
-                                <span style={{ 
-                                  display: "inline-block",
-                                  width: "6px",
-                                  height: "6px",
-                                  borderRadius: "50%",
-                                  backgroundColor: "#c5e800",
-                                  marginRight: "4px",
-                                }} />
-                                Note
-                              </span>
-                              {profileUser.id === user?.uid && (
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setEditNote(!editNote)}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    color: "#666",
-                                    fontSize: "10px",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  <EditIcon />
-                                  {profileUser.note ? "Edit" : "Add"}
-                                </motion.button>
-                              )}
-                            </div>
-
-                            {editNote && profileUser.id === user?.uid ? (
-                              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
-                                <input
-                                  type="text"
-                                  value={noteInput}
-                                  onChange={(e) => setNoteInput(e.target.value)}
-                                  placeholder="No note yet"
-                                  style={{
-                                    flex: 1,
-                                    padding: "6px 10px",
-                                    backgroundColor: "#fff",
-                                    border: "1px solid #e0e0e0",
-                                    borderRadius: "4px",
-                                    color: "#000",
-                                    fontSize: "12px",
-                                    outline: "none",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                  onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                      handleSaveNote();
-                                    }
-                                  }}
-                                />
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={handleSaveNote}
-                                  style={{
-                                    padding: "4px 12px",
-                                    backgroundColor: "#c5e800",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    color: "#000",
-                                    fontSize: "11px",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontFamily: FONT_FAMILY,
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  Save
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setEditNote(false)}
-                                  style={{
-                                    padding: "4px 10px",
-                                    backgroundColor: "transparent",
-                                    border: "1px solid #e0e0e0",
-                                    borderRadius: "4px",
-                                    color: "#666",
-                                    fontSize: "11px",
-                                    cursor: "pointer",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  Cancel
-                                </motion.button>
-                              </div>
-                            ) : (
-                              <div style={{ 
-                                padding: "4px 0",
-                                color: profileUser.note ? "#000" : "#999",
-                                fontSize: "13px",
-                                lineHeight: 1.4,
-                                minHeight: "24px",
-                                fontFamily: FONT_FAMILY,
-                              }}>
-                                {profileUser.note || "No note yet"}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            style={{
-                              width: "64px",
-                              height: "64px",
-                              borderRadius: "8px",
-                              backgroundColor: "#f0f0f0",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "28px",
-                              overflow: "hidden",
-                              border: "1px solid #e8e8e8",
-                              flexShrink: 0,
-                              position: "relative",
-                            }}
-                          >
-                            {profileUser.photoURL ? (
-                              <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            ) : (
-                              <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                            )}
-                          </motion.div>
-                          <div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                              <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                                {profileUser.name}
-                              </span>
-                              {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
-                            </div>
-                            <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                              <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                              <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                                {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ width: "100%", marginBottom: "16px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                              Bio
-                            </span>
-                            {profileUser.id === user?.uid && (
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setEditBio(!editBio)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: "#999",
-                                  fontSize: "10px",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                <EditIcon />
-                                {profileUser.bio ? "Edit" : "Add"}
-                              </motion.button>
-                            )}
-                          </div>
-                          {editBio && profileUser.id === user?.uid ? (
-                            <div>
-                              <textarea
-                                value={bioInput}
-                                onChange={(e) => setBioInput(e.target.value)}
-                                placeholder="No bio yet"
-                                rows={2}
-                                style={{
-                                  width: "100%",
-                                  padding: "8px 12px",
-                                  backgroundColor: "#f5f5f5",
-                                  border: "1px solid #e8e8e8",
-                                  borderRadius: "6px",
-                                  color: "#000",
-                                  fontSize: "13px",
-                                  outline: "none",
-                                  fontFamily: FONT_FAMILY,
-                                  resize: "vertical",
-                                }}
-                              />
-                              <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={handleSaveBio}
-                                  style={{
-                                    padding: "4px 14px",
-                                    backgroundColor: "#000",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    color: "#fff",
-                                    fontSize: "12px",
-                                    cursor: "pointer",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  Save
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setEditBio(false)}
-                                  style={{
-                                    padding: "4px 14px",
-                                    backgroundColor: "transparent",
-                                    border: "1px solid #e0e0e0",
-                                    borderRadius: "4px",
-                                    color: "#999",
-                                    fontSize: "12px",
-                                    cursor: "pointer",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  Cancel
-                                </motion.button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ 
-                              padding: "8px 12px", 
-                              backgroundColor: "#f8f8f8", 
-                              borderRadius: "6px",
-                              fontSize: "13px",
-                              color: profileUser.bio ? "#000" : "#ccc",
-                              lineHeight: 1.5,
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              {profileUser.bio || "No bio yet"}
-                            </div>
+                              }}
+                            >
+                              <EditIcon />
+                              {profileUser.note ? "Edit" : "Add"}
+                            </motion.button>
                           )}
                         </div>
 
-                        {/* STORIES - HANYA UNTUK ADMIN */}
-                        {profileUser && (
-                          <StoriesSection userEmail={profileUser.email} />
+                        {editNote && profileUser.id === user?.uid ? (
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+                            <input
+                              type="text"
+                              value={noteInput}
+                              onChange={(e) => setNoteInput(e.target.value)}
+                              placeholder="No note yet"
+                              style={{
+                                flex: 1,
+                                padding: "6px 10px",
+                                backgroundColor: "#fff",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#000",
+                                fontSize: "12px",
+                                outline: "none",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveNote();
+                                }
+                              }}
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleSaveNote}
+                              style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#c5e800",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "#000",
+                                fontSize: "11px",
+                                fontWeight: 500,
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Save
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditNote(false)}
+                              style={{
+                                padding: "4px 10px",
+                                backgroundColor: "transparent",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#666",
+                                fontSize: "11px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                        ) : (
+                          <div style={{ 
+                            padding: "4px 0",
+                            color: profileUser.note ? "#000" : "#999",
+                            fontSize: "13px",
+                            lineHeight: 1.4,
+                            minHeight: "24px",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {profileUser.note || "No note yet"}
+                          </div>
                         )}
+                      </div>
+                    </div>
 
-                        <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => {
-                              if (isUserBlocked(profileUser.id)) {
-                                return;
-                              }
-                              handleCloseProfile();
-                              setSelectedChat(profileUser);
-                            }}
-                            style={{
-                              flex: 1,
-                              padding: "10px",
-                              backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
-                              border: "none",
-                              borderRadius: "8px",
-                              color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
-                              fontSize: "14px",
-                              fontWeight: 500,
-                              cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
-                              fontFamily: FONT_FAMILY,
-                              transition: "opacity 0.2s ease",
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isUserBlocked(profileUser.id)) {
-                                e.currentTarget.style.opacity = "0.8";
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isUserBlocked(profileUser.id)) {
-                                e.currentTarget.style.opacity = "1";
-                              }
-                            }}
-                          >
-                            {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
-                          </motion.button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        style={{
+                          width: "64px",
+                          height: "64px",
+                          borderRadius: "8px",
+                          backgroundColor: "#f0f0f0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "28px",
+                          overflow: "hidden",
+                          border: "1px solid #e8e8e8",
+                          flexShrink: 0,
+                          position: "relative",
+                        }}
+                      >
+                        {profileUser.photoURL ? (
+                          <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                        )}
+                      </motion.div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                            {profileUser.name}
+                          </span>
+                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                        </div>
+                        <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
+                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ width: "100%", marginBottom: "16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
+                          Bio
+                        </span>
+                        {profileUser.id === user?.uid && (
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
+                            onClick={() => setEditBio(!editBio)}
                             style={{
-                              padding: "10px 16px",
-                              backgroundColor: "transparent",
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "8px",
-                              color: profileUser.isPinned ? "#000" : "#999",
+                              background: "none",
+                              border: "none",
+                              color: "#999",
+                              fontSize: "10px",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                               gap: "4px",
                               fontFamily: FONT_FAMILY,
-                              transition: "all 0.2s ease",
                             }}
                           >
-                            <PinIcon filled={profileUser.isPinned || false} />
+                            <EditIcon />
+                            {profileUser.bio ? "Edit" : "Add"}
                           </motion.button>
+                        )}
+                      </div>
+                      {editBio && profileUser.id === user?.uid ? (
+                        <div>
+                          <textarea
+                            value={bioInput}
+                            onChange={(e) => setBioInput(e.target.value)}
+                            placeholder="No bio yet"
+                            rows={2}
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              backgroundColor: "#f5f5f5",
+                              border: "1px solid #e8e8e8",
+                              borderRadius: "6px",
+                              color: "#000",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              resize: "vertical",
+                            }}
+                          />
+                          <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleSaveBio}
+                              style={{
+                                padding: "4px 14px",
+                                backgroundColor: "#000",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "#fff",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Save
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setEditBio(false)}
+                              style={{
+                                padding: "4px 14px",
+                                backgroundColor: "transparent",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "4px",
+                                color: "#999",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
                         </div>
-                      </>
+                      ) : (
+                        <div style={{ 
+                          padding: "8px 12px", 
+                          backgroundColor: "#f8f8f8", 
+                          borderRadius: "6px",
+                          fontSize: "13px",
+                          color: profileUser.bio ? "#000" : "#ccc",
+                          lineHeight: 1.5,
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {profileUser.bio || "No bio yet"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* STORIES - HANYA UNTUK ADMIN */}
+                    {profileUser && (
+                      <StoriesSection userEmail={profileUser.email} />
                     )}
+
+                    <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          if (isUserBlocked(profileUser.id)) {
+                            return;
+                          }
+                          handleCloseProfile();
+                          setSelectedChat(profileUser);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: "10px",
+                          backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
+                          border: "none",
+                          borderRadius: "8px",
+                          color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
+                          fontFamily: FONT_FAMILY,
+                          transition: "opacity 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isUserBlocked(profileUser.id)) {
+                            e.currentTarget.style.opacity = "0.8";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isUserBlocked(profileUser.id)) {
+                            e.currentTarget.style.opacity = "1";
+                          }
+                        }}
+                      >
+                        {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
+                        style={{
+                          padding: "10px 16px",
+                          backgroundColor: "transparent",
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "8px",
+                          color: profileUser.isPinned ? "#000" : "#999",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontFamily: FONT_FAMILY,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <PinIcon filled={profileUser.isPinned || false} />
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
               ) : !selectedChat ? (
