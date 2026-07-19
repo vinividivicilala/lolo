@@ -189,156 +189,24 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Instagram Verified Badge
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          marginLeft: "4px",
-          display: "inline-block",
-          verticalAlign: "middle",
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <path
-          fill="#0095F6"
-          d="
-            M12 2.2
-            C13.6 3.8 16.2 3.8 17.8 2.2
-            C18.6 3.8 20.2 5.4 21.8 6.2
-            C20.2 7.8 20.2 10.4 21.8 12
-            C20.2 13.6 20.2 16.2 21.8 17.8
-            C20.2 18.6 18.6 20.2 17.8 21.8
-            C16.2 20.2 13.6 20.2 12 21.8
-            C10.4 20.2 7.8 20.2 6.2 21.8
-            C5.4 20.2 3.8 18.6 2.2 17.8
-            C3.8 16.2 3.8 13.6 2.2 12
-            C3.8 10.4 3.8 7.8 2.2 6.2
-            C3.8 5.4 5.4 3.8 6.2 2.2
-            C7.8 3.8 10.4 3.8 12 2.2
-            Z
-          "
-        />
-        <path
-          d="M9.2 12.3l2 2 4.6-4.6"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          Official Account
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Online Status Indicator
+// Online Status Indicator - tanpa titik bulat
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const color = online ? "#4ade80" : "#999";
+  const color = online ? "#22c55e" : "#999";
   
   return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <div
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        style={{ cursor: "pointer" }}
-      >
-        <div style={{
-          width: "8px",
-          height: "8px",
-          borderRadius: "50%",
-          backgroundColor: color,
-          position: "relative",
-          transition: "all 0.3s ease",
-        }}>
-          {online && (
-            <div style={{
-              position: "absolute",
-              width: "22px",
-              height: "22px",
-              borderRadius: "50%",
-              backgroundColor: color,
-              opacity: 0.20,
-              animation: "awwwardsPulse 2s ease-in-out infinite",
-              pointerEvents: "none",
-              top: "-7px",
-              left: "-7px",
-            }} />
-          )}
-        </div>
-      </div>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          {online ? "Online" : (lastSeen || "Offline")}
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
+    <span style={{ 
+      fontSize: "10px", 
+      color: color,
+      fontFamily: FONT_FAMILY,
+      fontWeight: 500,
+    }}>
+      {online ? "Online" : (lastSeen || "Offline")}
+    </span>
   );
 };
 
 // Read Status
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
   if (!isMine) return null;
   
   const status = (() => {
@@ -346,52 +214,20 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     if (msg.read && msg.readAt) {
       return { icon: "✓✓", color: "#c5e800", label: "Read" };
     }
-    return { icon: "✓", color: "#c5e800", label: "Sent" };
+    return { icon: "✓", color: "#999", label: "Sent" };
   })();
   
   if (!status) return null;
   
   return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <span 
-        style={{
-          fontSize: "10px",
-          color: status.color,
-          fontWeight: status.label === "Read" ? 600 : 400,
-          cursor: "pointer",
-          fontFamily: FONT_FAMILY,
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        {status.icon}
-      </span>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          right: 0,
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          {status.label}
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            right: "10px",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
+    <span style={{
+      fontSize: "10px",
+      color: status.color,
+      fontWeight: status.label === "Read" ? 600 : 400,
+      fontFamily: FONT_FAMILY,
+    }}>
+      {status.icon}
+    </span>
   );
 };
 
@@ -587,6 +423,13 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
   );
 };
 
+// Arrow SVG untuk dropdown
+const ArrowDownIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -620,9 +463,11 @@ export default function HomePage(): React.JSX.Element {
   const [bioInput, setBioInput] = useState("");
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
+  const [showBlockDropdown, setShowBlockDropdown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
+  const blockDropdownRef = useRef<HTMLDivElement>(null);
 
   // Official Chat States
   const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
@@ -730,14 +575,6 @@ export default function HomePage(): React.JSX.Element {
     if (!user || !userId) return false;
     const currentUserData = users.find(u => u.id === user.uid);
     return (currentUserData?.blocked || []).includes(userId);
-  };
-
-  // Fungsi cek apakah user diblok oleh orang lain
-  const isBlockedByOther = (userId: string) => {
-    if (!user || !userId) return false;
-    const targetUser = users.find(u => u.id === userId);
-    if (!targetUser) return false;
-    return (targetUser.blockedBy || []).includes(user.uid);
   };
 
   // Auth Listener
@@ -1312,16 +1149,20 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // Handle login
+  // Handle login dengan popup - fix error
   const handleLogin = async () => {
     if (!auth) return;
     try {
       await signInWithPopup(auth, googleProvider);
       setShowLogin(false);
       setLoginError("");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setLoginError("Login failed. Please try again.");
+      if (error.code === 'auth/cancelled-popup-request') {
+        setLoginError("Login cancelled. Please try again.");
+      } else {
+        setLoginError("Login failed. Please try again.");
+      }
     }
   };
 
@@ -1333,7 +1174,7 @@ export default function HomePage(): React.JSX.Element {
       setLoginEmail("");
       setLoginPassword("");
       setLoginError("");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
       setLoginError("Wrong email or password.");
     }
@@ -1449,6 +1290,7 @@ export default function HomePage(): React.JSX.Element {
     setNoteInput(chatUser.note || "");
     setEditBio(false);
     setEditNote(false);
+    setShowBlockDropdown(false);
   };
 
   const handleCloseProfile = () => {
@@ -1456,6 +1298,7 @@ export default function HomePage(): React.JSX.Element {
     setProfileUser(null);
     setEditBio(false);
     setEditNote(false);
+    setShowBlockDropdown(false);
   };
 
   // Handle save bio
@@ -1575,6 +1418,8 @@ export default function HomePage(): React.JSX.Element {
           return u;
         }));
       }
+      
+      setShowBlockDropdown(false);
       
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
@@ -1969,6 +1814,9 @@ export default function HomePage(): React.JSX.Element {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMessageMenu(null);
+      }
+      if (blockDropdownRef.current && !blockDropdownRef.current.contains(event.target as Node)) {
+        setShowBlockDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -2426,7 +2274,6 @@ export default function HomePage(): React.JSX.Element {
                 ).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
-                    {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -3376,48 +3223,116 @@ export default function HomePage(): React.JSX.Element {
                       </motion.button>
 
                       {profileUser.id !== user.uid && (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            const isBlocked = isUserBlocked(profileUser.id);
-                            handleBlockUser(profileUser.id, isBlocked);
-                          }}
-                          style={{
-                            padding: "6px 14px",
-                            backgroundColor: isUserBlocked(profileUser.id) ? "#ef4444" : "#000",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "6px",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            fontFamily: FONT_FAMILY,
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {isUserBlocked(profileUser.id) ? "Unblock" : "Block"}
-                        </motion.button>
+                        <div ref={blockDropdownRef} style={{ position: "relative" }}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowBlockDropdown(!showBlockDropdown)}
+                            style={{
+                              padding: "8px 16px",
+                              backgroundColor: isUserBlocked(profileUser.id) ? "#ef4444" : "#000",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "8px",
+                              fontSize: "16px",
+                              fontWeight: 500,
+                              cursor: "pointer",
+                              fontFamily: FONT_FAMILY,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              transition: "all 0.2s ease",
+                              letterSpacing: "-0.02em",
+                            }}
+                          >
+                            <span>{isUserBlocked(profileUser.id) ? "Unblock" : "Block"}</span>
+                            <ArrowDownIcon />
+                          </motion.button>
+                          
+                          <AnimatePresence>
+                            {showBlockDropdown && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                style={{
+                                  position: "absolute",
+                                  top: "calc(100% + 4px)",
+                                  right: 0,
+                                  backgroundColor: "#ffffff",
+                                  borderRadius: "8px",
+                                  padding: "4px",
+                                  minWidth: "160px",
+                                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                                  zIndex: 60,
+                                  border: "1px solid #f0f0f0",
+                                }}
+                              >
+                                <motion.button
+                                  whileHover={{ backgroundColor: "#f5f5f5" }}
+                                  onClick={() => {
+                                    const isBlocked = isUserBlocked(profileUser.id);
+                                    handleBlockUser(profileUser.id, isBlocked);
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    padding: "10px 16px",
+                                    width: "100%",
+                                    background: "none",
+                                    border: "none",
+                                    color: isUserBlocked(profileUser.id) ? "#22c55e" : "#ef4444",
+                                    fontSize: "16px",
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    borderRadius: "6px",
+                                    transition: "all 0.2s ease",
+                                    fontFamily: FONT_FAMILY,
+                                    letterSpacing: "-0.02em",
+                                  }}
+                                >
+                                  <span>{isUserBlocked(profileUser.id) ? "Unblock User" : "Block User"}</span>
+                                  <ArrowDownIcon />
+                                </motion.button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       )}
                     </div>
 
-                    {/* Peringatan block di profile */}
+                    {/* Peringatan block di profile - warna biru stabilo */}
                     {isUserBlocked(profileUser.id) && (
                       <div style={{ 
                         width: "100%", 
                         marginTop: "16px",
-                        padding: "16px",
-                        backgroundColor: "#fee2e2",
+                        padding: "16px 20px",
+                        backgroundColor: "#c5e800",
                         borderRadius: "8px",
-                        border: "1px solid #fecaca",
-                        textAlign: "center",
+                        border: "none",
                         fontFamily: FONT_FAMILY,
                       }}>
-                        <div style={{ fontSize: "14px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                          ⚠️ Maaf akun ini sudah tidak bisa di chat
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px", fontFamily: FONT_FAMILY }}>
-                          Silahkan buka block untuk melanjutkan chat
-                        </div>
+                        <span style={{ 
+                          fontSize: "18px", 
+                          fontWeight: 700, 
+                          color: "#000000",
+                          fontFamily: FONT_FAMILY,
+                          letterSpacing: "-0.02em",
+                        }}>
+                          Account Blocked
+                        </span>
+                        <span style={{ 
+                          fontSize: "14px", 
+                          color: "#000000",
+                          fontFamily: FONT_FAMILY,
+                          display: "block",
+                          marginTop: "4px",
+                          fontWeight: 400,
+                        }}>
+                          This account has been blocked. Click Unblock to continue.
+                        </span>
                       </div>
                     )}
 
@@ -3443,14 +3358,6 @@ export default function HomePage(): React.JSX.Element {
                             gap: "4px",
                             fontFamily: FONT_FAMILY,
                           }}>
-                            <span style={{ 
-                              display: "inline-block",
-                              width: "6px",
-                              height: "6px",
-                              borderRadius: "50%",
-                              backgroundColor: "#c5e800",
-                              marginRight: "4px",
-                            }} />
                             Note
                           </span>
                           {profileUser.id === user?.uid && (
@@ -3581,14 +3488,10 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
-                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
                           <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -3759,22 +3662,37 @@ export default function HomePage(): React.JSX.Element {
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  {/* Peringatan dari penerima block di atas Announcement - REAL TIME */}
+                  {/* Peringatan block di atas Announcement - warna biru stabilo */}
                   {hasBlockedUsers && (
                     <div style={{ 
                       width: "100%", 
                       marginBottom: "10px",
-                      padding: "12px 16px",
-                      backgroundColor: "#fee2e2",
+                      padding: "16px 20px",
+                      backgroundColor: "#c5e800",
                       borderRadius: "8px",
-                      border: "1px solid #fecaca",
-                      textAlign: "center",
+                      border: "none",
                       fontFamily: FONT_FAMILY,
-                      animation: "pulseWarning 2s ease-in-out infinite",
                     }}>
-                      <div style={{ fontSize: "13px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                        ⚠️ Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
-                      </div>
+                      <span style={{ 
+                        fontSize: "18px", 
+                        fontWeight: 700, 
+                        color: "#000000",
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: "-0.02em",
+                        display: "block",
+                      }}>
+                        You have blocked some accounts
+                      </span>
+                      <span style={{ 
+                        fontSize: "14px", 
+                        color: "#000000",
+                        fontFamily: FONT_FAMILY,
+                        display: "block",
+                        marginTop: "4px",
+                        fontWeight: 400,
+                      }}>
+                        Click Unblock to restore access to these accounts
+                      </span>
                     </div>
                   )}
 
@@ -3884,7 +3802,6 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
-                              {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -4014,7 +3931,6 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
-                                      {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -4037,7 +3953,8 @@ export default function HomePage(): React.JSX.Element {
                                         cursor: "pointer",
                                         color: isUserBlocked(u.id) ? "#ef4444" : "#666",
                                         padding: "2px 8px",
-                                        fontSize: "11px",
+                                        fontSize: "13px",
+                                        fontWeight: 500,
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
@@ -4163,7 +4080,6 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
-                                        {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: isBlocked ? "#ccc" : "#999", fontFamily: FONT_FAMILY }}>
                                         {isBlocked ? "Blocked" : (room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages")}
@@ -4226,7 +4142,8 @@ export default function HomePage(): React.JSX.Element {
                                         cursor: "pointer",
                                         color: "#ef4444",
                                         padding: "2px 8px",
-                                        fontSize: "11px",
+                                        fontSize: "13px",
+                                        fontWeight: 500,
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
@@ -4300,7 +4217,6 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
-                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -4395,18 +4311,6 @@ export default function HomePage(): React.JSX.Element {
                               ) : (
                                 <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                               )}
-                              {isBlocked && (
-                                <div style={{
-                                  position: "absolute",
-                                  bottom: -1,
-                                  right: -1,
-                                  backgroundColor: "#ef4444",
-                                  width: "12px",
-                                  height: "12px",
-                                  borderRadius: "50%",
-                                  border: "2px solid #fff",
-                                }} />
-                              )}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: "14px", fontWeight: 500, color: isBlocked ? "#999" : "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -4419,17 +4323,16 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {otherUser.name}
                                   {isBlocked && (
-                                    <span style={{ fontSize: "10px", color: "#ef4444", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
+                                    <span style={{ fontSize: "12px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
                                       (Blocked)
                                     </span>
                                   )}
                                 </span>
-                                {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
                               </div>
                               <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {isBlocked ? (
-                                  <span style={{ color: "#ef4444" }}>⚠️ Akun diblok - klik untuk chat</span>
+                                  <span style={{ color: "#ef4444" }}>Blocked - Click to view</span>
                                 ) : typingDisplay ? (
                                   <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                 ) : (
@@ -4484,7 +4387,8 @@ export default function HomePage(): React.JSX.Element {
                                     cursor: "pointer",
                                     color: "#ef4444",
                                     padding: "2px 8px",
-                                    fontSize: "11px",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
@@ -4597,18 +4501,6 @@ export default function HomePage(): React.JSX.Element {
                         ) : (
                           <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
                         )}
-                        {isUserBlocked(selectedChat.id) && (
-                          <div style={{
-                            position: "absolute",
-                            bottom: -2,
-                            right: -2,
-                            backgroundColor: "#ef4444",
-                            width: "10px",
-                            height: "10px",
-                            borderRadius: "50%",
-                            border: "2px solid #000",
-                          }} />
-                        )}
                       </motion.div>
                       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
                         <div 
@@ -4620,34 +4512,23 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                             {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
                             {isUserBlocked(selectedChat.id) && (
-                              <span style={{ fontSize: "10px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
+                              <span style={{ fontSize: "12px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
                                 (Blocked)
                               </span>
                             )}
                           </span>
-                          {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                          {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           {isOfficialChatSelected ? (
                             <OnlineIndicator online={true} />
                           ) : isUserBlocked(selectedChat.id) ? (
-                            <span style={{ fontSize: "9px", color: "#ef4444", fontFamily: FONT_FAMILY }}>Blocked</span>
+                            <span style={{ fontSize: "11px", color: "#ef4444", fontFamily: FONT_FAMILY }}>Blocked</span>
                           ) : (
                             <>
                               <OnlineIndicator 
                                 online={getOnlineStatus(selectedChat.id)} 
                                 lastSeen={getLastSeen(selectedChat.id)}
                               />
-                              {getOnlineStatus(selectedChat.id) ? (
-                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                  {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                  {getLastSeen(selectedChat.id)}
-                                </span>
-                              )}
                             </>
                           )}
                         </div>
@@ -4686,7 +4567,8 @@ export default function HomePage(): React.JSX.Element {
                             cursor: "pointer",
                             color: "#ef4444",
                             padding: "4px 12px",
-                            fontSize: "12px",
+                            fontSize: "14px",
+                            fontWeight: 500,
                             fontFamily: FONT_FAMILY,
                             borderRadius: "4px",
                           }}
@@ -4876,7 +4758,6 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
-                                      {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -5342,20 +5223,37 @@ export default function HomePage(): React.JSX.Element {
                           <div
                             style={{
                               textAlign: "center",
-                              color: "#999",
-                              fontSize: "14px",
+                              color: "#000",
+                              fontSize: "16px",
                               marginTop: "60px",
                               fontFamily: FONT_FAMILY,
+                              padding: "20px",
+                              backgroundColor: "#c5e800",
+                              borderRadius: "8px",
+                              border: "none",
                             }}
                           >
-                            <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔒</div>
-                            <div style={{ fontWeight: 500, color: "#dc2626", fontFamily: FONT_FAMILY }}>
-                              ⚠️ Akun sudah di block oleh anda
-                            </div>
-                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#ef4444", fontFamily: FONT_FAMILY }}>
-                              Maaf akun ini sudah tidak bisa di chat, silahkan buka block
-                            </div>
-                            <div style={{ marginTop: "12px" }}>
+                            <span style={{ 
+                              fontSize: "20px", 
+                              fontWeight: 700, 
+                              color: "#000000",
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "-0.02em",
+                              display: "block",
+                            }}>
+                              Account Blocked
+                            </span>
+                            <span style={{ 
+                              fontSize: "14px", 
+                              color: "#000000",
+                              fontFamily: FONT_FAMILY,
+                              display: "block",
+                              marginTop: "6px",
+                              fontWeight: 400,
+                            }}>
+                              This account has been blocked. Click Unblock to continue.
+                            </span>
+                            <div style={{ marginTop: "16px" }}>
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -5364,17 +5262,19 @@ export default function HomePage(): React.JSX.Element {
                                   handleBlockUser(selectedChat.id, blocked);
                                 }}
                                 style={{
-                                  padding: "8px 20px",
-                                  backgroundColor: "#ef4444",
-                                  color: "#fff",
+                                  padding: "8px 24px",
+                                  backgroundColor: "#000000",
+                                  color: "#ffffff",
                                   border: "none",
-                                  borderRadius: "6px",
-                                  fontSize: "13px",
+                                  borderRadius: "8px",
+                                  fontSize: "16px",
+                                  fontWeight: 500,
                                   cursor: "pointer",
                                   fontFamily: FONT_FAMILY,
+                                  letterSpacing: "-0.02em",
                                 }}
                               >
-                                Unblock User
+                                Unblock
                               </motion.button>
                             </div>
                           </div>
@@ -5889,14 +5789,6 @@ export default function HomePage(): React.JSX.Element {
           100% {
             transform: scale(0.7);
             opacity: 0.25;
-          }
-        }
-        @keyframes pulseWarning {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
           }
         }
       `}</style>
