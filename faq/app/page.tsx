@@ -189,7 +189,86 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Online Status Indicator - tanpa titik bulat
+// Instagram Verified Badge
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "middle",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="
+            M12 2.2
+            C13.6 3.8 16.2 3.8 17.8 2.2
+            C18.6 3.8 20.2 5.4 21.8 6.2
+            C20.2 7.8 20.2 10.4 21.8 12
+            C20.2 13.6 20.2 16.2 21.8 17.8
+            C20.2 18.6 18.6 20.2 17.8 21.8
+            C16.2 20.2 13.6 20.2 12 21.8
+            C10.4 20.2 7.8 20.2 6.2 21.8
+            C5.4 20.2 3.8 18.6 2.2 17.8
+            C3.8 16.2 3.8 13.6 2.2 12
+            C3.8 10.4 3.8 7.8 2.2 6.2
+            C3.8 5.4 5.4 3.8 6.2 2.2
+            C7.8 3.8 10.4 3.8 12 2.2
+            Z
+          "
+        />
+        <path
+          d="M9.2 12.3l2 2 4.6-4.6"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Official Account
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Online Status Indicator - minimalist
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const color = online ? "#22c55e" : "#999";
   
@@ -199,6 +278,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
       color: color,
       fontFamily: FONT_FAMILY,
       fontWeight: 500,
+      letterSpacing: "0.02em",
     }}>
       {online ? "Online" : (lastSeen || "Offline")}
     </span>
@@ -280,7 +360,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.92);
       z-index: 9999;
       display: flex;
       align-items: center;
@@ -294,8 +374,9 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
     img.style.cssText = `
       max-width: 90%;
       max-height: 90%;
-      border-radius: 8px;
+      border-radius: 12px;
       object-fit: contain;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     `;
     img.onerror = () => {
       img.style.display = 'none';
@@ -305,6 +386,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
         color: #fff;
         font-size: 24px;
         font-family: ${FONT_FAMILY};
+        letter-spacing: -0.02em;
       `;
       overlay.appendChild(text);
     };
@@ -319,7 +401,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
         justifyContent: "space-between", 
         alignItems: "center", 
         marginBottom: "12px",
-        borderBottom: "1px solid #f0f0f0",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
         paddingBottom: "8px",
       }}>
         <span style={{ 
@@ -336,7 +418,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
           color: "#999", 
           fontFamily: FONT_FAMILY,
         }}>
-          {images.length} photos
+          {images.length}
         </span>
       </div>
       <div style={{ 
@@ -352,10 +434,10 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
               backgroundColor: "#f0f0f0",
               borderRadius: "12px",
               overflow: "hidden",
-              border: "2px solid #e8e8e8",
+              border: "1px solid rgba(0,0,0,0.04)",
               position: "relative",
               cursor: "pointer",
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+              transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease",
             }}
             onMouseEnter={() => {
               setStoryHover(prev => ({ ...prev, [num]: true }));
@@ -384,7 +466,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
                   parent.style.alignItems = "center";
                   parent.style.justifyContent = "center";
                   const span = document.createElement("span");
-                  span.textContent = `${num}.jpg`;
+                  span.textContent = `${num}`;
                   span.style.color = "#999";
                   span.style.fontSize = "12px";
                   span.style.fontFamily = FONT_FAMILY;
@@ -405,7 +487,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
               position: "absolute",
               bottom: "8px",
               left: "8px",
-              color: "rgba(255,255,255,0.8)",
+              color: "rgba(255,255,255,0.9)",
               fontSize: "11px",
               fontWeight: 500,
               fontFamily: FONT_FAMILY,
@@ -413,6 +495,7 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
               padding: "2px 8px",
               borderRadius: "10px",
               pointerEvents: "none",
+              backdropFilter: "blur(4px)",
             }}>
               {num}
             </div>
@@ -423,9 +506,9 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
   );
 };
 
-// Arrow SVG untuk dropdown
+// Arrow SVG untuk dropdown - minimalist
 const ArrowDownIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
@@ -904,7 +987,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, selectedChat]);
 
-  // Listen for typing status
+  // Listen for typing status - MULTI USER REAL TIME
   useEffect(() => {
     if (!db || !user) return;
 
@@ -924,8 +1007,10 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
+      // Update official typing users
       setOfficialTypingUsers(typingList);
       
+      // Update chat rooms dengan typing users - MULTI USER
       setChatRooms(prev => prev.map(room => {
         if (room.id === OFFICIAL_CHAT_ID) {
           return { ...room, typingUsers: typingList };
@@ -1367,7 +1452,6 @@ export default function HomePage(): React.JSX.Element {
       const userRef = doc(db, "users", user.uid);
       
       if (isBlocked) {
-        // Unblock user
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -1393,7 +1477,6 @@ export default function HomePage(): React.JSX.Element {
         }));
         
       } else {
-        // Block user
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -2011,6 +2094,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 {user.displayName || user.email}
+                {isAdmin && <InstagramVerifiedBadge size={14} />}
               </span>
               <OnlineIndicator online={true} />
               <motion.button
@@ -2274,6 +2358,7 @@ export default function HomePage(): React.JSX.Element {
                 ).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
+                    {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={14} />}
                   </option>
                 ))}
               </select>
@@ -3222,6 +3307,7 @@ export default function HomePage(): React.JSX.Element {
                         <span>Back</span>
                       </motion.button>
 
+                      {/* Block/Unblock dropdown - hanya untuk user lain */}
                       {profileUser.id !== user.uid && (
                         <div ref={blockDropdownRef} style={{ position: "relative" }}>
                           <motion.button
@@ -3230,8 +3316,8 @@ export default function HomePage(): React.JSX.Element {
                             onClick={() => setShowBlockDropdown(!showBlockDropdown)}
                             style={{
                               padding: "8px 16px",
-                              backgroundColor: isUserBlocked(profileUser.id) ? "#ef4444" : "#000",
-                              color: "#fff",
+                              backgroundColor: isUserBlocked(profileUser.id) ? "#22c55e" : "#000000",
+                              color: "#ffffff",
                               border: "none",
                               borderRadius: "8px",
                               fontSize: "16px",
@@ -3258,15 +3344,16 @@ export default function HomePage(): React.JSX.Element {
                                 transition={{ duration: 0.15 }}
                                 style={{
                                   position: "absolute",
-                                  top: "calc(100% + 4px)",
+                                  top: "calc(100% + 8px)",
                                   right: 0,
                                   backgroundColor: "#ffffff",
-                                  borderRadius: "8px",
-                                  padding: "4px",
+                                  borderRadius: "12px",
+                                  padding: "6px",
                                   minWidth: "160px",
                                   boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
                                   zIndex: 60,
-                                  border: "1px solid #f0f0f0",
+                                  border: "1px solid rgba(0,0,0,0.04)",
+                                  backdropFilter: "blur(8px)",
                                 }}
                               >
                                 <motion.button
@@ -3283,7 +3370,7 @@ export default function HomePage(): React.JSX.Element {
                                     width: "100%",
                                     background: "none",
                                     border: "none",
-                                    color: isUserBlocked(profileUser.id) ? "#22c55e" : "#ef4444",
+                                    color: isUserBlocked(profileUser.id) ? "#22c55e" : "#000000",
                                     fontSize: "16px",
                                     fontWeight: 500,
                                     cursor: "pointer",
@@ -3303,25 +3390,33 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* Peringatan block di profile - warna biru stabilo */}
+                    {/* Peringatan block di profile - DESIGN GLASSMORPHISM */}
                     {isUserBlocked(profileUser.id) && (
-                      <div style={{ 
-                        width: "100%", 
-                        marginTop: "16px",
-                        padding: "16px 20px",
-                        backgroundColor: "#c5e800",
-                        borderRadius: "8px",
-                        border: "none",
-                        fontFamily: FONT_FAMILY,
-                      }}>
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ 
+                          width: "100%", 
+                          marginTop: "16px",
+                          padding: "20px 24px",
+                          background: "rgba(197,232,0,0.15)",
+                          backdropFilter: "blur(20px)",
+                          borderRadius: "12px",
+                          border: "1px solid rgba(197,232,0,0.3)",
+                          boxShadow: "0 4px 20px rgba(197,232,0,0.1)",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
                         <span style={{ 
-                          fontSize: "18px", 
+                          fontSize: "20px", 
                           fontWeight: 700, 
                           color: "#000000",
                           fontFamily: FONT_FAMILY,
                           letterSpacing: "-0.02em",
+                          display: "block",
                         }}>
-                          Account Blocked
+                          Account Restricted
                         </span>
                         <span style={{ 
                           fontSize: "14px", 
@@ -3330,10 +3425,11 @@ export default function HomePage(): React.JSX.Element {
                           display: "block",
                           marginTop: "4px",
                           fontWeight: 400,
+                          opacity: 0.8,
                         }}>
-                          This account has been blocked. Click Unblock to continue.
+                          This account has been blocked. Click Unblock to restore access.
                         </span>
-                      </div>
+                      </motion.div>
                     )}
 
                     <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
@@ -3358,6 +3454,14 @@ export default function HomePage(): React.JSX.Element {
                             gap: "4px",
                             fontFamily: FONT_FAMILY,
                           }}>
+                            <span style={{ 
+                              display: "inline-block",
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#c5e800",
+                              marginRight: "4px",
+                            }} />
                             Note
                           </span>
                           {profileUser.id === user?.uid && (
@@ -3488,10 +3592,14 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                             {profileUser.name}
                           </span>
+                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                         </div>
                         <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
                           <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
+                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -3662,17 +3770,24 @@ export default function HomePage(): React.JSX.Element {
               ) : !selectedChat ? (
                 // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                  {/* Peringatan block di atas Announcement - warna biru stabilo */}
+                  {/* NOTIFIKASI PENERIMA BLOCK - REAL TIME via Firebase */}
                   {hasBlockedUsers && (
-                    <div style={{ 
-                      width: "100%", 
-                      marginBottom: "10px",
-                      padding: "16px 20px",
-                      backgroundColor: "#c5e800",
-                      borderRadius: "8px",
-                      border: "none",
-                      fontFamily: FONT_FAMILY,
-                    }}>
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ 
+                        width: "100%", 
+                        marginBottom: "12px",
+                        padding: "16px 20px",
+                        background: "rgba(197,232,0,0.15)",
+                        backdropFilter: "blur(20px)",
+                        borderRadius: "12px",
+                        border: "1px solid rgba(197,232,0,0.3)",
+                        boxShadow: "0 4px 20px rgba(197,232,0,0.1)",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
                       <span style={{ 
                         fontSize: "18px", 
                         fontWeight: 700, 
@@ -3690,10 +3805,11 @@ export default function HomePage(): React.JSX.Element {
                         display: "block",
                         marginTop: "4px",
                         fontWeight: 400,
+                        opacity: 0.8,
                       }}>
                         Click Unblock to restore access to these accounts
                       </span>
-                    </div>
+                    </motion.div>
                   )}
 
                   <div
@@ -3802,6 +3918,7 @@ export default function HomePage(): React.JSX.Element {
                           {availableUsers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.name}
+                              {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                             </option>
                           ))}
                         </select>
@@ -3931,6 +4048,7 @@ export default function HomePage(): React.JSX.Element {
                                       onClick={() => handleOpenProfile(u)}
                                     >
                                       {u.name}
+                                      {u.isOfficial && !u.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                     <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
                                       {u.email}
@@ -3951,7 +4069,7 @@ export default function HomePage(): React.JSX.Element {
                                         background: "none",
                                         border: "none",
                                         cursor: "pointer",
-                                        color: isUserBlocked(u.id) ? "#ef4444" : "#666",
+                                        color: isUserBlocked(u.id) ? "#22c55e" : "#999",
                                         padding: "2px 8px",
                                         fontSize: "13px",
                                         fontWeight: 500,
@@ -4080,6 +4198,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         {otherUser.name}
+                                        {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
                                       <div style={{ fontSize: "9px", color: isBlocked ? "#ccc" : "#999", fontFamily: FONT_FAMILY }}>
                                         {isBlocked ? "Blocked" : (room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages")}
@@ -4140,7 +4259,7 @@ export default function HomePage(): React.JSX.Element {
                                         background: "none",
                                         border: "none",
                                         cursor: "pointer",
-                                        color: "#ef4444",
+                                        color: "#22c55e",
                                         padding: "2px 8px",
                                         fontSize: "13px",
                                         fontWeight: 500,
@@ -4217,6 +4336,7 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
                                   <span>Menuru Official</span>
+                                  <InstagramVerifiedBadge size={14} />
                                   <OnlineIndicator online={true} />
                                 </div>
                                 <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
@@ -4270,7 +4390,6 @@ export default function HomePage(): React.JSX.Element {
                             key={room.id}
                             whileHover={{ scale: 1.02 }}
                             onClick={() => {
-                              // Bisa klik nama user yang diblok seperti akun normal
                               setSelectedChat(otherUser);
                             }}
                             style={{
@@ -4318,21 +4437,30 @@ export default function HomePage(): React.JSX.Element {
                                   style={{ cursor: "pointer" }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleOpenProfile(otherUser);
+                                    if (!isBlocked) {
+                                      handleOpenProfile(otherUser);
+                                    }
                                   }}
                                 >
                                   {otherUser.name}
                                   {isBlocked && (
-                                    <span style={{ fontSize: "12px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
-                                      (Blocked)
+                                    <span style={{ 
+                                      fontSize: "12px", 
+                                      color: "#22c55e", 
+                                      marginLeft: "8px", 
+                                      fontFamily: FONT_FAMILY,
+                                      fontWeight: 500,
+                                    }}>
+                                      Blocked
                                     </span>
                                   )}
                                 </span>
+                                {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
                               </div>
                               <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                 {isBlocked ? (
-                                  <span style={{ color: "#ef4444" }}>Blocked - Click to view</span>
+                                  <span style={{ color: "#22c55e" }}>Blocked - Click to view</span>
                                 ) : typingDisplay ? (
                                   <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                 ) : (
@@ -4385,7 +4513,7 @@ export default function HomePage(): React.JSX.Element {
                                     background: "none",
                                     border: "none",
                                     cursor: "pointer",
-                                    color: "#ef4444",
+                                    color: "#22c55e",
                                     padding: "2px 8px",
                                     fontSize: "13px",
                                     fontWeight: 500,
@@ -4426,7 +4554,7 @@ export default function HomePage(): React.JSX.Element {
               ) : (
                 // Chat View - untuk user yang diblok tetap bisa dibuka
                 <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                  {/* Chat Header */}
+                  {/* Chat Header - tanpa teks Blocked di header */}
                   <div
                     style={{
                       padding: "10px 16px",
@@ -4511,18 +4639,13 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                             {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
-                            {isUserBlocked(selectedChat.id) && (
-                              <span style={{ fontSize: "12px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
-                                (Blocked)
-                              </span>
-                            )}
                           </span>
+                          {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
+                          {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           {isOfficialChatSelected ? (
                             <OnlineIndicator online={true} />
-                          ) : isUserBlocked(selectedChat.id) ? (
-                            <span style={{ fontSize: "11px", color: "#ef4444", fontFamily: FONT_FAMILY }}>Blocked</span>
                           ) : (
                             <>
                               <OnlineIndicator 
@@ -4565,7 +4688,7 @@ export default function HomePage(): React.JSX.Element {
                             background: "none",
                             border: "none",
                             cursor: "pointer",
-                            color: "#ef4444",
+                            color: "#22c55e",
                             padding: "4px 12px",
                             fontSize: "14px",
                             fontWeight: 500,
@@ -4758,6 +4881,7 @@ export default function HomePage(): React.JSX.Element {
                                       fontWeight: 500
                                     }}>
                                       {msg.senderName}
+                                      {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
                                     </div>
                                   )}
                                   
@@ -5010,8 +5134,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
-                          <input
-                            type="text"
+                          <input                            type="text"
                             placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a message..."}
                             value={officialMessageInput}
                             onChange={handleOfficialTyping}
@@ -5220,17 +5343,22 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         {isUserBlocked(selectedChat.id) ? (
-                          <div
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
                             style={{
                               textAlign: "center",
                               color: "#000",
                               fontSize: "16px",
                               marginTop: "60px",
                               fontFamily: FONT_FAMILY,
-                              padding: "20px",
-                              backgroundColor: "#c5e800",
-                              borderRadius: "8px",
-                              border: "none",
+                              padding: "24px 20px",
+                              background: "rgba(197,232,0,0.12)",
+                              backdropFilter: "blur(20px)",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(197,232,0,0.2)",
+                              boxShadow: "0 4px 20px rgba(197,232,0,0.08)",
                             }}
                           >
                             <span style={{ 
@@ -5250,6 +5378,7 @@ export default function HomePage(): React.JSX.Element {
                               display: "block",
                               marginTop: "6px",
                               fontWeight: 400,
+                              opacity: 0.8,
                             }}>
                               This account has been blocked. Click Unblock to continue.
                             </span>
@@ -5277,7 +5406,7 @@ export default function HomePage(): React.JSX.Element {
                                 Unblock
                               </motion.button>
                             </div>
-                          </div>
+                          </motion.div>
                         ) : (
                           <>
                             {regularTypingUsers.length > 0 && (
