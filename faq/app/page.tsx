@@ -395,11 +395,15 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Komponen Stories - untuk semua user
+// Komponen Stories - HANYA UNTUK ADMIN
 const StoriesSection = ({ userEmail }: { userEmail: string }) => {
   const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
   const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
   const images = [10, 11, 12, 13, 14, 15];
+  const isAdmin = userEmail === ADMIN_EMAIL;
+
+  // Hanya tampilkan jika admin
+  if (!isAdmin) return null;
 
   useEffect(() => {
     const initialImages: { [key: number]: number } = {};
@@ -584,49 +588,6 @@ const StoriesSection = ({ userEmail }: { userEmail: string }) => {
   );
 };
 
-// Komponen 404 Not Found untuk user yang diblok
-const BlockedUserPage = ({ userName }: { userName: string }) => {
-  return (
-    <div style={{ 
-      display: "flex", 
-      flexDirection: "column", 
-      alignItems: "center", 
-      justifyContent: "center", 
-      height: "100%",
-      padding: "40px 20px",
-      textAlign: "center",
-      fontFamily: FONT_FAMILY,
-    }}>
-      <div style={{ 
-        fontSize: "72px", 
-        fontWeight: 700, 
-        color: "#000000",
-        letterSpacing: "-0.05em",
-        lineHeight: 1,
-        marginBottom: "16px",
-      }}>
-        404
-      </div>
-      <div style={{ 
-        fontSize: "20px", 
-        fontWeight: 500, 
-        color: "#333",
-        marginBottom: "8px",
-        fontFamily: FONT_FAMILY,
-      }}>
-        Profile Not Found
-      </div>
-      <div style={{ 
-        fontSize: "14px", 
-        color: "#999",
-        fontFamily: FONT_FAMILY,
-      }}>
-        {userName} is not available or has been blocked
-      </div>
-    </div>
-  );
-};
-
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -661,6 +622,7 @@ export default function HomePage(): React.JSX.Element {
   const [editNote, setEditNote] = useState(false);
   const [noteInput, setNoteInput] = useState("");
   const [showBlockDropdown, setShowBlockDropdown] = useState(false);
+  const [blockTargetUserId, setBlockTargetUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const rollingInterval = useRef<NodeJS.Timeout | null>(null);
@@ -1197,7 +1159,7 @@ export default function HomePage(): React.JSX.Element {
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
-              lastMessage: isBlocked ? "User has been blocked" : lastMessage,
+              lastMessage: isBlocked ? "Blocked" : lastMessage,
               lastMessageTime: lastMessageTime,
               lastMessageSenderId: lastMessageSenderId,
               unreadCount: isBlocked ? 0 : unreadCount,
@@ -1300,12 +1262,7 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
 
-    // Check if selected chat user is blocked
-    if (isUserBlocked(selectedChat.id)) {
-      setMessages([]);
-      return;
-    }
-
+    // Jika user diblok, tetap bisa lihat pesan lama tapi tidak bisa kirim baru
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -1423,6 +1380,7 @@ export default function HomePage(): React.JSX.Element {
       setOfficialReplyTo(null);
       setOfficialMessageInput("");
       setShowBlockDropdown(false);
+      setBlockTargetUserId(null);
     }
   };
 
@@ -1481,16 +1439,9 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile - dengan cek block
+  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     if (!chatUser || !user) return;
-    
-    // Check if user is blocked
-    if (isUserBlocked(chatUser.id)) {
-      setProfileUser(chatUser);
-      setShowProfile(true);
-      return;
-    }
     
     setProfileUser(chatUser);
     setShowProfile(true);
@@ -1499,6 +1450,7 @@ export default function HomePage(): React.JSX.Element {
     setEditBio(false);
     setEditNote(false);
     setShowBlockDropdown(false);
+    setBlockTargetUserId(null);
   };
 
   const handleCloseProfile = () => {
@@ -1507,6 +1459,7 @@ export default function HomePage(): React.JSX.Element {
     setEditBio(false);
     setEditNote(false);
     setShowBlockDropdown(false);
+    setBlockTargetUserId(null);
   };
 
   // Handle save bio
@@ -1629,31 +1582,21 @@ export default function HomePage(): React.JSX.Element {
           }
           return u;
         }));
-        
-        // If currently viewing blocked user's profile, close it
-        if (profileUser && profileUser.id === userId) {
-          handleCloseProfile();
-        }
-        
-        // If currently chatting with blocked user, close chat
-        if (selectedChat && selectedChat.id === userId) {
-          setSelectedChat(null);
-          setMessages([]);
-        }
       }
       
       setShowBlockDropdown(false);
+      setBlockTargetUserId(null);
       
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
     }
   };
 
-  // Send message to regular user - dengan cek block
+  // Send message to regular user
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
-    // Check if user is blocked
+    // Check if user is blocked - tidak bisa kirim pesan
     if (isUserBlocked(selectedChat.id)) {
       return;
     }
@@ -1755,7 +1698,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Share message - dengan cek block
+  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
     
@@ -1922,7 +1865,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat - dengan cek block
+  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -2047,6 +1990,7 @@ export default function HomePage(): React.JSX.Element {
       }
       if (blockDropdownRef.current && !blockDropdownRef.current.contains(event.target as Node)) {
         setShowBlockDropdown(false);
+        setBlockTargetUserId(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -2678,7 +2622,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.button>
               </div>
 
-              {/* Content - Update Detail Page */}
+              {/* Content - Update Detail Page, Update System, Privacy Policy */}
               {selectedUpdateId && selectedUpdate ? (
                 <div
                   style={{
@@ -3423,10 +3367,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : showProfile && profileUser ? (
-                // Profile view - dengan cek block
-                isProfileBlocked ? (
-                  <BlockedUserPage userName={profileUser.name} />
-                ) : (
+                // Profile view
                 <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
@@ -3460,7 +3401,10 @@ export default function HomePage(): React.JSX.Element {
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowBlockDropdown(!showBlockDropdown)}
+                            onClick={() => {
+                              setBlockTargetUserId(profileUser.id);
+                              setShowBlockDropdown(!showBlockDropdown);
+                            }}
                             style={{
                               padding: "6px 14px",
                               backgroundColor: isUserBlocked(profileUser.id) ? "#ef4444" : "#000",
@@ -3477,7 +3421,7 @@ export default function HomePage(): React.JSX.Element {
                           </motion.button>
                           
                           <AnimatePresence>
-                            {showBlockDropdown && (
+                            {showBlockDropdown && blockTargetUserId === profileUser.id && (
                               <motion.div
                                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -3527,346 +3471,367 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
+                    {/* Jika user diblok, tampilkan peringatan di profile */}
+                    {isProfileBlocked ? (
                       <div style={{ 
-                        backgroundColor: "#f5f5f5", 
+                        width: "100%", 
+                        marginTop: "16px",
+                        padding: "16px",
+                        backgroundColor: "#fee2e2",
                         borderRadius: "8px",
-                        padding: "8px 14px",
-                        position: "relative",
-                        marginBottom: "8px",
-                        maxWidth: "280px",
+                        border: "1px solid #fecaca",
+                        textAlign: "center",
                         fontFamily: FONT_FAMILY,
                       }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ 
-                            fontSize: "10px", 
-                            color: "#666", 
-                            fontWeight: 500, 
-                            letterSpacing: "0.05em", 
-                            textTransform: "uppercase",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
+                        <div style={{ fontSize: "14px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          ⚠️ Maaf akun ini sudah tidak bisa di chat
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                          Silahkan buka block untuk melanjutkan chat
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
+                          <div style={{ 
+                            backgroundColor: "#f5f5f5", 
+                            borderRadius: "8px",
+                            padding: "8px 14px",
+                            position: "relative",
+                            marginBottom: "8px",
+                            maxWidth: "280px",
                             fontFamily: FONT_FAMILY,
                           }}>
-                            <span style={{ 
-                              display: "inline-block",
-                              width: "6px",
-                              height: "6px",
-                              borderRadius: "50%",
-                              backgroundColor: "#c5e800",
-                              marginRight: "4px",
-                            }} />
-                            Note
-                          </span>
-                          {profileUser.id === user?.uid && (
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditNote(!editNote)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#666",
-                                fontSize: "10px",
-                                cursor: "pointer",
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ 
+                                fontSize: "10px", 
+                                color: "#666", 
+                                fontWeight: 500, 
+                                letterSpacing: "0.05em", 
+                                textTransform: "uppercase",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
                                 fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <EditIcon />
-                              {profileUser.note ? "Edit" : "Add"}
-                            </motion.button>
+                              }}>
+                                <span style={{ 
+                                  display: "inline-block",
+                                  width: "6px",
+                                  height: "6px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#c5e800",
+                                  marginRight: "4px",
+                                }} />
+                                Note
+                              </span>
+                              {profileUser.id === user?.uid && (
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setEditNote(!editNote)}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: "#666",
+                                    fontSize: "10px",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  <EditIcon />
+                                  {profileUser.note ? "Edit" : "Add"}
+                                </motion.button>
+                              )}
+                            </div>
+
+                            {editNote && profileUser.id === user?.uid ? (
+                              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+                                <input
+                                  type="text"
+                                  value={noteInput}
+                                  onChange={(e) => setNoteInput(e.target.value)}
+                                  placeholder="No note yet"
+                                  style={{
+                                    flex: 1,
+                                    padding: "6px 10px",
+                                    backgroundColor: "#fff",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    color: "#000",
+                                    fontSize: "12px",
+                                    outline: "none",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleSaveNote();
+                                    }
+                                  }}
+                                />
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={handleSaveNote}
+                                  style={{
+                                    padding: "4px 12px",
+                                    backgroundColor: "#c5e800",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    color: "#000",
+                                    fontSize: "11px",
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  Save
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setEditNote(false)}
+                                  style={{
+                                    padding: "4px 10px",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    color: "#666",
+                                    fontSize: "11px",
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  Cancel
+                                </motion.button>
+                              </div>
+                            ) : (
+                              <div style={{ 
+                                padding: "4px 0",
+                                color: profileUser.note ? "#000" : "#999",
+                                fontSize: "13px",
+                                lineHeight: 1.4,
+                                minHeight: "24px",
+                                fontFamily: FONT_FAMILY,
+                              }}>
+                                {profileUser.note || "No note yet"}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            style={{
+                              width: "64px",
+                              height: "64px",
+                              borderRadius: "8px",
+                              backgroundColor: "#f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "28px",
+                              overflow: "hidden",
+                              border: "1px solid #e8e8e8",
+                              flexShrink: 0,
+                              position: "relative",
+                            }}
+                          >
+                            {profileUser.photoURL ? (
+                              <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                              <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                            )}
+                          </motion.div>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                              <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                                {profileUser.name}
+                              </span>
+                              {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                            </div>
+                            <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                              <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                              <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
+                                {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ width: "100%", marginBottom: "16px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
+                              Bio
+                            </span>
+                            {profileUser.id === user?.uid && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setEditBio(!editBio)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color: "#999",
+                                  fontSize: "10px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <EditIcon />
+                                {profileUser.bio ? "Edit" : "Add"}
+                              </motion.button>
+                            )}
+                          </div>
+                          {editBio && profileUser.id === user?.uid ? (
+                            <div>
+                              <textarea
+                                value={bioInput}
+                                onChange={(e) => setBioInput(e.target.value)}
+                                placeholder="No bio yet"
+                                rows={2}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px 12px",
+                                  backgroundColor: "#f5f5f5",
+                                  border: "1px solid #e8e8e8",
+                                  borderRadius: "6px",
+                                  color: "#000",
+                                  fontSize: "13px",
+                                  outline: "none",
+                                  fontFamily: FONT_FAMILY,
+                                  resize: "vertical",
+                                }}
+                              />
+                              <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={handleSaveBio}
+                                  style={{
+                                    padding: "4px 14px",
+                                    backgroundColor: "#000",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    color: "#fff",
+                                    fontSize: "12px",
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  Save
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setEditBio(false)}
+                                  style={{
+                                    padding: "4px 14px",
+                                    backgroundColor: "transparent",
+                                    border: "1px solid #e0e0e0",
+                                    borderRadius: "4px",
+                                    color: "#999",
+                                    fontSize: "12px",
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  Cancel
+                                </motion.button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ 
+                              padding: "8px 12px", 
+                              backgroundColor: "#f8f8f8", 
+                              borderRadius: "6px",
+                              fontSize: "13px",
+                              color: profileUser.bio ? "#000" : "#ccc",
+                              lineHeight: 1.5,
+                              fontFamily: FONT_FAMILY,
+                            }}>
+                              {profileUser.bio || "No bio yet"}
+                            </div>
                           )}
                         </div>
 
-                        {editNote && profileUser.id === user?.uid ? (
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
-                            <input
-                              type="text"
-                              value={noteInput}
-                              onChange={(e) => setNoteInput(e.target.value)}
-                              placeholder="No note yet"
-                              style={{
-                                flex: 1,
-                                padding: "6px 10px",
-                                backgroundColor: "#fff",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#000",
-                                fontSize: "12px",
-                                outline: "none",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleSaveNote();
-                                }
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSaveNote}
-                              style={{
-                                padding: "4px 12px",
-                                backgroundColor: "#c5e800",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "#000",
-                                fontSize: "11px",
-                                fontWeight: 500,
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Save
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditNote(false)}
-                              style={{
-                                padding: "4px 10px",
-                                backgroundColor: "transparent",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#666",
-                                fontSize: "11px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Cancel
-                            </motion.button>
-                          </div>
-                        ) : (
-                          <div style={{ 
-                            padding: "4px 0",
-                            color: profileUser.note ? "#000" : "#999",
-                            fontSize: "13px",
-                            lineHeight: 1.4,
-                            minHeight: "24px",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {profileUser.note || "No note yet"}
-                          </div>
+                        {/* STORIES - HANYA UNTUK ADMIN */}
+                        {profileUser && (
+                          <StoriesSection userEmail={profileUser.email} />
                         )}
-                      </div>
-                    </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        style={{
-                          width: "64px",
-                          height: "64px",
-                          borderRadius: "8px",
-                          backgroundColor: "#f0f0f0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "28px",
-                          overflow: "hidden",
-                          border: "1px solid #e8e8e8",
-                          flexShrink: 0,
-                          position: "relative",
-                        }}
-                      >
-                        {profileUser.photoURL ? (
-                          <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                        )}
-                      </motion.div>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                            {profileUser.name}
-                          </span>
-                          {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
-                        </div>
-                        <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                          <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                          <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                            {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ width: "100%", marginBottom: "16px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                          Bio
-                        </span>
-                        {profileUser.id === user?.uid && (
+                        <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              if (isUserBlocked(profileUser.id)) {
+                                return;
+                              }
+                              handleCloseProfile();
+                              setSelectedChat(profileUser);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "10px",
+                              backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
+                              border: "none",
+                              borderRadius: "8px",
+                              color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
+                              fontSize: "14px",
+                              fontWeight: 500,
+                              cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
+                              fontFamily: FONT_FAMILY,
+                              transition: "opacity 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isUserBlocked(profileUser.id)) {
+                                e.currentTarget.style.opacity = "0.8";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isUserBlocked(profileUser.id)) {
+                                e.currentTarget.style.opacity = "1";
+                              }
+                            }}
+                          >
+                            {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
+                          </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => setEditBio(!editBio)}
+                            onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
                             style={{
-                              background: "none",
-                              border: "none",
-                              color: "#999",
-                              fontSize: "10px",
+                              padding: "10px 16px",
+                              backgroundColor: "transparent",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              color: profileUser.isPinned ? "#000" : "#999",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                               gap: "4px",
                               fontFamily: FONT_FAMILY,
+                              transition: "all 0.2s ease",
                             }}
                           >
-                            <EditIcon />
-                            {profileUser.bio ? "Edit" : "Add"}
+                            <PinIcon filled={profileUser.isPinned || false} />
                           </motion.button>
-                        )}
-                      </div>
-                      {editBio && profileUser.id === user?.uid ? (
-                        <div>
-                          <textarea
-                            value={bioInput}
-                            onChange={(e) => setBioInput(e.target.value)}
-                            placeholder="No bio yet"
-                            rows={2}
-                            style={{
-                              width: "100%",
-                              padding: "8px 12px",
-                              backgroundColor: "#f5f5f5",
-                              border: "1px solid #e8e8e8",
-                              borderRadius: "6px",
-                              color: "#000",
-                              fontSize: "13px",
-                              outline: "none",
-                              fontFamily: FONT_FAMILY,
-                              resize: "vertical",
-                            }}
-                          />
-                          <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSaveBio}
-                              style={{
-                                padding: "4px 14px",
-                                backgroundColor: "#000",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "#fff",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Save
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditBio(false)}
-                              style={{
-                                padding: "4px 14px",
-                                backgroundColor: "transparent",
-                                border: "1px solid #e0e0e0",
-                                borderRadius: "4px",
-                                color: "#999",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              Cancel
-                            </motion.button>
-                          </div>
                         </div>
-                      ) : (
-                        <div style={{ 
-                          padding: "8px 12px", 
-                          backgroundColor: "#f8f8f8", 
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          color: profileUser.bio ? "#000" : "#ccc",
-                          lineHeight: 1.5,
-                          fontFamily: FONT_FAMILY,
-                        }}>
-                          {profileUser.bio || "No bio yet"}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* STORIES - UNTUK SEMUA USER */}
-                    {profileUser && (
-                      <StoriesSection userEmail={profileUser.email} />
+                      </>
                     )}
-
-                    <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          // Check if user is blocked before sending
-                          if (isUserBlocked(profileUser.id)) {
-                            return;
-                          }
-                          handleCloseProfile();
-                          setSelectedChat(profileUser);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
-                          border: "none",
-                          borderRadius: "8px",
-                          color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
-                          fontFamily: FONT_FAMILY,
-                          transition: "opacity 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isUserBlocked(profileUser.id)) {
-                            e.currentTarget.style.opacity = "0.8";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isUserBlocked(profileUser.id)) {
-                            e.currentTarget.style.opacity = "1";
-                          }
-                        }}
-                      >
-                        {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
-                        style={{
-                          padding: "10px 16px",
-                          backgroundColor: "transparent",
-                          border: "1px solid #e0e0e0",
-                          borderRadius: "8px",
-                          color: profileUser.isPinned ? "#000" : "#999",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontFamily: FONT_FAMILY,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <PinIcon filled={profileUser.isPinned || false} />
-                      </motion.button>
-                    </div>
                   </div>
                 </div>
-                )
               ) : !selectedChat ? (
-                // Chat List View - dengan filter block
+                // Chat List View
                 <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
                   <div
                     style={{
@@ -4112,22 +4077,98 @@ export default function HomePage(): React.JSX.Element {
                                   </div>
                                   <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
                                 </div>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => handlePinUser(u.id, true)}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    color: "#c5e800",
-                                    padding: "2px 4px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <PinIcon filled={true} />
-                                </motion.button>
+                                <div style={{ display: "flex", gap: "4px" }}>
+                                  {/* Dropdown Block/Unblock di list user */}
+                                  {u.id !== user.uid && (
+                                    <div ref={blockDropdownRef} style={{ position: "relative" }}>
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setBlockTargetUserId(u.id);
+                                          setShowBlockDropdown(!showBlockDropdown);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: isUserBlocked(u.id) ? "#ef4444" : "#666",
+                                          padding: "2px 4px",
+                                          fontSize: "11px",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {isUserBlocked(u.id) ? "Unblock" : "Block"}
+                                      </motion.button>
+                                      
+                                      <AnimatePresence>
+                                        {showBlockDropdown && blockTargetUserId === u.id && (
+                                          <motion.div
+                                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            transition={{ duration: 0.15 }}
+                                            style={{
+                                              position: "absolute",
+                                              top: "calc(100% + 4px)",
+                                              right: 0,
+                                              backgroundColor: "#ffffff",
+                                              borderRadius: "8px",
+                                              padding: "4px",
+                                              minWidth: "140px",
+                                              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                                              zIndex: 60,
+                                              border: "1px solid #f0f0f0",
+                                            }}
+                                          >
+                                            <motion.button
+                                              whileHover={{ backgroundColor: "#f5f5f5" }}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const isBlocked = isUserBlocked(u.id);
+                                                handleBlockUser(u.id, isBlocked);
+                                              }}
+                                              style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "10px",
+                                                padding: "8px 14px",
+                                                width: "100%",
+                                                background: "none",
+                                                border: "none",
+                                                color: isUserBlocked(u.id) ? "#22c55e" : "#ef4444",
+                                                fontSize: "13px",
+                                                cursor: "pointer",
+                                                borderRadius: "6px",
+                                                transition: "all 0.2s ease",
+                                                fontFamily: FONT_FAMILY,
+                                              }}
+                                            >
+                                              <span>{isUserBlocked(u.id) ? "Unblock User" : "Block User"}</span>
+                                            </motion.button>
+                                          </motion.div>
+                                        )}
+                                      </AnimatePresence>
+                                    </div>
+                                  )}
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handlePinUser(u.id, true)}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "#c5e800",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <PinIcon filled={true} />
+                                  </motion.button>
+                                </div>
                               </div>
                             ))}
                           </motion.div>
@@ -4175,67 +4216,26 @@ export default function HomePage(): React.JSX.Element {
                               const otherId = room.participants.find(id => id !== user.uid);
                               const otherUser = users.find(u => u.id === otherId);
                               if (!otherUser) return null;
-                              // Skip if blocked
-                              if (isUserBlocked(otherId)) {
-                                // Tampilkan tetap tapi dengan indikator blocked
-                                return (
-                                  <div
-                                    key={room.id}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "10px",
-                                      padding: "6px 10px",
-                                      borderRadius: "6px",
-                                      backgroundColor: "#fafafa",
-                                      opacity: 0.6,
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        width: "32px",
-                                        height: "32px",
-                                        borderRadius: "6px",
-                                        backgroundColor: "#f0f0f0",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontSize: "14px",
-                                        overflow: "hidden",
-                                        flexShrink: 0,
-                                      }}
-                                    >
-                                      {otherUser.photoURL ? (
-                                        <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                      ) : (
-                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                                      )}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                      <div style={{ fontSize: "12px", fontWeight: 500, color: "#999", fontFamily: FONT_FAMILY }}>
-                                        {otherUser.name}
-                                      </div>
-                                      <div style={{ fontSize: "9px", color: "#ccc", fontFamily: FONT_FAMILY }}>
-                                        Blocked
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              }
+                              const isBlocked = isUserBlocked(otherId);
+                              
                               return (
                                 <motion.div
                                   key={room.id}
                                   whileHover={{ scale: 1.02 }}
-                                  onClick={() => setSelectedChat(otherUser)}
+                                  onClick={() => {
+                                    if (!isBlocked) {
+                                      setSelectedChat(otherUser);
+                                    }
+                                  }}
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "10px",
                                     padding: "6px 10px",
                                     borderRadius: "6px",
-                                    cursor: "pointer",
-                                    backgroundColor: "#fafafa",
+                                    cursor: isBlocked ? "not-allowed" : "pointer",
+                                    backgroundColor: isBlocked ? "#f5f5f5" : "#fafafa",
+                                    opacity: isBlocked ? 0.6 : 1,
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
@@ -4262,22 +4262,24 @@ export default function HomePage(): React.JSX.Element {
                                   <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                     <div>
                                       <div 
-                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
+                                        style={{ fontSize: "12px", fontWeight: 500, color: isBlocked ? "#999" : "#000", cursor: isBlocked ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          handleOpenProfile(otherUser);
+                                          if (!isBlocked) {
+                                            handleOpenProfile(otherUser);
+                                          }
                                         }}
                                       >
                                         {otherUser.name}
                                         {otherUser.isOfficial && !otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
                                       </div>
-                                      <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                        {room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages"}
+                                      <div style={{ fontSize: "9px", color: isBlocked ? "#ccc" : "#999", fontFamily: FONT_FAMILY }}>
+                                        {isBlocked ? "Blocked" : (room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages")}
                                       </div>
                                     </div>
-                                    <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />
+                                    {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
                                   </div>
-                                  {room.unreadCount > 0 && (
+                                  {room.unreadCount > 0 && !isBlocked && (
                                     <div
                                       style={{
                                         backgroundColor: "#c5e800",
@@ -4296,25 +4298,27 @@ export default function HomePage(): React.JSX.Element {
                                       {room.unreadCount}
                                     </div>
                                   )}
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handlePinChat(room.id, true);
-                                    }}
-                                    style={{
-                                      background: "none",
-                                      border: "none",
-                                      cursor: "pointer",
-                                      color: "#c5e800",
-                                      padding: "2px 4px",
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    <PinIcon filled={true} />
-                                  </motion.button>
+                                  {!isBlocked && (
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handlePinChat(room.id, true);
+                                      }}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        color: "#c5e800",
+                                        padding: "2px 4px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      <PinIcon filled={true} />
+                                    </motion.button>
+                                  )}
                                 </motion.div>
                               );
                             })}
@@ -4427,9 +4431,7 @@ export default function HomePage(): React.JSX.Element {
                         const otherUser = users.find(u => u.id === otherId);
                         if (!otherUser) return null;
                         
-                        // Check if blocked - tetap tampilkan tapi dengan indikator
                         const isBlocked = isUserBlocked(otherId);
-                        
                         const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                         const typingDisplay = getTypingUsersDisplay(room);
                         
@@ -4569,9 +4571,9 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // Chat View - dengan cek block
+                // Chat View
                 <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                  {/* Chat Header - tetap tampil tapi dengan indikator blocked */}
+                  {/* Chat Header */}
                   <div
                     style={{
                       padding: "10px 16px",
@@ -4794,7 +4796,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages Area dengan typing indicator */}
+                      {/* Messages Area */}
                       <div
                         style={{
                           flex: 1,
@@ -4808,7 +4810,7 @@ export default function HomePage(): React.JSX.Element {
                           minHeight: 0,
                         }}
                       >
-                        {/* Typing indicator di body - MULTI USER untuk official chat */}
+                        {/* Typing indicator di body */}
                         {officialTypingDisplay && (
                           <div
                             style={{
@@ -5129,7 +5131,6 @@ export default function HomePage(): React.JSX.Element {
                           flexShrink: 0,
                         }}
                       >
-                        {/* Typing indicator di atas input */}
                         {officialTypingDisplay && (
                           <div
                             style={{
@@ -5214,7 +5215,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
                   ) : (
-                    // Regular Chat View - dengan cek block
+                    // Regular Chat View
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && !isUserBlocked(selectedChat.id) && (
@@ -5343,7 +5344,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages - tampilkan pesan blocked jika user diblok */}
+                      {/* Messages */}
                       <div
                         style={{
                           flex: 1,
@@ -5368,16 +5369,16 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔒</div>
-                            <div style={{ fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                              This user has been blocked
+                            <div style={{ fontWeight: 500, color: "#dc2626", fontFamily: FONT_FAMILY }}>
+                              ⚠️ Akun sudah di block oleh anda
                             </div>
-                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#bbb", fontFamily: FONT_FAMILY }}>
-                              You can unblock them from their profile
+                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#ef4444", fontFamily: FONT_FAMILY }}>
+                              Maaf akun ini sudah tidak bisa di chat, silahkan buka block
                             </div>
                           </div>
                         ) : (
                           <>
-                            {/* Typing indicator di body untuk regular chat - DOUBLE/TRIPLE */}
+                            {/* Typing indicator di body */}
                             {regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5685,7 +5686,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input for regular chat - disabled jika user diblok */}
+                      {/* Input - disabled jika user diblok */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5699,7 +5700,6 @@ export default function HomePage(): React.JSX.Element {
                           flexShrink: 0,
                         }}
                       >
-                        {/* Typing indicator di atas input untuk regular chat - DOUBLE/TRIPLE */}
                         {!isUserBlocked(selectedChat.id) && regularTypingUsers.length > 0 && (
                           <div
                             style={{
