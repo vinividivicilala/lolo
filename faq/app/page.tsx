@@ -1103,7 +1103,13 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+  // ========== PERBAIKAN UTAMA: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+  // Gunakan useRef untuk menyimpan chatRooms terbaru tanpa dependency
+  const chatRoomsRef = useRef<ChatRoom[]>(chatRooms);
+  useEffect(() => {
+    chatRoomsRef.current = chatRooms;
+  }, [chatRooms]);
+
   useEffect(() => {
     if (!db || !user) return;
 
@@ -1111,15 +1117,17 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       // Buat map untuk menyimpan typing users per room
       const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
+      const currentRooms = chatRoomsRef.current;
       
       snapshot.forEach((doc) => {
         const data = doc.data();
         // Hanya proses user yang sedang typing dan bukan current user
         if (data.typing && data.id !== user?.uid) {
+          // Cari user di list users
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
             // Cek semua room yang diikuti oleh user ini
-            chatRooms.forEach(room => {
+            currentRooms.forEach(room => {
               if (room.participants && room.participants.includes(data.id)) {
                 if (!typingMap[room.id]) {
                   typingMap[room.id] = { names: [], ids: [] };
@@ -1147,7 +1155,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [user, users, chatRooms]);
+  }, [user, users]); // Hapus chatRooms dari dependency!
 
   // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
   useEffect(() => {
@@ -1908,8 +1916,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         {/* BANNER */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
+        <motion.div          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{
