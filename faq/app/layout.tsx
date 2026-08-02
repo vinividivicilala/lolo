@@ -1,36 +1,4 @@
-import type { Metadata, Viewport } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Menuru Official | Home',
-  description: 'Menuru Brand from Love yourself',
-  icons: {
-    icon: '/images/ai.jpg',
-    apple: '/images/ai.jpg',
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Menuru',
-  },
-  openGraph: {
-    title: 'Menuru Official | Home',
-    description: 'Menuru Brand from Love yourself',
-    images: [
-      {
-        url: '/images/ai.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Menuru Official',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Menuru Official | Home',
-    description: 'Menuru Brand from Love yourself',
-    images: ['/images/ai.jpg'],
-  },
-}
+import type { Viewport } from 'next'
 
 export const viewport: Viewport = {
   themeColor: '#8be9fd',
@@ -56,9 +24,9 @@ export default function RootLayout({
       }}
     >
       <head>
-        {/* Google Fonts CDN - Geist Sans (weight 400 saja) */}
+        {/* Google Fonts CDN - Poppins (weight 400 saja) */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap"
           rel="stylesheet"
         />
         
@@ -80,7 +48,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "'Geist', 'Geist Fallback'",
+          fontFamily: "'Poppins', 'Poppins Fallback'",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
