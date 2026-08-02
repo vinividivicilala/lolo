@@ -78,6 +78,7 @@ interface ChatUser {
   groupDescription?: string;
   groupMembers?: string[];
   groupAdmins?: string[];
+  groupCreatedBy?: string;
 }
 
 interface Message {
@@ -116,6 +117,7 @@ interface ChatRoom {
   groupDescription?: string;
   groupMembers?: string[];
   groupAdmins?: string[];
+  groupCreatedBy?: string;
 }
 
 interface UpdateItem {
@@ -133,18 +135,6 @@ interface UpdateItem {
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const SouthEastArrow = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const NorthWestArrow = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 7H17V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -285,14 +275,13 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
 // Online Status Indicator - Web Minimalist dengan GSAP
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const circleRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
   const color = online ? "#0D3CFC" : "#999";
   
   useEffect(() => {
     if (online && pulseRef.current) {
       gsap.to(pulseRef.current, {
-        scale: 2.2,
+        scale: 2.5,
         opacity: 0.05,
         duration: 1.8,
         repeat: -1,
@@ -310,7 +299,6 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         style={{ cursor: "pointer" }}
       >
         <div
-          ref={circleRef}
           style={{
             width: "8px",
             height: "8px",
@@ -645,7 +633,8 @@ export default function HomePage(): React.JSX.Element {
                 groupName: data.groupName || "",
                 groupDescription: data.groupDescription || "",
                 groupMembers: data.groupMembers || [],
-                groupAdmins: data.groupAdmins || []
+                groupAdmins: data.groupAdmins || [],
+                groupCreatedBy: data.groupCreatedBy || ""
               } as ChatUser);
             }
           });
@@ -712,7 +701,6 @@ export default function HomePage(): React.JSX.Element {
         if (data.participants && data.participants.includes(user.uid)) {
           const otherId = data.participants.find((id: string) => id !== user.uid);
           
-          // Check if group chat
           const isGroup = data.isGroup || false;
           
           let otherUser = null;
@@ -762,7 +750,8 @@ export default function HomePage(): React.JSX.Element {
               groupName: data.groupName || "",
               groupDescription: data.groupDescription || "",
               groupMembers: data.groupMembers || [],
-              groupAdmins: data.groupAdmins || []
+              groupAdmins: data.groupAdmins || [],
+              groupCreatedBy: data.groupCreatedBy || ""
             });
           }
         }
@@ -982,7 +971,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message
+  // Send message - FIXED
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
@@ -1007,7 +996,8 @@ export default function HomePage(): React.JSX.Element {
           groupName: selectedChat.groupName || "",
           groupDescription: selectedChat.groupDescription || "",
           groupMembers: selectedChat.groupMembers || [],
-          groupAdmins: selectedChat.groupAdmins || []
+          groupAdmins: selectedChat.groupAdmins || [],
+          groupCreatedBy: selectedChat.groupCreatedBy || ""
         });
       }
       
@@ -1223,7 +1213,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Create Group Chat
+  // Create Group Chat - FIXED dengan groupCreatedBy
   const handleCreateGroup = async () => {
     if (!user || !db || !groupName.trim() || selectedGroupMembers.length === 0) {
       setAddUserStatus("Please fill in all fields");
@@ -1233,8 +1223,9 @@ export default function HomePage(): React.JSX.Element {
     try {
       const members = [user.uid, ...selectedGroupMembers];
       const admins = [user.uid, ...groupAdmins];
+      const groupId = `group_${Date.now()}`;
       
-      const chatRef = doc(db, "chats", `group_${Date.now()}`);
+      const chatRef = doc(db, "chats", groupId);
       await setDoc(chatRef, {
         participants: members,
         createdAt: serverTimestamp(),
@@ -1243,7 +1234,31 @@ export default function HomePage(): React.JSX.Element {
         groupName: groupName.trim(),
         groupDescription: groupDescription.trim() || "",
         groupMembers: members,
-        groupAdmins: admins
+        groupAdmins: admins,
+        groupCreatedBy: user.uid
+      });
+
+      // Also create group user profile
+      const groupUserRef = doc(db, "users", groupId);
+      await setDoc(groupUserRef, {
+        id: groupId,
+        name: groupName.trim(),
+        email: "",
+        photoURL: "",
+        isGroup: true,
+        groupName: groupName.trim(),
+        groupDescription: groupDescription.trim() || "",
+        groupMembers: members,
+        groupAdmins: admins,
+        groupCreatedBy: user.uid,
+        createdAt: serverTimestamp(),
+        isPinned: false,
+        isAdmin: false,
+        online: false,
+        lastSeen: null,
+        typing: false,
+        blocked: [],
+        blockedBy: []
       });
 
       setAddUserStatus(`Group "${groupName}" created successfully!`);
@@ -1305,7 +1320,7 @@ export default function HomePage(): React.JSX.Element {
     return chatUser.typing || false;
   };
 
-  const pinnedUsers = users.filter(u => u.isPinned);
+  const pinnedUsers = users.filter(u => u.isPinned && !u.isGroup);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
   
@@ -1394,9 +1409,11 @@ export default function HomePage(): React.JSX.Element {
     return otherId && isUserBlocked(otherId);
   });
 
+  // Get blocked users list for notification
+  const blockedUsersList = users.filter(u => isUserBlocked(u.id) && u.id !== user?.uid);
+
   return (
     <>
-      {/* HEAD METADATA - PER HALAMAN */}
       <Head>
         <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
@@ -1453,6 +1470,7 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             borderBottom: "none",
             gap: "20px",
+            flexWrap: "wrap",
           }}
         >
           <AnimatePresence mode="wait">
@@ -1498,6 +1516,42 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
+        {/* BLOCKED USERS NOTIFICATION - REAL TIME */}
+        {blockedUsersList.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              position: "absolute",
+              top: "74px",
+              left: 0,
+              right: 0,
+              width: "100%",
+              backgroundColor: "#fef3c7",
+              padding: "8px 20px",
+              zIndex: 19,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderBottom: "1px solid #fcd34d",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "#92400e", fontFamily: FONT_FAMILY, fontWeight: 500 }}>
+              Akun yang di block:
+            </span>
+            {blockedUsersList.map((u, index) => (
+              <span key={u.id} style={{ fontSize: "13px", color: "#92400e", fontFamily: FONT_FAMILY }}>
+                {u.name}{index < blockedUsersList.length - 1 ? ", " : ""}
+              </span>
+            ))}
+            <span style={{ fontSize: "13px", color: "#92400e", fontFamily: FONT_FAMILY }}>
+              - Klik Unblock untuk membuka block
+            </span>
+          </motion.div>
+        )}
+
         {/* Menuru */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1505,7 +1559,7 @@ export default function HomePage(): React.JSX.Element {
           transition={{ duration: 0.5, delay: 0.3 }}
           style={{
             position: "absolute",
-            top: "80px",
+            top: blockedUsersList.length > 0 ? "118px" : "80px",
             left: "40px",
             zIndex: 15,
             display: "flex",
@@ -1533,7 +1587,7 @@ export default function HomePage(): React.JSX.Element {
           transition={{ duration: 0.5, delay: 0.2 }}
           style={{
             position: "absolute",
-            top: "80px",
+            top: blockedUsersList.length > 0 ? "118px" : "80px",
             right: "40px",
             zIndex: 10,
             display: "flex",
@@ -1833,7 +1887,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* Header */}
+                {/* Header - BG HITAM, TEKS PUTIH */}
                 <div
                   style={{
                     padding: "16px 20px",
@@ -1845,7 +1899,7 @@ export default function HomePage(): React.JSX.Element {
                     flexShrink: 0,
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                     <span
                       style={{
                         fontSize: "15px",
@@ -1853,6 +1907,9 @@ export default function HomePage(): React.JSX.Element {
                         color: "#ffffff",
                         letterSpacing: "-0.01em",
                         fontFamily: FONT_FAMILY,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
                       {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? (selectedChat.isGroup ? selectedChat.groupName || "Group Chat" : selectedChat.name) : "Messages"))))}
@@ -1915,6 +1972,7 @@ export default function HomePage(): React.JSX.Element {
                       transition: "all .2s ease",
                       display: "flex",
                       alignItems: "center",
+                      flexShrink: 0,
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
@@ -1929,7 +1987,7 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
 
-                {/* Content - Update Detail Page */}
+                {/* Content */}
                 {selectedUpdateId && selectedUpdate ? (
                   <div
                     style={{
@@ -2756,7 +2814,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
 
                       {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
-                      {isUserBlocked(profileUser.id) && (
+                      {isUserBlocked(profileUser.id) && !profileUser.isGroup && (
                         <div style={{ 
                           width: "100%", 
                           marginTop: "16px",
@@ -2776,54 +2834,95 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Group Chat Info */}
-                      {profileUser.isGroup && (
-                        <div style={{ width: "100%", marginBottom: "16px" }}>
+                      {/* Group Chat Profile */}
+                      {profileUser.isGroup ? (
+                        <div style={{ width: "100%" }}>
                           <div style={{ 
-                            fontSize: "14px", 
+                            fontSize: "22px", 
                             fontWeight: 600, 
                             color: "#000", 
                             fontFamily: FONT_FAMILY,
-                            marginBottom: "8px"
+                            marginBottom: "4px"
                           }}>
                             {profileUser.groupName || "Group Chat"}
                           </div>
                           {profileUser.groupDescription && (
                             <div style={{ 
-                              fontSize: "13px", 
+                              fontSize: "14px", 
                               color: "#666", 
                               fontFamily: FONT_FAMILY,
-                              marginBottom: "8px"
+                              marginBottom: "12px"
                             }}>
                               {profileUser.groupDescription}
                             </div>
                           )}
-                          <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
+                          <div style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
                             {profileUser.groupMembers?.length || 0} members
                           </div>
-                          <div style={{ marginTop: "8px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                          
+                          {/* Group Members List with Admin Label */}
+                          <div style={{ 
+                            borderTop: "1px solid #f0f0f0", 
+                            paddingTop: "12px",
+                            marginBottom: "12px"
+                          }}>
+                            <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
+                              Members
+                            </div>
                             {profileUser.groupMembers?.map((memberId) => {
                               const member = users.find(u => u.id === memberId);
                               const isGroupAdmin = profileUser.groupAdmins?.includes(memberId);
+                              const isCreator = profileUser.groupCreatedBy === memberId;
                               return member ? (
-                                <span key={memberId} style={{
-                                  fontSize: "11px",
-                                  backgroundColor: isGroupAdmin ? "#0D3CFC" : "#f0f0f0",
-                                  color: isGroupAdmin ? "#ffffff" : "#000",
-                                  padding: "2px 10px",
-                                  borderRadius: "12px",
+                                <div key={memberId} style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  padding: "6px 12px",
+                                  backgroundColor: isGroupAdmin ? "#f0f4ff" : "#f8f8f8",
+                                  borderRadius: "6px",
+                                  marginBottom: "4px",
                                   fontFamily: FONT_FAMILY,
                                 }}>
-                                  {member.name}
-                                  {isGroupAdmin && " (Admin)"}
-                                </span>
+                                  <span style={{ fontSize: "13px", color: "#000", fontFamily: FONT_FAMILY }}>
+                                    {member.name}
+                                    {member.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                  </span>
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    {isCreator && (
+                                      <span style={{ 
+                                        fontSize: "10px", 
+                                        backgroundColor: "#0D3CFC", 
+                                        color: "#fff",
+                                        padding: "1px 10px",
+                                        borderRadius: "10px",
+                                        fontFamily: FONT_FAMILY,
+                                        fontWeight: 500
+                                      }}>
+                                        Creator
+                                      </span>
+                                    )}
+                                    {isGroupAdmin && !isCreator && (
+                                      <span style={{ 
+                                        fontSize: "10px", 
+                                        backgroundColor: "#0D3CFC", 
+                                        color: "#fff",
+                                        padding: "1px 10px",
+                                        borderRadius: "10px",
+                                        fontFamily: FONT_FAMILY,
+                                        fontWeight: 500
+                                      }}>
+                                        Admin
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               ) : null;
                             })}
                           </div>
                         </div>
-                      )}
-
-                      {!profileUser.isGroup && (
+                      ) : (
+                        // Regular User Profile with Photo
                         <>
                           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
                             <motion.div
@@ -2937,31 +3036,14 @@ export default function HomePage(): React.JSX.Element {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH */}
-                    {hasBlockedUsers && (
-                      <div style={{ 
-                        width: "100%", 
-                        marginBottom: "10px",
-                        padding: "12px 16px",
-                        backgroundColor: "#0D3CFC",
-                        borderRadius: "8px",
-                        border: "none",
-                        textAlign: "center",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                          Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
-                        </div>
-                      </div>
-                    )}
-
+                    {/* Announcement - WARNA HIJAU STABILO */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
                         gap: "10px",
                         padding: "10px 14px",
-                        backgroundColor: "#f8f8f8",
+                        backgroundColor: "#d9f99d",
                         borderRadius: "8px",
                         marginBottom: "10px",
                         border: "none",
@@ -2972,7 +3054,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                           Announcement
                         </div>
-                        <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
+                        <div style={{ fontSize: "11px", color: "#000", fontFamily: FONT_FAMILY }}>
                           Chat feature is under development.
                         </div>
                       </div>
@@ -3021,7 +3103,6 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                     </motion.button>
 
-                    {/* Tombol Add Group Chat */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
@@ -3254,7 +3335,7 @@ export default function HomePage(): React.JSX.Element {
                                     fontFamily: FONT_FAMILY,
                                   }}
                                 >
-                                  {groupAdmins.includes(u.id) ? "Admin ✓" : "Make Admin"}
+                                  {groupAdmins.includes(u.id) ? "Admin" : "Make Admin"}
                                 </button>
                               )}
                             </div>
@@ -3498,6 +3579,7 @@ export default function HomePage(): React.JSX.Element {
                                           groupDescription: room.groupDescription,
                                           groupMembers: room.groupMembers,
                                           groupAdmins: room.groupAdmins,
+                                          groupCreatedBy: room.groupCreatedBy,
                                           online: false,
                                           lastSeen: null,
                                           typing: false,
@@ -3528,12 +3610,12 @@ export default function HomePage(): React.JSX.Element {
                                           display: "flex",
                                           alignItems: "center",
                                           justifyContent: "center",
-                                          fontSize: "14px",
+                                          fontSize: "16px",
                                           color: "#fff",
                                           flexShrink: 0,
                                         }}
                                       >
-                                        👥
+                                        G
                                       </div>
                                       <div style={{ flex: 1 }}>
                                         <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
@@ -3743,6 +3825,7 @@ export default function HomePage(): React.JSX.Element {
                                     groupDescription: room.groupDescription,
                                     groupMembers: room.groupMembers,
                                     groupAdmins: room.groupAdmins,
+                                    groupCreatedBy: room.groupCreatedBy,
                                     online: false,
                                     lastSeen: null,
                                     typing: false,
@@ -3775,12 +3858,13 @@ export default function HomePage(): React.JSX.Element {
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    fontSize: "20px",
+                                    fontSize: "18px",
                                     flexShrink: 0,
                                     color: "#fff",
+                                    fontWeight: 600,
                                   }}
                                 >
-                                  👥
+                                  G
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
@@ -3995,7 +4079,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : (
                   // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header */}
+                    {/* Chat Header - BG HITAM, TEKS PUTIH */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -4007,7 +4091,7 @@ export default function HomePage(): React.JSX.Element {
                         flexShrink: 0,
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -4025,6 +4109,7 @@ export default function HomePage(): React.JSX.Element {
                             transition: "all .2s ease",
                             display: "flex",
                             alignItems: "center",
+                            flexShrink: 0,
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
@@ -4048,12 +4133,13 @@ export default function HomePage(): React.JSX.Element {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "16px",
+                              fontSize: "14px",
                               color: "#fff",
                               flexShrink: 0,
+                              fontWeight: 600,
                             }}
                           >
-                            👥
+                            G
                           </div>
                         ) : (
                           <motion.div
@@ -4071,6 +4157,7 @@ export default function HomePage(): React.JSX.Element {
                               color: "#fff",
                               position: "relative",
                               cursor: "pointer",
+                              flexShrink: 0,
                             }}
                             onClick={() => {
                               handleOpenProfile(selectedChat);
@@ -4088,7 +4175,7 @@ export default function HomePage(): React.JSX.Element {
                           </motion.div>
                         )}
                         
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px", minWidth: 0 }}>
                           <div 
                             style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
                             onClick={() => {
@@ -4097,13 +4184,13 @@ export default function HomePage(): React.JSX.Element {
                               }
                             }}
                           >
-                            <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                            <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {selectedChat.isGroup ? (selectedChat.groupName || "Group Chat") : selectedChat.name}
                             </span>
                             {!selectedChat.isGroup && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                           </div>
                           {selectedChat.isGroup && selectedChat.groupMembers && (
-                            <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                            <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {selectedChat.groupMembers.map(id => {
                                 const member = users.find(u => u.id === id);
                                 return member ? member.name : "";
@@ -4142,6 +4229,7 @@ export default function HomePage(): React.JSX.Element {
                             display: "flex",
                             alignItems: "center",
                             transition: "all .2s ease",
+                            flexShrink: 0,
                           }}
                         >
                           <PinIcon filled={selectedChat.isPinned || false} />
@@ -4676,7 +4764,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input - disabled jika user diblok */}
+                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
