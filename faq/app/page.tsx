@@ -58,9 +58,6 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 // Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-// Official Chat Room ID
-const OFFICIAL_CHAT_ID = "official_menuru_room";
-
 interface ChatUser {
   id: string;
   name: string;
@@ -96,7 +93,6 @@ interface Message {
   sharedFrom?: string;
   sharedFromName?: string;
   isShared?: boolean;
-  isOfficialChat?: boolean;
 }
 
 interface ChatRoom {
@@ -170,10 +166,22 @@ const MoreIcon = () => (
   </svg>
 );
 
-const EditIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+// Arrow Icons
+const NorthEastArrow = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7L17 17L7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SouthEastArrow = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17L17 7L7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthWestArrow = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 7L7 17M7 7L17 7L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -263,10 +271,10 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Online Status Indicator
+// Online Status Indicator - dengan pemancar #0D3CFC
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const color = online ? "#4ade80" : "#999";
+  const color = online ? "#0D3CFC" : "#999";
   
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
@@ -276,8 +284,8 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         style={{ cursor: "pointer" }}
       >
         <div style={{
-          width: "8px",
-          height: "8px",
+          width: "10px",
+          height: "10px",
           borderRadius: "50%",
           backgroundColor: color,
           position: "relative",
@@ -286,15 +294,15 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
           {online && (
             <div style={{
               position: "absolute",
-              width: "22px",
-              height: "22px",
+              width: "30px",
+              height: "30px",
               borderRadius: "50%",
               backgroundColor: color,
-              opacity: 0.20,
-              animation: "awwwardsPulse 2s ease-in-out infinite",
+              opacity: 0.15,
+              animation: "pulseExpand 2s ease-in-out infinite",
               pointerEvents: "none",
-              top: "-7px",
-              left: "-7px",
+              top: "-10px",
+              left: "-10px",
             }} />
           )}
         </div>
@@ -390,198 +398,6 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Komponen Stories - HANYA UNTUK ADMIN
-const StoriesSection = ({ userEmail }: { userEmail: string }) => {
-  const [storyImages, setStoryImages] = useState<{ [key: number]: number }>({});
-  const [storyHover, setStoryHover] = useState<{ [key: number]: boolean }>({});
-  const images = [10, 11, 12, 13, 14, 15];
-  const isAdmin = userEmail === ADMIN_EMAIL;
-
-  if (!isAdmin) return null;
-
-  useEffect(() => {
-    const initialImages: { [key: number]: number } = {};
-    const initialHover: { [key: number]: boolean } = {};
-    images.forEach(num => {
-      initialImages[num] = num;
-      initialHover[num] = false;
-    });
-    setStoryImages(initialImages);
-    setStoryHover(initialHover);
-  }, []);
-
-  useEffect(() => {
-    const intervals: { [key: number]: NodeJS.Timeout } = {};
-    
-    Object.keys(storyHover).forEach(key => {
-      const num = parseInt(key);
-      if (storyHover[num]) {
-        intervals[num] = setInterval(() => {
-          setStoryImages(prev => {
-            const currentIndex = images.indexOf(prev[num]);
-            const nextIndex = (currentIndex + 1) % images.length;
-            return { ...prev, [num]: images[nextIndex] };
-          });
-        }, 800);
-      }
-    });
-    
-    return () => {
-      Object.values(intervals).forEach(interval => clearInterval(interval));
-    };
-  }, [storyHover]);
-
-  const openFullImage = (imageNumber: number) => {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    `;
-    overlay.onclick = () => overlay.remove();
-    
-    const img = document.createElement('img');
-    img.src = `/images/${imageNumber}.jpg`;
-    img.style.cssText = `
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 8px;
-      object-fit: contain;
-    `;
-    img.onerror = () => {
-      img.style.display = 'none';
-      const text = document.createElement('div');
-      text.textContent = `${imageNumber}.jpg`;
-      text.style.cssText = `
-        color: #fff;
-        font-size: 24px;
-        font-family: ${FONT_FAMILY};
-      `;
-      overlay.appendChild(text);
-    };
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-  };
-
-  return (
-    <div style={{ width: "100%", marginBottom: "20px" }}>
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        marginBottom: "12px",
-        borderBottom: "1px solid #f0f0f0",
-        paddingBottom: "8px",
-      }}>
-        <span style={{ 
-          fontSize: "18px", 
-          fontWeight: 700, 
-          color: "#000000", 
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.02em",
-        }}>
-          Stories
-        </span>
-        <span style={{ 
-          fontSize: "12px", 
-          color: "#999", 
-          fontFamily: FONT_FAMILY,
-        }}>
-          {images.length} photos
-        </span>
-      </div>
-      <div style={{ 
-        display: "grid", 
-        gridTemplateColumns: "repeat(3, 1fr)", 
-        gap: "10px",
-      }}>
-        {images.map((num) => (
-          <div
-            key={num}
-            style={{
-              aspectRatio: "3/4",
-              backgroundColor: "#f0f0f0",
-              borderRadius: "12px",
-              overflow: "hidden",
-              border: "2px solid #e8e8e8",
-              position: "relative",
-              cursor: "pointer",
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-            }}
-            onMouseEnter={() => {
-              setStoryHover(prev => ({ ...prev, [num]: true }));
-            }}
-            onMouseLeave={() => {
-              setStoryHover(prev => ({ ...prev, [num]: false }));
-              setStoryImages(prev => ({ ...prev, [num]: num }));
-            }}
-            onClick={() => openFullImage(storyImages[num] || num)}
-          >
-            <img
-              src={`/images/${storyImages[num] || num}.jpg`}
-              alt={`Stories ${num}`}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: "transform 0.5s ease",
-              }}
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  parent.style.backgroundColor = "#f0f0f0";
-                  parent.style.display = "flex";
-                  parent.style.alignItems = "center";
-                  parent.style.justifyContent = "center";
-                  const span = document.createElement("span");
-                  span.textContent = `${num}.jpg`;
-                  span.style.color = "#999";
-                  span.style.fontSize = "12px";
-                  span.style.fontFamily = FONT_FAMILY;
-                  parent.appendChild(span);
-                }
-              }}
-            />
-            <div style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: "40%",
-              background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
-              pointerEvents: "none",
-            }} />
-            <div style={{
-              position: "absolute",
-              bottom: "8px",
-              left: "8px",
-              color: "rgba(255,255,255,0.8)",
-              fontSize: "11px",
-              fontWeight: 500,
-              fontFamily: FONT_FAMILY,
-              backgroundColor: "rgba(0,0,0,0.3)",
-              padding: "2px 8px",
-              borderRadius: "10px",
-              pointerEvents: "none",
-            }}>
-              {num}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -595,6 +411,7 @@ export default function HomePage(): React.JSX.Element {
   const [showPinnedUsers, setShowPinnedUsers] = useState(false);
   const [showPinnedChats, setShowPinnedChats] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showAddGroup, setShowAddGroup] = useState(false);
   const [selectedNewUser, setSelectedNewUser] = useState("");
   const [addUserStatus, setAddUserStatus] = useState("");
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
@@ -607,23 +424,11 @@ export default function HomePage(): React.JSX.Element {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
-  const [editBio, setEditBio] = useState(false);
-  const [bioInput, setBioInput] = useState("");
-  const [editNote, setEditNote] = useState(false);
-  const [noteInput, setNoteInput] = useState("");
   const [showBlockDropdown, setShowBlockDropdown] = useState(false);
+  const [showFullImage, setShowFullImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Official Chat States
-  const [officialMessages, setOfficialMessages] = useState<Message[]>([]);
-  const [officialMessageInput, setOfficialMessageInput] = useState("");
-  const [officialReplyTo, setOfficialReplyTo] = useState<Message | null>(null);
-  const [officialPinnedMessages, setOfficialPinnedMessages] = useState<Message[]>([]);
-  const [showOfficialPinnedMessages, setShowOfficialPinnedMessages] = useState(false);
-  const [officialUnreadCount, setOfficialUnreadCount] = useState(0);
-  const [officialTypingUsers, setOfficialTypingUsers] = useState<string[]>([]);
 
   // Banner text
   const bannerTexts = [
@@ -849,30 +654,9 @@ export default function HomePage(): React.JSX.Element {
             }
           }
           
-          // Add official user
-          const officialExists = userList.some(u => u.id === "official_menuru");
-          if (!officialExists) {
-            userList.push({ 
-              id: "official_menuru",
-              name: "Menuru Official",
-              email: "official@menuru.com",
-              photoURL: "",
-              isOfficial: true,
-              isAdmin: false,
-              online: true,
-              typing: false,
-              bio: "Official Menuru Chat account. Managed by the Menuru team.",
-              note: "Official Account",
-              blocked: [],
-              blockedBy: []
-            });
-          }
-          
           userList.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
-            if (a.isOfficial && !b.isOfficial) return -1;
-            if (!a.isOfficial && b.isOfficial) return 1;
             return 0;
           });
           setUsers(userList);
@@ -884,157 +668,6 @@ export default function HomePage(): React.JSX.Element {
     };
     loadUsers();
   }, [user]);
-
-  // Load official chat messages
-  useEffect(() => {
-    if (!db || !user) return;
-
-    const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
-    const q = query(officialChatRef, orderBy("timestamp", "asc"));
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const msgList: Message[] = [];
-      const pinnedList: Message[] = [];
-      let unreadCount = 0;
-      let lastMessage = "";
-      let lastMessageTime = null;
-      let lastMessageSenderId = "";
-      let lastMessageSenderName = "";
-      
-      snapshot.forEach((doc) => {
-        const msg = { id: doc.id, ...doc.data() } as Message;
-        msgList.push(msg);
-        if (msg.isPinned) {
-          pinnedList.push(msg);
-        }
-        if (!msg.read && msg.senderId !== user.uid) {
-          unreadCount++;
-        }
-        if (!lastMessageTime || (msg.timestamp && msg.timestamp.seconds > (lastMessageTime?.seconds || 0))) {
-          if (msg.senderId === "official_menuru") {
-            lastMessage = msg.text;
-          } else {
-            lastMessage = `Menuru Official (from ${msg.senderName}): ${msg.text}`;
-          }
-          lastMessageTime = msg.timestamp;
-          lastMessageSenderId = msg.senderId;
-          lastMessageSenderName = msg.senderName;
-        }
-      });
-      
-      setOfficialMessages(msgList);
-      setOfficialPinnedMessages(pinnedList);
-      setOfficialUnreadCount(unreadCount);
-      
-      if (selectedChat?.id === "official_menuru") {
-        const unreadMessages = msgList.filter(m => 
-          !m.read && 
-          m.senderId !== user.uid
-        );
-        
-        for (const msg of unreadMessages) {
-          const msgRef = doc(db, "official_chat", OFFICIAL_CHAT_ID, "messages", msg.id);
-          await updateDoc(msgRef, {
-            read: true,
-            readAt: serverTimestamp()
-          });
-        }
-        
-        if (unreadMessages.length > 0) {
-          setOfficialUnreadCount(0);
-        }
-      }
-      
-      setChatRooms(prev => {
-        const updatedRooms = prev.map(room => {
-          if (room.id === OFFICIAL_CHAT_ID) {
-            return {
-              ...room,
-              lastMessage: lastMessage || "Chat with Menuru Official",
-              lastMessageTime: lastMessageTime,
-              lastMessageSenderId: lastMessageSenderId,
-              unreadCount: unreadCount
-            };
-          }
-          return room;
-        });
-        
-        const hasOfficial = updatedRooms.some(r => r.id === OFFICIAL_CHAT_ID);
-        if (!hasOfficial) {
-          updatedRooms.push({
-            id: OFFICIAL_CHAT_ID,
-            participants: ["official_menuru", user.uid],
-            lastMessage: lastMessage || "Chat with Menuru Official",
-            lastMessageTime: lastMessageTime,
-            lastMessageSenderId: lastMessageSenderId,
-            unreadCount: unreadCount,
-            isPinned: false,
-            typingUsers: []
-          });
-        }
-        
-        updatedRooms.sort((a, b) => {
-          if (a.isPinned && !b.isPinned) return -1;
-          if (!a.isPinned && b.isPinned) return 1;
-          if (a.lastMessageTime && b.lastMessageTime) {
-            return b.lastMessageTime.seconds - a.lastMessageTime.seconds;
-          }
-          return 0;
-        });
-        
-        return updatedRooms;
-      });
-      
-      const otherRoomsUnread = chatRooms.filter(r => r.id !== OFFICIAL_CHAT_ID).reduce((sum, r) => sum + r.unreadCount, 0);
-      setTotalUnread(otherRoomsUnread + unreadCount);
-    });
-
-    return () => unsubscribe();
-  }, [user, selectedChat]);
-
-  // Listen for typing status - OFFICIAL CHAT TYPING INDICATOR
-  useEffect(() => {
-    if (!db || !user) return;
-
-    const usersRef = collection(db, "users");
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      const typingList: string[] = [];
-      const allTypingUsers: { [key: string]: boolean } = {};
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.typing && data.id !== user?.uid) {
-          const foundUser = users.find(u => u.id === data.id);
-          if (foundUser) {
-            const isInOfficial = chatRooms.some(room => 
-              room.id === OFFICIAL_CHAT_ID && room.participants.includes(data.id)
-            );
-            if (isInOfficial || data.id === "official_menuru") {
-              typingList.push(foundUser.name);
-            }
-            allTypingUsers[data.id] = true;
-          }
-        }
-      });
-      
-      setOfficialTypingUsers(typingList);
-      
-      setChatRooms(prev => prev.map(room => {
-        if (room.id === OFFICIAL_CHAT_ID) {
-          return { ...room, typingUsers: typingList };
-        } else {
-          const otherId = room.participants.find(id => id !== user.uid);
-          if (otherId && allTypingUsers[otherId]) {
-            const foundUser = users.find(u => u.id === otherId);
-            return { ...room, typingUsers: foundUser ? [foundUser.name] : [] };
-          }
-          return { ...room, typingUsers: [] };
-        }
-      }));
-    });
-
-    return () => unsubscribe();
-  }, [user, users, chatRooms]);
 
   // Load chat rooms
   useEffect(() => {
@@ -1096,31 +729,6 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
-      // Add official chat room if not exists
-      const hasOfficial = rooms.some(r => r.id === OFFICIAL_CHAT_ID);
-      if (!hasOfficial) {
-        const officialLastMsg = officialMessages.length > 0 ? officialMessages[officialMessages.length - 1] : null;
-        let lastMessage = "Chat with Menuru Official";
-        if (officialLastMsg) {
-          if (officialLastMsg.senderId === "official_menuru") {
-            lastMessage = officialLastMsg.text;
-          } else {
-            lastMessage = `Menuru Official (from ${officialLastMsg.senderName}): ${officialLastMsg.text}`;
-          }
-        }
-        rooms.push({
-          id: OFFICIAL_CHAT_ID,
-          participants: ["official_menuru", user.uid],
-          lastMessage: lastMessage,
-          lastMessageTime: officialLastMsg ? officialLastMsg.timestamp : null,
-          lastMessageSenderId: officialLastMsg ? officialLastMsg.senderId : "",
-          unreadCount: officialUnreadCount,
-          isPinned: false,
-          typingUsers: [],
-          isBlocked: false
-        });
-      }
-      
       rooms.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -1131,24 +739,17 @@ export default function HomePage(): React.JSX.Element {
       });
       
       setChatRooms(rooms);
-      
-      const otherRoomsUnread = rooms.filter(r => r.id !== OFFICIAL_CHAT_ID).reduce((sum, r) => sum + r.unreadCount, 0);
-      const total = otherRoomsUnread + officialUnreadCount;
-      setTotalUnread(total);
+      setTotalUnread(totalUnreadCount);
     });
 
     return () => {
       unsubscribe();
     };
-  }, [user, users, officialMessages, officialUnreadCount]);
+  }, [user, users]);
 
   // Load messages for regular chat
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
-
-    if (selectedChat.id === "official_menuru") {
-      return;
-    }
 
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const messagesRef = collection(db, "chats", chatId, "messages");
@@ -1216,7 +817,6 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setOfficialMessages([]);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1228,14 +828,13 @@ export default function HomePage(): React.JSX.Element {
     if (!isChatOpen) {
       setSelectedChat(null);
       setShowAddUser(false);
+      setShowAddGroup(false);
       setReplyTo(null);
       setShowProfile(false);
       setProfileUser(null);
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      setOfficialReplyTo(null);
-      setOfficialMessageInput("");
     }
   };
 
@@ -1267,109 +866,19 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle typing for official chat
-  const handleOfficialTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setOfficialMessageInput(value);
-    
-    if (!user || !db) return;
-    
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      typing: value.length > 0
-    });
-    
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-    
-    const newTimeout = setTimeout(async () => {
-      const userRef2 = doc(db, "users", user.uid);
-      await updateDoc(userRef2, {
-        typing: false
-      });
-    }, 2000);
-    
-    setTypingTimeout(newTimeout);
-  };
-
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     if (!chatUser || !user) return;
     
     setProfileUser(chatUser);
     setShowProfile(true);
-    setBioInput(chatUser.bio || "");
-    setNoteInput(chatUser.note || "");
-    setEditBio(false);
-    setEditNote(false);
     setShowBlockDropdown(false);
   };
 
   const handleCloseProfile = () => {
     setShowProfile(false);
     setProfileUser(null);
-    setEditBio(false);
-    setEditNote(false);
     setShowBlockDropdown(false);
-  };
-
-  // Handle save bio
-  const handleSaveBio = async () => {
-    if (!profileUser || !db) return;
-    try {
-      const userRef = doc(db, "users", profileUser.id);
-      await updateDoc(userRef, {
-        bio: bioInput
-      });
-      setProfileUser({ ...profileUser, bio: bioInput });
-      setEditBio(false);
-      
-      setUsers(prev => prev.map(u => {
-        if (u.id === profileUser.id) {
-          return { ...u, bio: bioInput };
-        }
-        return u;
-      }));
-      
-      if (profileUser.id === user.uid) {
-        setUser((prev: any) => ({
-          ...prev,
-          bio: bioInput
-        }));
-      }
-    } catch (error) {
-      console.error("Error saving bio:", error);
-    }
-  };
-
-  // Handle save note
-  const handleSaveNote = async () => {
-    if (!profileUser || !db) return;
-    try {
-      const userRef = doc(db, "users", profileUser.id);
-      await updateDoc(userRef, {
-        note: noteInput
-      });
-      setProfileUser({ ...profileUser, note: noteInput });
-      setEditNote(false);
-      
-      setUsers(prev => prev.map(u => {
-        if (u.id === profileUser.id) {
-          return { ...u, note: noteInput };
-        }
-        return u;
-      }));
-      
-      if (profileUser.id === user.uid) {
-        setUser((prev: any) => ({
-          ...prev,
-          note: noteInput
-        }));
-      }
-    } catch (error) {
-      console.error("Error saving note:", error);
-    }
   };
 
   // Handle Block/Unblock user - UPDATE BOTH USERS secara realtime
@@ -1497,46 +1006,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to official chat
-  const handleSendOfficialMessage = async () => {
-    if (!user || !officialMessageInput.trim() || !db) {
-      return;
-    }
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { typing: false });
-      
-      const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
-      
-      const msgData: any = {
-        text: officialMessageInput.trim(),
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        receiverId: "official_menuru",
-        timestamp: serverTimestamp(),
-        read: false,
-        isPinned: false,
-        pinnedAt: null,
-        isOfficialChat: true
-      };
-      
-      if (officialReplyTo) {
-        msgData.replyTo = officialReplyTo.id;
-        msgData.replyToText = officialReplyTo.text;
-        msgData.replyToSender = officialReplyTo.senderName;
-      }
-      
-      await addDoc(officialChatRef, msgData);
-
-      setOfficialMessageInput("");
-      setOfficialReplyTo(null);
-      
-    } catch (error) {
-      console.error("Error sending official message:", error);
-    }
-  };
-
   // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
@@ -1588,73 +1057,45 @@ export default function HomePage(): React.JSX.Element {
   };
 
   // Pin/Unpin message
-  const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean, isOfficial: boolean = false) => {
+  const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
-      let msgRef;
-      if (isOfficial) {
-        msgRef = doc(db, "official_chat", OFFICIAL_CHAT_ID, "messages", messageId);
-      } else {
-        msgRef = doc(db, "chats", chatId, "messages", messageId);
-      }
+      const msgRef = doc(db, "chats", chatId, "messages", messageId);
       await updateDoc(msgRef, {
         isPinned: !currentPinned,
         pinnedAt: !currentPinned ? serverTimestamp() : null
       });
       setShowMessageMenu(null);
-      
-      if (isOfficial) {
-        const updatedMsgs = officialMessages.map(msg => 
-          msg.id === messageId ? { ...msg, isPinned: !currentPinned, pinnedAt: !currentPinned ? new Date() : null } : msg
-        );
-        setOfficialMessages(updatedMsgs);
-        setOfficialPinnedMessages(updatedMsgs.filter(m => m.isPinned));
-      }
     } catch (error) {
       console.error("Error pinning message:", error);
     }
   };
 
   // Resend message
-  const handleResendMessage = async (msg: Message, isOfficial: boolean = false) => {
+  const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
     
-    if (!isOfficial && isUserBlocked(selectedChat.id)) {
+    if (isUserBlocked(selectedChat.id)) {
       return;
     }
     
     try {
-      if (isOfficial) {
-        const officialChatRef = collection(db, "official_chat", OFFICIAL_CHAT_ID, "messages");
-        await addDoc(officialChatRef, {
-          text: msg.text,
-          senderId: user.uid,
-          senderName: user.displayName || user.email || "User",
-          receiverId: msg.receiverId,
-          timestamp: serverTimestamp(),
-          read: false,
-          isPinned: false,
-          pinnedAt: null,
-          isOfficialChat: true
-        });
-      } else {
-        const chatId = [user.uid, selectedChat.id].sort().join("_");
-        const messagesRef = collection(db, "chats", chatId, "messages");
-        await addDoc(messagesRef, {
-          text: msg.text,
-          senderId: user.uid,
-          senderName: user.displayName || user.email || "User",
-          receiverId: selectedChat.id,
-          timestamp: serverTimestamp(),
-          read: false,
-          isPinned: false,
-          pinnedAt: null,
-          isShared: false,
-          replyTo: null,
-          replyToText: null,
-          replyToSender: null
-        });
-      }
+      const chatId = [user.uid, selectedChat.id].sort().join("_");
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      await addDoc(messagesRef, {
+        text: msg.text,
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        receiverId: selectedChat.id,
+        timestamp: serverTimestamp(),
+        read: false,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: false,
+        replyTo: null,
+        replyToText: null,
+        replyToSender: null
+      });
       
       setShowMessageMenu(null);
     } catch (error) {
@@ -1742,6 +1183,13 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Add group chat
+  const handleAddGroupChat = async () => {
+    // Placeholder for group chat functionality
+    setAddUserStatus("Group chat feature coming soon!");
+    setTimeout(() => setAddUserStatus(""), 3000);
+  };
+
   // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
@@ -1794,13 +1242,12 @@ export default function HomePage(): React.JSX.Element {
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
     !chatRooms.some(room => room.participants.includes(u.id)) &&
-    u.id !== "official_menuru" &&
     !isUserBlocked(u.id)
   );
 
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    return room.typingUsers.join(" + ");
+    return room.typingUsers.join(", ");
   };
 
   const getRegularTypingUsers = () => {
@@ -1845,10 +1292,6 @@ export default function HomePage(): React.JSX.Element {
   }
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
-  const isOfficialChatSelected = selectedChat?.id === "official_menuru";
-
-  // Official typing display - semua user yang sedang mengetik di Official Menuru
-  const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(" + ") : null;
 
   // Cek apakah ada user yang diblok
   const hasBlockedUsers = Object.keys(chatRooms).some(key => {
@@ -1859,11 +1302,12 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
+      {/* HEAD METADATA - PER HALAMAN */}
       <Head>
         <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-        <meta name="theme-color" content="#8be9fd" />
+        <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
@@ -1896,7 +1340,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* BANNER - BIRU dengan #lifeatmenuru bg #EB2227, TANPA EMOTICON */}
+        {/* BANNER - #0D3CFC dengan #lifeatmenuru bg #EB2227 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -2167,7 +1611,6 @@ export default function HomePage(): React.JSX.Element {
                     <option key={u.id} value={u.id}>
                       {u.name}
                       {u.isAdmin && <InstagramVerifiedBadge size={14} />}
-                      {u.isOfficial && <InstagramVerifiedBadge size={14} />}
                     </option>
                   ))}
                 </select>
@@ -2216,6 +1659,49 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
               </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Full Image Modal - Blur Background */}
+        <AnimatePresence>
+          {showFullImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.8)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                zIndex: 9999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              onClick={() => setShowFullImage(null)}
+            >
+              <motion.img
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                src={showFullImage}
+                alt="Full view"
+                style={{
+                  maxWidth: "90%",
+                  maxHeight: "90%",
+                  borderRadius: "12px",
+                  objectFit: "contain",
+                  cursor: "default",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -2275,9 +1761,9 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? (isOfficialChatSelected ? "Menuru Official" : selectedChat.name) : "Messages"))))}
+                      {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? selectedChat.name : "Messages"))))}
                     </span>
-                    {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !isOfficialChatSelected && (
+                    {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
                       <>
                         <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
                           {selectedChat.email}
@@ -2666,7 +2152,7 @@ export default function HomePage(): React.JSX.Element {
                                     borderRadius: "50%",
                                     backgroundColor: dotColor,
                                     opacity: 0.20,
-                                    animation: "awwwardsPulse 2s ease-in-out infinite",
+                                    animation: "pulseExpand 2s ease-in-out infinite",
                                     pointerEvents: "none",
                                   }}
                                 />
@@ -2716,25 +2202,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   {item.title}
                                 </div>
-                                <svg
-                                  width="20"
-                                  height="20"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  style={{
-                                    flexShrink: 0,
-                                    color: "#000000",
-                                  }}
-                                >
-                                  <path
-                                    d="M9 6L15 12L9 18"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
+                                <NorthEastArrow />
                               </div>
                             </div>
                           </motion.div>
@@ -3188,157 +2656,26 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile - TANPA EMOTICON */}
+                      {/* Peringatan block di profile - TANPA EMOTICON, TEKS HITAM */}
                       {isUserBlocked(profileUser.id) && (
                         <div style={{ 
                           width: "100%", 
                           marginTop: "16px",
                           padding: "16px",
-                          backgroundColor: "#fee2e2",
+                          backgroundColor: "#f3f4f6",
                           borderRadius: "8px",
-                          border: "1px solid #fecaca",
+                          border: "1px solid #e5e7eb",
                           textAlign: "center",
                           fontFamily: FONT_FAMILY,
                         }}>
-                          <div style={{ fontSize: "14px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          <div style={{ fontSize: "14px", color: "#000000", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                             Maaf akun ini sudah tidak bisa di chat
                           </div>
-                          <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                          <div style={{ fontSize: "12px", color: "#000000", marginTop: "4px", fontFamily: FONT_FAMILY }}>
                             Silahkan buka block untuk melanjutkan chat
                           </div>
                         </div>
                       )}
-
-                      <div style={{ width: "100%", marginBottom: "0px", marginTop: "12px" }}>
-                        <div style={{ 
-                          backgroundColor: "#f5f5f5", 
-                          borderRadius: "8px",
-                          padding: "8px 14px",
-                          position: "relative",
-                          marginBottom: "8px",
-                          maxWidth: "280px",
-                          fontFamily: FONT_FAMILY,
-                        }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ 
-                              fontSize: "10px", 
-                              color: "#666", 
-                              fontWeight: 500, 
-                              letterSpacing: "0.05em", 
-                              textTransform: "uppercase",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              <span style={{ 
-                                display: "inline-block",
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                backgroundColor: "#c5e800",
-                                marginRight: "4px",
-                              }} />
-                              Note
-                            </span>
-                            {profileUser.id === user?.uid && (
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setEditNote(!editNote)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: "#666",
-                                  fontSize: "10px",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                <EditIcon />
-                                {profileUser.note ? "Edit" : "Add"}
-                              </motion.button>
-                            )}
-                          </div>
-
-                          {editNote && profileUser.id === user?.uid ? (
-                            <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
-                              <input
-                                type="text"
-                                value={noteInput}
-                                onChange={(e) => setNoteInput(e.target.value)}
-                                placeholder="No note yet"
-                                style={{
-                                  flex: 1,
-                                  padding: "6px 10px",
-                                  backgroundColor: "#fff",
-                                  border: "1px solid #e0e0e0",
-                                  borderRadius: "4px",
-                                  color: "#000",
-                                  fontSize: "12px",
-                                  outline: "none",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleSaveNote();
-                                  }
-                                }}
-                              />
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSaveNote}
-                                style={{
-                                  padding: "4px 12px",
-                                  backgroundColor: "#c5e800",
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  color: "#000",
-                                  fontSize: "11px",
-                                  fontWeight: 500,
-                                  cursor: "pointer",
-                                  fontFamily: FONT_FAMILY,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                Save
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setEditNote(false)}
-                                style={{
-                                  padding: "4px 10px",
-                                  backgroundColor: "transparent",
-                                  border: "1px solid #e0e0e0",
-                                  borderRadius: "4px",
-                                  color: "#666",
-                                  fontSize: "11px",
-                                  cursor: "pointer",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                Cancel
-                              </motion.button>
-                            </div>
-                          ) : (
-                            <div style={{ 
-                              padding: "4px 0",
-                              color: profileUser.note ? "#000" : "#999",
-                              fontSize: "13px",
-                              lineHeight: 1.4,
-                              minHeight: "24px",
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              {profileUser.note || "No note yet"}
-                            </div>
-                          )}
-                        </div>
-                      </div>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
                         <motion.div
@@ -3356,6 +2693,12 @@ export default function HomePage(): React.JSX.Element {
                             border: "1px solid #e8e8e8",
                             flexShrink: 0,
                             position: "relative",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            if (profileUser.photoURL) {
+                              setShowFullImage(profileUser.photoURL);
+                            }
                           }}
                         >
                           {profileUser.photoURL ? (
@@ -3370,7 +2713,6 @@ export default function HomePage(): React.JSX.Element {
                               {profileUser.name}
                             </span>
                             {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
-                            {profileUser.isOfficial && !profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
                           </div>
                           <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
@@ -3381,109 +2723,6 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         </div>
                       </div>
-
-                      <div style={{ width: "100%", marginBottom: "16px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "10px", color: "#999", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
-                            Bio
-                          </span>
-                          {profileUser.id === user?.uid && (
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setEditBio(!editBio)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#999",
-                                fontSize: "10px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <EditIcon />
-                              {profileUser.bio ? "Edit" : "Add"}
-                            </motion.button>
-                          )}
-                        </div>
-                        {editBio && profileUser.id === user?.uid ? (
-                          <div>
-                            <textarea
-                              value={bioInput}
-                              onChange={(e) => setBioInput(e.target.value)}
-                              placeholder="No bio yet"
-                              rows={2}
-                              style={{
-                                width: "100%",
-                                padding: "8px 12px",
-                                backgroundColor: "#f5f5f5",
-                                border: "1px solid #e8e8e8",
-                                borderRadius: "6px",
-                                color: "#000",
-                                fontSize: "13px",
-                                outline: "none",
-                                fontFamily: FONT_FAMILY,
-                                resize: "vertical",
-                              }}
-                            />
-                            <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSaveBio}
-                                style={{
-                                  padding: "4px 14px",
-                                  backgroundColor: "#000",
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  color: "#fff",
-                                  fontSize: "12px",
-                                  cursor: "pointer",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                Save
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setEditBio(false)}
-                                style={{
-                                  padding: "4px 14px",
-                                  backgroundColor: "transparent",
-                                  border: "1px solid #e0e0e0",
-                                  borderRadius: "4px",
-                                  color: "#999",
-                                  fontSize: "12px",
-                                  cursor: "pointer",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                Cancel
-                              </motion.button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ 
-                            padding: "8px 12px", 
-                            backgroundColor: "#f8f8f8", 
-                            borderRadius: "6px",
-                            fontSize: "13px",
-                            color: profileUser.bio ? "#000" : "#ccc",
-                            lineHeight: 1.5,
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {profileUser.bio || "No bio yet"}
-                          </div>
-                        )}
-                      </div>
-
-                      {profileUser && (
-                        <StoriesSection userEmail={profileUser.email} />
-                      )}
 
                       <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                         <motion.button
@@ -3548,19 +2787,19 @@ export default function HomePage(): React.JSX.Element {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Peringatan block - BIRU, TANPA EMOTICON */}
+                    {/* Peringatan block - WARNA #0D3CFC DARI BANNER, TEKS HITAM */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
                         marginBottom: "10px",
                         padding: "12px 16px",
-                        backgroundColor: "#dbeafe",
+                        backgroundColor: "#0D3CFC",
                         borderRadius: "8px",
-                        border: "1px solid #bfdbfe",
+                        border: "none",
                         textAlign: "center",
                         fontFamily: FONT_FAMILY,
                       }}>
-                        <div style={{ fontSize: "13px", color: "#1d4ed8", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                        <div style={{ fontSize: "13px", color: "#000000", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                           Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
                         </div>
                       </div>
@@ -3602,7 +2841,7 @@ export default function HomePage(): React.JSX.Element {
                         border: "none",
                         cursor: "pointer",
                         width: "100%",
-                        marginBottom: "12px",
+                        marginBottom: "8px",
                         fontFamily: FONT_FAMILY,
                       }}
                     >
@@ -3629,6 +2868,50 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       >
                         New Chat
+                      </span>
+                    </motion.button>
+
+                    {/* Tombol Add Group Chat */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAddGroup(!showAddGroup)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "8px 0",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        width: "100%",
+                        marginBottom: "12px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "32px",
+                          fontWeight: 300,
+                          display: "inline-block",
+                          lineHeight: 1,
+                          transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                          color: "#000000",
+                          transform: showAddGroup ? "rotate(45deg)" : "rotate(0deg)",
+                        }}
+                      >
+                        +
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 500,
+                          color: "#000000",
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        New Group
                       </span>
                     </motion.button>
                     
@@ -3726,6 +3009,73 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </AnimatePresence>
 
+                    <AnimatePresence>
+                      {showAddGroup && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: "auto" }}
+                          exit={{ opacity: 0, y: -10, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            padding: "16px",
+                            backgroundColor: "#f8f8f8",
+                            borderRadius: "12px",
+                            marginBottom: "12px",
+                            overflow: "hidden",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+                            Create Group Chat
+                          </div>
+                          <div style={{ fontSize: "13px", color: "#666", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+                            Select users to add to group (coming soon)
+                          </div>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleAddGroupChat}
+                              style={{
+                                backgroundColor: "#000",
+                                color: "#fff",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                transition: "all .2s ease",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Create Group
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setShowAddGroup(false)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                fontSize: "12px",
+                                color: "#666",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                          {addUserStatus && (
+                            <div style={{ fontSize: "11px", color: "#000", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+                              {addUserStatus}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Pinned Users */}
                     {pinnedUsers.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
@@ -3786,6 +3136,12 @@ export default function HomePage(): React.JSX.Element {
                                       fontSize: "14px",
                                       overflow: "hidden",
                                       flexShrink: 0,
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => {
+                                      if (u.photoURL) {
+                                        setShowFullImage(u.photoURL);
+                                      }
                                     }}
                                   >
                                     {u.photoURL ? (
@@ -3930,6 +3286,13 @@ export default function HomePage(): React.JSX.Element {
                                         fontSize: "14px",
                                         overflow: "hidden",
                                         flexShrink: 0,
+                                        cursor: "pointer",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (otherUser.photoURL) {
+                                          setShowFullImage(otherUser.photoURL);
+                                        }
                                       }}
                                     >
                                       {otherUser.photoURL ? (
@@ -4045,90 +3408,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
-                          if (room.id === OFFICIAL_CHAT_ID) {
-                            // TYPING INDICATOR DI ROOM CHAT MENURU OFFICIAL - MULTI USER
-                            const typingDisplay = getTypingUsersDisplay(room);
-                            return (
-                              <motion.div
-                                key={room.id}
-                                whileHover={{ scale: 1.02 }}
-                                onClick={() => {
-                                  const officialUser = users.find(u => u.id === "official_menuru");
-                                  if (officialUser) setSelectedChat(officialUser);
-                                }}
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "10px",
-                                  padding: "10px 12px",
-                                  borderRadius: "8px",
-                                  cursor: "pointer",
-                                  transition: "all .2s ease",
-                                  marginBottom: "2px",
-                                  backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    width: "40px",
-                                    height: "40px",
-                                    borderRadius: "6px",
-                                    backgroundColor: "#f0f0f0",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "16px",
-                                    flexShrink: 0,
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>💬</span>
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
-                                    <span>Menuru Official</span>
-                                    <InstagramVerifiedBadge size={14} />
-                                    <OnlineIndicator online={true} />
-                                  </div>
-                                  <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
-                                    {typingDisplay ? (
-                                      <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
-                                    ) : (
-                                      room.lastMessage || "Chat with Menuru Official"
-                                    )}
-                                  </div>
-                                </div>
-                                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                                  {room.lastMessageTime && (
-                                    <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
-                                      {formatTime(room.lastMessageTime)}
-                                    </span>
-                                  )}
-                                  {room.unreadCount > 0 && (
-                                    <div
-                                      style={{
-                                        backgroundColor: "#c5e800",
-                                        color: "#000",
-                                        padding: "0 6px",
-                                        borderRadius: "4px",
-                                        fontSize: "9px",
-                                        fontWeight: 600,
-                                        lineHeight: "18px",
-                                        height: "18px",
-                                        minWidth: "18px",
-                                        textAlign: "center",
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      {room.unreadCount}
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            );
-                          }
-
                           const otherId = room.participants.find(id => id !== user.uid);
                           const otherUser = users.find(u => u.id === otherId);
                           if (!otherUser) return null;
@@ -4171,6 +3450,13 @@ export default function HomePage(): React.JSX.Element {
                                   flexShrink: 0,
                                   overflow: "hidden",
                                   position: "relative",
+                                  cursor: "pointer",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (otherUser.photoURL) {
+                                    setShowFullImage(otherUser.photoURL);
+                                  }
                                 }}
                               >
                                 {otherUser.photoURL ? (
@@ -4204,7 +3490,7 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                                 <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                   {isBlocked ? (
-                                    <span style={{ color: "#ef4444" }}>Akun diblok - klik untuk chat</span>
+                                    <span style={{ color: "#000" }}>Akun diblok - klik untuk chat</span>
                                   ) : typingDisplay ? (
                                     <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                   ) : (
@@ -4297,7 +3583,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : (
                   // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header - HAPUS (Blocked) di header */}
+                    {/* Chat Header */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -4316,8 +3602,6 @@ export default function HomePage(): React.JSX.Element {
                           onClick={() => {
                             setSelectedChat(null);
                             setReplyTo(null);
-                            setOfficialReplyTo(null);
-                            setOfficialMessageInput("");
                           }}
                           style={{
                             background: "none",
@@ -4361,9 +3645,7 @@ export default function HomePage(): React.JSX.Element {
                             handleOpenProfile(selectedChat);
                           }}
                         >
-                          {isOfficialChatSelected ? (
-                            <span style={{ fontFamily: FONT_FAMILY }}>💬</span>
-                          ) : selectedChat.photoURL ? (
+                          {selectedChat.photoURL ? (
                             <img 
                               src={selectedChat.photoURL} 
                               alt="avatar" 
@@ -4381,1161 +3663,646 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                              {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
+                              {selectedChat.name}
                             </span>
-                            {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
-                            {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
-                            {!isOfficialChatSelected && selectedChat.isOfficial && !selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                            {selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            {isOfficialChatSelected ? (
-                              <OnlineIndicator online={true} />
+                            <OnlineIndicator 
+                              online={getOnlineStatus(selectedChat.id)} 
+                              lastSeen={getLastSeen(selectedChat.id)}
+                            />
+                            {getOnlineStatus(selectedChat.id) ? (
+                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
+                              </span>
                             ) : (
-                              <>
-                                <OnlineIndicator 
-                                  online={getOnlineStatus(selectedChat.id)} 
-                                  lastSeen={getLastSeen(selectedChat.id)}
-                                />
-                                {getOnlineStatus(selectedChat.id) ? (
-                                  <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                    {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
-                                  </span>
-                                ) : (
-                                  <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                    {getLastSeen(selectedChat.id)}
-                                  </span>
-                                )}
-                              </>
+                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                {getLastSeen(selectedChat.id)}
+                              </span>
                             )}
                           </div>
                         </div>
-                        {!isOfficialChatSelected && (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
-                              padding: "4px 6px",
-                              borderRadius: "4px",
-                              display: "flex",
-                              alignItems: "center",
-                              transition: "all .2s ease",
-                            }}
-                          >
-                            <PinIcon filled={selectedChat.isPinned || false} />
-                          </motion.button>
-                        )}
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
+                            padding: "4px 6px",
+                            borderRadius: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            transition: "all .2s ease",
+                          }}
+                        >
+                          <PinIcon filled={selectedChat.isPinned || false} />
+                        </motion.button>
                       </div>
                     </div>
 
-                    {/* Official Chat View */}
-                    {isOfficialChatSelected ? (
-                      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                        {/* Pinned Messages di Official Chat */}
-                        {officialPinnedMessages.length > 0 && (
-                          <div
-                            style={{
-                              padding: "6px 14px",
-                              backgroundColor: "rgba(0,0,0,0.02)",
-                              borderBottom: "1px solid rgba(0,0,0,0.04)",
-                              fontFamily: FONT_FAMILY,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <div
-                              onClick={() => setShowOfficialPinnedMessages(!showOfficialPinnedMessages)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                cursor: "pointer",
-                                color: "#999",
-                              }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <PinIcon filled={true} />
-                                <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                                  Pinned Messages ({officialPinnedMessages.length})
-                                </span>
-                              </div>
-                              <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                {showOfficialPinnedMessages ? "▼" : "▶"}
-                              </span>
-                            </div>
-                            <AnimatePresence>
-                              {showOfficialPinnedMessages && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  transition={{ duration: 0.3 }}
-                                  style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}
-                                >
-                                  {officialPinnedMessages.map((msg) => {
-                                    const isMine = msg.senderId === user?.uid;
-                                    return (
-                                      <div
-                                        key={msg.id}
-                                        style={{
-                                          padding: "4px 8px",
-                                          marginBottom: "2px",
-                                          borderRadius: "4px",
-                                          backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
-                                          fontSize: "11px",
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          alignItems: "center",
-                                          fontFamily: FONT_FAMILY,
-                                        }}
-                                      >
-                                        <div style={{ flex: 1 }}>
-                                          <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                            {isMine ? "Messages: " : `${msg.senderName}: `}
-                                          </span>
-                                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
-                                            {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
-                                          </span>
-                                        </div>
-                                        <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
-                                          {formatTime(msg.pinnedAt || msg.timestamp)}
-                                        </span>
-                                      </div>
-                                    );
-                                  })}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-
-                        {/* Messages Area - TYPING INDICATOR MULTI USER di body chat */}
+                    {/* Chat View */}
+                    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                      {/* Pinned Messages */}
+                      {pinnedMessages.length > 0 && !isUserBlocked(selectedChat.id) && (
                         <div
                           style={{
-                            flex: 1,
-                            padding: "16px 20px",
-                            overflowY: "auto",
-                            backgroundColor: "#ffffff",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "4px",
+                            padding: "6px 14px",
+                            backgroundColor: "rgba(0,0,0,0.02)",
+                            borderBottom: "1px solid rgba(0,0,0,0.04)",
                             fontFamily: FONT_FAMILY,
-                            minHeight: 0,
-                          }}
-                        >
-                          {/* TYPING INDICATOR - OFFICIAL MENURU - MULTI USER di body chat */}
-                          {officialTypingDisplay && (
-                            <div
-                              style={{
-                                textAlign: "center",
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "#000000",
-                                padding: "8px 0",
-                                fontFamily: FONT_FAMILY,
-                                backgroundColor: "transparent",
-                                fontStyle: "normal",
-                                letterSpacing: "-0.02em",
-                              }}
-                            >
-                              {officialTypingDisplay} typing...
-                            </div>
-                          )}
-
-                          {officialMessages.length === 0 ? (
-                            <div
-                              style={{
-                                textAlign: "center",
-                                color: "#bbb",
-                                fontSize: "13px",
-                                marginTop: "60px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                              <div>No messages yet</div>
-                              <div style={{ fontSize: "11px", marginTop: "4px", color: "#ccc" }}>
-                                Send a message to start chatting
-                              </div>
-                            </div>
-                          ) : (
-                            officialMessages.map((msg, idx) => {
-                              const isMine = msg.senderId === user?.uid;
-                              const showDate = idx === 0 || !officialMessages[idx-1]?.timestamp || 
-                                formatDate(msg.timestamp) !== formatDate(officialMessages[idx-1]?.timestamp);
-                              
-                              const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
-                              
-                              return (
-                                <React.Fragment key={idx}>
-                                  {showDate && (
-                                    <div
-                                      style={{
-                                        textAlign: "center",
-                                        color: "#ccc",
-                                        fontSize: "10px",
-                                        padding: "6px 0 10px 0",
-                                        fontWeight: 400,
-                                        letterSpacing: "0.03em",
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      {formatDate(msg.timestamp)}
-                                    </div>
-                                  )}
-                                  <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    transition={{ duration: 0.2 }}
-                                    style={{
-                                      alignSelf: isMine ? "flex-end" : "flex-start",
-                                      maxWidth: "80%",
-                                      padding: "10px 14px",
-                                      borderRadius: "12px",
-                                      backgroundColor: messageColor,
-                                      color: "#ffffff",
-                                      fontSize: "14px",
-                                      lineHeight: 1.5,
-                                      position: "relative",
-                                      boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
-                                      fontFamily: FONT_FAMILY,
-                                    }}
-                                  >
-                                    {!isMine && (
-                                      <div style={{ 
-                                        fontSize: "11px", 
-                                        color: "rgba(255,255,255,0.8)", 
-                                        marginBottom: "4px",
-                                        fontFamily: FONT_FAMILY,
-                                        fontWeight: 500
-                                      }}>
-                                        {msg.senderName}
-                                        {users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                        {users.find(u => u.id === msg.senderId)?.isOfficial && !users.find(u => u.id === msg.senderId)?.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                      </div>
-                                    )}
-                                    
-                                    {msg.replyTo && msg.replyToText && (
-                                      <div
-                                        style={{
-                                          fontSize: "11px",
-                                          color: "rgba(255,255,255,0.7)",
-                                          padding: "4px 8px",
-                                          borderLeft: "2px solid rgba(255,255,255,0.3)",
-                                          marginBottom: "6px",
-                                          backgroundColor: "rgba(255,255,255,0.1)",
-                                          borderRadius: "4px",
-                                          fontFamily: FONT_FAMILY,
-                                        }}
-                                      >
-                                        <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                                          Reply: {msg.replyToSender}
-                                        </span>
-                                        <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
-                                      </div>
-                                    )}
-                                    
-                                    <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "4px",
-                                        marginTop: "6px",
-                                        justifyContent: isMine ? "flex-end" : "flex-start",
-                                        flexWrap: "wrap",
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          fontSize: "9px",
-                                          color: "rgba(255,255,255,0.6)",
-                                          fontWeight: 400,
-                                          fontFamily: FONT_FAMILY,
-                                        }}
-                                      >
-                                        {formatTime(msg.timestamp)}
-                                      </span>
-                                      {isMine && (
-                                        <ReadStatus msg={msg} isMine={isMine} />
-                                      )}
-                                      <motion.button
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
-                                        style={{
-                                          background: "none",
-                                          border: "none",
-                                          cursor: "pointer",
-                                          color: "rgba(255,255,255,0.4)",
-                                          padding: "2px 4px",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          transition: "all .2s ease",
-                                          borderRadius: "4px",
-                                        }}
-                                        title="More"
-                                      >
-                                        <MoreIcon />
-                                      </motion.button>
-                                      
-                                      <AnimatePresence>
-                                        {showMessageMenu === msg.id && (
-                                          <motion.div
-                                            ref={menuRef}
-                                            initial={{ opacity: 0, scale: 0.9, y: 5 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                            transition={{ duration: 0.15 }}
-                                            style={{
-                                              position: "absolute",
-                                              bottom: "calc(100% + 6px)",
-                                              right: isMine ? 0 : "auto",
-                                              left: isMine ? "auto" : 0,
-                                              backgroundColor: "#ffffff",
-                                              borderRadius: "8px",
-                                              padding: "4px",
-                                              minWidth: "140px",
-                                              boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                                              zIndex: 50,
-                                              border: "1px solid rgba(0,0,0,0.04)",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <motion.button
-                                              whileHover={{ backgroundColor: "#f5f5f5" }}
-                                              onClick={() => {
-                                                setOfficialReplyTo(msg);
-                                                setShowMessageMenu(null);
-                                              }}
-                                              style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "8px",
-                                                padding: "6px 12px",
-                                                width: "100%",
-                                                background: "none",
-                                                border: "none",
-                                                color: "#000",
-                                                fontSize: "12px",
-                                                cursor: "pointer",
-                                                borderRadius: "6px",
-                                                transition: "all .2s ease",
-                                                fontFamily: FONT_FAMILY,
-                                              }}
-                                            >
-                                              <ReplyIcon />
-                                              <span>Reply</span>
-                                            </motion.button>
-                                            <motion.button
-                                              whileHover={{ backgroundColor: "#f5f5f5" }}
-                                              onClick={() => {
-                                                handleResendMessage(msg, true);
-                                              }}
-                                              style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "8px",
-                                                padding: "6px 12px",
-                                                width: "100%",
-                                                background: "none",
-                                                border: "none",
-                                                color: "#000",
-                                                fontSize: "12px",
-                                                cursor: "pointer",
-                                                borderRadius: "6px",
-                                                transition: "all .2s ease",
-                                                fontFamily: FONT_FAMILY,
-                                              }}
-                                            >
-                                              <SendIcon />
-                                              <span>Resend</span>
-                                            </motion.button>
-                                            <motion.button
-                                              whileHover={{ backgroundColor: "#f5f5f5" }}
-                                              onClick={() => {
-                                                setShareMessage(msg);
-                                                setShowShareModal(true);
-                                                setShowMessageMenu(null);
-                                              }}
-                                              style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "8px",
-                                                padding: "6px 12px",
-                                                width: "100%",
-                                                background: "none",
-                                                border: "none",
-                                                color: "#000",
-                                                fontSize: "12px",
-                                                cursor: "pointer",
-                                                borderRadius: "6px",
-                                                transition: "all .2s ease",
-                                                fontFamily: FONT_FAMILY,
-                                              }}
-                                            >
-                                              <ShareIcon />
-                                              <span>Forward</span>
-                                            </motion.button>
-                                            <motion.button
-                                              whileHover={{ backgroundColor: "#f5f5f5" }}
-                                              onClick={() => handlePinMessage(OFFICIAL_CHAT_ID, msg.id, msg.isPinned || false, true)}
-                                              style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "8px",
-                                                padding: "6px 12px",
-                                                width: "100%",
-                                                background: "none",
-                                                border: "none",
-                                                color: msg.isPinned ? "#c5e800" : "#000",
-                                                fontSize: "12px",
-                                                cursor: "pointer",
-                                                borderRadius: "6px",
-                                                transition: "all .2s ease",
-                                                fontFamily: FONT_FAMILY,
-                                              }}
-                                            >
-                                              <PinIcon filled={msg.isPinned || false} />
-                                              <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
-                                            </motion.button>
-                                          </motion.div>
-                                        )}
-                                      </AnimatePresence>
-                                    </div>
-                                  </motion.div>
-                                  {msg.isPinned && (
-                                    <div
-                                      style={{
-                                        alignSelf: isMine ? "flex-end" : "flex-start",
-                                        fontSize: "9px",
-                                        color: "#999",
-                                        marginTop: "-2px",
-                                        marginBottom: "4px",
-                                        padding: "0 4px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "4px",
-                                        fontWeight: 500,
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      <PinIcon filled={true} />
-                                      <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
-                                    </div>
-                                  )}
-                                </React.Fragment>
-                              );
-                            })
-                          )}
-                          <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* Input for official chat - TYPING INDICATOR di atas input */}
-                        <div
-                          style={{
-                            padding: "10px 14px 14px",
-                            borderTop: "1px solid rgba(0,0,0,0.04)",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "4px",
-                            backgroundColor: "#ffffff",
-                            fontFamily: FONT_FAMILY,
-                            position: "relative",
                             flexShrink: 0,
                           }}
                         >
-                          {/* TYPING INDICATOR di atas input - OFFICIAL MENURU - MULTI USER */}
-                          {officialTypingDisplay && (
-                            <div
-                              style={{
-                                textAlign: "left",
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "#000000",
-                                fontStyle: "normal",
-                                fontFamily: FONT_FAMILY,
-                                padding: "4px 0",
-                                backgroundColor: "transparent",
-                                marginBottom: "4px",
-                                letterSpacing: "-0.02em",
-                              }}
-                            >
-                              {officialTypingDisplay} typing...
-                            </div>
-                          )}
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <input
-                              type="text"
-                              placeholder={officialReplyTo ? `Reply to ${officialReplyTo.senderName}...` : "Type a message..."}
-                              value={officialMessageInput}
-                              onChange={handleOfficialTyping}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                  e.preventDefault();
-                                  handleSendOfficialMessage();
-                                }
-                              }}
-                              style={{
-                                flex: 1,
-                                padding: "10px 16px",
-                                border: "1px solid #e8e8e8",
-                                borderRadius: "8px",
-                                fontSize: "14px",
-                                outline: "none",
-                                fontFamily: FONT_FAMILY,
-                                transition: "all .2s ease",
-                                backgroundColor: "#f5f5f5",
-                                color: "#000",
-                              }}
-                              onFocus={(e) => {
-                                e.currentTarget.style.borderColor = "#c5e800";
-                                e.currentTarget.style.backgroundColor = "#ffffff";
-                              }}
-                              onBlur={(e) => {
-                                e.currentTarget.style.borderColor = "#e8e8e8";
-                                e.currentTarget.style.backgroundColor = "#f5f5f5";
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSendOfficialMessage}
-                              style={{
-                                backgroundColor: "#c5e800",
-                                border: "none",
-                                padding: "10px 20px",
-                                borderRadius: "8px",
-                                fontSize: "14px",
-                                fontWeight: 500,
-                                color: "#000",
-                                cursor: "pointer",
-                                transition: "all .2s ease",
-                                whiteSpace: "nowrap",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#b0d000";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "#c5e800";
-                              }}
-                            >
-                              <span>Send</span>
-                              <SendIcon />
-                            </motion.button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      // Regular Chat View
-                      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                        {/* Pinned Messages */}
-                        {pinnedMessages.length > 0 && !isUserBlocked(selectedChat.id) && (
                           <div
+                            onClick={() => setShowPinnedMessages(!showPinnedMessages)}
                             style={{
-                              padding: "6px 14px",
-                              backgroundColor: "rgba(0,0,0,0.02)",
-                              borderBottom: "1px solid rgba(0,0,0,0.04)",
-                              fontFamily: FONT_FAMILY,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <div
-                              onClick={() => setShowPinnedMessages(!showPinnedMessages)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                cursor: "pointer",
-                                color: "#999",
-                              }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <PinIcon filled={true} />
-                                <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
-                                  Pinned Messages ({pinnedMessages.length})
-                                </span>
-                              </div>
-                              <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
-                                {showPinnedMessages ? "▼" : "▶"}
-                              </span>
-                            </div>
-                            <AnimatePresence>
-                              {showPinnedMessages && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  transition={{ duration: 0.3 }}
-                                  style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}
-                                >
-                                  {pinnedMessages.map((msg) => {
-                                    const isMine = msg.senderId === user?.uid;
-                                    return (
-                                      <div
-                                        key={msg.id}
-                                        style={{
-                                          padding: "4px 8px",
-                                          marginBottom: "2px",
-                                          borderRadius: "4px",
-                                          backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
-                                          fontSize: "11px",
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          alignItems: "center",
-                                          fontFamily: FONT_FAMILY,
-                                        }}
-                                      >
-                                        <div style={{ flex: 1 }}>
-                                          <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
-                                            {isMine ? "Messages: " : `${msg.senderName}: `}
-                                          </span>
-                                          <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
-                                            {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
-                                          </span>
-                                        </div>
-                                        <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
-                                          {formatTime(msg.pinnedAt || msg.timestamp)}
-                                        </span>
-                                      </div>
-                                    );
-                                  })}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-
-                        {/* Reply Indicator */}
-                        {replyTo && !isUserBlocked(selectedChat.id) && (
-                          <div
-                            style={{
-                              padding: "4px 14px",
                               display: "flex",
-                              justifyContent: "space-between",
                               alignItems: "center",
-                              fontFamily: FONT_FAMILY,
-                              flexShrink: 0,
+                              justifyContent: "space-between",
+                              cursor: "pointer",
+                              color: "#999",
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <ReplyIcon />
-                              <div>
-                                <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                                  Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
-                                </div>
-                                <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
-                                  {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
-                                </div>
-                              </div>
+                              <PinIcon filled={true} />
+                              <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                                Pinned Messages ({pinnedMessages.length})
+                              </span>
                             </div>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => setReplyTo(null)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#999",
-                                cursor: "pointer",
-                                fontSize: "14px",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                transition: "all 0.2s ease",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "transparent";
-                              }}
-                            >
-                              ✕
-                            </motion.button>
+                            <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                              {showPinnedMessages ? "▼" : "▶"}
+                            </span>
                           </div>
-                        )}
-
-                        {/* Messages */}
-                        <div
-                          style={{
-                            flex: 1,
-                            padding: "16px 20px",
-                            overflowY: "auto",
-                            backgroundColor: "#ffffff",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "4px",
-                            fontFamily: FONT_FAMILY,
-                            minHeight: 0,
-                          }}
-                        >
-                          {isUserBlocked(selectedChat.id) ? (
-                            <div
-                              style={{
-                                textAlign: "center",
-                                color: "#999",
-                                fontSize: "14px",
-                                marginTop: "60px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔒</div>
-                              <div style={{ fontWeight: 500, color: "#dc2626", fontFamily: FONT_FAMILY }}>
-                                Akun sudah di block oleh anda
-                              </div>
-                              <div style={{ fontSize: "12px", marginTop: "4px", color: "#ef4444", fontFamily: FONT_FAMILY }}>
-                                Maaf akun ini sudah tidak bisa di chat, silahkan buka block
-                              </div>
-                              <div style={{ marginTop: "12px" }}>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => {
-                                    const blocked = isUserBlocked(selectedChat.id);
-                                    handleBlockUser(selectedChat.id, blocked);
-                                  }}
-                                  style={{
-                                    padding: "8px 20px",
-                                    backgroundColor: "#ef4444",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  Unblock User
-                                </motion.button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              {regularTypingUsers.length > 0 && (
-                                <div
-                                  style={{
-                                    textAlign: "center",
-                                    fontSize: "12px",
-                                    color: "#000000",
-                                    padding: "4px 0",
-                                    fontStyle: "italic",
-                                    fontFamily: FONT_FAMILY,
-                                    backgroundColor: "transparent",
-                                    fontWeight: 500,
-                                  }}
-                                >
-                                  {regularTypingUsers.join(", ")} typing...
-                                </div>
-                              )}
-
-                              {messages.length === 0 ? (
-                                <div
-                                  style={{
-                                    textAlign: "center",
-                                    color: "#bbb",
-                                    fontSize: "13px",
-                                    marginTop: "60px",
-                                    fontFamily: FONT_FAMILY,
-                                  }}
-                                >
-                                  <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
-                                  <div>No messages yet</div>
-                                </div>
-                              ) : (
-                                messages.map((msg, idx) => {
+                          <AnimatePresence>
+                            {showPinnedMessages && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                style={{ marginTop: "6px", maxHeight: "120px", overflowY: "auto" }}
+                              >
+                                {pinnedMessages.map((msg) => {
                                   const isMine = msg.senderId === user?.uid;
-                                  const chatId = [user.uid, selectedChat.id].sort().join("_");
-                                  const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
-                                    formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
-                                  
-                                  const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
-                                  const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
-                                  
                                   return (
-                                    <React.Fragment key={idx}>
-                                      {showDate && (
-                                        <div
-                                          style={{
-                                            textAlign: "center",
-                                            color: "#ccc",
-                                            fontSize: "10px",
-                                            padding: "6px 0 10px 0",
-                                            fontWeight: 400,
-                                            letterSpacing: "0.03em",
-                                            fontFamily: FONT_FAMILY,
-                                          }}
-                                        >
-                                          {formatDate(msg.timestamp)}
-                                        </div>
-                                      )}
-                                      <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        transition={{ duration: 0.2 }}
-                                        style={{
-                                          alignSelf: isMine ? "flex-end" : "flex-start",
-                                          maxWidth: "80%",
-                                          padding: "10px 14px",
-                                          borderRadius: "12px",
-                                          backgroundColor: messageColor,
-                                          color: "#ffffff",
-                                          fontSize: "14px",
-                                          lineHeight: 1.5,
-                                          position: "relative",
-                                          boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
-                                          fontFamily: FONT_FAMILY,
-                                        }}
-                                      >
-                                        {msg.isShared && msg.sharedFromName && (
-                                          <div
-                                            style={{
-                                              fontSize: "10px",
-                                              color: "rgba(255,255,255,0.7)",
-                                              marginBottom: "4px",
-                                              fontStyle: "italic",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            From {msg.sharedFromName}
-                                          </div>
-                                        )}
-                                        
-                                        {msg.replyTo && msg.replyToText && (
-                                          <div
-                                            style={{
-                                              fontSize: "11px",
-                                              color: "rgba(255,255,255,0.7)",
-                                              padding: "4px 8px",
-                                              borderLeft: `2px solid rgba(255,255,255,0.3)`,
-                                              marginBottom: "6px",
-                                              backgroundColor: "rgba(255,255,255,0.1)",
-                                              borderRadius: "4px",
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                                              {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
-                                            </span>
-                                            <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
-                                          </div>
-                                        )}
-                                        
-                                        <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
-                                        
-                                        <div
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            marginTop: "6px",
-                                            justifyContent: isMine ? "flex-end" : "flex-start",
-                                            flexWrap: "wrap",
-                                            fontFamily: FONT_FAMILY,
-                                          }}
-                                        >
-                                          <span
-                                            style={{
-                                              fontSize: "9px",
-                                              color: "rgba(255,255,255,0.6)",
-                                              fontWeight: 400,
-                                              fontFamily: FONT_FAMILY,
-                                            }}
-                                          >
-                                            {formatTime(msg.timestamp)}
-                                          </span>
-                                          <ReadStatus msg={msg} isMine={isMine} />
-                                          <motion.button
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
-                                            style={{
-                                              background: "none",
-                                              border: "none",
-                                              cursor: "pointer",
-                                              color: "rgba(255,255,255,0.4)",
-                                              padding: "2px 4px",
-                                              display: "flex",
-                                              alignItems: "center",
-                                              transition: "all .2s ease",
-                                              borderRadius: "4px",
-                                            }}
-                                            title="More"
-                                          >
-                                            <MoreIcon />
-                                          </motion.button>
-                                          
-                                          <AnimatePresence>
-                                            {showMessageMenu === msg.id && (
-                                              <motion.div
-                                                ref={menuRef}
-                                                initial={{ opacity: 0, scale: 0.9, y: 5 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                                transition={{ duration: 0.15 }}
-                                                style={{
-                                                  position: "absolute",
-                                                  bottom: "calc(100% + 6px)",
-                                                  right: isMine ? 0 : "auto",
-                                                  left: isMine ? "auto" : 0,
-                                                  backgroundColor: "#ffffff",
-                                                  borderRadius: "8px",
-                                                  padding: "4px",
-                                                  minWidth: "140px",
-                                                  boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                                                  zIndex: 50,
-                                                  border: "1px solid rgba(0,0,0,0.04)",
-                                                  fontFamily: FONT_FAMILY,
-                                                }}
-                                              >
-                                                <motion.button
-                                                  whileHover={{ backgroundColor: "#f5f5f5" }}
-                                                  onClick={() => {
-                                                    setReplyTo(msg);
-                                                    setShowMessageMenu(null);
-                                                  }}
-                                                  style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "8px",
-                                                    padding: "6px 12px",
-                                                    width: "100%",
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "#000",
-                                                    fontSize: "12px",
-                                                    cursor: "pointer",
-                                                    borderRadius: "6px",
-                                                    transition: "all .2s ease",
-                                                    fontFamily: FONT_FAMILY,
-                                                  }}
-                                                >
-                                                  <ReplyIcon />
-                                                  <span>Reply</span>
-                                                </motion.button>
-                                                <motion.button
-                                                  whileHover={{ backgroundColor: "#f5f5f5" }}
-                                                  onClick={() => {
-                                                    handleResendMessage(msg);
-                                                  }}
-                                                  style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "8px",
-                                                    padding: "6px 12px",
-                                                    width: "100%",
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "#000",
-                                                    fontSize: "12px",
-                                                    cursor: "pointer",
-                                                    borderRadius: "6px",
-                                                    transition: "all .2s ease",
-                                                    fontFamily: FONT_FAMILY,
-                                                  }}
-                                                >
-                                                  <SendIcon />
-                                                  <span>Resend</span>
-                                                </motion.button>
-                                                <motion.button
-                                                  whileHover={{ backgroundColor: "#f5f5f5" }}
-                                                  onClick={() => {
-                                                    setShareMessage(msg);
-                                                    setShowShareModal(true);
-                                                    setShowMessageMenu(null);
-                                                  }}
-                                                  style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "8px",
-                                                    padding: "6px 12px",
-                                                    width: "100%",
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "#000",
-                                                    fontSize: "12px",
-                                                    cursor: "pointer",
-                                                    borderRadius: "6px",
-                                                    transition: "all .2s ease",
-                                                    fontFamily: FONT_FAMILY,
-                                                  }}
-                                                >
-                                                  <ShareIcon />
-                                                  <span>Forward</span>
-                                                </motion.button>
-                                                <motion.button
-                                                  whileHover={{ backgroundColor: "#f5f5f5" }}
-                                                  onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
-                                                  style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "8px",
-                                                    padding: "6px 12px",
-                                                    width: "100%",
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: msg.isPinned ? "#c5e800" : "#000",
-                                                    fontSize: "12px",
-                                                    cursor: "pointer",
-                                                    borderRadius: "6px",
-                                                    transition: "all .2s ease",
-                                                    fontFamily: FONT_FAMILY,
-                                                  }}
-                                                >
-                                                  <PinIcon filled={msg.isPinned || false} />
-                                                  <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
-                                                </motion.button>
-                                              </motion.div>
-                                            )}
-                                          </AnimatePresence>
-                                        </div>
-                                      </motion.div>
-                                      {msg.isPinned && (
-                                        <div
-                                          style={{
-                                            alignSelf: isMine ? "flex-end" : "flex-start",
-                                            fontSize: "9px",
-                                            color: "#999",
-                                            marginTop: "-2px",
-                                            marginBottom: "4px",
-                                            padding: "0 4px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            fontWeight: 500,
-                                            fontFamily: FONT_FAMILY,
-                                          }}
-                                        >
-                                          <PinIcon filled={true} />
-                                          <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
-                                        </div>
-                                      )}
-                                    </React.Fragment>
+                                    <div
+                                      key={msg.id}
+                                      style={{
+                                        padding: "4px 8px",
+                                        marginBottom: "2px",
+                                        borderRadius: "4px",
+                                        backgroundColor: isMine ? "rgba(74,144,217,0.1)" : "rgba(255,107,107,0.1)",
+                                        fontSize: "11px",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <div style={{ flex: 1 }}>
+                                        <span style={{ color: "#999", fontSize: "9px", fontFamily: FONT_FAMILY }}>
+                                          {isMine ? "Messages: " : `${msg.senderName}: `}
+                                        </span>
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>
+                                          {msg.text.length > 40 ? msg.text.substring(0, 40) + "..." : msg.text}
+                                        </span>
+                                      </div>
+                                      <span style={{ fontSize: "8px", color: "#bbb", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
+                                        {formatTime(msg.pinnedAt || msg.timestamp)}
+                                      </span>
+                                    </div>
                                   );
-                                })
-                              )}
-                            </>
-                          )}
-                          <div ref={messagesEndRef} />
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
+                      )}
 
-                        {/* Input - disabled jika user diblok */}
+                      {/* Reply Indicator */}
+                      {replyTo && !isUserBlocked(selectedChat.id) && (
                         <div
                           style={{
-                            padding: "10px 14px 14px",
-                            borderTop: "1px solid rgba(0,0,0,0.04)",
+                            padding: "4px 14px",
                             display: "flex",
-                            flexDirection: "column",
-                            gap: "4px",
-                            backgroundColor: "#ffffff",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                             fontFamily: FONT_FAMILY,
-                            position: "relative",
                             flexShrink: 0,
                           }}
                         >
-                          {!isUserBlocked(selectedChat.id) && regularTypingUsers.length > 0 && (
-                            <div
-                              style={{
-                                textAlign: "left",
-                                fontSize: "12px",
-                                color: "#000000",
-                                fontStyle: "italic",
-                                fontFamily: FONT_FAMILY,
-                                padding: "2px 4px",
-                                backgroundColor: "transparent",
-                                marginBottom: "2px",
-                                fontWeight: 500,
-                              }}
-                            >
-                              {regularTypingUsers.join(", ")} typing...
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <ReplyIcon />
+                            <div>
+                              <div style={{ fontSize: "10px", color: "#22c55e", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                                Reply: {replyTo.senderName === user?.displayName ? "You" : replyTo.senderName}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
+                                {replyTo.text.length > 30 ? replyTo.text.substring(0, 30) + "..." : replyTo.text}
+                              </div>
                             </div>
-                          )}
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <input
-                              type="text"
-                              placeholder={isUserBlocked(selectedChat.id) ? "This user has been blocked" : (replyTo ? "Type a reply..." : "Type a message...")}
-                              value={message}
-                              onChange={handleTyping}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey && !isUserBlocked(selectedChat.id)) {
-                                  e.preventDefault();
-                                  handleSendMessage();
-                                }
-                              }}
-                              disabled={isUserBlocked(selectedChat.id)}
-                              style={{
-                                flex: 1,
-                                padding: "10px 16px",
-                                border: "1px solid #e8e8e8",
-                                borderRadius: "8px",
-                                fontSize: "14px",
-                                outline: "none",
-                                fontFamily: FONT_FAMILY,
-                                transition: "all .2s ease",
-                                backgroundColor: isUserBlocked(selectedChat.id) ? "#f5f5f5" : "#f5f5f5",
-                                color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
-                                cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "text",
-                              }}
-                              onFocus={(e) => {
-                                if (!isUserBlocked(selectedChat.id)) {
-                                  e.currentTarget.style.borderColor = "#c5e800";
-                                  e.currentTarget.style.backgroundColor = "#ffffff";
-                                }
-                              }}
-                              onBlur={(e) => {
-                                if (!isUserBlocked(selectedChat.id)) {
-                                  e.currentTarget.style.borderColor = "#e8e8e8";
-                                  e.currentTarget.style.backgroundColor = "#f5f5f5";
-                                }
-                              }}
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleSendMessage}
-                              disabled={isUserBlocked(selectedChat.id)}
-                              style={{
-                                backgroundColor: isUserBlocked(selectedChat.id) ? "#ccc" : "#c5e800",
-                                border: "none",
-                                padding: "10px 20px",
-                                borderRadius: "8px",
-                                fontSize: "14px",
-                                fontWeight: 500,
-                                color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
-                                cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "pointer",
-                                transition: "all .2s ease",
-                                whiteSpace: "nowrap",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isUserBlocked(selectedChat.id)) {
-                                  e.currentTarget.style.backgroundColor = "#b0d000";
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                if (!isUserBlocked(selectedChat.id)) {
-                                  e.currentTarget.style.backgroundColor = "#c5e800";
-                                }
-                              }}
-                            >
-                              <span>Send</span>
-                              <SendIcon />
-                            </motion.button>
                           </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setReplyTo(null)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#999",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              padding: "4px 8px",
+                              borderRadius: "4px",
+                              transition: "all 0.2s ease",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "transparent";
+                            }}
+                          >
+                            ✕
+                          </motion.button>
+                        </div>
+                      )}
+
+                      {/* Messages */}
+                      <div
+                        style={{
+                          flex: 1,
+                          padding: "16px 20px",
+                          overflowY: "auto",
+                          backgroundColor: "#ffffff",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "4px",
+                          fontFamily: FONT_FAMILY,
+                          minHeight: 0,
+                        }}
+                      >
+                        {isUserBlocked(selectedChat.id) ? (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "14px",
+                              marginTop: "60px",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            <div style={{ fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                              Akun sudah di block oleh anda
+                            </div>
+                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#000", fontFamily: FONT_FAMILY }}>
+                              Maaf akun ini sudah tidak bisa di chat, silahkan buka block
+                            </div>
+                            <div style={{ marginTop: "12px" }}>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                  const blocked = isUserBlocked(selectedChat.id);
+                                  handleBlockUser(selectedChat.id, blocked);
+                                }}
+                                style={{
+                                  padding: "8px 20px",
+                                  backgroundColor: "#ef4444",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  fontSize: "13px",
+                                  cursor: "pointer",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                Unblock User
+                              </motion.button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "12px",
+                                  color: "#000000",
+                                  padding: "4px 0",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {regularTypingUsers.join(", ")} typing...
+                              </div>
+                            )}
+
+                            {messages.length === 0 ? (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  color: "#bbb",
+                                  fontSize: "13px",
+                                  marginTop: "60px",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
+                                <div>No messages yet</div>
+                              </div>
+                            ) : (
+                              messages.map((msg, idx) => {
+                                const isMine = msg.senderId === user?.uid;
+                                const chatId = [user.uid, selectedChat.id].sort().join("_");
+                                const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
+                                  formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
+                                
+                                const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
+                                const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
+                                
+                                return (
+                                  <React.Fragment key={idx}>
+                                    {showDate && (
+                                      <div
+                                        style={{
+                                          textAlign: "center",
+                                          color: "#ccc",
+                                          fontSize: "10px",
+                                          padding: "6px 0 10px 0",
+                                          fontWeight: 400,
+                                          letterSpacing: "0.03em",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {formatDate(msg.timestamp)}
+                                      </div>
+                                    )}
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                                      transition={{ duration: 0.2 }}
+                                      style={{
+                                        alignSelf: isMine ? "flex-end" : "flex-start",
+                                        maxWidth: "80%",
+                                        padding: "10px 14px",
+                                        borderRadius: "12px",
+                                        backgroundColor: messageColor,
+                                        color: "#ffffff",
+                                        fontSize: "14px",
+                                        lineHeight: 1.5,
+                                        position: "relative",
+                                        boxShadow: msg.isPinned ? "0 0 20px rgba(0,0,0,0.15)" : "none",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      {msg.isShared && msg.sharedFromName && (
+                                        <div
+                                          style={{
+                                            fontSize: "10px",
+                                            color: "rgba(255,255,255,0.7)",
+                                            marginBottom: "4px",
+                                            fontStyle: "italic",
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          From {msg.sharedFromName}
+                                        </div>
+                                      )}
+                                      
+                                      {msg.replyTo && msg.replyToText && (
+                                        <div
+                                          style={{
+                                            fontSize: "11px",
+                                            color: "rgba(255,255,255,0.7)",
+                                            padding: "4px 8px",
+                                            borderLeft: `2px solid rgba(255,255,255,0.3)`,
+                                            marginBottom: "6px",
+                                            backgroundColor: "rgba(255,255,255,0.1)",
+                                            borderRadius: "4px",
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                                            {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
+                                          </span>
+                                          <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                        </div>
+                                      )}
+                                      
+                                      <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
+                                      
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          marginTop: "6px",
+                                          justifyContent: isMine ? "flex-end" : "flex-start",
+                                          flexWrap: "wrap",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            fontSize: "9px",
+                                            color: "rgba(255,255,255,0.6)",
+                                            fontWeight: 400,
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          {formatTime(msg.timestamp)}
+                                        </span>
+                                        <ReadStatus msg={msg} isMine={isMine} />
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
+                                          whileTap={{ scale: 0.9 }}
+                                          onClick={() => setShowMessageMenu(showMessageMenu === msg.id ? null : msg.id)}
+                                          style={{
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            color: "rgba(255,255,255,0.4)",
+                                            padding: "2px 4px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            transition: "all .2s ease",
+                                            borderRadius: "4px",
+                                          }}
+                                          title="More"
+                                        >
+                                          <MoreIcon />
+                                        </motion.button>
+                                        
+                                        <AnimatePresence>
+                                          {showMessageMenu === msg.id && (
+                                            <motion.div
+                                              ref={menuRef}
+                                              initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                                              exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                                              transition={{ duration: 0.15 }}
+                                              style={{
+                                                position: "absolute",
+                                                bottom: "calc(100% + 6px)",
+                                                right: isMine ? 0 : "auto",
+                                                left: isMine ? "auto" : 0,
+                                                backgroundColor: "#ffffff",
+                                                borderRadius: "8px",
+                                                padding: "4px",
+                                                minWidth: "140px",
+                                                boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                                                zIndex: 50,
+                                                border: "1px solid rgba(0,0,0,0.04)",
+                                                fontFamily: FONT_FAMILY,
+                                              }}
+                                            >
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  setReplyTo(msg);
+                                                  setShowMessageMenu(null);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <ReplyIcon />
+                                                <span>Reply</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  handleResendMessage(msg);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <SendIcon />
+                                                <span>Resend</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  setShareMessage(msg);
+                                                  setShowShareModal(true);
+                                                  setShowMessageMenu(null);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <ShareIcon />
+                                                <span>Forward</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => handlePinMessage(chatId, msg.id, msg.isPinned || false)}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: msg.isPinned ? "#c5e800" : "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <PinIcon filled={msg.isPinned || false} />
+                                                <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                              </motion.button>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+                                      </div>
+                                    </motion.div>
+                                    {msg.isPinned && (
+                                      <div
+                                        style={{
+                                          alignSelf: isMine ? "flex-end" : "flex-start",
+                                          fontSize: "9px",
+                                          color: "#999",
+                                          marginTop: "-2px",
+                                          marginBottom: "4px",
+                                          padding: "0 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          fontWeight: 500,
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        <PinIcon filled={true} />
+                                        <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                      </div>
+                                    )}
+                                  </React.Fragment>
+                                );
+                              })
+                            )}
+                          </>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+
+                      {/* Input - disabled jika user diblok */}
+                      <div
+                        style={{
+                          padding: "10px 14px 14px",
+                          borderTop: "1px solid rgba(0,0,0,0.04)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "4px",
+                          backgroundColor: "#ffffff",
+                          fontFamily: FONT_FAMILY,
+                          position: "relative",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {!isUserBlocked(selectedChat.id) && regularTypingUsers.length > 0 && (
+                          <div
+                            style={{
+                              textAlign: "left",
+                              fontSize: "12px",
+                              color: "#000000",
+                              fontStyle: "italic",
+                              fontFamily: FONT_FAMILY,
+                              padding: "2px 4px",
+                              backgroundColor: "transparent",
+                              marginBottom: "2px",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {regularTypingUsers.join(", ")} typing...
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input
+                            type="text"
+                            placeholder={isUserBlocked(selectedChat.id) ? "This user has been blocked" : (replyTo ? "Type a reply..." : "Type a message...")}
+                            value={message}
+                            onChange={handleTyping}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey && !isUserBlocked(selectedChat.id)) {
+                                e.preventDefault();
+                                handleSendMessage();
+                              }
+                            }}
+                            disabled={isUserBlocked(selectedChat.id)}
+                            style={{
+                              flex: 1,
+                              padding: "10px 16px",
+                              border: "1px solid #e8e8e8",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              transition: "all .2s ease",
+                              backgroundColor: isUserBlocked(selectedChat.id) ? "#f5f5f5" : "#f5f5f5",
+                              color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
+                              cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "text",
+                            }}
+                            onFocus={(e) => {
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.borderColor = "#c5e800";
+                                e.currentTarget.style.backgroundColor = "#ffffff";
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.borderColor = "#e8e8e8";
+                                e.currentTarget.style.backgroundColor = "#f5f5f5";
+                              }
+                            }}
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSendMessage}
+                            disabled={isUserBlocked(selectedChat.id)}
+                            style={{
+                              backgroundColor: isUserBlocked(selectedChat.id) ? "#ccc" : "#c5e800",
+                              border: "none",
+                              padding: "10px 20px",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontWeight: 500,
+                              color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
+                              cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "pointer",
+                              transition: "all .2s ease",
+                              whiteSpace: "nowrap",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.backgroundColor = "#b0d000";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isUserBlocked(selectedChat.id)) {
+                                e.currentTarget.style.backgroundColor = "#c5e800";
+                              }
+                            }}
+                          >
+                            <span>Send</span>
+                            <SendIcon />
+                          </motion.button>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -5610,18 +4377,18 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         <style jsx>{`
-          @keyframes awwwardsPulse {
+          @keyframes pulseExpand {
             0% {
-              transform: scale(0.7);
-              opacity: 0.25;
+              transform: scale(0.5);
+              opacity: 0.2;
             }
             50% {
-              transform: scale(1.6);
+              transform: scale(1.8);
               opacity: 0.05;
             }
             100% {
-              transform: scale(0.7);
-              opacity: 0.25;
+              transform: scale(0.5);
+              opacity: 0.2;
             }
           }
         `}</style>
