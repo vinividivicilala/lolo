@@ -544,6 +544,11 @@ export default function HomePage(): React.JSX.Element {
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<string[]>([]);
   const [groupAdmins, setGroupAdmins] = useState<string[]>([]);
 
+  // State untuk search user manual
+  const [searchUserInput, setSearchUserInput] = useState("");
+  const [searchUserResult, setSearchUserResult] = useState<ChatUser | null>(null);
+  const [searchUserStatus, setSearchUserStatus] = useState("");
+
   // Banner text
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih"
@@ -628,6 +633,93 @@ export default function HomePage(): React.JSX.Element {
     if (!user || !userId) return false;
     const targetUser = users.find(u => u.id === userId);
     return (targetUser?.blockedBy || []).includes(user.uid);
+  };
+
+  // Fungsi mencari user manual berdasarkan email
+  const handleSearchUser = async () => {
+    if (!searchUserInput.trim() || !db) {
+      setSearchUserStatus("Masukkan email");
+      return;
+    }
+
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", searchUserInput.trim()));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        setSearchUserStatus("User tidak ditemukan di database");
+        setSearchUserResult(null);
+        return;
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+      
+      if (userDoc.id === user.uid) {
+        setSearchUserStatus("Ini adalah akun Anda sendiri");
+        setSearchUserResult(null);
+        return;
+      }
+
+      const foundUser: ChatUser = {
+        id: userDoc.id,
+        ...userData,
+        isPinned: userData.isPinned || false,
+        isAdmin: userData.isAdmin || false,
+        online: userData.online || false,
+        lastSeen: userData.lastSeen || null,
+        typing: userData.typing || false,
+        blocked: userData.blocked || [],
+        blockedBy: userData.blockedBy || []
+      };
+
+      setSearchUserResult(foundUser);
+      setSearchUserStatus(`User ditemukan: ${foundUser.name}`);
+      
+    } catch (error) {
+      console.error("Error searching user:", error);
+      setSearchUserStatus("Terjadi kesalahan saat mencari user");
+    }
+  };
+
+  // Fungsi add user manual ke chat
+  const handleAddManualUser = async () => {
+    if (!searchUserResult || !user || !db) return;
+
+    if (isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)) {
+      setSearchUserStatus("User ini diblokir");
+      return;
+    }
+
+    try {
+      const chatId = [user.uid, searchUserResult.id].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      
+      if (chatSnap.exists()) {
+        setSearchUserStatus(`Chat dengan ${searchUserResult.name} sudah ada`);
+        return;
+      }
+
+      await setDoc(chatRef, {
+        participants: [user.uid, searchUserResult.id],
+        createdAt: serverTimestamp(),
+        isPinned: false,
+        isGroup: false
+      });
+
+      setSearchUserStatus(`Chat dengan ${searchUserResult.name} berhasil dibuat!`);
+      setSearchUserResult(null);
+      setSearchUserInput("");
+      
+      // Refresh chat rooms
+      setTimeout(() => setSearchUserStatus(""), 3000);
+      
+    } catch (error) {
+      console.error("Error adding manual user:", error);
+      setSearchUserStatus("Gagal menambahkan user");
+    }
   };
 
   // Auth Listener
@@ -1069,6 +1161,10 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
+      // Reset search states
+      setSearchUserInput("");
+      setSearchUserResult(null);
+      setSearchUserStatus("");
     }
   };
 
@@ -3490,6 +3586,123 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       </div>
                     )}
+
+                    {/* FORM ADD USER MANUAL - SEARCH BY EMAIL */}
+                    <div style={{
+                      padding: "14px",
+                      backgroundColor: "#f8f8f8",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
+                      border: "1px solid #e8e8e8",
+                    }}>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                        Tambah User Manual
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                        <input
+                          type="text"
+                          placeholder="Masukkan email user..."
+                          value={searchUserInput}
+                          onChange={(e) => setSearchUserInput(e.target.value)}
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            outline: "none",
+                            fontFamily: FONT_FAMILY,
+                            backgroundColor: "#fff",
+                            color: "#000",
+                          }}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleSearchUser}
+                          style={{
+                            padding: "8px 16px",
+                            backgroundColor: "#0D3CFC",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            cursor: "pointer",
+                            fontFamily: FONT_FAMILY,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Cari
+                        </motion.button>
+                      </div>
+                      
+                      {searchUserStatus && (
+                        <div style={{ 
+                          fontSize: "12px", 
+                          color: searchUserResult ? "#22c55e" : "#ef4444",
+                          marginBottom: "8px",
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {searchUserStatus}
+                        </div>
+                      )}
+
+                      {searchUserResult && (
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "10px 12px",
+                          backgroundColor: "#fff",
+                          borderRadius: "6px",
+                          border: "1px solid #e0e0e0",
+                        }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "6px",
+                              backgroundColor: "#f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              overflow: "hidden",
+                            }}>
+                              {searchUserResult.photoURL ? (
+                                <img src={searchUserResult.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                <span style={{ fontSize: "14px", color: "#000" }}>{searchUserResult.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                              )}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                                {searchUserResult.name}
+                                {searchUserResult.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "#999" }}>{searchUserResult.email}</div>
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddManualUser}
+                            disabled={isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)}
+                            style={{
+                              padding: "4px 14px",
+                              backgroundColor: (isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)) ? "#ccc" : "#0D3CFC",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: (isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)) ? "not-allowed" : "pointer",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            Add Chat
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
 
                     <motion.button
                       whileHover={{ scale: 1.02 }}
