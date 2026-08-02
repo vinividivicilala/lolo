@@ -9,6 +9,7 @@ import {
   getAuth, 
   onAuthStateChanged, 
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -1102,7 +1103,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION
+  // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
   useEffect(() => {
     if (!db || !user) return;
 
@@ -1135,15 +1136,29 @@ export default function HomePage(): React.JSX.Element {
       });
       
       // Update chatRooms dengan data typing terbaru
-      setChatRooms(prev => prev.map(room => ({
-        ...room,
-        typingUsers: typingMap[room.id]?.names || [],
-        typingUsersId: typingMap[room.id]?.ids || []
-      })));
+      setChatRooms(prev => prev.map(room => {
+        const typingData = typingMap[room.id];
+        return {
+          ...room,
+          typingUsers: typingData?.names || [],
+          typingUsersId: typingData?.ids || []
+        };
+      }));
     });
 
     return () => unsubscribe();
   }, [user, users, chatRooms]);
+
+  // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
+  useEffect(() => {
+    if (!selectedChat || !user || !db) return;
+    
+    // Set typing false saat chat ditutup
+    return () => {
+      const userRef = doc(db, "users", user.uid);
+      updateDoc(userRef, { typing: false }).catch(() => {});
+    };
+  }, [selectedChat, user, db]);
 
   // Chat button message rotation
   useEffect(() => {
@@ -1200,7 +1215,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing untuk chat - update status typing di Firestore
+  // ========== PERBAIKAN: Handle typing untuk chat - update status typing di Firestore ==========
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1210,14 +1225,24 @@ export default function HomePage(): React.JSX.Element {
     if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
     
     const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      typing: value.length > 0
-    });
     
+    // Set typing true jika ada teks, false jika kosong
+    if (value.length > 0) {
+      await updateDoc(userRef, {
+        typing: true
+      });
+    } else {
+      await updateDoc(userRef, {
+        typing: false
+      });
+    }
+    
+    // Clear timeout sebelumnya
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
     
+    // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
     const newTimeout = setTimeout(async () => {
       const userRef2 = doc(db, "users", user.uid);
       await updateDoc(userRef2, {
@@ -1769,7 +1794,7 @@ export default function HomePage(): React.JSX.Element {
     !u.isGroup
   );
 
-  // Fungsi untuk mendapatkan display typing users dengan format yang benar
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
     
@@ -1845,7 +1870,6 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
-      {/* HEAD METADATA - PER HALAMAN */}
       <Head>
         <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
@@ -4107,7 +4131,8 @@ export default function HomePage(): React.JSX.Element {
                             >
                               Create Group
                             </motion.button>
-                            <motion.button                              whileHover={{ scale: 1.05 }}
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               onClick={() => {
                                 setShowAddGroup(false);
@@ -5178,7 +5203,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* Multi-User Typing Indicator untuk Group Chat - format: User A + User B + User C typing... */}
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5519,6 +5544,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5636,7 +5662,7 @@ export default function HomePage(): React.JSX.Element {
             )}
           </AnimatePresence>
 
-          {/* Chat Button - menampilkan riwayat pesan user secara otomatis */}
+          {/* Chat Button */}
           <motion.button
             whileHover={!isChatOpen ? { scale: 1.03 } : {}}
             whileTap={!isChatOpen ? { scale: 0.97 } : {}}
