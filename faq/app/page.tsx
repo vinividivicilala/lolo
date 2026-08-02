@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
+import Lenis from '@studio-freight/lenis';
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -65,15 +67,17 @@ interface ChatUser {
   photoURL: string;
   createdAt?: any;
   isPinned?: boolean;
-  isOfficial?: boolean;
   isAdmin?: boolean;
   online?: boolean;
   lastSeen?: any;
   typing?: boolean;
-  bio?: string;
-  note?: string;
   blocked?: string[];
   blockedBy?: string[];
+  isGroup?: boolean;
+  groupName?: string;
+  groupDescription?: string;
+  groupMembers?: string[];
+  groupAdmins?: string[];
 }
 
 interface Message {
@@ -93,6 +97,8 @@ interface Message {
   sharedFrom?: string;
   sharedFromName?: string;
   isShared?: boolean;
+  isGroupMessage?: boolean;
+  groupId?: string;
 }
 
 interface ChatRoom {
@@ -105,6 +111,11 @@ interface ChatRoom {
   isPinned?: boolean;
   typingUsers?: string[];
   isBlocked?: boolean;
+  isGroup?: boolean;
+  groupName?: string;
+  groupDescription?: string;
+  groupMembers?: string[];
+  groupAdmins?: string[];
 }
 
 interface UpdateItem {
@@ -117,6 +128,25 @@ interface UpdateItem {
   link: string;
   publishedBy: string;
 }
+
+// Arrow SVG Icons
+const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SouthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthWestArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 7L7 17M7 7H17V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 // SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
@@ -163,25 +193,6 @@ const MoreIcon = () => (
     <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
     <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
     <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
-  </svg>
-);
-
-// Arrow Icons
-const NorthEastArrow = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 7L17 17M17 7L17 17L7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const SouthEastArrow = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 17L17 7M17 17L17 7L7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const NorthWestArrow = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 7L17 7L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -271,10 +282,25 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Online Status Indicator - dengan pemancar #0D3CFC
+// Online Status Indicator - Web Minimalist dengan GSAP
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const circleRef = useRef<HTMLDivElement>(null);
+  const pulseRef = useRef<HTMLDivElement>(null);
   const color = online ? "#0D3CFC" : "#999";
+  
+  useEffect(() => {
+    if (online && pulseRef.current) {
+      gsap.to(pulseRef.current, {
+        scale: 2.2,
+        opacity: 0.05,
+        duration: 1.8,
+        repeat: -1,
+        ease: "power1.inOut",
+        yoyo: true,
+      });
+    }
+  }, [online]);
   
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
@@ -283,27 +309,32 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         onMouseLeave={() => setShowTooltip(false)}
         style={{ cursor: "pointer" }}
       >
-        <div style={{
-          width: "10px",
-          height: "10px",
-          borderRadius: "50%",
-          backgroundColor: color,
-          position: "relative",
-          transition: "all 0.3s ease",
-        }}>
+        <div
+          ref={circleRef}
+          style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            backgroundColor: color,
+            position: "relative",
+            transition: "all 0.3s ease",
+          }}
+        >
           {online && (
-            <div style={{
-              position: "absolute",
-              width: "30px",
-              height: "30px",
-              borderRadius: "50%",
-              backgroundColor: color,
-              opacity: 0.15,
-              animation: "pulseExpand 2s ease-in-out infinite",
-              pointerEvents: "none",
-              top: "-10px",
-              left: "-10px",
-            }} />
+            <div
+              ref={pulseRef}
+              style={{
+                position: "absolute",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: color,
+                opacity: 0.2,
+                pointerEvents: "none",
+                top: "0px",
+                left: "0px",
+              }}
+            />
           )}
         </div>
       </div>
@@ -430,6 +461,12 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Group Chat States
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState<string[]>([]);
+  const [groupAdmins, setGroupAdmins] = useState<string[]>([]);
+
   // Banner text
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih"
@@ -529,13 +566,10 @@ export default function HomePage(): React.JSX.Element {
               photoURL: googlePhotoURL,
               createdAt: serverTimestamp(),
               isPinned: false,
-              isOfficial: false,
               isAdmin: isAdminUser,
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
-              bio: "",
-              note: "",
               blocked: [],
               blockedBy: []
             });
@@ -555,7 +589,6 @@ export default function HomePage(): React.JSX.Element {
                 photoURL: googlePhotoURL,
                 name: googleName,
                 lastSeen: serverTimestamp(),
-                isOfficial: false,
                 isAdmin: isAdminUser
               });
             }
@@ -573,8 +606,6 @@ export default function HomePage(): React.JSX.Element {
               ...prev,
               photoURL: updatedData.photoURL || prev.photoURL || "",
               displayName: updatedData.name || prev.displayName || prev.email,
-              bio: updatedData.bio || "",
-              note: updatedData.note || "",
               blocked: updatedData.blocked || [],
               blockedBy: updatedData.blockedBy || []
             }));
@@ -606,13 +637,15 @@ export default function HomePage(): React.JSX.Element {
                 online: data.online || false,
                 lastSeen: data.lastSeen || null,
                 typing: data.typing || false,
-                bio: data.bio || "",
-                note: data.note || "",
                 photoURL: data.photoURL || "",
-                isOfficial: data.isOfficial || false,
                 isAdmin: data.isAdmin || false,
                 blocked: data.blocked || [],
-                blockedBy: data.blockedBy || []
+                blockedBy: data.blockedBy || [],
+                isGroup: data.isGroup || false,
+                groupName: data.groupName || "",
+                groupDescription: data.groupDescription || "",
+                groupMembers: data.groupMembers || [],
+                groupAdmins: data.groupAdmins || []
               } as ChatUser);
             }
           });
@@ -623,13 +656,10 @@ export default function HomePage(): React.JSX.Element {
             email: user.email || "",
             photoURL: user.photoURL || "",
             isPinned: false,
-            isOfficial: false,
             isAdmin: isAdmin,
             online: true,
             lastSeen: null,
             typing: false,
-            bio: user.bio || "",
-            note: user.note || "",
             blocked: user.blocked || [],
             blockedBy: user.blockedBy || []
           };
@@ -644,9 +674,6 @@ export default function HomePage(): React.JSX.Element {
                 ...userList[index],
                 photoURL: user.photoURL || userList[index].photoURL || "",
                 name: user.displayName || userList[index].name || "",
-                bio: user.bio || userList[index].bio || "",
-                note: user.note || userList[index].note || "",
-                isOfficial: false,
                 isAdmin: isAdmin,
                 blocked: user.blocked || [],
                 blockedBy: user.blockedBy || []
@@ -684,9 +711,16 @@ export default function HomePage(): React.JSX.Element {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const otherId = data.participants.find((id: string) => id !== user.uid);
-          const otherUser = users.find(u => u.id === otherId);
           
-          if (otherUser) {
+          // Check if group chat
+          const isGroup = data.isGroup || false;
+          
+          let otherUser = null;
+          if (!isGroup && otherId) {
+            otherUser = users.find(u => u.id === otherId);
+          }
+          
+          if (isGroup || otherUser) {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -712,7 +746,7 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
-            const isBlocked = isUserBlocked(otherId);
+            const isBlocked = isGroup ? false : (otherId ? isUserBlocked(otherId) : false);
             
             rooms.push({
               id: docSnap.id,
@@ -723,7 +757,12 @@ export default function HomePage(): React.JSX.Element {
               unreadCount: isBlocked ? 0 : unreadCount,
               isPinned: data.isPinned || false,
               typingUsers: [],
-              isBlocked: isBlocked
+              isBlocked: isBlocked,
+              isGroup: isGroup,
+              groupName: data.groupName || "",
+              groupDescription: data.groupDescription || "",
+              groupMembers: data.groupMembers || [],
+              groupAdmins: data.groupAdmins || []
             });
           }
         }
@@ -747,7 +786,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [user, users]);
 
-  // Load messages for regular chat
+  // Load messages for chat
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
 
@@ -838,7 +877,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing for regular chat
+  // Handle typing for chat
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -881,7 +920,7 @@ export default function HomePage(): React.JSX.Element {
     setShowBlockDropdown(false);
   };
 
-  // Handle Block/Unblock user - UPDATE BOTH USERS secara realtime
+  // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -890,7 +929,6 @@ export default function HomePage(): React.JSX.Element {
       const targetRef = doc(db, "users", userId);
       
       if (isBlocked) {
-        // Unblock user - update both users
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -898,13 +936,11 @@ export default function HomePage(): React.JSX.Element {
           blockedBy: arrayRemove(user.uid)
         });
         
-        // Update local state for current user
         setUser((prev: any) => ({
           ...prev,
           blocked: (prev.blocked || []).filter((id: string) => id !== userId)
         }));
         
-        // Update local users list
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: (u.blocked || []).filter((id: string) => id !== userId) };
@@ -916,7 +952,6 @@ export default function HomePage(): React.JSX.Element {
         }));
         
       } else {
-        // Block user - update both users
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -924,13 +959,11 @@ export default function HomePage(): React.JSX.Element {
           blockedBy: arrayUnion(user.uid)
         });
         
-        // Update local state for current user
         setUser((prev: any) => ({
           ...prev,
           blocked: [...(prev.blocked || []), userId]
         }));
         
-        // Update local users list
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: [...(u.blocked || []), userId] };
@@ -949,7 +982,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message to regular user
+  // Send message
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
@@ -969,7 +1002,12 @@ export default function HomePage(): React.JSX.Element {
         await setDoc(chatRef, {
           participants: [user.uid, selectedChat.id],
           createdAt: serverTimestamp(),
-          isPinned: false
+          isPinned: false,
+          isGroup: selectedChat.isGroup || false,
+          groupName: selectedChat.groupName || "",
+          groupDescription: selectedChat.groupDescription || "",
+          groupMembers: selectedChat.groupMembers || [],
+          groupAdmins: selectedChat.groupAdmins || []
         });
       }
       
@@ -983,7 +1021,9 @@ export default function HomePage(): React.JSX.Element {
         read: false,
         isPinned: false,
         pinnedAt: null,
-        isShared: false
+        isShared: false,
+        isGroupMessage: selectedChat.isGroup || false,
+        groupId: selectedChat.isGroup ? chatId : undefined
       };
       
       if (replyTo) {
@@ -1183,11 +1223,41 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add group chat
-  const handleAddGroupChat = async () => {
-    // Placeholder for group chat functionality
-    setAddUserStatus("Group chat feature coming soon!");
-    setTimeout(() => setAddUserStatus(""), 3000);
+  // Create Group Chat
+  const handleCreateGroup = async () => {
+    if (!user || !db || !groupName.trim() || selectedGroupMembers.length === 0) {
+      setAddUserStatus("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const members = [user.uid, ...selectedGroupMembers];
+      const admins = [user.uid, ...groupAdmins];
+      
+      const chatRef = doc(db, "chats", `group_${Date.now()}`);
+      await setDoc(chatRef, {
+        participants: members,
+        createdAt: serverTimestamp(),
+        isPinned: false,
+        isGroup: true,
+        groupName: groupName.trim(),
+        groupDescription: groupDescription.trim() || "",
+        groupMembers: members,
+        groupAdmins: admins
+      });
+
+      setAddUserStatus(`Group "${groupName}" created successfully!`);
+      setGroupName("");
+      setGroupDescription("");
+      setSelectedGroupMembers([]);
+      setGroupAdmins([]);
+      setShowAddGroup(false);
+      
+      setTimeout(() => setAddUserStatus(""), 3000);
+    } catch (error) {
+      console.error("Error creating group:", error);
+      setAddUserStatus("Failed to create group");
+    }
   };
 
   // Format time
@@ -1242,7 +1312,8 @@ export default function HomePage(): React.JSX.Element {
   const availableUsers = users.filter(u => 
     u.id !== user?.uid && 
     !chatRooms.some(room => room.participants.includes(u.id)) &&
-    !isUserBlocked(u.id)
+    !isUserBlocked(u.id) &&
+    !u.isGroup
   );
 
   const getTypingUsersDisplay = (room: ChatRoom) => {
@@ -1274,6 +1345,29 @@ export default function HomePage(): React.JSX.Element {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // GSAP + Lenis initialization
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        smoothWheel: true,
+      });
+
+      function raf(time: number) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      requestAnimationFrame(raf);
+
+      return () => {
+        lenis.destroy();
+      };
+    }
   }, []);
 
   if (loading) {
@@ -1340,7 +1434,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* BANNER - #0D3CFC dengan #lifeatmenuru bg #EB2227 */}
+        {/* BANNER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1380,7 +1474,6 @@ export default function HomePage(): React.JSX.Element {
               Website sedang dalam pengembangan, Terima kasih
             </motion.span>
           </AnimatePresence>
-          {/* #lifeatmenuru dengan bg #EB2227 */}
           <div
             style={{
               backgroundColor: "#EB2227",
@@ -1405,7 +1498,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
-        {/* Menuru - Left Bottom - JUDUL WEB BESAR */}
+        {/* Menuru */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -1606,7 +1699,8 @@ export default function HomePage(): React.JSX.Element {
                   {users.filter(u => 
                     u.id !== user.uid && 
                     u.id !== shareMessage.senderId &&
-                    !isUserBlocked(u.id)
+                    !isUserBlocked(u.id) &&
+                    !u.isGroup
                   ).map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.name}
@@ -1621,7 +1715,7 @@ export default function HomePage(): React.JSX.Element {
                     onClick={handleShareMessage}
                     disabled={!selectedShareUser}
                     style={{
-                      backgroundColor: selectedShareUser ? "#000" : "#ccc",
+                      backgroundColor: selectedShareUser ? "#0D3CFC" : "#ccc",
                       color: "#fff",
                       border: "none",
                       padding: "10px 20px",
@@ -1761,9 +1855,9 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? selectedChat.name : "Messages"))))}
+                      {selectedUpdateId && selectedUpdate ? "Update Detail" : (showUpdate ? "Update System" : (showPrivacyPolicy ? "Privacy Policy" : (showProfile ? "Profile" : (selectedChat ? (selectedChat.isGroup ? selectedChat.groupName || "Group Chat" : selectedChat.name) : "Messages"))))}
                     </span>
-                    {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && (
+                    {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !selectedChat.isGroup && (
                       <>
                         <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
                           {selectedChat.email}
@@ -1773,6 +1867,11 @@ export default function HomePage(): React.JSX.Element {
                           lastSeen={getLastSeen(selectedChat.id)}
                         />
                       </>
+                    )}
+                    {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && selectedChat.isGroup && selectedChat.groupMembers && (
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                        {selectedChat.groupMembers.length} members
+                      </span>
                     )}
                     {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
                       <span
@@ -2152,7 +2251,7 @@ export default function HomePage(): React.JSX.Element {
                                     borderRadius: "50%",
                                     backgroundColor: dotColor,
                                     opacity: 0.20,
-                                    animation: "pulseExpand 2s ease-in-out infinite",
+                                    animation: "awwwardsPulse 2s ease-in-out infinite",
                                     pointerEvents: "none",
                                   }}
                                 />
@@ -2584,7 +2683,7 @@ export default function HomePage(): React.JSX.Element {
                           <span>Back</span>
                         </motion.button>
 
-                        {profileUser.id !== user.uid && (
+                        {profileUser.id !== user.uid && !profileUser.isGroup && (
                           <div ref={blockDropdownRef} style={{ position: "relative" }}>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -2656,138 +2755,189 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile - TANPA EMOTICON, TEKS HITAM */}
+                      {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
                       {isUserBlocked(profileUser.id) && (
                         <div style={{ 
                           width: "100%", 
                           marginTop: "16px",
                           padding: "16px",
-                          backgroundColor: "#f3f4f6",
+                          backgroundColor: "#0D3CFC",
                           borderRadius: "8px",
-                          border: "1px solid #e5e7eb",
+                          border: "none",
                           textAlign: "center",
                           fontFamily: FONT_FAMILY,
                         }}>
-                          <div style={{ fontSize: "14px", color: "#000000", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          <div style={{ fontSize: "14px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                             Maaf akun ini sudah tidak bisa di chat
                           </div>
-                          <div style={{ fontSize: "12px", color: "#000000", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                          <div style={{ fontSize: "12px", color: "#ffffff", marginTop: "4px", fontFamily: FONT_FAMILY }}>
                             Silahkan buka block untuk melanjutkan chat
                           </div>
                         </div>
                       )}
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          style={{
-                            width: "64px",
-                            height: "64px",
-                            borderRadius: "8px",
-                            backgroundColor: "#f0f0f0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "28px",
-                            overflow: "hidden",
-                            border: "1px solid #e8e8e8",
-                            flexShrink: 0,
-                            position: "relative",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            if (profileUser.photoURL) {
-                              setShowFullImage(profileUser.photoURL);
-                            }
-                          }}
-                        >
-                          {profileUser.photoURL ? (
-                            <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          ) : (
-                            <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
-                          )}
-                        </motion.div>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
-                              {profileUser.name}
-                            </span>
-                            {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                      {/* Group Chat Info */}
+                      {profileUser.isGroup && (
+                        <div style={{ width: "100%", marginBottom: "16px" }}>
+                          <div style={{ 
+                            fontSize: "14px", 
+                            fontWeight: 600, 
+                            color: "#000", 
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: "8px"
+                          }}>
+                            {profileUser.groupName || "Group Chat"}
                           </div>
-                          <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                            <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
-                            <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
-                              {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
-                            </span>
+                          {profileUser.groupDescription && (
+                            <div style={{ 
+                              fontSize: "13px", 
+                              color: "#666", 
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px"
+                            }}>
+                              {profileUser.groupDescription}
+                            </div>
+                          )}
+                          <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
+                            {profileUser.groupMembers?.length || 0} members
+                          </div>
+                          <div style={{ marginTop: "8px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                            {profileUser.groupMembers?.map((memberId) => {
+                              const member = users.find(u => u.id === memberId);
+                              const isGroupAdmin = profileUser.groupAdmins?.includes(memberId);
+                              return member ? (
+                                <span key={memberId} style={{
+                                  fontSize: "11px",
+                                  backgroundColor: isGroupAdmin ? "#0D3CFC" : "#f0f0f0",
+                                  color: isGroupAdmin ? "#ffffff" : "#000",
+                                  padding: "2px 10px",
+                                  borderRadius: "12px",
+                                  fontFamily: FONT_FAMILY,
+                                }}>
+                                  {member.name}
+                                  {isGroupAdmin && " (Admin)"}
+                                </span>
+                              ) : null;
+                            })}
                           </div>
                         </div>
-                      </div>
+                      )}
 
-                      <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            if (isUserBlocked(profileUser.id)) {
-                              return;
-                            }
-                            handleCloseProfile();
-                            setSelectedChat(profileUser);
-                          }}
-                          style={{
-                            flex: 1,
-                            padding: "10px",
-                            backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#000",
-                            border: "none",
-                            borderRadius: "8px",
-                            color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
-                            fontFamily: FONT_FAMILY,
-                            transition: "opacity 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isUserBlocked(profileUser.id)) {
-                              e.currentTarget.style.opacity = "0.8";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isUserBlocked(profileUser.id)) {
-                              e.currentTarget.style.opacity = "1";
-                            }
-                          }}
-                        >
-                          {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
-                          style={{
-                            padding: "10px 16px",
-                            backgroundColor: "transparent",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "8px",
-                            color: profileUser.isPinned ? "#000" : "#999",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontFamily: FONT_FAMILY,
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <PinIcon filled={profileUser.isPinned || false} />
-                        </motion.button>
-                      </div>
+                      {!profileUser.isGroup && (
+                        <>
+                          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", width: "100%" }}>
+                            <motion.div
+                              whileHover={{ scale: 1.05 }}
+                              style={{
+                                width: "64px",
+                                height: "64px",
+                                borderRadius: "8px",
+                                backgroundColor: "#f0f0f0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "28px",
+                                overflow: "hidden",
+                                border: "1px solid #e8e8e8",
+                                flexShrink: 0,
+                                position: "relative",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                if (profileUser.photoURL) {
+                                  setShowFullImage(profileUser.photoURL);
+                                }
+                              }}
+                            >
+                              {profileUser.photoURL ? (
+                                <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                              )}
+                            </motion.div>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                <span style={{ fontSize: "18px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                                  {profileUser.name}
+                                </span>
+                                {profileUser.isAdmin && <InstagramVerifiedBadge size={16} />}
+                              </div>
+                              <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>{profileUser.email}</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                                <OnlineIndicator online={getOnlineStatus(profileUser.id)} />
+                                <span style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>
+                                  {getOnlineStatus(profileUser.id) ? "Online" : getLastSeen(profileUser.id)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                if (isUserBlocked(profileUser.id)) {
+                                  return;
+                                }
+                                handleCloseProfile();
+                                setSelectedChat(profileUser);
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: "10px",
+                                backgroundColor: isUserBlocked(profileUser.id) ? "#ccc" : "#0D3CFC",
+                                border: "none",
+                                borderRadius: "8px",
+                                color: isUserBlocked(profileUser.id) ? "#999" : "#fff",
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                cursor: isUserBlocked(profileUser.id) ? "not-allowed" : "pointer",
+                                fontFamily: FONT_FAMILY,
+                                transition: "opacity 0.2s ease",
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isUserBlocked(profileUser.id)) {
+                                  e.currentTarget.style.opacity = "0.8";
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isUserBlocked(profileUser.id)) {
+                                  e.currentTarget.style.opacity = "1";
+                                }
+                              }}
+                            >
+                              {isUserBlocked(profileUser.id) ? "Cannot Send Message" : "Send Message"}
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handlePinUser(profileUser.id, profileUser.isPinned || false)}
+                              style={{
+                                padding: "10px 16px",
+                                backgroundColor: "transparent",
+                                border: "1px solid #e0e0e0",
+                                borderRadius: "8px",
+                                color: profileUser.isPinned ? "#000" : "#999",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontFamily: FONT_FAMILY,
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <PinIcon filled={profileUser.isPinned || false} />
+                            </motion.button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Peringatan block - WARNA #0D3CFC DARI BANNER, TEKS HITAM */}
+                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -2799,7 +2949,7 @@ export default function HomePage(): React.JSX.Element {
                         textAlign: "center",
                         fontFamily: FONT_FAMILY,
                       }}>
-                        <div style={{ fontSize: "13px", color: "#000000", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                        <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                           Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
                         </div>
                       </div>
@@ -2970,7 +3120,7 @@ export default function HomePage(): React.JSX.Element {
                               onClick={handleAddExistingUser}
                               disabled={!selectedNewUser}
                               style={{
-                                backgroundColor: selectedNewUser ? "#000" : "#ccc",
+                                backgroundColor: selectedNewUser ? "#0D3CFC" : "#ccc",
                                 color: "#fff",
                                 border: "none",
                                 padding: "8px 16px",
@@ -3028,16 +3178,94 @@ export default function HomePage(): React.JSX.Element {
                           <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
                             Create Group Chat
                           </div>
-                          <div style={{ fontSize: "13px", color: "#666", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
-                            Select users to add to group (coming soon)
+                          <input
+                            type="text"
+                            placeholder="Group Name"
+                            value={groupName}
+                            onChange={(e) => setGroupName(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px 14px",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px",
+                              backgroundColor: "#fff",
+                              color: "#000",
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Group Description (optional)"
+                            value={groupDescription}
+                            onChange={(e) => setGroupDescription(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px 14px",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px",
+                              backgroundColor: "#fff",
+                              color: "#000",
+                            }}
+                          />
+                          <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                            Select Members
                           </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
+                          {availableUsers.map((u) => (
+                            <div key={u.id} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                              <input
+                                type="checkbox"
+                                checked={selectedGroupMembers.includes(u.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedGroupMembers([...selectedGroupMembers, u.id]);
+                                  } else {
+                                    setSelectedGroupMembers(selectedGroupMembers.filter(id => id !== u.id));
+                                    setGroupAdmins(groupAdmins.filter(id => id !== u.id));
+                                  }
+                                }}
+                                style={{ cursor: "pointer" }}
+                              />
+                              <span style={{ fontSize: "13px", color: "#000", fontFamily: FONT_FAMILY }}>{u.name}</span>
+                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              {selectedGroupMembers.includes(u.id) && (
+                                <button
+                                  onClick={() => {
+                                    if (groupAdmins.includes(u.id)) {
+                                      setGroupAdmins(groupAdmins.filter(id => id !== u.id));
+                                    } else {
+                                      setGroupAdmins([...groupAdmins, u.id]);
+                                    }
+                                  }}
+                                  style={{
+                                    fontSize: "10px",
+                                    backgroundColor: groupAdmins.includes(u.id) ? "#0D3CFC" : "#f0f0f0",
+                                    color: groupAdmins.includes(u.id) ? "#fff" : "#000",
+                                    border: "none",
+                                    padding: "2px 10px",
+                                    borderRadius: "12px",
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  {groupAdmins.includes(u.id) ? "Admin ✓" : "Make Admin"}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={handleAddGroupChat}
+                              onClick={handleCreateGroup}
                               style={{
-                                backgroundColor: "#000",
+                                backgroundColor: "#0D3CFC",
                                 color: "#fff",
                                 border: "none",
                                 padding: "8px 16px",
@@ -3054,7 +3282,13 @@ export default function HomePage(): React.JSX.Element {
                             <motion.button
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              onClick={() => setShowAddGroup(false)}
+                              onClick={() => {
+                                setShowAddGroup(false);
+                                setGroupName("");
+                                setGroupDescription("");
+                                setSelectedGroupMembers([]);
+                                setGroupAdmins([]);
+                              }}
                               style={{
                                 background: "none",
                                 border: "none",
@@ -3166,7 +3400,7 @@ export default function HomePage(): React.JSX.Element {
                                     <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
                                   </div>
                                   <div style={{ display: "flex", gap: "4px" }}>
-                                    {u.id !== user.uid && (
+                                    {u.id !== user.uid && !u.isGroup && (
                                       <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
@@ -3248,6 +3482,90 @@ export default function HomePage(): React.JSX.Element {
                               style={{ padding: "4px 0", marginTop: "2px", overflow: "hidden" }}
                             >
                               {pinnedChats.map((room) => {
+                                if (room.isGroup) {
+                                  return (
+                                    <motion.div
+                                      key={room.id}
+                                      whileHover={{ scale: 1.02 }}
+                                      onClick={() => {
+                                        const groupUser: ChatUser = {
+                                          id: room.id,
+                                          name: room.groupName || "Group Chat",
+                                          email: "",
+                                          photoURL: "",
+                                          isGroup: true,
+                                          groupName: room.groupName,
+                                          groupDescription: room.groupDescription,
+                                          groupMembers: room.groupMembers,
+                                          groupAdmins: room.groupAdmins,
+                                          online: false,
+                                          lastSeen: null,
+                                          typing: false,
+                                          isPinned: room.isPinned,
+                                          isAdmin: false,
+                                          blocked: [],
+                                          blockedBy: []
+                                        };
+                                        setSelectedChat(groupUser);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "6px 10px",
+                                        borderRadius: "6px",
+                                        cursor: "pointer",
+                                        backgroundColor: "#fafafa",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          width: "32px",
+                                          height: "32px",
+                                          borderRadius: "6px",
+                                          backgroundColor: "#0D3CFC",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          fontSize: "14px",
+                                          color: "#fff",
+                                          flexShrink: 0,
+                                        }}
+                                      >
+                                        👥
+                                      </div>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                                          {room.groupName || "Group Chat"}
+                                        </div>
+                                        <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
+                                          {room.groupMembers?.length || 0} members
+                                        </div>
+                                      </div>
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handlePinChat(room.id, true);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: "#c5e800",
+                                          padding: "2px 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <PinIcon filled={true} />
+                                      </motion.button>
+                                    </motion.div>
+                                  );
+                                }
+
                                 const otherId = room.participants.find(id => id !== user.uid);
                                 const otherUser = users.find(u => u.id === otherId);
                                 if (!otherUser) return null;
@@ -3408,6 +3726,100 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
+                          // Group Chat
+                          if (room.isGroup) {
+                            return (
+                              <motion.div
+                                key={room.id}
+                                whileHover={{ scale: 1.02 }}
+                                onClick={() => {
+                                  const groupUser: ChatUser = {
+                                    id: room.id,
+                                    name: room.groupName || "Group Chat",
+                                    email: "",
+                                    photoURL: "",
+                                    isGroup: true,
+                                    groupName: room.groupName,
+                                    groupDescription: room.groupDescription,
+                                    groupMembers: room.groupMembers,
+                                    groupAdmins: room.groupAdmins,
+                                    online: false,
+                                    lastSeen: null,
+                                    typing: false,
+                                    isPinned: room.isPinned,
+                                    isAdmin: false,
+                                    blocked: [],
+                                    blockedBy: []
+                                  };
+                                  setSelectedChat(groupUser);
+                                }}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  transition: "all .2s ease",
+                                  marginBottom: "2px",
+                                  backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "6px",
+                                    backgroundColor: "#0D3CFC",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "20px",
+                                    flexShrink: 0,
+                                    color: "#fff",
+                                  }}
+                                >
+                                  👥
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
+                                    <span>{room.groupName || "Group Chat"}</span>
+                                  </div>
+                                  <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
+                                    {room.groupMembers?.length || 0} members • {room.lastMessage || "No messages"}
+                                  </div>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                  {room.lastMessageTime && (
+                                    <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
+                                      {formatTime(room.lastMessageTime)}
+                                    </span>
+                                  )}
+                                  {room.unreadCount > 0 && (
+                                    <div
+                                      style={{
+                                        backgroundColor: "#c5e800",
+                                        color: "#000",
+                                        padding: "0 6px",
+                                        borderRadius: "4px",
+                                        fontSize: "9px",
+                                        fontWeight: 600,
+                                        lineHeight: "18px",
+                                        height: "18px",
+                                        minWidth: "18px",
+                                        textAlign: "center",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      {room.unreadCount}
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            );
+                          }
+
                           const otherId = room.participants.find(id => id !== user.uid);
                           const otherUser = users.find(u => u.id === otherId);
                           if (!otherUser) return null;
@@ -3625,63 +4037,96 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <BackIcon />
                         </motion.button>
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "6px",
-                            backgroundColor: "rgba(255,255,255,0.1)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "14px",
-                            overflow: "hidden",
-                            color: "#fff",
-                            position: "relative",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            handleOpenProfile(selectedChat);
-                          }}
-                        >
-                          {selectedChat.photoURL ? (
-                            <img 
-                              src={selectedChat.photoURL} 
-                              alt="avatar" 
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          ) : (
-                            <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "?"}</span>
-                          )}
-                        </motion.div>
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
-                          <div 
-                            style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                        
+                        {selectedChat.isGroup ? (
+                          <div
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "6px",
+                              backgroundColor: "#0D3CFC",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "16px",
+                              color: "#fff",
+                              flexShrink: 0,
+                            }}
+                          >
+                            👥
+                          </div>
+                        ) : (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "6px",
+                              backgroundColor: "rgba(255,255,255,0.1)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "14px",
+                              overflow: "hidden",
+                              color: "#fff",
+                              position: "relative",
+                              cursor: "pointer",
+                            }}
                             onClick={() => {
                               handleOpenProfile(selectedChat);
                             }}
                           >
-                            <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                              {selectedChat.name}
-                            </span>
-                            {selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <OnlineIndicator 
-                              online={getOnlineStatus(selectedChat.id)} 
-                              lastSeen={getLastSeen(selectedChat.id)}
-                            />
-                            {getOnlineStatus(selectedChat.id) ? (
-                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
-                              </span>
+                            {selectedChat.photoURL ? (
+                              <img 
+                                src={selectedChat.photoURL} 
+                                alt="avatar" 
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
                             ) : (
-                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                {getLastSeen(selectedChat.id)}
-                              </span>
+                              <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "?"}</span>
                             )}
+                          </motion.div>
+                        )}
+                        
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
+                          <div 
+                            style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                            onClick={() => {
+                              if (!selectedChat.isGroup) {
+                                handleOpenProfile(selectedChat);
+                              }
+                            }}
+                          >
+                            <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                              {selectedChat.isGroup ? (selectedChat.groupName || "Group Chat") : selectedChat.name}
+                            </span>
+                            {!selectedChat.isGroup && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
                           </div>
+                          {selectedChat.isGroup && selectedChat.groupMembers && (
+                            <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                              {selectedChat.groupMembers.map(id => {
+                                const member = users.find(u => u.id === id);
+                                return member ? member.name : "";
+                              }).filter(Boolean).join(", ")}
+                            </div>
+                          )}
+                          {!selectedChat.isGroup && (
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <OnlineIndicator 
+                                online={getOnlineStatus(selectedChat.id)} 
+                                lastSeen={getLastSeen(selectedChat.id)}
+                              />
+                              {getOnlineStatus(selectedChat.id) ? (
+                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                  {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                  {getLastSeen(selectedChat.id)}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
@@ -3888,7 +4333,43 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {regularTypingUsers.length > 0 && (
+                            {/* Multi-User Typing Indicator untuk Group Chat */}
+                            {selectedChat.isGroup && selectedChat.groupMembers && (
+                              (() => {
+                                const typingUsers = selectedChat.groupMembers
+                                  .filter(id => {
+                                    const member = users.find(u => u.id === id);
+                                    return member && member.typing && member.id !== user?.uid;
+                                  })
+                                  .map(id => {
+                                    const member = users.find(u => u.id === id);
+                                    return member ? member.name : "";
+                                  })
+                                  .filter(Boolean);
+                                
+                                if (typingUsers.length > 0) {
+                                  return (
+                                    <div
+                                      style={{
+                                        textAlign: "center",
+                                        fontSize: "12px",
+                                        color: "#000000",
+                                        padding: "4px 0",
+                                        fontStyle: "italic",
+                                        fontFamily: FONT_FAMILY,
+                                        backgroundColor: "transparent",
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      {typingUsers.join(", ")} typing...
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()
+                            )}
+
+                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
                                   textAlign: "center",
@@ -4209,22 +4690,61 @@ export default function HomePage(): React.JSX.Element {
                           flexShrink: 0,
                         }}
                       >
-                        {!isUserBlocked(selectedChat.id) && regularTypingUsers.length > 0 && (
-                          <div
-                            style={{
-                              textAlign: "left",
-                              fontSize: "12px",
-                              color: "#000000",
-                              fontStyle: "italic",
-                              fontFamily: FONT_FAMILY,
-                              padding: "2px 4px",
-                              backgroundColor: "transparent",
-                              marginBottom: "2px",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {regularTypingUsers.join(", ")} typing...
-                          </div>
+                        {!isUserBlocked(selectedChat.id) && (
+                          <>
+                            {selectedChat.isGroup && selectedChat.groupMembers && (
+                              (() => {
+                                const typingUsers = selectedChat.groupMembers
+                                  .filter(id => {
+                                    const member = users.find(u => u.id === id);
+                                    return member && member.typing && member.id !== user?.uid;
+                                  })
+                                  .map(id => {
+                                    const member = users.find(u => u.id === id);
+                                    return member ? member.name : "";
+                                  })
+                                  .filter(Boolean);
+                                
+                                if (typingUsers.length > 0) {
+                                  return (
+                                    <div
+                                      style={{
+                                        textAlign: "left",
+                                        fontSize: "12px",
+                                        color: "#000000",
+                                        fontStyle: "italic",
+                                        fontFamily: FONT_FAMILY,
+                                        padding: "2px 4px",
+                                        backgroundColor: "transparent",
+                                        marginBottom: "2px",
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      {typingUsers.join(", ")} typing...
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()
+                            )}
+                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "left",
+                                  fontSize: "12px",
+                                  color: "#000000",
+                                  fontStyle: "italic",
+                                  fontFamily: FONT_FAMILY,
+                                  padding: "2px 4px",
+                                  backgroundColor: "transparent",
+                                  marginBottom: "2px",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {regularTypingUsers.join(", ")} typing...
+                              </div>
+                            )}
+                          </>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
                           <input
@@ -4254,7 +4774,7 @@ export default function HomePage(): React.JSX.Element {
                             }}
                             onFocus={(e) => {
                               if (!isUserBlocked(selectedChat.id)) {
-                                e.currentTarget.style.borderColor = "#c5e800";
+                                e.currentTarget.style.borderColor = "#0D3CFC";
                                 e.currentTarget.style.backgroundColor = "#ffffff";
                               }
                             }}
@@ -4271,13 +4791,13 @@ export default function HomePage(): React.JSX.Element {
                             onClick={handleSendMessage}
                             disabled={isUserBlocked(selectedChat.id)}
                             style={{
-                              backgroundColor: isUserBlocked(selectedChat.id) ? "#ccc" : "#c5e800",
+                              backgroundColor: isUserBlocked(selectedChat.id) ? "#ccc" : "#0D3CFC",
                               border: "none",
                               padding: "10px 20px",
                               borderRadius: "8px",
                               fontSize: "14px",
                               fontWeight: 500,
-                              color: isUserBlocked(selectedChat.id) ? "#999" : "#000",
+                              color: isUserBlocked(selectedChat.id) ? "#999" : "#fff",
                               cursor: isUserBlocked(selectedChat.id) ? "not-allowed" : "pointer",
                               transition: "all .2s ease",
                               whiteSpace: "nowrap",
@@ -4288,12 +4808,12 @@ export default function HomePage(): React.JSX.Element {
                             }}
                             onMouseEnter={(e) => {
                               if (!isUserBlocked(selectedChat.id)) {
-                                e.currentTarget.style.backgroundColor = "#b0d000";
+                                e.currentTarget.style.backgroundColor = "#0a2fc9";
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isUserBlocked(selectedChat.id)) {
-                                e.currentTarget.style.backgroundColor = "#c5e800";
+                                e.currentTarget.style.backgroundColor = "#0D3CFC";
                               }
                             }}
                           >
@@ -4377,7 +4897,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         <style jsx>{`
-          @keyframes pulseExpand {
+          @keyframes awwwardsPulse {
             0% {
               transform: scale(0.5);
               opacity: 0.2;
