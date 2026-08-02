@@ -99,7 +99,7 @@ interface Message {
   sharedFromName?: string;
   isShared?: boolean;
   isGroupMessage?: boolean;
-  groupId?: string;
+  groupId?: string | null;
 }
 
 interface ChatRoom {
@@ -834,6 +834,10 @@ export default function HomePage(): React.JSX.Element {
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
+        // Ensure groupId is set properly
+        if (selectedChat.isGroup && !msg.groupId) {
+          msg.groupId = chatId;
+        }
         messageList.push(msg);
         if (msg.isPinned) {
           pinnedList.push(msg);
@@ -883,11 +887,12 @@ export default function HomePage(): React.JSX.Element {
         if (data.typing && data.id !== user?.uid) {
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
-            // Check which rooms this user is typing in
             chatRooms.forEach(room => {
               if (room.participants.includes(data.id) || room.participants.includes(foundUser.id)) {
                 if (!typingMap[room.id]) typingMap[room.id] = [];
-                typingMap[room.id].push(foundUser.name);
+                if (!typingMap[room.id].includes(foundUser.name)) {
+                  typingMap[room.id].push(foundUser.name);
+                }
               }
             });
           }
@@ -1106,7 +1111,7 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isShared: false,
         isGroupMessage: selectedChat.isGroup || false,
-        groupId: selectedChat.isGroup ? chatId : undefined
+        groupId: selectedChat.isGroup ? chatId : null
       };
       
       if (replyTo) {
@@ -1169,7 +1174,8 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isShared: true,
         sharedFrom: shareMessage.senderId,
-        sharedFromName: shareMessage.senderName
+        sharedFromName: shareMessage.senderName,
+        groupId: null
       });
       
       setShowShareModal(false);
@@ -1218,7 +1224,8 @@ export default function HomePage(): React.JSX.Element {
         isShared: false,
         replyTo: null,
         replyToText: null,
-        replyToSender: null
+        replyToSender: null,
+        groupId: selectedChat.isGroup ? chatId : null
       });
       
       setShowMessageMenu(null);
@@ -1308,7 +1315,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Create Group Chat
+  // Create Group Chat - dengan cek duplikat nama
   const handleCreateGroup = async () => {
     if (!user || !db || !groupName.trim() || selectedGroupMembers.length === 0) {
       setAddUserStatus("Please fill in all fields");
@@ -1316,6 +1323,16 @@ export default function HomePage(): React.JSX.Element {
     }
 
     try {
+      // Check if group name already exists
+      const existingGroup = chatRooms.find(room => 
+        room.isGroup && room.groupName === groupName.trim()
+      );
+      
+      if (existingGroup) {
+        setAddUserStatus(`Group "${groupName}" already exists!`);
+        return;
+      }
+
       const members = [user.uid, ...selectedGroupMembers];
       const admins = [user.uid, ...groupAdmins];
       const groupId = `group_${Date.now()}`;
@@ -1340,7 +1357,7 @@ export default function HomePage(): React.JSX.Element {
       setGroupAdmins([]);
       setShowAddGroup(false);
       
-      // Add group to chat rooms
+      // Add group to users list
       const newGroup: ChatUser = {
         id: groupId,
         name: groupName.trim(),
@@ -1598,7 +1615,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
-        {/* Block Notification Banner */}
+        {/* Block Notification Banner - untuk akun korban block */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -2907,7 +2924,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Group Chat Profile */}
+                      {/* Group Chat Profile - bisa diklik */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -2976,7 +2993,14 @@ export default function HomePage(): React.JSX.Element {
                                   backgroundColor: isGroupAdmin ? "#0D3CFC" : "#f5f5f5",
                                   borderRadius: "6px",
                                   fontFamily: FONT_FAMILY,
-                                }}>
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  if (member.id !== user.uid) {
+                                    handleOpenProfile(member);
+                                  }
+                                }}
+                                >
                                   <span style={{
                                     fontSize: "13px",
                                     color: isGroupAdmin ? "#ffffff" : "#000",
