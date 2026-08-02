@@ -1372,7 +1372,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle Block/Unblock user - UPDATE BOTH USERS
+  // Handle Block/Unblock user - UPDATE BOTH USERS secara realtime
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1381,7 +1381,7 @@ export default function HomePage(): React.JSX.Element {
       const targetRef = doc(db, "users", userId);
       
       if (isBlocked) {
-        // Unblock user - update both
+        // Unblock user - update both users
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -1389,11 +1389,13 @@ export default function HomePage(): React.JSX.Element {
           blockedBy: arrayRemove(user.uid)
         });
         
+        // Update local state for current user
         setUser((prev: any) => ({
           ...prev,
           blocked: (prev.blocked || []).filter((id: string) => id !== userId)
         }));
         
+        // Update local users list
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: (u.blocked || []).filter((id: string) => id !== userId) };
@@ -1405,7 +1407,7 @@ export default function HomePage(): React.JSX.Element {
         }));
         
       } else {
-        // Block user - update both
+        // Block user - update both users
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -1413,11 +1415,13 @@ export default function HomePage(): React.JSX.Element {
           blockedBy: arrayUnion(user.uid)
         });
         
+        // Update local state for current user
         setUser((prev: any) => ({
           ...prev,
           blocked: [...(prev.blocked || []), userId]
         }));
         
+        // Update local users list
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: [...(u.blocked || []), userId] };
@@ -1796,7 +1800,7 @@ export default function HomePage(): React.JSX.Element {
 
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    return room.typingUsers.join(", ");
+    return room.typingUsers.join(" + ");
   };
 
   const getRegularTypingUsers = () => {
@@ -1844,7 +1848,7 @@ export default function HomePage(): React.JSX.Element {
   const isOfficialChatSelected = selectedChat?.id === "official_menuru";
 
   // Official typing display - semua user yang sedang mengetik di Official Menuru
-  const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(", ") : null;
+  const officialTypingDisplay = officialTypingUsers.length > 0 ? officialTypingUsers.join(" + ") : null;
 
   // Cek apakah ada user yang diblok
   const hasBlockedUsers = Object.keys(chatRooms).some(key => {
@@ -1855,7 +1859,6 @@ export default function HomePage(): React.JSX.Element {
 
   return (
     <>
-      {/* HEAD METADATA */}
       <Head>
         <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
@@ -1869,7 +1872,6 @@ export default function HomePage(): React.JSX.Element {
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         
-        {/* Open Graph */}
         <meta property="og:title" content="Menuru Official | Home" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
@@ -1877,7 +1879,6 @@ export default function HomePage(): React.JSX.Element {
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Menuru Official" />
         
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Menuru Official | Home" />
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
@@ -1895,7 +1896,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* BANNER - dengan #lifeatmenuru bg #EB2227 */}
+        {/* BANNER - BIRU dengan #lifeatmenuru bg #EB2227, TANPA EMOTICON */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1916,9 +1917,6 @@ export default function HomePage(): React.JSX.Element {
             gap: "20px",
           }}
         >
-          <span style={{ color: "#ffffff", display: "flex", alignItems: "center" }}>
-            <ChatIcon />
-          </span>
           <AnimatePresence mode="wait">
             <motion.span
               key={0}
@@ -1991,7 +1989,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </motion.div>
 
-        {/* User Status - HAPUS LOGIN, TAMPILKAN USER SAJA */}
+        {/* User Status */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -2346,7 +2344,7 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
 
-                {/* Content - Update Detail Page, Update System, Privacy Policy */}
+                {/* Content - Update Detail Page */}
                 {selectedUpdateId && selectedUpdate ? (
                   <div
                     style={{
@@ -3190,7 +3188,7 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile */}
+                      {/* Peringatan block di profile - TANPA EMOTICON */}
                       {isUserBlocked(profileUser.id) && (
                         <div style={{ 
                           width: "100%", 
@@ -3203,7 +3201,7 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}>
                           <div style={{ fontSize: "14px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                            ⚠️ Maaf akun ini sudah tidak bisa di chat
+                            Maaf akun ini sudah tidak bisa di chat
                           </div>
                           <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px", fontFamily: FONT_FAMILY }}>
                             Silahkan buka block untuk melanjutkan chat
@@ -3363,7 +3361,7 @@ export default function HomePage(): React.JSX.Element {
                           {profileUser.photoURL ? (
                             <img src={profileUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                           ) : (
-                            <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                            <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{profileUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
                           )}
                         </motion.div>
                         <div>
@@ -3550,20 +3548,20 @@ export default function HomePage(): React.JSX.Element {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Peringatan block di atas Announcement - muncul otomatis saat ada block */}
+                    {/* Peringatan block - BIRU, TANPA EMOTICON */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
                         marginBottom: "10px",
                         padding: "12px 16px",
-                        backgroundColor: "#fee2e2",
+                        backgroundColor: "#dbeafe",
                         borderRadius: "8px",
-                        border: "1px solid #fecaca",
+                        border: "1px solid #bfdbfe",
                         textAlign: "center",
                         fontFamily: FONT_FAMILY,
                       }}>
-                        <div style={{ fontSize: "13px", color: "#dc2626", fontWeight: 500, fontFamily: FONT_FAMILY }}>
-                          ⚠️ Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
+                        <div style={{ fontSize: "13px", color: "#1d4ed8", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
                         </div>
                       </div>
                     )}
@@ -3581,7 +3579,6 @@ export default function HomePage(): React.JSX.Element {
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <div style={{ fontSize: "20px" }}>📢</div>
                       <div>
                         <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
                           Announcement
@@ -3794,7 +3791,7 @@ export default function HomePage(): React.JSX.Element {
                                     {u.photoURL ? (
                                       <img src={u.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     ) : (
-                                      <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{u.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                      <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{u.name?.charAt(0)?.toUpperCase() || "?"}</span>
                                     )}
                                   </div>
                                   <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
@@ -3938,7 +3935,7 @@ export default function HomePage(): React.JSX.Element {
                                       {otherUser.photoURL ? (
                                         <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                       ) : (
-                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
                                       )}
                                     </div>
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
@@ -4049,6 +4046,7 @@ export default function HomePage(): React.JSX.Element {
                       ) : (
                         unpinnedChats.map((room) => {
                           if (room.id === OFFICIAL_CHAT_ID) {
+                            // TYPING INDICATOR DI ROOM CHAT MENURU OFFICIAL - MULTI USER
                             const typingDisplay = getTypingUsersDisplay(room);
                             return (
                               <motion.div
@@ -4144,7 +4142,6 @@ export default function HomePage(): React.JSX.Element {
                               key={room.id}
                               whileHover={{ scale: 1.02 }}
                               onClick={() => {
-                                // Bisa klik nama user yang diblok seperti akun normal
                                 setSelectedChat(otherUser);
                               }}
                               style={{
@@ -4183,7 +4180,7 @@ export default function HomePage(): React.JSX.Element {
                                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                   />
                                 ) : (
-                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "👤"}</span>
+                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
                                 )}
                                 {otherUser.isAdmin && (
                                   <div style={{ position: "absolute", bottom: -2, right: -2 }}>
@@ -4202,17 +4199,12 @@ export default function HomePage(): React.JSX.Element {
                                   >
                                     {otherUser.name}
                                     {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
-                                    {isBlocked && (
-                                      <span style={{ fontSize: "10px", color: "#ef4444", marginLeft: "6px", fontFamily: FONT_FAMILY }}>
-                                        (Blocked)
-                                      </span>
-                                    )}
                                   </span>
                                   {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
                                 </div>
                                 <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                   {isBlocked ? (
-                                    <span style={{ color: "#ef4444" }}>⚠️ Akun diblok - klik untuk chat</span>
+                                    <span style={{ color: "#ef4444" }}>Akun diblok - klik untuk chat</span>
                                   ) : typingDisplay ? (
                                     <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
                                   ) : (
@@ -4303,9 +4295,9 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : (
-                  // Chat View - untuk user yang diblok tetap bisa dibuka
+                  // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header */}
+                    {/* Chat Header - HAPUS (Blocked) di header */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -4378,19 +4370,7 @@ export default function HomePage(): React.JSX.Element {
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}
                             />
                           ) : (
-                            <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "👤"}</span>
-                          )}
-                          {isUserBlocked(selectedChat.id) && (
-                            <div style={{
-                              position: "absolute",
-                              bottom: -2,
-                              right: -2,
-                              backgroundColor: "#ef4444",
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                              border: "2px solid #000",
-                            }} />
+                            <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "?"}</span>
                           )}
                         </motion.div>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -4402,11 +4382,6 @@ export default function HomePage(): React.JSX.Element {
                           >
                             <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                               {isOfficialChatSelected ? "Menuru Official" : selectedChat.name}
-                              {isUserBlocked(selectedChat.id) && (
-                                <span style={{ fontSize: "10px", color: "#ef4444", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
-                                  (Blocked)
-                                </span>
-                              )}
                             </span>
                             {isOfficialChatSelected && <InstagramVerifiedBadge size={12} />}
                             {!isOfficialChatSelected && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
@@ -4415,8 +4390,6 @@ export default function HomePage(): React.JSX.Element {
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                             {isOfficialChatSelected ? (
                               <OnlineIndicator online={true} />
-                            ) : isUserBlocked(selectedChat.id) ? (
-                              <span style={{ fontSize: "9px", color: "#ef4444", fontFamily: FONT_FAMILY }}>Blocked</span>
                             ) : (
                               <>
                                 <OnlineIndicator 
@@ -4436,7 +4409,7 @@ export default function HomePage(): React.JSX.Element {
                             )}
                           </div>
                         </div>
-                        {!isOfficialChatSelected && !isUserBlocked(selectedChat.id) && (
+                        {!isOfficialChatSelected && (
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
@@ -4456,32 +4429,10 @@ export default function HomePage(): React.JSX.Element {
                             <PinIcon filled={selectedChat.isPinned || false} />
                           </motion.button>
                         )}
-                        {!isOfficialChatSelected && isUserBlocked(selectedChat.id) && (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => {
-                              const blocked = isUserBlocked(selectedChat.id);
-                              handleBlockUser(selectedChat.id, blocked);
-                            }}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#ef4444",
-                              padding: "4px 12px",
-                              fontSize: "12px",
-                              fontFamily: FONT_FAMILY,
-                              borderRadius: "4px",
-                            }}
-                          >
-                            Unblock
-                          </motion.button>
-                        )}
                       </div>
                     </div>
 
-                    {/* Official Chat View - dengan TYPING INDICATOR MULTI USER */}
+                    {/* Official Chat View */}
                     {isOfficialChatSelected ? (
                       <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                         {/* Pinned Messages di Official Chat */}
@@ -4561,7 +4512,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         )}
 
-                        {/* Messages Area dengan TYPING INDICATOR MULTI USER */}
+                        {/* Messages Area - TYPING INDICATOR MULTI USER di body chat */}
                         <div
                           style={{
                             flex: 1,
@@ -4575,7 +4526,7 @@ export default function HomePage(): React.JSX.Element {
                             minHeight: 0,
                           }}
                         >
-                          {/* TYPING INDICATOR - OFFICIAL MENURU - FONT BESAR, HITAM, TIDAK ITALIC */}
+                          {/* TYPING INDICATOR - OFFICIAL MENURU - MULTI USER di body chat */}
                           {officialTypingDisplay && (
                             <div
                               style={{
@@ -4884,7 +4835,7 @@ export default function HomePage(): React.JSX.Element {
                           <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input for official chat - dengan TYPING INDICATOR di atas input */}
+                        {/* Input for official chat - TYPING INDICATOR di atas input */}
                         <div
                           style={{
                             padding: "10px 14px 14px",
@@ -4898,7 +4849,7 @@ export default function HomePage(): React.JSX.Element {
                             flexShrink: 0,
                           }}
                         >
-                          {/* TYPING INDICATOR di atas input - OFFICIAL MENURU - FONT BESAR, HITAM, TIDAK ITALIC */}
+                          {/* TYPING INDICATOR di atas input - OFFICIAL MENURU - MULTI USER */}
                           {officialTypingDisplay && (
                             <div
                               style={{
@@ -5139,7 +5090,7 @@ export default function HomePage(): React.JSX.Element {
                             >
                               <div style={{ fontSize: "48px", marginBottom: "12px" }}>🔒</div>
                               <div style={{ fontWeight: 500, color: "#dc2626", fontFamily: FONT_FAMILY }}>
-                                ⚠️ Akun sudah di block oleh anda
+                                Akun sudah di block oleh anda
                               </div>
                               <div style={{ fontSize: "12px", marginTop: "4px", color: "#ef4444", fontFamily: FONT_FAMILY }}>
                                 Maaf akun ini sudah tidak bisa di chat, silahkan buka block
