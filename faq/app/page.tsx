@@ -532,6 +532,8 @@ export default function HomePage(): React.JSX.Element {
   const [showFullImage, setShowFullImage] = useState<string | null>(null);
   const [showAddMemberToGroup, setShowAddMemberToGroup] = useState(false);
   const [selectedGroupMember, setSelectedGroupMember] = useState("");
+  const [chatButtonMessages, setChatButtonMessages] = useState<string[]>([]);
+  const [chatButtonIndex, setChatButtonIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
@@ -792,6 +794,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
+      const allMessages: string[] = [];
       
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -827,6 +830,12 @@ export default function HomePage(): React.JSX.Element {
               const unreadSnap = await getDocs(unreadQuery);
               unreadCount = unreadSnap.size;
               totalUnreadCount += unreadCount;
+              
+              // Collect unread messages for chat button
+              unreadSnap.forEach((doc) => {
+                const msg = doc.data() as Message;
+                allMessages.push(`${otherUser.name}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
+              });
               
               const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
               
@@ -870,6 +879,13 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
+            // Collect unread messages for chat button
+            unreadSnap.forEach((doc) => {
+              const msg = doc.data() as Message;
+              const sender = users.find(u => u.id === msg.senderId);
+              allMessages.push(`${data.groupName || 'Group'}: ${sender?.name || 'Unknown'}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
+            });
+            
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
@@ -902,6 +918,14 @@ export default function HomePage(): React.JSX.Element {
       
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
+      
+      // Update chat button messages
+      if (allMessages.length > 0) {
+        setChatButtonMessages(allMessages);
+        setChatButtonIndex(0);
+      } else {
+        setChatButtonMessages(["Chat with Menuru"]);
+      }
     });
 
     return () => {
@@ -997,6 +1021,16 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, users, chatRooms]);
 
+  // Chat button message rotation
+  useEffect(() => {
+    if (chatButtonMessages.length > 1) {
+      const interval = setInterval(() => {
+        setChatButtonIndex((prev) => (prev + 1) % chatButtonMessages.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [chatButtonMessages]);
+
   const handleLogout = async () => {
     if (!auth) return;
     try {
@@ -1083,7 +1117,7 @@ export default function HomePage(): React.JSX.Element {
     setShowAddMemberToGroup(false);
   };
 
-  // Handle Block/Unblock user
+  // Handle Block/Unblock user - dengan notifikasi realtime
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1406,7 +1440,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add member to group
+  // Add member to group - MANUAL ADD
   const handleAddMemberToGroup = async () => {
     if (!profileUser || !selectedGroupMember || !user || !db) return;
     
@@ -1604,27 +1638,11 @@ export default function HomePage(): React.JSX.Element {
 
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
-    const typingList: string[] = [];
-    if (selectedChat.isGroup && selectedChat.groupMembers) {
-      const currentRoom = chatRooms.find(r => r.id === selectedChat.id);
-      if (currentRoom && currentRoom.typingUsers) {
-        return currentRoom.typingUsers;
-      }
-      selectedChat.groupMembers.forEach(id => {
-        if (id !== user?.uid) {
-          const member = users.find(u => u.id === id);
-          if (member && member.typing) {
-            typingList.push(member.name);
-          }
-        }
-      });
-    } else {
-      const selectedUser = users.find(u => u.id === selectedChat.id);
-      if (selectedUser && selectedUser.typing && selectedUser.id !== user?.uid) {
-        typingList.push(selectedUser.name);
-      }
+    const currentRoom = chatRooms.find(r => r.id === selectedChat.id);
+    if (currentRoom && currentRoom.typingUsers) {
+      return currentRoom.typingUsers;
     }
-    return typingList;
+    return [];
   };
 
   const regularTypingUsers = getRegularTypingUsers();
@@ -1667,6 +1685,9 @@ export default function HomePage(): React.JSX.Element {
     const otherId = room.participants?.find((id: string) => id !== user?.uid);
     return otherId && (isUserBlocked(otherId) || isBlockedByUser(otherId));
   });
+
+  // Chat button display message
+  const chatButtonDisplay = chatButtonMessages.length > 0 ? chatButtonMessages[chatButtonIndex] : "Chat with Menuru";
 
   return (
     <>
@@ -1772,7 +1793,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
-        {/* Block Notification Banner - untuk akun korban block */}
+        {/* Block Notification Banner */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -2139,7 +2160,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* Header - TEXT PUTIH di BG HITAM */}
+                {/* Header */}
                 <div
                   style={{
                     padding: "16px 20px",
@@ -3090,7 +3111,13 @@ export default function HomePage(): React.JSX.Element {
                             alignItems: "center",
                             gap: "16px",
                             marginBottom: "16px",
-                          }}>
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            handleCloseProfile();
+                            setSelectedChat(profileUser);
+                          }}
+                          >
                             <div
                               style={{
                                 width: "64px",
@@ -3173,7 +3200,7 @@ export default function HomePage(): React.JSX.Element {
                             })}
                           </div>
 
-                          {/* Add member to group */}
+                          {/* Add member to group - MANUAL */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -4488,7 +4515,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : (
                   // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header - TEXT PUTIH di BG HITAM */}
+                    {/* Chat Header */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -4544,6 +4571,10 @@ export default function HomePage(): React.JSX.Element {
                               fontSize: "16px",
                               color: "#fff",
                               flexShrink: 0,
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              handleOpenProfile(selectedChat);
                             }}
                           >
                             G
@@ -4833,31 +4864,22 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* Multi-User Typing Indicator untuk Group Chat - akun a + akun b + akun c */}
-                            {selectedChat.isGroup && (
-                              (() => {
-                                const typingUsers = regularTypingUsers;
-                                
-                                if (typingUsers.length > 0) {
-                                  return (
-                                    <div
-                                      style={{
-                                        textAlign: "center",
-                                        fontSize: "16px",
-                                        color: "#000000",
-                                        padding: "8px 0",
-                                        fontStyle: "normal",
-                                        fontFamily: FONT_FAMILY,
-                                        backgroundColor: "transparent",
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      {typingUsers.join(" + ")} typing...
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()
+                            {/* Multi-User Typing Indicator untuk Group Chat - format: User A + User B + User C typing... */}
+                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "16px",
+                                  color: "#000000",
+                                  padding: "8px 0",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.join(" + ")} typing...
+                              </div>
                             )}
 
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
@@ -5167,7 +5189,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input - disabled jika user diblok */}
+                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5183,30 +5205,21 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {selectedChat.isGroup && (
-                              (() => {
-                                const typingUsers = regularTypingUsers;
-                                
-                                if (typingUsers.length > 0) {
-                                  return (
-                                    <div
-                                      style={{
-                                        textAlign: "left",
-                                        fontSize: "16px",
-                                        color: "#000000",
-                                        fontStyle: "normal",
-                                        fontFamily: FONT_FAMILY,
-                                        padding: "4px 4px 8px 4px",
-                                        backgroundColor: "transparent",
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      {typingUsers.join(" + ")} typing...
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()
+                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "left",
+                                  fontSize: "16px",
+                                  color: "#000000",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  padding: "4px 4px 8px 4px",
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.join(" + ")} typing...
+                              </div>
                             )}
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
@@ -5309,7 +5322,7 @@ export default function HomePage(): React.JSX.Element {
             )}
           </AnimatePresence>
 
-          {/* Chat Button */}
+          {/* Chat Button - menampilkan riwayat pesan user secara otomatis */}
           <motion.button
             whileHover={!isChatOpen ? { scale: 1.03 } : {}}
             whileTap={!isChatOpen ? { scale: 0.97 } : {}}
@@ -5335,7 +5348,11 @@ export default function HomePage(): React.JSX.Element {
             {!isChatOpen && (
               <>
                 <motion.span
-                  initial={{ opacity: 1 }}
+                  key={chatButtonIndex}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.3 }}
                   style={{
                     fontSize: "14px",
                     fontWeight: 500,
@@ -5347,7 +5364,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {user ? "Chat with Menuru" : "Login to Chat"}
+                  {user ? chatButtonDisplay : "Login to Chat"}
                 </motion.span>
                 {totalUnread > 0 && (
                   <motion.span
