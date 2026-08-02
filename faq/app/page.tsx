@@ -415,6 +415,93 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
+// Stories Component - 6 photos for admin
+const StoriesSection = ({ userEmail, onImageClick }: { userEmail: string; onImageClick: (url: string) => void }) => {
+  const [storyImages] = useState([10, 11, 12, 13, 14, 15]);
+  const isAdmin = userEmail === ADMIN_EMAIL;
+
+  if (!isAdmin) return null;
+
+  return (
+    <div style={{ width: "100%", marginBottom: "16px" }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center", 
+        marginBottom: "8px",
+        borderBottom: "1px solid #f0f0f0",
+        paddingBottom: "6px",
+      }}>
+        <span style={{ 
+          fontSize: "14px", 
+          fontWeight: 600, 
+          color: "#000000", 
+          fontFamily: FONT_FAMILY,
+        }}>
+          Photos
+        </span>
+        <span style={{ 
+          fontSize: "11px", 
+          color: "#999", 
+          fontFamily: FONT_FAMILY,
+        }}>
+          {storyImages.length} photos
+        </span>
+      </div>
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(3, 1fr)", 
+        gap: "6px",
+      }}>
+        {storyImages.map((num) => (
+          <div
+            key={num}
+            style={{
+              aspectRatio: "3/4",
+              backgroundColor: "#f0f0f0",
+              borderRadius: "8px",
+              overflow: "hidden",
+              border: "1px solid #e8e8e8",
+              position: "relative",
+              cursor: "pointer",
+              transition: "transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
+            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+            onClick={() => onImageClick(`/images/${num}.jpg`)}
+          >
+            <img
+              src={`/images/${num}.jpg`}
+              alt={`Photo ${num}`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.style.backgroundColor = "#f0f0f0";
+                  parent.style.display = "flex";
+                  parent.style.alignItems = "center";
+                  parent.style.justifyContent = "center";
+                  const span = document.createElement("span");
+                  span.textContent = `${num}`;
+                  span.style.color = "#999";
+                  span.style.fontSize = "12px";
+                  span.style.fontFamily = FONT_FAMILY;
+                  parent.appendChild(span);
+                }
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function HomePage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -443,6 +530,8 @@ export default function HomePage(): React.JSX.Element {
   const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
   const [showBlockDropdown, setShowBlockDropdown] = useState(false);
   const [showFullImage, setShowFullImage] = useState<string | null>(null);
+  const [showAddMemberToGroup, setShowAddMemberToGroup] = useState(false);
+  const [selectedGroupMember, setSelectedGroupMember] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
@@ -834,7 +923,6 @@ export default function HomePage(): React.JSX.Element {
       
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
-        // Ensure groupId is set properly
         if (selectedChat.isGroup && !msg.groupId) {
           msg.groupId = chatId;
         }
@@ -874,7 +962,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // Listen for typing status
+  // Listen for typing status - MULTI USER TYPING
   useEffect(() => {
     if (!db || !user) return;
 
@@ -887,8 +975,9 @@ export default function HomePage(): React.JSX.Element {
         if (data.typing && data.id !== user?.uid) {
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
+            // Check all rooms where this user is a participant
             chatRooms.forEach(room => {
-              if (room.participants.includes(data.id) || room.participants.includes(foundUser.id)) {
+              if (room.participants && room.participants.includes(data.id)) {
                 if (!typingMap[room.id]) typingMap[room.id] = [];
                 if (!typingMap[room.id].includes(foundUser.name)) {
                   typingMap[room.id].push(foundUser.name);
@@ -984,12 +1073,14 @@ export default function HomePage(): React.JSX.Element {
     setProfileUser(chatUser);
     setShowProfile(true);
     setShowBlockDropdown(false);
+    setShowAddMemberToGroup(false);
   };
 
   const handleCloseProfile = () => {
     setShowProfile(false);
     setProfileUser(null);
     setShowBlockDropdown(false);
+    setShowAddMemberToGroup(false);
   };
 
   // Handle Block/Unblock user
@@ -1049,7 +1140,7 @@ export default function HomePage(): React.JSX.Element {
         }));
         
         const blockedUser = users.find(u => u.id === userId);
-        setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir`);
+        setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir oleh anda`);
         setTimeout(() => setBlockNotification(null), 5000);
       }
       
@@ -1315,7 +1406,71 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Create Group Chat - dengan cek duplikat nama
+  // Add member to group
+  const handleAddMemberToGroup = async () => {
+    if (!profileUser || !selectedGroupMember || !user || !db) return;
+    
+    if (!profileUser.isGroup) return;
+    
+    try {
+      const targetUser = users.find(u => u.id === selectedGroupMember);
+      if (!targetUser) {
+        setAddUserStatus("User not found");
+        return;
+      }
+      
+      const groupRef = doc(db, "chats", profileUser.id);
+      const groupSnap = await getDoc(groupRef);
+      
+      if (groupSnap.exists()) {
+        const groupData = groupSnap.data();
+        const currentMembers = groupData.groupMembers || [];
+        
+        if (currentMembers.includes(selectedGroupMember)) {
+          setAddUserStatus(`${targetUser.name} already in group`);
+          return;
+        }
+        
+        const newMembers = [...currentMembers, selectedGroupMember];
+        const newParticipants = [...groupData.participants, selectedGroupMember];
+        
+        await updateDoc(groupRef, {
+          groupMembers: newMembers,
+          participants: newParticipants
+        });
+        
+        // Update local state
+        setProfileUser({
+          ...profileUser,
+          groupMembers: newMembers
+        });
+        
+        setUsers(prev => prev.map(u => {
+          if (u.id === profileUser.id) {
+            return { ...u, groupMembers: newMembers };
+          }
+          return u;
+        }));
+        
+        setChatRooms(prev => prev.map(room => {
+          if (room.id === profileUser.id) {
+            return { ...room, groupMembers: newMembers, participants: newParticipants };
+          }
+          return room;
+        }));
+        
+        setAddUserStatus(`${targetUser.name} added to group!`);
+        setSelectedGroupMember("");
+        setShowAddMemberToGroup(false);
+        setTimeout(() => setAddUserStatus(""), 3000);
+      }
+    } catch (error) {
+      console.error("Error adding member to group:", error);
+      setAddUserStatus("Failed to add member");
+    }
+  };
+
+  // Create Group Chat
   const handleCreateGroup = async () => {
     if (!user || !db || !groupName.trim() || selectedGroupMembers.length === 0) {
       setAddUserStatus("Please fill in all fields");
@@ -1323,7 +1478,6 @@ export default function HomePage(): React.JSX.Element {
     }
 
     try {
-      // Check if group name already exists
       const existingGroup = chatRooms.find(room => 
         room.isGroup && room.groupName === groupName.trim()
       );
@@ -1357,7 +1511,6 @@ export default function HomePage(): React.JSX.Element {
       setGroupAdmins([]);
       setShowAddGroup(false);
       
-      // Add group to users list
       const newGroup: ChatUser = {
         id: groupId,
         name: groupName.trim(),
@@ -1446,13 +1599,17 @@ export default function HomePage(): React.JSX.Element {
 
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    return room.typingUsers.join(", ");
+    return room.typingUsers.join(" + ");
   };
 
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
     const typingList: string[] = [];
     if (selectedChat.isGroup && selectedChat.groupMembers) {
+      const currentRoom = chatRooms.find(r => r.id === selectedChat.id);
+      if (currentRoom && currentRoom.typingUsers) {
+        return currentRoom.typingUsers;
+      }
       selectedChat.groupMembers.forEach(id => {
         if (id !== user?.uid) {
           const member = users.find(u => u.id === id);
@@ -1918,7 +2075,7 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                backgroundColor: "rgba(0,0,0,0.8)",
+                backgroundColor: "rgba(0,0,0,0.85)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 zIndex: 9999,
@@ -1941,6 +2098,7 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "12px",
                   objectFit: "contain",
                   cursor: "default",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
                 }}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -2831,7 +2989,7 @@ export default function HomePage(): React.JSX.Element {
                           <span>Back</span>
                         </motion.button>
 
-                        {profileUser.id !== user.uid && !profileUser.isGroup && (
+                        {!profileUser.isGroup && profileUser.id !== user.uid && (
                           <div ref={blockDropdownRef} style={{ position: "relative" }}>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
@@ -2924,7 +3082,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Group Chat Profile - bisa diklik */}
+                      {/* Group Chat Profile */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -2993,7 +3151,7 @@ export default function HomePage(): React.JSX.Element {
                                   backgroundColor: isGroupAdmin ? "#0D3CFC" : "#f5f5f5",
                                   borderRadius: "6px",
                                   fontFamily: FONT_FAMILY,
-                                  cursor: "pointer",
+                                  cursor: member.id !== user.uid ? "pointer" : "default",
                                 }}
                                 onClick={() => {
                                   if (member.id !== user.uid) {
@@ -3014,6 +3172,105 @@ export default function HomePage(): React.JSX.Element {
                               ) : null;
                             })}
                           </div>
+
+                          {/* Add member to group */}
+                          {profileUser.createdBy === user.uid && (
+                            <div style={{ marginTop: "12px" }}>
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setShowAddMemberToGroup(!showAddMemberToGroup)}
+                                style={{
+                                  padding: "6px 14px",
+                                  backgroundColor: "#0D3CFC",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                + Add Member
+                              </motion.button>
+                              
+                              <AnimatePresence>
+                                {showAddMemberToGroup && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    style={{ marginTop: "8px", overflow: "hidden" }}
+                                  >
+                                    <select
+                                      value={selectedGroupMember}
+                                      onChange={(e) => setSelectedGroupMember(e.target.value)}
+                                      style={{
+                                        width: "100%",
+                                        padding: "8px 12px",
+                                        border: "1px solid #e0e0e0",
+                                        borderRadius: "6px",
+                                        fontSize: "13px",
+                                        outline: "none",
+                                        fontFamily: FONT_FAMILY,
+                                        marginBottom: "8px",
+                                        backgroundColor: "#fff",
+                                        color: "#000",
+                                      }}
+                                    >
+                                      <option value="">Select user...</option>
+                                      {users.filter(u => 
+                                        u.id !== user.uid &&
+                                        !profileUser.groupMembers?.includes(u.id) &&
+                                        !u.isGroup &&
+                                        !isUserBlocked(u.id) &&
+                                        !isBlockedByUser(u.id)
+                                      ).map((u) => (
+                                        <option key={u.id} value={u.id}>
+                                          {u.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <div style={{ display: "flex", gap: "8px" }}>
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={handleAddMemberToGroup}
+                                        disabled={!selectedGroupMember}
+                                        style={{
+                                          backgroundColor: selectedGroupMember ? "#0D3CFC" : "#ccc",
+                                          color: "#fff",
+                                          border: "none",
+                                          padding: "6px 14px",
+                                          borderRadius: "6px",
+                                          fontSize: "12px",
+                                          cursor: selectedGroupMember ? "pointer" : "not-allowed",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        Add
+                                      </motion.button>
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setShowAddMemberToGroup(false)}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          fontSize: "12px",
+                                          color: "#666",
+                                          cursor: "pointer",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        Cancel
+                                      </motion.button>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )}
 
                           <div style={{ display: "flex", gap: "8px", marginTop: "16px", width: "100%" }}>
                             <motion.button
@@ -3093,6 +3350,12 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             </div>
                           </div>
+
+                          {/* Stories for admin */}
+                          <StoriesSection 
+                            userEmail={profileUser.email} 
+                            onImageClick={(url) => setShowFullImage(url)}
+                          />
 
                           <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                             <motion.button
@@ -4570,35 +4833,26 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* Multi-User Typing Indicator untuk Group Chat */}
-                            {selectedChat.isGroup && selectedChat.groupMembers && (
+                            {/* Multi-User Typing Indicator untuk Group Chat - akun a + akun b + akun c */}
+                            {selectedChat.isGroup && (
                               (() => {
-                                const typingUsers = selectedChat.groupMembers
-                                  .filter(id => {
-                                    const member = users.find(u => u.id === id);
-                                    return member && member.typing && member.id !== user?.uid;
-                                  })
-                                  .map(id => {
-                                    const member = users.find(u => u.id === id);
-                                    return member ? member.name : "";
-                                  })
-                                  .filter(Boolean);
+                                const typingUsers = regularTypingUsers;
                                 
                                 if (typingUsers.length > 0) {
                                   return (
                                     <div
                                       style={{
                                         textAlign: "center",
-                                        fontSize: "14px",
+                                        fontSize: "16px",
                                         color: "#000000",
-                                        padding: "6px 0",
+                                        padding: "8px 0",
                                         fontStyle: "normal",
                                         fontFamily: FONT_FAMILY,
                                         backgroundColor: "transparent",
                                         fontWeight: 600,
                                       }}
                                     >
-                                      {typingUsers.join(", ")} typing...
+                                      {typingUsers.join(" + ")} typing...
                                     </div>
                                   );
                                 }
@@ -4929,25 +5183,16 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {selectedChat.isGroup && selectedChat.groupMembers && (
+                            {selectedChat.isGroup && (
                               (() => {
-                                const typingUsers = selectedChat.groupMembers
-                                  .filter(id => {
-                                    const member = users.find(u => u.id === id);
-                                    return member && member.typing && member.id !== user?.uid;
-                                  })
-                                  .map(id => {
-                                    const member = users.find(u => u.id === id);
-                                    return member ? member.name : "";
-                                  })
-                                  .filter(Boolean);
+                                const typingUsers = regularTypingUsers;
                                 
                                 if (typingUsers.length > 0) {
                                   return (
                                     <div
                                       style={{
                                         textAlign: "left",
-                                        fontSize: "14px",
+                                        fontSize: "16px",
                                         color: "#000000",
                                         fontStyle: "normal",
                                         fontFamily: FONT_FAMILY,
@@ -4956,7 +5201,7 @@ export default function HomePage(): React.JSX.Element {
                                         fontWeight: 600,
                                       }}
                                     >
-                                      {typingUsers.join(", ")} typing...
+                                      {typingUsers.join(" + ")} typing...
                                     </div>
                                   );
                                 }
