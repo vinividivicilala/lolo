@@ -111,6 +111,7 @@ interface ChatRoom {
   unreadCount: number;
   isPinned?: boolean;
   typingUsers?: string[];
+  typingUsersId?: string[];
   isBlocked?: boolean;
   isGroup?: boolean;
   groupName?: string;
@@ -961,6 +962,7 @@ export default function HomePage(): React.JSX.Element {
                 unreadCount: isBlocked ? 0 : unreadCount,
                 isPinned: data.isPinned || false,
                 typingUsers: [],
+                typingUsersId: [],
                 isBlocked: isBlocked,
                 isGroup: false
               });
@@ -1008,6 +1010,7 @@ export default function HomePage(): React.JSX.Element {
               unreadCount: unreadCount,
               isPinned: data.isPinned || false,
               typingUsers: [],
+              typingUsersId: [],
               isBlocked: false,
               isGroup: true,
               groupName: data.groupName || "Group Chat",
@@ -1099,26 +1102,31 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // Listen for typing status - MULTI USER TYPING untuk group chat
+  // LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION
   useEffect(() => {
     if (!db || !user) return;
 
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      const typingMap: { [key: string]: string[] } = {};
+      // Buat map untuk menyimpan typing users per room
+      const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
       
       snapshot.forEach((doc) => {
         const data = doc.data();
+        // Hanya proses user yang sedang typing dan bukan current user
         if (data.typing && data.id !== user?.uid) {
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
-            // Check all rooms where this user is a participant
+            // Cek semua room yang diikuti oleh user ini
             chatRooms.forEach(room => {
               if (room.participants && room.participants.includes(data.id)) {
-                if (!typingMap[room.id]) typingMap[room.id] = [];
-                // Gunakan nama user, bukan ID, untuk menampilkan multi-user typing
-                if (!typingMap[room.id].includes(foundUser.name)) {
-                  typingMap[room.id].push(foundUser.name);
+                if (!typingMap[room.id]) {
+                  typingMap[room.id] = { names: [], ids: [] };
+                }
+                // Gunakan nama user untuk display, hindari duplikat
+                if (!typingMap[room.id].names.includes(foundUser.name)) {
+                  typingMap[room.id].names.push(foundUser.name);
+                  typingMap[room.id].ids.push(data.id);
                 }
               }
             });
@@ -1126,9 +1134,11 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
+      // Update chatRooms dengan data typing terbaru
       setChatRooms(prev => prev.map(room => ({
         ...room,
-        typingUsers: typingMap[room.id] || []
+        typingUsers: typingMap[room.id]?.names || [],
+        typingUsersId: typingMap[room.id]?.ids || []
       })));
     });
 
@@ -1759,9 +1769,16 @@ export default function HomePage(): React.JSX.Element {
     !u.isGroup
   );
 
+  // Fungsi untuk mendapatkan display typing users dengan format yang benar
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    // Format: "User A + User B + User C" untuk multi-user typing
+    
+    // Jika hanya 1 user yang typing
+    if (room.typingUsers.length === 1) {
+      return room.typingUsers[0];
+    }
+    
+    // Jika lebih dari 1 user yang typing - format: "User A + User B + User C"
     return room.typingUsers.join(" + ");
   };
 
@@ -4090,8 +4107,7 @@ export default function HomePage(): React.JSX.Element {
                             >
                               Create Group
                             </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
+                            <motion.button                              whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               onClick={() => {
                                 setShowAddGroup(false);
