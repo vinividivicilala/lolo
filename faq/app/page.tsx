@@ -549,6 +549,9 @@ export default function HomePage(): React.JSX.Element {
   const [searchUserResult, setSearchUserResult] = useState<ChatUser | null>(null);
   const [searchUserStatus, setSearchUserStatus] = useState("");
 
+  // State untuk block banner di list chat (untuk penerima block)
+  const [blockedByBanner, setBlockedByBanner] = useState<{userId: string, userName: string} | null>(null);
+
   // Banner text
   const bannerTexts = [
     "Website sedang dalam pengembangan, Terima kasih"
@@ -888,6 +891,24 @@ export default function HomePage(): React.JSX.Element {
       let totalUnreadCount = 0;
       const allMessages: string[] = [];
       
+      // Cek apakah ada user yang memblock current user
+      let blockedByUser = null;
+      for (const u of users) {
+        if (u.id !== user.uid && (u.blockedBy || []).includes(user.uid)) {
+          blockedByUser = u;
+          break;
+        }
+      }
+      
+      if (blockedByUser) {
+        setBlockedByBanner({
+          userId: blockedByUser.id,
+          userName: blockedByUser.name
+        });
+      } else {
+        setBlockedByBanner(null);
+      }
+      
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
@@ -1078,7 +1099,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // Listen for typing status - MULTI USER TYPING
+  // Listen for typing status - MULTI USER TYPING untuk group chat
   useEffect(() => {
     if (!db || !user) return;
 
@@ -1095,6 +1116,7 @@ export default function HomePage(): React.JSX.Element {
             chatRooms.forEach(room => {
               if (room.participants && room.participants.includes(data.id)) {
                 if (!typingMap[room.id]) typingMap[room.id] = [];
+                // Gunakan nama user, bukan ID, untuk menampilkan multi-user typing
                 if (!typingMap[room.id].includes(foundUser.name)) {
                   typingMap[room.id].push(foundUser.name);
                 }
@@ -1168,7 +1190,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handle typing for chat
+  // Handle typing untuk chat - update status typing di Firestore
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1213,7 +1235,7 @@ export default function HomePage(): React.JSX.Element {
     setShowAddMemberToGroup(false);
   };
 
-  // Handle Block/Unblock user - dengan notifikasi realtime
+  // Handle Block/Unblock user - dengan notifikasi realtime untuk penerima block
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1222,6 +1244,7 @@ export default function HomePage(): React.JSX.Element {
       const targetRef = doc(db, "users", userId);
       
       if (isBlocked) {
+        // UNBLOCK: menghapus block
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -1244,9 +1267,15 @@ export default function HomePage(): React.JSX.Element {
           return u;
         }));
         
+        // Hapus banner untuk user yang diunblock
+        if (blockedByBanner?.userId === userId) {
+          setBlockedByBanner(null);
+        }
+        
         setBlockNotification(null);
         
       } else {
+        // BLOCK: menambahkan block
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -1271,6 +1300,9 @@ export default function HomePage(): React.JSX.Element {
         
         const blockedUser = users.find(u => u.id === userId);
         setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir oleh anda`);
+        
+        // Banner untuk penerima block (akan terlihat di list chat user yang diblok)
+        // Ini akan otomatis terdeteksi melalui effect chatRooms
         setTimeout(() => setBlockNotification(null), 5000);
       }
       
@@ -1729,6 +1761,7 @@ export default function HomePage(): React.JSX.Element {
 
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
+    // Format: "User A + User B + User C" untuk multi-user typing
     return room.typingUsers.join(" + ");
   };
 
@@ -1774,12 +1807,20 @@ export default function HomePage(): React.JSX.Element {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
-  // Cek apakah ada user yang diblok
+  // Cek apakah ada user yang diblok oleh current user
   const hasBlockedUsers = Object.keys(chatRooms).some(key => {
     const room = chatRooms[key];
     if (room.isGroup) return false;
     const otherId = room.participants?.find((id: string) => id !== user?.uid);
-    return otherId && (isUserBlocked(otherId) || isBlockedByUser(otherId));
+    return otherId && isUserBlocked(otherId);
+  });
+
+  // Cek apakah ada user yang memblock current user (banner untuk penerima block)
+  const hasBlockedByUsers = Object.keys(chatRooms).some(key => {
+    const room = chatRooms[key];
+    if (room.isGroup) return false;
+    const otherId = room.participants?.find((id: string) => id !== user?.uid);
+    return otherId && isBlockedByUser(otherId);
   });
 
   // Chat button display message
@@ -1889,7 +1930,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
-        {/* Block Notification Banner */}
+        {/* Block Notification Banner - untuk pengirim block */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -1918,6 +1959,29 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Banner untuk penerima block - muncul di list chat */}
+        {isChatOpen && blockedByBanner && (
+          <div style={{
+            position: "fixed",
+            top: "70px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            backgroundColor: "#ef4444",
+            color: "#ffffff",
+            padding: "12px 24px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: 500,
+            fontFamily: FONT_FAMILY,
+            boxShadow: "0 4px 20px rgba(239,68,68,0.3)",
+            textAlign: "center",
+            maxWidth: "90%",
+          }}>
+            {blockedByBanner.userName} telah memblokir anda
+          </div>
+        )}
 
         {/* Menuru */}
         <motion.div
@@ -3569,7 +3633,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH */}
+                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH untuk pengirim block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3583,6 +3647,27 @@ export default function HomePage(): React.JSX.Element {
                       }}>
                         <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
                           Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Banner untuk penerima block - WARNA MERAH */}
+                    {hasBlockedByUsers && (
+                      <div style={{ 
+                        width: "100%", 
+                        marginBottom: "10px",
+                        padding: "12px 16px",
+                        backgroundColor: "#ef4444",
+                        borderRadius: "8px",
+                        border: "none",
+                        textAlign: "center",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          {blockedByBanner?.userName || "Beberapa akun"} telah memblokir anda
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#ffffff", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                          Anda tidak dapat mengirim pesan ke akun yang memblokir anda
                         </div>
                       </div>
                     )}
