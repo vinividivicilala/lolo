@@ -2152,7 +2152,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - TINGGI 700px */}
+            {/* Search - TINGGI 700px, ROLLING DENGAN SETINTERVAL */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2333,7 +2333,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* KANAN: Shop + Pusat Bantuan + User Login - semuanya tanpa background, teks hitam, ikon besar */}
+          {/* KANAN: Shop + Pusat Bantuan + User Login - tanpa background, teks hitam */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             {/* Shop Button */}
             <motion.button
@@ -2365,7 +2365,7 @@ export default function HomePage(): React.JSX.Element {
               <span>Shop</span>
             </motion.button>
 
-            {/* Help Center Button - tanpa bg, teks hitam */}
+            {/* Help Center Button */}
             <motion.button
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2395,7 +2395,7 @@ export default function HomePage(): React.JSX.Element {
               <span>Pusat bantuan</span>
             </motion.button>
 
-            {/* User Login Status - tanpa background, teks hitam */}
+            {/* User Login Status */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -2918,7 +2918,8 @@ export default function HomePage(): React.JSX.Element {
                             fontFamily: FONT_FAMILY,
                           }}
                         >
-                          Update Detail                        </h3>
+                          Update Detail
+                        </h3>
                         <p
                           style={{
                             fontSize: "14px",
@@ -3612,7 +3613,7 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
+                      {/* Peringatan block di profile */}
                       {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
                         <div style={{ 
                           width: "100%", 
@@ -3730,7 +3731,7 @@ export default function HomePage(): React.JSX.Element {
                             })}
                           </div>
 
-                          {/* Add member to group - MANUAL */}
+                          {/* Add member to group */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -3979,7 +3980,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Banner Announcement - WARNA HIJAU STABILO */}
+                    {/* Banner Announcement */}
                     <div
                       style={{
                         display: "flex",
@@ -4003,7 +4004,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH untuk pengirim block */}
+                    {/* Peringatan block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -4021,7 +4022,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Banner untuk penerima block - WARNA MERAH */}
+                    {/* Banner untuk penerima block */}
                     {hasBlockedByUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -4042,7 +4043,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* FORM ADD USER MANUAL - SEARCH BY EMAIL */}
+                    {/* FORM ADD USER MANUAL */}
                     <div style={{
                       padding: "14px",
                       backgroundColor: "#f8f8f8",
@@ -4908,7 +4909,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
-                          // Group Chat
                           if (room.isGroup) {
                             const typingDisplay = getTypingUsersDisplay(room);
                             return (
@@ -5358,7 +5358,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Chat View */}
+                    {/* Chat View dengan Multi-User Typing Indicator */}
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
@@ -5544,18 +5544,18 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
+                            {/* ===== MULTI-USER TYPING INDICATOR SEPERTI WHATSAPP ===== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
-                                  textAlign: "center",
-                                  fontSize: "16px",
-                                  color: "#000000",
-                                  padding: "8px 0",
-                                  fontStyle: "normal",
+                                  textAlign: "left",
+                                  fontSize: "14px",
+                                  color: "#666666",
+                                  padding: "6px 0 10px 0",
+                                  fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
                                   backgroundColor: "transparent",
-                                  fontWeight: 600,
+                                  fontWeight: 400,
                                 }}
                               >
                                 {getTypingUsersText(regularTypingUsers)}
@@ -5565,14 +5565,14 @@ export default function HomePage(): React.JSX.Element {
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
-                                  textAlign: "center",
+                                  textAlign: "left",
                                   fontSize: "14px",
-                                  color: "#000000",
-                                  padding: "6px 0",
-                                  fontStyle: "normal",
+                                  color: "#666666",
+                                  padding: "4px 0 8px 0",
+                                  fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
                                   backgroundColor: "transparent",
-                                  fontWeight: 600,
+                                  fontWeight: 400,
                                 }}
                               >
                                 {getTypingUsersText(regularTypingUsers)}
@@ -5869,7 +5869,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input */}
+                      {/* Input dengan Typing Indicator di atas */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5885,18 +5885,18 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
+                            {/* ===== MULTI-USER TYPING INDICATOR DI ATAS INPUT ===== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
                                   textAlign: "left",
-                                  fontSize: "16px",
-                                  color: "#000000",
-                                  fontStyle: "normal",
+                                  fontSize: "13px",
+                                  color: "#666666",
+                                  padding: "2px 4px 6px 4px",
+                                  fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
-                                  padding: "4px 4px 8px 4px",
                                   backgroundColor: "transparent",
-                                  fontWeight: 600,
+                                  fontWeight: 400,
                                 }}
                               >
                                 {getTypingUsersText(regularTypingUsers)}
@@ -5906,13 +5906,13 @@ export default function HomePage(): React.JSX.Element {
                               <div
                                 style={{
                                   textAlign: "left",
-                                  fontSize: "14px",
-                                  color: "#000000",
-                                  fontStyle: "normal",
+                                  fontSize: "13px",
+                                  color: "#666666",
+                                  padding: "2px 4px 6px 4px",
+                                  fontStyle: "italic",
                                   fontFamily: FONT_FAMILY,
-                                  padding: "4px 4px 8px 4px",
                                   backgroundColor: "transparent",
-                                  fontWeight: 600,
+                                  fontWeight: 400,
                                 }}
                               >
                                 {getTypingUsersText(regularTypingUsers)}
