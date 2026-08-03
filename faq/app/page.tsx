@@ -568,6 +568,7 @@ export default function HomePage(): React.JSX.Element {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchExpandedRef = useRef<HTMLDivElement>(null);
 
   // ========== ROLLING TEXT SEARCH ==========
   const searchRollingTexts = ["Tentang Note", "Calendar", "Donasi", "Blog"];
@@ -687,12 +688,12 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, [rollingIndex, searchRollingTexts]);
 
-  // ========== SEARCH EFFECT WITH GSAP ==========
+  // ========== SEARCH EXPAND EFFECT WITH GSAP ==========
   useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      gsap.fromTo(searchInputRef.current, 
-        { width: 0, opacity: 0, scale: 0.8 },
-        { width: "180px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+    if (isSearchOpen && searchExpandedRef.current) {
+      gsap.fromTo(searchExpandedRef.current,
+        { height: 0, opacity: 0, y: -10 },
+        { height: "auto", opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
       );
       setTimeout(() => searchInputRef.current?.focus(), 300);
     }
@@ -2152,6 +2153,7 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
               ref={searchContainerRef}
+              style={{ position: "relative" }}
             >
               <div style={{
                 display: "flex",
@@ -2162,73 +2164,28 @@ export default function HomePage(): React.JSX.Element {
                 border: "none",
                 transition: "all 0.3s ease",
                 position: "relative",
-                minWidth: "240px",
+                minWidth: isSearchOpen ? "280px" : "240px",
                 boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
-              }}>
-                {isSearchOpen ? (
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                if (!isSearchOpen) {
+                  setIsSearchOpen(true);
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }
+              }}
+              >
+                {!isSearchOpen ? (
                   <div style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
-                    padding: "0 4px",
+                    gap: "10px",
+                    padding: "8px 16px",
+                    color: "#ffffff",
                     width: "100%",
+                    justifyContent: "space-between",
                   }}>
-                    <SearchIcon size={18} />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Cari..."
-                      style={{
-                        border: "none",
-                        outline: "none",
-                        backgroundColor: "transparent",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                        padding: "8px 4px",
-                        width: "180px",
-                        color: "#ffffff",
-                        flex: 1,
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        setIsSearchOpen(false);
-                        setSearchQuery("");
-                        setSearchResults([]);
-                      }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "rgba(255,255,255,0.5)",
-                        padding: "4px 6px",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsSearchOpen(true)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: "8px 16px",
-                      color: "#ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "14px",
-                      width: "100%",
-                      justifyContent: "space-between",
-                    }}
-                  >
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <SearchIcon size={18} />
                       <span 
@@ -2249,61 +2206,156 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       ⌘K
                     </span>
-                  </button>
-                )}
-
-                {/* Search Results Dropdown */}
-                <AnimatePresence>
-                  {isSearchOpen && searchResults.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        position: "absolute",
-                        top: "calc(100% + 8px)",
-                        left: 0,
-                        right: 0,
-                        backgroundColor: "#ffffff",
-                        borderRadius: "12px",
-                        boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                        border: "1px solid #f0f0f0",
-                        padding: "6px 0",
-                        zIndex: 100,
-                        minWidth: "240px",
-                      }}
-                    >
-                      {searchResults.map((item, index) => (
-                        <motion.div
-                          key={item}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          onClick={() => handleSearchSelect(item)}
-                          style={{
-                            padding: "10px 16px",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            color: "#000",
-                            fontFamily: FONT_FAMILY,
-                            transition: "all 0.2s ease",
-                            borderRadius: "4px",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "#f5f5f5";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "transparent";
-                          }}
-                        >
-                          {item}
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  </div>
+                ) : null}
               </div>
+
+              {/* ===== SEARCH EXPANDED - Membesar ke bawah dan ke kanan ===== */}
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    ref={searchExpandedRef}
+                    initial={{ height: 0, opacity: 0, y: -10 }}
+                    animate={{ height: "auto", opacity: 1, y: 0 }}
+                    exit={{ height: 0, opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4, ease: "power2.out" }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: "-20px",
+                      backgroundColor: "#0D3CFC",
+                      borderRadius: "16px",
+                      padding: "20px 24px",
+                      minWidth: "400px",
+                      boxShadow: "0 8px 40px rgba(13,60,252,0.25)",
+                      overflow: "hidden",
+                      zIndex: 100,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Search Input */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "16px",
+                      borderBottom: "1px solid rgba(255,255,255,0.1)",
+                      paddingBottom: "12px",
+                    }}>
+                      <SearchIcon size={20} />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Cari..."
+                        style={{
+                          border: "none",
+                          outline: "none",
+                          backgroundColor: "transparent",
+                          fontSize: "16px",
+                          fontFamily: FONT_FAMILY,
+                          padding: "4px 0",
+                          width: "100%",
+                          color: "#ffffff",
+                          fontWeight: 400,
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "rgba(255,255,255,0.5)",
+                          padding: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <CloseIcon />
+                      </button>
+                    </div>
+
+                    {/* Search Results / Content */}
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      minHeight: "60px",
+                    }}>
+                      {searchResults.length > 0 ? (
+                        searchResults.map((item, index) => (
+                          <motion.div
+                            key={item}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            onClick={() => handleSearchSelect(item)}
+                            style={{
+                              padding: "10px 16px",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              color: "#ffffff",
+                              fontFamily: FONT_FAMILY,
+                              transition: "all 0.2s ease",
+                              borderRadius: "8px",
+                              backgroundColor: "rgba(255,255,255,0.05)",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                            }}
+                          >
+                            {item}
+                          </motion.div>
+                        ))
+                      ) : (
+                        <div style={{
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: "14px",
+                          fontFamily: FONT_FAMILY,
+                          padding: "20px 0",
+                          textAlign: "center",
+                        }}>
+                          {searchQuery ? "Tidak ada hasil" : "Mulai mengetik untuk mencari..."}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer search */}
+                    <div style={{
+                      marginTop: "12px",
+                      paddingTop: "12px",
+                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                      <span style={{
+                        color: "rgba(255,255,255,0.3)",
+                        fontSize: "11px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        {searchRollingTexts.length} hasil
+                      </span>
+                      <span style={{
+                        color: "rgba(255,255,255,0.2)",
+                        fontSize: "10px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        ESC untuk keluar
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
 
@@ -2871,8 +2923,7 @@ export default function HomePage(): React.JSX.Element {
                             fontFamily: FONT_FAMILY,
                           }}
                         >
-                          Update Detail
-                        </h3>
+                          Update Detail                        </h3>
                         <p
                           style={{
                             fontSize: "14px",
