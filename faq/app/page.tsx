@@ -570,8 +570,8 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH ==========
-  const searchRollingTexts = ["Tentang Note", "Calendar", "Donasi", "Blog"];
+  // ========== ROLLING TEXT SEARCH - PERBAIKAN: "Tentang Note", "Tentang Donasi", "Tentang Blog" ==========
+  const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
   const rollingRef = useRef<HTMLSpanElement>(null);
@@ -712,13 +712,14 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle search input
+  // Handle search input - HAPUS FILTER, TIDAK ADA KONTEN DEFAULT
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
       return;
     }
 
+    // Filter berdasarkan rolling text
     const filtered = searchRollingTexts.filter(item => 
       item.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -2147,7 +2148,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - Sejajar dengan Menuru */}
+            {/* Search - Sejajar dengan Menuru - PERBAIKAN FULL WHITE */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2210,7 +2211,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - Membesar ke bawah dan ke kanan ===== */}
+              {/* ===== SEARCH EXPANDED - Perbaikan: Full White, Besar ke bawah & kanan, Hapus konten default ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2233,7 +2234,7 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Search Input */}
+                    {/* Search Input - Full White */}
                     <div style={{
                       display: "flex",
                       alignItems: "center",
@@ -2281,7 +2282,7 @@ export default function HomePage(): React.JSX.Element {
                       </button>
                     </div>
 
-                    {/* Search Results / Content */}
+                    {/* Search Results / Content - Full White, Hapus konten default */}
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
@@ -2317,6 +2318,7 @@ export default function HomePage(): React.JSX.Element {
                           </motion.div>
                         ))
                       ) : (
+                        // HAPUS KONTEN DEFAULT - TAMPILAN KOSONG DENGAN TEKS PUTIH
                         <div style={{
                           color: "rgba(255,255,255,0.5)",
                           fontSize: "14px",
@@ -2329,7 +2331,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* Footer search */}
+                    {/* Footer search - Full White */}
                     <div style={{
                       marginTop: "12px",
                       paddingTop: "12px",
@@ -2892,8 +2894,7 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      <p
-                        style={{
+                      <p                        style={{
                           fontSize: "15px",
                           color: "#000000",
                           lineHeight: 1.8,
