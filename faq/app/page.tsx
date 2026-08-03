@@ -570,11 +570,10 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH ==========
+  // ========== ROLLING TEXT SEARCH - TANPA GSAP ==========
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
-  const rollingRef = useRef<HTMLSpanElement>(null);
 
   // Group Chat States
   const [groupName, setGroupName] = useState("");
@@ -662,27 +661,11 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT WITH GSAP - OTOMATIS BERJALAN ==========
+  // ========== ROLLING TEXT EFFECT - TANPA GSAP, HANYA SETINTERVAL ==========
   useEffect(() => {
     const interval = setInterval(() => {
-      const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
-      setRollingIndex(nextIndex);
-      
-      if (rollingRef.current) {
-        gsap.to(rollingRef.current, {
-          y: -12,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.in",
-          onComplete: () => {
-            setRollingText(searchRollingTexts[nextIndex]);
-            gsap.fromTo(rollingRef.current, 
-              { y: 12, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-            );
-          }
-        });
-      }
+      setRollingIndex((prev) => (prev + 1) % searchRollingTexts.length);
+      setRollingText(searchRollingTexts[(rollingIndex + 1) % searchRollingTexts.length]);
     }, 3000);
     
     return () => clearInterval(interval);
@@ -2139,7 +2122,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - PERBAIKAN: 1500px ke bawah, rolling teks, hapus "3 hasil" */}
+            {/* Search - TINGGI 1200px, ROLLING TANPA GSAP */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2183,7 +2166,6 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <SearchIcon size={18} />
                       <span 
-                        ref={rollingRef}
                         style={{ 
                           color: "#ffffff",
                           fontWeight: 400,
@@ -2205,7 +2187,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - 1500px ke bawah & 1000px ke kanan ===== */}
+              {/* ===== SEARCH EXPANDED - 1200px ke bawah & 1000px ke kanan ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2223,7 +2205,7 @@ export default function HomePage(): React.JSX.Element {
                       padding: "32px 36px",
                       minWidth: "1000px",
                       width: "1000px",
-                      minHeight: "1500px",
+                      minHeight: "1200px",
                       boxShadow: "0 20px 80px rgba(13,60,252,0.4)",
                       overflow: "hidden",
                       zIndex: 100,
