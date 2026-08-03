@@ -661,7 +661,7 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT WITH GSAP ==========
+  // ========== ROLLING TEXT EFFECT WITH GSAP - OTOMATIS BERJALAN ==========
   useEffect(() => {
     const interval = setInterval(() => {
       const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
@@ -669,20 +669,20 @@ export default function HomePage(): React.JSX.Element {
       
       if (rollingRef.current) {
         gsap.to(rollingRef.current, {
-          y: -10,
+          y: -12,
           opacity: 0,
-          duration: 0.3,
+          duration: 0.4,
           ease: "power2.in",
           onComplete: () => {
             setRollingText(searchRollingTexts[nextIndex]);
             gsap.fromTo(rollingRef.current, 
-              { y: 10, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
+              { y: 12, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
             );
           }
         });
       }
-    }, 2500);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [rollingIndex, searchRollingTexts]);
@@ -2113,7 +2113,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* ===== ROW ATAS: Menuru + Search (sejajar top:80px) ===== */}
+        {/* ===== SEMUA SEJAJAR DI SATU BARIS (top:80px) ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -2124,321 +2124,316 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* Menuru Title - Kiri */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <span
-              style={{
-                fontSize: "48px",
-                fontWeight: 700,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                background: "transparent",
-              }}
+          {/* KIRI: Menuru + Search */}
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            {/* Menuru Title */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
-              Menuru
-            </span>
-          </motion.div>
+              <span
+                style={{
+                  fontSize: "48px",
+                  fontWeight: 700,
+                  color: "#000000",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
+                  background: "transparent",
+                }}
+              >
+                Menuru
+              </span>
+            </motion.div>
 
-          {/* Search - Kanan (sejajar dengan Menuru) */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            ref={searchContainerRef}
-          >
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#0D3CFC",
-              borderRadius: "30px",
-              padding: "4px 8px",
-              border: "none",
-              transition: "all 0.3s ease",
-              position: "relative",
-              minWidth: "240px",
-              boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
-            }}>
-              {isSearchOpen ? (
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "0 4px",
-                  width: "100%",
-                }}>
-                  <SearchIcon size={18} />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Cari..."
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      backgroundColor: "transparent",
-                      fontSize: "14px",
-                      fontFamily: FONT_FAMILY,
-                      padding: "8px 4px",
-                      width: "180px",
-                      color: "#ffffff",
-                      flex: 1,
-                    }}
-                  />
+            {/* Search - Sejajar dengan Menuru */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              ref={searchContainerRef}
+            >
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#0D3CFC",
+                borderRadius: "30px",
+                padding: "4px 8px",
+                border: "none",
+                transition: "all 0.3s ease",
+                position: "relative",
+                minWidth: "240px",
+                boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
+              }}>
+                {isSearchOpen ? (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "0 4px",
+                    width: "100%",
+                  }}>
+                    <SearchIcon size={18} />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Cari..."
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        backgroundColor: "transparent",
+                        fontSize: "14px",
+                        fontFamily: FONT_FAMILY,
+                        padding: "8px 4px",
+                        width: "180px",
+                        color: "#ffffff",
+                        flex: 1,
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                        setSearchResults([]);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "rgba(255,255,255,0.5)",
+                        padding: "4px 6px",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CloseIcon />
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery("");
-                      setSearchResults([]);
-                    }}
+                    onClick={() => setIsSearchOpen(true)}
                     style={{
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      color: "rgba(255,255,255,0.5)",
-                      padding: "4px 6px",
+                      padding: "8px 16px",
+                      color: "#ffffff",
                       display: "flex",
                       alignItems: "center",
+                      gap: "10px",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "14px",
+                      width: "100%",
+                      justifyContent: "space-between",
                     }}
                   >
-                    <CloseIcon />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsSearchOpen(true)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "8px 16px",
-                    color: "#ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "14px",
-                    width: "100%",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <SearchIcon size={18} />
-                    <span 
-                      ref={rollingRef}
-                      style={{ 
-                        color: "#ffffff",
-                        fontWeight: 400,
-                        display: "inline-block",
-                      }}
-                    >
-                      {rollingText}
-                    </span>
-                  </div>
-                  <span style={{ 
-                    color: "rgba(255,255,255,0.4)", 
-                    fontSize: "12px",
-                    fontWeight: 300,
-                  }}>
-                    ⌘K
-                  </span>
-                </button>
-              )}
-
-              {/* Search Results Dropdown */}
-              <AnimatePresence>
-                {isSearchOpen && searchResults.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      left: 0,
-                      right: 0,
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                      border: "1px solid #f0f0f0",
-                      padding: "6px 0",
-                      zIndex: 100,
-                      minWidth: "240px",
-                    }}
-                  >
-                    {searchResults.map((item, index) => (
-                      <motion.div
-                        key={item}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => handleSearchSelect(item)}
-                        style={{
-                          padding: "10px 16px",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          color: "#000",
-                          fontFamily: FONT_FAMILY,
-                          transition: "all 0.2s ease",
-                          borderRadius: "4px",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent";
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <SearchIcon size={18} />
+                      <span 
+                        ref={rollingRef}
+                        style={{ 
+                          color: "#ffffff",
+                          fontWeight: 400,
+                          display: "inline-block",
                         }}
                       >
-                        {item}
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                        {rollingText}
+                      </span>
+                    </div>
+                    <span style={{ 
+                      color: "rgba(255,255,255,0.4)", 
+                      fontSize: "12px",
+                      fontWeight: 300,
+                    }}>
+                      ⌘K
+                    </span>
+                  </button>
                 )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        </div>
 
-        {/* ===== ROW BAWAH: Pusat Bantuan + User Login (sejajar top:140px) ===== */}
-        <div style={{
-          position: "absolute",
-          top: "140px",
-          right: "40px",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-        }}>
-          {/* Help Center Button */}
-          <motion.button
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#000",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
-              fontFamily: FONT_FAMILY,
-              padding: "8px 18px",
-              borderRadius: "30px",
-              backgroundColor: "transparent",
-              border: "1px solid #e0e0e0",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#f5f5f5";
-              e.currentTarget.style.borderColor = "#ccc";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderColor = "#e0e0e0";
-            }}
-            onClick={() => {
-              console.log("Help Center clicked");
-            }}
-          >
-            <HelpDeskIcon size={18} />
-            <span style={{ fontWeight: 500 }}>Pusat bantuan</span>
-          </motion.button>
+                {/* Search Results Dropdown */}
+                <AnimatePresence>
+                  {isSearchOpen && searchResults.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 8px)",
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "#ffffff",
+                        borderRadius: "12px",
+                        boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                        border: "1px solid #f0f0f0",
+                        padding: "6px 0",
+                        zIndex: 100,
+                        minWidth: "240px",
+                      }}
+                    >
+                      {searchResults.map((item, index) => (
+                        <motion.div
+                          key={item}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          onClick={() => handleSearchSelect(item)}
+                          style={{
+                            padding: "10px 16px",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color: "#000",
+                            fontFamily: FONT_FAMILY,
+                            transition: "all 0.2s ease",
+                            borderRadius: "4px",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f5f5f5";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          {item}
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </div>
 
-          {/* User Login Status */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              padding: "8px 20px",
-              backgroundColor: "#f5f5f5",
-              borderRadius: "12px",
-              fontSize: "20px",
-              color: "#000",
-              border: "1px solid #e0e0e0",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            {user ? (
-              <>
-                {user.photoURL && (
-                  <motion.img 
-                    src={user.photoURL} 
-                    alt="avatar" 
-                    whileHover={{ scale: 1.05 }}
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "6px",
-                      objectFit: "cover",
+          {/* KANAN: Pusat Bantuan + User Login */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {/* Help Center Button */}
+            <motion.button
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#000",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "14px",
+                fontFamily: FONT_FAMILY,
+                padding: "8px 18px",
+                borderRadius: "30px",
+                backgroundColor: "transparent",
+                border: "1px solid #e0e0e0",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f5f5f5";
+                e.currentTarget.style.borderColor = "#ccc";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.borderColor = "#e0e0e0";
+              }}
+              onClick={() => {
+                console.log("Help Center clicked");
+              }}
+            >
+              <HelpDeskIcon size={18} />
+              <span style={{ fontWeight: 500 }}>Pusat bantuan</span>
+            </motion.button>
+
+            {/* User Login Status */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                padding: "8px 20px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+                fontSize: "20px",
+                color: "#000",
+                border: "1px solid #e0e0e0",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {user ? (
+                <>
+                  {user.photoURL && (
+                    <motion.img 
+                      src={user.photoURL} 
+                      alt="avatar" 
+                      whileHover={{ scale: 1.05 }}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "6px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        const selfUser = users.find(u => u.id === user.uid);
+                        if (selfUser) handleOpenProfile(selfUser);
+                      }}
+                    />
+                  )}
+                  <span 
+                    style={{ 
+                      fontWeight: 500, 
+                      color: "#000",
                       cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
                     }}
                     onClick={() => {
                       const selfUser = users.find(u => u.id === user.uid);
                       if (selfUser) handleOpenProfile(selfUser);
                     }}
-                  />
-                )}
-                <span 
-                  style={{ 
-                    fontWeight: 500, 
-                    color: "#000",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                  onClick={() => {
-                    const selfUser = users.find(u => u.id === user.uid);
-                    if (selfUser) handleOpenProfile(selfUser);
-                  }}
-                >
-                  {user.displayName || user.email}
-                  {isAdmin && <InstagramVerifiedBadge size={14} />}
+                  >
+                    {user.displayName || user.email}
+                    {isAdmin && <InstagramVerifiedBadge size={14} />}
+                  </span>
+                  <OnlineIndicator online={true} />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleLogout}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#000",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      padding: "4px 12px",
+                      borderRadius: "20px",
+                      transition: "all .2s ease",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#e0e0e0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    Logout
+                  </motion.button>
+                </>
+              ) : (
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: "#999" }}>
+                  Please login to use chat
                 </span>
-                <OnlineIndicator online={true} />
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#000",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                    transition: "all .2s ease",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#e0e0e0";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  Logout
-                </motion.button>
-              </>
-            ) : (
-              <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: "#999" }}>
-                Please login to use chat
-              </span>
-            )}
-          </motion.div>
+              )}
+            </motion.div>
+          </div>
         </div>
 
         {/* Share Modal */}
