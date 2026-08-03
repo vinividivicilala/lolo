@@ -195,25 +195,21 @@ const ChatIcon = () => (
   </svg>
 );
 
-// Search Icon
-const SearchIcon = ({ size = 20, color = "#fff" }: { size?: number; color?: string }) => (
+// Search Icon - White
+const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke={color} strokeWidth="1.5"/>
-    <path d="M16 16L21 21" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="11" cy="11" r="7" stroke="white" strokeWidth="1.5"/>
+    <path d="M16 16L21 21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
-// Help Desk Icon (BENAR - Icon Headset Support)
+// Help Desk Icon - Headset Support
 const HelpDeskIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Headset */}
     <path d="M3 13C3 10.6131 3.94821 8.32387 5.63604 6.63604C7.32387 4.94821 9.61305 4 12 4C14.3869 4 16.6761 4.94821 18.364 6.63604C20.0518 8.32387 21 10.6131 21 13V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    {/* Ear cup */}
     <path d="M3 16C3 14.8954 3.89543 14 5 14H7C8.10457 14 9 14.8954 9 16V18C9 19.1046 8.10457 20 7 20H5C3.89543 20 3 19.1046 3 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M21 16C21 14.8954 20.1046 14 19 14H17C15.8954 14 15 14.8954 15 16V18C15 19.1046 15.8954 20 17 20H19C20.1046 20 21 19.1046 21 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
-    {/* Microphone */}
     <path d="M6 14V13C6 9.68629 8.68629 7 12 7C15.3137 7 18 9.68629 18 13V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    {/* Sound waves */}
     <path d="M4 11C4 8.87827 4.84285 6.84344 6.34315 5.34315C7.84344 3.84285 9.87827 3 12 3C14.1217 3 16.1566 3.84285 17.6569 5.34315C19.1571 6.84344 20 8.87827 20 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
   </svg>
 );
@@ -696,7 +692,7 @@ export default function HomePage(): React.JSX.Element {
     if (isSearchOpen && searchInputRef.current) {
       gsap.fromTo(searchInputRef.current, 
         { width: 0, opacity: 0, scale: 0.8 },
-        { width: "220px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+        { width: "180px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
       );
       setTimeout(() => searchInputRef.current?.focus(), 300);
     }
@@ -2117,219 +2113,213 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Menuru Title - Left */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          style={{
-            position: "absolute",
-            top: "80px",
-            left: "40px",
-            zIndex: 15,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              background: "transparent",
-            }}
+        {/* ===== ROW ATAS: Menuru + Search (sejajar top:80px) ===== */}
+        <div style={{
+          position: "absolute",
+          top: "80px",
+          left: "40px",
+          right: "40px",
+          zIndex: 15,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          {/* Menuru Title - Kiri */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            Menuru
-          </span>
-        </motion.div>
+            <span
+              style={{
+                fontSize: "48px",
+                fontWeight: 700,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.03em",
+                background: "transparent",
+              }}
+            >
+              Menuru
+            </span>
+          </motion.div>
 
-        {/* ===== SEARCH - Sejajar dengan judul web (sisi kanan) ===== */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          ref={searchContainerRef}
-          style={{
-            position: "absolute",
-            top: "80px",
-            right: "40px",
-            zIndex: 15,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-            borderRadius: "30px",
-            padding: "4px 8px",
-            border: "1px solid #e0e0e0",
-            transition: "all 0.3s ease",
-            position: "relative",
-            minWidth: "280px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-          }}>
-            {isSearchOpen ? (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "0 4px",
-                width: "100%",
-              }}>
-                <SearchIcon size={18} color="#999" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari..."
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    backgroundColor: "transparent",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    padding: "8px 4px",
-                    width: "220px",
-                    color: "#000",
-                    flex: 1,
-                  }}
-                />
+          {/* Search - Kanan (sejajar dengan Menuru) */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            ref={searchContainerRef}
+          >
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "#0D3CFC",
+              borderRadius: "30px",
+              padding: "4px 8px",
+              border: "none",
+              transition: "all 0.3s ease",
+              position: "relative",
+              minWidth: "240px",
+              boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
+            }}>
+              {isSearchOpen ? (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "0 4px",
+                  width: "100%",
+                }}>
+                  <SearchIcon size={18} />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Cari..."
+                    style={{
+                      border: "none",
+                      outline: "none",
+                      backgroundColor: "transparent",
+                      fontSize: "14px",
+                      fontFamily: FONT_FAMILY,
+                      padding: "8px 4px",
+                      width: "180px",
+                      color: "#ffffff",
+                      flex: 1,
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery("");
+                      setSearchResults([]);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "rgba(255,255,255,0.5)",
+                      padding: "4px 6px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    setSearchQuery("");
-                    setSearchResults([]);
-                  }}
+                  onClick={() => setIsSearchOpen(true)}
                   style={{
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#999",
-                    padding: "4px 6px",
+                    padding: "8px 16px",
+                    color: "#ffffff",
                     display: "flex",
                     alignItems: "center",
+                    gap: "10px",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "14px",
+                    width: "100%",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <CloseIcon />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px 16px",
-                  color: "#000",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "14px",
-                  width: "100%",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <SearchIcon size={18} color="#999" />
-                  <span 
-                    ref={rollingRef}
-                    style={{ 
-                      color: "#000",
-                      fontWeight: 400,
-                      display: "inline-block",
-                    }}
-                  >
-                    {rollingText}
-                  </span>
-                </div>
-                <span style={{ 
-                  color: "#bbb", 
-                  fontSize: "12px",
-                  fontWeight: 300,
-                }}>
-                  ⌘K
-                </span>
-              </button>
-            )}
-
-            {/* Search Results Dropdown */}
-            <AnimatePresence>
-              {isSearchOpen && searchResults.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 8px)",
-                    left: 0,
-                    right: 0,
-                    backgroundColor: "#ffffff",
-                    borderRadius: "12px",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
-                    border: "1px solid #f0f0f0",
-                    padding: "6px 0",
-                    zIndex: 100,
-                    minWidth: "280px",
-                  }}
-                >
-                  {searchResults.map((item, index) => (
-                    <motion.div
-                      key={item}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handleSearchSelect(item)}
-                      style={{
-                        padding: "10px 16px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        color: "#000",
-                        fontFamily: FONT_FAMILY,
-                        transition: "all 0.2s ease",
-                        borderRadius: "4px",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <SearchIcon size={18} />
+                    <span 
+                      ref={rollingRef}
+                      style={{ 
+                        color: "#ffffff",
+                        fontWeight: 400,
+                        display: "inline-block",
                       }}
                     >
-                      {item}
-                    </motion.div>
-                  ))}
-                </motion.div>
+                      {rollingText}
+                    </span>
+                  </div>
+                  <span style={{ 
+                    color: "rgba(255,255,255,0.4)", 
+                    fontSize: "12px",
+                    fontWeight: 300,
+                  }}>
+                    ⌘K
+                  </span>
+                </button>
               )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
 
-        {/* ===== PUSAT BANTUAN - Sejajar dengan tombol login ===== */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          style={{
-            position: "absolute",
-            top: "140px",
-            right: "40px",
-            zIndex: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          {/* Help Center Button - Sejajar dengan login */}
+              {/* Search Results Dropdown */}
+              <AnimatePresence>
+                {isSearchOpen && searchResults.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      left: 0,
+                      right: 0,
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                      border: "1px solid #f0f0f0",
+                      padding: "6px 0",
+                      zIndex: 100,
+                      minWidth: "240px",
+                    }}
+                  >
+                    {searchResults.map((item, index) => (
+                      <motion.div
+                        key={item}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleSearchSelect(item)}
+                        style={{
+                          padding: "10px 16px",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          color: "#000",
+                          fontFamily: FONT_FAMILY,
+                          transition: "all 0.2s ease",
+                          borderRadius: "4px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#f5f5f5";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        {item}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ===== ROW BAWAH: Pusat Bantuan + User Login (sejajar top:140px) ===== */}
+        <div style={{
+          position: "absolute",
+          top: "140px",
+          right: "40px",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+        }}>
+          {/* Help Center Button */}
           <motion.button
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{
@@ -2449,7 +2439,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             )}
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Share Modal */}
         <AnimatePresence>
@@ -2582,7 +2572,7 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Full Image Modal */}
+        {/* Full Image Modal - Blur Background */}
         <AnimatePresence>
           {showFullImage && (
             <motion.div
@@ -3581,6 +3571,7 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
+                      {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
                       {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
                         <div style={{ 
                           width: "100%", 
@@ -3601,6 +3592,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
+                      {/* Group Chat Profile */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -3697,6 +3689,7 @@ export default function HomePage(): React.JSX.Element {
                             })}
                           </div>
 
+                          {/* Add member to group - MANUAL */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -3874,6 +3867,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
 
+                          {/* Stories for admin */}
                           <StoriesSection 
                             userEmail={profileUser.email} 
                             onImageClick={(url) => setShowFullImage(url)}
@@ -3942,7 +3936,9 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : !selectedChat ? (
+                  // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
+                    {/* Banner Announcement - WARNA HIJAU STABILO */}
                     <div
                       style={{
                         display: "flex",
@@ -3966,6 +3962,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
+                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH untuk pengirim block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3983,6 +3980,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
+                    {/* Banner untuk penerima block - WARNA MERAH */}
                     {hasBlockedByUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -4003,6 +4001,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
+                    {/* FORM ADD USER MANUAL - SEARCH BY EMAIL */}
                     <div style={{
                       padding: "14px",
                       backgroundColor: "#f8f8f8",
@@ -4162,6 +4161,7 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                     </motion.button>
 
+                    {/* Tombol Add Group Chat */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
@@ -4450,6 +4450,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </AnimatePresence>
 
+                    {/* Pinned Users */}
                     {pinnedUsers.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4585,6 +4586,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
+                    {/* Pinned Chats */}
                     {pinnedChats.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4865,6 +4867,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
+                          // Group Chat
                           if (room.isGroup) {
                             const typingDisplay = getTypingUsersDisplay(room);
                             return (
@@ -5149,7 +5152,9 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : (
+                  // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                    {/* Chat Header */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -5312,7 +5317,9 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
+                    {/* Chat View */}
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                      {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                         <div
                           style={{
@@ -5389,6 +5396,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
+                      {/* Reply Indicator */}
                       {replyTo && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                         <div
                           style={{
@@ -5438,6 +5446,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
+                      {/* Messages */}
                       <div
                         style={{
                           flex: 1,
@@ -5494,6 +5503,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5828,6 +5838,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
+                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5843,6 +5854,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5970,6 +5982,7 @@ export default function HomePage(): React.JSX.Element {
             )}
           </AnimatePresence>
 
+          {/* Chat Button */}
           <motion.button
             whileHover={!isChatOpen ? { scale: 1.03 } : {}}
             whileTap={!isChatOpen ? { scale: 0.97 } : {}}
