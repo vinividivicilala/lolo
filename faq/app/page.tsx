@@ -203,33 +203,31 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// ===== MODERN SHOP ICON =====
+// ===== MODERN MINIMALIST SHOP ICON =====
 const ShopIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 6H19L20 10H4L5 6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M4 10H20V20H4V10Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <circle cx="9" cy="16" r="1.5" fill="currentColor"/>
-    <circle cx="15" cy="16" r="1.5" fill="currentColor"/>
-    <path d="M6 6L8 3H16L18 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 7H21L19 20H5L3 7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="9" cy="14" r="1" fill="currentColor"/>
+    <circle cx="15" cy="14" r="1" fill="currentColor"/>
   </svg>
 );
 
-// Modern Help Desk Icon
+// Modern Minimalist Help Desk Icon
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 14C4 11.7909 4.84285 9.67091 6.34315 8.17061C7.84344 6.67031 9.96344 5.82748 12.1726 5.82748C14.3818 5.82748 16.5018 6.67031 18.0021 8.17061C19.5024 9.67091 20.3452 11.7909 20.3452 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M4 17C4 15.8954 4.89543 15 6 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H6C4.89543 21 4 20.1046 4 19V17Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M20 17C20 15.8954 19.1046 15 18 15H16C14.8954 15 14 15.8954 14 17V19C14 20.1046 14.8954 21 16 21H18C19.1046 21 20 20.1046 20 19V17Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M7 15V14C7 10.6863 9.68629 8 13 8C16.3137 8 19 10.6863 19 14V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="13" cy="11" r="1.5" fill="currentColor"/>
+    <path d="M5 12C5 8.13401 8.13401 5 12 5C15.866 5 19 8.13401 19 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M7 15V13C7 10.2386 9.23858 8 12 8C14.7614 8 17 10.2386 17 13V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
-// Modern User Avatar Icon
-const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+// Modern Minimalist User Icon
+const UserIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M4 20V19C4 15.6863 6.68629 13 10 13H14C17.3137 13 20 15.6863 20 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -589,7 +587,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH - TANPA GSAP ==========
+  // ========== ROLLING TEXT SEARCH DENGAN GSAP ==========
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
@@ -681,11 +679,30 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT - TANPA GSAP, HANYA SETINTERVAL ==========
+  // ========== ROLLING TEXT EFFECT DENGAN GSAP - MOVE FORWARD/BACKWARD ==========
   useEffect(() => {
     const interval = setInterval(() => {
-      setRollingIndex((prev) => (prev + 1) % searchRollingTexts.length);
-      setRollingText(searchRollingTexts[(rollingIndex + 1) % searchRollingTexts.length]);
+      const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
+      setRollingIndex(nextIndex);
+      
+      if (rollingRef.current) {
+        // Animasi keluar - naik ke atas dan fade out
+        gsap.to(rollingRef.current, {
+          y: -20,
+          opacity: 0,
+          duration: 0.4,
+          ease: "power2.in",
+          onComplete: () => {
+            // Ganti teks
+            setRollingText(searchRollingTexts[nextIndex]);
+            // Animasi masuk - dari bawah dengan fade in
+            gsap.fromTo(rollingRef.current, 
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+            );
+          }
+        });
+      }
     }, 3000);
     
     return () => clearInterval(interval);
@@ -2130,7 +2147,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search */}
+          {/* KIRI: Menuru + Teks Tengah + Search */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             {/* Menuru Title */}
             <motion.div
@@ -2152,7 +2169,29 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - TINGGI 700px, ROLLING DENGAN SETINTERVAL */}
+            {/* ===== TEKS TENGAH: Note, Donations, BLOG, Calendar ===== */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                fontSize: "16px",
+                fontWeight: 400,
+                color: "#666666",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+              }}
+            >
+              <span style={{ cursor: "pointer" }}>Note</span>
+              <span style={{ cursor: "pointer" }}>Donations</span>
+              <span style={{ cursor: "pointer", fontWeight: 600, color: "#000000" }}>BLOG</span>
+              <span style={{ cursor: "pointer" }}>Calendar</span>
+            </motion.div>
+
+            {/* Search - TINGGI 700px, ROLLING DENGAN GSAP */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2658,7 +2697,7 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Chat Box */}
+        {/* Chat Box - sama seperti sebelumnya */}
         <div
           style={{
             position: "fixed",
@@ -5358,7 +5397,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Chat View dengan Multi-User Typing Indicator */}
+                    {/* Chat View */}
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                       {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
@@ -5869,7 +5908,7 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input dengan Typing Indicator di atas */}
+                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
