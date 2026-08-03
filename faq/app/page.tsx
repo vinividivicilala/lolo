@@ -73,6 +73,7 @@ interface ChatUser {
   lastSeen?: any;
   typing?: boolean;
   typingRoomId?: string | null;
+  typingRooms?: string[]; // TAMBAHKAN: array untuk multiple roo
   blocked?: string[];
   blockedBy?: string[];
   isGroup?: boolean;
@@ -801,6 +802,7 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp(),
               typing: false,
               typingRoomId: null,
+              typingRooms: [], // TAMBAHKAN
               blocked: [],
               blockedBy: []
             });
@@ -1152,68 +1154,94 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
-  useEffect(() => {
-    if (!db || !user) return;
+// ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+useEffect(() => {
+  if (!db || !user) return;
 
-    const usersRef = collection(db, "users");
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      // Buat map untuk menyimpan typing users per room
-      const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        // Hanya proses user yang sedang typing dan bukan current user
-        if (data.typing && data.id !== user?.uid && data.typingRoomId) {
-          const foundUser = users.find(u => u.id === data.id);
-          if (foundUser) {
+  const usersRef = collection(db, "users");
+  const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+    // Buat map untuk menyimpan typing users per room
+    const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      // Hanya proses user yang sedang typing dan bukan current user
+      if (data.typing && data.id !== user?.uid) {
+        const foundUser = users.find(u => u.id === data.id);
+        if (foundUser) {
+          // Gunakan typingRooms array jika ada, fallback ke typingRoomId
+          const rooms = data.typingRooms || [];
+          
+          if (rooms.length > 0) {
+            // Proses semua room yang user ini typing
+            rooms.forEach((roomId: string) => {
+              if (!typingMap[roomId]) {
+                typingMap[roomId] = { names: [], ids: [] };
+              }
+              if (!typingMap[roomId].names.includes(foundUser.name)) {
+                typingMap[roomId].names.push(foundUser.name);
+                typingMap[roomId].ids.push(data.id);
+              }
+            });
+          } else if (data.typingRoomId) {
+            // Fallback untuk kompatibilitas dengan data lama
             const roomId = data.typingRoomId;
             if (!typingMap[roomId]) {
               typingMap[roomId] = { names: [], ids: [] };
             }
-            // Gunakan nama user untuk display, hindari duplikat
             if (!typingMap[roomId].names.includes(foundUser.name)) {
               typingMap[roomId].names.push(foundUser.name);
               typingMap[roomId].ids.push(data.id);
             }
           }
         }
-      });
-      
-      // Update typingUsersMap
-      const newTypingMap: { [key: string]: string[] } = {};
-      Object.keys(typingMap).forEach(roomId => {
-        newTypingMap[roomId] = typingMap[roomId].names;
-      });
-      setTypingUsersMap(newTypingMap);
-      
-      // Update chatRooms dengan data typing terbaru
-      setChatRooms(prev => prev.map(room => {
-        const typingData = typingMap[room.id];
-        return {
-          ...room,
-          typingUsers: typingData?.names || [],
-          typingUsersId: typingData?.ids || []
-        };
-      }));
+      }
     });
-
-    return () => unsubscribe();
-  }, [user, users]);
-
-  // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
-  useEffect(() => {
-    if (!selectedChat || !user || !db) return;
     
-    // Set typing false saat chat ditutup
-    return () => {
-      const userRef = doc(db, "users", user.uid);
+    // Update typingUsersMap
+    const newTypingMap: { [key: string]: string[] } = {};
+    Object.keys(typingMap).forEach(roomId => {
+      newTypingMap[roomId] = typingMap[roomId].names;
+    });
+    setTypingUsersMap(newTypingMap);
+    
+    // Update chatRooms dengan data typing terbaru
+    setChatRooms(prev => prev.map(room => {
+      const typingData = typingMap[room.id];
+      return {
+        ...room,
+        typingUsers: typingData?.names || [],
+        typingUsersId: typingData?.ids || []
+      };
+    }));
+  });
+
+  return () => unsubscribe();
+}, [user, users]);
+
+ // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
+useEffect(() => {
+  if (!selectedChat || !user || !db) return;
+  
+  // Set typing false saat chat ditutup
+  return () => {
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    const userRef = doc(db, "users", user.uid);
+    
+    // Ambil data user saat ini
+    getDoc(userRef).then((snap) => {
+      const data = snap.data();
+      const rooms = data?.typingRooms || [];
+      const updatedRooms = rooms.filter((id: string) => id !== chatId);
+      
       updateDoc(userRef, { 
-        typing: false,
-        typingRoomId: null 
+        typing: updatedRooms.length > 0,
+        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+        typingRooms: updatedRooms
       }).catch(() => {});
-    };
-  }, [selectedChat, user, db]);
+    }).catch(() => {});
+  };
+}, [selectedChat, user, db]);
 
   // Chat button message rotation
   useEffect(() => {
@@ -1225,32 +1253,33 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [chatButtonMessages]);
 
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        online: false,
-        lastSeen: serverTimestamp(),
-        typing: false,
-        typingRoomId: null
-      });
-      
-      await signOut(auth);
-      setIsChatOpen(false);
-      setSelectedChat(null);
-      setChatRooms([]);
-      setTotalUnread(0);
-      setShowProfile(false);
-      setProfileUser(null);
-      setShowPrivacyPolicy(false);
-      setShowUpdate(false);
-      setSelectedUpdateId(null);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
+ const handleLogout = async () => {
+  if (!auth) return;
+  try {
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, {
+      online: false,
+      lastSeen: serverTimestamp(),
+      typing: false,
+      typingRoomId: null,
+      typingRooms: [] // Kosongkan array
+    });
+    
+    await signOut(auth);
+    setIsChatOpen(false);
+    setSelectedChat(null);
+    setChatRooms([]);
+    setTotalUnread(0);
+    setShowProfile(false);
+    setProfileUser(null);
+    setShowPrivacyPolicy(false);
+    setShowUpdate(false);
+    setSelectedUpdateId(null);
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
+  
   const handleChatToggle = () => {
     if (!user) return;
     setIsChatOpen(!isChatOpen);
@@ -1271,49 +1300,75 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // ========== PERBAIKAN: Handle typing untuk chat - update status typing di Firestore ==========
-  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setMessage(value);
-    
-    if (!selectedChat || !user || !db) return;
-    
-    if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
-    
-    const userRef = doc(db, "users", user.uid);
-    
-    // Dapatkan chatId
-    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-    
-    // Set typing true jika ada teks, false jika kosong
-    if (value.length > 0) {
+// ========== PERBAIKAN: Handle typing untuk multi-user dengan array ==========
+const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setMessage(value);
+  
+  if (!selectedChat || !user || !db) return;
+  
+  if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
+  
+  const userRef = doc(db, "users", user.uid);
+  
+  // Dapatkan chatId
+  const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+  
+  // Dapatkan data user saat ini
+  const userSnap = await getDoc(userRef);
+  const userData = userSnap.data();
+  const currentTypingRooms = userData?.typingRooms || [];
+  
+  if (value.length > 0) {
+    // Tambahkan room jika belum ada
+    if (!currentTypingRooms.includes(chatId)) {
+      await updateDoc(userRef, {
+        typing: true,
+        typingRoomId: chatId,
+        typingRooms: [...currentTypingRooms, chatId]
+      });
+    } else {
+      // Update typing tetap true
       await updateDoc(userRef, {
         typing: true,
         typingRoomId: chatId
       });
-    } else {
-      await updateDoc(userRef, {
-        typing: false,
-        typingRoomId: null
-      });
     }
+  } else {
+    // Hapus room dari array
+    const updatedRooms = currentTypingRooms.filter((id: string) => id !== chatId);
+    await updateDoc(userRef, {
+      typing: updatedRooms.length > 0,
+      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+      typingRooms: updatedRooms
+    });
+  }
+  
+  // Clear timeout sebelumnya
+  if (typingTimeout) {
+    clearTimeout(typingTimeout);
+  }
+  
+  // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
+  const newTimeout = setTimeout(async () => {
+    const userRef2 = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef2);
+    const data = snap.data();
+    const rooms = data?.typingRooms || [];
+    const updatedRooms = rooms.filter((id: string) => id !== chatId);
     
-    // Clear timeout sebelumnya
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-    
-    // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
-    const newTimeout = setTimeout(async () => {
-      const userRef2 = doc(db, "users", user.uid);
-      await updateDoc(userRef2, {
-        typing: false,
-        typingRoomId: null
-      });
-    }, 2000);
-    
-    setTypingTimeout(newTimeout);
-  };
+    await updateDoc(userRef2, {
+      typing: updatedRooms.length > 0,
+      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+      typingRooms: updatedRooms
+    });
+  }, 2000);
+  
+  setTypingTimeout(newTimeout);
+};
+
+
+  
 
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
@@ -1410,82 +1465,90 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message
-  const handleSendMessage = async () => {
-    if (!selectedChat || !user || !message.trim() || !db) return;
+// Send message
+const handleSendMessage = async () => {
+  if (!selectedChat || !user || !message.trim() || !db) return;
 
-    if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) {
-      return;
+  if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) {
+    return;
+  }
+
+  try {
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    const userRef = doc(db, "users", user.uid);
+    
+    // Hapus room dari typingRooms saat send message
+    const snap = await getDoc(userRef);
+    const data = snap.data();
+    const rooms = data?.typingRooms || [];
+    const updatedRooms = rooms.filter((id: string) => id !== chatId);
+    
+    await updateDoc(userRef, { 
+      typing: updatedRooms.length > 0,
+      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+      typingRooms: updatedRooms
+    });
+    
+    // ... rest of send message code
+    const chatRef = doc(db, "chats", chatId);
+    const chatSnap = await getDoc(chatRef);
+    if (!chatSnap.exists()) {
+      if (selectedChat.isGroup) {
+        await setDoc(chatRef, {
+          participants: selectedChat.groupMembers || [user.uid],
+          createdAt: serverTimestamp(),
+          isPinned: false,
+          isGroup: true,
+          groupName: selectedChat.groupName || "Group Chat",
+          groupDescription: selectedChat.groupDescription || "",
+          groupMembers: selectedChat.groupMembers || [],
+          groupAdmins: selectedChat.groupAdmins || [],
+          createdBy: selectedChat.createdBy || user.uid
+        });
+      } else {
+        await setDoc(chatRef, {
+          participants: [user.uid, selectedChat.id],
+          createdAt: serverTimestamp(),
+          isPinned: false,
+          isGroup: false
+        });
+      }
     }
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { 
-        typing: false,
-        typingRoomId: null 
-      });
-      
-      const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-      
-      const chatRef = doc(db, "chats", chatId);
-      const chatSnap = await getDoc(chatRef);
-      if (!chatSnap.exists()) {
-        if (selectedChat.isGroup) {
-          await setDoc(chatRef, {
-            participants: selectedChat.groupMembers || [user.uid],
-            createdAt: serverTimestamp(),
-            isPinned: false,
-            isGroup: true,
-            groupName: selectedChat.groupName || "Group Chat",
-            groupDescription: selectedChat.groupDescription || "",
-            groupMembers: selectedChat.groupMembers || [],
-            groupAdmins: selectedChat.groupAdmins || [],
-            createdBy: selectedChat.createdBy || user.uid
-          });
-        } else {
-          await setDoc(chatRef, {
-            participants: [user.uid, selectedChat.id],
-            createdAt: serverTimestamp(),
-            isPinned: false,
-            isGroup: false
-          });
-        }
-      }
-      
-      const messagesRef = collection(db, "chats", chatId, "messages");
-      const msgData: any = {
-        text: message.trim(),
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        receiverId: selectedChat.isGroup ? chatId : selectedChat.id,
-        timestamp: serverTimestamp(),
-        read: false,
-        isPinned: false,
-        pinnedAt: null,
-        isShared: false,
-        isGroupMessage: selectedChat.isGroup || false,
-        groupId: selectedChat.isGroup ? chatId : null
-      };
-      
-      if (replyTo) {
-        msgData.replyTo = replyTo.id;
-        msgData.replyToText = replyTo.text;
-        msgData.replyToSender = replyTo.senderName;
-      }
-      
-      await addDoc(messagesRef, msgData);
-
-      setMessage("");
-      setReplyTo(null);
-      
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        setTypingTimeout(null);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
+    
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const msgData: any = {
+      text: message.trim(),
+      senderId: user.uid,
+      senderName: user.displayName || user.email || "User",
+      receiverId: selectedChat.isGroup ? chatId : selectedChat.id,
+      timestamp: serverTimestamp(),
+      read: false,
+      isPinned: false,
+      pinnedAt: null,
+      isShared: false,
+      isGroupMessage: selectedChat.isGroup || false,
+      groupId: selectedChat.isGroup ? chatId : null
+    };
+    
+    if (replyTo) {
+      msgData.replyTo = replyTo.id;
+      msgData.replyToText = replyTo.text;
+      msgData.replyToSender = replyTo.senderName;
     }
-  };
+    
+    await addDoc(messagesRef, msgData);
+
+    setMessage("");
+    setReplyTo(null);
+    
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+      setTypingTimeout(null);
+    }
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+};
 
   // Share message
   const handleShareMessage = async () => {
