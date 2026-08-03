@@ -647,25 +647,28 @@ export default function HomePage(): React.JSX.Element {
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
     
+    const names = room.typingUsers;
+    
     // Jika hanya 1 user yang typing
-    if (room.typingUsers.length === 1) {
-      return room.typingUsers[0];
+    if (names.length === 1) {
+      return names[0];
     }
     
-    // Jika lebih dari 1 user yang typing - format: "User A, User B, and User C"
-    const names = room.typingUsers;
+    // Jika 2 user: "User A and User B"
     if (names.length === 2) {
       return `${names[0]} and ${names[1]}`;
     }
-    // Untuk 3 atau lebih
+    
+    // Jika 3 atau lebih: "User A, User B, and User C"
     const last = names[names.length - 1];
     const rest = names.slice(0, -1);
     return `${rest.join(', ')} and ${last}`;
   };
 
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
-    // Gunakan typingUsersMap untuk mendapatkan typing users
+    // Gunakan typingUsersMap yang sudah diupdate dari snapshot
     const usersTyping = typingUsersMap[selectedChat.id] || [];
     return usersTyping;
   };
