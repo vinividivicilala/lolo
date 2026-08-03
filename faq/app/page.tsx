@@ -73,7 +73,7 @@ interface ChatUser {
   lastSeen?: any;
   typing?: boolean;
   typingRoomId?: string | null;
-  typingRooms?: string[]; // TAMBAHKAN: array untuk multiple roo
+  typingRooms?: string[];
   blocked?: string[];
   blockedBy?: string[];
   isGroup?: boolean;
@@ -542,7 +542,7 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
 
-  // ========== PERBAIKAN: State untuk menyimpan typing users per room ==========
+  // ========== State untuk menyimpan typing users per room ==========
   const [typingUsersMap, setTypingUsersMap] = useState<{ [key: string]: string[] }>({});
 
   // Group Chat States
@@ -558,11 +558,6 @@ export default function HomePage(): React.JSX.Element {
 
   // State untuk block banner di list chat (untuk penerima block)
   const [blockedByBanner, setBlockedByBanner] = useState<{userId: string, userName: string} | null>(null);
-
-  // Banner text
-  const bannerTexts = [
-    "Website sedang dalam pengembangan, Terima kasih"
-  ];
 
   // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
@@ -645,45 +640,39 @@ export default function HomePage(): React.JSX.Element {
     return (targetUser?.blockedBy || []).includes(user.uid);
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
+  // ========== Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
     
     const names = room.typingUsers;
     
-    // Jika hanya 1 user yang typing
     if (names.length === 1) {
       return names[0];
     }
     
-    // Jika 2 user: "User A and User B"
     if (names.length === 2) {
       return `${names[0]} and ${names[1]}`;
     }
     
-    // Jika 3 atau lebih: "User A, User B, and User C"
     const last = names[names.length - 1];
     const rest = names.slice(0, -1);
     return `${rest.join(', ')} and ${last}`;
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
+  // ========== Fungsi untuk mendapatkan typing users dari selected chat ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat || !user) return [];
     
-    // Untuk group chat, cek berdasarkan room id
     if (selectedChat.isGroup) {
       const usersTyping = typingUsersMap[selectedChat.id] || [];
       return usersTyping;
     }
     
-    // Untuk personal chat
     const chatId = [user.uid, selectedChat.id].sort().join("_");
     const usersTyping = typingUsersMap[chatId] || [];
     return usersTyping;
   };
 
-  // Gunakan fungsi ini di dalam render
   const regularTypingUsers = getRegularTypingUsers();
 
   // Fungsi mencari user manual berdasarkan email
@@ -722,6 +711,7 @@ export default function HomePage(): React.JSX.Element {
         lastSeen: userData.lastSeen || null,
         typing: userData.typing || false,
         typingRoomId: userData.typingRoomId || null,
+        typingRooms: userData.typingRooms || [],
         blocked: userData.blocked || [],
         blockedBy: userData.blockedBy || []
       };
@@ -765,7 +755,6 @@ export default function HomePage(): React.JSX.Element {
       setSearchUserResult(null);
       setSearchUserInput("");
       
-      // Refresh chat rooms
       setTimeout(() => setSearchUserStatus(""), 3000);
       
     } catch (error) {
@@ -802,7 +791,7 @@ export default function HomePage(): React.JSX.Element {
               lastSeen: serverTimestamp(),
               typing: false,
               typingRoomId: null,
-              typingRooms: [], // TAMBAHKAN
+              typingRooms: [],
               blocked: [],
               blockedBy: []
             });
@@ -871,6 +860,7 @@ export default function HomePage(): React.JSX.Element {
                 lastSeen: data.lastSeen || null,
                 typing: data.typing || false,
                 typingRoomId: data.typingRoomId || null,
+                typingRooms: data.typingRooms || [],
                 photoURL: data.photoURL || "",
                 isAdmin: data.isAdmin || false,
                 blocked: data.blocked || [],
@@ -896,6 +886,7 @@ export default function HomePage(): React.JSX.Element {
             lastSeen: null,
             typing: false,
             typingRoomId: null,
+            typingRooms: [],
             blocked: user.blocked || [],
             blockedBy: user.blockedBy || []
           };
@@ -944,7 +935,6 @@ export default function HomePage(): React.JSX.Element {
       let totalUnreadCount = 0;
       const allMessages: string[] = [];
       
-      // Cek apakah ada user yang memblock current user
       let blockedByUser = null;
       for (const u of users) {
         if (u.id !== user.uid && (u.blockedBy || []).includes(user.uid)) {
@@ -997,7 +987,6 @@ export default function HomePage(): React.JSX.Element {
               unreadCount = unreadSnap.size;
               totalUnreadCount += unreadCount;
               
-              // Collect unread messages for chat button
               unreadSnap.forEach((doc) => {
                 const msg = doc.data() as Message;
                 allMessages.push(`${otherUser.name}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
@@ -1020,7 +1009,6 @@ export default function HomePage(): React.JSX.Element {
               });
             }
           } else {
-            // Group chat
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -1046,7 +1034,6 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
-            // Collect unread messages for chat button
             unreadSnap.forEach((doc) => {
               const msg = doc.data() as Message;
               const sender = users.find(u => u.id === msg.senderId);
@@ -1087,7 +1074,6 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
       
-      // Update chat button messages
       if (allMessages.length > 0) {
         setChatButtonMessages(allMessages);
         setChatButtonIndex(0);
@@ -1154,27 +1140,33 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-// ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
-useEffect(() => {
-  if (!db || !user) return;
+  // ========== LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+  useEffect(() => {
+    if (!db || !user) return;
 
-  const usersRef = collection(db, "users");
-  const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-    // Buat map untuk menyimpan typing users per room
-    const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
-    
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      // Hanya proses user yang sedang typing dan bukan current user
-      if (data.typing && data.id !== user?.uid) {
-        const foundUser = users.find(u => u.id === data.id);
-        if (foundUser) {
-          // Gunakan typingRooms array jika ada, fallback ke typingRoomId
-          const rooms = data.typingRooms || [];
-          
-          if (rooms.length > 0) {
-            // Proses semua room yang user ini typing
-            rooms.forEach((roomId: string) => {
+    const usersRef = collection(db, "users");
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.typing && data.id !== user?.uid) {
+          const foundUser = users.find(u => u.id === data.id);
+          if (foundUser) {
+            const rooms = data.typingRooms || [];
+            
+            if (rooms.length > 0) {
+              rooms.forEach((roomId: string) => {
+                if (!typingMap[roomId]) {
+                  typingMap[roomId] = { names: [], ids: [] };
+                }
+                if (!typingMap[roomId].names.includes(foundUser.name)) {
+                  typingMap[roomId].names.push(foundUser.name);
+                  typingMap[roomId].ids.push(data.id);
+                }
+              });
+            } else if (data.typingRoomId) {
+              const roomId = data.typingRoomId;
               if (!typingMap[roomId]) {
                 typingMap[roomId] = { names: [], ids: [] };
               }
@@ -1182,66 +1174,52 @@ useEffect(() => {
                 typingMap[roomId].names.push(foundUser.name);
                 typingMap[roomId].ids.push(data.id);
               }
-            });
-          } else if (data.typingRoomId) {
-            // Fallback untuk kompatibilitas dengan data lama
-            const roomId = data.typingRoomId;
-            if (!typingMap[roomId]) {
-              typingMap[roomId] = { names: [], ids: [] };
-            }
-            if (!typingMap[roomId].names.includes(foundUser.name)) {
-              typingMap[roomId].names.push(foundUser.name);
-              typingMap[roomId].ids.push(data.id);
             }
           }
         }
-      }
-    });
-    
-    // Update typingUsersMap
-    const newTypingMap: { [key: string]: string[] } = {};
-    Object.keys(typingMap).forEach(roomId => {
-      newTypingMap[roomId] = typingMap[roomId].names;
-    });
-    setTypingUsersMap(newTypingMap);
-    
-    // Update chatRooms dengan data typing terbaru
-    setChatRooms(prev => prev.map(room => {
-      const typingData = typingMap[room.id];
-      return {
-        ...room,
-        typingUsers: typingData?.names || [],
-        typingUsersId: typingData?.ids || []
-      };
-    }));
-  });
-
-  return () => unsubscribe();
-}, [user, users]);
-
- // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
-useEffect(() => {
-  if (!selectedChat || !user || !db) return;
-  
-  // Set typing false saat chat ditutup
-  return () => {
-    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-    const userRef = doc(db, "users", user.uid);
-    
-    // Ambil data user saat ini
-    getDoc(userRef).then((snap) => {
-      const data = snap.data();
-      const rooms = data?.typingRooms || [];
-      const updatedRooms = rooms.filter((id: string) => id !== chatId);
+      });
       
-      updateDoc(userRef, { 
-        typing: updatedRooms.length > 0,
-        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-        typingRooms: updatedRooms
+      const newTypingMap: { [key: string]: string[] } = {};
+      Object.keys(typingMap).forEach(roomId => {
+        newTypingMap[roomId] = typingMap[roomId].names;
+      });
+      setTypingUsersMap(newTypingMap);
+      
+      setChatRooms(prev => prev.map(room => {
+        const typingData = typingMap[room.id];
+        return {
+          ...room,
+          typingUsers: typingData?.names || [],
+          typingUsersId: typingData?.ids || []
+        };
+      }));
+    });
+
+    return () => unsubscribe();
+  }, [user, users]);
+
+  // ========== EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
+  useEffect(() => {
+    if (!selectedChat || !user || !db) return;
+    
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    
+    return () => {
+      const userRef = doc(db, "users", user.uid);
+      
+      getDoc(userRef).then((snap) => {
+        const data = snap.data();
+        const rooms: string[] = data?.typingRooms || [];
+        const updatedRooms = rooms.filter((id: string) => id !== chatId);
+        
+        updateDoc(userRef, { 
+          typing: updatedRooms.length > 0,
+          typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+          typingRooms: updatedRooms
+        }).catch(() => {});
       }).catch(() => {});
-    }).catch(() => {});
-  };
-}, [selectedChat, user, db]);
+    };
+  }, [selectedChat, user, db]);
 
   // Chat button message rotation
   useEffect(() => {
@@ -1253,33 +1231,33 @@ useEffect(() => {
     }
   }, [chatButtonMessages]);
 
- const handleLogout = async () => {
-  if (!auth) return;
-  try {
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      online: false,
-      lastSeen: serverTimestamp(),
-      typing: false,
-      typingRoomId: null,
-      typingRooms: [] // Kosongkan array
-    });
-    
-    await signOut(auth);
-    setIsChatOpen(false);
-    setSelectedChat(null);
-    setChatRooms([]);
-    setTotalUnread(0);
-    setShowProfile(false);
-    setProfileUser(null);
-    setShowPrivacyPolicy(false);
-    setShowUpdate(false);
-    setSelectedUpdateId(null);
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
-};
-  
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        online: false,
+        lastSeen: serverTimestamp(),
+        typing: false,
+        typingRoomId: null,
+        typingRooms: []
+      });
+      
+      await signOut(auth);
+      setIsChatOpen(false);
+      setSelectedChat(null);
+      setChatRooms([]);
+      setTotalUnread(0);
+      setShowProfile(false);
+      setProfileUser(null);
+      setShowPrivacyPolicy(false);
+      setShowUpdate(false);
+      setSelectedUpdateId(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const handleChatToggle = () => {
     if (!user) return;
     setIsChatOpen(!isChatOpen);
@@ -1293,82 +1271,70 @@ useEffect(() => {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      // Reset search states
       setSearchUserInput("");
       setSearchUserResult(null);
       setSearchUserStatus("");
     }
   };
 
-// ========== PERBAIKAN: Handle typing untuk multi-user dengan array ==========
-const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-  setMessage(value);
-  
-  if (!selectedChat || !user || !db) return;
-  
-  if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
-  
-  const userRef = doc(db, "users", user.uid);
-  
-  // Dapatkan chatId
-  const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-  
-  // Dapatkan data user saat ini
-  const userSnap = await getDoc(userRef);
-  const userData = userSnap.data();
-  const currentTypingRooms = userData?.typingRooms || [];
-  
-  if (value.length > 0) {
-    // Tambahkan room jika belum ada
-    if (!currentTypingRooms.includes(chatId)) {
-      await updateDoc(userRef, {
-        typing: true,
-        typingRoomId: chatId,
-        typingRooms: [...currentTypingRooms, chatId]
-      });
+  // ========== Handle typing untuk chat - update status typing di Firestore ==========
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+    
+    if (!selectedChat || !user || !db) return;
+    
+    if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
+    
+    const userRef = doc(db, "users", user.uid);
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+    const currentTypingRooms: string[] = userData?.typingRooms || [];
+    
+    if (value.length > 0) {
+      if (!currentTypingRooms.includes(chatId)) {
+        await updateDoc(userRef, {
+          typing: true,
+          typingRoomId: chatId,
+          typingRooms: [...currentTypingRooms, chatId]
+        });
+      } else {
+        await updateDoc(userRef, {
+          typing: true,
+          typingRoomId: chatId
+        });
+      }
     } else {
-      // Update typing tetap true
+      const updatedRooms = currentTypingRooms.filter((id: string) => id !== chatId);
       await updateDoc(userRef, {
-        typing: true,
-        typingRoomId: chatId
+        typing: updatedRooms.length > 0,
+        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+        typingRooms: updatedRooms
       });
     }
-  } else {
-    // Hapus room dari array
-    const updatedRooms = currentTypingRooms.filter((id: string) => id !== chatId);
-    await updateDoc(userRef, {
-      typing: updatedRooms.length > 0,
-      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-      typingRooms: updatedRooms
-    });
-  }
-  
-  // Clear timeout sebelumnya
-  if (typingTimeout) {
-    clearTimeout(typingTimeout);
-  }
-  
-  // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
-  const newTimeout = setTimeout(async () => {
-    const userRef2 = doc(db, "users", user.uid);
-    const snap = await getDoc(userRef2);
-    const data = snap.data();
-    const rooms = data?.typingRooms || [];
-    const updatedRooms = rooms.filter((id: string) => id !== chatId);
     
-    await updateDoc(userRef2, {
-      typing: updatedRooms.length > 0,
-      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-      typingRooms: updatedRooms
-    });
-  }, 2000);
-  
-  setTypingTimeout(newTimeout);
-};
-
-
-  
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    
+    const newTimeout = setTimeout(async () => {
+      const userRef2 = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef2);
+      const data = snap.data();
+      const rooms: string[] = data?.typingRooms || [];
+      const updatedRooms = rooms.filter((id: string) => id !== chatId);
+      
+      await updateDoc(userRef2, {
+        typing: updatedRooms.length > 0,
+        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+        typingRooms: updatedRooms
+      });
+    }, 2000);
+    
+    setTypingTimeout(newTimeout);
+  };
 
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
@@ -1387,7 +1353,7 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowAddMemberToGroup(false);
   };
 
-  // Handle Block/Unblock user - dengan notifikasi realtime untuk penerima block
+  // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1396,7 +1362,6 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const targetRef = doc(db, "users", userId);
       
       if (isBlocked) {
-        // UNBLOCK: menghapus block
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -1419,7 +1384,6 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
           return u;
         }));
         
-        // Hapus banner untuk user yang diunblock
         if (blockedByBanner?.userId === userId) {
           setBlockedByBanner(null);
         }
@@ -1427,7 +1391,6 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setBlockNotification(null);
         
       } else {
-        // BLOCK: menambahkan block
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -1453,8 +1416,6 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const blockedUser = users.find(u => u.id === userId);
         setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir oleh anda`);
         
-        // Banner untuk penerima block (akan terlihat di list chat user yang diblok)
-        // Ini akan otomatis terdeteksi melalui effect chatRooms
         setTimeout(() => setBlockNotification(null), 5000);
       }
       
@@ -1465,90 +1426,88 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   };
 
-// Send message
-const handleSendMessage = async () => {
-  if (!selectedChat || !user || !message.trim() || !db) return;
+  // Send message
+  const handleSendMessage = async () => {
+    if (!selectedChat || !user || !message.trim() || !db) return;
 
-  if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) {
-    return;
-  }
+    if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) {
+      return;
+    }
 
-  try {
-    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-    const userRef = doc(db, "users", user.uid);
-    
-    // Hapus room dari typingRooms saat send message
-    const snap = await getDoc(userRef);
-    const data = snap.data();
-    const rooms = data?.typingRooms || [];
-    const updatedRooms = rooms.filter((id: string) => id !== chatId);
-    
-    await updateDoc(userRef, { 
-      typing: updatedRooms.length > 0,
-      typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-      typingRooms: updatedRooms
-    });
-    
-    // ... rest of send message code
-    const chatRef = doc(db, "chats", chatId);
-    const chatSnap = await getDoc(chatRef);
-    if (!chatSnap.exists()) {
-      if (selectedChat.isGroup) {
-        await setDoc(chatRef, {
-          participants: selectedChat.groupMembers || [user.uid],
-          createdAt: serverTimestamp(),
-          isPinned: false,
-          isGroup: true,
-          groupName: selectedChat.groupName || "Group Chat",
-          groupDescription: selectedChat.groupDescription || "",
-          groupMembers: selectedChat.groupMembers || [],
-          groupAdmins: selectedChat.groupAdmins || [],
-          createdBy: selectedChat.createdBy || user.uid
-        });
-      } else {
-        await setDoc(chatRef, {
-          participants: [user.uid, selectedChat.id],
-          createdAt: serverTimestamp(),
-          isPinned: false,
-          isGroup: false
-        });
+    try {
+      const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+      const userRef = doc(db, "users", user.uid);
+      
+      const snap = await getDoc(userRef);
+      const data = snap.data();
+      const rooms: string[] = data?.typingRooms || [];
+      const updatedRooms = rooms.filter((id: string) => id !== chatId);
+      
+      await updateDoc(userRef, { 
+        typing: updatedRooms.length > 0,
+        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
+        typingRooms: updatedRooms
+      });
+      
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        if (selectedChat.isGroup) {
+          await setDoc(chatRef, {
+            participants: selectedChat.groupMembers || [user.uid],
+            createdAt: serverTimestamp(),
+            isPinned: false,
+            isGroup: true,
+            groupName: selectedChat.groupName || "Group Chat",
+            groupDescription: selectedChat.groupDescription || "",
+            groupMembers: selectedChat.groupMembers || [],
+            groupAdmins: selectedChat.groupAdmins || [],
+            createdBy: selectedChat.createdBy || user.uid
+          });
+        } else {
+          await setDoc(chatRef, {
+            participants: [user.uid, selectedChat.id],
+            createdAt: serverTimestamp(),
+            isPinned: false,
+            isGroup: false
+          });
+        }
       }
-    }
-    
-    const messagesRef = collection(db, "chats", chatId, "messages");
-    const msgData: any = {
-      text: message.trim(),
-      senderId: user.uid,
-      senderName: user.displayName || user.email || "User",
-      receiverId: selectedChat.isGroup ? chatId : selectedChat.id,
-      timestamp: serverTimestamp(),
-      read: false,
-      isPinned: false,
-      pinnedAt: null,
-      isShared: false,
-      isGroupMessage: selectedChat.isGroup || false,
-      groupId: selectedChat.isGroup ? chatId : null
-    };
-    
-    if (replyTo) {
-      msgData.replyTo = replyTo.id;
-      msgData.replyToText = replyTo.text;
-      msgData.replyToSender = replyTo.senderName;
-    }
-    
-    await addDoc(messagesRef, msgData);
+      
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      const msgData: any = {
+        text: message.trim(),
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        receiverId: selectedChat.isGroup ? chatId : selectedChat.id,
+        timestamp: serverTimestamp(),
+        read: false,
+        isPinned: false,
+        pinnedAt: null,
+        isShared: false,
+        isGroupMessage: selectedChat.isGroup || false,
+        groupId: selectedChat.isGroup ? chatId : null
+      };
+      
+      if (replyTo) {
+        msgData.replyTo = replyTo.id;
+        msgData.replyToText = replyTo.text;
+        msgData.replyToSender = replyTo.senderName;
+      }
+      
+      await addDoc(messagesRef, msgData);
 
-    setMessage("");
-    setReplyTo(null);
-    
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-      setTypingTimeout(null);
+      setMessage("");
+      setReplyTo(null);
+      
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
-  } catch (error) {
-    console.error("Error sending message:", error);
-  }
-};
+  };
 
   // Share message
   const handleShareMessage = async () => {
@@ -1731,7 +1690,7 @@ const handleSendMessage = async () => {
     }
   };
 
-  // Add member to group - MANUAL ADD
+  // Add member to group
   const handleAddMemberToGroup = async () => {
     if (!profileUser || !selectedGroupMember || !user || !db) return;
     
@@ -1764,7 +1723,6 @@ const handleSendMessage = async () => {
           participants: newParticipants
         });
         
-        // Update local state
         setProfileUser({
           ...profileUser,
           groupMembers: newMembers
@@ -1851,6 +1809,7 @@ const handleSendMessage = async () => {
         lastSeen: null,
         typing: false,
         typingRoomId: null,
+        typingRooms: [],
         isPinned: false,
         isAdmin: false,
         blocked: [],
@@ -1954,7 +1913,6 @@ const handleSendMessage = async () => {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
-  // Cek apakah ada user yang diblok oleh current user
   const hasBlockedUsers = Object.keys(chatRooms).some(key => {
     const room = chatRooms[key];
     if (room.isGroup) return false;
@@ -1962,7 +1920,6 @@ const handleSendMessage = async () => {
     return otherId && isUserBlocked(otherId);
   });
 
-  // Cek apakah ada user yang memblock current user (banner untuk penerima block)
   const hasBlockedByUsers = Object.keys(chatRooms).some(key => {
     const room = chatRooms[key];
     if (room.isGroup) return false;
@@ -1970,7 +1927,6 @@ const handleSendMessage = async () => {
     return otherId && isBlockedByUser(otherId);
   });
 
-  // Chat button display message
   const chatButtonDisplay = chatButtonMessages.length > 0 ? chatButtonMessages[chatButtonIndex] : "Chat with Menuru";
 
   return (
@@ -2076,7 +2032,7 @@ const handleSendMessage = async () => {
           </div>
         </motion.div>
 
-        {/* Block Notification Banner - untuk pengirim block */}
+        {/* Block Notification Banner */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -2106,7 +2062,6 @@ const handleSendMessage = async () => {
           )}
         </AnimatePresence>
 
-        {/* Banner untuk penerima block - muncul di list chat */}
         {isChatOpen && blockedByBanner && (
           <div style={{
             position: "fixed",
@@ -2389,7 +2344,7 @@ const handleSendMessage = async () => {
           )}
         </AnimatePresence>
 
-        {/* Full Image Modal - Blur Background */}
+        {/* Full Image Modal */}
         <AnimatePresence>
           {showFullImage && (
             <motion.div
@@ -3388,7 +3343,6 @@ const handleSendMessage = async () => {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
                       {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
                         <div style={{ 
                           width: "100%", 
@@ -3409,7 +3363,6 @@ const handleSendMessage = async () => {
                         </div>
                       )}
 
-                      {/* Group Chat Profile */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -3506,7 +3459,6 @@ const handleSendMessage = async () => {
                             })}
                           </div>
 
-                          {/* Add member to group - MANUAL */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -3684,7 +3636,6 @@ const handleSendMessage = async () => {
                             </div>
                           </div>
 
-                          {/* Stories for admin */}
                           <StoriesSection 
                             userEmail={profileUser.email} 
                             onImageClick={(url) => setShowFullImage(url)}
@@ -3755,7 +3706,6 @@ const handleSendMessage = async () => {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Banner Announcement - WARNA HIJAU STABILO */}
                     <div
                       style={{
                         display: "flex",
@@ -3779,7 +3729,6 @@ const handleSendMessage = async () => {
                       </div>
                     </div>
 
-                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH untuk pengirim block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3797,7 +3746,6 @@ const handleSendMessage = async () => {
                       </div>
                     )}
 
-                    {/* Banner untuk penerima block - WARNA MERAH */}
                     {hasBlockedByUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3818,7 +3766,6 @@ const handleSendMessage = async () => {
                       </div>
                     )}
 
-                    {/* FORM ADD USER MANUAL - SEARCH BY EMAIL */}
                     <div style={{
                       padding: "14px",
                       backgroundColor: "#f8f8f8",
@@ -3978,7 +3925,6 @@ const handleSendMessage = async () => {
                       </span>
                     </motion.button>
 
-                    {/* Tombol Add Group Chat */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
@@ -4267,7 +4213,6 @@ const handleSendMessage = async () => {
                       )}
                     </AnimatePresence>
 
-                    {/* Pinned Users */}
                     {pinnedUsers.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4403,7 +4348,6 @@ const handleSendMessage = async () => {
                       </div>
                     )}
 
-                    {/* Pinned Chats */}
                     {pinnedChats.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4460,6 +4404,7 @@ const handleSendMessage = async () => {
                                           lastSeen: null,
                                           typing: false,
                                           typingRoomId: null,
+                                          typingRooms: [],
                                           isPinned: room.isPinned,
                                           isAdmin: false,
                                           blocked: [],
@@ -4685,7 +4630,6 @@ const handleSendMessage = async () => {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
-                          // Group Chat
                           if (room.isGroup) {
                             const typingDisplay = getTypingUsersDisplay(room);
                             return (
@@ -4708,6 +4652,7 @@ const handleSendMessage = async () => {
                                     lastSeen: null,
                                     typing: false,
                                     typingRoomId: null,
+                                    typingRooms: [],
                                     isPinned: room.isPinned,
                                     isAdmin: false,
                                     blocked: [],
@@ -5322,12 +5267,12 @@ const handleSendMessage = async () => {
                           </div>
                         ) : (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
-                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                            {/* ========== TYPING INDICATOR MULTI-USER DI MESSAGES ========== */}
+                            {regularTypingUsers.length > 0 && (
                               <div
                                 style={{
                                   textAlign: "center",
-                                  fontSize: "16px",
+                                  fontSize: selectedChat.isGroup ? "16px" : "14px",
                                   color: "#000000",
                                   padding: "8px 0",
                                   fontStyle: "normal",
@@ -5342,27 +5287,6 @@ const handleSendMessage = async () => {
                                   `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
                                 ) : (
                                   `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-                                )}
-                              </div>
-                            )}
-
-                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
-                              <div
-                                style={{
-                                  textAlign: "center",
-                                  fontSize: "14px",
-                                  color: "#000000",
-                                  padding: "6px 0",
-                                  fontStyle: "normal",
-                                  fontFamily: FONT_FAMILY,
-                                  backgroundColor: "transparent",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : (
-                                  `${regularTypingUsers.join(', ')} are typing...`
                                 )}
                               </div>
                             )}
@@ -5673,12 +5597,12 @@ const handleSendMessage = async () => {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
-                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                            {/* ========== TYPING INDICATOR MULTI-USER DI INPUT AREA ========== */}
+                            {regularTypingUsers.length > 0 && (
                               <div
                                 style={{
                                   textAlign: "left",
-                                  fontSize: "16px",
+                                  fontSize: selectedChat.isGroup ? "16px" : "14px",
                                   color: "#000000",
                                   fontStyle: "normal",
                                   fontFamily: FONT_FAMILY,
@@ -5693,26 +5617,6 @@ const handleSendMessage = async () => {
                                   `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
                                 ) : (
                                   `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-                                )}
-                              </div>
-                            )}
-                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
-                              <div
-                                style={{
-                                  textAlign: "left",
-                                  fontSize: "14px",
-                                  color: "#000000",
-                                  fontStyle: "normal",
-                                  fontFamily: FONT_FAMILY,
-                                  padding: "4px 4px 8px 4px",
-                                  backgroundColor: "transparent",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : (
-                                  `${regularTypingUsers.join(', ')} are typing...`
                                 )}
                               </div>
                             )}
