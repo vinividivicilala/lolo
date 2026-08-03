@@ -203,6 +203,15 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+// Shop Icon SVG
+const ShopIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 9L5 21H19L21 9M3 9L5 3H19L21 9M3 9H21M12 13V17M7 13H9M15 13H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="7" y="9" width="2" height="2" fill="currentColor" opacity="0.3"/>
+    <rect x="15" y="9" width="2" height="2" fill="currentColor" opacity="0.3"/>
+  </svg>
+);
+
 // Help Desk Icon - Headset Support
 const HelpDeskIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -570,7 +579,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH - TANPA GSAP ==========
+  // ========== ROLLING TEXT SEARCH - ANIMATED ROTATING PLACEHOLDER ==========
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
@@ -661,7 +670,7 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT - TANPA GSAP, HANYA SETINTERVAL ==========
+  // ========== ROLLING TEXT EFFECT - ANIMATED ROTATING PLACEHOLDER ==========
   useEffect(() => {
     const interval = setInterval(() => {
       setRollingIndex((prev) => (prev + 1) % searchRollingTexts.length);
@@ -721,7 +730,7 @@ export default function HomePage(): React.JSX.Element {
     return (targetUser?.blockedBy || []).includes(user.uid);
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar - MULTI USER ==========
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
     
@@ -740,7 +749,7 @@ export default function HomePage(): React.JSX.Element {
     return `${rest.join(', ')} and ${last}`;
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat - MULTI USER ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
     const usersTyping = typingUsersMap[selectedChat.id] || [];
@@ -748,6 +757,23 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const regularTypingUsers = getRegularTypingUsers();
+
+  // ========== PERBAIKAN: Fungsi untuk format multi-user typing di body chat ==========
+  const getTypingDisplayText = (names: string[]) => {
+    if (!names || names.length === 0) return null;
+    
+    if (names.length === 1) {
+      return `${names[0]} is typing...`;
+    }
+    
+    if (names.length === 2) {
+      return `${names[0]} and ${names[1]} are typing...`;
+    }
+    
+    const last = names[names.length - 1];
+    const rest = names.slice(0, -1);
+    return `${rest.join(', ')} and ${last} are typing...`;
+  };
 
   // Fungsi mencari user manual berdasarkan email
   const handleSearchUser = async () => {
@@ -2122,7 +2148,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - TINGGI 1200px, ROLLING TANPA GSAP */}
+            {/* Search - TINGGI 700px, ANIMATED ROTATING PLACEHOLDER */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2130,7 +2156,7 @@ export default function HomePage(): React.JSX.Element {
               ref={searchContainerRef}
               style={{ position: "relative" }}
             >
-              {/* Tombol Search - TETAP 240px */}
+              {/* Tombol Search - TETAP 240px - ANIMATED ROTATING PLACEHOLDER */}
               <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -2144,6 +2170,7 @@ export default function HomePage(): React.JSX.Element {
                 width: "240px",
                 boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
                 cursor: "pointer",
+                overflow: "hidden",
               }}
               onClick={() => {
                 if (!isSearchOpen) {
@@ -2162,24 +2189,36 @@ export default function HomePage(): React.JSX.Element {
                     color: "#ffffff",
                     width: "100%",
                     justifyContent: "space-between",
+                    position: "relative",
                   }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", position: "relative", overflow: "hidden" }}>
                       <SearchIcon size={18} />
-                      <span 
-                        style={{ 
-                          color: "#ffffff",
-                          fontWeight: 400,
-                          display: "inline-block",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {rollingText}
-                      </span>
+                      <div style={{ position: "relative", overflow: "hidden", height: "20px" }}>
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={rollingText}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -20, opacity: 0 }}
+                            transition={{ duration: 0.5, ease: "easeInOut" }}
+                            style={{ 
+                              color: "#ffffff",
+                              fontWeight: 400,
+                              display: "block",
+                              fontSize: "14px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {rollingText}
+                          </motion.span>
+                        </AnimatePresence>
+                      </div>
                     </div>
                     <span style={{ 
                       color: "rgba(255,255,255,0.4)", 
                       fontSize: "12px",
                       fontWeight: 300,
+                      flexShrink: 0,
                     }}>
                       ⌘K
                     </span>
@@ -2187,7 +2226,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - 1200px ke bawah & 1000px ke kanan ===== */}
+              {/* ===== SEARCH EXPANDED - 700px ke bawah & 1000px ke kanan ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2205,7 +2244,7 @@ export default function HomePage(): React.JSX.Element {
                       padding: "32px 36px",
                       minWidth: "1000px",
                       width: "1000px",
-                      minHeight: "1200px",
+                      minHeight: "700px",
                       boxShadow: "0 20px 80px rgba(13,60,252,0.4)",
                       overflow: "hidden",
                       zIndex: 100,
@@ -2302,8 +2341,45 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* KANAN: Pusat Bantuan + User Login */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {/* KANAN: Shop + Pusat Bantuan + User Login */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Shop Button - BG HIJAU */}
+            <motion.button
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#000",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "14px",
+                fontFamily: FONT_FAMILY,
+                padding: "8px 18px",
+                borderRadius: "30px",
+                backgroundColor: "#22c55e",
+                border: "1px solid #16a34a",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#16a34a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#22c55e";
+              }}
+              onClick={() => {
+                console.log("Shop clicked");
+              }}
+            >
+              <ShopIcon size={18} />
+              <span style={{ fontWeight: 500, color: "#ffffff" }}>Shop</span>
+            </motion.button>
+
             {/* Help Center Button */}
             <motion.button
               initial={{ opacity: 0, y: -20 }}
@@ -5506,13 +5582,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : regularTypingUsers.length === 2 ? (
-                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
-                                ) : (
-                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-                                )}
+                                {getTypingDisplayText(regularTypingUsers)}
                               </div>
                             )}
 
@@ -5529,11 +5599,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : (
-                                  `${regularTypingUsers.join(', ')} are typing...`
-                                )}
+                                {getTypingDisplayText(regularTypingUsers)}
                               </div>
                             )}
 
@@ -5857,13 +5923,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : regularTypingUsers.length === 2 ? (
-                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
-                                ) : (
-                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-                                )}
+                                {getTypingDisplayText(regularTypingUsers)}
                               </div>
                             )}
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
@@ -5879,11 +5939,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.length === 1 ? (
-                                  `${regularTypingUsers[0]} is typing...`
-                                ) : (
-                                  `${regularTypingUsers.join(', ')} are typing...`
-                                )}
+                                {getTypingDisplayText(regularTypingUsers)}
                               </div>
                             )}
                           </>
