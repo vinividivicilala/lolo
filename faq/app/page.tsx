@@ -161,7 +161,7 @@ const BackIcon = () => (
 
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokelinejoin="round" />
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -203,11 +203,14 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Help Center Icon
-const HelpIcon = ({ size = 20 }: { size?: number }) => (
+// Help Desk Icon (Bukan tanda tanya)
+const HelpDeskIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.92694 12.4272 7.06491C13.1255 7.20289 13.7588 7.59377 14.2149 8.16119C14.671 8.7286 14.9166 9.43197 14.91 10.15C14.91 12 12.09 12.82 12.09 12.82M12.18 16H12.17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 8.5C8 7.5 8.5 6 10.5 6C12.5 6 13 7.5 13 8.5C13 10 11.5 10.5 11.5 12.5V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="11.5" cy="16.5" r="0.5" fill="currentColor" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 8.5C8 7.5 8.5 6 10.5 6C12.5 6 13 7.5 13 8.5C13 10 11.5 10.5 11.5 12.5V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M14 9C15.5 9 16 10 16 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -559,15 +562,18 @@ export default function HomePage(): React.JSX.Element {
   // ========== PERBAIKAN: State untuk menyimpan typing users per room ==========
   const [typingUsersMap, setTypingUsersMap] = useState<{ [key: string]: string[] }>({});
 
-  // ========== NEW: Search state ==========
+  // ========== SEARCH STATE ==========
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Search items
-  const searchItems = ["Tentang Note", "Calendar", "Donasi", "Blog"];
+  // ========== ROLLING TEXT SEARCH ==========
+  const searchRollingTexts = ["Tentang Note", "Calendar", "Donasi", "Blog"];
+  const [rollingIndex, setRollingIndex] = useState(0);
+  const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
+  const rollingRef = useRef<HTMLSpanElement>(null);
 
   // Group Chat States
   const [groupName, setGroupName] = useState("");
@@ -655,16 +661,40 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== SEARCH EFFECT with GSAP ==========
+  // ========== ROLLING TEXT EFFECT WITH GSAP ==========
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
+      setRollingIndex(nextIndex);
+      
+      // GSAP animation for rolling text
+      if (rollingRef.current) {
+        gsap.to(rollingRef.current, {
+          y: -10,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setRollingText(searchRollingTexts[nextIndex]);
+            gsap.fromTo(rollingRef.current, 
+              { y: 10, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
+            );
+          }
+        });
+      }
+    }, 2500);
+    
+    return () => clearInterval(interval);
+  }, [rollingIndex, searchRollingTexts]);
+
+  // ========== SEARCH EFFECT WITH GSAP ==========
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
-      // GSAP animation for search input
       gsap.fromTo(searchInputRef.current, 
         { width: 0, opacity: 0, scale: 0.8 },
-        { width: "200px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+        { width: "220px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
       );
-      
-      // Focus input after animation
       setTimeout(() => searchInputRef.current?.focus(), 300);
     }
   }, [isSearchOpen]);
@@ -689,19 +719,17 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
 
-    const filtered = searchItems.filter(item => 
+    const filtered = searchRollingTexts.filter(item => 
       item.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setSearchResults(filtered);
   }, [searchQuery]);
 
   const handleSearchSelect = (item: string) => {
-    // Handle selected search item
     console.log("Selected:", item);
     setIsSearchOpen(false);
     setSearchQuery("");
     setSearchResults([]);
-    // You can add navigation or action here
   };
 
   // Fungsi cek block dengan aman
@@ -724,17 +752,14 @@ export default function HomePage(): React.JSX.Element {
     
     const names = room.typingUsers;
     
-    // Jika hanya 1 user yang typing
     if (names.length === 1) {
       return names[0];
     }
     
-    // Jika 2 user: "User A and User B"
     if (names.length === 2) {
       return `${names[0]} and ${names[1]}`;
     }
     
-    // Jika 3 atau lebih: "User A, User B, and User C"
     const last = names[names.length - 1];
     const rest = names.slice(0, -1);
     return `${rest.join(', ')} and ${last}`;
@@ -743,7 +768,6 @@ export default function HomePage(): React.JSX.Element {
   // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
-    // Gunakan typingUsersMap yang sudah diupdate dari snapshot
     const usersTyping = typingUsersMap[selectedChat.id] || [];
     return usersTyping;
   };
@@ -828,7 +852,6 @@ export default function HomePage(): React.JSX.Element {
       setSearchUserResult(null);
       setSearchUserInput("");
       
-      // Refresh chat rooms
       setTimeout(() => setSearchUserStatus(""), 3000);
       
     } catch (error) {
@@ -1003,7 +1026,6 @@ export default function HomePage(): React.JSX.Element {
       let totalUnreadCount = 0;
       const allMessages: string[] = [];
       
-      // Cek apakah ada user yang memblock current user
       let blockedByUser = null;
       for (const u of users) {
         if (u.id !== user.uid && (u.blockedBy || []).includes(user.uid)) {
@@ -1056,7 +1078,6 @@ export default function HomePage(): React.JSX.Element {
               unreadCount = unreadSnap.size;
               totalUnreadCount += unreadCount;
               
-              // Collect unread messages for chat button
               unreadSnap.forEach((doc) => {
                 const msg = doc.data() as Message;
                 allMessages.push(`${otherUser.name}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
@@ -1079,7 +1100,6 @@ export default function HomePage(): React.JSX.Element {
               });
             }
           } else {
-            // Group chat
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
@@ -1105,7 +1125,6 @@ export default function HomePage(): React.JSX.Element {
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
             
-            // Collect unread messages for chat button
             unreadSnap.forEach((doc) => {
               const msg = doc.data() as Message;
               const sender = users.find(u => u.id === msg.senderId);
@@ -1146,7 +1165,6 @@ export default function HomePage(): React.JSX.Element {
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
       
-      // Update chat button messages
       if (allMessages.length > 0) {
         setChatButtonMessages(allMessages);
         setChatButtonIndex(0);
@@ -1219,22 +1237,18 @@ export default function HomePage(): React.JSX.Element {
 
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      // Buat map untuk menyimpan typing users per room
       const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
       
       snapshot.forEach((doc) => {
         const data = doc.data();
-        // Hanya proses user yang sedang typing dan bukan current user
         if (data.typing && data.id !== user?.uid) {
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
-            // Cek semua room yang diikuti oleh user ini
             chatRooms.forEach(room => {
               if (room.participants && room.participants.includes(data.id)) {
                 if (!typingMap[room.id]) {
                   typingMap[room.id] = { names: [], ids: [] };
                 }
-                // Gunakan nama user untuk display, hindari duplikat
                 if (!typingMap[room.id].names.includes(foundUser.name)) {
                   typingMap[room.id].names.push(foundUser.name);
                   typingMap[room.id].ids.push(data.id);
@@ -1245,14 +1259,12 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
-      // Update typingUsersMap
       const newTypingMap: { [key: string]: string[] } = {};
       Object.keys(typingMap).forEach(roomId => {
         newTypingMap[roomId] = typingMap[roomId].names;
       });
       setTypingUsersMap(newTypingMap);
       
-      // Update chatRooms dengan data typing terbaru
       setChatRooms(prev => prev.map(room => {
         const typingData = typingMap[room.id];
         return {
@@ -1270,7 +1282,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
     
-    // Set typing false saat chat ditutup
     return () => {
       const userRef = doc(db, "users", user.uid);
       updateDoc(userRef, { typing: false }).catch(() => {});
@@ -1325,7 +1336,6 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
-      // Reset search states
       setSearchUserInput("");
       setSearchUserResult(null);
       setSearchUserStatus("");
@@ -1343,7 +1353,6 @@ export default function HomePage(): React.JSX.Element {
     
     const userRef = doc(db, "users", user.uid);
     
-    // Set typing true jika ada teks, false jika kosong
     if (value.length > 0) {
       await updateDoc(userRef, {
         typing: true
@@ -1354,12 +1363,10 @@ export default function HomePage(): React.JSX.Element {
       });
     }
     
-    // Clear timeout sebelumnya
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
     
-    // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
     const newTimeout = setTimeout(async () => {
       const userRef2 = doc(db, "users", user.uid);
       await updateDoc(userRef2, {
@@ -1387,7 +1394,7 @@ export default function HomePage(): React.JSX.Element {
     setShowAddMemberToGroup(false);
   };
 
-  // Handle Block/Unblock user - dengan notifikasi realtime untuk penerima block
+  // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1396,7 +1403,6 @@ export default function HomePage(): React.JSX.Element {
       const targetRef = doc(db, "users", userId);
       
       if (isBlocked) {
-        // UNBLOCK: menghapus block
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
         });
@@ -1419,7 +1425,6 @@ export default function HomePage(): React.JSX.Element {
           return u;
         }));
         
-        // Hapus banner untuk user yang diunblock
         if (blockedByBanner?.userId === userId) {
           setBlockedByBanner(null);
         }
@@ -1427,7 +1432,6 @@ export default function HomePage(): React.JSX.Element {
         setBlockNotification(null);
         
       } else {
-        // BLOCK: menambahkan block
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
         });
@@ -1453,8 +1457,6 @@ export default function HomePage(): React.JSX.Element {
         const blockedUser = users.find(u => u.id === userId);
         setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir oleh anda`);
         
-        // Banner untuk penerima block (akan terlihat di list chat user yang diblok)
-        // Ini akan otomatis terdeteksi melalui effect chatRooms
         setTimeout(() => setBlockNotification(null), 5000);
       }
       
@@ -1720,7 +1722,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add member to group - MANUAL ADD
+  // Add member to group
   const handleAddMemberToGroup = async () => {
     if (!profileUser || !selectedGroupMember || !user || !db) return;
     
@@ -1753,7 +1755,6 @@ export default function HomePage(): React.JSX.Element {
           participants: newParticipants
         });
         
-        // Update local state
         setProfileUser({
           ...profileUser,
           groupMembers: newMembers
@@ -1942,7 +1943,6 @@ export default function HomePage(): React.JSX.Element {
 
   const selectedUpdate = updates.find(item => item.id === selectedUpdateId);
 
-  // Cek apakah ada user yang diblok oleh current user
   const hasBlockedUsers = Object.keys(chatRooms).some(key => {
     const room = chatRooms[key];
     if (room.isGroup) return false;
@@ -1950,7 +1950,6 @@ export default function HomePage(): React.JSX.Element {
     return otherId && isUserBlocked(otherId);
   });
 
-  // Cek apakah ada user yang memblock current user (banner untuk penerima block)
   const hasBlockedByUsers = Object.keys(chatRooms).some(key => {
     const room = chatRooms[key];
     if (room.isGroup) return false;
@@ -1958,7 +1957,6 @@ export default function HomePage(): React.JSX.Element {
     return otherId && isBlockedByUser(otherId);
   });
 
-  // Chat button display message
   const chatButtonDisplay = chatButtonMessages.length > 0 ? chatButtonMessages[chatButtonIndex] : "Chat with Menuru";
 
   return (
@@ -2064,7 +2062,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </motion.div>
 
-        {/* Block Notification Banner - untuk pengirim block */}
+        {/* Block Notification Banner */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -2094,7 +2092,6 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Banner untuk penerima block - muncul di list chat */}
         {isChatOpen && blockedByBanner && (
           <div style={{
             position: "fixed",
@@ -2145,7 +2142,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </motion.div>
 
-        {/* ===== NEW: Search & Help Center - Right side of title ===== */}
+        {/* ===== SEARCH - Sejajar dengan judul web ===== */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -2161,16 +2158,17 @@ export default function HomePage(): React.JSX.Element {
             gap: "16px",
           }}
         >
-          {/* Search Container */}
+          {/* Search Container - Background Biru seperti Banner */}
           <div style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: "#f5f5f5",
+            backgroundColor: "#0D3CFC",
             borderRadius: "30px",
             padding: "4px 8px",
-            border: "1px solid #e8e8e8",
+            border: "none",
             transition: "all 0.3s ease",
             position: "relative",
+            minWidth: "280px",
           }}>
             {isSearchOpen ? (
               <div style={{
@@ -2178,23 +2176,25 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: "center",
                 gap: "6px",
                 padding: "0 4px",
+                width: "100%",
               }}>
-                <SearchIcon size={18} />
+                <SearchIcon size={18} color="rgba(255,255,255,0.7)" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
+                  placeholder="Cari..."
                   style={{
                     border: "none",
                     outline: "none",
                     backgroundColor: "transparent",
                     fontSize: "14px",
                     fontFamily: FONT_FAMILY,
-                    padding: "6px 4px",
-                    width: "180px",
-                    color: "#000",
+                    padding: "8px 4px",
+                    width: "220px",
+                    color: "#ffffff",
+                    flex: 1,
                   }}
                 />
                 <button
@@ -2207,7 +2207,7 @@ export default function HomePage(): React.JSX.Element {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#999",
+                    color: "rgba(255,255,255,0.5)",
                     padding: "4px 6px",
                     display: "flex",
                     alignItems: "center",
@@ -2223,17 +2223,37 @@ export default function HomePage(): React.JSX.Element {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  padding: "6px 14px",
-                  color: "#000",
+                  padding: "8px 16px",
+                  color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "10px",
                   fontFamily: FONT_FAMILY,
                   fontSize: "14px",
+                  width: "100%",
+                  justifyContent: "space-between",
                 }}
               >
-                <SearchIcon size={18} />
-                <span style={{ color: "#999" }}>Search</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <SearchIcon size={18} color="rgba(255,255,255,0.7)" />
+                  <span 
+                    ref={rollingRef}
+                    style={{ 
+                      color: "rgba(255,255,255,0.9)",
+                      fontWeight: 400,
+                      display: "inline-block",
+                    }}
+                  >
+                    {rollingText}
+                  </span>
+                </div>
+                <span style={{ 
+                  color: "rgba(255,255,255,0.4)", 
+                  fontSize: "12px",
+                  fontWeight: 300,
+                }}>
+                  ⌘K
+                </span>
               </button>
             )}
 
@@ -2256,7 +2276,7 @@ export default function HomePage(): React.JSX.Element {
                     border: "1px solid #f0f0f0",
                     padding: "6px 0",
                     zIndex: 100,
-                    minWidth: "220px",
+                    minWidth: "280px",
                   }}
                 >
                   {searchResults.map((item, index) => (
@@ -2289,8 +2309,24 @@ export default function HomePage(): React.JSX.Element {
               )}
             </AnimatePresence>
           </div>
+        </motion.div>
 
-          {/* Help Center Button */}
+        {/* ===== PUSAT BANTUAN - Sejajar dengan tombol login ===== */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          style={{
+            position: "absolute",
+            top: "140px",
+            right: "40px",
+            zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          {/* Help Center Button - Sejajar dengan login */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -2301,46 +2337,32 @@ export default function HomePage(): React.JSX.Element {
               color: "#000",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
+              gap: "8px",
               fontSize: "14px",
               fontFamily: FONT_FAMILY,
-              padding: "6px 14px",
+              padding: "8px 18px",
               borderRadius: "30px",
-              backgroundColor: "#f5f5f5",
-              border: "1px solid #e8e8e8",
+              backgroundColor: "transparent",
+              border: "1px solid #e0e0e0",
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#e8e8e8";
+              e.currentTarget.style.backgroundColor = "#f5f5f5";
+              e.currentTarget.style.borderColor = "#ccc";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#f5f5f5";
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = "#e0e0e0";
             }}
             onClick={() => {
-              // Handle help center click
               console.log("Help Center clicked");
             }}
           >
-            <HelpIcon size={18} />
+            <HelpDeskIcon size={18} />
             <span style={{ fontWeight: 500 }}>Pusat bantuan</span>
           </motion.button>
-        </motion.div>
 
-        {/* User Status - moved slightly right to accommodate search */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          style={{
-            position: "absolute",
-            top: "140px",
-            right: "40px",
-            zIndex: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
+          {/* User Login Status */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -2558,7 +2580,7 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Full Image Modal - Blur Background */}
+        {/* Full Image Modal */}
         <AnimatePresence>
           {showFullImage && (
             <motion.div
@@ -3557,7 +3579,6 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile - WARNA #0D3CFC + TEKS PUTIH */}
                       {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
                         <div style={{ 
                           width: "100%", 
@@ -3578,7 +3599,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Group Chat Profile */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -3675,7 +3695,6 @@ export default function HomePage(): React.JSX.Element {
                             })}
                           </div>
 
-                          {/* Add member to group - MANUAL */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -3853,7 +3872,6 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
 
-                          {/* Stories for admin */}
                           <StoriesSection 
                             userEmail={profileUser.email} 
                             onImageClick={(url) => setShowFullImage(url)}
@@ -3922,9 +3940,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : !selectedChat ? (
-                  // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Banner Announcement - WARNA HIJAU STABILO */}
                     <div
                       style={{
                         display: "flex",
@@ -3948,7 +3964,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Peringatan block - WARNA #0D3CFC + TEKS PUTIH untuk pengirim block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3966,7 +3981,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Banner untuk penerima block - WARNA MERAH */}
                     {hasBlockedByUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -3987,7 +4001,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* FORM ADD USER MANUAL - SEARCH BY EMAIL */}
                     <div style={{
                       padding: "14px",
                       backgroundColor: "#f8f8f8",
@@ -4147,7 +4160,6 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                     </motion.button>
 
-                    {/* Tombol Add Group Chat */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
@@ -4436,7 +4448,6 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </AnimatePresence>
 
-                    {/* Pinned Users */}
                     {pinnedUsers.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4572,7 +4583,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Pinned Chats */}
                     {pinnedChats.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4853,7 +4863,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       ) : (
                         unpinnedChats.map((room) => {
-                          // Group Chat
                           if (room.isGroup) {
                             const typingDisplay = getTypingUsersDisplay(room);
                             return (
@@ -5138,9 +5147,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : (
-                  // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header */}
                     <div
                       style={{
                         padding: "10px 16px",
@@ -5303,9 +5310,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Chat View */}
                     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                      {/* Pinned Messages */}
                       {pinnedMessages.length > 0 && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                         <div
                           style={{
@@ -5382,7 +5387,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Reply Indicator */}
                       {replyTo && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                         <div
                           style={{
@@ -5432,7 +5436,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages */}
                       <div
                         style={{
                           flex: 1,
@@ -5489,7 +5492,6 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5824,7 +5826,6 @@ export default function HomePage(): React.JSX.Element {
                         <div ref={messagesEndRef} />
                       </div>
 
-                      {/* Input */}
                       <div
                         style={{
                           padding: "10px 14px 14px",
@@ -5840,7 +5841,6 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
@@ -5968,7 +5968,6 @@ export default function HomePage(): React.JSX.Element {
             )}
           </AnimatePresence>
 
-          {/* Chat Button */}
           <motion.button
             whileHover={!isChatOpen ? { scale: 1.03 } : {}}
             whileTap={!isChatOpen ? { scale: 0.97 } : {}}
