@@ -570,7 +570,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH - PERBAIKAN: "Tentang Note", "Tentang Donasi", "Tentang Blog" ==========
+  // ========== ROLLING TEXT SEARCH ==========
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
@@ -712,14 +712,13 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle search input - HAPUS FILTER, TIDAK ADA KONTEN DEFAULT
+  // Handle search input
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
       return;
     }
 
-    // Filter berdasarkan rolling text
     const filtered = searchRollingTexts.filter(item => 
       item.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -2148,7 +2147,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - Sejajar dengan Menuru - PERBAIKAN FULL WHITE */}
+            {/* Search - PERBAIKAN UKURAN BESAR & FULL WHITE */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2156,6 +2155,7 @@ export default function HomePage(): React.JSX.Element {
               ref={searchContainerRef}
               style={{ position: "relative" }}
             >
+              {/* Tombol Search - Ukuran tetap 240px */}
               <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -2165,7 +2165,8 @@ export default function HomePage(): React.JSX.Element {
                 border: "none",
                 transition: "all 0.3s ease",
                 position: "relative",
-                minWidth: isSearchOpen ? "280px" : "240px",
+                minWidth: "240px",
+                width: "240px",
                 boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
                 cursor: "pointer",
               }}
@@ -2195,6 +2196,7 @@ export default function HomePage(): React.JSX.Element {
                           color: "#ffffff",
                           fontWeight: 400,
                           display: "inline-block",
+                          fontSize: "14px",
                         }}
                       >
                         {rollingText}
@@ -2211,7 +2213,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - Perbaikan: Full White, Besar ke bawah & kanan, Hapus konten default ===== */}
+              {/* ===== SEARCH EXPANDED - UKURAN BESAR, FULL WHITE, KOSONG ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2223,12 +2225,13 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       position: "absolute",
                       top: "calc(100% + 8px)",
-                      right: "-20px",
+                      right: "-60px",
                       backgroundColor: "#0D3CFC",
                       borderRadius: "16px",
-                      padding: "20px 24px",
-                      minWidth: "400px",
-                      boxShadow: "0 8px 40px rgba(13,60,252,0.25)",
+                      padding: "24px 28px",
+                      minWidth: "480px",
+                      width: "480px",
+                      boxShadow: "0 12px 60px rgba(13,60,252,0.3)",
                       overflow: "hidden",
                       zIndex: 100,
                     }}
@@ -2238,12 +2241,12 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "16px",
-                      borderBottom: "1px solid rgba(255,255,255,0.1)",
-                      paddingBottom: "12px",
+                      gap: "14px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid rgba(255,255,255,0.15)",
+                      paddingBottom: "14px",
                     }}>
-                      <SearchIcon size={20} />
+                      <SearchIcon size={22} />
                       <input
                         ref={searchInputRef}
                         type="text"
@@ -2254,9 +2257,9 @@ export default function HomePage(): React.JSX.Element {
                           border: "none",
                           outline: "none",
                           backgroundColor: "transparent",
-                          fontSize: "16px",
+                          fontSize: "18px",
                           fontFamily: FONT_FAMILY,
-                          padding: "4px 0",
+                          padding: "6px 0",
                           width: "100%",
                           color: "#ffffff",
                           fontWeight: 400,
@@ -2282,12 +2285,12 @@ export default function HomePage(): React.JSX.Element {
                       </button>
                     </div>
 
-                    {/* Search Results / Content - Full White, Hapus konten default */}
+                    {/* Search Results - FULL WHITE, KOSONG TIDAK ADA KONTEN DEFAULT */}
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: "4px",
-                      minHeight: "60px",
+                      gap: "6px",
+                      minHeight: "80px",
                     }}>
                       {searchResults.length > 0 ? (
                         searchResults.map((item, index) => (
@@ -2298,9 +2301,9 @@ export default function HomePage(): React.JSX.Element {
                             transition={{ delay: index * 0.05 }}
                             onClick={() => handleSearchSelect(item)}
                             style={{
-                              padding: "10px 16px",
+                              padding: "12px 18px",
                               cursor: "pointer",
-                              fontSize: "14px",
+                              fontSize: "15px",
                               color: "#ffffff",
                               fontFamily: FONT_FAMILY,
                               transition: "all 0.2s ease",
@@ -2318,38 +2321,39 @@ export default function HomePage(): React.JSX.Element {
                           </motion.div>
                         ))
                       ) : (
-                        // HAPUS KONTEN DEFAULT - TAMPILAN KOSONG DENGAN TEKS PUTIH
+                        // KOSONG - HANYA TEKS PUTIH
                         <div style={{
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: "14px",
+                          color: "#ffffff",
+                          fontSize: "15px",
                           fontFamily: FONT_FAMILY,
-                          padding: "20px 0",
+                          padding: "24px 0",
                           textAlign: "center",
+                          fontWeight: 400,
                         }}>
                           {searchQuery ? "Tidak ada hasil" : "Mulai mengetik untuk mencari..."}
                         </div>
                       )}
                     </div>
 
-                    {/* Footer search - Full White */}
+                    {/* Footer - FULL WHITE */}
                     <div style={{
-                      marginTop: "12px",
-                      paddingTop: "12px",
-                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      marginTop: "16px",
+                      paddingTop: "14px",
+                      borderTop: "1px solid rgba(255,255,255,0.08)",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
                     }}>
                       <span style={{
-                        color: "rgba(255,255,255,0.3)",
-                        fontSize: "11px",
+                        color: "rgba(255,255,255,0.4)",
+                        fontSize: "12px",
                         fontFamily: FONT_FAMILY,
                       }}>
                         {searchRollingTexts.length} hasil
                       </span>
                       <span style={{
-                        color: "rgba(255,255,255,0.2)",
-                        fontSize: "10px",
+                        color: "rgba(255,255,255,0.3)",
+                        fontSize: "11px",
                         fontFamily: FONT_FAMILY,
                       }}>
                         ESC untuk keluar
@@ -2894,7 +2898,8 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       </div>
 
-                      <p                        style={{
+                      <p
+                        style={{
                           fontSize: "15px",
                           color: "#000000",
                           lineHeight: 1.8,
