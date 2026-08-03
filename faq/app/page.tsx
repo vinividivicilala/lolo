@@ -196,21 +196,25 @@ const ChatIcon = () => (
 );
 
 // Search Icon
-const SearchIcon = ({ size = 20 }: { size?: number }) => (
+const SearchIcon = ({ size = 20, color = "#fff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="11" cy="11" r="7" stroke={color} strokeWidth="1.5"/>
+    <path d="M16 16L21 21" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
-// Help Desk Icon (Bukan tanda tanya)
+// Help Desk Icon (BENAR - Icon Headset Support)
 const HelpDeskIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M8 8.5C8 7.5 8.5 6 10.5 6C12.5 6 13 7.5 13 8.5C13 10 11.5 10.5 11.5 12.5V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="11.5" cy="16.5" r="0.5" fill="currentColor" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M8 8.5C8 7.5 8.5 6 10.5 6C12.5 6 13 7.5 13 8.5C13 10 11.5 10.5 11.5 12.5V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M14 9C15.5 9 16 10 16 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    {/* Headset */}
+    <path d="M3 13C3 10.6131 3.94821 8.32387 5.63604 6.63604C7.32387 4.94821 9.61305 4 12 4C14.3869 4 16.6761 4.94821 18.364 6.63604C20.0518 8.32387 21 10.6131 21 13V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    {/* Ear cup */}
+    <path d="M3 16C3 14.8954 3.89543 14 5 14H7C8.10457 14 9 14.8954 9 16V18C9 19.1046 8.10457 20 7 20H5C3.89543 20 3 19.1046 3 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M21 16C21 14.8954 20.1046 14 19 14H17C15.8954 14 15 14.8954 15 16V18C15 19.1046 15.8954 20 17 20H19C20.1046 20 21 19.1046 21 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
+    {/* Microphone */}
+    <path d="M6 14V13C6 9.68629 8.68629 7 12 7C15.3137 7 18 9.68629 18 13V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    {/* Sound waves */}
+    <path d="M4 11C4 8.87827 4.84285 6.84344 6.34315 5.34315C7.84344 3.84285 9.87827 3 12 3C14.1217 3 16.1566 3.84285 17.6569 5.34315C19.1571 6.84344 20 8.87827 20 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
   </svg>
 );
 
@@ -667,7 +671,6 @@ export default function HomePage(): React.JSX.Element {
       const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
       setRollingIndex(nextIndex);
       
-      // GSAP animation for rolling text
       if (rollingRef.current) {
         gsap.to(rollingRef.current, {
           y: -10,
@@ -2142,7 +2145,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </motion.div>
 
-        {/* ===== SEARCH - Sejajar dengan judul web ===== */}
+        {/* ===== SEARCH - Sejajar dengan judul web (sisi kanan) ===== */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -2155,20 +2158,19 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 15,
             display: "flex",
             alignItems: "center",
-            gap: "16px",
           }}
         >
-          {/* Search Container - Background Biru seperti Banner */}
           <div style={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: "#0D3CFC",
+            backgroundColor: "#ffffff",
             borderRadius: "30px",
             padding: "4px 8px",
-            border: "none",
+            border: "1px solid #e0e0e0",
             transition: "all 0.3s ease",
             position: "relative",
             minWidth: "280px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           }}>
             {isSearchOpen ? (
               <div style={{
@@ -2178,7 +2180,7 @@ export default function HomePage(): React.JSX.Element {
                 padding: "0 4px",
                 width: "100%",
               }}>
-                <SearchIcon size={18} color="rgba(255,255,255,0.7)" />
+                <SearchIcon size={18} color="#999" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -2193,7 +2195,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: FONT_FAMILY,
                     padding: "8px 4px",
                     width: "220px",
-                    color: "#ffffff",
+                    color: "#000",
                     flex: 1,
                   }}
                 />
@@ -2207,7 +2209,7 @@ export default function HomePage(): React.JSX.Element {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "rgba(255,255,255,0.5)",
+                    color: "#999",
                     padding: "4px 6px",
                     display: "flex",
                     alignItems: "center",
@@ -2224,7 +2226,7 @@ export default function HomePage(): React.JSX.Element {
                   border: "none",
                   cursor: "pointer",
                   padding: "8px 16px",
-                  color: "#ffffff",
+                  color: "#000",
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
@@ -2235,11 +2237,11 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <SearchIcon size={18} color="rgba(255,255,255,0.7)" />
+                  <SearchIcon size={18} color="#999" />
                   <span 
                     ref={rollingRef}
                     style={{ 
-                      color: "rgba(255,255,255,0.9)",
+                      color: "#000",
                       fontWeight: 400,
                       display: "inline-block",
                     }}
@@ -2248,7 +2250,7 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                 </div>
                 <span style={{ 
-                  color: "rgba(255,255,255,0.4)", 
+                  color: "#bbb", 
                   fontSize: "12px",
                   fontWeight: 300,
                 }}>
