@@ -72,7 +72,7 @@ interface ChatUser {
   online?: boolean;
   lastSeen?: any;
   typing?: boolean;
-    typingRoomId?: string | null; // TAMBAHKAN INI
+  typingRoomId?: string | null;
   blocked?: string[];
   blockedBy?: string[];
   isGroup?: boolean;
@@ -666,21 +666,24 @@ export default function HomePage(): React.JSX.Element {
     return `${rest.join(', ')} and ${last}`;
   };
 
- // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
-const getRegularTypingUsers = () => {
-  if (!selectedChat) return [];
-  
-  // Untuk group chat, cek berdasarkan room id
-  if (selectedChat.isGroup) {
-    const usersTyping = typingUsersMap[selectedChat.id] || [];
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
+  const getRegularTypingUsers = () => {
+    if (!selectedChat || !user) return [];
+    
+    // Untuk group chat, cek berdasarkan room id
+    if (selectedChat.isGroup) {
+      const usersTyping = typingUsersMap[selectedChat.id] || [];
+      return usersTyping;
+    }
+    
+    // Untuk personal chat
+    const chatId = [user.uid, selectedChat.id].sort().join("_");
+    const usersTyping = typingUsersMap[chatId] || [];
     return usersTyping;
-  }
-  
-  // Untuk personal chat
-  const chatId = [user?.uid, selectedChat.id].sort().join("_");
-  const usersTyping = typingUsersMap[chatId] || [];
-  return usersTyping;
-};
+  };
+
+  // Gunakan fungsi ini di dalam render
+  const regularTypingUsers = getRegularTypingUsers();
 
   // Fungsi mencari user manual berdasarkan email
   const handleSearchUser = async () => {
@@ -717,6 +720,7 @@ const getRegularTypingUsers = () => {
         online: userData.online || false,
         lastSeen: userData.lastSeen || null,
         typing: userData.typing || false,
+        typingRoomId: userData.typingRoomId || null,
         blocked: userData.blocked || [],
         blockedBy: userData.blockedBy || []
       };
@@ -796,7 +800,7 @@ const getRegularTypingUsers = () => {
               online: true,
               lastSeen: serverTimestamp(),
               typing: false,
-              typingRoomId: null, 
+              typingRoomId: null,
               blocked: [],
               blockedBy: []
             });
@@ -864,6 +868,7 @@ const getRegularTypingUsers = () => {
                 online: data.online || false,
                 lastSeen: data.lastSeen || null,
                 typing: data.typing || false,
+                typingRoomId: data.typingRoomId || null,
                 photoURL: data.photoURL || "",
                 isAdmin: data.isAdmin || false,
                 blocked: data.blocked || [],
@@ -888,6 +893,7 @@ const getRegularTypingUsers = () => {
             online: true,
             lastSeen: null,
             typing: false,
+            typingRoomId: null,
             blocked: user.blocked || [],
             blockedBy: user.blockedBy || []
           };
@@ -1146,70 +1152,68 @@ const getRegularTypingUsers = () => {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-
   // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
-useEffect(() => {
-  if (!db || !user) return;
+  useEffect(() => {
+    if (!db || !user) return;
 
-  const usersRef = collection(db, "users");
-  const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-    // Buat map untuk menyimpan typing users per room
-    const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
-    
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      // Hanya proses user yang sedang typing dan bukan current user
-      if (data.typing && data.id !== user?.uid && data.typingRoomId) {
-        const foundUser = users.find(u => u.id === data.id);
-        if (foundUser) {
-          const roomId = data.typingRoomId;
-          if (!typingMap[roomId]) {
-            typingMap[roomId] = { names: [], ids: [] };
-          }
-          // Gunakan nama user untuk display, hindari duplikat
-          if (!typingMap[roomId].names.includes(foundUser.name)) {
-            typingMap[roomId].names.push(foundUser.name);
-            typingMap[roomId].ids.push(data.id);
+    const usersRef = collection(db, "users");
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      // Buat map untuk menyimpan typing users per room
+      const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        // Hanya proses user yang sedang typing dan bukan current user
+        if (data.typing && data.id !== user?.uid && data.typingRoomId) {
+          const foundUser = users.find(u => u.id === data.id);
+          if (foundUser) {
+            const roomId = data.typingRoomId;
+            if (!typingMap[roomId]) {
+              typingMap[roomId] = { names: [], ids: [] };
+            }
+            // Gunakan nama user untuk display, hindari duplikat
+            if (!typingMap[roomId].names.includes(foundUser.name)) {
+              typingMap[roomId].names.push(foundUser.name);
+              typingMap[roomId].ids.push(data.id);
+            }
           }
         }
-      }
+      });
+      
+      // Update typingUsersMap
+      const newTypingMap: { [key: string]: string[] } = {};
+      Object.keys(typingMap).forEach(roomId => {
+        newTypingMap[roomId] = typingMap[roomId].names;
+      });
+      setTypingUsersMap(newTypingMap);
+      
+      // Update chatRooms dengan data typing terbaru
+      setChatRooms(prev => prev.map(room => {
+        const typingData = typingMap[room.id];
+        return {
+          ...room,
+          typingUsers: typingData?.names || [],
+          typingUsersId: typingData?.ids || []
+        };
+      }));
     });
-    
-    // Update typingUsersMap
-    const newTypingMap: { [key: string]: string[] } = {};
-    Object.keys(typingMap).forEach(roomId => {
-      newTypingMap[roomId] = typingMap[roomId].names;
-    });
-    setTypingUsersMap(newTypingMap);
-    
-    // Update chatRooms dengan data typing terbaru
-    setChatRooms(prev => prev.map(room => {
-      const typingData = typingMap[room.id];
-      return {
-        ...room,
-        typingUsers: typingData?.names || [],
-        typingUsersId: typingData?.ids || []
-      };
-    }));
-  });
 
-  return () => unsubscribe();
-}, [user, users]);
-  
+    return () => unsubscribe();
+  }, [user, users]);
 
-// ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
-useEffect(() => {
-  if (!selectedChat || !user || !db) return;
-  
-  // Set typing false saat chat ditutup
-  return () => {
-    const userRef = doc(db, "users", user.uid);
-    updateDoc(userRef, { 
-      typing: false,
-      typingRoomId: null 
-    }).catch(() => {});
-  };
-}, [selectedChat, user, db]);
+  // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
+  useEffect(() => {
+    if (!selectedChat || !user || !db) return;
+    
+    // Set typing false saat chat ditutup
+    return () => {
+      const userRef = doc(db, "users", user.uid);
+      updateDoc(userRef, { 
+        typing: false,
+        typingRoomId: null 
+      }).catch(() => {});
+    };
+  }, [selectedChat, user, db]);
 
   // Chat button message rotation
   useEffect(() => {
@@ -1228,7 +1232,8 @@ useEffect(() => {
       await updateDoc(userRef, {
         online: false,
         lastSeen: serverTimestamp(),
-        typing: false
+        typing: false,
+        typingRoomId: null
       });
       
       await signOut(auth);
@@ -1266,46 +1271,49 @@ useEffect(() => {
     }
   };
 
-// ========== PERBAIKAN: Handle typing untuk multi-user ==========
-const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-  setMessage(value);
-  
-  if (!selectedChat || !user || !db) return;
-  
-  if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
-  
-  const userRef = doc(db, "users", user.uid);
-  
-  // Set typing true jika ada teks, false jika kosong
-  if (value.length > 0) {
-    await updateDoc(userRef, {
-      typing: true,
-      typingRoomId: selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_")
-    });
-  } else {
-    await updateDoc(userRef, {
-      typing: false,
-      typingRoomId: null
-    });
-  }
-  
-  // Clear timeout sebelumnya
-  if (typingTimeout) {
-    clearTimeout(typingTimeout);
-  }
-  
-  // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
-  const newTimeout = setTimeout(async () => {
-    const userRef2 = doc(db, "users", user.uid);
-    await updateDoc(userRef2, {
-      typing: false,
-      typingRoomId: null
-    });
-  }, 2000);
-  
-  setTypingTimeout(newTimeout);
-};
+  // ========== PERBAIKAN: Handle typing untuk chat - update status typing di Firestore ==========
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+    
+    if (!selectedChat || !user || !db) return;
+    
+    if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
+    
+    const userRef = doc(db, "users", user.uid);
+    
+    // Dapatkan chatId
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    
+    // Set typing true jika ada teks, false jika kosong
+    if (value.length > 0) {
+      await updateDoc(userRef, {
+        typing: true,
+        typingRoomId: chatId
+      });
+    } else {
+      await updateDoc(userRef, {
+        typing: false,
+        typingRoomId: null
+      });
+    }
+    
+    // Clear timeout sebelumnya
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    
+    // Set timeout untuk menghentikan typing setelah 2 detik tidak mengetik
+    const newTimeout = setTimeout(async () => {
+      const userRef2 = doc(db, "users", user.uid);
+      await updateDoc(userRef2, {
+        typing: false,
+        typingRoomId: null
+      });
+    }, 2000);
+    
+    setTypingTimeout(newTimeout);
+  };
 
   // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
@@ -1412,7 +1420,10 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
     try {
       const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { typing: false });
+      await updateDoc(userRef, { 
+        typing: false,
+        typingRoomId: null 
+      });
       
       const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
       
@@ -1776,6 +1787,7 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
         online: false,
         lastSeen: null,
         typing: false,
+        typingRoomId: null,
         isPinned: false,
         isAdmin: false,
         blocked: [],
@@ -4384,6 +4396,7 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                           online: false,
                                           lastSeen: null,
                                           typing: false,
+                                          typingRoomId: null,
                                           isPinned: room.isPinned,
                                           isAdmin: false,
                                           blocked: [],
@@ -4631,6 +4644,7 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
                                     online: false,
                                     lastSeen: null,
                                     typing: false,
+                                    typingRoomId: null,
                                     isPinned: room.isPinned,
                                     isAdmin: false,
                                     blocked: [],
@@ -5245,51 +5259,51 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
                           </div>
                         ) : (
                           <>
-                         
-{/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
-{selectedChat.isGroup && regularTypingUsers.length > 0 && (
-  <div
-    style={{
-      textAlign: "center",
-      fontSize: "16px",
-      color: "#000000",
-      padding: "8px 0",
-      fontStyle: "normal",
-      fontFamily: FONT_FAMILY,
-      backgroundColor: "transparent",
-      fontWeight: 600,
-    }}
-  >
-    {regularTypingUsers.length === 1 ? (
-      `${regularTypingUsers[0]} is typing...`
-    ) : regularTypingUsers.length === 2 ? (
-      `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
-    ) : (
-      `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-    )}
-  </div>
-)}
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator untuk Group Chat ========== */}
+                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "16px",
+                                  color: "#000000",
+                                  padding: "8px 0",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : regularTypingUsers.length === 2 ? (
+                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
+                                ) : (
+                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
+                                )}
+                              </div>
+                            )}
 
-{!selectedChat.isGroup && regularTypingUsers.length > 0 && (
-  <div
-    style={{
-      textAlign: "center",
-      fontSize: "14px",
-      color: "#000000",
-      padding: "6px 0",
-      fontStyle: "normal",
-      fontFamily: FONT_FAMILY,
-      backgroundColor: "transparent",
-      fontWeight: 600,
-    }}
-  >
-    {regularTypingUsers.length === 1 ? (
-      `${regularTypingUsers[0]} is typing...`
-    ) : (
-      `${regularTypingUsers.join(', ')} are typing...`
-    )}
-  </div>
-)}
+                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: "14px",
+                                  color: "#000000",
+                                  padding: "6px 0",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : (
+                                  `${regularTypingUsers.join(', ')} are typing...`
+                                )}
+                              </div>
+                            )}
+
                             {messages.length === 0 ? (
                               <div
                                 style={{
@@ -5596,49 +5610,49 @@ const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                           {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
-{selectedChat.isGroup && regularTypingUsers.length > 0 && (
-  <div
-    style={{
-      textAlign: "left",
-      fontSize: "16px",
-      color: "#000000",
-      fontStyle: "normal",
-      fontFamily: FONT_FAMILY,
-      padding: "4px 4px 8px 4px",
-      backgroundColor: "transparent",
-      fontWeight: 600,
-    }}
-  >
-    {regularTypingUsers.length === 1 ? (
-      `${regularTypingUsers[0]} is typing...`
-    ) : regularTypingUsers.length === 2 ? (
-      `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
-    ) : (
-      `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
-    )}
-  </div>
-)}
-{!selectedChat.isGroup && regularTypingUsers.length > 0 && (
-  <div
-    style={{
-      textAlign: "left",
-      fontSize: "14px",
-      color: "#000000",
-      fontStyle: "normal",
-      fontFamily: FONT_FAMILY,
-      padding: "4px 4px 8px 4px",
-      backgroundColor: "transparent",
-      fontWeight: 600,
-    }}
-  >
-    {regularTypingUsers.length === 1 ? (
-      `${regularTypingUsers[0]} is typing...`
-    ) : (
-      `${regularTypingUsers.join(', ')} are typing...`
-    )}
-  </div>
-)}
+                            {/* ========== PERBAIKAN: Multi-User Typing Indicator di Input Area ========== */}
+                            {selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "left",
+                                  fontSize: "16px",
+                                  color: "#000000",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  padding: "4px 4px 8px 4px",
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : regularTypingUsers.length === 2 ? (
+                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
+                                ) : (
+                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
+                                )}
+                              </div>
+                            )}
+                            {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
+                              <div
+                                style={{
+                                  textAlign: "left",
+                                  fontSize: "14px",
+                                  color: "#000000",
+                                  fontStyle: "normal",
+                                  fontFamily: FONT_FAMILY,
+                                  padding: "4px 4px 8px 4px",
+                                  backgroundColor: "transparent",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : (
+                                  `${regularTypingUsers.join(', ')} are typing...`
+                                )}
+                              </div>
+                            )}
                           </>
                         )}
                         <div style={{ display: "flex", gap: "8px" }}>
