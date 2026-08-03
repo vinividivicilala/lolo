@@ -71,9 +71,6 @@ interface ChatUser {
   isAdmin?: boolean;
   online?: boolean;
   lastSeen?: any;
-  typing?: boolean;
-  typingRoomId?: string | null;
-  typingRooms?: string[];
   blocked?: string[];
   blockedBy?: string[];
   isGroup?: boolean;
@@ -663,12 +660,7 @@ export default function HomePage(): React.JSX.Element {
   const getRegularTypingUsers = () => {
     if (!selectedChat || !user) return [];
     
-    if (selectedChat.isGroup) {
-      const usersTyping = typingUsersMap[selectedChat.id] || [];
-      return usersTyping;
-    }
-    
-    const chatId = [user.uid, selectedChat.id].sort().join("_");
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
     const usersTyping = typingUsersMap[chatId] || [];
     return usersTyping;
   };
@@ -709,9 +701,6 @@ export default function HomePage(): React.JSX.Element {
         isAdmin: userData.isAdmin || false,
         online: userData.online || false,
         lastSeen: userData.lastSeen || null,
-        typing: userData.typing || false,
-        typingRoomId: userData.typingRoomId || null,
-        typingRooms: userData.typingRooms || [],
         blocked: userData.blocked || [],
         blockedBy: userData.blockedBy || []
       };
@@ -789,9 +778,6 @@ export default function HomePage(): React.JSX.Element {
               isAdmin: isAdminUser,
               online: true,
               lastSeen: serverTimestamp(),
-              typing: false,
-              typingRoomId: null,
-              typingRooms: [],
               blocked: [],
               blockedBy: []
             });
@@ -858,9 +844,6 @@ export default function HomePage(): React.JSX.Element {
                 ...data,
                 online: data.online || false,
                 lastSeen: data.lastSeen || null,
-                typing: data.typing || false,
-                typingRoomId: data.typingRoomId || null,
-                typingRooms: data.typingRooms || [],
                 photoURL: data.photoURL || "",
                 isAdmin: data.isAdmin || false,
                 blocked: data.blocked || [],
@@ -884,9 +867,6 @@ export default function HomePage(): React.JSX.Element {
             isAdmin: isAdmin,
             online: true,
             lastSeen: null,
-            typing: false,
-            typingRoomId: null,
-            typingRooms: [],
             blocked: user.blocked || [],
             blockedBy: user.blockedBy || []
           };
@@ -1141,62 +1121,47 @@ export default function HomePage(): React.JSX.Element {
   }, [selectedChat, user]);
 
   // ========== LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+  // Menggunakan subcollection typing di setiap chat room
   useEffect(() => {
-    if (!db || !user) return;
+    if (!db || !user || !selectedChat) return;
 
-    const usersRef = collection(db, "users");
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
+    const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+    const typingRef = collection(db, "chats", chatId, "typing");
+    
+    const unsubscribe = onSnapshot(typingRef, (snapshot) => {
+      const typingUsers: string[] = [];
+      const typingIds: string[] = [];
       
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.typing && data.id !== user?.uid) {
-          const foundUser = users.find(u => u.id === data.id);
-          if (foundUser) {
-            const rooms = data.typingRooms || [];
-            
-            if (rooms.length > 0) {
-              rooms.forEach((roomId: string) => {
-                if (!typingMap[roomId]) {
-                  typingMap[roomId] = { names: [], ids: [] };
-                }
-                if (!typingMap[roomId].names.includes(foundUser.name)) {
-                  typingMap[roomId].names.push(foundUser.name);
-                  typingMap[roomId].ids.push(data.id);
-                }
-              });
-            } else if (data.typingRoomId) {
-              const roomId = data.typingRoomId;
-              if (!typingMap[roomId]) {
-                typingMap[roomId] = { names: [], ids: [] };
-              }
-              if (!typingMap[roomId].names.includes(foundUser.name)) {
-                typingMap[roomId].names.push(foundUser.name);
-                typingMap[roomId].ids.push(data.id);
-              }
-            }
-          }
+        // Skip current user
+        if (data.userId !== user.uid && data.isTyping === true) {
+          typingUsers.push(data.userName);
+          typingIds.push(data.userId);
         }
       });
       
-      const newTypingMap: { [key: string]: string[] } = {};
-      Object.keys(typingMap).forEach(roomId => {
-        newTypingMap[roomId] = typingMap[roomId].names;
-      });
-      setTypingUsersMap(newTypingMap);
+      // Update typingUsersMap untuk room ini
+      setTypingUsersMap(prev => ({
+        ...prev,
+        [chatId]: typingUsers
+      }));
       
+      // Update chatRooms
       setChatRooms(prev => prev.map(room => {
-        const typingData = typingMap[room.id];
-        return {
-          ...room,
-          typingUsers: typingData?.names || [],
-          typingUsersId: typingData?.ids || []
-        };
+        if (room.id === chatId) {
+          return {
+            ...room,
+            typingUsers: typingUsers,
+            typingUsersId: typingIds
+          };
+        }
+        return room;
       }));
     });
 
     return () => unsubscribe();
-  }, [user, users]);
+  }, [db, user, selectedChat]);
 
   // ========== EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
   useEffect(() => {
@@ -1205,19 +1170,8 @@ export default function HomePage(): React.JSX.Element {
     const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
     
     return () => {
-      const userRef = doc(db, "users", user.uid);
-      
-      getDoc(userRef).then((snap) => {
-        const data = snap.data();
-        const rooms: string[] = data?.typingRooms || [];
-        const updatedRooms = rooms.filter((id: string) => id !== chatId);
-        
-        updateDoc(userRef, { 
-          typing: updatedRooms.length > 0,
-          typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-          typingRooms: updatedRooms
-        }).catch(() => {});
-      }).catch(() => {});
+      const typingRef = doc(db, "chats", chatId, "typing", user.uid);
+      deleteDoc(typingRef).catch(() => {});
     };
   }, [selectedChat, user, db]);
 
@@ -1234,13 +1188,17 @@ export default function HomePage(): React.JSX.Element {
   const handleLogout = async () => {
     if (!auth) return;
     try {
+      // Hapus typing status jika ada
+      if (selectedChat) {
+        const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
+        const typingRef = doc(db, "chats", chatId, "typing", user.uid);
+        await deleteDoc(typingRef).catch(() => {});
+      }
+      
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         online: false,
-        lastSeen: serverTimestamp(),
-        typing: false,
-        typingRoomId: null,
-        typingRooms: []
+        lastSeen: serverTimestamp()
       });
       
       await signOut(auth);
@@ -1277,7 +1235,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // ========== Handle typing untuk chat - update status typing di Firestore ==========
+  // ========== Handle typing untuk chat - menggunakan subcollection ==========
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1286,51 +1244,33 @@ export default function HomePage(): React.JSX.Element {
     
     if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
     
-    const userRef = doc(db, "users", user.uid);
     const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
     
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-    const currentTypingRooms: string[] = userData?.typingRooms || [];
+    // Referensi ke dokumen typing di subcollection
+    const typingRef = doc(db, "chats", chatId, "typing", user.uid);
     
     if (value.length > 0) {
-      if (!currentTypingRooms.includes(chatId)) {
-        await updateDoc(userRef, {
-          typing: true,
-          typingRoomId: chatId,
-          typingRooms: [...currentTypingRooms, chatId]
-        });
-      } else {
-        await updateDoc(userRef, {
-          typing: true,
-          typingRoomId: chatId
-        });
-      }
-    } else {
-      const updatedRooms = currentTypingRooms.filter((id: string) => id !== chatId);
-      await updateDoc(userRef, {
-        typing: updatedRooms.length > 0,
-        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-        typingRooms: updatedRooms
+      // Set typing status di subcollection
+      await setDoc(typingRef, {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        timestamp: serverTimestamp(),
+        isTyping: true
       });
+    } else {
+      // Hapus typing status
+      await deleteDoc(typingRef).catch(() => {});
     }
     
+    // Clear timeout sebelumnya
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
     
+    // Set timeout untuk menghentikan typing setelah 2 detik
     const newTimeout = setTimeout(async () => {
-      const userRef2 = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef2);
-      const data = snap.data();
-      const rooms: string[] = data?.typingRooms || [];
-      const updatedRooms = rooms.filter((id: string) => id !== chatId);
-      
-      await updateDoc(userRef2, {
-        typing: updatedRooms.length > 0,
-        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-        typingRooms: updatedRooms
-      });
+      const typingRef2 = doc(db, "chats", chatId, "typing", user.uid);
+      await deleteDoc(typingRef2).catch(() => {});
     }, 2000);
     
     setTypingTimeout(newTimeout);
@@ -1436,18 +1376,10 @@ export default function HomePage(): React.JSX.Element {
 
     try {
       const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-      const userRef = doc(db, "users", user.uid);
       
-      const snap = await getDoc(userRef);
-      const data = snap.data();
-      const rooms: string[] = data?.typingRooms || [];
-      const updatedRooms = rooms.filter((id: string) => id !== chatId);
-      
-      await updateDoc(userRef, { 
-        typing: updatedRooms.length > 0,
-        typingRoomId: updatedRooms.length > 0 ? updatedRooms[0] : null,
-        typingRooms: updatedRooms
-      });
+      // Hapus typing status
+      const typingRef = doc(db, "chats", chatId, "typing", user.uid);
+      await deleteDoc(typingRef).catch(() => {});
       
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -1807,9 +1739,6 @@ export default function HomePage(): React.JSX.Element {
         createdBy: user.uid,
         online: false,
         lastSeen: null,
-        typing: false,
-        typingRoomId: null,
-        typingRooms: [],
         isPinned: false,
         isAdmin: false,
         blocked: [],
@@ -1861,13 +1790,6 @@ export default function HomePage(): React.JSX.Element {
     if (chatUser.id === user?.uid) return "Online";
     const date = chatUser.lastSeen.toDate ? chatUser.lastSeen.toDate() : new Date(chatUser.lastSeen);
     return `Last seen ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-  };
-
-  const getTypingStatus = (userId: string) => {
-    const chatUser = users.find(u => u.id === userId);
-    if (!chatUser) return false;
-    if (chatUser.id === user?.uid) return false;
-    return chatUser.typing || false;
   };
 
   const pinnedUsers = users.filter(u => u.isPinned && !u.isGroup);
@@ -4402,9 +4324,6 @@ export default function HomePage(): React.JSX.Element {
                                           createdBy: room.createdBy,
                                           online: false,
                                           lastSeen: null,
-                                          typing: false,
-                                          typingRoomId: null,
-                                          typingRooms: [],
                                           isPinned: room.isPinned,
                                           isAdmin: false,
                                           blocked: [],
@@ -4650,9 +4569,6 @@ export default function HomePage(): React.JSX.Element {
                                     createdBy: room.createdBy,
                                     online: false,
                                     lastSeen: null,
-                                    typing: false,
-                                    typingRoomId: null,
-                                    typingRooms: [],
                                     isPinned: room.isPinned,
                                     isAdmin: false,
                                     blocked: [],
@@ -5045,7 +4961,7 @@ export default function HomePage(): React.JSX.Element {
                               />
                               {getOnlineStatus(selectedChat.id) ? (
                                 <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                                  {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
+                                  Online
                                 </span>
                               ) : (
                                 <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
@@ -5267,7 +5183,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* ========== TYPING INDICATOR MULTI-USER DI MESSAGES ========== */}
+                            {/* ========== TYPING INDICATOR MULTI-USER ========== */}
                             {regularTypingUsers.length > 0 && (
                               <div
                                 style={{
