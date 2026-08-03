@@ -714,7 +714,6 @@ export default function HomePage(): React.JSX.Element {
 
   // Handle search input - SELALU KOSONGKAN HASIL
   useEffect(() => {
-    // Search results selalu kosong - 0 hasil
     setSearchResults([]);
   }, [searchQuery]);
 
@@ -2140,7 +2139,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - PERBAIKAN: Rolling teks di tombol, konten 1000px, hasil 0 */}
+            {/* Search - PERBAIKAN: 1500px ke bawah, rolling teks, hapus "3 hasil" */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2206,7 +2205,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - 1000px ke bawah & 1000px ke kanan ===== */}
+              {/* ===== SEARCH EXPANDED - 1500px ke bawah & 1000px ke kanan ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2224,7 +2223,7 @@ export default function HomePage(): React.JSX.Element {
                       padding: "32px 36px",
                       minWidth: "1000px",
                       width: "1000px",
-                      minHeight: "400px",
+                      minHeight: "1500px",
                       boxShadow: "0 20px 80px rgba(13,60,252,0.4)",
                       overflow: "hidden",
                       zIndex: 100,
@@ -2298,22 +2297,15 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Footer */}
+                    {/* Footer - HAPUS "3 hasil" */}
                     <div style={{
                       marginTop: "20px",
                       paddingTop: "16px",
                       borderTop: "1px solid rgba(255,255,255,0.08)",
                       display: "flex",
-                      justifyContent: "space-between",
+                      justifyContent: "flex-end",
                       alignItems: "center",
                     }}>
-                      <span style={{
-                        color: "rgba(255,255,255,0.4)",
-                        fontSize: "13px",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {searchRollingTexts.length} hasil
-                      </span>
                       <span style={{
                         color: "rgba(255,255,255,0.3)",
                         fontSize: "12px",
