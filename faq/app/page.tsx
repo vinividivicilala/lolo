@@ -540,6 +540,9 @@ export default function HomePage(): React.JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
 
+  // ========== PERBAIKAN: State untuk menyimpan typing users per room ==========
+  const [typingUsersMap, setTypingUsersMap] = useState<{ [key: string]: string[] }>({});
+
   // Group Chat States
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
@@ -639,6 +642,35 @@ export default function HomePage(): React.JSX.Element {
     const targetUser = users.find(u => u.id === userId);
     return (targetUser?.blockedBy || []).includes(user.uid);
   };
+
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
+  const getTypingUsersDisplay = (room: ChatRoom) => {
+    if (!room.typingUsers || room.typingUsers.length === 0) return null;
+    
+    // Jika hanya 1 user yang typing
+    if (room.typingUsers.length === 1) {
+      return room.typingUsers[0];
+    }
+    
+    // Jika lebih dari 1 user yang typing - format: "User A, User B, and User C"
+    const names = room.typingUsers;
+    if (names.length === 2) {
+      return `${names[0]} and ${names[1]}`;
+    }
+    // Untuk 3 atau lebih
+    const last = names[names.length - 1];
+    const rest = names.slice(0, -1);
+    return `${rest.join(', ')} and ${last}`;
+  };
+
+  const getRegularTypingUsers = () => {
+    if (!selectedChat) return [];
+    // Gunakan typingUsersMap untuk mendapatkan typing users
+    const usersTyping = typingUsersMap[selectedChat.id] || [];
+    return usersTyping;
+  };
+
+  const regularTypingUsers = getRegularTypingUsers();
 
   // Fungsi mencari user manual berdasarkan email
   const handleSearchUser = async () => {
@@ -1103,13 +1135,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // ========== PERBAIKAN UTAMA: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
-  // Gunakan useRef untuk menyimpan chatRooms terbaru tanpa dependency
-  const chatRoomsRef = useRef<ChatRoom[]>(chatRooms);
-  useEffect(() => {
-    chatRoomsRef.current = chatRooms;
-  }, [chatRooms]);
-
+  // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
   useEffect(() => {
     if (!db || !user) return;
 
@@ -1117,17 +1143,15 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       // Buat map untuk menyimpan typing users per room
       const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
-      const currentRooms = chatRoomsRef.current;
       
       snapshot.forEach((doc) => {
         const data = doc.data();
         // Hanya proses user yang sedang typing dan bukan current user
         if (data.typing && data.id !== user?.uid) {
-          // Cari user di list users
           const foundUser = users.find(u => u.id === data.id);
           if (foundUser) {
             // Cek semua room yang diikuti oleh user ini
-            currentRooms.forEach(room => {
+            chatRooms.forEach(room => {
               if (room.participants && room.participants.includes(data.id)) {
                 if (!typingMap[room.id]) {
                   typingMap[room.id] = { names: [], ids: [] };
@@ -1143,6 +1167,13 @@ export default function HomePage(): React.JSX.Element {
         }
       });
       
+      // Update typingUsersMap
+      const newTypingMap: { [key: string]: string[] } = {};
+      Object.keys(typingMap).forEach(roomId => {
+        newTypingMap[roomId] = typingMap[roomId].names;
+      });
+      setTypingUsersMap(newTypingMap);
+      
       // Update chatRooms dengan data typing terbaru
       setChatRooms(prev => prev.map(room => {
         const typingData = typingMap[room.id];
@@ -1155,7 +1186,7 @@ export default function HomePage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [user, users]); // Hapus chatRooms dari dependency!
+  }, [user, users, chatRooms]);
 
   // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
   useEffect(() => {
@@ -1802,30 +1833,6 @@ export default function HomePage(): React.JSX.Element {
     !u.isGroup
   );
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
-  const getTypingUsersDisplay = (room: ChatRoom) => {
-    if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    
-    // Jika hanya 1 user yang typing
-    if (room.typingUsers.length === 1) {
-      return room.typingUsers[0];
-    }
-    
-    // Jika lebih dari 1 user yang typing - format: "User A + User B + User C"
-    return room.typingUsers.join(" + ");
-  };
-
-  const getRegularTypingUsers = () => {
-    if (!selectedChat) return [];
-    const currentRoom = chatRooms.find(r => r.id === selectedChat.id);
-    if (currentRoom && currentRoom.typingUsers) {
-      return currentRoom.typingUsers;
-    }
-    return [];
-  };
-
-  const regularTypingUsers = getRegularTypingUsers();
-
   // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1916,7 +1923,8 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         {/* BANNER */}
-        <motion.div          initial={{ opacity: 0, y: -20 }}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{
@@ -4650,7 +4658,13 @@ export default function HomePage(): React.JSX.Element {
                                   </div>
                                   <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
                                     {typingDisplay ? (
-                                      <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
+                                      <span style={{ color: "#000", fontStyle: "italic" }}>
+                                        {typingDisplay.includes(',') || typingDisplay.includes(' and ') ? (
+                                          `${typingDisplay} are typing...`
+                                        ) : (
+                                          `${typingDisplay} is typing...`
+                                        )}
+                                      </span>
                                     ) : (
                                       `${room.groupMembers?.length || 0} members • ${room.lastMessage || "No messages"}`
                                     )}
@@ -4770,7 +4784,13 @@ export default function HomePage(): React.JSX.Element {
                                   {isBlocked ? (
                                     <span style={{ color: "#000" }}>Akun diblok - klik untuk chat</span>
                                   ) : typingDisplay ? (
-                                    <span style={{ color: "#000", fontStyle: "italic" }}>{typingDisplay} typing...</span>
+                                    <span style={{ color: "#000", fontStyle: "italic" }}>
+                                      {typingDisplay.includes(',') || typingDisplay.includes(' and ') ? (
+                                        `${typingDisplay} are typing...`
+                                      ) : (
+                                        `${typingDisplay} is typing...`
+                                      )}
+                                    </span>
                                   ) : (
                                     room.lastMessage ? (
                                       <>
@@ -5224,7 +5244,13 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.join(" + ")} typing...
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : regularTypingUsers.length === 2 ? (
+                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
+                                ) : (
+                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
+                                )}
                               </div>
                             )}
 
@@ -5241,7 +5267,11 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.join(", ")} typing...
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : (
+                                  `${regularTypingUsers.join(', ')} are typing...`
+                                )}
                               </div>
                             )}
 
@@ -5565,7 +5595,13 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.join(" + ")} typing...
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : regularTypingUsers.length === 2 ? (
+                                  `${regularTypingUsers[0]} and ${regularTypingUsers[1]} are typing...`
+                                ) : (
+                                  `${regularTypingUsers.slice(0, -1).join(', ')} and ${regularTypingUsers[regularTypingUsers.length - 1]} are typing...`
+                                )}
                               </div>
                             )}
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
@@ -5581,7 +5617,11 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {regularTypingUsers.join(", ")} typing...
+                                {regularTypingUsers.length === 1 ? (
+                                  `${regularTypingUsers[0]} is typing...`
+                                ) : (
+                                  `${regularTypingUsers.join(', ')} are typing...`
+                                )}
                               </div>
                             )}
                           </>
