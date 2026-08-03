@@ -161,7 +161,7 @@ const BackIcon = () => (
 
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokelinejoin="round" />
   </svg>
 );
 
@@ -192,6 +192,22 @@ const MoreIcon = () => (
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Search Icon
+const SearchIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+// Help Center Icon
+const HelpIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.92694 12.4272 7.06491C13.1255 7.20289 13.7588 7.59377 14.2149 8.16119C14.671 8.7286 14.9166 9.43197 14.91 10.15C14.91 12 12.09 12.82 12.09 12.82M12.18 16H12.17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -543,6 +559,16 @@ export default function HomePage(): React.JSX.Element {
   // ========== PERBAIKAN: State untuk menyimpan typing users per room ==========
   const [typingUsersMap, setTypingUsersMap] = useState<{ [key: string]: string[] }>({});
 
+  // ========== NEW: Search state ==========
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Search items
+  const searchItems = ["Tentang Note", "Calendar", "Donasi", "Blog"];
+
   // Group Chat States
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
@@ -628,6 +654,55 @@ export default function HomePage(): React.JSX.Element {
 
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
+
+  // ========== SEARCH EFFECT with GSAP ==========
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      // GSAP animation for search input
+      gsap.fromTo(searchInputRef.current, 
+        { width: 0, opacity: 0, scale: 0.8 },
+        { width: "200px", opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+      );
+      
+      // Focus input after animation
+      setTimeout(() => searchInputRef.current?.focus(), 300);
+    }
+  }, [isSearchOpen]);
+
+  // Handle search outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handle search input
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    const filtered = searchItems.filter(item => 
+      item.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setSearchResults(filtered);
+  }, [searchQuery]);
+
+  const handleSearchSelect = (item: string) => {
+    // Handle selected search item
+    console.log("Selected:", item);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    // You can add navigation or action here
+  };
 
   // Fungsi cek block dengan aman
   const isUserBlocked = (userId: string) => {
@@ -2042,7 +2117,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Menuru */}
+        {/* Menuru Title - Left */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -2070,14 +2145,195 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </motion.div>
 
-        {/* User Status */}
+        {/* ===== NEW: Search & Help Center - Right side of title ===== */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+          ref={searchContainerRef}
+          style={{
+            position: "absolute",
+            top: "80px",
+            right: "40px",
+            zIndex: 15,
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          {/* Search Container */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "30px",
+            padding: "4px 8px",
+            border: "1px solid #e8e8e8",
+            transition: "all 0.3s ease",
+            position: "relative",
+          }}>
+            {isSearchOpen ? (
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0 4px",
+              }}>
+                <SearchIcon size={18} />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  style={{
+                    border: "none",
+                    outline: "none",
+                    backgroundColor: "transparent",
+                    fontSize: "14px",
+                    fontFamily: FONT_FAMILY,
+                    padding: "6px 4px",
+                    width: "180px",
+                    color: "#000",
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#999",
+                    padding: "4px 6px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "6px 14px",
+                  color: "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                }}
+              >
+                <SearchIcon size={18} />
+                <span style={{ color: "#999" }}>Search</span>
+              </button>
+            )}
+
+            {/* Search Results Dropdown */}
+            <AnimatePresence>
+              {isSearchOpen && searchResults.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    left: 0,
+                    right: 0,
+                    backgroundColor: "#ffffff",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+                    border: "1px solid #f0f0f0",
+                    padding: "6px 0",
+                    zIndex: 100,
+                    minWidth: "220px",
+                  }}
+                >
+                  {searchResults.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => handleSearchSelect(item)}
+                      style={{
+                        padding: "10px 16px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        color: "#000",
+                        fontFamily: FONT_FAMILY,
+                        transition: "all 0.2s ease",
+                        borderRadius: "4px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      {item}
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Help Center Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#000",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontSize: "14px",
+              fontFamily: FONT_FAMILY,
+              padding: "6px 14px",
+              borderRadius: "30px",
+              backgroundColor: "#f5f5f5",
+              border: "1px solid #e8e8e8",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#e8e8e8";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#f5f5f5";
+            }}
+            onClick={() => {
+              // Handle help center click
+              console.log("Help Center clicked");
+            }}
+          >
+            <HelpIcon size={18} />
+            <span style={{ fontWeight: 500 }}>Pusat bantuan</span>
+          </motion.button>
+        </motion.div>
+
+        {/* User Status - moved slightly right to accommodate search */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           style={{
             position: "absolute",
-            top: "80px",
+            top: "140px",
             right: "40px",
             zIndex: 10,
             display: "flex",
