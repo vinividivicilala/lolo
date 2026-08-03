@@ -1113,7 +1113,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // ========== LISTEN FOR TYPING STATUS - MENGGUNAKAN SUBCOLLECTION typingUsers ==========
+  // ========== LISTEN FOR TYPING STATUS - SUBCOLLECTION typingUsers ==========
   // Struktur: chats/{roomId}/typingUsers/{userId} dengan field name dan timestamp
   useEffect(() => {
     if (!db || !user || !selectedChat) return;
@@ -1157,7 +1157,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [db, user, selectedChat]);
 
-  // ========== EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
+  // ========== RESET TYPING SAAT CHAT DITUTUP ==========
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
     
@@ -3618,9 +3618,1210 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 ) : !selectedChat ? (
-                  // Chat List View - sama seperti sebelumnya
+                  // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* ... konten chat list sama seperti sebelumnya ... */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        backgroundColor: "#c5e800",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
+                        border: "none",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: "12px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
+                          Announcement
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#000", fontFamily: FONT_FAMILY }}>
+                          Chat feature is under development.
+                        </div>
+                      </div>
+                    </div>
+
+                    {hasBlockedUsers && (
+                      <div style={{ 
+                        width: "100%", 
+                        marginBottom: "10px",
+                        padding: "12px 16px",
+                        backgroundColor: "#0D3CFC",
+                        borderRadius: "8px",
+                        border: "none",
+                        textAlign: "center",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          Anda telah memblock beberapa akun. Klik "Unblock" untuk membuka block.
+                        </div>
+                      </div>
+                    )}
+
+                    {hasBlockedByUsers && (
+                      <div style={{ 
+                        width: "100%", 
+                        marginBottom: "10px",
+                        padding: "12px 16px",
+                        backgroundColor: "#ef4444",
+                        borderRadius: "8px",
+                        border: "none",
+                        textAlign: "center",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        <div style={{ fontSize: "13px", color: "#ffffff", fontWeight: 500, fontFamily: FONT_FAMILY }}>
+                          {blockedByBanner?.userName || "Beberapa akun"} telah memblokir anda
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#ffffff", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                          Anda tidak dapat mengirim pesan ke akun yang memblokir anda
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{
+                      padding: "14px",
+                      backgroundColor: "#f8f8f8",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
+                      border: "1px solid #e8e8e8",
+                    }}>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                        Tambah User Manual
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                        <input
+                          type="text"
+                          placeholder="Masukkan email user..."
+                          value={searchUserInput}
+                          onChange={(e) => setSearchUserInput(e.target.value)}
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            outline: "none",
+                            fontFamily: FONT_FAMILY,
+                            backgroundColor: "#fff",
+                            color: "#000",
+                          }}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleSearchUser}
+                          style={{
+                            padding: "8px 16px",
+                            backgroundColor: "#0D3CFC",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            cursor: "pointer",
+                            fontFamily: FONT_FAMILY,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Cari
+                        </motion.button>
+                      </div>
+                      
+                      {searchUserStatus && (
+                        <div style={{ 
+                          fontSize: "12px", 
+                          color: searchUserResult ? "#22c55e" : "#ef4444",
+                          marginBottom: "8px",
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {searchUserStatus}
+                        </div>
+                      )}
+
+                      {searchUserResult && (
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "10px 12px",
+                          backgroundColor: "#fff",
+                          borderRadius: "6px",
+                          border: "1px solid #e0e0e0",
+                        }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "6px",
+                              backgroundColor: "#f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              overflow: "hidden",
+                            }}>
+                              {searchUserResult.photoURL ? (
+                                <img src={searchUserResult.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                <span style={{ fontSize: "14px", color: "#000" }}>{searchUserResult.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                              )}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>
+                                {searchUserResult.name}
+                                {searchUserResult.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "#999" }}>{searchUserResult.email}</div>
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddManualUser}
+                            disabled={isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)}
+                            style={{
+                              padding: "4px 14px",
+                              backgroundColor: (isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)) ? "#ccc" : "#0D3CFC",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: (isUserBlocked(searchUserResult.id) || isBlockedByUser(searchUserResult.id)) ? "not-allowed" : "pointer",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            Add Chat
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAddUser(!showAddUser)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "8px 0",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        width: "100%",
+                        marginBottom: "8px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "32px",
+                          fontWeight: 300,
+                          display: "inline-block",
+                          lineHeight: 1,
+                          transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                          color: "#000000",
+                          transform: showAddUser ? "rotate(45deg)" : "rotate(0deg)",
+                        }}
+                      >
+                        +
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 500,
+                          color: "#000000",
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        New Chat
+                      </span>
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAddGroup(!showAddGroup)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "8px 0",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        width: "100%",
+                        marginBottom: "12px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "32px",
+                          fontWeight: 300,
+                          display: "inline-block",
+                          lineHeight: 1,
+                          transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                          color: "#000000",
+                          transform: showAddGroup ? "rotate(45deg)" : "rotate(0deg)",
+                        }}
+                      >
+                        +
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 500,
+                          color: "#000000",
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        New Group
+                      </span>
+                    </motion.button>
+                    
+                    <AnimatePresence>
+                      {showAddUser && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: "auto" }}
+                          exit={{ opacity: 0, y: -10, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            padding: "16px",
+                            backgroundColor: "#f8f8f8",
+                            borderRadius: "12px",
+                            marginBottom: "12px",
+                            overflow: "hidden",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+                            Select user
+                          </div>
+                          <select
+                            value={selectedNewUser}
+                            onChange={(e) => setSelectedNewUser(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px 14px",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px",
+                              backgroundColor: "#fff",
+                              color: "#000",
+                            }}
+                          >
+                            <option value="">Select user...</option>
+                            {availableUsers.map((u) => (
+                              <option key={u.id} value={u.id}>
+                                {u.name}
+                                {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              </option>
+                            ))}
+                          </select>
+                          {availableUsers.length === 0 && (
+                            <div style={{ fontSize: "11px", color: "#666", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                              All users are already in chat
+                            </div>
+                          )}
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <motion.button
+                              whileHover={selectedNewUser ? { scale: 1.02 } : {}}
+                              whileTap={selectedNewUser ? { scale: 0.98 } : {}}
+                              onClick={handleAddExistingUser}
+                              disabled={!selectedNewUser}
+                              style={{
+                                backgroundColor: selectedNewUser ? "#0D3CFC" : "#ccc",
+                                color: "#fff",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                                cursor: selectedNewUser ? "pointer" : "not-allowed",
+                                fontWeight: 500,
+                                transition: "all .2s ease",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Start Chat
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setShowAddUser(false)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                fontSize: "12px",
+                                color: "#666",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                          {addUserStatus && (
+                            <div style={{ fontSize: "11px", color: "#000", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+                              {addUserStatus}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <AnimatePresence>
+                      {showAddGroup && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: "auto" }}
+                          exit={{ opacity: 0, y: -10, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            padding: "16px",
+                            backgroundColor: "#f8f8f8",
+                            borderRadius: "12px",
+                            marginBottom: "12px",
+                            overflow: "hidden",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+                            Create Group Chat
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Group Name"
+                            value={groupName}
+                            onChange={(e) => setGroupName(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px 14px",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px",
+                              backgroundColor: "#fff",
+                              color: "#000",
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Group Description (optional)"
+                            value={groupDescription}
+                            onChange={(e) => setGroupDescription(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px 14px",
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "8px",
+                              fontSize: "13px",
+                              outline: "none",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "8px",
+                              backgroundColor: "#fff",
+                              color: "#000",
+                            }}
+                          />
+                          <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
+                            Select Members
+                          </div>
+                          {availableUsers.map((u) => (
+                            <div key={u.id} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                              <input
+                                type="checkbox"
+                                checked={selectedGroupMembers.includes(u.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedGroupMembers([...selectedGroupMembers, u.id]);
+                                  } else {
+                                    setSelectedGroupMembers(selectedGroupMembers.filter(id => id !== u.id));
+                                    setGroupAdmins(groupAdmins.filter(id => id !== u.id));
+                                  }
+                                }}
+                                style={{ cursor: "pointer" }}
+                              />
+                              <span style={{ fontSize: "13px", color: "#000", fontFamily: FONT_FAMILY }}>{u.name}</span>
+                              {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                              {selectedGroupMembers.includes(u.id) && (
+                                <button
+                                  onClick={() => {
+                                    if (groupAdmins.includes(u.id)) {
+                                      setGroupAdmins(groupAdmins.filter(id => id !== u.id));
+                                    } else {
+                                      setGroupAdmins([...groupAdmins, u.id]);
+                                    }
+                                  }}
+                                  style={{
+                                    fontSize: "10px",
+                                    backgroundColor: groupAdmins.includes(u.id) ? "#0D3CFC" : "#f0f0f0",
+                                    color: groupAdmins.includes(u.id) ? "#fff" : "#000",
+                                    border: "none",
+                                    padding: "2px 10px",
+                                    borderRadius: "12px",
+                                    cursor: "pointer",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  {groupAdmins.includes(u.id) ? "Admin" : "Make Admin"}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleCreateGroup}
+                              style={{
+                                backgroundColor: "#0D3CFC",
+                                color: "#fff",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                transition: "all .2s ease",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Create Group
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setShowAddGroup(false);
+                                setGroupName("");
+                                setGroupDescription("");
+                                setSelectedGroupMembers([]);
+                                setGroupAdmins([]);
+                              }}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                fontSize: "12px",
+                                color: "#666",
+                                cursor: "pointer",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              Cancel
+                            </motion.button>
+                          </div>
+                          {addUserStatus && (
+                            <div style={{ fontSize: "11px", color: "#000", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+                              {addUserStatus}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {pinnedUsers.length > 0 && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div
+                          onClick={() => setShowPinnedUsers(!showPinnedUsers)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            borderRadius: "6px",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <PinIcon filled={true} />
+                            <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                              Pinned Users ({pinnedUsers.length})
+                            </span>
+                          </div>
+                          <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                            {showPinnedUsers ? "▼" : "▶"}
+                          </span>
+                        </div>
+                        <AnimatePresence>
+                          {showPinnedUsers && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              style={{ padding: "4px 0", marginTop: "2px", overflow: "hidden" }}
+                            >
+                              {pinnedUsers.map((u) => (
+                                <div
+                                  key={u.id}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    backgroundColor: "#fafafa",
+                                    fontFamily: FONT_FAMILY,
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: "32px",
+                                      height: "32px",
+                                      borderRadius: "6px",
+                                      backgroundColor: "#f0f0f0",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: "14px",
+                                      overflow: "hidden",
+                                      flexShrink: 0,
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => {
+                                      if (u.photoURL) {
+                                        setShowFullImage(u.photoURL);
+                                      }
+                                    }}
+                                  >
+                                    {u.photoURL ? (
+                                      <img src={u.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ) : (
+                                      <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{u.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                                    )}
+                                  </div>
+                                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
+                                    <div>
+                                      <div 
+                                        style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
+                                        onClick={() => handleOpenProfile(u)}
+                                      >
+                                        {u.name}
+                                        {u.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                      </div>
+                                      <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
+                                        {u.email}
+                                      </div>
+                                    </div>
+                                    <OnlineIndicator online={u.online || false} lastSeen={getLastSeen(u.id)} />
+                                  </div>
+                                  <div style={{ display: "flex", gap: "4px" }}>
+                                    {u.id !== user.uid && !u.isGroup && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => {
+                                          const isBlocked = isUserBlocked(u.id);
+                                          handleBlockUser(u.id, isBlocked);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: isUserBlocked(u.id) ? "#ef4444" : "#666",
+                                          padding: "2px 8px",
+                                          fontSize: "11px",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {isUserBlocked(u.id) ? "Unblock" : "Block"}
+                                      </motion.button>
+                                    )}
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={() => handlePinUser(u.id, true)}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        color: "#c5e800",
+                                        padding: "2px 4px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      <PinIcon filled={true} />
+                                    </motion.button>
+                                  </div>
+                                </div>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+
+                    {pinnedChats.length > 0 && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div
+                          onClick={() => setShowPinnedChats(!showPinnedChats)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            borderRadius: "6px",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <PinIcon filled={true} />
+                            <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
+                              Pinned Chats ({pinnedChats.length})
+                            </span>
+                          </div>
+                          <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                            {showPinnedChats ? "▼" : "▶"}
+                          </span>
+                        </div>
+                        <AnimatePresence>
+                          {showPinnedChats && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              style={{ padding: "4px 0", marginTop: "2px", overflow: "hidden" }}
+                            >
+                              {pinnedChats.map((room) => {
+                                if (room.isGroup) {
+                                  return (
+                                    <motion.div
+                                      key={room.id}
+                                      whileHover={{ scale: 1.02 }}
+                                      onClick={() => {
+                                        const groupUser: ChatUser = {
+                                          id: room.id,
+                                          name: room.groupName || "Group Chat",
+                                          email: "",
+                                          photoURL: "",
+                                          isGroup: true,
+                                          groupName: room.groupName,
+                                          groupDescription: room.groupDescription,
+                                          groupMembers: room.groupMembers,
+                                          groupAdmins: room.groupAdmins,
+                                          createdBy: room.createdBy,
+                                          online: false,
+                                          lastSeen: null,
+                                          isPinned: room.isPinned,
+                                          isAdmin: false,
+                                          blocked: [],
+                                          blockedBy: []
+                                        };
+                                        setSelectedChat(groupUser);
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "6px 10px",
+                                        borderRadius: "6px",
+                                        cursor: "pointer",
+                                        backgroundColor: "#fafafa",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          width: "32px",
+                                          height: "32px",
+                                          borderRadius: "6px",
+                                          backgroundColor: "#0D3CFC",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          fontSize: "14px",
+                                          color: "#fff",
+                                          flexShrink: 0,
+                                        }}
+                                      >
+                                        G
+                                      </div>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>
+                                          {room.groupName || "Group Chat"}
+                                        </div>
+                                        <div style={{ fontSize: "9px", color: "#999", fontFamily: FONT_FAMILY }}>
+                                          {room.groupMembers?.length || 0} members
+                                        </div>
+                                      </div>
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handlePinChat(room.id, true);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: "#c5e800",
+                                          padding: "2px 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <PinIcon filled={true} />
+                                      </motion.button>
+                                    </motion.div>
+                                  );
+                                }
+
+                                const otherId = room.participants.find(id => id !== user.uid);
+                                const otherUser = users.find(u => u.id === otherId);
+                                if (!otherUser) return null;
+                                const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
+                                
+                                return (
+                                  <motion.div
+                                    key={room.id}
+                                    whileHover={{ scale: 1.02 }}
+                                    onClick={() => {
+                                      if (!isBlocked) {
+                                        setSelectedChat(otherUser);
+                                      }
+                                    }}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                      padding: "6px 10px",
+                                      borderRadius: "6px",
+                                      cursor: isBlocked ? "not-allowed" : "pointer",
+                                      backgroundColor: isBlocked ? "#f5f5f5" : "#fafafa",
+                                      opacity: isBlocked ? 0.6 : 1,
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "6px",
+                                        backgroundColor: "#f0f0f0",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "14px",
+                                        overflow: "hidden",
+                                        flexShrink: 0,
+                                        cursor: "pointer",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (otherUser.photoURL) {
+                                          setShowFullImage(otherUser.photoURL);
+                                        }
+                                      }}
+                                    >
+                                      {otherUser.photoURL ? (
+                                        <img src={otherUser.photoURL} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                      ) : (
+                                        <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                                      )}
+                                    </div>
+                                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
+                                      <div>
+                                        <div 
+                                          style={{ fontSize: "12px", fontWeight: 500, color: isBlocked ? "#999" : "#000", cursor: isBlocked ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!isBlocked) {
+                                              handleOpenProfile(otherUser);
+                                            }
+                                          }}
+                                        >
+                                          {otherUser.name}
+                                          {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                        </div>
+                                        <div style={{ fontSize: "9px", color: isBlocked ? "#ccc" : "#999", fontFamily: FONT_FAMILY }}>
+                                          {isBlocked ? "Blocked" : (room.lastMessage ? room.lastMessage.substring(0, 25) + (room.lastMessage.length > 25 ? "..." : "") : "No messages")}
+                                        </div>
+                                      </div>
+                                      {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
+                                    </div>
+                                    {room.unreadCount > 0 && !isBlocked && (
+                                      <div
+                                        style={{
+                                          backgroundColor: "#c5e800",
+                                          color: "#000",
+                                          padding: "0 6px",
+                                          borderRadius: "4px",
+                                          fontSize: "9px",
+                                          fontWeight: 600,
+                                          lineHeight: "18px",
+                                          height: "18px",
+                                          minWidth: "18px",
+                                          textAlign: "center",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {room.unreadCount}
+                                      </div>
+                                    )}
+                                    {!isBlocked && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handlePinChat(room.id, true);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: "#c5e800",
+                                          padding: "2px 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <PinIcon filled={true} />
+                                      </motion.button>
+                                    )}
+                                    {isBlocked && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const blocked = isUserBlocked(otherId);
+                                          handleBlockUser(otherId, blocked);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          color: "#ef4444",
+                                          padding: "2px 8px",
+                                          fontSize: "11px",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        Unblock
+                                      </motion.button>
+                                    )}
+                                  </motion.div>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+
+                    <div style={{ padding: "4px 0" }}>
+                      {unpinnedChats.length === 0 && pinnedChats.length === 0 ? (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            color: "#999",
+                            fontSize: "13px",
+                            padding: "40px 0",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          <div style={{ fontSize: "28px", marginBottom: "6px" }}>💬</div>
+                          <div>No chat history</div>
+                        </div>
+                      ) : (
+                        unpinnedChats.map((room) => {
+                          if (room.isGroup) {
+                            const typingDisplay = getTypingUsersDisplay(room);
+                            return (
+                              <motion.div
+                                key={room.id}
+                                whileHover={{ scale: 1.02 }}
+                                onClick={() => {
+                                  const groupUser: ChatUser = {
+                                    id: room.id,
+                                    name: room.groupName || "Group Chat",
+                                    email: "",
+                                    photoURL: "",
+                                    isGroup: true,
+                                    groupName: room.groupName,
+                                    groupDescription: room.groupDescription,
+                                    groupMembers: room.groupMembers,
+                                    groupAdmins: room.groupAdmins,
+                                    createdBy: room.createdBy,
+                                    online: false,
+                                    lastSeen: null,
+                                    isPinned: room.isPinned,
+                                    isAdmin: false,
+                                    blocked: [],
+                                    blockedBy: []
+                                  };
+                                  setSelectedChat(groupUser);
+                                }}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  padding: "10px 12px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  transition: "all .2s ease",
+                                  marginBottom: "2px",
+                                  backgroundColor: room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "6px",
+                                    backgroundColor: "#0D3CFC",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "20px",
+                                    flexShrink: 0,
+                                    color: "#fff",
+                                  }}
+                                >
+                                  G
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: "14px", fontWeight: 500, color: "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
+                                    <span>{room.groupName || "Group Chat"}</span>
+                                  </div>
+                                  <div style={{ fontSize: "11px", color: "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
+                                    {typingDisplay ? (
+                                      <span style={{ color: "#000", fontStyle: "italic" }}>
+                                        {typingDisplay.includes(',') || typingDisplay.includes(' and ') ? (
+                                          `${typingDisplay} are typing...`
+                                        ) : (
+                                          `${typingDisplay} is typing...`
+                                        )}
+                                      </span>
+                                    ) : (
+                                      `${room.groupMembers?.length || 0} members • ${room.lastMessage || "No messages"}`
+                                    )}
+                                  </div>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                  {room.lastMessageTime && (
+                                    <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
+                                      {formatTime(room.lastMessageTime)}
+                                    </span>
+                                  )}
+                                  {room.unreadCount > 0 && (
+                                    <div
+                                      style={{
+                                        backgroundColor: "#c5e800",
+                                        color: "#000",
+                                        padding: "0 6px",
+                                        borderRadius: "4px",
+                                        fontSize: "9px",
+                                        fontWeight: 600,
+                                        lineHeight: "18px",
+                                        height: "18px",
+                                        minWidth: "18px",
+                                        textAlign: "center",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      {room.unreadCount}
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            );
+                          }
+
+                          const otherId = room.participants.find(id => id !== user.uid);
+                          const otherUser = users.find(u => u.id === otherId);
+                          if (!otherUser) return null;
+                          
+                          const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
+                          const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
+                          const typingDisplay = getTypingUsersDisplay(room);
+                          
+                          return (
+                            <motion.div
+                              key={room.id}
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => {
+                                setSelectedChat(otherUser);
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                transition: "all .2s ease",
+                                marginBottom: "2px",
+                                backgroundColor: isBlocked ? "#f5f5f5" : (room.unreadCount > 0 ? "rgba(197,232,0,0.06)" : "transparent"),
+                                opacity: isBlocked ? 0.8 : 1,
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  borderRadius: "6px",
+                                  backgroundColor: "#f0f0f0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "16px",
+                                  flexShrink: 0,
+                                  overflow: "hidden",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (otherUser.photoURL) {
+                                    setShowFullImage(otherUser.photoURL);
+                                  }
+                                }}
+                              >
+                                {otherUser.photoURL ? (
+                                  <img 
+                                    src={otherUser.photoURL} 
+                                    alt="avatar" 
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <span style={{ color: "#000", fontFamily: FONT_FAMILY }}>{otherUser.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                                )}
+                                {otherUser.isAdmin && (
+                                  <div style={{ position: "absolute", bottom: -2, right: -2 }}>
+                                    <InstagramVerifiedBadge size={12} />
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: "14px", fontWeight: 500, color: isBlocked ? "#999" : "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
+                                  <span 
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenProfile(otherUser);
+                                    }}
+                                  >
+                                    {otherUser.name}
+                                    {otherUser.isAdmin && <InstagramVerifiedBadge size={12} />}
+                                  </span>
+                                  {!isBlocked && <OnlineIndicator online={otherUser.online || false} lastSeen={getLastSeen(otherUser.id)} />}
+                                </div>
+                                <div style={{ fontSize: "11px", color: isBlocked ? "#ccc" : "#999", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FONT_FAMILY }}>
+                                  {isBlocked ? (
+                                    <span style={{ color: "#000" }}>Akun diblok - klik untuk chat</span>
+                                  ) : typingDisplay ? (
+                                    <span style={{ color: "#000", fontStyle: "italic" }}>
+                                      {typingDisplay.includes(',') || typingDisplay.includes(' and ') ? (
+                                        `${typingDisplay} are typing...`
+                                      ) : (
+                                        `${typingDisplay} is typing...`
+                                      )}
+                                    </span>
+                                  ) : (
+                                    room.lastMessage ? (
+                                      <>
+                                        {isLastMessageFromMe && "Messages: "}
+                                        {room.lastMessage}
+                                      </>
+                                    ) : (
+                                      "No messages"
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                {room.lastMessageTime && !isBlocked && (
+                                  <span style={{ fontSize: "9px", color: "#bbb", fontFamily: FONT_FAMILY }}>
+                                    {formatTime(room.lastMessageTime)}
+                                  </span>
+                                )}
+                                {room.unreadCount > 0 && !isBlocked && (
+                                  <div
+                                    style={{
+                                      backgroundColor: "#c5e800",
+                                      color: "#000",
+                                      padding: "0 6px",
+                                      borderRadius: "4px",
+                                      fontSize: "9px",
+                                      fontWeight: 600,
+                                      lineHeight: "18px",
+                                      height: "18px",
+                                      minWidth: "18px",
+                                      textAlign: "center",
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    {room.unreadCount}
+                                  </div>
+                                )}
+                                {isBlocked ? (
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const blocked = isUserBlocked(otherId);
+                                      handleBlockUser(otherId, blocked);
+                                    }}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: "#ef4444",
+                                      padding: "2px 8px",
+                                      fontSize: "11px",
+                                      fontFamily: FONT_FAMILY,
+                                    }}
+                                  >
+                                    Unblock
+                                  </motion.button>
+                                ) : (
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePinChat(room.id, room.isPinned || false);
+                                    }}
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      cursor: "pointer",
+                                      color: room.isPinned ? "#c5e800" : "#ddd",
+                                      padding: "2px 4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      transition: "all .2s ease",
+                                    }}
+                                  >
+                                    <PinIcon filled={room.isPinned || false} />
+                                  </motion.button>
+                                )}
+                              </div>
+                            </motion.div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
                 ) : (
                   // Chat View
