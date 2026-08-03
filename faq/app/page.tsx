@@ -203,23 +203,33 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Shop Icon SVG
-const ShopIcon = ({ size = 20 }: { size?: number }) => (
+// ===== MODERN SHOP ICON =====
+const ShopIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 9L5 21H19L21 9M3 9L5 3H19L21 9M3 9H21M12 13V17M7 13H9M15 13H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="7" y="9" width="2" height="2" fill="currentColor" opacity="0.3"/>
-    <rect x="15" y="9" width="2" height="2" fill="currentColor" opacity="0.3"/>
+    <path d="M5 6H19L20 10H4L5 6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M4 10H20V20H4V10Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <circle cx="9" cy="16" r="1.5" fill="currentColor"/>
+    <circle cx="15" cy="16" r="1.5" fill="currentColor"/>
+    <path d="M6 6L8 3H16L18 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-// Help Desk Icon - Headset Support
-const HelpDeskIcon = ({ size = 20 }: { size?: number }) => (
+// Modern Help Desk Icon
+const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 13C3 10.6131 3.94821 8.32387 5.63604 6.63604C7.32387 4.94821 9.61305 4 12 4C14.3869 4 16.6761 4.94821 18.364 6.63604C20.0518 8.32387 21 10.6131 21 13V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M3 16C3 14.8954 3.89543 14 5 14H7C8.10457 14 9 14.8954 9 16V18C9 19.1046 8.10457 20 7 20H5C3.89543 20 3 19.1046 3 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M21 16C21 14.8954 20.1046 14 19 14H17C15.8954 14 15 14.8954 15 16V18C15 19.1046 15.8954 20 17 20H19C20.1046 20 21 19.1046 21 18V16Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M6 14V13C6 9.68629 8.68629 7 12 7C15.3137 7 18 9.68629 18 13V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M4 11C4 8.87827 4.84285 6.84344 6.34315 5.34315C7.84344 3.84285 9.87827 3 12 3C14.1217 3 16.1566 3.84285 17.6569 5.34315C19.1571 6.84344 20 8.87827 20 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+    <path d="M4 14C4 11.7909 4.84285 9.67091 6.34315 8.17061C7.84344 6.67031 9.96344 5.82748 12.1726 5.82748C14.3818 5.82748 16.5018 6.67031 18.0021 8.17061C19.5024 9.67091 20.3452 11.7909 20.3452 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M4 17C4 15.8954 4.89543 15 6 15H8C9.10457 15 10 15.8954 10 17V19C10 20.1046 9.10457 21 8 21H6C4.89543 21 4 20.1046 4 19V17Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M20 17C20 15.8954 19.1046 15 18 15H16C14.8954 15 14 15.8954 14 17V19C14 20.1046 14.8954 21 16 21H18C19.1046 21 20 20.1046 20 19V17Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M7 15V14C7 10.6863 9.68629 8 13 8C16.3137 8 19 10.6863 19 14V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="13" cy="11" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
+// Modern User Avatar Icon
+const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -579,10 +589,11 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH - ANIMATED ROTATING PLACEHOLDER ==========
+  // ========== ROLLING TEXT SEARCH - TANPA GSAP ==========
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
+  const rollingRef = useRef<HTMLSpanElement>(null);
 
   // Group Chat States
   const [groupName, setGroupName] = useState("");
@@ -670,7 +681,7 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT - ANIMATED ROTATING PLACEHOLDER ==========
+  // ========== ROLLING TEXT EFFECT - TANPA GSAP, HANYA SETINTERVAL ==========
   useEffect(() => {
     const interval = setInterval(() => {
       setRollingIndex((prev) => (prev + 1) % searchRollingTexts.length);
@@ -730,7 +741,7 @@ export default function HomePage(): React.JSX.Element {
     return (targetUser?.blockedBy || []).includes(user.uid);
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar - MULTI USER ==========
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
     
@@ -749,7 +760,7 @@ export default function HomePage(): React.JSX.Element {
     return `${rest.join(', ')} and ${last}`;
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat - MULTI USER ==========
+  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
     const usersTyping = typingUsersMap[selectedChat.id] || [];
@@ -758,20 +769,13 @@ export default function HomePage(): React.JSX.Element {
 
   const regularTypingUsers = getRegularTypingUsers();
 
-  // ========== PERBAIKAN: Fungsi untuk format multi-user typing di body chat ==========
-  const getTypingDisplayText = (names: string[]) => {
-    if (!names || names.length === 0) return null;
-    
-    if (names.length === 1) {
-      return `${names[0]} is typing...`;
-    }
-    
-    if (names.length === 2) {
-      return `${names[0]} and ${names[1]} are typing...`;
-    }
-    
-    const last = names[names.length - 1];
-    const rest = names.slice(0, -1);
+  // ========== PERBAIKAN: Format untuk menampilkan typing users di group chat seperti WhatsApp ==========
+  const getTypingUsersText = (typingUsers: string[]) => {
+    if (!typingUsers || typingUsers.length === 0) return null;
+    if (typingUsers.length === 1) return `${typingUsers[0]} is typing...`;
+    if (typingUsers.length === 2) return `${typingUsers[0]} and ${typingUsers[1]} are typing...`;
+    const last = typingUsers[typingUsers.length - 1];
+    const rest = typingUsers.slice(0, -1);
     return `${rest.join(', ')} and ${last} are typing...`;
   };
 
@@ -2148,7 +2152,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Search - TINGGI 700px, ANIMATED ROTATING PLACEHOLDER */}
+            {/* Search - TINGGI 700px */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2156,7 +2160,7 @@ export default function HomePage(): React.JSX.Element {
               ref={searchContainerRef}
               style={{ position: "relative" }}
             >
-              {/* Tombol Search - TETAP 240px - ANIMATED ROTATING PLACEHOLDER */}
+              {/* Tombol Search - TETAP 240px */}
               <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -2170,7 +2174,6 @@ export default function HomePage(): React.JSX.Element {
                 width: "240px",
                 boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
                 cursor: "pointer",
-                overflow: "hidden",
               }}
               onClick={() => {
                 if (!isSearchOpen) {
@@ -2189,36 +2192,25 @@ export default function HomePage(): React.JSX.Element {
                     color: "#ffffff",
                     width: "100%",
                     justifyContent: "space-between",
-                    position: "relative",
                   }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <SearchIcon size={18} />
-                      <div style={{ position: "relative", overflow: "hidden", height: "20px" }}>
-                        <AnimatePresence mode="wait">
-                          <motion.span
-                            key={rollingText}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                            style={{ 
-                              color: "#ffffff",
-                              fontWeight: 400,
-                              display: "block",
-                              fontSize: "14px",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {rollingText}
-                          </motion.span>
-                        </AnimatePresence>
-                      </div>
+                      <span 
+                        ref={rollingRef}
+                        style={{ 
+                          color: "#ffffff",
+                          fontWeight: 400,
+                          display: "inline-block",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {rollingText}
+                      </span>
                     </div>
                     <span style={{ 
                       color: "rgba(255,255,255,0.4)", 
                       fontSize: "12px",
                       fontWeight: 300,
-                      flexShrink: 0,
                     }}>
                       ⌘K
                     </span>
@@ -2341,9 +2333,9 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* KANAN: Shop + Pusat Bantuan + User Login */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Shop Button - BG HIJAU */}
+          {/* KANAN: Shop + Pusat Bantuan + User Login - semuanya tanpa background, teks hitam, ikon besar */}
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            {/* Shop Button */}
             <motion.button
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2351,36 +2343,29 @@ export default function HomePage(): React.JSX.Element {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{
-                background: "none",
+                background: "transparent",
                 border: "none",
                 cursor: "pointer",
-                color: "#000",
+                color: "#000000",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "14px",
+                fontSize: "18px",
+                fontWeight: 500,
                 fontFamily: FONT_FAMILY,
-                padding: "8px 18px",
+                padding: "8px 12px",
                 borderRadius: "30px",
-                backgroundColor: "#22c55e",
-                border: "1px solid #16a34a",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#16a34a";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#22c55e";
-              }}
-              onClick={() => {
-                console.log("Shop clicked");
-              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              onClick={() => console.log("Shop clicked")}
             >
-              <ShopIcon size={18} />
-              <span style={{ fontWeight: 500, color: "#ffffff" }}>Shop</span>
+              <ShopIcon size={24} />
+              <span>Shop</span>
             </motion.button>
 
-            {/* Help Center Button */}
+            {/* Help Center Button - tanpa bg, teks hitam */}
             <motion.button
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2388,38 +2373,29 @@ export default function HomePage(): React.JSX.Element {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{
-                background: "none",
+                background: "transparent",
                 border: "none",
                 cursor: "pointer",
-                color: "#000",
+                color: "#000000",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "14px",
+                fontSize: "18px",
+                fontWeight: 500,
                 fontFamily: FONT_FAMILY,
-                padding: "8px 18px",
+                padding: "8px 12px",
                 borderRadius: "30px",
-                backgroundColor: "transparent",
-                border: "1px solid #e0e0e0",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f5f5f5";
-                e.currentTarget.style.borderColor = "#ccc";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.borderColor = "#e0e0e0";
-              }}
-              onClick={() => {
-                console.log("Help Center clicked");
-              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              onClick={() => console.log("Help Center clicked")}
             >
-              <HelpDeskIcon size={18} />
-              <span style={{ fontWeight: 500 }}>Pusat bantuan</span>
+              <HelpDeskIcon size={24} />
+              <span>Pusat bantuan</span>
             </motion.button>
 
-            {/* User Login Status */}
+            {/* User Login Status - tanpa background, teks hitam */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -2427,13 +2403,12 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
-                padding: "8px 20px",
-                backgroundColor: "#f5f5f5",
-                borderRadius: "12px",
-                fontSize: "20px",
-                color: "#000",
-                border: "1px solid #e0e0e0",
+                gap: "12px",
+                padding: "8px 12px",
+                backgroundColor: "transparent",
+                borderRadius: "30px",
+                fontSize: "16px",
+                color: "#000000",
                 fontFamily: FONT_FAMILY,
               }}
             >
@@ -2463,6 +2438,7 @@ export default function HomePage(): React.JSX.Element {
                       color: "#000",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
+                      fontSize: "16px",
                     }}
                     onClick={() => {
                       const selfUser = users.find(u => u.id === user.uid);
@@ -2478,7 +2454,7 @@ export default function HomePage(): React.JSX.Element {
                     whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
                     style={{
-                      background: "none",
+                      background: "transparent",
                       border: "none",
                       color: "#000",
                       cursor: "pointer",
@@ -2489,7 +2465,7 @@ export default function HomePage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#e0e0e0";
+                      e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
@@ -2500,7 +2476,7 @@ export default function HomePage(): React.JSX.Element {
                 </>
               ) : (
                 <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: "#999" }}>
-                  Please login to use chat
+                  Login
                 </span>
               )}
             </motion.div>
@@ -5582,7 +5558,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {getTypingDisplayText(regularTypingUsers)}
+                                {getTypingUsersText(regularTypingUsers)}
                               </div>
                             )}
 
@@ -5599,7 +5575,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {getTypingDisplayText(regularTypingUsers)}
+                                {getTypingUsersText(regularTypingUsers)}
                               </div>
                             )}
 
@@ -5923,7 +5899,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {getTypingDisplayText(regularTypingUsers)}
+                                {getTypingUsersText(regularTypingUsers)}
                               </div>
                             )}
                             {!selectedChat.isGroup && regularTypingUsers.length > 0 && (
@@ -5939,7 +5915,7 @@ export default function HomePage(): React.JSX.Element {
                                   fontWeight: 600,
                                 }}
                               >
-                                {getTypingDisplayText(regularTypingUsers)}
+                                {getTypingUsersText(regularTypingUsers)}
                               </div>
                             )}
                           </>
