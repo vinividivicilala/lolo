@@ -206,28 +206,28 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
 // ===== MODERN MINIMALIST SHOP ICON =====
 const ShopIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 7H21L19 20H5L3 7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="9" cy="14" r="1" fill="currentColor"/>
-    <circle cx="15" cy="14" r="1" fill="currentColor"/>
+    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
 // Modern Minimalist Help Desk Icon
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12C5 8.13401 8.13401 5 12 5C15.866 5 19 8.13401 19 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M7 15V13C7 10.2386 9.23858 8 12 8C14.7614 8 17 10.2386 17 13V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
-// Modern Minimalist User Icon
-const UserIcon = ({ size = 24 }: { size?: number }) => (
+// Modern Minimalist User Avatar Icon
+const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M4 20V19C4 15.6863 6.68629 13 10 13H14C17.3137 13 20 15.6863 20 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -679,34 +679,41 @@ export default function HomePage(): React.JSX.Element {
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT DENGAN GSAP - MOVE FORWARD/BACKWARD ==========
+  // ========== ROLLING TEXT EFFECT DENGAN GSAP - BERGERAK MAJU MUNDUR ==========
   useEffect(() => {
+    let isForward = true;
+    let currentIndex = 0;
+    
     const interval = setInterval(() => {
-      const nextIndex = (rollingIndex + 1) % searchRollingTexts.length;
-      setRollingIndex(nextIndex);
+      if (isForward) {
+        currentIndex++;
+        if (currentIndex >= searchRollingTexts.length) {
+          currentIndex = searchRollingTexts.length - 2;
+          isForward = false;
+        }
+      } else {
+        currentIndex--;
+        if (currentIndex < 0) {
+          currentIndex = 1;
+          isForward = true;
+        }
+      }
       
-      if (rollingRef.current) {
-        // Animasi keluar - naik ke atas dan fade out
-        gsap.to(rollingRef.current, {
-          y: -20,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.in",
-          onComplete: () => {
-            // Ganti teks
-            setRollingText(searchRollingTexts[nextIndex]);
-            // Animasi masuk - dari bawah dengan fade in
-            gsap.fromTo(rollingRef.current, 
-              { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-            );
-          }
-        });
+      if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
+        setRollingIndex(currentIndex);
+        setRollingText(searchRollingTexts[currentIndex]);
+        
+        if (rollingRef.current) {
+          gsap.fromTo(rollingRef.current,
+            { y: 10, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+          );
+        }
       }
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [rollingIndex, searchRollingTexts]);
+  }, []);
 
   // ========== SEARCH EXPAND EFFECT WITH GSAP ==========
   useEffect(() => {
@@ -2147,7 +2154,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Teks Tengah + Search */}
+          {/* KIRI: Menuru + Search + Teks Tengah */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             {/* Menuru Title */}
             <motion.div
@@ -2173,31 +2180,60 @@ export default function HomePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "20px",
-                fontSize: "16px",
-                fontWeight: 400,
-                color: "#666666",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
+                gap: "32px",
+                padding: "0 20px",
+                marginLeft: "20px",
               }}
             >
-              <span style={{ cursor: "pointer" }}>Note</span>
-              <span style={{ cursor: "pointer" }}>Donations</span>
-              <span style={{ cursor: "pointer", fontWeight: 600, color: "#000000" }}>BLOG</span>
-              <span style={{ cursor: "pointer" }}>Calendar</span>
+              <span style={{
+                fontSize: "35px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+              }}>
+                Note
+              </span>
+              <span style={{
+                fontSize: "35px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+              }}>
+                Donations
+              </span>
+              <span style={{
+                fontSize: "35px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+              }}>
+                BLOG
+              </span>
+              <span style={{
+                fontSize: "35px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+              }}>
+                Calendar
+              </span>
             </motion.div>
 
-            {/* Search - TINGGI 700px, ROLLING DENGAN GSAP */}
+            {/* Search - TETAP DI POSISINYA */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
               ref={searchContainerRef}
-              style={{ position: "relative" }}
+              style={{ position: "relative", marginLeft: "auto" }}
             >
               {/* Tombol Search - TETAP 240px */}
               <div style={{
@@ -2257,7 +2293,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </div>
 
-              {/* ===== SEARCH EXPANDED - 700px ke bawah & 1000px ke kanan ===== */}
+              {/* ===== SEARCH EXPANDED - 700px ===== */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2349,7 +2385,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Footer - HAPUS "3 hasil" */}
+                    {/* Footer */}
                     <div style={{
                       marginTop: "20px",
                       paddingTop: "16px",
@@ -2372,7 +2408,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* KANAN: Shop + Pusat Bantuan + User Login - tanpa background, teks hitam */}
+          {/* KANAN: Shop + Pusat Bantuan + User Login */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             {/* Shop Button */}
             <motion.button
@@ -2653,7 +2689,7 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Full Image Modal - Blur Background */}
+        {/* Full Image Modal */}
         <AnimatePresence>
           {showFullImage && (
             <motion.div
@@ -2697,7 +2733,7 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Chat Box - sama seperti sebelumnya */}
+        {/* Chat Box - Full */}
         <div
           style={{
             position: "fixed",
@@ -3652,7 +3688,6 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Peringatan block di profile */}
                       {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
                         <div style={{ 
                           width: "100%", 
@@ -3673,7 +3708,6 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Group Chat Profile */}
                       {profileUser.isGroup && (
                         <div style={{ width: "100%", marginBottom: "16px" }}>
                           <div style={{ 
@@ -3770,7 +3804,6 @@ export default function HomePage(): React.JSX.Element {
                             })}
                           </div>
 
-                          {/* Add member to group */}
                           {profileUser.createdBy === user.uid && (
                             <div style={{ marginTop: "12px" }}>
                               <motion.button
@@ -3948,7 +3981,6 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                           </div>
 
-                          {/* Stories for admin */}
                           <StoriesSection 
                             userEmail={profileUser.email} 
                             onImageClick={(url) => setShowFullImage(url)}
@@ -4019,7 +4051,6 @@ export default function HomePage(): React.JSX.Element {
                 ) : !selectedChat ? (
                   // Chat List View
                   <div style={{ padding: "8px 12px", overflowY: "auto", flex: 1, maxHeight: "640px", fontFamily: FONT_FAMILY }}>
-                    {/* Banner Announcement */}
                     <div
                       style={{
                         display: "flex",
@@ -4043,7 +4074,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Peringatan block */}
                     {hasBlockedUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -4061,7 +4091,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Banner untuk penerima block */}
                     {hasBlockedByUsers && (
                       <div style={{ 
                         width: "100%", 
@@ -4082,7 +4111,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* FORM ADD USER MANUAL */}
                     <div style={{
                       padding: "14px",
                       backgroundColor: "#f8f8f8",
@@ -4242,7 +4270,6 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                     </motion.button>
 
-                    {/* Tombol Add Group Chat */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
@@ -4531,7 +4558,6 @@ export default function HomePage(): React.JSX.Element {
                       )}
                     </AnimatePresence>
 
-                    {/* Pinned Users */}
                     {pinnedUsers.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -4667,7 +4693,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     )}
 
-                    {/* Pinned Chats */}
                     {pinnedChats.length > 0 && (
                       <div style={{ marginBottom: "10px" }}>
                         <div
@@ -5924,7 +5949,6 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {!(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                           <>
-                            {/* ===== MULTI-USER TYPING INDICATOR DI ATAS INPUT ===== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
