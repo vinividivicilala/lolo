@@ -61,6 +61,39 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 // Admin Email
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
+// ===== ENKRIPSI SEDERHANA =====
+const encryptMessage = (text: string, key: string = "menuru-secret-2026"): string => {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+    result += String.fromCharCode(charCode);
+  }
+  return btoa(result);
+};
+
+const decryptMessage = (encrypted: string, key: string = "menuru-secret-2026"): string => {
+  try {
+    const decoded = atob(encrypted);
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+      result += String.fromCharCode(charCode);
+    }
+    return result;
+  } catch {
+    return encrypted;
+  }
+};
+
+// ===== GET GREETING BASED ON TIMEZONE =====
+const getGreeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour >= 4 && hour < 10) return "Selamat pagi";
+  if (hour >= 10 && hour < 15) return "Selamat siang";
+  if (hour >= 15 && hour < 18) return "Selamat sore";
+  return "Selamat malam";
+};
+
 interface ChatUser {
   id: string;
   name: string;
@@ -104,6 +137,7 @@ interface Message {
   isSaved?: boolean;
   savedAt?: any;
   savedBy?: string[];
+  encrypted?: boolean;
 }
 
 interface ChatRoom {
@@ -265,6 +299,13 @@ const SaveIcon = ({ filled = false }: { filled?: boolean }) => (
   </svg>
 );
 
+// ===== PIN ICON GOOGLE FONT STYLE =====
+const GooglePinIcon = ({ filled = false }: { filled?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
+  </svg>
+);
+
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -344,7 +385,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Online Status Indicator
+// Online Status Indicator with Tooltip
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const pulseRef = useRef<HTMLDivElement>(null);
@@ -371,20 +412,21 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
         style={{ cursor: "pointer" }}
       >
         <div style={{
-          width: "8px",
-          height: "8px",
+          width: "10px",
+          height: "10px",
           borderRadius: "50%",
           backgroundColor: color,
           position: "relative",
           transition: "all 0.3s ease",
+          boxShadow: online ? "0 0 12px rgba(13,60,252,0.4)" : "none",
         }}>
           {online && (
             <div
               ref={pulseRef}
               style={{
                 position: "absolute",
-                width: "8px",
-                height: "8px",
+                width: "10px",
+                height: "10px",
                 borderRadius: "50%",
                 backgroundColor: color,
                 opacity: 0.2,
@@ -399,20 +441,22 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
       {showTooltip && (
         <div style={{
           position: "absolute",
-          bottom: "calc(100% + 8px)",
+          bottom: "calc(100% + 10px)",
           left: "50%",
           transform: "translateX(-50%)",
           backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
+          color: "#ffffff",
+          padding: "6px 14px",
+          borderRadius: "8px",
+          fontSize: "13px",
+          fontWeight: 500,
           whiteSpace: "nowrap",
           zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
+          border: "1px solid rgba(255,255,255,0.08)",
           fontFamily: FONT_FAMILY,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
         }}>
-          {online ? "Online" : (lastSeen || "Offline")}
+          {online ? "🟢 Online" : (lastSeen || "Offline")}
           <div style={{
             position: "absolute",
             top: "100%",
@@ -427,7 +471,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   );
 };
 
-// Read Status
+// Read Status with bright color
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -436,9 +480,9 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
-      return { icon: "✓✓", color: "#0095f6", label: "Read" };
+      return { icon: "✓✓", color: "#00D4FF", label: "Dibaca", bg: "rgba(0,212,255,0.15)" };
     }
-    return { icon: "✓", color: "#999", label: "Sent" };
+    return { icon: "✓", color: "#FFD700", label: "Terkirim", bg: "rgba(255,215,0,0.15)" };
   })();
   
   if (!status) return null;
@@ -447,11 +491,13 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
       <span 
         style={{
-          fontSize: "10px",
+          fontSize: "11px",
           color: status.color,
-          fontWeight: status.label === "Read" ? 600 : 400,
+          fontWeight: 600,
           cursor: "pointer",
           fontFamily: FONT_FAMILY,
+          textShadow: "0 0 8px rgba(0,0,0,0.2)",
+          letterSpacing: "0.5px",
         }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -465,9 +511,10 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
           right: 0,
           backgroundColor: "#1a1a1a",
           color: "#fff",
-          padding: "4px 10px",
+          padding: "4px 12px",
           borderRadius: "6px",
-          fontSize: "11px",
+          fontSize: "12px",
+          fontWeight: 500,
           whiteSpace: "nowrap",
           zIndex: 100,
           border: "1px solid rgba(255,255,255,0.05)",
@@ -619,7 +666,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ROLLING TEXT SEARCH - NEW: Tentang Note, Tentang Donasi, Tentang Blog, Tentang Shop, Tentang Pusat bantuan
+  // ROLLING TEXT SEARCH
   const searchRollingTexts = [
     "Tentang Note", 
     "Tentang Donasi", 
@@ -631,11 +678,25 @@ export default function HomePage(): React.JSX.Element {
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
   const rollingRef = useRef<HTMLSpanElement>(null);
 
-  // GREETING ROLLING TEXT for dropdown
-  const greetingTexts = ["Selamat pagi", "Selamat siang", "Selamat sore", "Selamat malam"];
-  const [greetingIndex, setGreetingIndex] = useState(0);
-  const [greetingText, setGreetingText] = useState(greetingTexts[0]);
+  // GREETING - DETEKSI WAKTU OTOMATIS
+  const [greetingText, setGreetingText] = useState(getGreeting());
   const greetingRef = useRef<HTMLSpanElement>(null);
+
+  // Update greeting every minute
+  useEffect(() => {
+    const updateGreeting = () => {
+      const newGreeting = getGreeting();
+      setGreetingText(newGreeting);
+      if (greetingRef.current) {
+        gsap.fromTo(greetingRef.current,
+          { opacity: 0.5, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+        );
+      }
+    };
+    const interval = setInterval(updateGreeting, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Group Chat States
   const [groupName, setGroupName] = useState("");
@@ -648,8 +709,6 @@ export default function HomePage(): React.JSX.Element {
   const [searchUserStatus, setSearchUserStatus] = useState("");
 
   const [blockedByBanner, setBlockedByBanner] = useState<{userId: string, userName: string} | null>(null);
-
-  const bannerTexts = ["Website sedang dalam pengembangan, Terima kasih"];
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
@@ -759,42 +818,6 @@ export default function HomePage(): React.JSX.Element {
         }
       }
     }, 3000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  // ===== GREETING ROLLING TEXT EFFECT =====
-  useEffect(() => {
-    let isForward = true;
-    let currentIndex = 0;
-    
-    const interval = setInterval(() => {
-      if (isForward) {
-        currentIndex++;
-        if (currentIndex >= greetingTexts.length) {
-          currentIndex = greetingTexts.length - 2;
-          isForward = false;
-        }
-      } else {
-        currentIndex--;
-        if (currentIndex < 0) {
-          currentIndex = 1;
-          isForward = true;
-        }
-      }
-      
-      if (currentIndex >= 0 && currentIndex < greetingTexts.length) {
-        setGreetingIndex(currentIndex);
-        setGreetingText(greetingTexts[currentIndex]);
-        
-        if (greetingRef.current) {
-          gsap.fromTo(greetingRef.current,
-            { y: 10, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-          );
-        }
-      }
-    }, 3500);
     
     return () => clearInterval(interval);
   }, []);
@@ -989,7 +1012,6 @@ export default function HomePage(): React.JSX.Element {
       const msgData = msgSnap.data() as Message;
       
       if (currentSaved) {
-        // Unsave: remove from savedMessages collection
         const savedRef = collection(db, "users", user.uid, "savedMessages");
         const q = query(savedRef, where("messageId", "==", messageId));
         const querySnap = await getDocs(q);
@@ -997,14 +1019,12 @@ export default function HomePage(): React.JSX.Element {
           await deleteDoc(doc.ref);
         });
         
-        // Remove from message's savedBy array
         await updateDoc(msgRef, {
           savedBy: arrayRemove(user.uid)
         });
         
         setShowMessageMenu(null);
       } else {
-        // Save: add to savedMessages collection
         const savedRef = collection(db, "users", user.uid, "savedMessages");
         await addDoc(savedRef, {
           messageId: messageId,
@@ -1018,7 +1038,6 @@ export default function HomePage(): React.JSX.Element {
           groupName: selectedChat?.groupName || null
         });
         
-        // Add to message's savedBy array
         await updateDoc(msgRef, {
           savedBy: arrayUnion(user.uid)
         });
@@ -1026,7 +1045,6 @@ export default function HomePage(): React.JSX.Element {
         setShowMessageMenu(null);
       }
       
-      // Refresh saved messages
       loadSavedMessages();
       
     } catch (error) {
@@ -1128,7 +1146,6 @@ export default function HomePage(): React.JSX.Element {
             }));
           }
           
-          // Load saved messages
           loadSavedMessages();
           
         } catch (error) {
@@ -1718,9 +1735,12 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       
+      // ENKRIPSI PESAN SEBELUM DIKIRIM
+      const encryptedText = encryptMessage(message.trim());
+      
       const messagesRef = collection(db, "chats", chatId, "messages");
       const msgData: any = {
-        text: message.trim(),
+        text: encryptedText,
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: selectedChat.isGroup ? chatId : selectedChat.id,
@@ -1731,12 +1751,13 @@ export default function HomePage(): React.JSX.Element {
         isShared: false,
         isGroupMessage: selectedChat.isGroup || false,
         groupId: selectedChat.isGroup ? chatId : null,
-        savedBy: []
+        savedBy: [],
+        encrypted: true
       };
       
       if (replyTo) {
         msgData.replyTo = replyTo.id;
-        msgData.replyToText = replyTo.text;
+        msgData.replyToText = encryptMessage(replyTo.text);
         msgData.replyToSender = replyTo.senderName;
       }
       
@@ -1782,8 +1803,9 @@ export default function HomePage(): React.JSX.Element {
       }
       
       const messagesRef = collection(db, "chats", chatId, "messages");
+      const sharedText = `From ${shareMessage.senderName}: ${shareMessage.text}`;
       await addDoc(messagesRef, {
-        text: `From ${shareMessage.senderName}: ${shareMessage.text}`,
+        text: encryptMessage(sharedText),
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: targetUser.id,
@@ -1795,7 +1817,8 @@ export default function HomePage(): React.JSX.Element {
         sharedFrom: shareMessage.senderId,
         sharedFromName: shareMessage.senderName,
         groupId: null,
-        savedBy: []
+        savedBy: [],
+        encrypted: true
       });
       
       setShowShareModal(false);
@@ -1830,8 +1853,9 @@ export default function HomePage(): React.JSX.Element {
     try {
       const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
       const messagesRef = collection(db, "chats", chatId, "messages");
+      const decryptedText = msg.encrypted ? decryptMessage(msg.text) : msg.text;
       await addDoc(messagesRef, {
-        text: msg.text,
+        text: encryptMessage(decryptedText),
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
         receiverId: selectedChat.id,
@@ -1844,7 +1868,8 @@ export default function HomePage(): React.JSX.Element {
         replyToText: null,
         replyToSender: null,
         groupId: selectedChat.isGroup ? chatId : null,
-        savedBy: []
+        savedBy: [],
+        encrypted: true
       });
       
       setShowMessageMenu(null);
@@ -2319,7 +2344,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* ===== HEADER BARU ===== */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -2330,7 +2355,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search (bersebelahan) */}
+          {/* KIRI: Menuru + Search */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -2351,7 +2376,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* ===== SEARCH BUTTON - ROUNDED SQUARE ===== */}
+            {/* SEARCH BUTTON - ROUNDED SQUARE */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2531,7 +2556,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* ===== TENGAH: Note Donations News Calendar - 29px FULL HITAM ===== */}
+          {/* ===== TENGAH: Note Donations News Calendar - 29px ===== */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2828,7 +2853,7 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </motion.div>
 
-                  {/* ===== DROPDOWN dengan GSAP + Framer ===== */}
+                  {/* ===== DROPDOWN dengan GREETING OTOMATIS ===== */}
                   <AnimatePresence>
                     {showProfileDropdown && (
                       <motion.div
@@ -2854,7 +2879,7 @@ export default function HomePage(): React.JSX.Element {
                         <div style={{ padding: "14px 16px", borderBottom: "1px solid #f0f0f0" }}>
                           <div style={{ fontSize: "13px", color: "#666", display: "flex", alignItems: "center", gap: "4px" }}>
                             <span>Hi,</span>
-                            <span ref={greetingRef} style={{ fontWeight: 500, color: "#0D3CFC", display: "inline-block" }}>
+                            <span ref={greetingRef} style={{ fontWeight: 600, color: "#0D3CFC", display: "inline-block", fontSize: "14px" }}>
                               {greetingText}
                             </span>
                           </div>
@@ -3287,7 +3312,6 @@ export default function HomePage(): React.JSX.Element {
                               try {
                                 const savedRef = doc(db, "users", user.uid, "savedMessages", saved.id);
                                 await deleteDoc(savedRef);
-                                // Also remove from message's savedBy
                                 const msgRef = doc(db, "chats", saved.chatId, "messages", saved.messageId);
                                 await updateDoc(msgRef, {
                                   savedBy: arrayRemove(user.uid)
@@ -3352,7 +3376,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* Header */}
+                {/* Header - dengan teks besar dan warna cerah */}
                 <div
                   style={{
                     padding: "16px 20px",
@@ -3360,15 +3384,15 @@ export default function HomePage(): React.JSX.Element {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    backgroundColor: "#000000",
+                    backgroundColor: "#0D3CFC",
                     flexShrink: 0,
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                     <span
                       style={{
-                        fontSize: "15px",
-                        fontWeight: 500,
+                        fontSize: "18px",
+                        fontWeight: 600,
                         color: "#ffffff",
                         letterSpacing: "-0.01em",
                         fontFamily: FONT_FAMILY,
@@ -3378,7 +3402,7 @@ export default function HomePage(): React.JSX.Element {
                     </span>
                     {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && !selectedChat.isGroup && (
                       <>
-                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                           {selectedChat.email}
                         </span>
                         <OnlineIndicator 
@@ -3388,17 +3412,16 @@ export default function HomePage(): React.JSX.Element {
                       </>
                     )}
                     {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && selectedChat.isGroup && selectedChat.groupMembers && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                           {selectedChat.groupMembers.length} members
                         </span>
-                        {/* Show online members in group */}
                         {(() => {
                           const onlineMembers = getOnlineGroupMembers(selectedChat.groupMembers || []);
                           if (onlineMembers.length > 0) {
                             return (
-                              <span style={{ fontSize: "9px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
-                                <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#0D3CFC" }} />
+                              <span style={{ fontSize: "10px", color: "#c5e800", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
+                                <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#c5e800" }} />
                                 {onlineMembers.map(m => m.name).join(", ")}
                               </span>
                             );
@@ -3412,9 +3435,9 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           backgroundColor: "#c5e800",
                           color: "#000000",
-                          padding: "2px 6px",
+                          padding: "2px 10px",
                           borderRadius: "4px",
-                          fontSize: "10px",
+                          fontSize: "12px",
                           fontWeight: 600,
                           fontFamily: FONT_FAMILY,
                         }}
@@ -3440,10 +3463,10 @@ export default function HomePage(): React.JSX.Element {
                       }
                     }}
                     style={{
-                      background: "none",
+                      background: "rgba(255,255,255,0.15)",
                       border: "none",
                       cursor: "pointer",
-                      color: "rgba(255,255,255,0.5)",
+                      color: "#ffffff",
                       padding: "4px 8px",
                       borderRadius: "4px",
                       transition: "all .2s ease",
@@ -3451,12 +3474,10 @@ export default function HomePage(): React.JSX.Element {
                       alignItems: "center",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                      e.currentTarget.style.color = "#ffffff";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "rgba(255,255,255,0.5)";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
                     }}
                   >
                     <CloseIcon />
@@ -4350,7 +4371,6 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
                                 Created by: {users.find(u => u.id === profileUser.createdBy)?.name || "Unknown"}
                               </div>
-                              {/* Show online members in group */}
                               {(() => {
                                 const onlineMembers = getOnlineGroupMembers(profileUser.groupMembers || []);
                                 if (onlineMembers.length > 0) {
@@ -4363,7 +4383,6 @@ export default function HomePage(): React.JSX.Element {
                                 }
                                 return null;
                               })()}
-                              {/* Show typing members in group */}
                               {(() => {
                                 const typingMembers = profileUser.groupMembers?.filter(id => {
                                   const u = users.find(user => user.id === id);
@@ -4440,7 +4459,20 @@ export default function HomePage(): React.JSX.Element {
                                     fontWeight: isGroupAdmin ? 500 : 400,
                                   }}>
                                     {member.name}
-                                    {isGroupAdmin && " (Admin)"}
+                                    {isGroupAdmin && (
+                                      <span style={{
+                                        marginLeft: "6px",
+                                        fontSize: "9px",
+                                        fontWeight: 600,
+                                        backgroundColor: "#c5e800",
+                                        color: "#000",
+                                        padding: "1px 8px",
+                                        borderRadius: "10px",
+                                        letterSpacing: "0.3px",
+                                      }}>
+                                        Admin
+                                      </span>
+                                    )}
                                     {isOnline && <span style={{ marginLeft: "6px", fontSize: "10px", color: isGroupAdmin ? "#aaddff" : "#0D3CFC" }}>● Online</span>}
                                     {isTyping && member.id !== user?.uid && <span style={{ marginLeft: "6px", fontSize: "10px", fontStyle: "italic", color: isGroupAdmin ? "#aaddff" : "#666" }}>typing...</span>}
                                   </span>
@@ -5905,19 +5937,19 @@ export default function HomePage(): React.JSX.Element {
                 ) : (
                   // Chat View
                   <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                    {/* Chat Header */}
+                    {/* Chat Header - dengan warna cerah dan teks besar */}
                     <div
                       style={{
-                        padding: "10px 16px",
+                        padding: "12px 16px",
                         borderBottom: "none",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        backgroundColor: "#000000",
+                        backgroundColor: "#0D3CFC",
                         flexShrink: 0,
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -5926,10 +5958,10 @@ export default function HomePage(): React.JSX.Element {
                             setReplyTo(null);
                           }}
                           style={{
-                            background: "none",
+                            background: "rgba(255,255,255,0.15)",
                             border: "none",
                             cursor: "pointer",
-                            color: "rgba(255,255,255,0.5)",
+                            color: "#ffffff",
                             padding: "4px 6px",
                             borderRadius: "4px",
                             transition: "all .2s ease",
@@ -5937,12 +5969,10 @@ export default function HomePage(): React.JSX.Element {
                             alignItems: "center",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                            e.currentTarget.style.color = "#ffffff";
+                            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)";
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "transparent";
-                            e.currentTarget.style.color = "rgba(255,255,255,0.5)";
+                            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
                           }}
                         >
                           <BackIcon />
@@ -5951,14 +5981,14 @@ export default function HomePage(): React.JSX.Element {
                         {selectedChat.isGroup ? (
                           <div
                             style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "6px",
-                              backgroundColor: "#0D3CFC",
+                              width: "36px",
+                              height: "36px",
+                              borderRadius: "8px",
+                              backgroundColor: "rgba(255,255,255,0.2)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "16px",
+                              fontSize: "18px",
                               color: "#fff",
                               flexShrink: 0,
                               cursor: "pointer",
@@ -5973,14 +6003,14 @@ export default function HomePage(): React.JSX.Element {
                           <motion.div
                             whileHover={{ scale: 1.05 }}
                             style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "6px",
-                              backgroundColor: "rgba(255,255,255,0.1)",
+                              width: "36px",
+                              height: "36px",
+                              borderRadius: "8px",
+                              backgroundColor: "rgba(255,255,255,0.2)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "14px",
+                              fontSize: "16px",
                               overflow: "hidden",
                               color: "#fff",
                               position: "relative",
@@ -5997,52 +6027,50 @@ export default function HomePage(): React.JSX.Element {
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             ) : (
-                              <span style={{ fontFamily: FONT_FAMILY }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "?"}</span>
+                              <span style={{ fontFamily: FONT_FAMILY, fontWeight: 600 }}>{selectedChat.name?.charAt(0)?.toUpperCase() || "?"}</span>
                             )}
                           </motion.div>
                         )}
                         
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px" }}>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px", minWidth: 0 }}>
                           <div 
-                            style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                            style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", flexWrap: "wrap" }}
                             onClick={() => {
                               if (!selectedChat.isGroup) {
                                 handleOpenProfile(selectedChat);
                               }
                             }}
                           >
-                            <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                            <span style={{ fontSize: "17px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                               {selectedChat.isGroup ? (selectedChat.groupName || "Group Chat") : selectedChat.name}
                             </span>
-                            {!selectedChat.isGroup && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                            {!selectedChat.isGroup && selectedChat.isAdmin && <InstagramVerifiedBadge size={14} />}
                             {selectedChat.isGroup && (
-                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                                 {selectedChat.groupMembers?.length || 0} members
                               </span>
                             )}
                           </div>
                           {selectedChat.isGroup && selectedChat.groupMembers && (
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                                 {selectedChat.groupMembers.map(id => {
                                   const member = users.find(u => u.id === id);
                                   return member ? member.name : "";
                                 }).filter(Boolean).join(", ")}
                               </div>
-                              {/* Show online members in group header */}
                               {(() => {
                                 const onlineMembers = getOnlineGroupMembers(selectedChat.groupMembers || []);
                                 if (onlineMembers.length > 0) {
                                   return (
-                                    <span style={{ fontSize: "8px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
-                                      <span style={{ display: "inline-block", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#0D3CFC" }} />
+                                    <span style={{ fontSize: "9px", color: "#c5e800", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
+                                      <span style={{ display: "inline-block", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#c5e800" }} />
                                       {onlineMembers.map(m => m.name).join(", ")}
                                     </span>
                                   );
                                 }
                                 return null;
                               })()}
-                              {/* Show typing members in group header */}
                               {(() => {
                                 const typingMembers = selectedChat.groupMembers?.filter(id => {
                                   const u = users.find(user => user.id === id);
@@ -6054,7 +6082,7 @@ export default function HomePage(): React.JSX.Element {
                                     return u?.name || "";
                                   }).filter(Boolean);
                                   return (
-                                    <span style={{ fontSize: "8px", color: "#666", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                                    <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
                                       {names.join(", ")} typing...
                                     </span>
                                   );
@@ -6070,18 +6098,18 @@ export default function HomePage(): React.JSX.Element {
                                 lastSeen={getLastSeen(selectedChat.id)}
                               />
                               {getOnlineStatus(selectedChat.id) ? (
-                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                                   {getTypingStatus(selectedChat.id) ? "typing..." : "Online"}
                                 </span>
                               ) : (
-                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                                   {getLastSeen(selectedChat.id)}
                                 </span>
                               )}
                             </div>
                           )}
                           {(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
-                            <span style={{ fontSize: "9px", color: "#ef4444", fontFamily: FONT_FAMILY }}>
+                            <span style={{ fontSize: "10px", color: "#ff6b6b", fontFamily: FONT_FAMILY }}>
                               {isUserBlocked(selectedChat.id) ? "Blocked" : "Blocked by user"}
                             </span>
                           )}
@@ -6091,18 +6119,24 @@ export default function HomePage(): React.JSX.Element {
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handlePinUser(selectedChat.id, selectedChat.isPinned || false)}
                           style={{
-                            background: "none",
+                            background: "rgba(255,255,255,0.15)",
                             border: "none",
                             cursor: "pointer",
-                            color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.3)",
-                            padding: "4px 6px",
+                            color: selectedChat.isPinned ? "#c5e800" : "rgba(255,255,255,0.5)",
+                            padding: "4px 8px",
                             borderRadius: "4px",
                             display: "flex",
                             alignItems: "center",
                             transition: "all .2s ease",
                           }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
+                          }}
                         >
-                          <PinIcon filled={selectedChat.isPinned || false} />
+                          <GooglePinIcon filled={selectedChat.isPinned || false} />
                         </motion.button>
                       </div>
                     </div>
@@ -6131,7 +6165,7 @@ export default function HomePage(): React.JSX.Element {
                             }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <PinIcon filled={true} />
+                              <GooglePinIcon filled={true} />
                               <span style={{ fontSize: "11px", fontWeight: 500, color: "#666", fontFamily: FONT_FAMILY }}>
                                 Pinned Messages ({pinnedMessages.length})
                               </span>
@@ -6236,7 +6270,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                       )}
 
-                      {/* Messages */}
+                      {/* Messages - dengan bubble tidak mentok ke kanan */}
                       <div
                         style={{
                           flex: 1,
@@ -6348,8 +6382,15 @@ export default function HomePage(): React.JSX.Element {
                                   formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
                                 
                                 const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
+                                // Decrypt message if encrypted
+                                const displayText = msg.encrypted ? decryptMessage(msg.text) : msg.text;
+                                const displayReplyText = msg.replyToText && msg.encrypted ? decryptMessage(msg.replyToText) : msg.replyToText;
+                                
                                 const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
                                 const isSaved = isMessageSaved(msg.id);
+                                
+                                // Group message sender name
+                                const showSenderName = selectedChat.isGroup && !isMine;
                                 
                                 return (
                                   <React.Fragment key={idx}>
@@ -6374,7 +6415,8 @@ export default function HomePage(): React.JSX.Element {
                                       transition={{ duration: 0.2 }}
                                       style={{
                                         alignSelf: isMine ? "flex-end" : "flex-start",
-                                        maxWidth: "80%",
+                                        maxWidth: "75%",
+                                        minWidth: "60px",
                                         padding: "10px 14px",
                                         borderRadius: "12px",
                                         backgroundColor: messageColor,
@@ -6403,6 +6445,19 @@ export default function HomePage(): React.JSX.Element {
                                           <SaveIcon filled={true} style={{ width: "12px", height: "12px", color: "#fff" }} />
                                         </div>
                                       )}
+                                      {showSenderName && (
+                                        <div
+                                          style={{
+                                            fontSize: "11px",
+                                            fontWeight: 600,
+                                            color: "rgba(255,255,255,0.85)",
+                                            marginBottom: "4px",
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          {msg.senderName}
+                                        </div>
+                                      )}
                                       {msg.isShared && msg.sharedFromName && (
                                         <div
                                           style={{
@@ -6417,7 +6472,7 @@ export default function HomePage(): React.JSX.Element {
                                         </div>
                                       )}
                                       
-                                      {msg.replyTo && msg.replyToText && (
+                                      {msg.replyTo && displayReplyText && (
                                         <div
                                           style={{
                                             fontSize: "11px",
@@ -6433,11 +6488,11 @@ export default function HomePage(): React.JSX.Element {
                                           <span style={{ fontWeight: 500, fontFamily: FONT_FAMILY }}>
                                             {isMine ? `Reply: ${replySenderName}` : `Reply: ${msg.replyToSender}`}
                                           </span>
-                                          <span style={{ fontFamily: FONT_FAMILY }}> {msg.replyToText}</span>
+                                          <span style={{ fontFamily: FONT_FAMILY }}> {displayReplyText}</span>
                                         </div>
                                       )}
                                       
-                                      <span style={{ fontFamily: FONT_FAMILY }}>{msg.text}</span>
+                                      <span style={{ fontFamily: FONT_FAMILY, wordBreak: "break-word" }}>{displayText}</span>
                                       
                                       <div
                                         style={{
@@ -6598,7 +6653,7 @@ export default function HomePage(): React.JSX.Element {
                                                   fontFamily: FONT_FAMILY,
                                                 }}
                                               >
-                                                <PinIcon filled={msg.isPinned || false} />
+                                                <GooglePinIcon filled={msg.isPinned || false} />
                                                 <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
                                               </motion.button>
                                               <motion.button
@@ -6625,6 +6680,22 @@ export default function HomePage(): React.JSX.Element {
                                                 <SaveIcon filled={isSaved} />
                                                 <span>{isSaved ? "Unsave" : "Save"}</span>
                                               </motion.button>
+                                              {msg.encrypted && (
+                                                <div style={{ 
+                                                  padding: "4px 12px", 
+                                                  fontSize: "9px", 
+                                                  color: "#22c55e",
+                                                  borderTop: "1px solid #f0f0f0",
+                                                  marginTop: "2px",
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "4px",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}>
+                                                  <span>🔒</span>
+                                                  <span>Terenkripsi</span>
+                                                </div>
+                                              )}
                                             </motion.div>
                                           )}
                                         </AnimatePresence>
@@ -6646,8 +6717,27 @@ export default function HomePage(): React.JSX.Element {
                                           fontFamily: FONT_FAMILY,
                                         }}
                                       >
-                                        <PinIcon filled={true} />
+                                        <GooglePinIcon filled={true} />
                                         <span>Pin • {formatTime(msg.pinnedAt || msg.timestamp)}</span>
+                                      </div>
+                                    )}
+                                    {msg.encrypted && !isMine && !showSenderName && (
+                                      <div
+                                        style={{
+                                          alignSelf: "flex-start",
+                                          fontSize: "8px",
+                                          color: "#22c55e",
+                                          marginTop: "-2px",
+                                          marginBottom: "4px",
+                                          padding: "0 4px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        <span>🔒</span>
+                                        <span>End-to-end encrypted</span>
                                       </div>
                                     )}
                                   </React.Fragment>
@@ -6783,6 +6873,9 @@ export default function HomePage(): React.JSX.Element {
                             <span>Send</span>
                             <SendIcon />
                           </motion.button>
+                        </div>
+                        <div style={{ fontSize: "8px", color: "#22c55e", textAlign: "right", padding: "2px 4px 0", fontFamily: FONT_FAMILY }}>
+                          🔒 Pesan dienkripsi end-to-end
                         </div>
                       </div>
                     </div>
