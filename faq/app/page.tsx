@@ -101,6 +101,9 @@ interface Message {
   isShared?: boolean;
   isGroupMessage?: boolean;
   groupId?: string | null;
+  isSaved?: boolean;
+  savedAt?: any;
+  savedBy?: string[];
 }
 
 interface ChatRoom {
@@ -133,7 +136,20 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// SVG Icons
+interface SavedMessage {
+  id: string;
+  messageId: string;
+  chatId: string;
+  text: string;
+  senderName: string;
+  senderId: string;
+  timestamp: any;
+  savedAt: any;
+  isGroupMessage?: boolean;
+  groupName?: string;
+}
+
+// ===== SVG ICONS =====
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -222,6 +238,30 @@ const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+// ===== GOOGLE FONT ICONS (Material Symbols) =====
+const StoreIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 7H20M4 7L3 12H21L20 7M4 7L5 20H19L20 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12V16H15V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
+    <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    {hasBadge && (
+      <circle cx="19" cy="5" r="5" fill="#ef4444" stroke="white" strokeWidth="2"/>
+    )}
+  </svg>
+);
+
+const SaveIcon = ({ filled = false }: { filled?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
   </svg>
 );
 
@@ -579,11 +619,23 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ROLLING TEXT SEARCH
-  const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
+  // ROLLING TEXT SEARCH - NEW: Tentang Note, Tentang Donasi, Tentang Blog, Tentang Shop, Tentang Pusat bantuan
+  const searchRollingTexts = [
+    "Tentang Note", 
+    "Tentang Donasi", 
+    "Tentang Blog", 
+    "Tentang Shop", 
+    "Tentang Pusat bantuan"
+  ];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
   const rollingRef = useRef<HTMLSpanElement>(null);
+
+  // GREETING ROLLING TEXT for dropdown
+  const greetingTexts = ["Selamat pagi", "Selamat siang", "Selamat sore", "Selamat malam"];
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const [greetingText, setGreetingText] = useState(greetingTexts[0]);
+  const greetingRef = useRef<HTMLSpanElement>(null);
 
   // Group Chat States
   const [groupName, setGroupName] = useState("");
@@ -606,9 +658,19 @@ export default function HomePage(): React.JSX.Element {
 
   const [blockNotification, setBlockNotification] = useState<string | null>(null);
 
-  // ===== DROPDOWN PROFILE STATE =====
+  // ===== PROFILE DROPDOWN STATE =====
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // ===== SAVED MESSAGES STATE =====
+  const [savedMessages, setSavedMessages] = useState<SavedMessage[]>([]);
+  const [showSavedMessages, setShowSavedMessages] = useState(false);
+  const [totalSavedCount, setTotalSavedCount] = useState(0);
+
+  // ===== NOTIFICATION STATE =====
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   const updates: UpdateItem[] = [
     {
@@ -665,7 +727,7 @@ export default function HomePage(): React.JSX.Element {
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ROLLING TEXT EFFECT
+  // ===== ROLLING TEXT SEARCH EFFECT =====
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -701,7 +763,43 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
-  // SEARCH EXPAND EFFECT
+  // ===== GREETING ROLLING TEXT EFFECT =====
+  useEffect(() => {
+    let isForward = true;
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      if (isForward) {
+        currentIndex++;
+        if (currentIndex >= greetingTexts.length) {
+          currentIndex = greetingTexts.length - 2;
+          isForward = false;
+        }
+      } else {
+        currentIndex--;
+        if (currentIndex < 0) {
+          currentIndex = 1;
+          isForward = true;
+        }
+      }
+      
+      if (currentIndex >= 0 && currentIndex < greetingTexts.length) {
+        setGreetingIndex(currentIndex);
+        setGreetingText(greetingTexts[currentIndex]);
+        
+        if (greetingRef.current) {
+          gsap.fromTo(greetingRef.current,
+            { y: 10, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+          );
+        }
+      }
+    }, 3500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // ===== SEARCH EXPAND EFFECT =====
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -712,7 +810,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isSearchOpen]);
 
-  // SEARCH OUTSIDE CLICK
+  // ===== SEARCH OUTSIDE CLICK =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -725,11 +823,14 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // PROFILE DROPDOWN OUTSIDE CLICK
+  // ===== PROFILE DROPDOWN OUTSIDE CLICK =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
         setShowProfileDropdown(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -784,6 +885,12 @@ export default function HomePage(): React.JSX.Element {
     const last = typingUsers[typingUsers.length - 1];
     const rest = typingUsers.slice(0, -1);
     return `${rest.join(', ')} and ${last} are typing...`;
+  };
+
+  // ===== GET ONLINE MEMBERS IN GROUP =====
+  const getOnlineGroupMembers = (groupMembers: string[]) => {
+    if (!groupMembers) return [];
+    return users.filter(u => groupMembers.includes(u.id) && u.online && u.id !== user?.uid);
   };
 
   const handleSearchUser = async () => {
@@ -870,6 +977,89 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // ===== SAVE MESSAGE =====
+  const handleSaveMessage = async (chatId: string, messageId: string, currentSaved: boolean) => {
+    if (!db || !user) return;
+    
+    try {
+      const msgRef = doc(db, "chats", chatId, "messages", messageId);
+      const msgSnap = await getDoc(msgRef);
+      
+      if (!msgSnap.exists()) return;
+      const msgData = msgSnap.data() as Message;
+      
+      if (currentSaved) {
+        // Unsave: remove from savedMessages collection
+        const savedRef = collection(db, "users", user.uid, "savedMessages");
+        const q = query(savedRef, where("messageId", "==", messageId));
+        const querySnap = await getDocs(q);
+        querySnap.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+        
+        // Remove from message's savedBy array
+        await updateDoc(msgRef, {
+          savedBy: arrayRemove(user.uid)
+        });
+        
+        setShowMessageMenu(null);
+      } else {
+        // Save: add to savedMessages collection
+        const savedRef = collection(db, "users", user.uid, "savedMessages");
+        await addDoc(savedRef, {
+          messageId: messageId,
+          chatId: chatId,
+          text: msgData.text,
+          senderName: msgData.senderName,
+          senderId: msgData.senderId,
+          timestamp: msgData.timestamp,
+          savedAt: serverTimestamp(),
+          isGroupMessage: msgData.isGroupMessage || false,
+          groupName: selectedChat?.groupName || null
+        });
+        
+        // Add to message's savedBy array
+        await updateDoc(msgRef, {
+          savedBy: arrayUnion(user.uid)
+        });
+        
+        setShowMessageMenu(null);
+      }
+      
+      // Refresh saved messages
+      loadSavedMessages();
+      
+    } catch (error) {
+      console.error("Error saving message:", error);
+    }
+  };
+
+  // ===== LOAD SAVED MESSAGES =====
+  const loadSavedMessages = async () => {
+    if (!db || !user) return;
+    
+    try {
+      const savedRef = collection(db, "users", user.uid, "savedMessages");
+      const q = query(savedRef, orderBy("savedAt", "desc"));
+      const querySnap = await getDocs(q);
+      
+      const savedList: SavedMessage[] = [];
+      querySnap.forEach((doc) => {
+        savedList.push({ id: doc.id, ...doc.data() } as SavedMessage);
+      });
+      
+      setSavedMessages(savedList);
+      setTotalSavedCount(savedList.length);
+    } catch (error) {
+      console.error("Error loading saved messages:", error);
+    }
+  };
+
+  // ===== CHECK IF MESSAGE IS SAVED =====
+  const isMessageSaved = (messageId: string) => {
+    return savedMessages.some(s => s.messageId === messageId);
+  };
+
   // Auth Listener
   useEffect(() => {
     if (!auth) return;
@@ -937,6 +1127,9 @@ export default function HomePage(): React.JSX.Element {
               blockedBy: updatedData.blockedBy || []
             }));
           }
+          
+          // Load saved messages
+          loadSavedMessages();
           
         } catch (error) {
           console.error("Error saving user:", error);
@@ -1307,6 +1500,13 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [chatButtonMessages]);
 
+  // Load saved messages on user change
+  useEffect(() => {
+    if (user) {
+      loadSavedMessages();
+    }
+  }, [user]);
+
   const handleLogout = async () => {
     if (!auth) return;
     try {
@@ -1328,6 +1528,8 @@ export default function HomePage(): React.JSX.Element {
       setShowUpdate(false);
       setSelectedUpdateId(null);
       setShowProfileDropdown(false);
+      setShowSavedMessages(false);
+      setShowNotifications(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1350,6 +1552,8 @@ export default function HomePage(): React.JSX.Element {
       setSearchUserResult(null);
       setSearchUserStatus("");
       setShowProfileDropdown(false);
+      setShowSavedMessages(false);
+      setShowNotifications(false);
     }
   };
 
@@ -1526,7 +1730,8 @@ export default function HomePage(): React.JSX.Element {
         pinnedAt: null,
         isShared: false,
         isGroupMessage: selectedChat.isGroup || false,
-        groupId: selectedChat.isGroup ? chatId : null
+        groupId: selectedChat.isGroup ? chatId : null,
+        savedBy: []
       };
       
       if (replyTo) {
@@ -1589,7 +1794,8 @@ export default function HomePage(): React.JSX.Element {
         isShared: true,
         sharedFrom: shareMessage.senderId,
         sharedFromName: shareMessage.senderName,
-        groupId: null
+        groupId: null,
+        savedBy: []
       });
       
       setShowShareModal(false);
@@ -1637,7 +1843,8 @@ export default function HomePage(): React.JSX.Element {
         replyTo: null,
         replyToText: null,
         replyToSender: null,
-        groupId: selectedChat.isGroup ? chatId : null
+        groupId: selectedChat.isGroup ? chatId : null,
+        savedBy: []
       });
       
       setShowMessageMenu(null);
@@ -2112,7 +2319,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* ===== HEADER BARU: Menuru+Search | Center Text | Profile ===== */}
+        {/* ===== HEADER BARU ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -2144,7 +2351,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* ===== SEARCH BUTTON - ROUNDED DENGAN GSAP + FRAMER ===== */}
+            {/* ===== SEARCH BUTTON - ROUNDED SQUARE ===== */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2157,12 +2364,12 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   alignItems: "center",
                   backgroundColor: "#0D3CFC",
-                  borderRadius: "40px",
+                  borderRadius: "12px",
                   padding: "4px 8px",
                   border: "none",
                   position: "relative",
-                  minWidth: "200px",
-                  width: "200px",
+                  minWidth: "240px",
+                  width: "240px",
                   boxShadow: "0 2px 12px rgba(13,60,252,0.2)",
                   cursor: "pointer",
                 }}
@@ -2212,7 +2419,7 @@ export default function HomePage(): React.JSX.Element {
                 ) : null}
               </motion.div>
 
-              {/* SEARCH EXPANDED - 700px */}
+              {/* SEARCH EXPANDED */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2324,7 +2531,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* TENGAH: Note Donations BLOG Calendar - 18px */}
+          {/* ===== TENGAH: Note Donations News Calendar - 29px FULL HITAM ===== */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2332,12 +2539,12 @@ export default function HomePage(): React.JSX.Element {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "32px",
+              gap: "40px",
               padding: "0 20px",
             }}
           >
             <span style={{
-              fontSize: "18px",
+              fontSize: "29px",
               fontWeight: 500,
               color: "#000000",
               fontFamily: FONT_FAMILY,
@@ -2346,7 +2553,7 @@ export default function HomePage(): React.JSX.Element {
               Note
             </span>
             <span style={{
-              fontSize: "18px",
+              fontSize: "29px",
               fontWeight: 500,
               color: "#000000",
               fontFamily: FONT_FAMILY,
@@ -2355,16 +2562,16 @@ export default function HomePage(): React.JSX.Element {
               Donations
             </span>
             <span style={{
-              fontSize: "18px",
+              fontSize: "29px",
               fontWeight: 500,
               color: "#000000",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.02em",
             }}>
-              BLOG
+              News
             </span>
             <span style={{
-              fontSize: "18px",
+              fontSize: "29px",
               fontWeight: 500,
               color: "#000000",
               fontFamily: FONT_FAMILY,
@@ -2374,8 +2581,8 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </motion.div>
 
-          {/* KANAN: Shop + Pusat bantuan + Profile Photo (dengan dropdown) */}
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          {/* ===== KANAN: Shop + Pusat bantuan + Notif + Profile ===== */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             {/* Shop Button */}
             <motion.button
               initial={{ opacity: 0, y: -20 }}
@@ -2402,7 +2609,7 @@ export default function HomePage(): React.JSX.Element {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               onClick={() => console.log("Shop clicked")}
             >
-              <ShopIcon size={22} />
+              <StoreIcon size={22} />
               <span>Shop</span>
             </motion.button>
 
@@ -2435,6 +2642,151 @@ export default function HomePage(): React.JSX.Element {
               <HelpDeskIcon size={22} />
               <span>Pusat bantuan</span>
             </motion.button>
+
+            {/* Notification Button */}
+            <div ref={notificationsRef} style={{ position: "relative" }}>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowNotifications(!showNotifications)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#000000",
+                  padding: "8px 8px",
+                  borderRadius: "8px",
+                  position: "relative",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <NotificationsIcon size={24} hasBadge={totalUnread > 0} />
+                {totalUnread > 0 && (
+                  <span style={{
+                    position: "absolute",
+                    top: "2px",
+                    right: "2px",
+                    backgroundColor: "#ef4444",
+                    color: "#fff",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    borderRadius: "50%",
+                    width: "18px",
+                    height: "18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    {totalUnread > 9 ? "9+" : totalUnread}
+                  </span>
+                )}
+              </motion.button>
+
+              {/* Notification Dropdown */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      minWidth: "320px",
+                      maxWidth: "380px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+                      border: "1px solid rgba(0,0,0,0.04)",
+                      zIndex: 60,
+                      fontFamily: FONT_FAMILY,
+                      padding: "12px 0",
+                    }}
+                  >
+                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
+                      Notifikasi
+                    </div>
+                    {chatRooms.filter(r => r.unreadCount > 0).length === 0 ? (
+                      <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                        Tidak ada notifikasi
+                      </div>
+                    ) : (
+                      chatRooms.filter(r => r.unreadCount > 0).map((room) => {
+                        if (room.isGroup) {
+                          return (
+                            <div key={room.id} style={{ padding: "10px 16px", borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
+                              onClick={() => {
+                                const groupUser: ChatUser = {
+                                  id: room.id,
+                                  name: room.groupName || "Group Chat",
+                                  email: "",
+                                  photoURL: "",
+                                  isGroup: true,
+                                  groupName: room.groupName,
+                                  groupDescription: room.groupDescription,
+                                  groupMembers: room.groupMembers,
+                                  groupAdmins: room.groupAdmins,
+                                  createdBy: room.createdBy,
+                                  online: false,
+                                  lastSeen: null,
+                                  typing: false,
+                                  isPinned: room.isPinned,
+                                  isAdmin: false,
+                                  blocked: [],
+                                  blockedBy: []
+                                };
+                                setSelectedChat(groupUser);
+                                setShowNotifications(false);
+                              }}
+                            >
+                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{room.groupName || "Group Chat"}</div>
+                              <div style={{ fontSize: "11px", color: "#666" }}>{room.unreadCount} pesan baru</div>
+                            </div>
+                          );
+                        }
+                        const otherId = room.participants?.find(id => id !== user?.uid);
+                        const otherUser = users.find(u => u.id === otherId);
+                        if (!otherUser) return null;
+                        return (
+                          <div key={room.id} style={{ padding: "10px 16px", borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
+                            onClick={() => {
+                              setSelectedChat(otherUser);
+                              setShowNotifications(false);
+                            }}
+                          >
+                            <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
+                            <div style={{ fontSize: "11px", color: "#666" }}>{room.unreadCount} pesan baru</div>
+                          </div>
+                        );
+                      })
+                    )}
+                    <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0", textAlign: "center" }}>
+                      <button style={{ background: "none", border: "none", color: "#0D3CFC", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY }}
+                        onClick={() => {
+                          setShowNotifications(false);
+                          setIsChatOpen(true);
+                          setSelectedChat(null);
+                        }}
+                      >
+                        Lihat semua pesan
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* ===== PROFILE PHOTO WITH DROPDOWN ===== */}
             <div ref={profileDropdownRef} style={{ position: "relative" }}>
@@ -2488,7 +2840,7 @@ export default function HomePage(): React.JSX.Element {
                           position: "absolute",
                           top: "calc(100% + 8px)",
                           right: 0,
-                          minWidth: "200px",
+                          minWidth: "220px",
                           backgroundColor: "#ffffff",
                           borderRadius: "12px",
                           boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
@@ -2498,8 +2850,15 @@ export default function HomePage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}
                       >
-                        <div style={{ padding: "12px 16px", borderBottom: "1px solid #f0f0f0" }}>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "#000" }}>
+                        {/* Header with greeting */}
+                        <div style={{ padding: "14px 16px", borderBottom: "1px solid #f0f0f0" }}>
+                          <div style={{ fontSize: "13px", color: "#666", display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span>Hi,</span>
+                            <span ref={greetingRef} style={{ fontWeight: 500, color: "#0D3CFC", display: "inline-block" }}>
+                              {greetingText}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: "15px", fontWeight: 600, color: "#000", marginTop: "2px" }}>
                             {user.displayName || user.email}
                           </div>
                           <div style={{ fontSize: "12px", color: "#999" }}>
@@ -2527,7 +2886,7 @@ export default function HomePage(): React.JSX.Element {
                             display: "flex",
                             alignItems: "center",
                             gap: "12px",
-                            padding: "12px 16px",
+                            padding: "10px 16px",
                             width: "100%",
                             background: "none",
                             border: "none",
@@ -2553,7 +2912,7 @@ export default function HomePage(): React.JSX.Element {
                             display: "flex",
                             alignItems: "center",
                             gap: "12px",
-                            padding: "12px 16px",
+                            padding: "10px 16px",
                             width: "100%",
                             background: "none",
                             border: "none",
@@ -2565,11 +2924,37 @@ export default function HomePage(): React.JSX.Element {
                             transition: "background 0.15s ease",
                           }}
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                          </svg>
+                          <StoreIcon size={18} />
                           <span>Transaksi</span>
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ backgroundColor: "#f5f5f5" }}
+                          onClick={() => {
+                            setShowSavedMessages(!showSavedMessages);
+                            setShowProfileDropdown(false);
+                            if (!showSavedMessages) {
+                              loadSavedMessages();
+                            }
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "10px 16px",
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            color: "#000",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            fontFamily: FONT_FAMILY,
+                            transition: "background 0.15s ease",
+                          }}
+                        >
+                          <SaveIcon filled={true} />
+                          <span>Pesan Tersimpan ({totalSavedCount})</span>
                         </motion.button>
 
                         <motion.button
@@ -2579,7 +2964,7 @@ export default function HomePage(): React.JSX.Element {
                             display: "flex",
                             alignItems: "center",
                             gap: "12px",
-                            padding: "12px 16px",
+                            padding: "10px 16px",
                             width: "100%",
                             background: "none",
                             border: "none",
@@ -2801,6 +3186,139 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
+        {/* Saved Messages Modal */}
+        <AnimatePresence>
+          {showSavedMessages && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setShowSavedMessages(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  maxWidth: "500px",
+                  width: "90%",
+                  maxHeight: "80vh",
+                  border: "1px solid #e0e0e0",
+                  fontFamily: FONT_FAMILY,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                  <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
+                    <SaveIcon filled={true} style={{ marginRight: "8px" }} />
+                    Pesan Tersimpan ({totalSavedCount})
+                  </h3>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowSavedMessages(false)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#999",
+                      padding: "4px",
+                    }}
+                  >
+                    <CloseIcon />
+                  </motion.button>
+                </div>
+                <div style={{ flex: 1, overflowY: "auto", paddingRight: "4px" }}>
+                  {savedMessages.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#999", padding: "40px 0", fontSize: "14px" }}>
+                      <div style={{ fontSize: "32px", marginBottom: "8px" }}>📂</div>
+                      <div>Belum ada pesan tersimpan</div>
+                    </div>
+                  ) : (
+                    savedMessages.map((saved) => (
+                      <div key={saved.id} style={{
+                        padding: "12px 14px",
+                        borderBottom: "1px solid #f0f0f0",
+                        backgroundColor: "#fafafa",
+                        borderRadius: "8px",
+                        marginBottom: "8px",
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: "12px", fontWeight: 500, color: "#0D3CFC" }}>
+                              {saved.senderName}
+                              {saved.isGroupMessage && saved.groupName && (
+                                <span style={{ fontSize: "10px", color: "#999", fontWeight: 400, marginLeft: "6px" }}>
+                                  • {saved.groupName}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: "14px", color: "#000", marginTop: "2px" }}>
+                              {saved.text}
+                            </div>
+                            <div style={{ fontSize: "10px", color: "#bbb", marginTop: "4px" }}>
+                              Disimpan {formatTime(saved.savedAt)}
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={async () => {
+                              if (!db) return;
+                              try {
+                                const savedRef = doc(db, "users", user.uid, "savedMessages", saved.id);
+                                await deleteDoc(savedRef);
+                                // Also remove from message's savedBy
+                                const msgRef = doc(db, "chats", saved.chatId, "messages", saved.messageId);
+                                await updateDoc(msgRef, {
+                                  savedBy: arrayRemove(user.uid)
+                                });
+                                loadSavedMessages();
+                              } catch (error) {
+                                console.error("Error removing saved message:", error);
+                              }
+                            }}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#ef4444",
+                              cursor: "pointer",
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >
+                            Hapus
+                          </motion.button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Chat Box - Full */}
         <div
           style={{
@@ -2870,9 +3388,24 @@ export default function HomePage(): React.JSX.Element {
                       </>
                     )}
                     {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && selectedChat && selectedChat.isGroup && selectedChat.groupMembers && (
-                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
-                        {selectedChat.groupMembers.length} members
-                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                          {selectedChat.groupMembers.length} members
+                        </span>
+                        {/* Show online members in group */}
+                        {(() => {
+                          const onlineMembers = getOnlineGroupMembers(selectedChat.groupMembers || []);
+                          if (onlineMembers.length > 0) {
+                            return (
+                              <span style={{ fontSize: "9px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
+                                <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#0D3CFC" }} />
+                                {onlineMembers.map(m => m.name).join(", ")}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
                     )}
                     {!showProfile && !showPrivacyPolicy && !showUpdate && !selectedUpdateId && !selectedChat && totalUnread > 0 && (
                       <span
@@ -3817,6 +4350,38 @@ export default function HomePage(): React.JSX.Element {
                               <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
                                 Created by: {users.find(u => u.id === profileUser.createdBy)?.name || "Unknown"}
                               </div>
+                              {/* Show online members in group */}
+                              {(() => {
+                                const onlineMembers = getOnlineGroupMembers(profileUser.groupMembers || []);
+                                if (onlineMembers.length > 0) {
+                                  return (
+                                    <div style={{ fontSize: "11px", color: "#0D3CFC", marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#0D3CFC" }} />
+                                      Online: {onlineMembers.map(m => m.name).join(", ")}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                              {/* Show typing members in group */}
+                              {(() => {
+                                const typingMembers = profileUser.groupMembers?.filter(id => {
+                                  const u = users.find(user => user.id === id);
+                                  return u?.typing && u.id !== user?.uid;
+                                }) || [];
+                                if (typingMembers.length > 0) {
+                                  const names = typingMembers.map(id => {
+                                    const u = users.find(user => user.id === id);
+                                    return u?.name || "";
+                                  }).filter(Boolean);
+                                  return (
+                                    <div style={{ fontSize: "11px", color: "#666", fontStyle: "italic", marginTop: "2px" }}>
+                                      {names.join(", ")} typing...
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
                             </div>
                           </div>
 
@@ -3835,12 +4400,23 @@ export default function HomePage(): React.JSX.Element {
                           )}
 
                           <div style={{ fontSize: "14px", fontWeight: 600, color: "#000", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                            Members
+                            Members {(() => {
+                              const onlineCount = (profileUser.groupMembers || []).filter(id => {
+                                const u = users.find(user => user.id === id);
+                                return u?.online && u.id !== user?.uid;
+                              }).length;
+                              if (onlineCount > 0) {
+                                return <span style={{ fontSize: "11px", fontWeight: 400, color: "#0D3CFC", marginLeft: "6px" }}>• {onlineCount} online</span>;
+                              }
+                              return null;
+                            })()}
                           </div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                             {profileUser.groupMembers?.map((memberId) => {
                               const member = users.find(u => u.id === memberId);
                               const isGroupAdmin = profileUser.groupAdmins?.includes(memberId);
+                              const isOnline = member?.online || false;
+                              const isTyping = member?.typing || false;
                               return member ? (
                                 <div key={memberId} style={{
                                   display: "flex",
@@ -3865,6 +4441,8 @@ export default function HomePage(): React.JSX.Element {
                                   }}>
                                     {member.name}
                                     {isGroupAdmin && " (Admin)"}
+                                    {isOnline && <span style={{ marginLeft: "6px", fontSize: "10px", color: isGroupAdmin ? "#aaddff" : "#0D3CFC" }}>● Online</span>}
+                                    {isTyping && member.id !== user?.uid && <span style={{ marginLeft: "6px", fontSize: "10px", fontStyle: "italic", color: isGroupAdmin ? "#aaddff" : "#666" }}>typing...</span>}
                                   </span>
                                   {member.isAdmin && <InstagramVerifiedBadge size={12} />}
                                 </div>
@@ -5437,13 +6015,52 @@ export default function HomePage(): React.JSX.Element {
                               {selectedChat.isGroup ? (selectedChat.groupName || "Group Chat") : selectedChat.name}
                             </span>
                             {!selectedChat.isGroup && selectedChat.isAdmin && <InstagramVerifiedBadge size={12} />}
+                            {selectedChat.isGroup && (
+                              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
+                                {selectedChat.groupMembers?.length || 0} members
+                              </span>
+                            )}
                           </div>
                           {selectedChat.isGroup && selectedChat.groupMembers && (
-                            <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                              {selectedChat.groupMembers.map(id => {
-                                const member = users.find(u => u.id === id);
-                                return member ? member.name : "";
-                              }).filter(Boolean).join(", ")}
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                                {selectedChat.groupMembers.map(id => {
+                                  const member = users.find(u => u.id === id);
+                                  return member ? member.name : "";
+                                }).filter(Boolean).join(", ")}
+                              </div>
+                              {/* Show online members in group header */}
+                              {(() => {
+                                const onlineMembers = getOnlineGroupMembers(selectedChat.groupMembers || []);
+                                if (onlineMembers.length > 0) {
+                                  return (
+                                    <span style={{ fontSize: "8px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "2px" }}>
+                                      <span style={{ display: "inline-block", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#0D3CFC" }} />
+                                      {onlineMembers.map(m => m.name).join(", ")}
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
+                              {/* Show typing members in group header */}
+                              {(() => {
+                                const typingMembers = selectedChat.groupMembers?.filter(id => {
+                                  const u = users.find(user => user.id === id);
+                                  return u?.typing && u.id !== user?.uid;
+                                }) || [];
+                                if (typingMembers.length > 0) {
+                                  const names = typingMembers.map(id => {
+                                    const u = users.find(user => user.id === id);
+                                    return u?.name || "";
+                                  }).filter(Boolean);
+                                  return (
+                                    <span style={{ fontSize: "8px", color: "#666", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                                      {names.join(", ")} typing...
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
                             </div>
                           )}
                           {!selectedChat.isGroup && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
@@ -5732,6 +6349,7 @@ export default function HomePage(): React.JSX.Element {
                                 
                                 const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
                                 const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
+                                const isSaved = isMessageSaved(msg.id);
                                 
                                 return (
                                   <React.Fragment key={idx}>
@@ -5768,6 +6386,23 @@ export default function HomePage(): React.JSX.Element {
                                         fontFamily: FONT_FAMILY,
                                       }}
                                     >
+                                      {isSaved && (
+                                        <div
+                                          style={{
+                                            position: "absolute",
+                                            top: "-8px",
+                                            right: "-8px",
+                                            backgroundColor: "#0D3CFC",
+                                            borderRadius: "50%",
+                                            padding: "2px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                          }}
+                                        >
+                                          <SaveIcon filled={true} style={{ width: "12px", height: "12px", color: "#fff" }} />
+                                        </div>
+                                      )}
                                       {msg.isShared && msg.sharedFromName && (
                                         <div
                                           style={{
@@ -5862,7 +6497,7 @@ export default function HomePage(): React.JSX.Element {
                                                 backgroundColor: "#ffffff",
                                                 borderRadius: "8px",
                                                 padding: "4px",
-                                                minWidth: "140px",
+                                                minWidth: "150px",
                                                 boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
                                                 zIndex: 50,
                                                 border: "1px solid rgba(0,0,0,0.04)",
@@ -5965,6 +6600,30 @@ export default function HomePage(): React.JSX.Element {
                                               >
                                                 <PinIcon filled={msg.isPinned || false} />
                                                 <span>{msg.isPinned ? "Unpin" : "Pin"}</span>
+                                              </motion.button>
+                                              <motion.button
+                                                whileHover={{ backgroundColor: "#f5f5f5" }}
+                                                onClick={() => {
+                                                  handleSaveMessage(chatId, msg.id, isSaved);
+                                                }}
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  padding: "6px 12px",
+                                                  width: "100%",
+                                                  background: "none",
+                                                  border: "none",
+                                                  color: isSaved ? "#0D3CFC" : "#000",
+                                                  fontSize: "12px",
+                                                  cursor: "pointer",
+                                                  borderRadius: "6px",
+                                                  transition: "all .2s ease",
+                                                  fontFamily: FONT_FAMILY,
+                                                }}
+                                              >
+                                                <SaveIcon filled={isSaved} />
+                                                <span>{isSaved ? "Unsave" : "Save"}</span>
                                               </motion.button>
                                             </motion.div>
                                           )}
