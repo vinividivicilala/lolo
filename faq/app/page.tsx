@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
@@ -2639,34 +2640,36 @@ export default function HomePage(): React.JSX.Element {
             </motion.button>
 
             {/* Help Center Button */}
-            <motion.button
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#000000",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "16px",
-                fontWeight: 500,
-                fontFamily: FONT_FAMILY,
-                padding: "8px 12px",
-                borderRadius: "30px",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              onClick={() => console.log("Help Center clicked")}
-            >
-              <HelpDeskIcon size={22} />
-              <span>Pusat bantuan</span>
-            </motion.button>
+           <Link href="/pusat-bantuan" passHref>
+  <motion.a
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.25 }}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    style={{
+      background: "transparent",
+      border: "none",
+      cursor: "pointer",
+      color: "#000000",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      fontSize: "16px",
+      fontWeight: 500,
+      fontFamily: FONT_FAMILY,
+      padding: "8px 12px",
+      borderRadius: "30px",
+      transition: "all 0.2s ease",
+      textDecoration: "none",
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+  >
+    <HelpDeskIcon size={22} />
+    <span>Pusat bantuan</span>
+  </motion.a>
+</Link>
 
             {/* Notification Button */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
