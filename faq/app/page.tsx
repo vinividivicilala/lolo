@@ -133,14 +133,13 @@ interface UpdateItem {
   publishedBy: string;
 }
 
-// Arrow SVG Icons
+// SVG Icons
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-// SVG Icons
 const PinIcon = ({ filled = false }: { filled?: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M12 2L15 9H21L16 14L18 21L12 17L6 21L8 14L3 9H9L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={filled ? "currentColor" : "none"} />
@@ -188,22 +187,19 @@ const MoreIcon = () => (
   </svg>
 );
 
-// Chat Icon SVG
 const ChatIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-// Search Icon - White
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="white" strokeWidth="1.5"/>
-    <path d="M16 16L21 21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
-// ===== MODERN MINIMALIST SHOP ICON =====
 const ShopIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -213,7 +209,6 @@ const ShopIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-// Modern Minimalist Help Desk Icon
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -223,7 +218,6 @@ const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-// Modern Minimalist User Avatar Icon
 const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
@@ -310,7 +304,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// Online Status Indicator - GSAP pulse
+// Online Status Indicator
 const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const pulseRef = useRef<HTMLDivElement>(null);
@@ -453,7 +447,7 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   );
 };
 
-// Stories Component - 6 photos for admin
+// Stories Component
 const StoriesSection = ({ userEmail, onImageClick }: { userEmail: string; onImageClick: (url: string) => void }) => {
   const [storyImages] = useState([10, 11, 12, 13, 14, 15]);
   const isAdmin = userEmail === ADMIN_EMAIL;
@@ -575,11 +569,9 @@ export default function HomePage(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const blockDropdownRef = useRef<HTMLDivElement>(null);
-
-  // ========== PERBAIKAN: State untuk menyimpan typing users per room ==========
   const [typingUsersMap, setTypingUsersMap] = useState<{ [key: string]: string[] }>({});
 
-  // ========== SEARCH STATE ==========
+  // SEARCH STATE
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -587,7 +579,7 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // ========== ROLLING TEXT SEARCH DENGAN GSAP ==========
+  // ROLLING TEXT SEARCH
   const searchRollingTexts = ["Tentang Note", "Tentang Donasi", "Tentang Blog"];
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
@@ -599,30 +591,25 @@ export default function HomePage(): React.JSX.Element {
   const [selectedGroupMembers, setSelectedGroupMembers] = useState<string[]>([]);
   const [groupAdmins, setGroupAdmins] = useState<string[]>([]);
 
-  // State untuk search user manual
   const [searchUserInput, setSearchUserInput] = useState("");
   const [searchUserResult, setSearchUserResult] = useState<ChatUser | null>(null);
   const [searchUserStatus, setSearchUserStatus] = useState("");
 
-  // State untuk block banner di list chat (untuk penerima block)
   const [blockedByBanner, setBlockedByBanner] = useState<{userId: string, userName: string} | null>(null);
 
-  // Banner text
-  const bannerTexts = [
-    "Website sedang dalam pengembangan, Terima kasih"
-  ];
+  const bannerTexts = ["Website sedang dalam pengembangan, Terima kasih"];
 
-  // Update Page
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
   
-  // Privacy Policy
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  // Block notification state
   const [blockNotification, setBlockNotification] = useState<string | null>(null);
 
-  // Update Data
+  // ===== DROPDOWN PROFILE STATE =====
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
   const updates: UpdateItem[] = [
     {
       id: "1",
@@ -676,10 +663,9 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // ========== ROLLING TEXT EFFECT DENGAN GSAP - BERGERAK MAJU MUNDUR ==========
+  // ROLLING TEXT EFFECT
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -715,7 +701,7 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
-  // ========== SEARCH EXPAND EFFECT WITH GSAP ==========
+  // SEARCH EXPAND EFFECT
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -726,7 +712,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isSearchOpen]);
 
-  // Handle search outside click
+  // SEARCH OUTSIDE CLICK
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -739,7 +725,17 @@ export default function HomePage(): React.JSX.Element {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle search input - SELALU KOSONGKAN HASIL
+  // PROFILE DROPDOWN OUTSIDE CLICK
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
@@ -751,40 +747,28 @@ export default function HomePage(): React.JSX.Element {
     setSearchResults([]);
   };
 
-  // Fungsi cek block dengan aman
   const isUserBlocked = (userId: string) => {
     if (!user || !userId) return false;
     const currentUserData = users.find(u => u.id === user.uid);
     return (currentUserData?.blocked || []).includes(userId);
   };
 
-  // Check if user is blocked by someone
   const isBlockedByUser = (userId: string) => {
     if (!user || !userId) return false;
     const targetUser = users.find(u => u.id === userId);
     return (targetUser?.blockedBy || []).includes(user.uid);
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan display typing users dengan format yang benar ==========
   const getTypingUsersDisplay = (room: ChatRoom) => {
     if (!room.typingUsers || room.typingUsers.length === 0) return null;
-    
     const names = room.typingUsers;
-    
-    if (names.length === 1) {
-      return names[0];
-    }
-    
-    if (names.length === 2) {
-      return `${names[0]} and ${names[1]}`;
-    }
-    
+    if (names.length === 1) return names[0];
+    if (names.length === 2) return `${names[0]} and ${names[1]}`;
     const last = names[names.length - 1];
     const rest = names.slice(0, -1);
     return `${rest.join(', ')} and ${last}`;
   };
 
-  // ========== PERBAIKAN: Fungsi untuk mendapatkan typing users dari selected chat ==========
   const getRegularTypingUsers = () => {
     if (!selectedChat) return [];
     const usersTyping = typingUsersMap[selectedChat.id] || [];
@@ -793,7 +777,6 @@ export default function HomePage(): React.JSX.Element {
 
   const regularTypingUsers = getRegularTypingUsers();
 
-  // ========== PERBAIKAN: Format untuk menampilkan typing users di group chat seperti WhatsApp ==========
   const getTypingUsersText = (typingUsers: string[]) => {
     if (!typingUsers || typingUsers.length === 0) return null;
     if (typingUsers.length === 1) return `${typingUsers[0]} is typing...`;
@@ -803,7 +786,6 @@ export default function HomePage(): React.JSX.Element {
     return `${rest.join(', ')} and ${last} are typing...`;
   };
 
-  // Fungsi mencari user manual berdasarkan email
   const handleSearchUser = async () => {
     if (!searchUserInput.trim() || !db) {
       setSearchUserStatus("Masukkan email");
@@ -851,7 +833,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi add user manual ke chat
   const handleAddManualUser = async () => {
     if (!searchUserResult || !user || !db) return;
 
@@ -1260,7 +1241,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [selectedChat, user]);
 
-  // ========== PERBAIKAN: LISTEN FOR TYPING STATUS - MULTI-USER REAL-TIME DETECTION ==========
+  // LISTEN FOR TYPING STATUS
   useEffect(() => {
     if (!db || !user) return;
 
@@ -1307,7 +1288,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [user, users, chatRooms]);
 
-  // ========== PERBAIKAN: EFFECT UNTUK MEMASTIKAN TYPING STATUS RESET SAAT CHAT DITUTUP ==========
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
     
@@ -1347,6 +1327,7 @@ export default function HomePage(): React.JSX.Element {
       setShowPrivacyPolicy(false);
       setShowUpdate(false);
       setSelectedUpdateId(null);
+      setShowProfileDropdown(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -1368,10 +1349,10 @@ export default function HomePage(): React.JSX.Element {
       setSearchUserInput("");
       setSearchUserResult(null);
       setSearchUserStatus("");
+      setShowProfileDropdown(false);
     }
   };
 
-  // ========== PERBAIKAN: Handle typing untuk chat - update status typing di Firestore ==========
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -1406,7 +1387,6 @@ export default function HomePage(): React.JSX.Element {
     setTypingTimeout(newTimeout);
   };
 
-  // Handle open profile
   const handleOpenProfile = (chatUser: ChatUser) => {
     if (!chatUser || !user) return;
     
@@ -1414,6 +1394,7 @@ export default function HomePage(): React.JSX.Element {
     setShowProfile(true);
     setShowBlockDropdown(false);
     setShowAddMemberToGroup(false);
+    setShowProfileDropdown(false);
   };
 
   const handleCloseProfile = () => {
@@ -1423,7 +1404,6 @@ export default function HomePage(): React.JSX.Element {
     setShowAddMemberToGroup(false);
   };
 
-  // Handle Block/Unblock user
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
     
@@ -1496,7 +1476,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Send message
   const handleSendMessage = async () => {
     if (!selectedChat || !user || !message.trim() || !db) return;
 
@@ -1570,7 +1549,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Share message
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
     
@@ -1622,7 +1600,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin message
   const handlePinMessage = async (chatId: string, messageId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1637,7 +1614,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Resend message
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
     
@@ -1670,7 +1646,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin chat room
   const handlePinChat = async (chatId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1690,7 +1665,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Pin/Unpin user
   const handlePinUser = async (userId: string, currentPinned: boolean) => {
     if (!db) return;
     try {
@@ -1710,7 +1684,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add existing user to chat
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
     
@@ -1751,7 +1724,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Add member to group
   const handleAddMemberToGroup = async () => {
     if (!profileUser || !selectedGroupMember || !user || !db) return;
     
@@ -1814,7 +1786,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Create Group Chat
   const handleCreateGroup = async () => {
     if (!user || !db || !groupName.trim() || selectedGroupMembers.length === 0) {
       setAddUserStatus("Please fill in all fields");
@@ -1884,7 +1855,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Format time
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1941,7 +1911,6 @@ export default function HomePage(): React.JSX.Element {
     !u.isGroup
   );
 
-  // Close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -2143,7 +2112,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         )}
 
-        {/* ===== SEMUA SEJAJAR DI SATU BARIS (top:80px) ===== */}
+        {/* ===== HEADER BARU: Menuru+Search | Center Text | Profile ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -2154,9 +2123,8 @@ export default function HomePage(): React.JSX.Element {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search + Teks Tengah */}
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-            {/* Menuru Title */}
+          {/* KIRI: Menuru + Search (bersebelahan) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -2176,87 +2144,38 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* ===== TEKS TENGAH: Note, Donations, BLOG, Calendar ===== */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "32px",
-                padding: "0 20px",
-                marginLeft: "20px",
-              }}
-            >
-              <span style={{
-                fontSize: "35px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-              }}>
-                Note
-              </span>
-              <span style={{
-                fontSize: "35px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-              }}>
-                Donations
-              </span>
-              <span style={{
-                fontSize: "35px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-              }}>
-                BLOG
-              </span>
-              <span style={{
-                fontSize: "35px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-              }}>
-                Calendar
-              </span>
-            </motion.div>
-
-            {/* Search - TETAP DI POSISINYA */}
+            {/* ===== SEARCH BUTTON - ROUNDED DENGAN GSAP + FRAMER ===== */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
               ref={searchContainerRef}
-              style={{ position: "relative", marginLeft: "auto" }}
+              style={{ position: "relative" }}
             >
-              {/* Tombol Search - TETAP 240px */}
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#0D3CFC",
-                borderRadius: "30px",
-                padding: "4px 8px",
-                border: "none",
-                transition: "all 0.3s ease",
-                position: "relative",
-                minWidth: "240px",
-                width: "240px",
-                boxShadow: "0 2px 8px rgba(13,60,252,0.15)",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                if (!isSearchOpen) {
-                  setIsSearchOpen(true);
-                  setSearchQuery("");
-                  setSearchResults([]);
-                }
-              }}
+              <motion.div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "40px",
+                  padding: "4px 8px",
+                  border: "none",
+                  position: "relative",
+                  minWidth: "200px",
+                  width: "200px",
+                  boxShadow: "0 2px 12px rgba(13,60,252,0.2)",
+                  cursor: "pointer",
+                }}
+                whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(13,60,252,0.3)" }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                onClick={() => {
+                  if (!isSearchOpen) {
+                    setIsSearchOpen(true);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }
+                }}
               >
                 {!isSearchOpen ? (
                   <div style={{
@@ -2291,9 +2210,9 @@ export default function HomePage(): React.JSX.Element {
                     </span>
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
 
-              {/* ===== SEARCH EXPANDED - 700px ===== */}
+              {/* SEARCH EXPANDED - 700px */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -2305,20 +2224,19 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       position: "absolute",
                       top: "calc(100% + 8px)",
-                      right: "-1000px",
+                      right: "-400px",
                       backgroundColor: "#0D3CFC",
                       borderRadius: "16px",
                       padding: "32px 36px",
-                      minWidth: "1000px",
-                      width: "1000px",
-                      minHeight: "700px",
+                      minWidth: "700px",
+                      width: "700px",
+                      minHeight: "500px",
                       boxShadow: "0 20px 80px rgba(13,60,252,0.4)",
                       overflow: "hidden",
                       zIndex: 100,
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Search Input - Placeholder KOSONG */}
                     <div style={{
                       display: "flex",
                       alignItems: "center",
@@ -2366,7 +2284,6 @@ export default function HomePage(): React.JSX.Element {
                       </button>
                     </div>
 
-                    {/* Search Results - SELALU KOSONG 0 HASIL */}
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
@@ -2385,7 +2302,6 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     </div>
 
-                    {/* Footer */}
                     <div style={{
                       marginTop: "20px",
                       paddingTop: "16px",
@@ -2408,7 +2324,57 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* KANAN: Shop + Pusat Bantuan + User Login */}
+          {/* TENGAH: Note Donations BLOG Calendar - 18px */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "32px",
+              padding: "0 20px",
+            }}
+          >
+            <span style={{
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Note
+            </span>
+            <span style={{
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Donations
+            </span>
+            <span style={{
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              BLOG
+            </span>
+            <span style={{
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Calendar
+            </span>
+          </motion.div>
+
+          {/* KANAN: Shop + Pusat bantuan + Profile Photo (dengan dropdown) */}
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             {/* Shop Button */}
             <motion.button
@@ -2425,7 +2391,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "18px",
+                fontSize: "16px",
                 fontWeight: 500,
                 fontFamily: FONT_FAMILY,
                 padding: "8px 12px",
@@ -2436,7 +2402,7 @@ export default function HomePage(): React.JSX.Element {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               onClick={() => console.log("Shop clicked")}
             >
-              <ShopIcon size={24} />
+              <ShopIcon size={22} />
               <span>Shop</span>
             </motion.button>
 
@@ -2455,7 +2421,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "18px",
+                fontSize: "16px",
                 fontWeight: 500,
                 fontFamily: FONT_FAMILY,
                 padding: "8px 12px",
@@ -2466,95 +2432,197 @@ export default function HomePage(): React.JSX.Element {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               onClick={() => console.log("Help Center clicked")}
             >
-              <HelpDeskIcon size={24} />
+              <HelpDeskIcon size={22} />
               <span>Pusat bantuan</span>
             </motion.button>
 
-            {/* User Login Status */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "8px 12px",
-                backgroundColor: "transparent",
-                borderRadius: "30px",
-                fontSize: "16px",
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
+            {/* ===== PROFILE PHOTO WITH DROPDOWN ===== */}
+            <div ref={profileDropdownRef} style={{ position: "relative" }}>
               {user ? (
                 <>
-                  {user.photoURL && (
-                    <motion.img 
-                      src={user.photoURL} 
-                      alt="avatar" 
-                      whileHover={{ scale: 1.05 }}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "6px",
-                        objectFit: "cover",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        const selfUser = users.find(u => u.id === user.uid);
-                        if (selfUser) handleOpenProfile(selfUser);
-                      }}
-                    />
-                  )}
-                  <span 
-                    style={{ 
-                      fontWeight: 500, 
-                      color: "#000",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "16px",
-                    }}
-                    onClick={() => {
-                      const selfUser = users.find(u => u.id === user.uid);
-                      if (selfUser) handleOpenProfile(selfUser);
-                    }}
-                  >
-                    {user.displayName || user.email}
-                    {isAdmin && <InstagramVerifiedBadge size={14} />}
-                  </span>
-                  <OnlineIndicator online={true} />
-                  <motion.button
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleLogout}
+                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                     style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#000",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "8px",
+                      backgroundColor: "#f0f0f0",
+                      overflow: "hidden",
                       cursor: "pointer",
-                      fontSize: "14px",
-                      padding: "4px 12px",
-                      borderRadius: "20px",
-                      transition: "all .2s ease",
-                      fontFamily: FONT_FAMILY,
+                      border: "2px solid transparent",
+                      transition: "border-color 0.2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}
                   >
-                    Logout
-                  </motion.button>
+                    {user.photoURL ? (
+                      <img 
+                        src={user.photoURL} 
+                        alt="avatar" 
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "18px", color: "#000", fontFamily: FONT_FAMILY }}>
+                        {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "?"}
+                      </span>
+                    )}
+                  </motion.div>
+
+                  {/* ===== DROPDOWN dengan GSAP + Framer ===== */}
+                  <AnimatePresence>
+                    {showProfileDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        style={{
+                          position: "absolute",
+                          top: "calc(100% + 8px)",
+                          right: 0,
+                          minWidth: "200px",
+                          backgroundColor: "#ffffff",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+                          border: "1px solid rgba(0,0,0,0.04)",
+                          overflow: "hidden",
+                          zIndex: 60,
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        <div style={{ padding: "12px 16px", borderBottom: "1px solid #f0f0f0" }}>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "#000" }}>
+                            {user.displayName || user.email}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#999" }}>
+                            {user.email}
+                          </div>
+                          {isAdmin && (
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                              <InstagramVerifiedBadge size={14} />
+                              <span style={{ fontSize: "11px", color: "#0095F6", fontWeight: 500 }}>Admin</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Dropdown Items */}
+                        <motion.button
+                          whileHover={{ backgroundColor: "#f5f5f5" }}
+                          onClick={() => {
+                            const selfUser = users.find(u => u.id === user.uid);
+                            if (selfUser) {
+                              handleOpenProfile(selfUser);
+                              setShowProfileDropdown(false);
+                            }
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "12px 16px",
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            color: "#000",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            fontFamily: FONT_FAMILY,
+                            transition: "background 0.15s ease",
+                          }}
+                        >
+                          <UserAvatarIcon size={18} />
+                          <span>Profil</span>
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ backgroundColor: "#f5f5f5" }}
+                          onClick={() => {
+                            console.log("Transactions clicked");
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "12px 16px",
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            color: "#000",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            fontFamily: FONT_FAMILY,
+                            transition: "background 0.15s ease",
+                          }}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                          </svg>
+                          <span>Transaksi</span>
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ backgroundColor: "#f5f5f5" }}
+                          onClick={handleLogout}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "12px 16px",
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            borderTop: "1px solid #f0f0f0",
+                            color: "#ef4444",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            fontFamily: FONT_FAMILY,
+                            transition: "background 0.15s ease",
+                          }}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                          </svg>
+                          <span>Logout</span>
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </>
               ) : (
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: "#999" }}>
-                  Login
-                </span>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    backgroundColor: "#f0f0f0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px solid #e0e0e0",
+                  }}
+                >
+                  <UserAvatarIcon size={22} />
+                </motion.div>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -5608,7 +5676,6 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         ) : (
                           <>
-                            {/* ===== MULTI-USER TYPING INDICATOR SEPERTI WHATSAPP ===== */}
                             {selectedChat.isGroup && regularTypingUsers.length > 0 && (
                               <div
                                 style={{
