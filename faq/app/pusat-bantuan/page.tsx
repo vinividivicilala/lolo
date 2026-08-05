@@ -135,6 +135,16 @@ const ChatIcon = () => (
   </svg>
 );
 
+// ===== LIVE CHAT AGENT ICON (untuk tampilan logout) =====
+const LiveChatIllustration = () => (
+  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="8" cy="10" r="1" fill="#0D3CFC"/>
+    <circle cx="12" cy="10" r="1" fill="#0D3CFC"/>
+    <circle cx="16" cy="10" r="1" fill="#0D3CFC"/>
+  </svg>
+);
+
 // ===== INSTAGRAM VERIFIED BADGE =====
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -523,9 +533,10 @@ const PulsingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (SAMA SEPERTI SEBELUMNYA) =====
+// ===== LIVE CHAT AGENT COMPONENT (FIXED - NO EARLY RETURN) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
+  // ===== ALL HOOKS CALLED AT TOP LEVEL (FIX ERROR #300) =====
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -545,6 +556,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
+  // ===== FUNGSI GENERATE TICKET ID =====
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -568,6 +580,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   };
 
+  // ===== ICON SVG =====
   const WaitingIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10"/>
@@ -595,6 +608,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
+  // ===== ALL useEffect HOOKS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -665,6 +679,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, [messages, selectedTicket, db, user, isAdmin]);
 
+  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -800,8 +815,91 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   // ============================================================
-  // ===== USER VIEW =====
+  // ===== RENDER COMPONENT (CONDITIONAL RENDERING DI JSX) =====
   // ============================================================
+  
+  // --- KASUS 1: USER TIDAK LOGIN ---
+  if (!user) {
+    return (
+      <div style={{
+        marginTop: "60px",
+        borderTop: "1px solid #e8e8e8",
+        paddingTop: "40px",
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "24px",
+          flexWrap: "wrap",
+        }}>
+          {/* Ilustrasi di sisi kiri */}
+          <div style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(13,60,252,0.06)",
+            borderRadius: "16px",
+            padding: "20px",
+            width: "120px",
+            height: "120px",
+          }}>
+            <LiveChatIllustration />
+          </div>
+          
+          {/* Konten teks di sisi kiri */}
+          <div style={{
+            textAlign: "left",
+            flex: 1,
+            minWidth: "200px",
+          }}>
+            <h3 style={{
+              fontSize: "28px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px",
+            }}>
+              Live Chat Agent
+            </h3>
+            <p style={{
+              fontSize: "16px",
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "16px",
+              opacity: 0.8,
+            }}>
+              Silakan login untuk menggunakan Live Chat Agent
+            </p>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  padding: "10px 32px",
+                  backgroundColor: "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  transition: "background 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0a2fc9"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#0D3CFC"}
+              >
+                Login
+              </motion.button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- KASUS 2: USER ADALAH USER BIASA (bukan admin) ---
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     const isWaiting = activeTicket?.status === 'waiting';
@@ -1286,9 +1384,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ============================================================
-  // ===== AGENT VIEW =====
-  // ============================================================
+  // --- KASUS 3: USER ADALAH ADMIN (AGENT) ---
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1987,6 +2083,7 @@ export default function PusatBantuanPage() {
           overflow-y: scroll;
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* IE and Edge */
+          scroll-behavior: smooth;
         }
         body::-webkit-scrollbar {
           display: none; /* Chrome, Safari, Opera */
@@ -2772,48 +2869,12 @@ export default function PusatBantuanPage() {
           ))}
 
           {/* ===== LIVE CHAT AGENT ===== */}
-          {user ? (
-            <LiveChatAgent 
-              user={user} 
-              isAdmin={isAdmin} 
-              db={db} 
-              auth={auth} 
-            />
-          ) : (
-            <div style={{
-              marginTop: "60px",
-              borderTop: "1px solid #e8e8e8",
-              paddingTop: "40px",
-              textAlign: "center",
-            }}>
-              <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
-                Live Chat Agent
-              </h3>
-              <p style={{ fontSize: "18px", color: "#666", fontFamily: FONT_FAMILY }}>
-                Silakan login untuk menggunakan Live Chat Agent
-              </p>
-              <Link href="/" style={{ textDecoration: "none" }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    marginTop: "16px",
-                    padding: "12px 32px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Login
-                </motion.button>
-              </Link>
-            </div>
-          )}
+          <LiveChatAgent 
+            user={user} 
+            isAdmin={isAdmin} 
+            db={db} 
+            auth={auth} 
+          />
         </div>
       </div>
     </>
