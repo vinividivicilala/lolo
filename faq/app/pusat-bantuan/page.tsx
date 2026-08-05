@@ -24,7 +24,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-// Firebase Config (sama dengan halaman utama)
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -52,7 +52,7 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-// ===== ICONS (sama seperti di halaman utama) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -66,28 +66,12 @@ const CloseIcon = () => (
   </svg>
 );
 
-const ShopIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -108,9 +92,14 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-// ===== KOMPONEN HEADER (sama seperti halaman utama) =====
+const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
 
-// Search Rolling Text
+// ===== SEARCH ROLLING TEXT =====
 const searchRollingTexts = [
   "Tentang Note", 
   "Tentang Donasi", 
@@ -119,7 +108,7 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
-// Greeting
+// ===== GREETING =====
 const getGreeting = (): string => {
   const hour = new Date().getHours();
   if (hour >= 4 && hour < 10) return "Selamat pagi";
@@ -162,7 +151,7 @@ const faqData = {
   ]
 };
 
-// ===== KOMPONEN FAQ ITEM dengan GSAP =====
+// ===== KOMPONEN FAQ ITEM =====
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -198,7 +187,7 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
   };
 
   return (
-    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }}>
+    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '16px 0' }}>
       <div 
         onClick={toggleFaq}
         style={{
@@ -210,7 +199,7 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
         }}
       >
         <span style={{
-          fontSize: '24px',
+          fontSize: '30px',
           fontWeight: 500,
           color: '#0D3CFC',
           fontFamily: FONT_FAMILY,
@@ -218,19 +207,21 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
           {question}
         </span>
         <span ref={iconRef} style={{
-          fontSize: '32px',
+          fontSize: '36px',
           fontWeight: 300,
           color: '#0D3CFC',
           transition: 'transform 0.3s ease',
           display: 'inline-block',
+          flexShrink: 0,
+          marginLeft: '20px',
         }}>
           +
         </span>
       </div>
       <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0 }}>
         <div style={{
-          padding: '12px 0 8px 0',
-          fontSize: '18px',
+          padding: '16px 0 8px 0',
+          fontSize: '30px',
           color: '#333333',
           fontFamily: FONT_FAMILY,
           lineHeight: 1.6,
@@ -265,7 +256,7 @@ export default function PusatBantuanPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Auth Listener (sama seperti halaman utama)
+  // Auth Listener
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -302,7 +293,6 @@ export default function PusatBantuanPage() {
               });
             }
           } else {
-            const userData = userSnap.data();
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp()
@@ -316,7 +306,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // Load users untuk online status (opsional)
+  // Load users untuk online status
   useEffect(() => {
     if (!db || !user) return;
     const usersRef = collection(db, "users");
@@ -329,6 +319,31 @@ export default function PusatBantuanPage() {
         }
       });
       setUsers(userList);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // Load chat rooms untuk notifikasi
+  useEffect(() => {
+    if (!db || !user) return;
+    const chatsRef = collection(db, "chats");
+    const q = query(chatsRef);
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      let total = 0;
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        if (data.participants && data.participants.includes(user.uid)) {
+          const messagesRef = collection(db, "chats", docSnap.id, "messages");
+          const unreadQuery = query(
+            messagesRef, 
+            where("read", "==", false),
+            where("senderId", "!=", user.uid)
+          );
+          const unreadSnap = await getDocs(unreadQuery);
+          total += unreadSnap.size;
+        }
+      }
+      setTotalUnread(total);
     });
     return () => unsubscribe();
   }, [user]);
@@ -438,7 +453,7 @@ export default function PusatBantuanPage() {
         fontFamily: FONT_FAMILY,
         overflowX: "hidden",
       }}>
-        {/* BANNER (sama seperti halaman utama) */}
+        {/* BANNER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -765,7 +780,7 @@ export default function PusatBantuanPage() {
             </span>
           </motion.div>
 
-          {/* KANAN: Shop + Pusat bantuan + Notif + Profile */}
+          {/* KANAN: Shop + Pusat bantuan (biru) + Notif + Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             {/* Shop Button */}
             <Link href="/shop" passHref>
@@ -799,7 +814,7 @@ export default function PusatBantuanPage() {
               </motion.a>
             </Link>
 
-            {/* Help Center Button - di halaman ini tidak aktif atau link ke # */}
+            {/* Help Center Button - BIRU (aktif) */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -807,17 +822,17 @@ export default function PusatBantuanPage() {
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#000000",
+                color: "#0D3CFC",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 fontSize: "16px",
-                fontWeight: 500,
+                fontWeight: 600,
                 fontFamily: FONT_FAMILY,
                 padding: "8px 12px",
                 borderRadius: "30px",
-                opacity: 0.7,
                 cursor: "default",
+                backgroundColor: "rgba(13,60,252,0.08)",
               }}
             >
               <HelpDeskIcon size={22} />
@@ -870,6 +885,51 @@ export default function PusatBantuanPage() {
                   </span>
                 )}
               </motion.button>
+
+              {/* Notification Dropdown */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      minWidth: "320px",
+                      maxWidth: "380px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+                      border: "1px solid rgba(0,0,0,0.04)",
+                      zIndex: 60,
+                      fontFamily: FONT_FAMILY,
+                      padding: "12px 0",
+                    }}
+                  >
+                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
+                      Notifikasi
+                    </div>
+                    {totalUnread === 0 ? (
+                      <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                        Tidak ada notifikasi
+                      </div>
+                    ) : (
+                      <div style={{ padding: "16px", textAlign: "center", color: "#666", fontSize: "13px" }}>
+                        Anda memiliki {totalUnread} pesan belum dibaca.
+                        <br />
+                        <Link href="/" style={{ color: "#0D3CFC", fontWeight: 500, textDecoration: "none" }}>
+                          Kembali ke Beranda
+                        </Link>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Profile */}
@@ -1091,48 +1151,28 @@ export default function PusatBantuanPage() {
               transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
               style={{ marginBottom: "60px" }}
             >
-              {/* Judul Kategori 200px biru */}
+              {/* Judul Kategori 70px biru - kiri */}
               <h2 style={{
-                fontSize: "200px",
+                fontSize: "70px",
                 fontWeight: 700,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.05em",
-                lineHeight: 1,
-                margin: "0 0 30px 0",
-                textAlign: "center",
-                wordBreak: "break-word",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.2,
+                margin: "0 0 20px 0",
+                textAlign: "left",
               }}>
                 {category}
               </h2>
 
-              {/* Daftar FAQ */}
-              <div style={{
-                maxWidth: "900px",
-                margin: "0 auto",
-                backgroundColor: "#f9f9f9",
-                borderRadius: "20px",
-                padding: "20px 30px",
-                boxShadow: "0 2px 20px rgba(0,0,0,0.03)",
-              }}>
+              {/* Daftar FAQ - tanpa background, kiri */}
+              <div style={{ maxWidth: "100%" }}>
                 {faqData[category as keyof typeof faqData].map((item, idx) => (
                   <FaqItem key={idx} question={item.q} answer={item.a} />
                 ))}
               </div>
             </motion.div>
           ))}
-        </div>
-
-        {/* Footer kecil */}
-        <div style={{
-          textAlign: "center",
-          padding: "20px 40px",
-          borderTop: "1px solid #f0f0f0",
-          marginTop: "20px",
-        }}>
-          <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>
-            © 2026 Menuru. All rights reserved.
-          </span>
         </div>
       </div>
     </>
