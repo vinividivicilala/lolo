@@ -15,7 +15,9 @@ import {
 import { 
   getFirestore, 
   collection, 
+  addDoc, 
   query, 
+  orderBy, 
   onSnapshot,
   serverTimestamp,
   doc,
@@ -25,6 +27,8 @@ import {
   where,
   getDocs,
   deleteDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 
 // Firebase Config
@@ -54,8 +58,10 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const AGENT_NAME = "Farid Ardiansyah";
+const AGENT_PHOTO = "https://lh3.googleusercontent.com/a/ACg8ocL..."; // ganti dengan foto agent
 
-// ===== ICONS =====
+// ===== ICONS (sama) =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -66,6 +72,18 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
 const CloseIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const BackIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -111,10 +129,15 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-// ===== Instagram Verified Badge (sama seperti halaman utama) =====
+const ChatIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// ===== Instagram Verified Badge =====
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       <svg
@@ -190,6 +213,56 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
+// ===== Online Indicator =====
+const OnlineIndicator = ({ online }: { online: boolean }) => {
+  const pulseRef = useRef<HTMLDivElement>(null);
+  const color = online ? "#0D3CFC" : "#999";
+  
+  useEffect(() => {
+    if (online && pulseRef.current) {
+      gsap.to(pulseRef.current, {
+        scale: 2.5,
+        opacity: 0.05,
+        duration: 1.5,
+        repeat: -1,
+        ease: "power1.inOut",
+        yoyo: true,
+      });
+    }
+  }, [online]);
+  
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <div style={{
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: color,
+        position: "relative",
+        transition: "all 0.3s ease",
+        boxShadow: online ? "0 0 12px rgba(13,60,252,0.4)" : "none",
+      }}>
+        {online && (
+          <div
+            ref={pulseRef}
+            style={{
+              position: "absolute",
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              backgroundColor: color,
+              opacity: 0.2,
+              pointerEvents: "none",
+              top: "0px",
+              left: "0px",
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ===== Search Rolling Text =====
 const searchRollingTexts = [
   "Tentang Note", 
@@ -242,7 +315,7 @@ const defaultFaqData = {
   ]
 };
 
-// ===== KOMPONEN FAQ ITEM dengan GSAP =====
+// ===== Komponen FaqItem (sama) =====
 const FaqItem = ({ 
   question, 
   answer, 
@@ -460,6 +533,767 @@ const FaqItem = ({
       )}
     </div>
   );
+};
+
+// ===== KOMPONEN LIVE CHAT AGENT =====
+interface LiveChatRoom {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  agentId?: string;
+  status: 'waiting' | 'active' | 'closed';
+  topic: string;
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+}
+
+interface LiveChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+}
+
+const LiveChatAgent = ({ 
+  user, 
+  isAdmin, 
+  db,
+  auth,
+}: { 
+  user: any; 
+  isAdmin: boolean; 
+  db: any;
+  auth: any;
+}) => {
+  const [rooms, setRooms] = useState<LiveChatRoom[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<LiveChatRoom | null>(null);
+  const [messages, setMessages] = useState<LiveChatMessage[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [showStartChat, setShowStartChat] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [isAgentOnline, setIsAgentOnline] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const topics = [
+    "Pertanyaan tentang produk",
+    "Bantuan teknis",
+    "Permasalahan akun",
+    "Donasi",
+    "Kerjasama",
+    "Lainnya"
+  ];
+
+  // Load rooms for agent or user
+  useEffect(() => {
+    if (!db || !user) return;
+
+    let q;
+    if (isAdmin) {
+      // Agent melihat semua room
+      q = query(collection(db, "livechat_rooms"), orderBy("createdAt", "desc"));
+    } else {
+      // User melihat room miliknya yang statusnya belum closed
+      q = query(
+        collection(db, "livechat_rooms"),
+        where("userId", "==", user.uid),
+        where("status", "in", ["waiting", "active"])
+      );
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const roomList: LiveChatRoom[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        roomList.push({ id: doc.id, ...data } as LiveChatRoom);
+      });
+      setRooms(roomList);
+    });
+
+    return () => unsubscribe();
+  }, [db, user, isAdmin]);
+
+  // Load messages for selected room
+  useEffect(() => {
+    if (!db || !selectedRoom) return;
+
+    const q = query(
+      collection(db, "livechat_rooms", selectedRoom.id, "messages"),
+      orderBy("timestamp", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgList: LiveChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        msgList.push({ id: doc.id, ...doc.data() } as LiveChatMessage);
+      });
+      setMessages(msgList);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    });
+
+    return () => unsubscribe();
+  }, [db, selectedRoom]);
+
+  // Mark messages as read
+  useEffect(() => {
+    if (!db || !selectedRoom || !user) return;
+    if (isAdmin) {
+      // Agent membaca pesan user
+      const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+      unread.forEach(async (msg) => {
+        const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
+        await updateDoc(msgRef, { read: true });
+      });
+    } else {
+      // User membaca pesan agent
+      const unread = messages.filter(m => m.senderId === user.uid && !m.read);
+      // Tidak perlu mark read untuk user, karena yang penting agent sudah baca
+    }
+  }, [messages, selectedRoom, db, user, isAdmin]);
+
+  // Start new chat
+  const startChat = async () => {
+    if (!db || !user || !selectedTopic) return;
+
+    try {
+      const roomRef = await addDoc(collection(db, "livechat_rooms"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: selectedTopic,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+      });
+
+      // Send first message
+      await addDoc(collection(db, "livechat_rooms", roomRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+
+      setSelectedTopic("");
+      setShowStartChat(false);
+    } catch (error) {
+      console.error("Error starting chat:", error);
+    }
+  };
+
+  // Send message
+  const sendMessage = async () => {
+    if (!db || !selectedRoom || !messageText.trim() || !user) return;
+
+    try {
+      await addDoc(collection(db, "livechat_rooms", selectedRoom.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: messageText.trim(),
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+
+      // Update last message
+      await updateDoc(doc(db, "livechat_rooms", selectedRoom.id), {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        ...(selectedRoom.status === "waiting" && { status: "active" }),
+      });
+
+      setMessageText("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  // Agent mengambil room
+  const takeRoom = async (roomId: string) => {
+    if (!db || !isAdmin || !user) return;
+    try {
+      await updateDoc(doc(db, "livechat_rooms", roomId), {
+        agentId: user.uid,
+        status: "active",
+      });
+    } catch (error) {
+      console.error("Error taking room:", error);
+    }
+  };
+
+  // Close room
+  const closeRoom = async (roomId: string) => {
+    if (!db || !isAdmin) return;
+    try {
+      await updateDoc(doc(db, "livechat_rooms", roomId), {
+        status: "closed",
+      });
+      if (selectedRoom?.id === roomId) {
+        setSelectedRoom(null);
+      }
+    } catch (error) {
+      console.error("Error closing room:", error);
+    }
+  };
+
+  // Format time
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Jika user bukan agent dan belum ada room aktif, tampilkan form start chat
+  if (!isAdmin) {
+    const activeRoom = rooms.find(r => r.status === 'active' || r.status === 'waiting');
+    if (!activeRoom && !showStartChat) {
+      return (
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
+            Live Chat Agent
+          </h3>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowStartChat(true)}
+            style={{
+              padding: "14px 32px",
+              backgroundColor: "#0D3CFC",
+              color: "#fff",
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "18px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <ChatIcon />
+            <span>Mulai Live Chat</span>
+          </motion.button>
+        </div>
+      );
+    }
+
+    if (showStartChat) {
+      return (
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
+            Live Chat Agent
+          </h3>
+          <div style={{ maxWidth: "500px" }}>
+            <div style={{ fontSize: "18px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>
+              Pilih topik permasalahan Anda:
+            </div>
+            <select
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                border: "2px solid #e0e0e0",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                backgroundColor: "#fff",
+                marginBottom: "16px",
+              }}
+            >
+              <option value="">-- Pilih topik --</option>
+              {topics.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={startChat}
+                disabled={!selectedTopic}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Mulai Chat
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowStartChat(false)}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Batal
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // User sedang dalam chat aktif
+    if (activeRoom) {
+      const isWaiting = activeRoom.status === 'waiting';
+      return (
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}>
+            <div>
+              <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                Live Chat Agent
+              </h3>
+              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#22c55e", fontFamily: FONT_FAMILY }}>
+                {isWaiting ? "⏳ Menunggu agent..." : "🟢 Agent online"}
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                // Tutup chat (user bisa menutup)
+                if (window.confirm("Tutup chat ini?")) {
+                  // Hanya tutup dari UI, status tetap active/waiting
+                  setSelectedRoom(null);
+                }
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#999",
+                cursor: "pointer",
+                fontSize: "20px",
+              }}
+            >
+              ✕
+            </motion.button>
+          </div>
+
+          {/* Chat box */}
+          <div style={{
+            backgroundColor: "#f9f9f9",
+            borderRadius: "12px",
+            border: "1px solid #e8e8e8",
+            height: "400px",
+            display: "flex",
+            flexDirection: "column",
+          }}>
+            <div style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px",
+            }}>
+              {messages.map((msg, idx) => {
+                const isMine = msg.senderId === user.uid;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      alignSelf: isMine ? "flex-end" : "flex-start",
+                      maxWidth: "75%",
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                      color: isMine ? "#fff" : "#000",
+                      fontSize: "14px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {!isMine && (
+                      <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                        {msg.senderName}
+                      </div>
+                    )}
+                    <div>{msg.text}</div>
+                    <div style={{ fontSize: "9px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "4px" }}>
+                      {formatTime(msg.timestamp)}
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            <div style={{
+              padding: "12px 16px",
+              borderTop: "1px solid #e8e8e8",
+              display: "flex",
+              gap: "8px",
+              backgroundColor: "#fff",
+              borderRadius: "0 0 12px 12px",
+            }}>
+              <input
+                type="text"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder={isWaiting ? "Menunggu agent..." : "Ketik pesan..."}
+                disabled={isWaiting}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  border: "1px solid #e8e8e8",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: FONT_FAMILY,
+                  backgroundColor: isWaiting ? "#f5f5f5" : "#fff",
+                }}
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={sendMessage}
+                disabled={isWaiting || !messageText.trim()}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: (isWaiting || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: (isWaiting || !messageText.trim()) ? "not-allowed" : "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <SendIcon />
+                <span>Kirim</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // ===== AGENT VIEW =====
+  if (isAdmin) {
+    const waitingRooms = rooms.filter(r => r.status === 'waiting');
+    const activeRooms = rooms.filter(r => r.status === 'active');
+    const closedRooms = rooms.filter(r => r.status === 'closed');
+
+    return (
+      <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <div>
+            <h2 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+              Live Chat Agent
+            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+              <OnlineIndicator online={true} />
+              <span style={{ fontSize: "14px", color: "#22c55e", fontFamily: FONT_FAMILY }}>Online</span>
+              <span style={{ fontSize: "14px", color: "#999", fontFamily: FONT_FAMILY }}>•</span>
+              <span style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY }}>
+                {waitingRooms.length} menunggu • {activeRooms.length} aktif
+              </span>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="Agent" style={{ width: "40px", height: "40px", borderRadius: "50%" }} />
+            ) : (
+              <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600 }}>
+                {AGENT_NAME.charAt(0)}
+              </div>
+            )}
+            <div>
+              <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>{AGENT_NAME}</div>
+              <div style={{ fontSize: "12px", color: "#999" }}>Agent</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "24px", height: "500px" }}>
+          {/* Daftar Room - kiri */}
+          <div style={{
+            width: "300px",
+            backgroundColor: "#f9f9f9",
+            borderRadius: "12px",
+            border: "1px solid #e8e8e8",
+            overflowY: "auto",
+            flexShrink: 0,
+          }}>
+            {/* Waiting */}
+            {waitingRooms.length > 0 && (
+              <div>
+                <div style={{ padding: "12px 16px", backgroundColor: "#fef3c7", fontWeight: 600, fontSize: "14px", color: "#92400e" }}>
+                  🟡 Menunggu ({waitingRooms.length})
+                </div>
+                {waitingRooms.map((room) => (
+                  <div
+                    key={room.id}
+                    onClick={() => {
+                      setSelectedRoom(room);
+                      takeRoom(room.id);
+                    }}
+                    style={{
+                      padding: "12px 16px",
+                      borderBottom: "1px solid #e8e8e8",
+                      cursor: "pointer",
+                      backgroundColor: selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent",
+                      transition: "background 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
+                        <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
+                      </div>
+                      <span style={{ fontSize: "10px", color: "#f59e0b" }}>⏳</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Active */}
+            {activeRooms.length > 0 && (
+              <div>
+                <div style={{ padding: "12px 16px", backgroundColor: "#d1fae5", fontWeight: 600, fontSize: "14px", color: "#065f46" }}>
+                  🟢 Aktif ({activeRooms.length})
+                </div>
+                {activeRooms.map((room) => (
+                  <div
+                    key={room.id}
+                    onClick={() => setSelectedRoom(room)}
+                    style={{
+                      padding: "12px 16px",
+                      borderBottom: "1px solid #e8e8e8",
+                      cursor: "pointer",
+                      backgroundColor: selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent",
+                      transition: "background 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
+                      {room.lastMessage && (
+                        <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>
+                          {room.lastMessage.substring(0, 40)}{room.lastMessage.length > 40 ? "..." : ""}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {waitingRooms.length === 0 && activeRooms.length === 0 && (
+              <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "14px" }}>
+                Tidak ada chat masuk
+              </div>
+            )}
+          </div>
+
+          {/* Chat Area - kanan */}
+          <div style={{
+            flex: 1,
+            backgroundColor: "#ffffff",
+            borderRadius: "12px",
+            border: "1px solid #e8e8e8",
+            display: "flex",
+            flexDirection: "column",
+          }}>
+            {selectedRoom ? (
+              <>
+                <div style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid #e8e8e8",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "16px", color: "#000" }}>
+                      {selectedRoom.userName}
+                      <span style={{ fontSize: "12px", fontWeight: 400, color: "#999", marginLeft: "8px" }}>
+                        {selectedRoom.topic}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
+                      {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : '🟢 Aktif'}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {selectedRoom.status !== 'closed' && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => closeRoom(selectedRoom.id)}
+                        style={{
+                          padding: "6px 14px",
+                          backgroundColor: "#ef4444",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Tutup Chat
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
+                <div style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  {messages.map((msg, idx) => {
+                    const isMine = msg.senderId === user.uid;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          alignSelf: isMine ? "flex-end" : "flex-start",
+                          maxWidth: "75%",
+                          padding: "10px 14px",
+                          borderRadius: "12px",
+                          backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                          color: isMine ? "#fff" : "#000",
+                          fontSize: "14px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {!isMine && (
+                          <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                            {msg.senderName}
+                          </div>
+                        )}
+                        <div>{msg.text}</div>
+                        <div style={{ fontSize: "9px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "4px" }}>
+                          {formatTime(msg.timestamp)}
+                          {!isMine && msg.read && <span style={{ marginLeft: "6px" }}>✓✓</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+                {selectedRoom.status !== 'closed' && (
+                  <div style={{
+                    padding: "12px 16px",
+                    borderTop: "1px solid #e8e8e8",
+                    display: "flex",
+                    gap: "8px",
+                    backgroundColor: "#fff",
+                    borderRadius: "0 0 12px 12px",
+                  }}>
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Ketik balasan..."
+                      style={{
+                        flex: 1,
+                        padding: "10px 14px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={sendMessage}
+                      disabled={!messageText.trim()}
+                      style={{
+                        padding: "10px 20px",
+                        backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: messageText.trim() ? "pointer" : "not-allowed",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <SendIcon />
+                      <span>Kirim</span>
+                    </motion.button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "16px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                Pilih chat dari daftar di kiri
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 // ===== KOMPONEN UTAMA =====
@@ -1482,6 +2316,7 @@ export default function PusatBantuanPage() {
               display: "flex",
               alignItems: "center",
               gap: "8px",
+              flexWrap: "wrap",
             }}
           >
             <span>Author by</span>
@@ -1537,6 +2372,16 @@ export default function PusatBantuanPage() {
               </div>
             </motion.div>
           ))}
+
+          {/* ===== LIVE CHAT AGENT ===== */}
+          {user && (
+            <LiveChatAgent 
+              user={user} 
+              isAdmin={isAdmin} 
+              db={db} 
+              auth={auth} 
+            />
+          )}
         </div>
       </div>
     </>
