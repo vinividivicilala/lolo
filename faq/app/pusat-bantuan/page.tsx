@@ -603,8 +603,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // ===== HOOKS (dipanggil di semua render) =====
-  // 1. Agent online status
+  // ===== HOOKS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -618,7 +617,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db]);
 
-  // 2. Subscribe tickets
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -648,7 +646,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, user, isAdmin]);
 
-  // 3. Subscribe messages
   useEffect(() => {
     if (!db || !selectedTicket) return;
     const q = query(
@@ -668,7 +665,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, selectedTicket]);
 
-  // 4. Mark messages as read (agent only)
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
@@ -814,7 +810,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   // ============================================================
-  // ===== USER VIEW (bukan admin) =====
+  // ===== USER VIEW =====
   // ============================================================
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
@@ -822,7 +818,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
     const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
 
-    // Jika ada ticket, pilih yang aktif atau yang terakhir
     useEffect(() => {
       if (activeTicket) {
         setSelectedTicket(activeTicket);
@@ -834,7 +829,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     }, [activeTicket, tickets]);
 
-    // Form start chat (belum ada ticket sama sekali)
     if (tickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -945,11 +939,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER DENGAN SIDEBAR KIRI (RIWAYAT TICKET) =====
     return (
       <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
         <div style={{ display: "flex", gap: "24px", height: "500px" }}>
-          {/* SIDEBAR KIRI - BIRU */}
           <div style={{
             width: "280px",
             backgroundColor: "#0D3CFC",
@@ -1046,7 +1038,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 Belum ada chat
               </div>
             )}
-            {/* Tombol Chat Baru di sidebar */}
             <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -1081,7 +1072,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           </div>
 
-          {/* CHAT AREA KANAN */}
           <div style={{
             flex: 1,
             backgroundColor: "#ffffff",
@@ -1307,7 +1297,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   // ============================================================
-  // ===== AGENT VIEW (admin) =====
+  // ===== AGENT VIEW =====
   // ============================================================
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
@@ -1363,7 +1353,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       </div>
 
       <div style={{ display: "flex", gap: "24px", height: "500px" }}>
-        {/* Left: Daftar Ticket */}
         <div style={{
           width: "320px",
           backgroundColor: "#f9f9f9",
@@ -1501,7 +1490,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           )}
         </div>
 
-        {/* Right: Chat Area */}
         <div style={{
           flex: 1,
           backgroundColor: "#ffffff",
@@ -1716,6 +1704,116 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 };
 
 // ============================================================
+// ===== FOOTER COMPONENT =====
+// ============================================================
+const FooterSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (footerRef.current && containerRef.current) {
+      gsap.set(footerRef.current, {
+        y: '100%',
+        opacity: 0,
+      });
+
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: 'top bottom',
+        end: 'top center',
+        onUpdate: (self) => {
+          const progress = self.progress;
+          const yProgress = 1 - progress;
+          gsap.to(footerRef.current, {
+            y: `${yProgress * 100}%`,
+            opacity: progress,
+            duration: 0.1,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          });
+        },
+        onEnter: () => {
+          gsap.to(footerRef.current, {
+            y: '0%',
+            opacity: 1,
+            duration: 0.6,
+            ease: 'power2.out',
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(footerRef.current, {
+            y: '100%',
+            opacity: 0,
+            duration: 0.6,
+            ease: 'power2.in',
+          });
+        },
+      });
+    }
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  return (
+    <div 
+      ref={containerRef}
+      style={{
+        height: '50vh',
+        minHeight: '350px',
+        position: 'relative',
+        overflow: 'hidden',
+        marginTop: '20px',
+        padding: '0 20px',
+      }}
+    >
+      <div
+        ref={footerRef}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#0D3CFC',
+          borderRadius: '40px 40px 0 0',
+          padding: '60px 40px',
+          color: '#fff',
+          fontFamily: FONT_FAMILY,
+          textAlign: 'center',
+          transform: 'translateY(100%)',
+          opacity: 0,
+          minHeight: '50vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '600px' }}>
+          <h3 style={{ fontSize: '32px', fontWeight: 600, marginBottom: '16px', fontFamily: FONT_FAMILY }}>
+            Menuru
+          </h3>
+          <p style={{ fontSize: '16px', opacity: 0.8, fontFamily: FONT_FAMILY }}>
+            © 2026 Menuru. All rights reserved.
+          </p>
+        </div>
+        <div style={{
+          position: 'absolute',
+          top: '-50%',
+          left: '-20%',
+          width: '140%',
+          height: '200%',
+          background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }} />
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
 // ===== KOMPONEN UTAMA =====
 // ============================================================
 export default function PusatBantuanPage() {
@@ -1744,9 +1842,6 @@ export default function PusatBantuanPage() {
   const [authorName, setAuthorName] = useState<string>("");
   const [authorEmail, setAuthorEmail] = useState<string>("");
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
-
-  // Ref untuk footer
-  const footerRef = useRef<HTMLDivElement>(null);
 
   // Load FAQ dari Firestore
   const loadFaqFromFirestore = async () => {
@@ -1918,30 +2013,6 @@ export default function PusatBantuanPage() {
   // Load FAQ dari Firestore on mount
   useEffect(() => {
     loadFaqFromFirestore();
-  }, []);
-
-  // GSAP Footer Scroll Effect
-  useEffect(() => {
-    if (footerRef.current) {
-      gsap.fromTo(footerRef.current,
-        { y: 100, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: "top bottom",
-            end: "top center",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
   }, []);
 
   // Rolling text search
@@ -2826,54 +2897,8 @@ export default function PusatBantuanPage() {
           )}
         </div>
 
-        {/* ===== FOOTER BIRU DENGAN BORDER RADIUS ===== */}
-        <motion.div
-          ref={footerRef}
-          style={{
-            marginTop: "80px",
-            padding: "60px 40px",
-            backgroundColor: "#0D3CFC",
-            borderRadius: "40px 40px 0 0",
-            color: "#fff",
-            fontFamily: FONT_FAMILY,
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ position: "relative", zIndex: 2 }}>
-            <h3 style={{ fontSize: "32px", fontWeight: 600, marginBottom: "16px", fontFamily: FONT_FAMILY }}>
-              Menuru
-            </h3>
-            <p style={{ fontSize: "16px", opacity: 0.8, maxWidth: "500px", margin: "0 auto", fontFamily: FONT_FAMILY }}>
-              © 2026 Menuru. All rights reserved.
-            </p>
-          </div>
-          {/* Efek blur di belakang */}
-          <div style={{
-            position: "absolute",
-            top: "-50%",
-            left: "-20%",
-            width: "140%",
-            height: "200%",
-            background: "radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 1,
-          }} />
-        </motion.div>
-
-        <style jsx>{`
-          @keyframes blink {
-            0% { opacity: 0.2; }
-            20% { opacity: 1; }
-            100% { opacity: 0.2; }
-          }
-          .dot {
-            animation: blink 1.4s infinite both;
-            font-size: 12px;
-            color: #22c55e;
-          }
-        `}</style>
+        {/* ===== FOOTER ===== */}
+        <FooterSection />
       </div>
     </>
   );
