@@ -59,9 +59,8 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
-const AGENT_PHOTO = "https://lh3.googleusercontent.com/a/ACg8ocL..."; // ganti dengan foto agent
 
-// ===== ICONS (sama) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -84,6 +83,14 @@ const BackIcon = () => (
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== GOOGLE MATERIAL EDIT ICON =====
+const EditIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 20H21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16.5 3.5L20.5 7.5L7 21L3 21L3 17L16.5 3.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -135,7 +142,7 @@ const ChatIcon = () => (
   </svg>
 );
 
-// ===== Instagram Verified Badge =====
+// ===== INSTAGRAM VERIFIED BADGE =====
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   return (
@@ -156,31 +163,9 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
       >
         <path
           fill="#0095F6"
-          d="
-            M12 2.2
-            C13.6 3.8 16.2 3.8 17.8 2.2
-            C18.6 3.8 20.2 5.4 21.8 6.2
-            C20.2 7.8 20.2 10.4 21.8 12
-            C20.2 13.6 20.2 16.2 21.8 17.8
-            C20.2 18.6 18.6 20.2 17.8 21.8
-            C16.2 20.2 13.6 20.2 12 21.8
-            C10.4 20.2 7.8 20.2 6.2 21.8
-            C5.4 20.2 3.8 18.6 2.2 17.8
-            C3.8 16.2 3.8 13.6 2.2 12
-            C3.8 10.4 3.8 7.8 2.2 6.2
-            C3.8 5.4 5.4 3.8 6.2 2.2
-            C7.8 3.8 10.4 3.8 12 2.2
-            Z
-          "
+          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
         />
-        <path
-          d="M9.2 12.3l2 2 4.6-4.6"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
       {showTooltip && (
         <div style={{
@@ -213,7 +198,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-// ===== Online Indicator =====
+// ===== ONLINE INDICATOR (dengan pulsing dot) =====
 const OnlineIndicator = ({ online }: { online: boolean }) => {
   const pulseRef = useRef<HTMLDivElement>(null);
   const color = online ? "#0D3CFC" : "#999";
@@ -315,7 +300,7 @@ const defaultFaqData = {
   ]
 };
 
-// ===== Komponen FaqItem (sama) =====
+// ===== KOMPONEN FAQ ITEM dengan GSAP =====
 const FaqItem = ({ 
   question, 
   answer, 
@@ -429,16 +414,17 @@ const FaqItem = ({
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '24px',
-                color: '#0D3CFC',
                 padding: '4px 8px',
                 borderRadius: '4px',
                 transition: 'background 0.2s ease',
+                color: '#0D3CFC',
+                display: 'flex',
+                alignItems: 'center',
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(13,60,252,0.08)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              ✏️
+              <EditIcon size={20} />
             </button>
           )}
           {isEditing ? (
@@ -543,12 +529,16 @@ interface LiveChatRoom {
   userEmail: string;
   userPhoto?: string;
   agentId?: string;
+  agentName?: string;
   status: 'waiting' | 'active' | 'closed';
   topic: string;
   createdAt: any;
   lastMessage?: string;
   lastMessageTime?: any;
   unreadCount: number;
+  typing?: boolean;
+  typingUserId?: string;
+  typingUserName?: string;
 }
 
 interface LiveChatMessage {
@@ -578,7 +568,9 @@ const LiveChatAgent = ({
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [isAgentOnline, setIsAgentOnline] = useState(true);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -589,16 +581,21 @@ const LiveChatAgent = ({
     "Lainnya"
   ];
 
-  // Load rooms for agent or user
+  // ===== CHECK AGENT ONLINE STATUS =====
+  useEffect(() => {
+    if (!db) return;
+    // Agent selalu online jika admin login
+    setIsAgentOnline(isAdmin);
+  }, [isAdmin]);
+
+  // ===== LOAD ROOMS =====
   useEffect(() => {
     if (!db || !user) return;
 
     let q;
     if (isAdmin) {
-      // Agent melihat semua room
       q = query(collection(db, "livechat_rooms"), orderBy("createdAt", "desc"));
     } else {
-      // User melihat room miliknya yang statusnya belum closed
       q = query(
         collection(db, "livechat_rooms"),
         where("userId", "==", user.uid),
@@ -618,7 +615,7 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin]);
 
-  // Load messages for selected room
+  // ===== LOAD MESSAGES =====
   useEffect(() => {
     if (!db || !selectedRoom) return;
 
@@ -641,24 +638,59 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, selectedRoom]);
 
-  // Mark messages as read
+  // ===== MARK MESSAGES AS READ =====
   useEffect(() => {
     if (!db || !selectedRoom || !user) return;
-    if (isAdmin) {
-      // Agent membaca pesan user
-      const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
-      unread.forEach(async (msg) => {
-        const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
-        await updateDoc(msgRef, { read: true });
+    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true });
+    });
+  }, [messages, selectedRoom, db, user]);
+
+  // ===== DETEKSI TYPING DARI ROOM =====
+  useEffect(() => {
+    if (!selectedRoom) return;
+    // Typing status sudah ada di selectedRoom dari snapshot
+  }, [selectedRoom]);
+
+  // ===== HANDLE TYPING =====
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessageText(value);
+    
+    if (!selectedRoom || !user || !db) return;
+    
+    const roomRef = doc(db, "livechat_rooms", selectedRoom.id);
+    
+    if (value.length > 0) {
+      await updateDoc(roomRef, {
+        typing: true,
+        typingUserId: user.uid,
+        typingUserName: user.displayName || user.email || "User",
       });
     } else {
-      // User membaca pesan agent
-      const unread = messages.filter(m => m.senderId === user.uid && !m.read);
-      // Tidak perlu mark read untuk user, karena yang penting agent sudah baca
+      await updateDoc(roomRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
     }
-  }, [messages, selectedRoom, db, user, isAdmin]);
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    typingTimeoutRef.current = setTimeout(async () => {
+      await updateDoc(roomRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+    }, 2000);
+  };
 
-  // Start new chat
+  // ===== START CHAT =====
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
 
@@ -672,9 +704,11 @@ const LiveChatAgent = ({
         topic: selectedTopic,
         createdAt: serverTimestamp(),
         unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
       });
 
-      // Send first message
       await addDoc(collection(db, "livechat_rooms", roomRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
@@ -690,38 +724,51 @@ const LiveChatAgent = ({
     }
   };
 
-  // Send message
+  // ===== SEND MESSAGE =====
   const sendMessage = async () => {
     if (!db || !selectedRoom || !messageText.trim() || !user) return;
 
     try {
+      // Reset typing
+      const roomRef = doc(db, "livechat_rooms", selectedRoom.id);
+      await updateDoc(roomRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+
       await addDoc(collection(db, "livechat_rooms", selectedRoom.id, "messages"), {
         senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
+        senderName: user.displayName || user.email || (isAdmin ? AGENT_NAME : "User"),
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
       });
 
-      // Update last message
-      await updateDoc(doc(db, "livechat_rooms", selectedRoom.id), {
+      await updateDoc(roomRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
         ...(selectedRoom.status === "waiting" && { status: "active" }),
+        agentId: isAdmin ? user.uid : selectedRoom.agentId,
+        agentName: isAdmin ? AGENT_NAME : selectedRoom.agentName,
       });
 
       setMessageText("");
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  // Agent mengambil room
+  // ===== TAKE ROOM (Agent) =====
   const takeRoom = async (roomId: string) => {
     if (!db || !isAdmin || !user) return;
     try {
       await updateDoc(doc(db, "livechat_rooms", roomId), {
         agentId: user.uid,
+        agentName: AGENT_NAME,
         status: "active",
       });
     } catch (error) {
@@ -729,7 +776,7 @@ const LiveChatAgent = ({
     }
   };
 
-  // Close room
+  // ===== CLOSE ROOM =====
   const closeRoom = async (roomId: string) => {
     if (!db || !isAdmin) return;
     try {
@@ -744,22 +791,38 @@ const LiveChatAgent = ({
     }
   };
 
-  // Format time
+  // ===== FORMAT TIME =====
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Jika user bukan agent dan belum ada room aktif, tampilkan form start chat
+  // ===== GET TYPING DISPLAY TEXT =====
+  const getTypingText = (room: LiveChatRoom | null) => {
+    if (!room || !room.typing) return null;
+    const name = room.typingUserName || "Seseorang";
+    return `${name} sedang mengetik...`;
+  };
+
+  // ============================================================
+  // ===== USER VIEW (bukan admin) =====
+  // ============================================================
   if (!isAdmin) {
     const activeRoom = rooms.find(r => r.status === 'active' || r.status === 'waiting');
+    const isWaiting = activeRoom?.status === 'waiting';
+    const isAgentOnlineNow = isAgentOnline && activeRoom?.status === 'active';
+
+    // Tampilkan form start chat jika belum ada room
     if (!activeRoom && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
           <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
             Live Chat Agent
           </h3>
+          <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+            Butuh bantuan? Chat langsung dengan agent kami.
+          </p>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -786,6 +849,7 @@ const LiveChatAgent = ({
       );
     }
 
+    // Form start chat
     if (showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -860,9 +924,11 @@ const LiveChatAgent = ({
       );
     }
 
-    // User sedang dalam chat aktif
+    // ===== USER DALAM CHAT =====
     if (activeRoom) {
-      const isWaiting = activeRoom.status === 'waiting';
+      const typingText = getTypingText(activeRoom);
+      const showAgentName = activeRoom.agentName || AGENT_NAME;
+      
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
           <div style={{
@@ -872,20 +938,27 @@ const LiveChatAgent = ({
             marginBottom: "16px",
           }}>
             <div>
-              <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                Live Chat Agent
-              </h3>
-              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#22c55e", fontFamily: FONT_FAMILY }}>
-                {isWaiting ? "⏳ Menunggu agent..." : "🟢 Agent online"}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                  Live Chat Agent
+                </h3>
+                <OnlineIndicator online={isAgentOnlineNow || false} />
+                <span style={{ fontSize: "14px", color: isAgentOnlineNow ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+                  {isAgentOnlineNow ? "Online" : "Offline"}
+                </span>
+              </div>
+              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#22c55e", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
+                {isWaiting ? "⏳ Menunggu agent..." : `🟢 Agent: ${showAgentName}`}
+                {activeRoom.agentName && !isWaiting && (
+                  <InstagramVerifiedBadge size={14} />
+                )}
               </div>
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                // Tutup chat (user bisa menutup)
                 if (window.confirm("Tutup chat ini?")) {
-                  // Hanya tutup dari UI, status tetap active/waiting
                   setSelectedRoom(null);
                 }
               }}
@@ -895,7 +968,12 @@ const LiveChatAgent = ({
                 color: "#999",
                 cursor: "pointer",
                 fontSize: "20px",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                transition: "background 0.2s ease",
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
             >
               ✕
             </motion.button>
@@ -920,6 +998,7 @@ const LiveChatAgent = ({
             }}>
               {messages.map((msg, idx) => {
                 const isMine = msg.senderId === user.uid;
+                const isAgent = msg.senderId !== user.uid && msg.senderName === AGENT_NAME;
                 return (
                   <div
                     key={idx}
@@ -935,17 +1014,47 @@ const LiveChatAgent = ({
                     }}
                   >
                     {!isMine && (
-                      <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                      <div style={{ 
+                        fontSize: "11px", 
+                        fontWeight: 500, 
+                        color: "#0D3CFC", 
+                        marginBottom: "2px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}>
                         {msg.senderName}
+                        {isAgent && <InstagramVerifiedBadge size={12} />}
                       </div>
                     )}
                     <div>{msg.text}</div>
-                    <div style={{ fontSize: "9px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "4px" }}>
+                    <div style={{ 
+                      fontSize: "9px", 
+                      color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                      marginTop: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}>
                       {formatTime(msg.timestamp)}
+                      {isMine && msg.read && <span style={{ color: "#22c55e" }}>✓✓ Dibaca</span>}
+                      {isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                     </div>
                   </div>
                 );
               })}
+              {typingText && (
+                <div style={{
+                  alignSelf: "flex-start",
+                  fontSize: "13px",
+                  color: "#666",
+                  fontStyle: "italic",
+                  padding: "4px 8px",
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  {typingText}
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
             <div style={{
@@ -959,9 +1068,9 @@ const LiveChatAgent = ({
               <input
                 type="text"
                 value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
+                onChange={handleTyping}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey && !isWaiting && messageText.trim()) {
                     e.preventDefault();
                     sendMessage();
                   }
@@ -977,6 +1086,13 @@ const LiveChatAgent = ({
                   outline: "none",
                   fontFamily: FONT_FAMILY,
                   backgroundColor: isWaiting ? "#f5f5f5" : "#fff",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  if (!isWaiting) e.currentTarget.style.borderColor = "#0D3CFC";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e8e8";
                 }}
               />
               <motion.button
@@ -995,6 +1111,17 @@ const LiveChatAgent = ({
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isWaiting && messageText.trim()) {
+                    e.currentTarget.style.backgroundColor = "#0a2fc9";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isWaiting && messageText.trim()) {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                  }
                 }}
               >
                 <SendIcon />
@@ -1007,11 +1134,13 @@ const LiveChatAgent = ({
     }
   }
 
-  // ===== AGENT VIEW =====
+  // ============================================================
+  // ===== AGENT VIEW (admin) =====
+  // ============================================================
   if (isAdmin) {
     const waitingRooms = rooms.filter(r => r.status === 'waiting');
     const activeRooms = rooms.filter(r => r.status === 'active');
-    const closedRooms = rooms.filter(r => r.status === 'closed');
+    const typingText = selectedRoom ? getTypingText(selectedRoom) : null;
 
     return (
       <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -1033,13 +1162,16 @@ const LiveChatAgent = ({
             {user?.photoURL ? (
               <img src={user.photoURL} alt="Agent" style={{ width: "40px", height: "40px", borderRadius: "50%" }} />
             ) : (
-              <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600 }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "18px" }}>
                 {AGENT_NAME.charAt(0)}
               </div>
             )}
             <div>
-              <div style={{ fontSize: "16px", fontWeight: 600, color: "#000" }}>{AGENT_NAME}</div>
-              <div style={{ fontSize: "12px", color: "#999" }}>Agent</div>
+              <div style={{ fontSize: "16px", fontWeight: 600, color: "#000", display: "flex", alignItems: "center", gap: "4px" }}>
+                {AGENT_NAME}
+                <InstagramVerifiedBadge size={14} />
+              </div>
+              <div style={{ fontSize: "12px", color: "#999" }}>Agent Support</div>
             </div>
           </div>
         </div>
@@ -1077,12 +1209,14 @@ const LiveChatAgent = ({
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div>
-                        <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
-                        <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
-                      </div>
-                      <span style={{ fontSize: "10px", color: "#f59e0b" }}>⏳</span>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
+                      {room.typing && (
+                        <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>
+                          {room.typingUserName} mengetik...
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1112,6 +1246,11 @@ const LiveChatAgent = ({
                     <div>
                       <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
                       <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
+                      {room.typing && (
+                        <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>
+                          {room.typingUserName} mengetik...
+                        </div>
+                      )}
                       {room.lastMessage && (
                         <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>
                           {room.lastMessage.substring(0, 40)}{room.lastMessage.length > 40 ? "..." : ""}
@@ -1155,8 +1294,15 @@ const LiveChatAgent = ({
                         {selectedRoom.topic}
                       </span>
                     </div>
-                    <div style={{ fontSize: "12px", color: "#666" }}>
-                      {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : '🟢 Aktif'}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "12px", color: selectedRoom.status === 'waiting' ? "#f59e0b" : "#22c55e" }}>
+                        {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : '🟢 Aktif'}
+                      </span>
+                      {selectedRoom.typing && (
+                        <span style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>
+                          {selectedRoom.typingUserName} mengetik...
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "8px" }}>
@@ -1174,7 +1320,10 @@ const LiveChatAgent = ({
                           fontSize: "12px",
                           cursor: "pointer",
                           fontFamily: FONT_FAMILY,
+                          transition: "opacity 0.2s ease",
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                       >
                         Tutup Chat
                       </motion.button>
@@ -1206,18 +1355,46 @@ const LiveChatAgent = ({
                         }}
                       >
                         {!isMine && (
-                          <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                          <div style={{ 
+                            fontSize: "11px", 
+                            fontWeight: 500, 
+                            color: "#0D3CFC", 
+                            marginBottom: "2px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}>
                             {msg.senderName}
                           </div>
                         )}
                         <div>{msg.text}</div>
-                        <div style={{ fontSize: "9px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "4px" }}>
+                        <div style={{ 
+                          fontSize: "9px", 
+                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                          marginTop: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}>
                           {formatTime(msg.timestamp)}
-                          {!isMine && msg.read && <span style={{ marginLeft: "6px" }}>✓✓</span>}
+                          {!isMine && msg.read && <span style={{ color: "#22c55e" }}>✓✓ Dibaca</span>}
+                          {!isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                         </div>
                       </div>
                     );
                   })}
+                  {typingText && (
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "13px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "4px 8px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {typingText}
+                    </div>
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
                 {selectedRoom.status !== 'closed' && (
@@ -1232,9 +1409,9 @@ const LiveChatAgent = ({
                     <input
                       type="text"
                       value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
+                      onChange={handleTyping}
                       onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
                           e.preventDefault();
                           sendMessage();
                         }
@@ -1248,7 +1425,10 @@ const LiveChatAgent = ({
                         fontSize: "14px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
+                        transition: "border-color 0.2s ease",
                       }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                     />
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -1266,6 +1446,17 @@ const LiveChatAgent = ({
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0a2fc9";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0D3CFC";
+                        }
                       }}
                     >
                       <SendIcon />
