@@ -523,7 +523,7 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT =====
+// ===== LIVE CHAT AGENT COMPONENT (FULLY FIXED) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [rooms, setRooms] = useState<LiveChatRoom[]>([]);
@@ -564,8 +564,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (!db || !user) return;
     let q;
     if (isAdmin) {
+      // Agent melihat SEMUA room termasuk yang sudah closed (untuk riwayat)
       q = query(collection(db, "livechat_rooms"), orderBy("createdAt", "desc"));
     } else {
+      // User melihat room miliknya yang statusnya waiting atau active
       q = query(
         collection(db, "livechat_rooms"),
         where("userId", "==", user.uid),
@@ -595,7 +597,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as LiveChatMessage);
       });
       setMessages(msgList);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     });
     return () => unsubscribe();
   }, [db, selectedRoom]);
@@ -672,13 +676,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     try {
       const roomRef = doc(db, "livechat_rooms", selectedRoom.id);
       await updateDoc(roomRef, { typing: false, typingUserId: null, typingUserName: null });
+      
+      const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
+      
       await addDoc(collection(db, "livechat_rooms", selectedRoom.id, "messages"), {
         senderId: user.uid,
-        senderName: user.displayName || user.email || (isAdmin ? AGENT_NAME : "User"),
+        senderName: senderName,
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
       });
+      
       await updateDoc(roomRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -686,6 +694,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         agentId: isAdmin ? user.uid : selectedRoom.agentId,
         agentName: isAdmin ? AGENT_NAME : selectedRoom.agentName,
       });
+      
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
@@ -738,6 +747,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const isWaiting = activeRoom?.status === 'waiting';
     const isAgentOnlineNow = agentOnline && activeRoom?.status === 'active';
 
+    // Tampilkan form start chat
     if (!activeRoom && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -847,7 +857,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER DALAM CHAT =====
+    // ===== USER DALAM CHAT - menampilkan riwayat dari agent =====
     if (activeRoom) {
       const typingText = getTypingText(activeRoom);
       const showAgentName = activeRoom.agentName || AGENT_NAME;
@@ -900,6 +910,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </button>
           </div>
 
+          {/* Chat box dengan riwayat pesan */}
           <div style={{
             backgroundColor: "#f9f9f9",
             borderRadius: "12px",
@@ -916,53 +927,59 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               flexDirection: "column",
               gap: "6px",
             }}>
-              {messages.map((msg, idx) => {
-                const isMine = msg.senderId === user.uid;
-                const isAgent = !isMine && msg.senderName === AGENT_NAME;
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      alignSelf: isMine ? "flex-end" : "flex-start",
-                      maxWidth: "75%",
-                      padding: "10px 14px",
-                      borderRadius: "12px",
-                      backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                      color: isMine ? "#fff" : "#000",
-                      fontSize: "14px",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    {!isMine && (
+              {messages.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                  Belum ada pesan. Mulai chat sekarang!
+                </div>
+              ) : (
+                messages.map((msg, idx) => {
+                  const isMine = msg.senderId === user.uid;
+                  const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        alignSelf: isMine ? "flex-end" : "flex-start",
+                        maxWidth: "75%",
+                        padding: "10px 14px",
+                        borderRadius: "12px",
+                        backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                        color: isMine ? "#fff" : "#000",
+                        fontSize: "14px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {!isMine && (
+                        <div style={{ 
+                          fontSize: "11px", 
+                          fontWeight: 500, 
+                          color: "#0D3CFC", 
+                          marginBottom: "2px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}>
+                          {msg.senderName}
+                          {isAgent && <InstagramVerifiedBadge size={12} />}
+                        </div>
+                      )}
+                      <div>{msg.text}</div>
                       <div style={{ 
-                        fontSize: "11px", 
-                        fontWeight: 500, 
-                        color: "#0D3CFC", 
-                        marginBottom: "2px",
+                        fontSize: "9px", 
+                        color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                        marginTop: "4px",
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
                       }}>
-                        {msg.senderName}
-                        {isAgent && <InstagramVerifiedBadge size={12} />}
+                        {formatTime(msg.timestamp)}
+                        {isMine && msg.read && <span style={{ color: "#22c55e" }}>✓✓ Dibaca</span>}
+                        {isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                       </div>
-                    )}
-                    <div>{msg.text}</div>
-                    <div style={{ 
-                      fontSize: "9px", 
-                      color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                      marginTop: "4px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}>
-                      {formatTime(msg.timestamp)}
-                      {isMine && msg.read && <span style={{ color: "#22c55e" }}>✓✓ Dibaca</span>}
-                      {isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
               {typingText && (
                 <div style={{
                   alignSelf: "flex-start",
@@ -977,6 +994,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Input pesan - user bisa kirim pesan */}
             <div style={{
               padding: "12px 16px",
               borderTop: "1px solid #e8e8e8",
