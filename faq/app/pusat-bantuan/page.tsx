@@ -466,10 +466,9 @@ const FaqItem = ({
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT - STRUKTUR FIREBASE BARU =====
+// ===== LIVE CHAT AGENT - FIREBASE STRUCTURE =====
 // ============================================================
 
-// Interface untuk Ticket
 interface Ticket {
   id: string;
   userId: string;
@@ -489,7 +488,6 @@ interface Ticket {
   typingUserName?: string | null;
 }
 
-// Interface untuk Pesan
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -499,7 +497,7 @@ interface ChatMessage {
   read: boolean;
 }
 
-// ===== BLINKING DOTS COMPONENT =====
+// ===== BLINKING DOTS =====
 const BlinkingDots = ({ active }: { active: boolean }) => {
   if (!active) return <span style={{ color: '#999', fontSize: '14px' }}>● Offline</span>;
   return (
@@ -524,10 +522,9 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (REWRITE FROM SCRATCH) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
-  // State untuk tickets
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -547,7 +544,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
-  // ===== 1. SUBSCRIBE AGENT ONLINE STATUS =====
+  // ===== 1. AGENT ONLINE STATUS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -567,13 +564,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     let q;
     if (isAdmin) {
-      // Agent melihat SEMUA ticket yang belum resolved/closed + yang resolved/closed (untuk riwayat)
-      q = query(
-        collection(db, "livechat_tickets"),
-        orderBy("createdAt", "desc")
-      );
+      // Agent melihat SEMUA ticket
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
-      // User hanya melihat ticket miliknya yang statusnya waiting atau active (belum resolved)
+      // User hanya melihat ticket miliknya yang belum resolved/closed
       q = query(
         collection(db, "livechat_tickets"),
         where("userId", "==", user.uid),
@@ -659,7 +653,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }, 2000);
   };
 
-  // ===== 6. START CHAT (USER) - Buat ticket baru =====
+  // ===== 6. START CHAT (USER) =====
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
 
@@ -700,11 +694,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== 7. SEND MESSAGE (BOTH USER & AGENT) =====
+  // ===== 7. SEND MESSAGE (BOTH) =====
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
 
-    // Cek apakah ticket sudah resolved/closed
+    // Jika ticket sudah resolved/closed, tidak bisa kirim
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
@@ -790,10 +784,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ===== USER VIEW (bukan admin) =====
   // ============================================================
   if (!isAdmin) {
-    // Cari ticket aktif (waiting atau active)
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     const isWaiting = activeTicket?.status === 'waiting';
+    const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
     const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
+
+    // ===== SINKRONKAN selectedTicket dengan activeTicket =====
+    useEffect(() => {
+      if (activeTicket) {
+        setSelectedTicket(activeTicket);
+      } else {
+        setSelectedTicket(null);
+        setMessages([]);
+      }
+    }, [activeTicket]);
 
     // Jika tidak ada ticket aktif dan belum menampilkan form start chat
     if (!activeTicket && !showStartChat) {
@@ -906,11 +910,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER DALAM CHAT =====
+    // ===== USER DALAM CHAT (aktif) =====
     if (activeTicket) {
       const typingText = getTypingText(activeTicket);
       const showAgentName = activeTicket.agentName || AGENT_NAME;
-      const isResolved = activeTicket.status === 'resolved' || activeTicket.status === 'closed';
 
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -932,9 +935,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </span>
                 </div>
               </div>
-              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : (isResolved ? "#ef4444" : "#22c55e"), fontFamily: FONT_FAMILY, marginTop: "2px" }}>
-                {isWaiting ? "⏳ Menunggu agent..." : (isResolved ? "✅ Chat selesai" : `🟢 Agent: ${showAgentName}`)}
-                {activeTicket.agentName && !isWaiting && !isResolved && <InstagramVerifiedBadge size={14} />}
+              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#22c55e", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
+                {isWaiting ? "⏳ Menunggu agent..." : `🟢 Agent: ${showAgentName}`}
+                {activeTicket.agentName && !isWaiting && <InstagramVerifiedBadge size={14} />}
               </div>
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
@@ -1151,12 +1154,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ============================================================
   // ===== AGENT VIEW (admin) =====
   // ============================================================
-  // Tickets yang waiting atau active
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
-  
-  // Jika ada ticket yang dipilih
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
   const isTicketResolved = selectedTicket?.status === 'resolved' || selectedTicket?.status === 'closed';
 
@@ -1206,7 +1206,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           overflowY: "auto",
           flexShrink: 0,
         }}>
-          {/* Waiting */}
           {waitingTickets.length > 0 && (
             <div>
               <div style={{ padding: "12px 16px", backgroundColor: "#fef3c7", fontWeight: 600, fontSize: "14px", color: "#92400e" }}>
@@ -1237,7 +1236,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           )}
 
-          {/* Active */}
           {activeTickets.length > 0 && (
             <div>
               <div style={{ padding: "12px 16px", backgroundColor: "#d1fae5", fontWeight: 600, fontSize: "14px", color: "#065f46" }}>
@@ -1266,7 +1264,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           )}
 
-          {/* Resolved / Closed */}
           {resolvedTickets.length > 0 && (
             <div>
               <div style={{ padding: "12px 16px", backgroundColor: "#e5e7eb", fontWeight: 600, fontSize: "14px", color: "#6b7280" }}>
@@ -1537,7 +1534,7 @@ export default function PusatBantuanPage() {
   const [authorEmail, setAuthorEmail] = useState<string>("");
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
 
-  // Load FAQ from Firestore
+  // Load FAQ dari Firestore
   const loadFaqFromFirestore = async () => {
     if (!db) return;
     try {
@@ -1566,7 +1563,7 @@ export default function PusatBantuanPage() {
     }
   };
 
-  // Save FAQ to Firestore
+  // Save FAQ ke Firestore
   const saveFaqToFirestore = async (newFaqData: any) => {
     if (!db || !isAdmin) return;
     try {
@@ -1704,7 +1701,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load FAQ from Firestore on mount
+  // Load FAQ dari Firestore on mount
   useEffect(() => {
     loadFaqFromFirestore();
   }, []);
@@ -2143,7 +2140,6 @@ export default function PusatBantuanPage() {
 
           {/* KANAN: Shop + Pusat bantuan (biru) + Notif + Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {/* Shop Button */}
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
                 initial={{ opacity: 0, y: -20 }}
@@ -2175,7 +2171,7 @@ export default function PusatBantuanPage() {
               </motion.a>
             </Link>
 
-            {/* Help Center Button - BIRU, tidak bisa diklik */}
+            {/* Help Center Button - BIRU */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2199,7 +2195,7 @@ export default function PusatBantuanPage() {
               <span>Pusat bantuan</span>
             </motion.div>
 
-            {/* Notification Button */}
+            {/* Notification */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -2246,7 +2242,6 @@ export default function PusatBantuanPage() {
                 )}
               </motion.button>
 
-              {/* Notification Dropdown */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
@@ -2542,7 +2537,7 @@ export default function PusatBantuanPage() {
             </span>
           </motion.div>
 
-          {/* ===== KATEGORI: Blog, Shop, Donation, News, Calendar, Note ===== */}
+          {/* KATEGORI FAQ */}
           {Object.keys(faqData).map((category, catIndex) => (
             <motion.div
               key={category}
@@ -2551,7 +2546,6 @@ export default function PusatBantuanPage() {
               transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
               style={{ marginBottom: "60px" }}
             >
-              {/* Judul Kategori 70px biru, align left */}
               <h2 style={{
                 fontSize: "70px",
                 fontWeight: 700,
@@ -2566,11 +2560,7 @@ export default function PusatBantuanPage() {
                 {category}
               </h2>
 
-              {/* Daftar FAQ - tanpa background */}
-              <div style={{
-                maxWidth: "100%",
-                margin: "0",
-              }}>
+              <div style={{ maxWidth: "100%", margin: "0" }}>
                 {faqData[category as keyof typeof faqData].map((item, idx) => (
                   <FaqItem 
                     key={idx} 
