@@ -1704,7 +1704,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 };
 
 // ============================================================
-// ===== FOOTER COMPONENT =====
+// ===== FOOTER SECTION =====
 // ============================================================
 const FooterSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1774,6 +1774,7 @@ const FooterSection = () => {
           bottom: 0,
           left: 0,
           right: 0,
+          margin: '0 20px',
           backgroundColor: '#0D3CFC',
           borderRadius: '40px 40px 0 0',
           padding: '60px 40px',
@@ -1787,7 +1788,6 @@ const FooterSection = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '100%',
         }}
       >
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '600px' }}>
@@ -1843,7 +1843,6 @@ export default function PusatBantuanPage() {
   const [authorEmail, setAuthorEmail] = useState<string>("");
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
 
-  // Load FAQ dari Firestore
   const loadFaqFromFirestore = async () => {
     if (!db) return;
     try {
@@ -1872,7 +1871,6 @@ export default function PusatBantuanPage() {
     }
   };
 
-  // Save FAQ ke Firestore
   const saveFaqToFirestore = async (newFaqData: any) => {
     if (!db || !isAdmin) return;
     try {
@@ -1910,14 +1908,12 @@ export default function PusatBantuanPage() {
     }
   };
 
-  // Handle edit FAQ
   const handleEditFaq = (category: string, index: number, newQ: string, newA: string) => {
     const newData = { ...faqData };
     newData[category as keyof typeof faqData][index] = { q: newQ, a: newA };
     saveFaqToFirestore(newData);
   };
 
-  // Auth Listener
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1968,7 +1964,6 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // Load users & unread count
   useEffect(() => {
     if (!db || !user) return;
     const usersRef = collection(db, "users");
@@ -1985,7 +1980,6 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load unread messages count
   useEffect(() => {
     if (!db || !user) return;
     const chatsRef = collection(db, "chats");
@@ -2010,12 +2004,10 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load FAQ dari Firestore on mount
   useEffect(() => {
     loadFaqFromFirestore();
   }, []);
 
-  // Rolling text search
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -2047,7 +2039,6 @@ export default function PusatBantuanPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Search expand
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -2058,7 +2049,6 @@ export default function PusatBantuanPage() {
     }
   }, [isSearchOpen]);
 
-  // Click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -2783,7 +2773,6 @@ export default function PusatBantuanPage() {
           marginLeft: "auto",
           marginRight: "auto",
         }}>
-          {/* Judul "Pusat Bantuan" 200px biru */}
           <motion.h1
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -2803,7 +2792,6 @@ export default function PusatBantuanPage() {
             Pusat Bantuan
           </motion.h1>
 
-          {/* Last Update */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -2820,7 +2808,6 @@ export default function PusatBantuanPage() {
             Last Update: {lastUpdate || "Belum diperbarui"}
           </motion.div>
 
-          {/* Author Verified */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -2847,7 +2834,6 @@ export default function PusatBantuanPage() {
             </span>
           </motion.div>
 
-          {/* KATEGORI FAQ */}
           {Object.keys(faqData).map((category, catIndex) => (
             <motion.div
               key={category}
@@ -2886,7 +2872,6 @@ export default function PusatBantuanPage() {
             </motion.div>
           ))}
 
-          {/* ===== LIVE CHAT AGENT ===== */}
           {user && (
             <LiveChatAgent 
               user={user} 
