@@ -125,7 +125,7 @@ const OnlineIndicator = ({ online }: { online: boolean }) => {
   );
 };
 
-// ===== KOMPONEN GREETING =====
+// ===== GREETING =====
 const getGreeting = (): string => {
   const hour = new Date().getHours();
   if (hour >= 4 && hour < 10) return "Selamat pagi";
@@ -134,7 +134,110 @@ const getGreeting = (): string => {
   return "Selamat malam";
 };
 
-// ===== KOMPONEN UTAMA =====
+// ===== DATA FAQ =====
+const faqData = [
+  {
+    id: "blog",
+    title: "Blog",
+    items: [
+      {
+        question: "Bagaimana cara menulis blog di Menuru?",
+        answer: "Anda dapat menulis blog melalui dashboard akun Anda. Klik menu 'Buat Blog Baru', lalu isi judul, konten, dan tag yang sesuai. Setelah selesai, klik 'Publikasikan' untuk mempublikasikan blog Anda."
+      },
+      {
+        question: "Apakah blog saya bisa dilihat oleh semua orang?",
+        answer: "Ya, blog yang Anda publikasikan akan terlihat oleh semua pengunjung Menuru. Anda juga bisa mengatur privasi blog menjadi 'Draft' jika belum siap dipublikasikan."
+      },
+      {
+        question: "Bagaimana cara mengedit blog yang sudah dipublikasikan?",
+        answer: "Buka dashboard akun Anda, pilih 'Kelola Blog', lalu klik tombol 'Edit' pada blog yang ingin Anda ubah. Setelah selesai mengedit, klik 'Perbarui' untuk menyimpan perubahan."
+      }
+    ]
+  },
+  {
+    id: "shop",
+    title: "Shop",
+    items: [
+      {
+        question: "Bagaimana cara berbelanja di Menuru Shop?",
+        answer: "Anda dapat menjelajahi produk di halaman Shop, pilih produk yang diinginkan, lalu klik 'Tambah ke Keranjang'. Setelah selesai berbelanja, lanjutkan ke proses checkout dan ikuti instruksi pembayaran."
+      },
+      {
+        question: "Metode pembayaran apa saja yang tersedia?",
+        answer: "Kami menerima pembayaran melalui transfer bank, e-wallet (GoPay, OVO, Dana), dan kartu kredit/debit. Semua transaksi diproses secara aman."
+      },
+      {
+        question: "Berapa lama waktu pengiriman barang?",
+        answer: "Waktu pengiriman bervariasi tergantung lokasi Anda. Untuk wilayah Jabodetabek, estimasi 1-3 hari kerja. Untuk luar Jawa, estimasi 3-7 hari kerja."
+      }
+    ]
+  },
+  {
+    id: "donation",
+    title: "Donation",
+    items: [
+      {
+        question: "Bagaimana cara melakukan donasi?",
+        answer: "Anda dapat melakukan donasi melalui halaman Donasi. Pilih nominal donasi yang diinginkan, lalu ikuti instruksi pembayaran. Donasi Anda akan disalurkan kepada penerima yang membutuhkan."
+      },
+      {
+        question: "Apakah donasi saya bisa digunakan untuk program tertentu?",
+        answer: "Ya, Anda dapat memilih program donasi yang ingin Anda dukung. Setiap program memiliki deskripsi dan tujuan yang jelas."
+      },
+      {
+        question: "Bagaimana saya bisa melihat laporan donasi?",
+        answer: "Laporan donasi dapat diakses melalui dashboard akun Anda. Di sana Anda dapat melihat riwayat donasi dan program yang telah Anda dukung."
+      }
+    ]
+  },
+  {
+    id: "news",
+    title: "News",
+    items: [
+      {
+        question: "Bagaimana cara mendapatkan berita terbaru dari Menuru?",
+        answer: "Anda dapat mengikuti halaman News atau berlangganan newsletter kami. Kami akan mengirimkan berita terbaru langsung ke email Anda."
+      },
+      {
+        question: "Apakah saya bisa mengirimkan berita atau artikel?",
+        answer: "Ya, Anda dapat mengirimkan artikel atau berita melalui form kontribusi yang tersedia di halaman News. Tim kami akan meninjau dan mempublikasikannya jika sesuai."
+      }
+    ]
+  },
+  {
+    id: "calendar",
+    title: "Calendar",
+    items: [
+      {
+        question: "Apa fungsi Calendar di Menuru?",
+        answer: "Calendar digunakan untuk menampilkan jadwal acara, webinar, dan kegiatan penting lainnya yang diselenggarakan oleh Menuru atau komunitas."
+      },
+      {
+        question: "Bagaimana cara menambahkan acara ke Calendar?",
+        answer: "Jika Anda memiliki akun dengan izin khusus, Anda dapat menambahkan acara melalui tombol 'Tambah Acara' di halaman Calendar. Isi detail acara dan klik 'Simpan'."
+      }
+    ]
+  },
+  {
+    id: "note",
+    title: "Note",
+    items: [
+      {
+        question: "Apa itu fitur Note di Menuru?",
+        answer: "Note adalah fitur catatan pribadi yang memungkinkan Anda menyimpan ide, daftar tugas, atau informasi penting lainnya dengan aman."
+      },
+      {
+        question: "Apakah catatan saya aman dan pribadi?",
+        answer: "Ya, catatan Anda bersifat pribadi dan hanya dapat diakses oleh Anda. Semua catatan disimpan dengan enkripsi untuk menjaga keamanan data Anda."
+      },
+      {
+        question: "Bisakah saya berbagi catatan dengan orang lain?",
+        answer: "Saat ini, fitur Note bersifat pribadi. Namun, kami sedang mengembangkan fitur berbagi catatan untuk rilis mendatang."
+      }
+    ]
+  }
+];
+
 export default function PusatBantuanPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -164,7 +267,10 @@ export default function PusatBantuanPage() {
   const notificationsRef = useRef<HTMLDivElement>(null);
   const [totalUnread, setTotalUnread] = useState(0);
 
-  // Update greeting every minute
+  // FAQ accordion state
+  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
+
+  // Update greeting
   useEffect(() => {
     const updateGreeting = () => {
       const newGreeting = getGreeting();
@@ -180,7 +286,7 @@ export default function PusatBantuanPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // ===== ROLLING TEXT SEARCH =====
+  // Rolling text search
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -211,7 +317,7 @@ export default function PusatBantuanPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // ===== SEARCH EXPAND =====
+  // Search expand
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -222,7 +328,7 @@ export default function PusatBantuanPage() {
     }
   }, [isSearchOpen]);
 
-  // ===== CLICK OUTSIDE =====
+  // Click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -241,7 +347,7 @@ export default function PusatBantuanPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ===== AUTH =====
+  // Auth
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -261,7 +367,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // ===== LOAD UNREAD COUNT =====
+  // Load unread count
   useEffect(() => {
     if (!db || !user) return;
     const chatsRef = collection(db, "chats");
@@ -271,6 +377,7 @@ export default function PusatBantuanPage() {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const messagesRef = collection(db, "chats", docSnap.id, "messages");
+          const q = query(messagesRef);
           const msgSnap = await import('firebase/firestore').then(({ getDocs, query, where }) => 
             getDocs(query(messagesRef, where("read", "==", false), where("senderId", "!=", user.uid)))
           );
@@ -282,7 +389,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // ===== LOGOUT =====
+  // Logout
   const handleLogout = async () => {
     if (!auth) return;
     try {
@@ -297,17 +404,9 @@ export default function PusatBantuanPage() {
     }
   };
 
-  // ===== GSAP ANIMASI UNTUK KELOMPOK MENU =====
+  // GSAP animation for FAQ items with plus sign
   useEffect(() => {
-    const items = document.querySelectorAll('.menu-item');
-    items.forEach((item, index) => {
-      gsap.fromTo(item,
-        { opacity: 0, x: -30, scale: 0.95 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.5, delay: 0.8 + index * 0.08, ease: "power2.out" }
-      );
-    });
-
-    const plusSigns = document.querySelectorAll('.plus-sign');
+    const plusSigns = document.querySelectorAll('.plus-sign-faq');
     plusSigns.forEach((plus) => {
       const el = plus as HTMLElement;
       el.addEventListener('mouseenter', () => {
@@ -326,6 +425,10 @@ export default function PusatBantuanPage() {
       </div>
     );
   }
+
+  const toggleFaq = (id: string) => {
+    setOpenFaqId(openFaqId === id ? null : id);
+  };
 
   return (
     <>
@@ -346,7 +449,7 @@ export default function PusatBantuanPage() {
         fontFamily: FONT_FAMILY,
         overflow: "hidden",
       }}>
-        {/* ===== HEADER SAMA DENGAN HALAMAN UTAMA ===== */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -550,7 +653,7 @@ export default function PusatBantuanPage() {
               </motion.button>
             </Link>
 
-            {/* Pusat bantuan - aktif di halaman ini */}
+            {/* Pusat bantuan - active */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -572,7 +675,7 @@ export default function PusatBantuanPage() {
               <span>Pusat bantuan</span>
             </motion.div>
 
-            {/* Notification Button */}
+            {/* Notification */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -619,7 +722,6 @@ export default function PusatBantuanPage() {
                 )}
               </motion.button>
 
-              {/* Notification Dropdown */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
@@ -668,7 +770,7 @@ export default function PusatBantuanPage() {
               </AnimatePresence>
             </div>
 
-            {/* ===== PROFILE DROPDOWN ===== */}
+            {/* Profile */}
             <div ref={profileDropdownRef} style={{ position: "relative" }}>
               {user ? (
                 <>
@@ -855,9 +957,9 @@ export default function PusatBantuanPage() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          padding: "140px 40px 40px 40px",
+          padding: "140px 40px 60px 40px",
           width: "100%",
-          maxWidth: "1400px",
+          maxWidth: "1200px",
           margin: "0 auto",
           minHeight: "100vh",
         }}>
@@ -884,107 +986,116 @@ export default function PusatBantuanPage() {
             Pusat Bantuan
           </motion.h1>
 
-          {/* ===== KELOMPOK MENU DI SISI KIRI ===== */}
+          {/* ===== FAQ ACCORDION ===== */}
           <div style={{
             marginTop: "60px",
             width: "100%",
-            maxWidth: "800px",
+            maxWidth: "900px",
           }}>
-            {[
-              "Blog",
-              "Shop",
-              "Donation",
-              "News",
-              "Calendar",
-              "Note"
-            ].map((title, index) => (
+            {faqData.map((section, index) => (
               <motion.div
-                key={index}
-                className="menu-item"
-                initial={{ opacity: 0, x: -30, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.8 + index * 0.08, ease: "power2.out" }}
+                key={section.id}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 + index * 0.08, ease: "power2.out" }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  padding: "16px 20px",
-                  borderBottom: index < 5 ? "1px solid #f0f0f0" : "none",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  borderRadius: "12px",
-                  marginBottom: "4px",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.04)";
-                  e.currentTarget.style.paddingLeft = "28px";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.paddingLeft = "20px";
+                  marginBottom: "24px",
+                  borderBottom: index < faqData.length - 1 ? "1px solid #f0f0f0" : "none",
+                  paddingBottom: index < faqData.length - 1 ? "24px" : "0",
                 }}
               >
-                <span className="plus-sign" style={{
-                  fontSize: "28px",
-                  fontWeight: 300,
-                  color: "#0D3CFC",
-                  display: "inline-block",
-                  transition: "transform 0.3s ease",
-                  width: "36px",
-                  textAlign: "center",
-                }}>
-                  +
-                </span>
-                <span style={{
-                  fontSize: "24px",
-                  fontWeight: 500,
-                  color: "#000000",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.02em",
-                }}>
-                  {title}
-                </span>
+                {/* Judul Section - biru */}
+                <div
+                  onClick={() => toggleFaq(section.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                    cursor: "pointer",
+                    padding: "8px 0",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.paddingLeft = "8px";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.paddingLeft = "0";
+                  }}
+                >
+                  <span className="plus-sign-faq" style={{
+                    fontSize: "32px",
+                    fontWeight: 300,
+                    color: "#0D3CFC",
+                    display: "inline-block",
+                    transition: "transform 0.3s ease",
+                    width: "40px",
+                    textAlign: "center",
+                    transform: openFaqId === section.id ? "rotate(45deg)" : "rotate(0deg)",
+                  }}>
+                    +
+                  </span>
+                  <span style={{
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "-0.02em",
+                  }}>
+                    {section.title}
+                  </span>
+                </div>
+
+                {/* Konten FAQ - hitam */}
+                <AnimatePresence>
+                  {openFaqId === section.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "power2.out" }}
+                      style={{
+                        overflow: "hidden",
+                        paddingLeft: "56px",
+                      }}
+                    >
+                      <div style={{
+                        paddingTop: "8px",
+                        paddingBottom: "4px",
+                      }}>
+                        {section.items.map((item, idx) => (
+                          <div key={idx} style={{
+                            marginBottom: "20px",
+                            padding: "16px 20px",
+                            backgroundColor: "#f8f8f8",
+                            borderRadius: "8px",
+                            borderLeft: "3px solid #0D3CFC",
+                          }}>
+                            <div style={{
+                              fontSize: "16px",
+                              fontWeight: 600,
+                              color: "#000000",
+                              fontFamily: FONT_FAMILY,
+                              marginBottom: "6px",
+                            }}>
+                              {item.question}
+                            </div>
+                            <div style={{
+                              fontSize: "15px",
+                              color: "#333333",
+                              fontFamily: FONT_FAMILY,
+                              lineHeight: 1.7,
+                            }}>
+                              {item.answer}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
-        </div>
-
-        {/* Tombol kembali ke beranda - minimalis tanpa footer */}
-        <div style={{
-          position: "fixed",
-          bottom: "32px",
-          right: "40px",
-          zIndex: 20,
-        }}>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <motion.button
-              whileHover={{ scale: 1.05, x: -4 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#0D3CFC",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                fontFamily: FONT_FAMILY,
-                padding: "10px 20px",
-                borderRadius: "30px",
-                transition: "all 0.2s ease",
-                backgroundColor: "rgba(13,60,252,0.06)",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.12)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.06)"}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M5 12L12 19M5 12L12 5" />
-              </svg>
-              <span>Kembali ke Beranda</span>
-            </motion.button>
-          </Link>
         </div>
       </div>
     </>
