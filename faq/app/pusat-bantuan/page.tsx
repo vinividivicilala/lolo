@@ -6,7 +6,6 @@ import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -31,11 +30,6 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-
-// Register ScrollTrigger
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 // Firebase Config
 const firebaseConfig = {
@@ -529,7 +523,7 @@ const PulsingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT =====
+// ===== LIVE CHAT AGENT COMPONENT (SAMA SEPERTI SEBELUMNYA) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -551,7 +545,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
-  // ===== FUNGSI GENERATE TICKET ID =====
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -575,7 +568,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   };
 
-  // ===== ICON SVG =====
   const WaitingIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10"/>
@@ -603,7 +595,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // ===== HOOKS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -674,7 +665,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, [messages, selectedTicket, db, user, isAdmin]);
 
-  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -1704,116 +1694,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 };
 
 // ============================================================
-// ===== FOOTER SECTION =====
-// ============================================================
-const FooterSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (footerRef.current && containerRef.current) {
-      gsap.set(footerRef.current, {
-        y: '100%',
-        opacity: 0,
-      });
-
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'top bottom',
-        end: 'top center',
-        onUpdate: (self) => {
-          const progress = self.progress;
-          const yProgress = 1 - progress;
-          gsap.to(footerRef.current, {
-            y: `${yProgress * 100}%`,
-            opacity: progress,
-            duration: 0.1,
-            ease: 'power2.out',
-            overwrite: 'auto',
-          });
-        },
-        onEnter: () => {
-          gsap.to(footerRef.current, {
-            y: '0%',
-            opacity: 1,
-            duration: 0.6,
-            ease: 'power2.out',
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(footerRef.current, {
-            y: '100%',
-            opacity: 0,
-            duration: 0.6,
-            ease: 'power2.in',
-          });
-        },
-      });
-    }
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
-
-  return (
-    <div 
-      ref={containerRef}
-      style={{
-        height: '50vh',
-        minHeight: '350px',
-        position: 'relative',
-        overflow: 'hidden',
-        marginTop: '20px',
-        padding: '0 20px',
-      }}
-    >
-      <div
-        ref={footerRef}
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          margin: '0 20px',
-          backgroundColor: '#0D3CFC',
-          borderRadius: '40px 40px 0 0',
-          padding: '60px 40px',
-          color: '#fff',
-          fontFamily: FONT_FAMILY,
-          textAlign: 'center',
-          transform: 'translateY(100%)',
-          opacity: 0,
-          minHeight: '50vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '600px' }}>
-          <h3 style={{ fontSize: '32px', fontWeight: 600, marginBottom: '16px', fontFamily: FONT_FAMILY }}>
-            Menuru
-          </h3>
-          <p style={{ fontSize: '16px', opacity: 0.8, fontFamily: FONT_FAMILY }}>
-            © 2026 Menuru. All rights reserved.
-          </p>
-        </div>
-        <div style={{
-          position: 'absolute',
-          top: '-50%',
-          left: '-20%',
-          width: '140%',
-          height: '200%',
-          background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%)',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }} />
-      </div>
-    </div>
-  );
-};
-
-// ============================================================
 // ===== KOMPONEN UTAMA =====
 // ============================================================
 export default function PusatBantuanPage() {
@@ -2100,6 +1980,24 @@ export default function PusatBantuanPage() {
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
       </Head>
+
+      <style jsx global>{`
+        /* Hilangkan scrollbar tapi tetap bisa scroll */
+        body {
+          overflow-y: scroll;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
+        }
+        body::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        * {
+          scrollbar-width: none;
+        }
+        *::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
 
       <div style={{
         minHeight: "100vh",
@@ -2772,6 +2670,7 @@ export default function PusatBantuanPage() {
           maxWidth: "1400px",
           marginLeft: "auto",
           marginRight: "auto",
+          paddingBottom: "80px",
         }}>
           <motion.h1
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
@@ -2872,18 +2771,50 @@ export default function PusatBantuanPage() {
             </motion.div>
           ))}
 
-          {user && (
+          {/* ===== LIVE CHAT AGENT ===== */}
+          {user ? (
             <LiveChatAgent 
               user={user} 
               isAdmin={isAdmin} 
               db={db} 
               auth={auth} 
             />
+          ) : (
+            <div style={{
+              marginTop: "60px",
+              borderTop: "1px solid #e8e8e8",
+              paddingTop: "40px",
+              textAlign: "center",
+            }}>
+              <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
+                Live Chat Agent
+              </h3>
+              <p style={{ fontSize: "18px", color: "#666", fontFamily: FONT_FAMILY }}>
+                Silakan login untuk menggunakan Live Chat Agent
+              </p>
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    marginTop: "16px",
+                    padding: "12px 32px",
+                    backgroundColor: "#0D3CFC",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Login
+                </motion.button>
+              </Link>
+            </div>
           )}
         </div>
-
-        {/* ===== FOOTER ===== */}
-        <FooterSection />
       </div>
     </>
   );
