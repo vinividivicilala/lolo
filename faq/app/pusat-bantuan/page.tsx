@@ -533,7 +533,7 @@ const PulsingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (FIXED - NO EARLY RETURN) =====
+// ===== LIVE CHAT AGENT COMPONENT (FIXED - NO HOOKS IN CONDITIONAL) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   // ===== ALL HOOKS CALLED AT TOP LEVEL (FIX ERROR #300) =====
@@ -608,7 +608,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // ===== ALL useEffect HOOKS =====
+  // ===== ALL useEffect HOOKS (NO CONDITIONAL INSIDE) =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -649,7 +649,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin]);
+  }, [db, user, isAdmin, selectedTicket]);
 
   useEffect(() => {
     if (!db || !selectedTicket) return;
@@ -678,6 +678,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       await updateDoc(msgRef, { read: true });
     });
   }, [messages, selectedTicket, db, user, isAdmin]);
+
+  // ===== EFFECT UNTUK USER BIASA (TANPA CONDITIONAL DI DALAM) =====
+  useEffect(() => {
+    if (!user || isAdmin) return;
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+    if (activeTicket) {
+      setSelectedTicket(activeTicket);
+    } else if (tickets.length > 0 && !selectedTicket) {
+      setSelectedTicket(tickets[0]);
+    } else if (tickets.length === 0) {
+      setSelectedTicket(null);
+      setMessages([]);
+    }
+  }, [tickets, user, isAdmin, selectedTicket]);
 
   // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -832,7 +846,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           gap: "24px",
           flexWrap: "wrap",
         }}>
-          {/* Ilustrasi di sisi kiri */}
           <div style={{
             flexShrink: 0,
             display: "flex",
@@ -846,8 +859,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           }}>
             <LiveChatIllustration />
           </div>
-          
-          {/* Konten teks di sisi kiri */}
           <div style={{
             textAlign: "left",
             flex: 1,
@@ -905,17 +916,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const isWaiting = activeTicket?.status === 'waiting';
     const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
     const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
-
-    useEffect(() => {
-      if (activeTicket) {
-        setSelectedTicket(activeTicket);
-      } else if (tickets.length > 0 && !selectedTicket) {
-        setSelectedTicket(tickets[0]);
-      } else if (tickets.length === 0) {
-        setSelectedTicket(null);
-        setMessages([]);
-      }
-    }, [activeTicket, tickets]);
 
     if (tickets.length === 0 && !showStartChat) {
       return (
@@ -2081,12 +2081,12 @@ export default function PusatBantuanPage() {
         /* Hilangkan scrollbar tapi tetap bisa scroll */
         body {
           overflow-y: scroll;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none;
+          -ms-overflow-style: none;
           scroll-behavior: smooth;
         }
         body::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
         * {
           scrollbar-width: none;
