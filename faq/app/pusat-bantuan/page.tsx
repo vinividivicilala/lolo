@@ -523,7 +523,7 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (FULLY FIXED) =====
+// ===== LIVE CHAT AGENT COMPONENT (REBUILT FROM SCRATCH) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [rooms, setRooms] = useState<LiveChatRoom[]>([]);
@@ -545,14 +545,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
-  // ===== SUBSCRIBE AGENT ONLINE STATUS =====
+  // ===== CHECK AGENT ONLINE STATUS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
+        const data = snapshot.docs[0].data();
         setAgentOnline(data.online || false);
       }
     });
@@ -562,29 +561,42 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ===== LOAD ROOMS =====
   useEffect(() => {
     if (!db || !user) return;
-    let q;
+    
     if (isAdmin) {
-      // Agent melihat SEMUA room termasuk yang sudah closed (untuk riwayat)
-      q = query(collection(db, "livechat_rooms"), orderBy("createdAt", "desc"));
+      // Admin melihat semua room yang belum closed
+      const q = query(
+        collection(db, "livechat_rooms"),
+        where("status", "in", ["waiting", "active"]),
+        orderBy("createdAt", "desc")
+      );
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const roomList: LiveChatRoom[] = [];
+        snapshot.forEach((doc) => {
+          roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
+        });
+        setRooms(roomList);
+      });
+      return () => unsubscribe();
     } else {
-      // User melihat room miliknya yang statusnya waiting atau active
-      q = query(
+      // User melihat room miliknya sendiri
+      const q = query(
         collection(db, "livechat_rooms"),
         where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"])
+        where("status", "in", ["waiting", "active"]),
+        orderBy("createdAt", "desc")
       );
-    }
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const roomList: LiveChatRoom[] = [];
-      snapshot.forEach((doc) => {
-        roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const roomList: LiveChatRoom[] = [];
+        snapshot.forEach((doc) => {
+          roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
+        });
+        setRooms(roomList);
       });
-      setRooms(roomList);
-    });
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
   }, [db, user, isAdmin]);
 
-  // ===== LOAD MESSAGES PER ROOM =====
+  // ===== LOAD MESSAGES FOR SELECTED ROOM =====
   useEffect(() => {
     if (!db || !selectedRoom) return;
     const q = query(
@@ -604,15 +616,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, selectedRoom]);
 
-  // ===== MARK MESSAGES AS READ (for agent) =====
+  // ===== MARK MESSAGES AS READ =====
   useEffect(() => {
-    if (!db || !selectedRoom || !user || !isAdmin) return;
-    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
-    unread.forEach(async (msg) => {
-      const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
-      await updateDoc(msgRef, { read: true });
+    if (!db || !selectedRoom || !user) return;
+    // User marks messages as read when they are opened
+    const unreadMessages = messages.filter(m => m.senderId !== user.uid && !m.read);
+    if (unreadMessages.length === 0) return;
+    unreadMessages.forEach(async (msg) => {
+      try {
+        const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
+        await updateDoc(msgRef, { read: true });
+      } catch (error) {
+        console.error("Error marking message as read:", error);
+      }
     });
-  }, [messages, selectedRoom, db, user, isAdmin]);
+  }, [messages, selectedRoom, db, user]);
 
   // ===== HANDLE TYPING =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -670,7 +688,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== SEND MESSAGE (BOTH) =====
+  // ===== SEND MESSAGE =====
   const sendMessage = async () => {
     if (!db || !selectedRoom || !messageText.trim() || !user) return;
     try {
@@ -747,7 +765,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const isWaiting = activeRoom?.status === 'waiting';
     const isAgentOnlineNow = agentOnline && activeRoom?.status === 'active';
 
-    // Tampilkan form start chat
     if (!activeRoom && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -857,7 +874,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER DALAM CHAT - menampilkan riwayat dari agent =====
+    // ===== USER CHAT VIEW =====
     if (activeRoom) {
       const typingText = getTypingText(activeRoom);
       const showAgentName = activeRoom.agentName || AGENT_NAME;
@@ -887,30 +904,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 {activeRoom.agentName && !isWaiting && <InstagramVerifiedBadge size={14} />}
               </div>
             </div>
-            <button
-              onClick={() => {
-                if (window.confirm("Tutup chat ini?")) {
-                  setSelectedRoom(null);
-                }
-              }}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#999",
-                cursor: "pointer",
-                fontSize: "20px",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                transition: "background 0.2s ease",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-            >
-              ✕
-            </button>
           </div>
 
-          {/* Chat box dengan riwayat pesan */}
           <div style={{
             backgroundColor: "#f9f9f9",
             borderRadius: "12px",
@@ -994,8 +989,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               )}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Input pesan - user bisa kirim pesan */}
             <div style={{
               padding: "12px 16px",
               borderTop: "1px solid #e8e8e8",
@@ -1030,9 +1023,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 onFocus={(e) => { if (!isWaiting) e.currentTarget.style.borderColor = "#0D3CFC"; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
               />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={sendMessage}
                 disabled={isWaiting || !messageText.trim()}
                 style={{
@@ -1057,7 +1048,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               >
                 <SendIcon />
                 <span>Kirim</span>
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
@@ -1110,7 +1101,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       </div>
 
       <div style={{ display: "flex", gap: "24px", height: "500px" }}>
-        {/* Left: Room list */}
         <div style={{
           width: "300px",
           backgroundColor: "#f9f9f9",
@@ -1179,7 +1169,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           )}
         </div>
 
-        {/* Right: Chat area - HEADER BIRU */}
         <div style={{
           flex: 1,
           backgroundColor: "#ffffff",
@@ -1533,7 +1522,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // Load users & unread count
+  // Load users
   useEffect(() => {
     if (!db || !user) return;
     const usersRef = collection(db, "users");
@@ -1550,7 +1539,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load unread messages count
+  // Load unread messages count (untuk notifikasi)
   useEffect(() => {
     if (!db || !user) return;
     const chatsRef = collection(db, "chats");
