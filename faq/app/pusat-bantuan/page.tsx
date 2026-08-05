@@ -51,6 +51,7 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const VERIFIED_EMAILS = ["faridardiansyah061@gmail.com"];
 
 // ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
@@ -66,12 +67,28 @@ const CloseIcon = () => (
   </svg>
 );
 
+const ShopIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -92,14 +109,15 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+// Verified Badge (Google Font style)
+const VerifiedBadge = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="12" fill="#1DA1F2" />
+    <path d="M7 12L10.5 15.5L17 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ===== SEARCH ROLLING TEXT =====
+// ===== SEARCH ROLLING =====
 const searchRollingTexts = [
   "Tentang Note", 
   "Tentang Donasi", 
@@ -117,45 +135,136 @@ const getGreeting = (): string => {
   return "Selamat malam";
 };
 
-// ===== FAQ DATA =====
+// ===== FAQ DATA dengan author & lastUpdate =====
 const faqData = {
   Blog: [
-    { q: "Apa itu Blog Menuru?", a: "Blog Menuru adalah platform untuk berbagi artikel, tips, dan informasi seputar gaya hidup, pengembangan diri, dan teknologi." },
-    { q: "Bagaimana cara menulis artikel di Blog Menuru?", a: "Untuk menulis artikel, Anda harus login sebagai kontributor. Hubungi tim admin untuk mendapatkan akses." },
-    { q: "Apakah ada biaya untuk membaca blog?", a: "Tidak, semua artikel di Blog Menuru dapat dibaca secara gratis." },
+    { 
+      q: "Apa itu Blog Menuru?", 
+      a: "Blog Menuru adalah platform untuk berbagi artikel, tips, dan informasi seputar gaya hidup, pengembangan diri, dan teknologi.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Bagaimana cara menulis artikel di Blog Menuru?", 
+      a: "Untuk menulis artikel, Anda harus login sebagai kontributor. Hubungi tim admin untuk mendapatkan akses.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Apakah ada biaya untuk membaca blog?", 
+      a: "Tidak, semua artikel di Blog Menuru dapat dibaca secara gratis.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-03"
+    },
   ],
   Shop: [
-    { q: "Produk apa saja yang dijual di Shop Menuru?", a: "Shop Menuru menjual merchandise eksklusif seperti kaos, tas, dan aksesoris dengan desain khas Menuru." },
-    { q: "Bagaimana cara melakukan pembelian?", a: "Pilih produk, tambahkan ke keranjang, lalu ikuti proses checkout. Pembayaran melalui transfer bank atau e-wallet." },
-    { q: "Apakah tersedia pengiriman internasional?", a: "Saat ini pengiriman hanya untuk wilayah Indonesia. Kami akan segera membuka pengiriman internasional." },
+    { 
+      q: "Produk apa saja yang dijual di Shop Menuru?", 
+      a: "Shop Menuru menjual merchandise eksklusif seperti kaos, tas, dan aksesoris dengan desain khas Menuru.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Bagaimana cara melakukan pembelian?", 
+      a: "Pilih produk, tambahkan ke keranjang, lalu ikuti proses checkout. Pembayaran melalui transfer bank atau e-wallet.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Apakah tersedia pengiriman internasional?", 
+      a: "Saat ini pengiriman hanya untuk wilayah Indonesia. Kami akan segera membuka pengiriman internasional.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-02"
+    },
   ],
   Donation: [
-    { q: "Bagaimana cara berdonasi?", a: "Anda dapat berdonasi melalui tombol Donasi di halaman utama, atau transfer ke rekening resmi Menuru yang tertera." },
-    { q: "Kemana donasi disalurkan?", a: "Donasi disalurkan untuk kegiatan sosial, pendidikan, dan pengembangan komunitas." },
-    { q: "Apakah donasi bisa mendapatkan laporan?", a: "Ya, setiap donasi akan dilaporkan secara transparan di halaman Laporan Donasi." },
+    { 
+      q: "Bagaimana cara berdonasi?", 
+      a: "Anda dapat berdonasi melalui tombol Donasi di halaman utama, atau transfer ke rekening resmi Menuru yang tertera.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Kemana donasi disalurkan?", 
+      a: "Donasi disalurkan untuk kegiatan sosial, pendidikan, dan pengembangan komunitas.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Apakah donasi bisa mendapatkan laporan?", 
+      a: "Ya, setiap donasi akan dilaporkan secara transparan di halaman Laporan Donasi.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-03"
+    },
   ],
   News: [
-    { q: "Berita apa saja yang dimuat di News?", a: "News berisi berita terbaru seputar kegiatan Menuru, pencapaian, dan acara mendatang." },
-    { q: "Apakah bisa berlangganan newsletter?", a: "Ya, Anda bisa berlangganan newsletter melalui form di halaman News." },
-    { q: "Bagaimana cara mengirimkan berita?", a: "Kirimkan berita ke email redaksi@menuru.com untuk dipertimbangkan." },
+    { 
+      q: "Berita apa saja yang dimuat di News?", 
+      a: "News berisi berita terbaru seputar kegiatan Menuru, pencapaian, dan acara mendatang.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Apakah bisa berlangganan newsletter?", 
+      a: "Ya, Anda bisa berlangganan newsletter melalui form di halaman News.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Bagaimana cara mengirimkan berita?", 
+      a: "Kirimkan berita ke email redaksi@menuru.com untuk dipertimbangkan.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-03"
+    },
   ],
   Calendar: [
-    { q: "Apa fungsi Calendar?", a: "Calendar menampilkan jadwal acara, webinar, dan kegiatan komunitas Menuru." },
-    { q: "Bagaimana cara menambahkan acara ke Calendar?", a: "Acara ditambahkan oleh tim admin. Jika Anda ingin mengusulkan acara, hubungi kami." },
-    { q: "Apakah Calendar bisa di-sync ke Google Calendar?", a: "Ya, ada tombol sinkronisasi untuk menambahkan acara ke Google Calendar Anda." },
+    { 
+      q: "Apa fungsi Calendar?", 
+      a: "Calendar menampilkan jadwal acara, webinar, dan kegiatan komunitas Menuru.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Bagaimana cara menambahkan acara ke Calendar?", 
+      a: "Acara ditambahkan oleh tim admin. Jika Anda ingin mengusulkan acara, hubungi kami.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Apakah Calendar bisa di-sync ke Google Calendar?", 
+      a: "Ya, ada tombol sinkronisasi untuk menambahkan acara ke Google Calendar Anda.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-03"
+    },
   ],
   Note: [
-    { q: "Apa itu Note?", a: "Note adalah fitur untuk mencatat ide, catatan pribadi, atau hal penting lainnya." },
-    { q: "Apakah Note bisa dibagikan?", a: "Saat ini Note bersifat pribadi. Fitur berbagi akan segera hadir." },
-    { q: "Bagaimana cara menyimpan Note?", a: "Cukup tulis catatan Anda dan klik simpan. Note akan tersimpan di akun Anda." },
+    { 
+      q: "Apa itu Note?", 
+      a: "Note adalah fitur untuk mencatat ide, catatan pribadi, atau hal penting lainnya.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-05"
+    },
+    { 
+      q: "Apakah Note bisa dibagikan?", 
+      a: "Saat ini Note bersifat pribadi. Fitur berbagi akan segera hadir.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-04"
+    },
+    { 
+      q: "Bagaimana cara menyimpan Note?", 
+      a: "Cukup tulis catatan Anda dan klik simpan. Note akan tersimpan di akun Anda.",
+      author: "faridardiansyah061@gmail.com",
+      lastUpdated: "2026-08-03"
+    },
   ]
 };
 
-// ===== KOMPONEN FAQ ITEM =====
-const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
+// ===== FAQ ITEM with GSAP =====
+const FaqItem = ({ question, answer, author, lastUpdated }: { question: string; answer: string; author: string; lastUpdated: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLSpanElement>(null);
+  const isVerified = VERIFIED_EMAILS.includes(author);
 
   const toggleFaq = () => {
     setIsOpen(!isOpen);
@@ -187,7 +296,7 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
   };
 
   return (
-    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '16px 0' }}>
+    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0', maxWidth: '900px' }}>
       <div 
         onClick={toggleFaq}
         style={{
@@ -207,20 +316,18 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
           {question}
         </span>
         <span ref={iconRef} style={{
-          fontSize: '36px',
+          fontSize: '32px',
           fontWeight: 300,
           color: '#0D3CFC',
           transition: 'transform 0.3s ease',
           display: 'inline-block',
-          flexShrink: 0,
-          marginLeft: '20px',
         }}>
           +
         </span>
       </div>
       <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0 }}>
         <div style={{
-          padding: '16px 0 8px 0',
+          padding: '12px 0 8px 0',
           fontSize: '30px',
           color: '#333333',
           fontFamily: FONT_FAMILY,
@@ -228,12 +335,30 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
         }}>
           {answer}
         </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          fontSize: '18px',
+          color: '#999',
+          fontFamily: FONT_FAMILY,
+          padding: '8px 0 4px 0',
+          borderTop: '1px solid #f0f0f0',
+          marginTop: '8px',
+        }}>
+          <span>Diperbarui: {lastUpdated}</span>
+          <span>•</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            Oleh: {author}
+            {isVerified && <VerifiedBadge size={18} />}
+          </span>
+        </div>
       </div>
     </div>
   );
 };
 
-// ===== KOMPONEN UTAMA =====
+// ===== MAIN COMPONENT =====
 export default function PusatBantuanPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -256,7 +381,7 @@ export default function PusatBantuanPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Auth Listener
+  // Auth
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -293,6 +418,7 @@ export default function PusatBantuanPage() {
               });
             }
           } else {
+            const userData = userSnap.data();
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp()
@@ -306,7 +432,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // Load users untuk online status
+  // Users untuk online status (opsional)
   useEffect(() => {
     if (!db || !user) return;
     const usersRef = collection(db, "users");
@@ -323,32 +449,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load chat rooms untuk notifikasi
-  useEffect(() => {
-    if (!db || !user) return;
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef);
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      let total = 0;
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        if (data.participants && data.participants.includes(user.uid)) {
-          const messagesRef = collection(db, "chats", docSnap.id, "messages");
-          const unreadQuery = query(
-            messagesRef, 
-            where("read", "==", false),
-            where("senderId", "!=", user.uid)
-          );
-          const unreadSnap = await getDocs(unreadQuery);
-          total += unreadSnap.size;
-        }
-      }
-      setTotalUnread(total);
-    });
-    return () => unsubscribe();
-  }, [user]);
-
-  // Rolling text search
+  // Rolling text
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -528,7 +629,7 @@ export default function PusatBantuanPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search */}
+          {/* KIRI */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref>
               <motion.a
@@ -730,7 +831,7 @@ export default function PusatBantuanPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH: Note Donations News Calendar */}
+          {/* TENGAH */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -742,47 +843,15 @@ export default function PusatBantuanPage() {
               padding: "0 20px",
             }}
           >
-            <span style={{
-              fontSize: "29px",
-              fontWeight: 500,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-            }}>
-              Note
-            </span>
-            <span style={{
-              fontSize: "29px",
-              fontWeight: 500,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-            }}>
-              Donations
-            </span>
-            <span style={{
-              fontSize: "29px",
-              fontWeight: 500,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-            }}>
-              News
-            </span>
-            <span style={{
-              fontSize: "29px",
-              fontWeight: 500,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-            }}>
-              Calendar
-            </span>
+            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>Note</span>
+            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>Donations</span>
+            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>News</span>
+            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>Calendar</span>
           </motion.div>
 
-          {/* KANAN: Shop + Pusat bantuan (biru) + Notif + Profile */}
+          {/* KANAN */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {/* Shop Button */}
+            {/* Shop */}
             <Link href="/shop" passHref>
               <motion.a
                 initial={{ opacity: 0, y: -20 }}
@@ -814,32 +883,32 @@ export default function PusatBantuanPage() {
               </motion.a>
             </Link>
 
-            {/* Help Center Button - BIRU (aktif) */}
+            {/* Pusat bantuan - aktif (biru) */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
               style={{
-                background: "transparent",
+                background: "#0D3CFC",
                 border: "none",
-                color: "#0D3CFC",
+                color: "#ffffff",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 fontSize: "16px",
-                fontWeight: 600,
+                fontWeight: 500,
                 fontFamily: FONT_FAMILY,
-                padding: "8px 12px",
+                padding: "8px 16px",
                 borderRadius: "30px",
                 cursor: "default",
-                backgroundColor: "rgba(13,60,252,0.08)",
+                boxShadow: "0 2px 12px rgba(13,60,252,0.3)",
               }}
             >
-              <HelpDeskIcon size={22} />
+              <HelpDeskIcon size={22} style={{ color: "#ffffff" }} />
               <span>Pusat bantuan</span>
             </motion.div>
 
-            {/* Notification Button */}
+            {/* Notifikasi */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -885,51 +954,6 @@ export default function PusatBantuanPage() {
                   </span>
                 )}
               </motion.button>
-
-              {/* Notification Dropdown */}
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      minWidth: "320px",
-                      maxWidth: "380px",
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(0,0,0,0.04)",
-                      zIndex: 60,
-                      fontFamily: FONT_FAMILY,
-                      padding: "12px 0",
-                    }}
-                  >
-                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
-                      Notifikasi
-                    </div>
-                    {totalUnread === 0 ? (
-                      <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
-                        Tidak ada notifikasi
-                      </div>
-                    ) : (
-                      <div style={{ padding: "16px", textAlign: "center", color: "#666", fontSize: "13px" }}>
-                        Anda memiliki {totalUnread} pesan belum dibaca.
-                        <br />
-                        <Link href="/" style={{ color: "#0D3CFC", fontWeight: 500, textDecoration: "none" }}>
-                          Kembali ke Beranda
-                        </Link>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
             {/* Profile */}
@@ -1113,7 +1137,7 @@ export default function PusatBantuanPage() {
           </div>
         </div>
 
-        {/* ===== KONTEN PUSAT BANTUAN ===== */}
+        {/* ===== KONTEN ===== */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 60px",
@@ -1122,27 +1146,26 @@ export default function PusatBantuanPage() {
           marginLeft: "auto",
           marginRight: "auto",
         }}>
-          {/* Judul "Pusat Bantuan" 200px biru */}
+          {/* Judul Pusat Bantuan 70px */}
           <motion.h1
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "power3.out" }}
             style={{
-              fontSize: "200px",
+              fontSize: "70px",
               fontWeight: 700,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.05em",
               lineHeight: 1,
               margin: "0 0 40px 0",
-              textAlign: "center",
-              wordBreak: "break-word",
+              textAlign: "left",
             }}
           >
             Pusat Bantuan
           </motion.h1>
 
-          {/* ===== KATEGORI: Blog, Shop, Donation, News, Calendar, Note ===== */}
+          {/* KATEGORI */}
           {Object.keys(faqData).map((category, catIndex) => (
             <motion.div
               key={category}
@@ -1151,24 +1174,24 @@ export default function PusatBantuanPage() {
               transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
               style={{ marginBottom: "60px" }}
             >
-              {/* Judul Kategori 70px biru - kiri */}
+              {/* Judul Kategori 70px biru, rata kiri */}
               <h2 style={{
                 fontSize: "70px",
                 fontWeight: 700,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.2,
+                letterSpacing: "-0.05em",
+                lineHeight: 1,
                 margin: "0 0 20px 0",
                 textAlign: "left",
               }}>
                 {category}
               </h2>
 
-              {/* Daftar FAQ - tanpa background, kiri */}
+              {/* Daftar FAQ - tanpa background, rata kiri */}
               <div style={{ maxWidth: "100%" }}>
                 {faqData[category as keyof typeof faqData].map((item, idx) => (
-                  <FaqItem key={idx} question={item.q} answer={item.a} />
+                  <FaqItem key={idx} question={item.q} answer={item.a} author={item.author} lastUpdated={item.lastUpdated} />
                 ))}
               </div>
             </motion.div>
