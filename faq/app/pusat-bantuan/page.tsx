@@ -74,12 +74,6 @@ const CloseIcon = () => (
   </svg>
 );
 
-const BackIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -551,7 +545,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
-  // ===== SUBSCRIBE AGENT ONLINE STATUS =====
+  // ===== SUBSCRIBE AGENT ONLINE STATUS (dari Firestore) =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -572,16 +566,23 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (isAdmin) {
       q = query(collection(db, "livechat_rooms"), orderBy("createdAt", "desc"));
     } else {
+      // USER: ambil semua room miliknya, termasuk yang sudah closed (riwayat)
       q = query(
         collection(db, "livechat_rooms"),
-        where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"])
+        where("userId", "==", user.uid)
       );
     }
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const roomList: LiveChatRoom[] = [];
       snapshot.forEach((doc) => {
         roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
+      });
+      // Urutkan berdasarkan lastMessageTime terbaru
+      roomList.sort((a, b) => {
+        if (a.lastMessageTime && b.lastMessageTime) {
+          return b.lastMessageTime.seconds - a.lastMessageTime.seconds;
+        }
+        return 0;
       });
       setRooms(roomList);
     });
@@ -606,15 +607,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, selectedRoom]);
 
-  // ===== MARK MESSAGES AS READ (for agent) =====
+  // ===== MARK MESSAGES AS READ (untuk agent dan user) =====
   useEffect(() => {
-    if (!db || !selectedRoom || !user || !isAdmin) return;
+    if (!db || !selectedRoom || !user) return;
+    // Tandai pesan dari lawan bicara yang belum dibaca
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedRoom, db, user, isAdmin]);
+  }, [messages, selectedRoom, db, user]);
 
   // ===== HANDLE TYPING =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -672,7 +674,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== SEND MESSAGE (BOTH) =====
+  // ===== SEND MESSAGE (BOTH USER & AGENT) =====
   const sendMessage = async () => {
     if (!db || !selectedRoom || !messageText.trim() || !user) return;
     try {
@@ -740,10 +742,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ===== USER VIEW (bukan admin) =====
   // ============================================================
   if (!isAdmin) {
+    // Cari room aktif (waiting atau active)
     const activeRoom = rooms.find(r => r.status === 'active' || r.status === 'waiting');
+    // Riwayat chat (closed)
+    const closedRooms = rooms.filter(r => r.status === 'closed');
     const isWaiting = activeRoom?.status === 'waiting';
     const isAgentOnlineNow = agentOnline && activeRoom?.status === 'active';
 
+    // Jika tidak ada room aktif dan tidak dalam mode start chat
     if (!activeRoom && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -775,6 +781,46 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <ChatIcon />
             <span>Mulai Live Chat</span>
           </motion.button>
+
+          {/* Tampilkan riwayat chat jika ada */}
+          {closedRooms.length > 0 && (
+            <div style={{ marginTop: "30px" }}>
+              <h4 style={{ fontSize: "20px", fontWeight: 600, color: "#333", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
+                Riwayat Chat
+              </h4>
+              {closedRooms.map((room) => (
+                <div
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  style={{
+                    padding: "12px 16px",
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: "8px",
+                    border: "1px solid #e8e8e8",
+                    marginBottom: "8px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>
+                        {room.topic}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>
+                        {room.lastMessage || "Tidak ada pesan"}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#999" }}>
+                      {room.lastMessageTime ? formatTime(room.lastMessageTime) : ""}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -853,7 +899,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER DALAM CHAT =====
+    // ===== USER DALAM CHAT AKTIF =====
     if (activeRoom) {
       const typingText = getTypingText(activeRoom);
       const showAgentName = activeRoom.agentName || AGENT_NAME;
@@ -886,6 +932,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <button
               onClick={() => {
                 if (window.confirm("Tutup chat ini?")) {
+                  // User menutup chat, tapi status tetap active/waiting (agent bisa lanjut)
                   setSelectedRoom(null);
                 }
               }}
@@ -1058,6 +1105,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ============================================================
   const waitingRooms = rooms.filter(r => r.status === 'waiting');
   const activeRooms = rooms.filter(r => r.status === 'active');
+  const closedRoomsAgent = rooms.filter(r => r.status === 'closed');
   const typingText = selectedRoom ? getTypingText(selectedRoom) : null;
 
   return (
@@ -1074,7 +1122,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </span>
             <span style={{ fontSize: "14px", color: "#999" }}>•</span>
             <span style={{ fontSize: "14px", color: "#666" }}>
-              {waitingRooms.length} menunggu • {activeRooms.length} aktif
+              {waitingRooms.length} menunggu • {activeRooms.length} aktif • {closedRoomsAgent.length} selesai
             </span>
           </div>
         </div>
@@ -1159,14 +1207,39 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               ))}
             </div>
           )}
-          {waitingRooms.length === 0 && activeRooms.length === 0 && (
+          {closedRoomsAgent.length > 0 && (
+            <div>
+              <div style={{ padding: "12px 16px", backgroundColor: "#e5e7eb", fontWeight: 600, fontSize: "14px", color: "#4b5563" }}>
+                ✅ Selesai ({closedRoomsAgent.length})
+              </div>
+              {closedRoomsAgent.map((room) => (
+                <div
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {waitingRooms.length === 0 && activeRooms.length === 0 && closedRoomsAgent.length === 0 && (
             <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "14px" }}>
-              Tidak ada chat masuk
+              Tidak ada chat
             </div>
           )}
         </div>
 
-        {/* Right: Chat area */}
+        {/* Right: Chat area - HEADER BIRU */}
         <div style={{
           flex: 1,
           backgroundColor: "#ffffff",
@@ -1179,24 +1252,26 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <>
               <div style={{
                 padding: "12px 16px",
+                backgroundColor: "#0D3CFC",
                 borderBottom: "1px solid #e8e8e8",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                borderRadius: "12px 12px 0 0",
               }}>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: "16px", color: "#000" }}>
+                  <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff" }}>
                     {selectedRoom.userName}
-                    <span style={{ fontSize: "12px", fontWeight: 400, color: "#999", marginLeft: "8px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
                       {selectedRoom.topic}
                     </span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "12px", color: selectedRoom.status === 'waiting' ? "#f59e0b" : "#22c55e" }}>
-                      {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : '🟢 Aktif'}
+                    <span style={{ fontSize: "12px", color: selectedRoom.status === 'waiting' ? "#fef3c7" : selectedRoom.status === 'closed' ? "#d1d5db" : "#d1fae5" }}>
+                      {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : selectedRoom.status === 'closed' ? '✅ Selesai' : '🟢 Aktif'}
                     </span>
-                    {selectedRoom.typing && (
-                      <span style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>
+                    {selectedRoom.typing && selectedRoom.status !== 'closed' && (
+                      <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic" }}>
                         {selectedRoom.typingUserName} mengetik...
                       </span>
                     )}
@@ -1268,7 +1343,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     </div>
                   );
                 })}
-                {typingText && (
+                {typingText && selectedRoom.status !== 'closed' && (
                   <div style={{
                     alignSelf: "flex-start",
                     fontSize: "13px",
