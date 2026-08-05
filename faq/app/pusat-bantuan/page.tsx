@@ -521,7 +521,7 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT =====
+// ===== LIVE CHAT AGENT COMPONENT (FIXED HOOKS) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -589,7 +589,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // ===== AGENT ONLINE STATUS =====
+  // ===== HOOKS (dipanggil di level atas komponen) =====
+  // 1. Agent online status
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -603,7 +604,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db]);
 
-  // ===== SUBSCRIBE TICKETS =====
+  // 2. Subscribe tickets
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -622,6 +623,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
       });
       setTickets(ticketList);
+      // Jika selectedTicket tidak ada di list, reset
       if (selectedTicket) {
         const stillExists = ticketList.some(t => t.id === selectedTicket.id);
         if (!stillExists) {
@@ -631,9 +633,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin]);
+  }, [db, user, isAdmin, selectedTicket]);
 
-  // ===== SUBSCRIBE MESSAGES =====
+  // 3. Subscribe messages per ticket
   useEffect(() => {
     if (!db || !selectedTicket) return;
     const q = query(
@@ -653,7 +655,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, selectedTicket]);
 
-  // ===== MARK MESSAGES AS READ =====
+  // 4. Mark messages as read (agent only)
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
@@ -663,7 +665,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, [messages, selectedTicket, db, user, isAdmin]);
 
-  // ===== HANDLE TYPING =====
+  // 5. Sinkronkan selectedTicket dengan activeTicket (user view)
+  useEffect(() => {
+    if (!isAdmin && tickets.length > 0) {
+      const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+      if (activeTicket) {
+        setSelectedTicket(activeTicket);
+      } else {
+        setSelectedTicket(null);
+        setMessages([]);
+      }
+    }
+  }, [tickets, isAdmin]);
+
+  // ===== HANDLE FUNCTIONS =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -688,7 +703,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }, 2000);
   };
 
-  // ===== START CHAT =====
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
     const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
@@ -724,7 +738,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== SEND MESSAGE =====
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
@@ -760,7 +773,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== TAKE TICKET =====
   const takeTicket = async (ticketId: string) => {
     if (!db || !isAdmin || !user) return;
     try {
@@ -774,7 +786,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== RESOLVE TICKET =====
   const resolveTicket = async (ticketId: string) => {
     if (!db || !isAdmin) return;
     try {
@@ -802,23 +813,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  // ============================================================
-  // ===== USER VIEW (bukan admin) =====
-  // ============================================================
+  // ===== RENDER =====
+  // User view
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     const isWaiting = activeTicket?.status === 'waiting';
     const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
     const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
-
-    useEffect(() => {
-      if (activeTicket) {
-        setSelectedTicket(activeTicket);
-      } else {
-        setSelectedTicket(null);
-        setMessages([]);
-      }
-    }, [activeTicket]);
 
     if (!activeTicket && !showStartChat) {
       return (
@@ -1173,9 +1174,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return null;
   }
 
-  // ============================================================
-  // ===== AGENT VIEW (admin) =====
-  // ============================================================
+  // ===== AGENT VIEW =====
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
