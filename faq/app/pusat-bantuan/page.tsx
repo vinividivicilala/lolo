@@ -6,6 +6,7 @@ import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -30,6 +31,11 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+
+// Register ScrollTrigger
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Firebase Config
 const firebaseConfig = {
@@ -496,8 +502,10 @@ interface ChatMessage {
   read: boolean;
 }
 
-// ===== BLINKING DOTS =====
-const BlinkingDots = ({ active }: { active: boolean }) => {
+// ============================================================
+// ===== PULSING DOTS =====
+// ============================================================
+const PulsingDots = ({ active }: { active: boolean }) => {
   if (!active) return <span style={{ color: '#999', fontSize: '14px' }}>● Offline</span>;
   return (
     <span style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
@@ -521,7 +529,7 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (FIXED HOOKS) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -589,7 +597,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // ===== HOOKS (dipanggil di level atas komponen) =====
+  const ChatIconSmall = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  // ===== HOOKS (dipanggil di semua render) =====
   // 1. Agent online status
   useEffect(() => {
     if (!db) return;
@@ -614,7 +628,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       q = query(
         collection(db, "livechat_tickets"),
         where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"])
+        orderBy("createdAt", "desc")
       );
     }
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -623,7 +637,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
       });
       setTickets(ticketList);
-      // Jika selectedTicket tidak ada di list, reset
       if (selectedTicket) {
         const stillExists = ticketList.some(t => t.id === selectedTicket.id);
         if (!stillExists) {
@@ -633,9 +646,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket]);
+  }, [db, user, isAdmin]);
 
-  // 3. Subscribe messages per ticket
+  // 3. Subscribe messages
   useEffect(() => {
     if (!db || !selectedTicket) return;
     const q = query(
@@ -665,20 +678,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, [messages, selectedTicket, db, user, isAdmin]);
 
-  // 5. Sinkronkan selectedTicket dengan activeTicket (user view)
-  useEffect(() => {
-    if (!isAdmin && tickets.length > 0) {
-      const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-      if (activeTicket) {
-        setSelectedTicket(activeTicket);
-      } else {
-        setSelectedTicket(null);
-        setMessages([]);
-      }
-    }
-  }, [tickets, isAdmin]);
-
-  // ===== HANDLE FUNCTIONS =====
+  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -813,15 +813,29 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  // ===== RENDER =====
-  // User view
+  // ============================================================
+  // ===== USER VIEW (bukan admin) =====
+  // ============================================================
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     const isWaiting = activeTicket?.status === 'waiting';
     const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
     const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
 
-    if (!activeTicket && !showStartChat) {
+    // Jika ada ticket, pilih yang aktif atau yang terakhir
+    useEffect(() => {
+      if (activeTicket) {
+        setSelectedTicket(activeTicket);
+      } else if (tickets.length > 0 && !selectedTicket) {
+        setSelectedTicket(tickets[0]);
+      } else if (tickets.length === 0) {
+        setSelectedTicket(null);
+        setMessages([]);
+      }
+    }, [activeTicket, tickets]);
+
+    // Form start chat (belum ada ticket sama sekali)
+    if (tickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
           <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
@@ -931,250 +945,370 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    if (activeTicket) {
-      const typingText = getTypingText(activeTicket);
-      const showAgentName = activeTicket.agentName || AGENT_NAME;
-      const ticketId = generateTicketId(activeTicket.createdAt);
-
-      return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+    // ===== USER DENGAN SIDEBAR KIRI (RIWAYAT TICKET) =====
+    return (
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+        <div style={{ display: "flex", gap: "24px", height: "500px" }}>
+          {/* SIDEBAR KIRI - BIRU */}
           <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
+            width: "280px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "12px",
+            padding: "16px 0",
+            overflowY: "auto",
+            flexShrink: 0,
+            color: "#fff",
+            fontFamily: FONT_FAMILY,
+            boxShadow: "0 4px 20px rgba(13,60,252,0.15)",
           }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                  Live Chat Agent
-                </h3>
-                <BlinkingDots active={isAgentOnlineNow} />
-                <span style={{ fontSize: '14px', color: isAgentOnlineNow ? '#0D3CFC' : '#999', fontFamily: FONT_FAMILY }}>
-                  {isAgentOnlineNow ? 'Online' : 'Offline'}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#0D3CFC", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
-                {isWaiting ? 'Menunggu agent...' : `Agent: ${showAgentName}`}
-                {activeTicket.agentName && !isWaiting && <InstagramVerifiedBadge size={14} />}
-              </div>
-              <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
-                {ticketId}
-              </div>
+            <div style={{
+              padding: "0 16px 12px 16px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              fontWeight: 600,
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "#fff",
+            }}>
+              <ChatIconSmall />
+              <span>Riwayat Chat</span>
+              <span style={{
+                marginLeft: "auto",
+                fontSize: "11px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                padding: "2px 10px",
+                borderRadius: "12px",
+              }}>{tickets.length}</span>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {isResolved && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+            {tickets.map((ticket) => {
+              const ticketId = generateTicketId(ticket.createdAt);
+              const isActive = selectedTicket?.id === ticket.id;
+              const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
+                                  ticket.status === 'active' ? 'Aktif' : 'Selesai';
+              const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                  ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+              const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
+                                      ticket.status === 'active' ? '#065f46' : '#6b7280';
+              return (
+                <div
+                  key={ticket.id}
                   onClick={() => {
-                    if (window.confirm("Buat ticket baru?")) {
-                      setSelectedTicket(null);
-                      setMessages([]);
-                      setShowStartChat(true);
-                    }
+                    setSelectedTicket(ticket);
+                    setMessages([]);
                   }}
                   style={{
-                    padding: "6px 14px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "12px",
+                    padding: "12px 16px",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
                     cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
+                    transition: "all 0.2s ease",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
                   }}
                 >
-                  Chat Baru
-                </motion.button>
-              )}
-              <button
-                onClick={() => {
-                  if (window.confirm("Tutup chat ini?")) {
-                    setSelectedTicket(null);
-                    setMessages([]);
-                  }
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#999",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  transition: "background 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <CloseIcon />
-              </button>
-            </div>
-          </div>
-
-          <div style={{
-            backgroundColor: "#f9f9f9",
-            borderRadius: "12px",
-            border: "1px solid #e8e8e8",
-            height: "400px",
-            display: "flex",
-            flexDirection: "column",
-          }}>
-            <div style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-            }}>
-              {messages.length === 0 ? (
-                <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
-                  Belum ada pesan. Mulai chat sekarang!
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#fff" }}>
+                    {ticket.userName}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                    {ticket.topic}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                    <span style={{
+                      fontSize: "10px",
+                      backgroundColor: statusColor,
+                      color: statusTextColor,
+                      padding: "1px 10px",
+                      borderRadius: "12px",
+                      fontWeight: 500,
+                    }}>
+                      {statusLabel}
+                    </span>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                      {ticketId}
+                    </span>
+                  </div>
+                  {ticket.status === 'resolved' && (
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
+                      Diterima: {formatReceivedDate(ticket.createdAt)}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                messages.map((msg, idx) => {
-                  const isMine = msg.senderId === user.uid;
-                  const isAgent = !isMine && msg.senderName === AGENT_NAME;
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        alignSelf: isMine ? "flex-end" : "flex-start",
-                        maxWidth: "75%",
-                        padding: "10px 14px",
-                        borderRadius: "12px",
-                        backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                        color: isMine ? "#fff" : "#000",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {!isMine && (
-                        <div style={{ 
-                          fontSize: "11px", 
-                          fontWeight: 500, 
-                          color: "#0D3CFC", 
-                          marginBottom: "2px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}>
-                          {msg.senderName}
-                          {isAgent && <InstagramVerifiedBadge size={12} />}
-                        </div>
-                      )}
-                      <div>{msg.text}</div>
-                      <div style={{ 
-                        fontSize: "9px", 
-                        color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                        marginTop: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}>
-                        {formatTime(msg.timestamp)}
-                        {isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
-                        {isMine && !msg.read && <span style={{ color: "#22c55e", fontWeight: 400 }}>✓ Terkirim</span>}
-                      </div>
-                    </motion.div>
-                  );
-                })
-              )}
-              {typingText && !isResolved && (
-                <div style={{
-                  alignSelf: "flex-start",
-                  fontSize: "13px",
-                  color: "#666",
-                  fontStyle: "italic",
-                  padding: "4px 8px",
-                  fontFamily: FONT_FAMILY,
-                }}>
-                  {typingText}
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div style={{
-              padding: "12px 16px",
-              borderTop: "1px solid #e8e8e8",
-              display: "flex",
-              gap: "8px",
-              backgroundColor: "#fff",
-              borderRadius: "0 0 12px 12px",
-            }}>
-              <input
-                type="text"
-                value={messageText}
-                onChange={handleTyping}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !isWaiting && !isResolved && messageText.trim()) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder={isResolved ? "Chat sudah selesai" : (isWaiting ? "Menunggu agent..." : "Ketik pesan...")}
-                disabled={isWaiting || isResolved}
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  border: "1px solid #e8e8e8",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  outline: "none",
-                  fontFamily: FONT_FAMILY,
-                  backgroundColor: (isWaiting || isResolved) ? "#f5f5f5" : "#fff",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => { if (!isWaiting && !isResolved) e.currentTarget.style.borderColor = "#0D3CFC"; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
-              />
+              );
+            })}
+            {tickets.length === 0 && (
+              <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+                Belum ada chat
+              </div>
+            )}
+            {/* Tombol Chat Baru di sidebar */}
+            <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={sendMessage}
-                disabled={isWaiting || isResolved || !messageText.trim()}
+                onClick={() => setShowStartChat(true)}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: (isWaiting || isResolved || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
                   color: "#fff",
                   border: "none",
                   borderRadius: "8px",
-                  cursor: (isWaiting || isResolved || !messageText.trim()) ? "not-allowed" : "pointer",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
                   fontFamily: FONT_FAMILY,
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
-                  transition: "all 0.2s ease",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "background 0.2s ease",
                 }}
-                onMouseEnter={(e) => {
-                  if (!isWaiting && !isResolved && messageText.trim()) {
-                    e.currentTarget.style.backgroundColor = "#0a2fc9";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isWaiting && !isResolved && messageText.trim()) {
-                    e.currentTarget.style.backgroundColor = "#0D3CFC";
-                  }
-                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"}
               >
-                <SendIcon />
-                <span>Kirim</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Chat Baru
               </motion.button>
             </div>
           </div>
+
+          {/* CHAT AREA KANAN */}
+          <div style={{
+            flex: 1,
+            backgroundColor: "#ffffff",
+            borderRadius: "12px",
+            border: "1px solid #e8e8e8",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}>
+            {selectedTicket ? (
+              <>
+                <div style={{
+                  padding: "12px 16px",
+                  backgroundColor: "#0D3CFC",
+                  borderBottom: "1px solid #e8e8e8",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderRadius: "12px 12px 0 0",
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                      {selectedTicket.userName}
+                      <span style={{ fontSize: "12px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.topic}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "12px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : selectedTicket.status === 'resolved' ? "#e5e7eb" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.status === 'waiting' ? 'Menunggu' : selectedTicket.status === 'resolved' ? 'Selesai' : 'Aktif'}
+                      </span>
+                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
+                        <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                          {selectedTicket.typingUserName} mengetik...
+                        </span>
+                      )}
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
+                        {generateTicketId(selectedTicket.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "6px 14px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        transition: "opacity 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                    >
+                      Selesaikan
+                    </button>
+                  )}
+                </div>
+                <div style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  {messages.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                      Belum ada pesan
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "10px 14px",
+                            borderRadius: "12px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "14px",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          {!isMine && (
+                            <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
+                              {msg.senderName}
+                              {isAgent && <InstagramVerifiedBadge size={12} />}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "9px", 
+                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                            marginTop: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {formatTime(msg.timestamp)}
+                            {isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
+                            {isMine && !msg.read && <span style={{ color: "#22c55e", fontWeight: 400 }}>✓ Terkirim</span>}
+                            {!isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
+                            {!isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  )}
+                  {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "13px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "4px 8px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {getTypingText(selectedTicket)}
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                  <div style={{
+                    padding: "12px 16px",
+                    borderTop: "1px solid #e8e8e8",
+                    display: "flex",
+                    gap: "8px",
+                    backgroundColor: "#fff",
+                    borderRadius: "0 0 12px 12px",
+                  }}>
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
+                      disabled={selectedTicket.status === 'waiting'}
+                      style={{
+                        flex: 1,
+                        padding: "10px 14px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                        transition: "border-color 0.2s ease",
+                        backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff",
+                      }}
+                      onFocus={(e) => { if (selectedTicket.status !== 'waiting') e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={sendMessage}
+                      disabled={selectedTicket.status === 'waiting' || !messageText.trim()}
+                      style={{
+                        padding: "10px 20px",
+                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "not-allowed" : "pointer",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedTicket.status !== 'waiting' && messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0a2fc9";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedTicket.status !== 'waiting' && messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0D3CFC";
+                        }
+                      }}
+                    >
+                      <SendIcon />
+                      <span>Kirim</span>
+                    </motion.button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "16px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                Pilih chat dari daftar di kiri
+              </div>
+            )}
+          </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 
-  // ===== AGENT VIEW =====
+  // ============================================================
+  // ===== AGENT VIEW (admin) =====
+  // ============================================================
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1188,7 +1322,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             Live Chat Agent
           </h2>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
-            <BlinkingDots active={agentOnline} />
+            <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "14px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
               {agentOnline ? "Online" : "Offline"}
             </span>
@@ -1396,7 +1530,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <span style={{ fontSize: "12px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : selectedTicket.status === 'resolved' ? "#e5e7eb" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                      {selectedTicket.status === 'waiting' ? '⏳ Menunggu' : selectedTicket.status === 'resolved' ? '✅ Selesai' : '🟢 Aktif'}
+                      {selectedTicket.status === 'waiting' ? 'Menunggu' : selectedTicket.status === 'resolved' ? 'Selesai' : 'Aktif'}
                     </span>
                     {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                       <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
@@ -1611,6 +1745,9 @@ export default function PusatBantuanPage() {
   const [authorEmail, setAuthorEmail] = useState<string>("");
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
 
+  // Ref untuk footer
+  const footerRef = useRef<HTMLDivElement>(null);
+
   // Load FAQ dari Firestore
   const loadFaqFromFirestore = async () => {
     if (!db) return;
@@ -1783,6 +1920,30 @@ export default function PusatBantuanPage() {
     loadFaqFromFirestore();
   }, []);
 
+  // GSAP Footer Scroll Effect
+  useEffect(() => {
+    if (footerRef.current) {
+      gsap.fromTo(footerRef.current,
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: "top bottom",
+            end: "top center",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   // Rolling text search
   useEffect(() => {
     let isForward = true;
@@ -1887,6 +2048,7 @@ export default function PusatBantuanPage() {
         position: "relative",
         fontFamily: FONT_FAMILY,
         overflowX: "hidden",
+        overflowY: "auto",
       }}>
         {/* BANNER */}
         <motion.div
@@ -2663,6 +2825,55 @@ export default function PusatBantuanPage() {
             />
           )}
         </div>
+
+        {/* ===== FOOTER BIRU DENGAN BORDER RADIUS ===== */}
+        <motion.div
+          ref={footerRef}
+          style={{
+            marginTop: "80px",
+            padding: "60px 40px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "40px 40px 0 0",
+            color: "#fff",
+            fontFamily: FONT_FAMILY,
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <h3 style={{ fontSize: "32px", fontWeight: 600, marginBottom: "16px", fontFamily: FONT_FAMILY }}>
+              Menuru
+            </h3>
+            <p style={{ fontSize: "16px", opacity: 0.8, maxWidth: "500px", margin: "0 auto", fontFamily: FONT_FAMILY }}>
+              © 2026 Menuru. All rights reserved.
+            </p>
+          </div>
+          {/* Efek blur di belakang */}
+          <div style={{
+            position: "absolute",
+            top: "-50%",
+            left: "-20%",
+            width: "140%",
+            height: "200%",
+            background: "radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%)",
+            pointerEvents: "none",
+            zIndex: 1,
+          }} />
+        </motion.div>
+
+        <style jsx>{`
+          @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+          }
+          .dot {
+            animation: blink 1.4s infinite both;
+            font-size: 12px;
+            color: #22c55e;
+          }
+        `}</style>
       </div>
     </>
   );
