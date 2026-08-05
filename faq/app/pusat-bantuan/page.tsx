@@ -29,6 +29,7 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
+  limit,
 } from "firebase/firestore";
 
 // Firebase Config
@@ -468,7 +469,7 @@ const FaqItem = ({
 // ============================================================
 // ===== LIVE CHAT AGENT INTERFACES =====
 // ============================================================
-interface LiveChatRoom {
+interface Ticket {
   id: string;
   userId: string;
   userName: string;
@@ -476,21 +477,22 @@ interface LiveChatRoom {
   userPhoto?: string;
   agentId?: string;
   agentName?: string;
-  status: 'waiting' | 'active' | 'closed';
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
   topic: string;
   createdAt: any;
   lastMessage?: string;
   lastMessageTime?: any;
   unreadCount: number;
-  typing?: boolean;
+  isTyping?: boolean;
   typingUserId?: string;
   typingUserName?: string;
 }
 
-interface LiveChatMessage {
+interface TicketMessage {
   id: string;
   senderId: string;
   senderName: string;
+  senderRole: 'user' | 'agent';
   text: string;
   timestamp: any;
   read: boolean;
@@ -523,14 +525,15 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (REBUILT FROM SCRATCH) =====
+// ===== LIVE CHAT AGENT COMPONENT (REBUILT) =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
-  const [rooms, setRooms] = useState<LiveChatRoom[]>([]);
-  const [selectedRoom, setSelectedRoom] = useState<LiveChatRoom | null>(null);
-  const [messages, setMessages] = useState<LiveChatMessage[]>([]);
+  // === STATE ===
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [messageText, setMessageText] = useState("");
-  const [showStartChat, setShowStartChat] = useState(false);
+  const [showStartTicket, setShowStartTicket] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -545,68 +548,65 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
-  // ===== CHECK AGENT ONLINE STATUS =====
+  // ===== SUBSCRIBE AGENT ONLINE STATUS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
-        const data = snapshot.docs[0].data();
+        const doc = snapshot.docs[0];
+        const data = doc.data();
         setAgentOnline(data.online || false);
       }
     });
     return () => unsubscribe();
   }, [db]);
 
-  // ===== LOAD ROOMS =====
+  // ===== LOAD TICKETS =====
   useEffect(() => {
     if (!db || !user) return;
-    
+
+    let q;
     if (isAdmin) {
-      // Admin melihat semua room yang belum closed
-      const q = query(
-        collection(db, "livechat_rooms"),
-        where("status", "in", ["waiting", "active"]),
-        orderBy("createdAt", "desc")
-      );
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const roomList: LiveChatRoom[] = [];
-        snapshot.forEach((doc) => {
-          roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
-        });
-        setRooms(roomList);
-      });
-      return () => unsubscribe();
+      // Agent melihat SEMUA ticket (termasuk yang sudah closed)
+      q = query(collection(db, "support_tickets"), orderBy("createdAt", "desc"));
     } else {
-      // User melihat room miliknya sendiri
-      const q = query(
-        collection(db, "livechat_rooms"),
+      // User hanya melihat ticket miliknya yang statusnya belum closed
+      q = query(
+        collection(db, "support_tickets"),
         where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"]),
-        orderBy("createdAt", "desc")
+        where("status", "in", ["open", "in_progress", "resolved"])
       );
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const roomList: LiveChatRoom[] = [];
-        snapshot.forEach((doc) => {
-          roomList.push({ id: doc.id, ...doc.data() } as LiveChatRoom);
-        });
-        setRooms(roomList);
-      });
-      return () => unsubscribe();
     }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        ticketList.push({ 
+          id: doc.id, 
+          ...data,
+          status: data.status || 'open',
+          unreadCount: data.unreadCount || 0,
+        } as Ticket);
+      });
+      setTickets(ticketList);
+    });
+
+    return () => unsubscribe();
   }, [db, user, isAdmin]);
 
-  // ===== LOAD MESSAGES FOR SELECTED ROOM =====
+  // ===== LOAD MESSAGES =====
   useEffect(() => {
-    if (!db || !selectedRoom) return;
+    if (!db || !selectedTicket) return;
     const q = query(
-      collection(db, "livechat_rooms", selectedRoom.id, "messages"),
+      collection(db, "support_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgList: LiveChatMessage[] = [];
+      const msgList: TicketMessage[] = [];
       snapshot.forEach((doc) => {
-        msgList.push({ id: doc.id, ...doc.data() } as LiveChatMessage);
+        msgList.push({ id: doc.id, ...doc.data() } as TicketMessage);
       });
       setMessages(msgList);
       setTimeout(() => {
@@ -614,105 +614,131 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }, 100);
     });
     return () => unsubscribe();
-  }, [db, selectedRoom]);
+  }, [db, selectedTicket]);
 
   // ===== MARK MESSAGES AS READ =====
   useEffect(() => {
-    if (!db || !selectedRoom || !user) return;
-    // User marks messages as read when they are opened
-    const unreadMessages = messages.filter(m => m.senderId !== user.uid && !m.read);
-    if (unreadMessages.length === 0) return;
-    unreadMessages.forEach(async (msg) => {
-      try {
-        const msgRef = doc(db, "livechat_rooms", selectedRoom.id, "messages", msg.id);
-        await updateDoc(msgRef, { read: true });
-      } catch (error) {
-        console.error("Error marking message as read:", error);
-      }
+    if (!db || !selectedTicket || !user) return;
+    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+    if (unread.length === 0) return;
+    
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "support_tickets", selectedTicket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedRoom, db, user]);
+
+    // Reset unread count di ticket
+    const ticketRef = doc(db, "support_tickets", selectedTicket.id);
+    updateDoc(ticketRef, { unreadCount: 0 }).catch(() => {});
+  }, [messages, selectedTicket, db, user]);
 
   // ===== HANDLE TYPING =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
-    if (!selectedRoom || !user || !db) return;
-    const roomRef = doc(db, "livechat_rooms", selectedRoom.id);
+    if (!selectedTicket || !user || !db) return;
+    
+    const ticketRef = doc(db, "support_tickets", selectedTicket.id);
     if (value.length > 0) {
-      await updateDoc(roomRef, {
-        typing: true,
+      await updateDoc(ticketRef, {
+        isTyping: true,
         typingUserId: user.uid,
         typingUserName: user.displayName || user.email || "User",
       });
     } else {
-      await updateDoc(roomRef, {
-        typing: false,
+      await updateDoc(ticketRef, {
+        isTyping: false,
         typingUserId: null,
         typingUserName: null,
       });
     }
+    
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(roomRef, { typing: false, typingUserId: null, typingUserName: null });
+      await updateDoc(ticketRef, {
+        isTyping: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
     }, 2000);
   };
 
-  // ===== START CHAT (USER) =====
-  const startChat = async () => {
+  // ===== CREATE TICKET (USER) =====
+  const createTicket = async () => {
     if (!db || !user || !selectedTopic) return;
     try {
-      const roomRef = await addDoc(collection(db, "livechat_rooms"), {
+      const ticketRef = await addDoc(collection(db, "support_tickets"), {
         userId: user.uid,
         userName: user.displayName || user.email || "User",
         userEmail: user.email,
         userPhoto: user.photoURL || "",
-        status: "waiting",
+        status: "open",
         topic: selectedTopic,
         createdAt: serverTimestamp(),
         unreadCount: 0,
-        typing: false,
+        isTyping: false,
         typingUserId: null,
         typingUserName: null,
+        agentId: null,
+        agentName: null,
       });
-      await addDoc(collection(db, "livechat_rooms", roomRef.id, "messages"), {
+
+      // Kirim pesan pertama
+      await addDoc(collection(db, "support_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
+        senderRole: "user",
         text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
         timestamp: serverTimestamp(),
         read: false,
       });
+
       setSelectedTopic("");
-      setShowStartChat(false);
+      setShowStartTicket(false);
     } catch (error) {
-      console.error("Error starting chat:", error);
+      console.error("Error creating ticket:", error);
     }
   };
 
   // ===== SEND MESSAGE =====
   const sendMessage = async () => {
-    if (!db || !selectedRoom || !messageText.trim() || !user) return;
+    if (!db || !selectedTicket || !messageText.trim() || !user) return;
     try {
-      const roomRef = doc(db, "livechat_rooms", selectedRoom.id);
-      await updateDoc(roomRef, { typing: false, typingUserId: null, typingUserName: null });
+      const ticketRef = doc(db, "support_tickets", selectedTicket.id);
       
+      // Reset typing
+      await updateDoc(ticketRef, {
+        isTyping: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+
       const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
-      
-      await addDoc(collection(db, "livechat_rooms", selectedRoom.id, "messages"), {
+      const senderRole = isAdmin ? "agent" : "user";
+
+      await addDoc(collection(db, "support_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
         senderName: senderName,
+        senderRole: senderRole,
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
       });
-      
-      await updateDoc(roomRef, {
+
+      // Update ticket
+      const updates: any = {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
-        ...(selectedRoom.status === "waiting" && { status: "active" }),
-        agentId: isAdmin ? user.uid : selectedRoom.agentId,
-        agentName: isAdmin ? AGENT_NAME : selectedRoom.agentName,
-      });
+        agentId: isAdmin ? user.uid : selectedTicket.agentId,
+        agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
+      };
       
+      if (selectedTicket.status === "open" && isAdmin) {
+        updates.status = "in_progress";
+      }
+      
+      await updateDoc(ticketRef, updates);
+
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
@@ -720,28 +746,42 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== TAKE ROOM (AGENT) =====
-  const takeRoom = async (roomId: string) => {
+  // ===== TAKE TICKET (AGENT) =====
+  const takeTicket = async (ticketId: string) => {
     if (!db || !isAdmin || !user) return;
     try {
-      await updateDoc(doc(db, "livechat_rooms", roomId), {
+      await updateDoc(doc(db, "support_tickets", ticketId), {
         agentId: user.uid,
         agentName: AGENT_NAME,
-        status: "active",
+        status: "in_progress",
       });
     } catch (error) {
-      console.error("Error taking room:", error);
+      console.error("Error taking ticket:", error);
     }
   };
 
-  // ===== CLOSE ROOM (AGENT) =====
-  const closeRoom = async (roomId: string) => {
+  // ===== RESOLVE TICKET (AGENT) =====
+  const resolveTicket = async (ticketId: string) => {
     if (!db || !isAdmin) return;
     try {
-      await updateDoc(doc(db, "livechat_rooms", roomId), { status: "closed" });
-      if (selectedRoom?.id === roomId) setSelectedRoom(null);
+      await updateDoc(doc(db, "support_tickets", ticketId), {
+        status: "resolved",
+      });
     } catch (error) {
-      console.error("Error closing room:", error);
+      console.error("Error resolving ticket:", error);
+    }
+  };
+
+  // ===== CLOSE TICKET =====
+  const closeTicket = async (ticketId: string) => {
+    if (!db || !isAdmin) return;
+    try {
+      await updateDoc(doc(db, "support_tickets", ticketId), {
+        status: "closed",
+      });
+      if (selectedTicket?.id === ticketId) setSelectedTicket(null);
+    } catch (error) {
+      console.error("Error closing ticket:", error);
     }
   };
 
@@ -751,33 +791,45 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getTypingText = (room: LiveChatRoom | null) => {
-    if (!room || !room.typing) return null;
-    const name = room.typingUserName || "Seseorang";
+  const getTypingText = (ticket: Ticket | null) => {
+    if (!ticket || !ticket.isTyping) return null;
+    const name = ticket.typingUserName || "Seseorang";
     return `${name} sedang mengetik...`;
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch(status) {
+      case 'open': return { label: '🟡 Open', color: '#f59e0b' };
+      case 'in_progress': return { label: '🟢 In Progress', color: '#22c55e' };
+      case 'resolved': return { label: '✅ Resolved', color: '#3b82f6' };
+      case 'closed': return { label: '🔴 Closed', color: '#ef4444' };
+      default: return { label: status, color: '#999' };
+    }
   };
 
   // ============================================================
   // ===== USER VIEW (bukan admin) =====
   // ============================================================
   if (!isAdmin) {
-    const activeRoom = rooms.find(r => r.status === 'active' || r.status === 'waiting');
-    const isWaiting = activeRoom?.status === 'waiting';
-    const isAgentOnlineNow = agentOnline && activeRoom?.status === 'active';
+    const activeTicket = tickets.find(t => t.status === 'open' || t.status === 'in_progress' || t.status === 'resolved');
+    const isWaiting = activeTicket?.status === 'open';
+    const isResolved = activeTicket?.status === 'resolved';
+    const isAgentOnlineNow = agentOnline && (activeTicket?.status === 'in_progress' || activeTicket?.status === 'resolved');
 
-    if (!activeRoom && !showStartChat) {
+    // Tampilkan form buat ticket
+    if (!activeTicket && !showStartTicket) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
           <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
             Live Chat Agent
           </h3>
           <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
-            Butuh bantuan? Chat langsung dengan agent kami.
+            Butuh bantuan? Buat tiket dan chat langsung dengan agent kami.
           </p>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setShowStartChat(true)}
+            onClick={() => setShowStartTicket(true)}
             style={{
               padding: "14px 32px",
               backgroundColor: "#0D3CFC",
@@ -794,17 +846,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             }}
           >
             <ChatIcon />
-            <span>Mulai Live Chat</span>
+            <span>Buat Tiket Baru</span>
           </motion.button>
         </div>
       );
     }
 
-    if (showStartChat) {
+    if (showStartTicket) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
           <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
-            Live Chat Agent
+            Buat Tiket Baru
           </h3>
           <div style={{ maxWidth: "500px" }}>
             <div style={{ fontSize: "18px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>
@@ -834,7 +886,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={startChat}
+                onClick={createTicket}
                 disabled={!selectedTopic}
                 style={{
                   padding: "10px 24px",
@@ -848,12 +900,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Mulai Chat
+                Kirim Tiket
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowStartChat(false)}
+                onClick={() => setShowStartTicket(false)}
                 style={{
                   padding: "10px 24px",
                   backgroundColor: "transparent",
@@ -874,10 +926,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // ===== USER CHAT VIEW =====
-    if (activeRoom) {
-      const typingText = getTypingText(activeRoom);
-      const showAgentName = activeRoom.agentName || AGENT_NAME;
+    // ===== USER DALAM TICKET =====
+    if (activeTicket) {
+      const typingText = getTypingText(activeTicket);
+      const showAgentName = activeTicket.agentName || AGENT_NAME;
+      const statusInfo = getStatusLabel(activeTicket.status);
 
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -898,14 +951,39 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     {isAgentOnlineNow ? 'Online' : 'Offline'}
                   </span>
                 </div>
+                <span style={{ fontSize: '14px', color: statusInfo.color, fontWeight: 500 }}>
+                  {statusInfo.label}
+                </span>
               </div>
               <div style={{ fontSize: "14px", color: isWaiting ? "#f59e0b" : "#22c55e", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
                 {isWaiting ? "⏳ Menunggu agent..." : `🟢 Agent: ${showAgentName}`}
-                {activeRoom.agentName && !isWaiting && <InstagramVerifiedBadge size={14} />}
+                {activeTicket.agentName && !isWaiting && <InstagramVerifiedBadge size={14} />}
               </div>
             </div>
+            {isResolved && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Tutup tiket ini?")) {
+                    closeTicket(activeTicket.id);
+                  }
+                }}
+                style={{
+                  padding: "6px 14px",
+                  backgroundColor: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Tutup Tiket
+              </button>
+            )}
           </div>
 
+          {/* Chat box */}
           <div style={{
             backgroundColor: "#f9f9f9",
             borderRadius: "12px",
@@ -924,12 +1002,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             }}>
               {messages.length === 0 ? (
                 <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
-                  Belum ada pesan. Mulai chat sekarang!
+                  Belum ada pesan.
                 </div>
               ) : (
                 messages.map((msg, idx) => {
                   const isMine = msg.senderId === user.uid;
-                  const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                  const isAgent = !isMine && msg.senderRole === 'agent';
                   return (
                     <div
                       key={idx}
@@ -989,6 +1067,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Input pesan */}
             <div style={{
               padding: "12px 16px",
               borderTop: "1px solid #e8e8e8",
@@ -1002,13 +1082,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 value={messageText}
                 onChange={handleTyping}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !isWaiting && messageText.trim()) {
+                  if (e.key === 'Enter' && !e.shiftKey && !isWaiting && !isResolved && messageText.trim()) {
                     e.preventDefault();
                     sendMessage();
                   }
                 }}
-                placeholder={isWaiting ? "Menunggu agent..." : "Ketik pesan..."}
-                disabled={isWaiting}
+                placeholder={isWaiting ? "Menunggu agent..." : isResolved ? "Tiket sudah selesai" : "Ketik pesan..."}
+                disabled={isWaiting || isResolved}
                 style={{
                   flex: 1,
                   padding: "10px 14px",
@@ -1017,22 +1097,24 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontSize: "14px",
                   outline: "none",
                   fontFamily: FONT_FAMILY,
-                  backgroundColor: isWaiting ? "#f5f5f5" : "#fff",
+                  backgroundColor: (isWaiting || isResolved) ? "#f5f5f5" : "#fff",
                   transition: "border-color 0.2s ease",
                 }}
-                onFocus={(e) => { if (!isWaiting) e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                onFocus={(e) => { if (!isWaiting && !isResolved) e.currentTarget.style.borderColor = "#0D3CFC"; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
               />
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={sendMessage}
-                disabled={isWaiting || !messageText.trim()}
+                disabled={isWaiting || isResolved || !messageText.trim()}
                 style={{
                   padding: "10px 20px",
-                  backgroundColor: (isWaiting || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                  backgroundColor: (isWaiting || isResolved || !messageText.trim()) ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
                   borderRadius: "8px",
-                  cursor: (isWaiting || !messageText.trim()) ? "not-allowed" : "pointer",
+                  cursor: (isWaiting || isResolved || !messageText.trim()) ? "not-allowed" : "pointer",
                   fontFamily: FONT_FAMILY,
                   display: "flex",
                   alignItems: "center",
@@ -1040,15 +1122,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isWaiting && messageText.trim()) e.currentTarget.style.backgroundColor = "#0a2fc9";
+                  if (!isWaiting && !isResolved && messageText.trim()) e.currentTarget.style.backgroundColor = "#0a2fc9";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isWaiting && messageText.trim()) e.currentTarget.style.backgroundColor = "#0D3CFC";
+                  if (!isWaiting && !isResolved && messageText.trim()) e.currentTarget.style.backgroundColor = "#0D3CFC";
                 }}
               >
                 <SendIcon />
                 <span>Kirim</span>
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -1060,9 +1142,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ============================================================
   // ===== AGENT VIEW (admin) =====
   // ============================================================
-  const waitingRooms = rooms.filter(r => r.status === 'waiting');
-  const activeRooms = rooms.filter(r => r.status === 'active');
-  const typingText = selectedRoom ? getTypingText(selectedRoom) : null;
+  const openTickets = tickets.filter(t => t.status === 'open');
+  const inProgressTickets = tickets.filter(t => t.status === 'in_progress');
+  const resolvedTickets = tickets.filter(t => t.status === 'resolved');
+  const closedTickets = tickets.filter(t => t.status === 'closed');
+  const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
     <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -1078,7 +1162,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </span>
             <span style={{ fontSize: "14px", color: "#999" }}>•</span>
             <span style={{ fontSize: "14px", color: "#666" }}>
-              {waitingRooms.length} menunggu • {activeRooms.length} aktif
+              {openTickets.length} open • {inProgressTickets.length} in progress
             </span>
           </div>
         </div>
@@ -1101,74 +1185,144 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       </div>
 
       <div style={{ display: "flex", gap: "24px", height: "500px" }}>
+        {/* Left: Ticket list */}
         <div style={{
-          width: "300px",
+          width: "320px",
           backgroundColor: "#f9f9f9",
           borderRadius: "12px",
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
         }}>
-          {waitingRooms.length > 0 && (
+          {/* Open */}
+          {openTickets.length > 0 && (
             <div>
-              <div style={{ padding: "12px 16px", backgroundColor: "#fef3c7", fontWeight: 600, fontSize: "14px", color: "#92400e" }}>
-                🟡 Menunggu ({waitingRooms.length})
+              <div style={{ padding: "10px 16px", backgroundColor: "#fef3c7", fontWeight: 600, fontSize: "13px", color: "#92400e" }}>
+                🟡 Open ({openTickets.length})
               </div>
-              {waitingRooms.map((room) => (
+              {openTickets.map((ticket) => (
                 <div
-                  key={room.id}
-                  onClick={() => { setSelectedRoom(room); takeRoom(room.id); }}
+                  key={ticket.id}
+                  onClick={() => { setSelectedTicket(ticket); takeTicket(ticket.id); }}
                   style={{
                     padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
                     cursor: "pointer",
-                    backgroundColor: selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                     transition: "background 0.2s ease",
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
                 >
-                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
-                  <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
-                  {room.typing && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>{room.typingUserName} mengetik...</div>}
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>{ticket.topic}</div>
+                  {ticket.isTyping && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
                 </div>
               ))}
             </div>
           )}
-          {activeRooms.length > 0 && (
+
+          {/* In Progress */}
+          {inProgressTickets.length > 0 && (
             <div>
-              <div style={{ padding: "12px 16px", backgroundColor: "#d1fae5", fontWeight: 600, fontSize: "14px", color: "#065f46" }}>
-                🟢 Aktif ({activeRooms.length})
+              <div style={{ padding: "10px 16px", backgroundColor: "#d1fae5", fontWeight: 600, fontSize: "13px", color: "#065f46" }}>
+                🟢 In Progress ({inProgressTickets.length})
               </div>
-              {activeRooms.map((room) => (
+              {inProgressTickets.map((ticket) => (
                 <div
-                  key={room.id}
-                  onClick={() => setSelectedRoom(room)}
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
                   style={{
                     padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
                     cursor: "pointer",
-                    backgroundColor: selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                     transition: "background 0.2s ease",
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedRoom?.id === room.id ? "rgba(13,60,252,0.05)" : "transparent"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
                 >
-                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{room.userName}</div>
-                  <div style={{ fontSize: "12px", color: "#666" }}>{room.topic}</div>
-                  {room.typing && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>{room.typingUserName} mengetik...</div>}
-                  {room.lastMessage && <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>{room.lastMessage.substring(0, 40)}{room.lastMessage.length > 40 ? "..." : ""}</div>}
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>{ticket.topic}</div>
+                  {ticket.isTyping && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.lastMessage && (
+                    <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>
+                      {ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
-          {waitingRooms.length === 0 && activeRooms.length === 0 && (
+
+          {/* Resolved */}
+          {resolvedTickets.length > 0 && (
+            <div>
+              <div style={{ padding: "10px 16px", backgroundColor: "#dbeafe", fontWeight: 600, fontSize: "13px", color: "#1e40af" }}>
+                ✅ Resolved ({resolvedTickets.length})
+              </div>
+              {resolvedTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>{ticket.topic}</div>
+                  {ticket.lastMessage && (
+                    <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>
+                      {ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Closed */}
+          {closedTickets.length > 0 && (
+            <div>
+              <div style={{ padding: "10px 16px", backgroundColor: "#f3f4f6", fontWeight: 600, fontSize: "13px", color: "#6b7280" }}>
+                🔴 Closed ({closedTickets.length})
+              </div>
+              {closedTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                    opacity: 0.7,
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.03)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#000" }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>{ticket.topic}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tickets.length === 0 && (
             <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "14px" }}>
-              Tidak ada chat masuk
+              Tidak ada tiket
             </div>
           )}
         </div>
 
+        {/* Right: Chat area */}
         <div style={{
           flex: 1,
           backgroundColor: "#ffffff",
@@ -1177,7 +1331,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
         }}>
-          {selectedRoom ? (
+          {selectedTicket ? (
             <>
               <div style={{
                 padding: "12px 16px",
@@ -1190,42 +1344,75 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff" }}>
-                    {selectedRoom.userName}
+                    {selectedTicket.userName}
                     <span style={{ fontSize: "12px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
-                      {selectedRoom.topic}
+                      {selectedTicket.topic}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "12px", color: selectedRoom.status === 'waiting' ? "#fef3c7" : "#d1fae5" }}>
-                      {selectedRoom.status === 'waiting' ? '⏳ Menunggu' : '🟢 Aktif'}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "12px", color: selectedTicket.status === 'open' ? "#fef3c7" : selectedTicket.status === 'in_progress' ? "#d1fae5" : selectedTicket.status === 'resolved' ? "#dbeafe" : "#e5e7eb" }}>
+                      {getStatusLabel(selectedTicket.status).label}
                     </span>
-                    {selectedRoom.typing && (
+                    {selectedTicket.isTyping && (
                       <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic" }}>
-                        {selectedRoom.typingUserName} mengetik...
+                        {selectedTicket.typingUserName} mengetik...
                       </span>
                     )}
                   </div>
                 </div>
-                {selectedRoom.status !== 'closed' && (
-                  <button
-                    onClick={() => closeRoom(selectedRoom.id)}
-                    style={{
-                      padding: "6px 14px",
-                      backgroundColor: "#ef4444",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      transition: "opacity 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                  >
-                    Tutup Chat
-                  </button>
-                )}
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {selectedTicket.status === 'in_progress' && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "6px 14px",
+                        backgroundColor: "#3b82f6",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      ✅ Resolve
+                    </button>
+                  )}
+                  {selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved' && (
+                    <button
+                      onClick={() => closeTicket(selectedTicket.id)}
+                      style={{
+                        padding: "6px 14px",
+                        backgroundColor: "#ef4444",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Tutup Tiket
+                    </button>
+                  )}
+                  {selectedTicket.status === 'resolved' && (
+                    <button
+                      onClick={() => closeTicket(selectedTicket.id)}
+                      style={{
+                        padding: "6px 14px",
+                        backgroundColor: "#ef4444",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Arsipkan
+                    </button>
+                  )}
+                </div>
               </div>
               <div style={{
                 flex: 1,
@@ -1254,6 +1441,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       {!isMine && (
                         <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
                           {msg.senderName}
+                          {msg.senderRole === 'agent' && <InstagramVerifiedBadge size={12} />}
                         </div>
                       )}
                       <div>{msg.text}</div>
@@ -1286,7 +1474,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 )}
                 <div ref={messagesEndRef} />
               </div>
-              {selectedRoom.status !== 'closed' && (
+              {selectedTicket.status !== 'closed' && (
                 <div style={{
                   padding: "12px 16px",
                   borderTop: "1px solid #e8e8e8",
@@ -1358,7 +1546,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "16px",
               fontFamily: FONT_FAMILY,
             }}>
-              Pilih chat dari daftar di kiri
+              Pilih tiket dari daftar di kiri
             </div>
           )}
         </div>
@@ -1522,7 +1710,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, []);
 
-  // Load users
+  // Load users & unread count
   useEffect(() => {
     if (!db || !user) return;
     const usersRef = collection(db, "users");
@@ -1539,7 +1727,7 @@ export default function PusatBantuanPage() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load unread messages count (untuk notifikasi)
+  // Load unread messages count
   useEffect(() => {
     if (!db || !user) return;
     const chatsRef = collection(db, "chats");
