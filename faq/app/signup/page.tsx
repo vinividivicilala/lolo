@@ -190,7 +190,7 @@ export default function SignUpPage() {
   const notificationsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // ===== EFFECTS (dijalankan hanya di client) =====
+  // ===== EFFECTS (CLIENT-SIDE ONLY) =====
   useEffect(() => {
     // Mobile detection
     const checkMobile = () => {
@@ -201,7 +201,6 @@ export default function SignUpPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // ===== Admin check =====
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -214,7 +213,6 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
-  // ===== Load Terms =====
   useEffect(() => {
     if (!db) return;
     const loadTerms = async () => {
@@ -245,7 +243,6 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
-  // ===== GSAP Animation for Terms =====
   useEffect(() => {
     if (isTermsOpen && termsContentRef.current) {
       gsap.fromTo(termsContentRef.current,
@@ -262,7 +259,6 @@ export default function SignUpPage() {
     }
   }, [isTermsOpen]);
 
-  // ===== Rolling Text =====
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -294,7 +290,6 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // ===== Search Expand =====
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -305,7 +300,6 @@ export default function SignUpPage() {
     }
   }, [isSearchOpen]);
 
-  // ===== Click Outside =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -325,7 +319,7 @@ export default function SignUpPage() {
     setSearchResults([]);
   }, [searchQuery]);
 
-  // ===== Save Terms =====
+  // ===== FUNGSI =====
   const saveTerms = async () => {
     if (!db || !isAdmin) return;
     try {
@@ -338,7 +332,6 @@ export default function SignUpPage() {
     }
   };
 
-  // ===== PIN Handling =====
   const handlePinChange = (index: number, value: string) => {
     const newPin = [...pin];
     newPin[index] = value.replace(/\D/g, '').slice(0, 1);
@@ -381,7 +374,6 @@ export default function SignUpPage() {
     }
   };
 
-  // ===== Sign Up =====
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) {
@@ -437,7 +429,7 @@ export default function SignUpPage() {
     }
   };
 
-  // ===== Render =====
+  // ===== RENDER =====
   return (
     <>
       <Head>
@@ -506,7 +498,7 @@ export default function SignUpPage() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* ===== BANNER ===== */}
+        {/* BANNER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -570,7 +562,7 @@ export default function SignUpPage() {
           </div>
         </motion.div>
 
-        {/* ===== HEADER ===== */}
+        {/* HEADER */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -982,7 +974,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* ===== KONTEN SIGN UP ===== */}
+        {/* KONTEN SIGN UP */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 80px",
@@ -1290,9 +1282,8 @@ export default function SignUpPage() {
                         </div>
                       </div>
                     ) : (
-                      // Gunakan dangerouslySetInnerHTML dengan aman
                       <div dangerouslySetInnerHTML={{ 
-                        __html: termsContent.replace(/\n/g, '<br/>') 
+                        __html: termsContent ? termsContent.replace(/\n/g, '<br/>') : ''
                       }} />
                     )}
                   </div>
@@ -1413,7 +1404,7 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* ===== MODAL PIN ===== */}
+      {/* MODAL PIN */}
       <AnimatePresence>
         {showPinModal && (
           <motion.div
