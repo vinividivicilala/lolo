@@ -13,7 +13,7 @@ import {
 } from "firebase/auth";
 import gsap from 'gsap';
 
-// Konfigurasi Firebase
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -94,7 +94,6 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-// ===== ICON MATA UNTUK PASSWORD =====
 const EyeIcon = ({ open }: { open: boolean }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     {open ? (
@@ -107,16 +106,6 @@ const EyeIcon = ({ open }: { open: boolean }) => (
         <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </>
-    )}
-  </svg>
-);
-
-// ===== ICON CEKLIS =====
-const CheckIcon = ({ checked }: { checked: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="18" height="18" rx="4" stroke="#0D3CFC" strokeWidth="2" fill={checked ? "#0D3CFC" : "none"}/>
-    {checked && (
-      <path d="M9 12L11.5 14.5L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     )}
   </svg>
 );
@@ -143,28 +132,37 @@ export default function SignUpPage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [showTerms, setShowTerms] = useState(false);
-  const [termsChecked, setTermsChecked] = useState(false);
-  const [showPasswordPattern, setShowPasswordPattern] = useState(false);
+  
+  // State untuk rolling text (pastikan nama variabel unik)
+  const [rollingText, setRollingText] = useState<string>(searchRollingTexts[0]);
   const rollingRef = useRef<HTMLSpanElement>(null);
+  
+  // State untuk persetujuan
+  const [agreed, setAgreed] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const termsRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk pola sandi
+  const [showPattern, setShowPattern] = useState(false);
+  const [pattern, setPattern] = useState<number[]>([]);
+  const [patternError, setPatternError] = useState("");
+  
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
-  const termsContentRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Rolling text search
+  // Rolling text effect
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -183,7 +181,6 @@ export default function SignUpPage() {
         }
       }
       if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
-        setRollingIndex(currentIndex);
         setRollingText(searchRollingTexts[currentIndex]);
         if (rollingRef.current) {
           gsap.fromTo(rollingRef.current,
@@ -196,7 +193,7 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Search expand
+  // Search expand effect
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -220,41 +217,33 @@ export default function SignUpPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // GSAP animation for terms
-  useEffect(() => {
-    if (showTerms && termsContentRef.current) {
-      gsap.fromTo(termsContentRef.current,
-        { height: 0, opacity: 0 },
-        { height: "auto", opacity: 1, duration: 0.4, ease: "power2.out" }
-      );
-    } else if (!showTerms && termsContentRef.current) {
-      gsap.to(termsContentRef.current, {
-        height: 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.in"
-      });
-    }
-  }, [showTerms]);
-
-  // GSAP animation for check icon
-  useEffect(() => {
-    if (termsChecked) {
-      gsap.fromTo('.check-icon',
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out" }
-      );
-    }
-  }, [termsChecked]);
-
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
 
+  // Toggle terms with GSAP
+  const toggleTerms = () => {
+    setShowTerms(!showTerms);
+    if (!showTerms && termsRef.current) {
+      gsap.fromTo(termsRef.current,
+        { height: 0, opacity: 0 },
+        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    } else if (termsRef.current) {
+      gsap.to(termsRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.in'
+      });
+    }
+  };
+
+  // Handle Sign Up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsChecked) {
-      setError("Anda harus menyetujui persyaratan terlebih dahulu.");
+    if (!agreed) {
+      setError("Anda harus menyetujui Kebijakan Privasi dan Ketentuan Layanan.");
       return;
     }
     setIsLoading(true);
@@ -272,11 +261,13 @@ export default function SignUpPage() {
       });
 
       console.log("User created successfully:", userCredential.user);
-      router.push('/');
+      
+      // Tampilkan pola sandi
+      setShowPattern(true);
+      setIsLoading(false);
       
     } catch (error: any) {
       console.error("Sign up error:", error);
-      
       switch (error.code) {
         case 'auth/email-already-in-use':
           setError("Email sudah digunakan. Coba email lain atau login.");
@@ -293,135 +284,68 @@ export default function SignUpPage() {
         default:
           setError("Terjadi kesalahan. Silakan coba lagi.");
       }
-      
       setIsLoading(false);
     }
   };
 
-  // ===== KOMPONEN POLA SANDI =====
-  const PasswordPattern = () => {
-    const [pattern, setPattern] = useState(Array(6).fill(''));
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const patternRef = useRef<HTMLDivElement>(null);
+  // Handle pattern lock
+  const handlePatternComplete = () => {
+    if (pattern.length < 4) {
+      setPatternError("Minimal 4 titik terhubung.");
+      return;
+    }
+    setPatternError("");
+    // Simpan pola (simulasi)
+    console.log("Pattern saved:", pattern);
+    router.push('/');
+  };
 
-    const handlePatternClick = (index: number) => {
-      if (index === currentIndex) {
-        const newPattern = [...pattern];
-        newPattern[index] = '●';
-        setPattern(newPattern);
-        setCurrentIndex(index + 1);
-        if (index + 1 >= 6) {
-          setShowPasswordPattern(false);
-          // Reset setelah selesai
-          setTimeout(() => {
-            setPattern(Array(6).fill(''));
-            setCurrentIndex(0);
-          }, 1000);
-        }
-      }
-    };
+  const handleDotClick = (index: number) => {
+    if (pattern.includes(index)) return;
+    const newPattern = [...pattern, index];
+    setPattern(newPattern);
+    if (newPattern.length >= 4) {
+      // Optional: auto complete
+    }
+  };
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        transition={{ duration: 0.4 }}
-        ref={patternRef}
-        style={{
-          marginTop: "40px",
-          padding: "30px 0",
-          borderTop: "1px solid #f0f0f0",
-        }}
-      >
-        <h3 style={{
-          fontSize: "24px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          marginBottom: "8px",
-        }}>
-          Pola Sandi Keamanan
-        </h3>
-        <p style={{
-          fontSize: "14px",
-          color: "#666",
-          fontFamily: FONT_FAMILY,
-          marginBottom: "20px",
-        }}>
-          Klik 6 titik secara berurutan untuk membuat pola sandi
-        </p>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(6, 1fr)",
-          gap: "12px",
-          maxWidth: "360px",
-        }}>
-          {pattern.map((_, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handlePatternClick(index)}
-              style={{
-                aspectRatio: "1",
-                borderRadius: "50%",
-                backgroundColor: pattern[index] === '●' ? "#0D3CFC" : "#e8e8e8",
-                border: pattern[index] === '●' ? "2px solid #0D3CFC" : "2px solid #ddd",
-                cursor: index === currentIndex ? "pointer" : "not-allowed",
-                transition: "all 0.3s ease",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "24px",
-                color: "#fff",
-                opacity: index === currentIndex ? 1 : 0.6,
-              }}
-            >
-              {pattern[index] === '●' && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500 }}
-                >
-                  ●
-                </motion.span>
-              )}
-            </motion.div>
-          ))}
-        </div>
-        {currentIndex === 6 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            style={{
-              marginTop: "16px",
-              color: "#22c55e",
-              fontSize: "14px",
-              fontWeight: 500,
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            ✓ Pola sandi berhasil dibuat!
-          </motion.div>
-        )}
-        <button
-          onClick={() => setShowPasswordPattern(false)}
+  const resetPattern = () => {
+    setPattern([]);
+    setPatternError("");
+  };
+
+  // Render titik untuk pola
+  const renderDots = () => {
+    const dots = [];
+    for (let i = 0; i < 9; i++) {
+      const isActive = pattern.includes(i);
+      dots.push(
+        <motion.button
+          key={i}
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => handleDotClick(i)}
           style={{
-            marginTop: "12px",
-            background: "none",
-            border: "none",
-            color: "#999",
-            fontSize: "13px",
-            cursor: "pointer",
-            fontFamily: FONT_FAMILY,
-            textDecoration: "underline",
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            backgroundColor: isActive ? '#0D3CFC' : '#e0e0e0',
+            border: '2px solid #0D3CFC',
+            cursor: 'pointer',
+            transition: 'background 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '20px',
+            color: '#fff',
+            fontWeight: 'bold',
           }}
         >
-          Tutup
-        </button>
-      </motion.div>
-    );
+          {isActive && '●'}
+        </motion.button>
+      );
+    }
+    return dots;
   };
 
   return (
@@ -449,14 +373,6 @@ export default function SignUpPage() {
         }
         *::-webkit-scrollbar {
           display: none;
-        }
-        .terms-content {
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.4s ease;
-        }
-        .terms-content.open {
-          max-height: 500px;
         }
       `}</style>
 
@@ -952,388 +868,401 @@ export default function SignUpPage() {
               justifyContent: "center",
             }}
           >
-            {/* Teks Sign Up 200px */}
-            <h1 style={{
-              fontSize: isMobile ? "80px" : "200px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-              margin: "0 0 10px 0",
-              textAlign: "left",
-              wordBreak: "break-word",
-            }}>
-              Sign Up
-            </h1>
-
-            <p style={{
-              fontSize: "18px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "32px",
-              textAlign: "left",
-            }}>
-              Create your account to join the Menuru community
-            </p>
-
-            {/* Error Message */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    backgroundColor: "rgba(239,68,68,0.1)",
-                    border: "1px solid rgba(239,68,68,0.3)",
-                    borderRadius: "8px",
-                    padding: "12px 16px",
-                    marginBottom: "16px",
-                    color: "#ef4444",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Form */}
-            <motion.form
-              onSubmit={handleSignUp}
-              style={{ width: "100%" }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "12px",
-                  fontSize: "16px",
+            {!showPattern ? (
+              // === FORM SIGN UP ===
+              <>
+                <h1 style={{
+                  fontSize: isMobile ? "80px" : "200px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
-                  background: "#ffffff",
-                  color: "#000000",
-                  outline: "none",
-                  marginBottom: "16px",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
-              
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "12px",
-                  fontSize: "16px",
+                  letterSpacing: "-0.05em",
+                  lineHeight: 1,
+                  margin: "0 0 10px 0",
+                  textAlign: "left",
+                  wordBreak: "break-word",
+                }}>
+                  Sign Up
+                </h1>
+
+                <p style={{
+                  fontSize: "18px",
+                  color: "#666666",
                   fontFamily: FONT_FAMILY,
-                  background: "#ffffff",
-                  color: "#000000",
-                  outline: "none",
-                  marginBottom: "16px",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
+                  marginBottom: "32px",
+                  textAlign: "left",
+                }}>
+                  Create your account to join the Menuru community
+                </p>
 
-              {/* Password dengan icon mata */}
-              <div style={{
-                position: "relative",
-                marginBottom: "12px",
-              }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password (min. 6 characters)"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  minLength={6}
-                  style={{
-                    width: "100%",
-                    padding: "16px 50px 16px 20px",
-                    border: "2px solid #e8e8e8",
-                    borderRadius: "12px",
-                    fontSize: "16px",
-                    fontFamily: FONT_FAMILY,
-                    background: "#ffffff",
-                    color: "#000000",
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "14px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-
-              {/* ===== PERSETUJUAN PERSYARATAN (GSAP) ===== */}
-              <div style={{
-                marginBottom: "16px",
-                fontFamily: FONT_FAMILY,
-              }}>
-                <div
-                  onClick={() => setShowTerms(!showTerms)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    cursor: "pointer",
-                    color: "#0D3CFC",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    userSelect: "none",
-                  }}
-                >
-                  <span className="check-icon" style={{ display: "flex", alignItems: "center" }}>
-                    <CheckIcon checked={termsChecked} />
-                  </span>
-                  <span>
-                    {showTerms ? "Sembunyikan" : "Lihat"} Syarat & Ketentuan
-                  </span>
-                </div>
-
+                {/* Error Message */}
                 <AnimatePresence>
-                  {showTerms && (
+                  {error && (
                     <motion.div
-                      ref={termsContentRef}
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: "power2.out" }}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
                       style={{
-                        overflow: "hidden",
-                        paddingTop: showTerms ? "12px" : "0",
+                        backgroundColor: "rgba(239,68,68,0.1)",
+                        border: "1px solid rgba(239,68,68,0.3)",
+                        borderRadius: "8px",
+                        padding: "12px 16px",
+                        marginBottom: "16px",
+                        color: "#ef4444",
+                        fontSize: "14px",
+                        fontFamily: FONT_FAMILY,
                       }}
                     >
-                      <div style={{
-                        fontSize: "14px",
-                        color: "#0D3CFC",
-                        lineHeight: 1.8,
-                        fontFamily: FONT_FAMILY,
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        paddingRight: "8px",
-                      }}>
-                        <p><strong>Ketentuan Layanan Menuru</strong></p>
-                        <p>1. Dengan mendaftar, Anda menyetujui semua kebijakan yang berlaku di Menuru.</p>
-                        <p>2. Data pribadi Anda akan dilindungi sesuai dengan Kebijakan Privasi.</p>
-                        <p>3. Anda bertanggung jawab penuh atas aktivitas akun Anda.</p>
-                        <p>4. Dilarang menyalahgunakan layanan Menuru untuk hal-hal yang melanggar hukum.</p>
-                        <p>5. Menuru berhak mengubah ketentuan ini sewaktu-waktu.</p>
-                        <p>6. Anda akan menerima notifikasi penting terkait akun Anda.</p>
-                        <p>7. Dengan menyetujui, Anda memberikan izin untuk pemrosesan data sesuai aturan yang berlaku.</p>
-                      </div>
-                      <div style={{
-                        marginTop: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}>
-                        <button
-                          type="button"
-                          onClick={() => setTermsChecked(!termsChecked)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: "0",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <CheckIcon checked={termsChecked} />
-                        </button>
-                        <span style={{
-                          fontSize: "14px",
-                          color: "#0D3CFC",
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: 500,
-                        }}>
-                          Saya menyetujui semua persyaratan
-                        </span>
-                      </div>
+                      {error}
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
 
-              {/* Kebijakan dan Ketentuan */}
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                marginBottom: "24px",
-                flexWrap: "wrap",
-                fontSize: "14px",
-                fontFamily: FONT_FAMILY,
-                color: "#666666",
-              }}>
-                <span>Dengan mendaftar, Anda menyetujui</span>
-                <Link href="/kebijakan" style={{
-                  color: "#0D3CFC",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  transition: "color 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                <motion.form
+                  onSubmit={handleSignUp}
+                  style={{ width: "100%" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                 >
-                  Kebijakan Privasi
-                </Link>
-                <span style={{ color: "#ccc" }}>•</span>
-                <Link href="/ketentuan" style={{
-                  color: "#0D3CFC",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  transition: "color 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-                >
-                  Ketentuan Layanan
-                </Link>
-              </div>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      border: "2px solid #e8e8e8",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
+                      outline: "none",
+                      marginBottom: "16px",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+                  
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      border: "2px solid #e8e8e8",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
+                      outline: "none",
+                      marginBottom: "16px",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
 
-              <motion.button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "18px",
-                  fontWeight: 600,
+                  {/* Password dengan icon mata */}
+                  <div style={{
+                    position: "relative",
+                    marginBottom: "16px",
+                  }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password (min. 6 characters)"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      minLength={6}
+                      style={{
+                        width: "100%",
+                        padding: "16px 50px 16px 20px",
+                        border: "2px solid #e8e8e8",
+                        borderRadius: "12px",
+                        fontSize: "16px",
+                        fontFamily: FONT_FAMILY,
+                        background: "#ffffff",
+                        color: "#000000",
+                        outline: "none",
+                        transition: "border-color 0.2s ease",
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#999",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <EyeIcon open={showPassword} />
+                    </button>
+                  </div>
+
+                  {/* Checkbox Persetujuan */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                    marginBottom: "20px",
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="agree"
+                      checked={agreed}
+                      onChange={() => setAgreed(!agreed)}
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        marginTop: "2px",
+                        accentColor: "#0D3CFC",
+                        cursor: "pointer",
+                      }}
+                    />
+                    <label
+                      htmlFor="agree"
+                      style={{
+                        fontSize: "15px",
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                        cursor: "pointer",
+                        lineHeight: 1.6,
+                      }}
+                      onClick={toggleTerms}
+                    >
+                      Saya menyetujui Kebijakan Privasi dan Ketentuan Layanan
+                    </label>
+                  </div>
+
+                  {/* Detail Syarat & Ketentuan (scrollable, tanpa scrollbar) */}
+                  <div
+                    ref={termsRef}
+                    style={{
+                      overflow: 'hidden',
+                      height: 0,
+                      opacity: 0,
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <div style={{
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                      padding: '12px 16px',
+                      backgroundColor: '#f8faff',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      color: '#333',
+                      lineHeight: 1.8,
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      <strong>Kebijakan Privasi</strong><br />
+                      Kami menghormati privasi Anda. Data pribadi Anda akan digunakan untuk memberikan layanan terbaik.<br /><br />
+                      <strong>Ketentuan Layanan</strong><br />
+                      Dengan menggunakan layanan ini, Anda setuju untuk mematuhi semua peraturan yang berlaku.
+                      {/* Isi lengkap bisa ditambahkan di sini */}
+                    </div>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "12px",
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      fontFamily: FONT_FAMILY,
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                    }}
+                    whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                    whileTap={!isLoading ? { scale: 0.98 } : {}}
+                  >
+                    {isLoading ? "Creating Account..." : "Get Started"}
+                  </motion.button>
+                </motion.form>
+
+                <div style={{
+                  textAlign: "center",
+                  fontSize: "16px",
+                  color: "#666666",
                   fontFamily: FONT_FAMILY,
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: "all 0.3s ease",
-                }}
-                whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
-              >
-                {isLoading ? "Creating Account..." : "Get Started"}
-              </motion.button>
-            </motion.form>
+                  marginTop: "16px",
+                }}>
+                  Already have an account?{" "}
+                  <Link
+                    href="/signin"
+                    style={{
+                      color: "#0D3CFC",
+                      textDecoration: "underline",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Sign in
+                  </Link>
+                </div>
 
-            {/* Link ke Sign In */}
-            <div style={{
-              textAlign: "center",
-              fontSize: "16px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              marginTop: "16px",
-            }}>
-              Already have an account?{" "}
-              <Link
-                href="/signin"
+                <div style={{
+                  textAlign: "center",
+                  marginTop: "20px",
+                  paddingTop: "20px",
+                  borderTop: "1px solid #f0f0f0",
+                }}>
+                  <Link
+                    href="/pusat-bantuan"
+                    style={{
+                      color: "#0D3CFC",
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                  >
+                    <HelpDeskIcon size={18} />
+                    <span>Pusat Bantuan</span>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              // === POLA SANDI ===
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
                 style={{
-                  color: "#0D3CFC",
-                  textDecoration: "underline",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                Sign in
-              </Link>
-            </div>
-
-            {/* Pusat Bantuan - Link tambahan di bawah */}
-            <div style={{
-              textAlign: "center",
-              marginTop: "20px",
-              paddingTop: "20px",
-              borderTop: "1px solid #f0f0f0",
-            }}>
-              <Link
-                href="/pusat-bantuan"
-                style={{
-                  color: "#0D3CFC",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                  textDecoration: "none",
-                  transition: "color 0.2s ease",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-              >
-                <HelpDeskIcon size={18} />
-                <span>Pusat Bantuan</span>
-              </Link>
-            </div>
-
-            {/* ===== POLA SANDI (Terpisah dari Form) ===== */}
-            <div style={{ marginTop: "30px" }}>
-              <button
-                type="button"
-                onClick={() => setShowPasswordPattern(!showPasswordPattern)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#0D3CFC",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  gap: "8px",
+                  width: "100%",
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                {showPasswordPattern ? "Tutup Pola Sandi" : "Buat Pola Sandi Keamanan"}
-              </button>
+                <h2 style={{
+                  fontSize: "32px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "8px",
+                }}>
+                  Buat Pola Sandi
+                </h2>
+                <p style={{
+                  fontSize: "16px",
+                  color: "#666",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "24px",
+                  textAlign: "center",
+                }}>
+                  Hubungkan minimal 4 titik untuk keamanan tambahan
+                </p>
 
-              <AnimatePresence>
-                {showPasswordPattern && <PasswordPattern />}
-              </AnimatePresence>
-            </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '16px',
+                  marginBottom: '24px',
+                }}>
+                  {renderDots()}
+                </div>
+
+                {pattern.length > 0 && (
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#0D3CFC',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '8px',
+                  }}>
+                    {pattern.length} titik terhubung
+                  </div>
+                )}
+
+                {patternError && (
+                  <div style={{
+                    color: '#ef4444',
+                    fontSize: '14px',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '8px',
+                  }}>
+                    {patternError}
+                  </div>
+                )}
+
+                <div style={{
+                  display: 'flex',
+                  gap: '16px',
+                  marginTop: '8px',
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={resetPattern}
+                    style={{
+                      padding: '10px 24px',
+                      backgroundColor: 'transparent',
+                      color: '#666',
+                      border: '2px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Reset
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handlePatternComplete}
+                    style={{
+                      padding: '10px 24px',
+                      backgroundColor: '#0D3CFC',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Simpan Pola
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* SISI KANAN: Kosong */}
