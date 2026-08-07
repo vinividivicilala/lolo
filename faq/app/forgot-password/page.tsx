@@ -15,6 +15,15 @@ import {
   collection, 
   addDoc, 
   serverTimestamp,
+  doc,
+  getDoc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  updateDoc,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
@@ -44,6 +53,8 @@ if (typeof window !== "undefined") {
 }
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const AGENT_NAME = "Farid Ardiansyah";
 
 // ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
@@ -101,7 +112,7 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-// ===== NORTH EAST ARROW SVG =====
+// ===== NORTH EAST ARROW =====
 const NorthEastArrow = ({ width = 60, height = 60 }: { width?: number; height?: number }) => (
   <svg width={width} height={height} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -117,6 +128,265 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
+// ===== LIVE CHAT AGENT COMPONENT (GUEST VERSION) =====
+interface LiveChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+}
+
+const LiveChatAgentGuest = ({ ticketId, userName, userEmail, onClose }: { 
+  ticketId: string; 
+  userName: string; 
+  userEmail: string; 
+  onClose: () => void;
+}) => {
+  const [messages, setMessages] = useState<LiveChatMessage[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [agentOnline, setAgentOnline] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Subscribe agent online status
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        setAgentOnline(data.online || false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Subscribe messages
+  useEffect(() => {
+    if (!db || !ticketId) return;
+    const q = query(
+      collection(db, "livechat_tickets", ticketId, "messages"),
+      orderBy("timestamp", "asc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgList: LiveChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        msgList.push({ id: doc.id, ...doc.data() } as LiveChatMessage);
+      });
+      setMessages(msgList);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    });
+    return () => unsubscribe();
+  }, [ticketId]);
+
+  // Send message
+  const sendMessage = async () => {
+    if (!db || !ticketId || !messageText.trim()) return;
+    try {
+      const ticketRef = doc(db, "livechat_tickets", ticketId);
+      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
+        senderId: "guest_" + ticketId,
+        senderName: userName || "Pengguna",
+        text: messageText.trim(),
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        status: "active",
+      });
+      setMessageText("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return (
+    <div style={{
+      marginTop: "40px",
+      borderTop: "1px solid #e8e8e8",
+      paddingTop: "40px",
+      width: "100%",
+      maxWidth: "700px",
+    }}>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "20px",
+      }}>
+        <h3 style={{
+          fontSize: "24px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          margin: 0,
+        }}>
+          Live Chat Agent
+        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{
+            display: "inline-block",
+            width: "10px",
+            height: "10px",
+            borderRadius: "50%",
+            backgroundColor: agentOnline ? "#22c55e" : "#999",
+            boxShadow: agentOnline ? "0 0 10px rgba(34,197,94,0.5)" : "none",
+          }} />
+          <span style={{ fontSize: "14px", color: agentOnline ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+            {agentOnline ? "Online" : "Offline"}
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#999",
+              cursor: "pointer",
+              fontSize: "20px",
+              padding: "4px 8px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div style={{
+        backgroundColor: "#f9f9f9",
+        borderRadius: "12px",
+        border: "1px solid #e8e8e8",
+        height: "400px",
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+        }}>
+          {messages.length === 0 ? (
+            <div style={{
+              textAlign: "center",
+              color: "#999",
+              fontSize: "14px",
+              padding: "40px 0",
+              fontFamily: FONT_FAMILY,
+            }}>
+              Belum ada pesan. Mulai chat dengan agent.
+            </div>
+          ) : (
+            messages.map((msg) => {
+              const isMine = msg.senderId === "guest_" + ticketId;
+              return (
+                <div
+                  key={msg.id}
+                  style={{
+                    alignSelf: isMine ? "flex-end" : "flex-start",
+                    maxWidth: "75%",
+                    padding: "10px 14px",
+                    borderRadius: "12px",
+                    backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                    color: isMine ? "#fff" : "#000",
+                    fontSize: "14px",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {!isMine && (
+                    <div style={{
+                      fontSize: "11px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      marginBottom: "2px",
+                    }}>
+                      {msg.senderName}
+                    </div>
+                  )}
+                  <div>{msg.text}</div>
+                  <div style={{
+                    fontSize: "9px",
+                    color: isMine ? "rgba(255,255,255,0.6)" : "#999",
+                    marginTop: "4px",
+                  }}>
+                    {formatTime(msg.timestamp)}
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div style={{
+          padding: "12px 16px",
+          borderTop: "1px solid #e8e8e8",
+          display: "flex",
+          gap: "8px",
+          backgroundColor: "#fff",
+          borderRadius: "0 0 12px 12px",
+        }}>
+          <input
+            type="text"
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && messageText.trim()) {
+                sendMessage();
+              }
+            }}
+            placeholder="Ketik pesan..."
+            style={{
+              flex: 1,
+              padding: "10px 14px",
+              border: "1px solid #e8e8e8",
+              borderRadius: "8px",
+              fontSize: "14px",
+              outline: "none",
+              fontFamily: FONT_FAMILY,
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!messageText.trim()}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: messageText.trim() ? "pointer" : "not-allowed",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>Kirim</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== MAIN PAGE =====
 export default function ForgotPasswordPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -147,8 +417,9 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [ticketId, setTicketId] = useState("");
+  const [showLiveChat, setShowLiveChat] = useState(false);
 
-  // State untuk pernyataan persetujuan (GSAP)
+  // State untuk pernyataan persetujuan
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
@@ -277,16 +548,15 @@ export default function ForgotPasswordPage() {
       }
 
       // Kirim email reset password jika opsi password
-      if (selectedOption === 'password') {
+      if (selectedOption === 'password' && formData.email) {
         try {
           await sendPasswordResetEmail(auth, formData.email);
         } catch (err: any) {
-          // Jika email tidak terdaftar, tetap buat ticket
           console.log("Email reset password error:", err.message);
         }
       }
 
-      // Buat ticket di Firestore (livechat_tickets)
+      // Buat ticket di Firestore
       const ticketData = {
         userId: null,
         userName: formData.name || "Pengguna",
@@ -307,6 +577,7 @@ export default function ForgotPasswordPage() {
       const docRef = await addDoc(collection(db, "livechat_tickets"), ticketData);
       setTicketId(docRef.id);
       setSuccess(true);
+      setShowLiveChat(true);
       setLoading(false);
     } catch (err: any) {
       console.error("Error creating ticket:", err);
@@ -323,10 +594,15 @@ export default function ForgotPasswordPage() {
     setError("");
     setSuccess(false);
     setTicketId("");
+    setShowLiveChat(false);
     setShowAgreement(false);
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
+  };
+
+  const closeLiveChat = () => {
+    setShowLiveChat(false);
   };
 
   // ===== RENDER =====
@@ -447,7 +723,7 @@ export default function ForgotPasswordPage() {
           </div>
         </motion.div>
 
-        {/* ===== HEADER (sama seperti SignInPage) ===== */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -458,7 +734,7 @@ export default function ForgotPasswordPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search */}
+          {/* KIRI */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -661,7 +937,7 @@ export default function ForgotPasswordPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH: Note Donations News Calendar */}
+          {/* TENGAH */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -711,7 +987,7 @@ export default function ForgotPasswordPage() {
             </span>
           </motion.div>
 
-          {/* KANAN: Shop + Pusat bantuan + Notif + Profile */}
+          {/* KANAN */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -887,316 +1163,167 @@ export default function ForgotPasswordPage() {
           flexDirection: "column",
           alignItems: "flex-start",
           minHeight: "calc(100vh - 260px)",
-          justifyContent: "center",
+          justifyContent: "flex-start",
         }}>
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "power2.out" }}
-            style={{
-              width: "100%",
-              maxWidth: "900px",
-            }}
-          >
-            {!selectedOption && !success ? (
-              // ===== TAMPILAN AWAL: 3 OPSI (tanpa icon, border, hover) =====
-              <>
-                <h1 style={{
-                  fontSize: isMobile ? "60px" : "120px",
-                  fontWeight: 700,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                  margin: "0 0 20px 0",
-                  textAlign: "left",
-                }}>
-                  Lupa Akses
-                </h1>
-                <p style={{
-                  fontSize: "18px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: "48px",
-                }}>
-                  Pilih masalah yang Anda alami:
-                </p>
+          {!showLiveChat ? (
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: "power2.out" }}
+              style={{
+                width: "100%",
+                maxWidth: "900px",
+              }}
+            >
+              {!selectedOption && !success ? (
+                // ===== TAMPILAN AWAL: 3 OPSI =====
+                <>
+                  <h1 style={{
+                    fontSize: isMobile ? "60px" : "120px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    margin: "0 0 20px 0",
+                    textAlign: "left",
+                  }}>
+                    Lupa Akses
+                  </h1>
+                  <p style={{
+                    fontSize: "18px",
+                    color: "#666",
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: "48px",
+                  }}>
+                    Pilih masalah yang Anda alami:
+                  </p>
 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  width: '100%',
-                  maxWidth: '500px',
-                }}>
-                  {[
-                    { id: 'password', label: 'Lupa Password' },
-                    { id: 'email', label: 'Lupa Email' },
-                    { id: 'pin', label: 'Lupa Pola Sandi' },
-                  ].map((item) => (
-                    <motion.div
-                      key={item.id}
-                      whileHover={{ x: 8 }}
-                      transition={{ duration: 0.2 }}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    width: '100%',
+                    maxWidth: '500px',
+                  }}>
+                    {[
+                      { id: 'password', label: 'Lupa Password' },
+                      { id: 'email', label: 'Lupa Email' },
+                      { id: 'pin', label: 'Lupa Pola Sandi' },
+                    ].map((item) => (
+                      <motion.div
+                        key={item.id}
+                        whileHover={{ x: 8 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '16px 0',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #f0f0f0',
+                        }}
+                        onClick={() => setSelectedOption(item.id as any)}
+                      >
+                        <span style={{
+                          fontSize: '24px',
+                          fontWeight: 400,
+                          color: '#0D3CFC',
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {item.label}
+                        </span>
+                        <NorthEastArrow width={40} height={40} />
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div style={{
+                    marginTop: '48px',
+                    display: 'flex',
+                    gap: '24px',
+                    flexWrap: 'wrap',
+                  }}>
+                    <Link href="/signin" style={{
+                      color: '#0D3CFC',
+                      fontSize: '16px',
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: 'underline',
+                    }}>
+                      Kembali ke Sign In
+                    </Link>
+                    <span style={{ color: '#ccc' }}>|</span>
+                    <Link href="/signup" style={{
+                      color: '#0D3CFC',
+                      fontSize: '16px',
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: 'underline',
+                    }}>
+                      Buat Akun Baru
+                    </Link>
+                    <span style={{ color: '#ccc' }}>|</span>
+                    <Link href="/pusat-bantuan" style={{
+                      color: '#0D3CFC',
+                      fontSize: '16px',
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: 'underline',
+                    }}>
+                      Pusat Bantuan
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                // ===== FORM TIKET =====
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  style={{ width: '100%' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                    <button
+                      onClick={resetForm}
                       style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0D3CFC',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        fontFamily: FONT_FAMILY,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '16px 0',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid #f0f0f0',
-                      }}
-                      onClick={() => setSelectedOption(item.id as any)}
-                    >
-                      <span style={{
-                        fontSize: '24px',
-                        fontWeight: 400,
-                        color: '#0D3CFC',
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {item.label}
-                      </span>
-                      <NorthEastArrow width={40} height={40} />
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div style={{
-                  marginTop: '48px',
-                  display: 'flex',
-                  gap: '24px',
-                  flexWrap: 'wrap',
-                }}>
-                  <Link href="/signin" style={{
-                    color: '#0D3CFC',
-                    fontSize: '16px',
-                    fontFamily: FONT_FAMILY,
-                    textDecoration: 'underline',
-                  }}>
-                    Kembali ke Sign In
-                  </Link>
-                  <span style={{ color: '#ccc' }}>|</span>
-                  <Link href="/signup" style={{
-                    color: '#0D3CFC',
-                    fontSize: '16px',
-                    fontFamily: FONT_FAMILY,
-                    textDecoration: 'underline',
-                  }}>
-                    Buat Akun Baru
-                  </Link>
-                  <span style={{ color: '#ccc' }}>|</span>
-                  <Link href="/pusat-bantuan" style={{
-                    color: '#0D3CFC',
-                    fontSize: '16px',
-                    fontFamily: FONT_FAMILY,
-                    textDecoration: 'underline',
-                  }}>
-                    Pusat Bantuan
-                  </Link>
-                </div>
-              </>
-            ) : success ? (
-              // ===== SUKSES =====
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  width: '100%',
-                  padding: '20px 0',
-                }}
-              >
-                <div style={{ fontSize: '48px', marginBottom: '8px' }}>✓</div>
-                <h2 style={{
-                  fontSize: '32px',
-                  fontWeight: 600,
-                  color: '#0D3CFC',
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: '12px',
-                }}>
-                  Tiket Berhasil Dibuat!
-                </h2>
-                <p style={{
-                  fontSize: '18px',
-                  color: '#666',
-                  fontFamily: FONT_FAMILY,
-                  maxWidth: '500px',
-                  lineHeight: 1.6,
-                }}>
-                  Permintaan Anda telah dikirim ke tim support. Kami akan segera merespon melalui email atau live chat.
-                  <br />
-                  <span style={{ fontSize: '14px', color: '#999', marginTop: '8px', display: 'block' }}>
-                    ID Tiket: <strong style={{ color: '#0D3CFC' }}>{ticketId}</strong>
-                  </span>
-                </p>
-                <div style={{ display: 'flex', gap: '16px', marginTop: '30px' }}>
-                  <button
-                    onClick={resetForm}
-                    style={{
-                      padding: '12px 28px',
-                      backgroundColor: '#0D3CFC',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      cursor: 'pointer',
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    Buat Tiket Baru
-                  </button>
-                  <Link href="/">
-                    <button
-                      style={{
-                        padding: '12px 28px',
-                        backgroundColor: 'transparent',
-                        color: '#0D3CFC',
-                        border: '2px solid #0D3CFC',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        cursor: 'pointer',
-                        fontFamily: FONT_FAMILY,
+                        gap: '8px',
                       }}
                     >
-                      Ke Beranda
+                      <NorthEastArrow width={30} height={30} style={{ transform: 'rotate(180deg)' }} />
+                      <span style={{ fontSize: '18px' }}>Kembali</span>
                     </button>
-                  </Link>
-                </div>
-              </motion.div>
-            ) : (
-              // ===== FORM TIKET =====
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                style={{ width: '100%' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                  <button
-                    onClick={resetForm}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0D3CFC',
-                      fontSize: '24px',
-                      cursor: 'pointer',
-                      fontFamily: FONT_FAMILY,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <NorthEastArrow width={30} height={30} style={{ transform: 'rotate(180deg)' }} />
-                    <span style={{ fontSize: '18px' }}>Kembali</span>
-                  </button>
-                </div>
+                  </div>
 
-                <h2 style={{
-                  fontSize: '32px',
-                  fontWeight: 600,
-                  color: '#0D3CFC',
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: '8px',
-                }}>
-                  {selectedOption === 'password' && 'Lupa Password'}
-                  {selectedOption === 'email' && 'Lupa Email'}
-                  {selectedOption === 'pin' && 'Lupa Pola Sandi'}
-                </h2>
-                <p style={{
-                  fontSize: '16px',
-                  color: '#666',
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: '32px',
-                }}>
-                  {selectedOption === 'password' && 'Masukkan email terdaftar Anda untuk reset password.'}
-                  {selectedOption === 'email' && 'Masukkan nama lengkap Anda untuk mencari email terdaftar.'}
-                  {selectedOption === 'pin' && 'Masukkan nama dan email Anda untuk reset pola sandi.'}
-                </p>
+                  <h2 style={{
+                    fontSize: '32px',
+                    fontWeight: 600,
+                    color: '#0D3CFC',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '8px',
+                  }}>
+                    {selectedOption === 'password' && 'Lupa Password'}
+                    {selectedOption === 'email' && 'Lupa Email'}
+                    {selectedOption === 'pin' && 'Lupa Pola Sandi'}
+                  </h2>
+                  <p style={{
+                    fontSize: '16px',
+                    color: '#666',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '32px',
+                  }}>
+                    {selectedOption === 'password' && 'Masukkan email terdaftar Anda untuk reset password.'}
+                    {selectedOption === 'email' && 'Masukkan nama lengkap Anda untuk mencari email terdaftar.'}
+                    {selectedOption === 'pin' && 'Masukkan nama dan email Anda untuk reset pola sandi.'}
+                  </p>
 
-                <form onSubmit={handleSubmitTicket} style={{ width: '100%', maxWidth: '500px' }}>
-                  {selectedOption === 'password' && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                        Email Terdaftar
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="Masukkan email Anda"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '14px 16px',
-                          border: '2px solid #e8e8e8',
-                          borderRadius: '12px',
-                          fontSize: '16px',
-                          fontFamily: FONT_FAMILY,
-                          outline: 'none',
-                          transition: 'border-color 0.2s ease',
-                        }}
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                        onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
-                      />
-                    </div>
-                  )}
-
-                  {selectedOption === 'email' && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                        Nama Lengkap
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Masukkan nama Anda"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '14px 16px',
-                          border: '2px solid #e8e8e8',
-                          borderRadius: '12px',
-                          fontSize: '16px',
-                          fontFamily: FONT_FAMILY,
-                          outline: 'none',
-                          transition: 'border-color 0.2s ease',
-                        }}
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                        onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
-                      />
-                    </div>
-                  )}
-
-                  {selectedOption === 'pin' && (
-                    <>
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                          Nama Lengkap
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Masukkan nama Anda"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                          style={{
-                            width: '100%',
-                            padding: '14px 16px',
-                            border: '2px solid #e8e8e8',
-                            borderRadius: '12px',
-                            fontSize: '16px',
-                            fontFamily: FONT_FAMILY,
-                            outline: 'none',
-                            transition: 'border-color 0.2s ease',
-                          }}
-                          onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                          onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
-                        />
-                      </div>
+                  <form onSubmit={handleSubmitTicket} style={{ width: '100%', maxWidth: '500px' }}>
+                    {selectedOption === 'password' && (
                       <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
                           Email Terdaftar
@@ -1221,145 +1348,313 @@ export default function ForgotPasswordPage() {
                           onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
                         />
                       </div>
-                    </>
-                  )}
+                    )}
 
-                  {/* Pernyataan Persetujuan */}
-                  <div style={{ marginBottom: '20px', marginTop: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                      <input
-                        type="checkbox"
-                        id="agree"
-                        checked={agreed}
-                        onChange={() => setAgreed(!agreed)}
+                    {selectedOption === 'email' && (
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
+                          Nama Lengkap
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Masukkan nama Anda"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '14px 16px',
+                            border: '2px solid #e8e8e8',
+                            borderRadius: '12px',
+                            fontSize: '16px',
+                            fontFamily: FONT_FAMILY,
+                            outline: 'none',
+                            transition: 'border-color 0.2s ease',
+                          }}
+                          onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                          onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                        />
+                      </div>
+                    )}
+
+                    {selectedOption === 'pin' && (
+                      <>
+                        <div style={{ marginBottom: '16px' }}>
+                          <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
+                            Nama Lengkap
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Masukkan nama Anda"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            required
+                            style={{
+                              width: '100%',
+                              padding: '14px 16px',
+                              border: '2px solid #e8e8e8',
+                              borderRadius: '12px',
+                              fontSize: '16px',
+                              fontFamily: FONT_FAMILY,
+                              outline: 'none',
+                              transition: 'border-color 0.2s ease',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                            onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                          />
+                        </div>
+                        <div style={{ marginBottom: '16px' }}>
+                          <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
+                            Email Terdaftar
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="Masukkan email Anda"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            required
+                            style={{
+                              width: '100%',
+                              padding: '14px 16px',
+                              border: '2px solid #e8e8e8',
+                              borderRadius: '12px',
+                              fontSize: '16px',
+                              fontFamily: FONT_FAMILY,
+                              outline: 'none',
+                              transition: 'border-color 0.2s ease',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                            onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Pernyataan Persetujuan */}
+                    <div style={{ marginBottom: '20px', marginTop: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <input
+                          type="checkbox"
+                          id="agree"
+                          checked={agreed}
+                          onChange={() => setAgreed(!agreed)}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            marginTop: '2px',
+                            accentColor: '#0D3CFC',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <label
+                          htmlFor="agree"
+                          style={{
+                            fontSize: '16px',
+                            color: '#0D3CFC',
+                            fontFamily: FONT_FAMILY,
+                            cursor: 'pointer',
+                            lineHeight: 1.5,
+                          }}
+                          onClick={toggleAgreement}
+                        >
+                          Saya menyetujui <strong>Pernyataan Persetujuan</strong>
+                        </label>
+                      </div>
+
+                      <div
+                        ref={agreementRef}
                         style={{
-                          width: '20px',
-                          height: '20px',
-                          marginTop: '2px',
-                          accentColor: '#0D3CFC',
-                          cursor: 'pointer',
+                          overflow: 'hidden',
+                          height: 0,
+                          opacity: 0,
+                          marginTop: '12px',
                         }}
-                      />
-                      <label
-                        htmlFor="agree"
-                        style={{
-                          fontSize: '16px',
-                          color: '#0D3CFC',
-                          fontFamily: FONT_FAMILY,
-                          cursor: 'pointer',
-                          lineHeight: 1.5,
-                        }}
-                        onClick={toggleAgreement}
                       >
-                        Saya menyetujui <strong>Pernyataan Persetujuan</strong>
-                      </label>
-                    </div>
-
-                    {/* Konten Pernyataan Persetujuan (expand dengan GSAP) */}
-                    <div
-                      ref={agreementRef}
-                      style={{
-                        overflow: 'hidden',
-                        height: 0,
-                        opacity: 0,
-                        marginTop: '12px',
-                      }}
-                    >
-                      <div style={{
-                        padding: '16px 0',
-                        fontSize: '16px',
-                        color: '#333',
-                        lineHeight: 1.8,
-                        fontFamily: FONT_FAMILY,
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        scrollbarWidth: 'none',
-                        msOverflowStyle: 'none',
-                      }}>
-                        <h4 style={{ fontSize: '18px', fontWeight: 600, color: '#0D3CFC', marginBottom: '12px' }}>
-                          Pernyataan Persetujuan
-                        </h4>
-                        <p><strong>1. Tujuan Pengumpulan Data</strong></p>
-                        <p style={{ marginLeft: '20px' }}>1.1 Data yang Anda berikan akan digunakan untuk memproses permintaan bantuan Anda.</p>
-                        <p style={{ marginLeft: '20px' }}>1.2 Tim support akan menghubungi Anda melalui email atau live chat.</p>
-                        <p><strong>2. Keamanan Data</strong></p>
-                        <p style={{ marginLeft: '20px' }}>2.1 Data Anda akan dilindungi sesuai dengan Kebijakan Privasi Menuru.</p>
-                        <p style={{ marginLeft: '20px' }}>2.2 Kami tidak akan membagikan data Anda ke pihak ketiga tanpa izin.</p>
-                        <p><strong>3. Proses Bantuan</strong></p>
-                        <p style={{ marginLeft: '20px' }}>3.1 Tim support akan merespons dalam waktu 1x24 jam.</p>
-                        <p style={{ marginLeft: '20px' }}>3.2 Anda dapat melihat status tiket melalui live chat agent.</p>
+                        <div style={{
+                          padding: '16px 0',
+                          fontSize: '16px',
+                          color: '#333',
+                          lineHeight: 1.8,
+                          fontFamily: FONT_FAMILY,
+                          maxHeight: '300px',
+                          overflowY: 'auto',
+                          scrollbarWidth: 'none',
+                          msOverflowStyle: 'none',
+                        }}>
+                          <h4 style={{ fontSize: '18px', fontWeight: 600, color: '#0D3CFC', marginBottom: '12px' }}>
+                            Pernyataan Persetujuan
+                          </h4>
+                          <p><strong>1. Tujuan Pengumpulan Data</strong></p>
+                          <p style={{ marginLeft: '20px' }}>1.1 Data yang Anda berikan akan digunakan untuk memproses permintaan bantuan Anda.</p>
+                          <p style={{ marginLeft: '20px' }}>1.2 Tim support akan menghubungi Anda melalui email atau live chat.</p>
+                          <p><strong>2. Keamanan Data</strong></p>
+                          <p style={{ marginLeft: '20px' }}>2.1 Data Anda akan dilindungi sesuai dengan Kebijakan Privasi Menuru.</p>
+                          <p style={{ marginLeft: '20px' }}>2.2 Kami tidak akan membagikan data Anda ke pihak ketiga tanpa izin.</p>
+                          <p><strong>3. Proses Bantuan</strong></p>
+                          <p style={{ marginLeft: '20px' }}>3.1 Tim support akan merespons dalam waktu 1x24 jam.</p>
+                          <p style={{ marginLeft: '20px' }}>3.2 Anda dapat melihat status tiket melalui live chat agent.</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {error && (
-                    <div style={{
-                      color: '#0D3CFC',
-                      fontSize: '15px',
+                    {error && (
+                      <div style={{
+                        color: '#0D3CFC',
+                        fontSize: '15px',
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: '16px',
+                      }}>
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      style={{
+                        width: '100%',
+                        padding: '16px',
+                        backgroundColor: loading ? '#ccc' : '#0D3CFC',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '18px',
+                        fontWeight: 600,
+                        fontFamily: FONT_FAMILY,
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {loading ? 'Mengirim...' : 'Kirim Tiket'}
+                    </button>
+                  </form>
+
+                  {/* Link Kebijakan & Ketentuan */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    gap: '24px',
+                    marginTop: '30px',
+                    flexWrap: 'wrap',
+                  }}>
+                    <Link href="/kebijakan" style={{
+                      color: '#666',
+                      fontSize: '14px',
                       fontFamily: FONT_FAMILY,
-                      marginBottom: '16px',
+                      textDecoration: 'underline',
                     }}>
-                      {error}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                      width: '100%',
-                      padding: '16px',
-                      backgroundColor: loading ? '#ccc' : '#0D3CFC',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontSize: '18px',
-                      fontWeight: 600,
+                      Kebijakan Privasi
+                    </Link>
+                    <Link href="/ketentuan" style={{
+                      color: '#666',
+                      fontSize: '14px',
                       fontFamily: FONT_FAMILY,
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    {loading ? 'Mengirim...' : 'Kirim Tiket'}
-                  </button>
-                </form>
-
-                {/* Link Kebijakan & Ketentuan */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                  gap: '24px',
-                  marginTop: '30px',
-                  flexWrap: 'wrap',
+                      textDecoration: 'underline',
+                    }}>
+                      Ketentuan Kami
+                    </Link>
+                    <Link href="/pusat-bantuan" style={{
+                      color: '#666',
+                      fontSize: '14px',
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: 'underline',
+                    }}>
+                      Pusat Bantuan
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          ) : (
+            // ===== TAMPILAN LIVE CHAT AGENT =====
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                width: '100%',
+                maxWidth: '800px',
+              }}
+            >
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{
+                  fontSize: '28px',
+                  fontWeight: 600,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: '4px',
                 }}>
-                  <Link href="/kebijakan" style={{
+                  Tiket berhasil dibuat!
+                </h2>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#666',
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  Anda sekarang dapat chat langsung dengan agent. Tunggu hingga agent merespons.
+                </p>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#999',
+                  fontFamily: FONT_FAMILY,
+                  marginTop: '4px',
+                }}>
+                  ID Tiket: <strong style={{ color: '#0D3CFC' }}>{ticketId}</strong>
+                </p>
+              </div>
+
+              <LiveChatAgentGuest
+                ticketId={ticketId}
+                userName={formData.name || "Pengguna"}
+                userEmail={formData.email || "tidakada@email.com"}
+                onClose={() => {
+                  setShowLiveChat(false);
+                  resetForm();
+                }}
+              />
+
+              <div style={{
+                marginTop: '30px',
+                display: 'flex',
+                gap: '16px',
+                flexWrap: 'wrap',
+              }}>
+                <Link href="/" style={{
+                  color: '#0D3CFC',
+                  fontSize: '16px',
+                  fontFamily: FONT_FAMILY,
+                  textDecoration: 'underline',
+                }}>
+                  Ke Beranda
+                </Link>
+                <Link href="/signin" style={{
+                  color: '#0D3CFC',
+                  fontSize: '16px',
+                  fontFamily: FONT_FAMILY,
+                  textDecoration: 'underline',
+                }}>
+                  Sign In
+                </Link>
+                <button
+                  onClick={() => {
+                    setShowLiveChat(false);
+                    resetForm();
+                  }}
+                  style={{
                     color: '#666',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     fontFamily: FONT_FAMILY,
                     textDecoration: 'underline',
-                  }}>
-                    Kebijakan Privasi
-                  </Link>
-                  <Link href="/ketentuan" style={{
-                    color: '#666',
-                    fontSize: '14px',
-                    fontFamily: FONT_FAMILY,
-                    textDecoration: 'underline',
-                  }}>
-                    Ketentuan Kami
-                  </Link>
-                  <Link href="/pusat-bantuan" style={{
-                    color: '#666',
-                    fontSize: '14px',
-                    fontFamily: FONT_FAMILY,
-                    textDecoration: 'underline',
-                  }}>
-                    Pusat Bantuan
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Buat Tiket Baru
+                </button>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </>
