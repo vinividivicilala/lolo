@@ -191,7 +191,7 @@ export default function SignUpPage() {
   const router = useRouter();
 
   // ===== EFFECTS =====
-  // 1. Mobile detection - HANYA di client
+  // Mobile detection - hanya di client
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -201,7 +201,7 @@ export default function SignUpPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 2. Admin check
+  // Admin check
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -210,7 +210,7 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
-  // 3. Load Terms
+  // Load Terms
   useEffect(() => {
     if (!db) return;
     const loadTerms = async () => {
@@ -241,7 +241,7 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
-  // 4. GSAP terms animation
+  // GSAP terms animation
   useEffect(() => {
     if (isTermsOpen && termsContentRef.current) {
       gsap.fromTo(termsContentRef.current,
@@ -258,7 +258,7 @@ export default function SignUpPage() {
     }
   }, [isTermsOpen]);
 
-  // 5. Rolling text
+  // Rolling text
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -290,7 +290,7 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // 6. Search expand
+  // Search expand
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -301,7 +301,7 @@ export default function SignUpPage() {
     }
   }, [isSearchOpen]);
 
-  // 7. Click outside
+  // Click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -317,7 +317,7 @@ export default function SignUpPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 8. Reset search results
+  // Reset search results
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
@@ -428,6 +428,12 @@ export default function SignUpPage() {
       
       setIsLoading(false);
     }
+  };
+
+  // Helper untuk render terms content dengan aman
+  const renderTermsContent = (content: string) => {
+    if (!content || typeof content !== 'string') return '';
+    return content.replace(/\n/g, '<br/>');
   };
 
   // ===== RENDER =====
@@ -989,7 +995,9 @@ export default function SignUpPage() {
           alignItems: isMobile ? "center" : "flex-start",
           minHeight: "calc(100vh - 260px)",
           justifyContent: "center",
-        }}>
+        }}
+        suppressHydrationWarning
+        >
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1013,7 +1021,9 @@ export default function SignUpPage() {
               margin: "0 0 10px 0",
               textAlign: "left",
               wordBreak: "break-word",
-            }}>
+            }}
+            suppressHydrationWarning
+            >
               Sign Up
             </h1>
 
@@ -1023,7 +1033,9 @@ export default function SignUpPage() {
               fontFamily: FONT_FAMILY,
               marginBottom: "32px",
               textAlign: "left",
-            }}>
+            }}
+            suppressHydrationWarning
+            >
               Create your account to join the Menuru community
             </p>
 
@@ -1286,7 +1298,7 @@ export default function SignUpPage() {
                       </div>
                     ) : (
                       <div dangerouslySetInnerHTML={{ 
-                        __html: termsContent ? termsContent.replace(/\n/g, '<br/>') : ''
+                        __html: typeof termsContent === 'string' ? termsContent.replace(/\n/g, '<br/>') : ''
                       }} />
                     )}
                   </div>
