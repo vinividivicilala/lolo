@@ -38,7 +38,7 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// ===== ICONS (Sama seperti sebelumnya) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -111,6 +111,16 @@ const EyeIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
+// ===== ICON CEKLIS =====
+const CheckIcon = ({ checked }: { checked: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="18" height="18" rx="4" stroke="#0D3CFC" strokeWidth="2" fill={checked ? "#0D3CFC" : "none"}/>
+    {checked && (
+      <path d="M9 12L11.5 14.5L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    )}
+  </svg>
+);
+
 // ===== SEARCH ROLLING TEXT =====
 const searchRollingTexts = [
   "Tentang Note", 
@@ -120,170 +130,27 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
-// ===== KOMPONEN MODAL UNTUK SYARAT & KETENTUAN =====
-const TermsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(8px)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-      }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        transition={{ type: 'spring', damping: 25 }}
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          maxWidth: '700px',
-          width: '100%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          padding: '40px',
-          position: 'relative',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            color: '#999',
-            transition: 'color 0.2s ease',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#333'}
-          onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
-        >
-          ✕
-        </button>
-        <h2 style={{
-          fontSize: '28px',
-          fontWeight: 600,
-          color: '#0D3CFC',
-          fontFamily: FONT_FAMILY,
-          marginBottom: '16px',
-        }}>
-          Syarat & Ketentuan
-        </h2>
-        <div style={{
-          fontSize: '15px',
-          color: '#333',
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.8,
-        }}>
-          <p><strong>1. Pendahuluan</strong></p>
-          <p>Selamat datang di Menuru. Dengan menggunakan layanan kami, Anda setuju untuk terikat dengan syarat dan ketentuan berikut. Harap baca dengan saksama sebelum mendaftar.</p>
-          
-          <p><strong>2. Akun Pengguna</strong></p>
-          <p>Anda bertanggung jawab penuh atas keamanan akun dan kerahasiaan kata sandi Anda. Anda setuju untuk memberi tahu kami segera jika terjadi akses tidak sah ke akun Anda.</p>
-          
-          <p><strong>3. Konten dan Perilaku</strong></p>
-          <p>Konten yang Anda unggah harus sesuai dengan hukum yang berlaku dan tidak melanggar hak pihak ketiga. Kami berhak menghapus konten yang dianggap tidak pantas.</p>
-          
-          <p><strong>4. Privasi</strong></p>
-          <p>Kami menghargai privasi Anda. Data pribadi Anda akan dilindungi sesuai dengan Kebijakan Privasi kami yang terpisah.</p>
-          
-          <p><strong>5. Pembatasan Tanggung Jawab</strong></p>
-          <p>Layanan ini disediakan "sebagaimana adanya". Kami tidak bertanggung jawab atas kerugian langsung atau tidak langsung yang timbul dari penggunaan layanan ini.</p>
-          
-          <p><strong>6. Perubahan Ketentuan</strong></p>
-          <p>Kami dapat mengubah syarat dan ketentuan ini setiap saat. Perubahan akan diumumkan melalui situs kami.</p>
-          
-          <p><strong>7. Hukum yang Berlaku</strong></p>
-          <p>Ketentuan ini tunduk pada hukum Negara Republik Indonesia.</p>
-          
-          <p><strong>8. Kontak</strong></p>
-          <p>Jika Anda memiliki pertanyaan, silakan hubungi kami di support@menuru.com.</p>
-          
-          <p style={{ marginTop: '16px', fontStyle: 'italic', color: '#666' }}>
-            Terakhir diperbarui: 7 Agustus 2026
-          </p>
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            marginTop: '24px',
-            padding: '12px 32px',
-            backgroundColor: '#0D3CFC',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: 500,
-            cursor: 'pointer',
-            fontFamily: FONT_FAMILY,
-            transition: 'background 0.2s ease',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0a2fc9'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0D3CFC'}
-        >
-          Tutup
-        </button>
-      </motion.div>
-    </motion.div>
-  );
-};
-
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
-    pin: "",
-    confirmPin: "",
+    password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showPin, setShowPin] = useState(false);
-  const [showConfirmPin, setShowConfirmPin] = useState(false);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [rollingIndex, setRollingIndex] = useState(0);
-  const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [showPasswordPattern, setShowPasswordPattern] = useState(false);
   const rollingRef = useRef<HTMLSpanElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
+  const termsContentRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -353,24 +220,43 @@ export default function SignUpPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // GSAP animation for terms
+  useEffect(() => {
+    if (showTerms && termsContentRef.current) {
+      gsap.fromTo(termsContentRef.current,
+        { height: 0, opacity: 0 },
+        { height: "auto", opacity: 1, duration: 0.4, ease: "power2.out" }
+      );
+    } else if (!showTerms && termsContentRef.current) {
+      gsap.to(termsContentRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+  }, [showTerms]);
+
+  // GSAP animation for check icon
+  useEffect(() => {
+    if (termsChecked) {
+      gsap.fromTo('.check-icon',
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out" }
+      );
+    }
+  }, [termsChecked]);
+
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.pin !== formData.confirmPin) {
-      setError("PIN tidak cocok. Silakan periksa kembali.");
+    if (!termsChecked) {
+      setError("Anda harus menyetujui persyaratan terlebih dahulu.");
       return;
     }
-    if (formData.pin.length < 6) {
-      setError("PIN harus 6 digit angka.");
-      return;
-    }
-    // Simpan PIN (misal ke state atau localStorage untuk demo)
-    // Tampilkan alert PIN berhasil dibuat
-    alert(`Pendaftaran berhasil! PIN Anda: ${formData.pin}`);
-    
     setIsLoading(true);
     setError("");
 
@@ -412,6 +298,132 @@ export default function SignUpPage() {
     }
   };
 
+  // ===== KOMPONEN POLA SANDI =====
+  const PasswordPattern = () => {
+    const [pattern, setPattern] = useState(Array(6).fill(''));
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const patternRef = useRef<HTMLDivElement>(null);
+
+    const handlePatternClick = (index: number) => {
+      if (index === currentIndex) {
+        const newPattern = [...pattern];
+        newPattern[index] = '●';
+        setPattern(newPattern);
+        setCurrentIndex(index + 1);
+        if (index + 1 >= 6) {
+          setShowPasswordPattern(false);
+          // Reset setelah selesai
+          setTimeout(() => {
+            setPattern(Array(6).fill(''));
+            setCurrentIndex(0);
+          }, 1000);
+        }
+      }
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.4 }}
+        ref={patternRef}
+        style={{
+          marginTop: "40px",
+          padding: "30px 0",
+          borderTop: "1px solid #f0f0f0",
+        }}
+      >
+        <h3 style={{
+          fontSize: "24px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          marginBottom: "8px",
+        }}>
+          Pola Sandi Keamanan
+        </h3>
+        <p style={{
+          fontSize: "14px",
+          color: "#666",
+          fontFamily: FONT_FAMILY,
+          marginBottom: "20px",
+        }}>
+          Klik 6 titik secara berurutan untuk membuat pola sandi
+        </p>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(6, 1fr)",
+          gap: "12px",
+          maxWidth: "360px",
+        }}>
+          {pattern.map((_, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handlePatternClick(index)}
+              style={{
+                aspectRatio: "1",
+                borderRadius: "50%",
+                backgroundColor: pattern[index] === '●' ? "#0D3CFC" : "#e8e8e8",
+                border: pattern[index] === '●' ? "2px solid #0D3CFC" : "2px solid #ddd",
+                cursor: index === currentIndex ? "pointer" : "not-allowed",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "24px",
+                color: "#fff",
+                opacity: index === currentIndex ? 1 : 0.6,
+              }}
+            >
+              {pattern[index] === '●' && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500 }}
+                >
+                  ●
+                </motion.span>
+              )}
+            </motion.div>
+          ))}
+        </div>
+        {currentIndex === 6 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={{
+              marginTop: "16px",
+              color: "#22c55e",
+              fontSize: "14px",
+              fontWeight: 500,
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            ✓ Pola sandi berhasil dibuat!
+          </motion.div>
+        )}
+        <button
+          onClick={() => setShowPasswordPattern(false)}
+          style={{
+            marginTop: "12px",
+            background: "none",
+            border: "none",
+            color: "#999",
+            fontSize: "13px",
+            cursor: "pointer",
+            fontFamily: FONT_FAMILY,
+            textDecoration: "underline",
+          }}
+        >
+          Tutup
+        </button>
+      </motion.div>
+    );
+  };
+
   return (
     <>
       <Head>
@@ -437,6 +449,14 @@ export default function SignUpPage() {
         }
         *::-webkit-scrollbar {
           display: none;
+        }
+        .terms-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.4s ease;
+        }
+        .terms-content.open {
+          max-height: 500px;
         }
       `}</style>
 
@@ -842,25 +862,32 @@ export default function SignUpPage() {
               </motion.a>
             </Link>
 
-            {/* Notification - bisa diklik */}
-            <button
-              onClick={() => alert("Notifikasi: Anda tidak memiliki notifikasi baru.")}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#000000",
-                padding: "8px 8px",
-                borderRadius: "8px",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-            >
-              <NotificationsIcon size={24} hasBadge={false} />
-            </button>
+            {/* Notification */}
+            <div style={{ position: "relative" }}>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#000000",
+                  padding: "8px 8px",
+                  borderRadius: "8px",
+                  position: "relative",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <NotificationsIcon size={24} hasBadge={false} />
+              </motion.button>
+            </div>
 
             {/* Profile - Login/Signup link */}
             <div style={{ position: "relative" }}>
@@ -990,8 +1017,8 @@ export default function SignUpPage() {
                 style={{
                   width: "100%",
                   padding: "16px 20px",
-                  border: "1px solid #d0d0d0",
-                  borderRadius: "8px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "12px",
                   fontSize: "16px",
                   fontFamily: FONT_FAMILY,
                   background: "#ffffff",
@@ -1001,7 +1028,7 @@ export default function SignUpPage() {
                   transition: "border-color 0.2s ease",
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#d0d0d0"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
               
               <input
@@ -1013,8 +1040,8 @@ export default function SignUpPage() {
                 style={{
                   width: "100%",
                   padding: "16px 20px",
-                  border: "1px solid #d0d0d0",
-                  borderRadius: "8px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "12px",
                   fontSize: "16px",
                   fontFamily: FONT_FAMILY,
                   background: "#ffffff",
@@ -1024,13 +1051,13 @@ export default function SignUpPage() {
                   transition: "border-color 0.2s ease",
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#d0d0d0"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
 
-              {/* Password */}
+              {/* Password dengan icon mata */}
               <div style={{
                 position: "relative",
-                marginBottom: "16px",
+                marginBottom: "12px",
               }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -1042,8 +1069,8 @@ export default function SignUpPage() {
                   style={{
                     width: "100%",
                     padding: "16px 50px 16px 20px",
-                    border: "1px solid #d0d0d0",
-                    borderRadius: "8px",
+                    border: "2px solid #e8e8e8",
+                    borderRadius: "12px",
                     fontSize: "16px",
                     fontFamily: FONT_FAMILY,
                     background: "#ffffff",
@@ -1052,7 +1079,7 @@ export default function SignUpPage() {
                     transition: "border-color 0.2s ease",
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#d0d0d0"}
+                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                 />
                 <button
                   type="button"
@@ -1076,160 +1103,132 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {/* PIN - Langkah 1 */}
+              {/* ===== PERSETUJUAN PERSYARATAN (GSAP) ===== */}
               <div style={{
-                position: "relative",
-                marginBottom: "12px",
-              }}>
-                <input
-                  type={showPin ? "text" : "password"}
-                  placeholder="Buat PIN (6 digit angka)"
-                  value={formData.pin}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    if (val.length <= 6) {
-                      setFormData({ ...formData, pin: val });
-                    }
-                  }}
-                  required
-                  maxLength={6}
-                  style={{
-                    width: "100%",
-                    padding: "16px 50px 16px 20px",
-                    border: "1px solid #d0d0d0",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontFamily: FONT_FAMILY,
-                    background: "#ffffff",
-                    color: "#000000",
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                    letterSpacing: '4px',
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#d0d0d0"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPin(!showPin)}
-                  style={{
-                    position: "absolute",
-                    right: "14px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <EyeIcon open={showPin} />
-                </button>
-              </div>
-
-              {/* Konfirmasi PIN - Langkah 2 */}
-              <div style={{
-                position: "relative",
-                marginBottom: "12px",
-              }}>
-                <input
-                  type={showConfirmPin ? "text" : "password"}
-                  placeholder="Verifikasi PIN (ulangi 6 digit angka)"
-                  value={formData.confirmPin}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    if (val.length <= 6) {
-                      setFormData({ ...formData, confirmPin: val });
-                    }
-                  }}
-                  required
-                  maxLength={6}
-                  style={{
-                    width: "100%",
-                    padding: "16px 50px 16px 20px",
-                    border: "1px solid #d0d0d0",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontFamily: FONT_FAMILY,
-                    background: "#ffffff",
-                    color: "#000000",
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                    letterSpacing: '4px',
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#d0d0d0"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPin(!showConfirmPin)}
-                  style={{
-                    position: "absolute",
-                    right: "14px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <EyeIcon open={showConfirmPin} />
-                </button>
-              </div>
-
-              {/* Persyaratan - Tanpa scroll, hanya link ke modal */}
-              <div style={{
-                marginBottom: "20px",
-                fontSize: "14px",
-                color: "#666",
+                marginBottom: "16px",
                 fontFamily: FONT_FAMILY,
               }}>
-                <span>Dengan mendaftar, Anda menyetujui </span>
-                <button
-                  type="button"
-                  onClick={() => setIsTermsModalOpen(true)}
+                <div
+                  onClick={() => setShowTerms(!showTerms)}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#0D3CFC',
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    color: "#0D3CFC",
+                    fontSize: "14px",
                     fontWeight: 500,
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '14px',
-                    padding: 0,
+                    userSelect: "none",
                   }}
                 >
-                  Syarat & Ketentuan
-                </button>
-                <span> dan </span>
-                <button
-                  type="button"
-                  onClick={() => setIsTermsModalOpen(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#0D3CFC',
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '14px',
-                    padding: 0,
-                  }}
+                  <span className="check-icon" style={{ display: "flex", alignItems: "center" }}>
+                    <CheckIcon checked={termsChecked} />
+                  </span>
+                  <span>
+                    {showTerms ? "Sembunyikan" : "Lihat"} Syarat & Ketentuan
+                  </span>
+                </div>
+
+                <AnimatePresence>
+                  {showTerms && (
+                    <motion.div
+                      ref={termsContentRef}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "power2.out" }}
+                      style={{
+                        overflow: "hidden",
+                        paddingTop: showTerms ? "12px" : "0",
+                      }}
+                    >
+                      <div style={{
+                        fontSize: "14px",
+                        color: "#0D3CFC",
+                        lineHeight: 1.8,
+                        fontFamily: FONT_FAMILY,
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        paddingRight: "8px",
+                      }}>
+                        <p><strong>Ketentuan Layanan Menuru</strong></p>
+                        <p>1. Dengan mendaftar, Anda menyetujui semua kebijakan yang berlaku di Menuru.</p>
+                        <p>2. Data pribadi Anda akan dilindungi sesuai dengan Kebijakan Privasi.</p>
+                        <p>3. Anda bertanggung jawab penuh atas aktivitas akun Anda.</p>
+                        <p>4. Dilarang menyalahgunakan layanan Menuru untuk hal-hal yang melanggar hukum.</p>
+                        <p>5. Menuru berhak mengubah ketentuan ini sewaktu-waktu.</p>
+                        <p>6. Anda akan menerima notifikasi penting terkait akun Anda.</p>
+                        <p>7. Dengan menyetujui, Anda memberikan izin untuk pemrosesan data sesuai aturan yang berlaku.</p>
+                      </div>
+                      <div style={{
+                        marginTop: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}>
+                        <button
+                          type="button"
+                          onClick={() => setTermsChecked(!termsChecked)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "0",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <CheckIcon checked={termsChecked} />
+                        </button>
+                        <span style={{
+                          fontSize: "14px",
+                          color: "#0D3CFC",
+                          fontFamily: FONT_FAMILY,
+                          fontWeight: 500,
+                        }}>
+                          Saya menyetujui semua persyaratan
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Kebijakan dan Ketentuan */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                marginBottom: "24px",
+                flexWrap: "wrap",
+                fontSize: "14px",
+                fontFamily: FONT_FAMILY,
+                color: "#666666",
+              }}>
+                <span>Dengan mendaftar, Anda menyetujui</span>
+                <Link href="/kebijakan" style={{
+                  color: "#0D3CFC",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  transition: "color 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
                 >
                   Kebijakan Privasi
-                </button>
-                <span> kami.</span>
+                </Link>
+                <span style={{ color: "#ccc" }}>•</span>
+                <Link href="/ketentuan" style={{
+                  color: "#0D3CFC",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  transition: "color 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                >
+                  Ketentuan Layanan
+                </Link>
               </div>
 
               <motion.button
@@ -1241,7 +1240,7 @@ export default function SignUpPage() {
                   backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   fontSize: "18px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
@@ -1278,7 +1277,7 @@ export default function SignUpPage() {
               </Link>
             </div>
 
-            {/* Pusat Bantuan */}
+            {/* Pusat Bantuan - Link tambahan di bawah */}
             <div style={{
               textAlign: "center",
               marginTop: "20px",
@@ -1305,6 +1304,36 @@ export default function SignUpPage() {
                 <span>Pusat Bantuan</span>
               </Link>
             </div>
+
+            {/* ===== POLA SANDI (Terpisah dari Form) ===== */}
+            <div style={{ marginTop: "30px" }}>
+              <button
+                type="button"
+                onClick={() => setShowPasswordPattern(!showPasswordPattern)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#0D3CFC",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                {showPasswordPattern ? "Tutup Pola Sandi" : "Buat Pola Sandi Keamanan"}
+              </button>
+
+              <AnimatePresence>
+                {showPasswordPattern && <PasswordPattern />}
+              </AnimatePresence>
+            </div>
           </motion.div>
 
           {/* SISI KANAN: Kosong */}
@@ -1318,12 +1347,6 @@ export default function SignUpPage() {
             }}
           />
         </div>
-
-        {/* Modal Syarat & Ketentuan */}
-        <TermsModal 
-          isOpen={isTermsModalOpen} 
-          onClose={() => setIsTermsModalOpen(false)} 
-        />
       </div>
     </>
   );
