@@ -84,6 +84,7 @@ const StoreIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+// ===== ICON NOTIFIKASI =====
 const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
     <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -120,6 +121,14 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
+// ===== DATA NOTIFIKASI DUMMY =====
+const notificationData = [
+  { id: 1, title: "Selamat datang!", message: "Terima kasih telah bergabung dengan Menuru", time: "5 menit lalu", read: false },
+  { id: 2, title: "Verifikasi email", message: "Silakan verifikasi email Anda untuk mengaktifkan akun", time: "1 jam lalu", read: false },
+  { id: 3, title: "Tips & Trik", message: "Baca panduan penggunaan Menuru untuk pemula", time: "3 jam lalu", read: true },
+  { id: 4, title: "Update fitur", message: "Fitur baru Live Chat Agent telah tersedia", time: "1 hari lalu", read: true },
+];
+
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -131,19 +140,29 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(notificationData);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
   const rollingRef = useRef<HTMLSpanElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
   const termsContainerRef = useRef<HTMLDivElement>(null);
   const checkboxRef = useRef<HTMLInputElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Hitung notifikasi belum dibaca
+  useEffect(() => {
+    const count = notifications.filter(n => !n.read).length;
+    setUnreadCount(count);
+  }, [notifications]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -207,6 +226,9 @@ export default function SignUpPage() {
         setSearchQuery("");
         setSearchResults([]);
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -215,38 +237,6 @@ export default function SignUpPage() {
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
-
-  // Scroll detection untuk terms
-  useEffect(() => {
-    const handleScroll = () => {
-      if (termsContainerRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = termsContainerRef.current;
-        const isBottom = scrollTop + clientHeight >= scrollHeight - 10;
-        setIsScrolledToBottom(isBottom);
-        
-        // GSAP animasi border saat mencapai bottom
-        if (isBottom) {
-          gsap.to(termsContainerRef.current, {
-            borderColor: '#22c55e',
-            duration: 0.5,
-            ease: 'power2.out',
-          });
-        } else {
-          gsap.to(termsContainerRef.current, {
-            borderColor: '#e8e8e8',
-            duration: 0.3,
-            ease: 'power2.in',
-          });
-        }
-      }
-    };
-    
-    const container = termsContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, []);
 
   // GSAP animasi checkbox saat dicentang
   useEffect(() => {
@@ -260,9 +250,19 @@ export default function SignUpPage() {
     }
   }, [acceptedTerms]);
 
+  // Animasi notifikasi dropdown
+  useEffect(() => {
+    if (showNotifications && notificationsRef.current) {
+      gsap.fromTo(notificationsRef.current,
+        { opacity: 0, y: -10, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }
+      );
+    }
+  }, [showNotifications]);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!acceptedTerms || !isScrolledToBottom) {
+    if (!acceptedTerms) {
       setError("Harap baca dan setujui syarat & ketentuan terlebih dahulu.");
       return;
     }
@@ -306,6 +306,11 @@ export default function SignUpPage() {
       
       setIsLoading(false);
     }
+  };
+
+  // Tandai semua notifikasi sebagai sudah dibaca
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   return (
@@ -753,14 +758,15 @@ export default function SignUpPage() {
               </motion.a>
             </Link>
 
-            {/* Notification */}
-            <div style={{ position: "relative" }}>
+            {/* Notification - BISA DIKLIK */}
+            <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowNotifications(!showNotifications)}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -776,8 +782,186 @@ export default function SignUpPage() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
-                <NotificationsIcon size={24} hasBadge={false} />
+                <NotificationsIcon size={24} hasBadge={unreadCount > 0} />
+                {unreadCount > 0 && (
+                  <span style={{
+                    position: "absolute",
+                    top: "2px",
+                    right: "2px",
+                    backgroundColor: "#ef4444",
+                    color: "#fff",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    borderRadius: "50%",
+                    width: "18px",
+                    height: "18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </motion.button>
+
+              {/* Dropdown Notifikasi */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    ref={notificationsRef}
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: "power2.out" }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      minWidth: "340px",
+                      maxWidth: "380px",
+                      maxHeight: "400px",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      zIndex: 60,
+                      fontFamily: FONT_FAMILY,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{
+                      padding: "14px 18px",
+                      borderBottom: "1px solid #f0f0f0",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                      <span style={{ fontWeight: 600, fontSize: "15px", color: "#000" }}>
+                        Notifikasi
+                        {unreadCount > 0 && (
+                          <span style={{
+                            marginLeft: "8px",
+                            backgroundColor: "#0D3CFC",
+                            color: "#fff",
+                            fontSize: "10px",
+                            padding: "1px 10px",
+                            borderRadius: "12px",
+                            fontWeight: 500,
+                          }}>
+                            {unreadCount} baru
+                          </span>
+                        )}
+                      </span>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#0D3CFC",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            fontFamily: FONT_FAMILY,
+                            fontWeight: 500,
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            transition: "background 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.06)"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                        >
+                          Tandai semua dibaca
+                        </button>
+                      )}
+                    </div>
+                    <div style={{
+                      maxHeight: "320px",
+                      overflowY: "auto",
+                      padding: "4px 0",
+                    }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: "30px 18px", textAlign: "center", color: "#999", fontSize: "14px" }}>
+                          Tidak ada notifikasi
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            style={{
+                              padding: "12px 18px",
+                              borderBottom: "1px solid #f5f5f5",
+                              backgroundColor: notif.read ? "transparent" : "rgba(13,60,252,0.04)",
+                              cursor: "pointer",
+                              transition: "background 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = notif.read ? "#f8f8f8" : "rgba(13,60,252,0.07)"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notif.read ? "transparent" : "rgba(13,60,252,0.04)"}
+                            onClick={() => {
+                              // Tandai sebagai dibaca
+                              setNotifications(prev => 
+                                prev.map(n => n.id === notif.id ? { ...n, read: true } : n)
+                              );
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                              <div>
+                                <div style={{
+                                  fontSize: "14px",
+                                  fontWeight: notif.read ? 400 : 600,
+                                  color: "#000",
+                                }}>
+                                  {notif.title}
+                                </div>
+                                <div style={{
+                                  fontSize: "13px",
+                                  color: "#666",
+                                  marginTop: "2px",
+                                  lineHeight: 1.4,
+                                }}>
+                                  {notif.message}
+                                </div>
+                                <div style={{
+                                  fontSize: "11px",
+                                  color: "#999",
+                                  marginTop: "4px",
+                                }}>
+                                  {notif.time}
+                                </div>
+                              </div>
+                              {!notif.read && (
+                                <span style={{
+                                  width: "8px",
+                                  height: "8px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#0D3CFC",
+                                  flexShrink: 0,
+                                  marginTop: "4px",
+                                }} />
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div style={{
+                      padding: "10px 18px",
+                      borderTop: "1px solid #f0f0f0",
+                      textAlign: "center",
+                    }}>
+                      <Link href="/pusat-bantuan" style={{
+                        color: "#0D3CFC",
+                        fontSize: "13px",
+                        textDecoration: "none",
+                        fontWeight: 500,
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        Lihat semua notifikasi
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Profile - Login/Signup link */}
@@ -994,89 +1178,36 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {/* ===== PERNYATAAN PERSETUJUAN DENGAN SCROLL ===== */}
-              <div style={{ marginBottom: "12px" }}>
-                <div
-                  ref={termsContainerRef}
-                  className="terms-scroll"
-                  style={{
-                    maxHeight: "120px",
-                    overflowY: "auto",
-                    padding: "12px 16px",
-                    border: `2px solid ${isScrolledToBottom ? '#22c55e' : '#e8e8e8'}`,
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                    color: "#666",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
-                    transition: "border-color 0.3s ease",
-                    backgroundColor: "#fafafa",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <p style={{ margin: "0 0 8px 0", fontWeight: 600, color: "#333" }}>📋 Persyaratan Layanan:</p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    1. Anda setuju untuk menggunakan layanan ini sesuai dengan ketentuan yang berlaku.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    2. Data pribadi Anda akan dilindungi sesuai dengan Kebijakan Privasi kami.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    3. Anda bertanggung jawab penuh atas akun dan aktivitas Anda.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    4. Kami berhak mengubah ketentuan ini setiap saat dengan pemberitahuan.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    5. Penggunaan layanan ini menunjukkan persetujuan Anda terhadap semua ketentuan.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    6. Dilarang menggunakan layanan untuk tujuan ilegal atau merugikan.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    7. Akun yang melanggar ketentuan dapat ditangguhkan atau dihapus.
-                  </p>
-                  <p style={{ margin: "0 0 6px 0" }}>
-                    8. Kami tidak bertanggung jawab atas kerugian yang timbul dari penggunaan layanan.
-                  </p>
-                  <p style={{ 
-                    margin: "6px 0 0 0", 
-                    color: isScrolledToBottom ? "#22c55e" : "#999",
-                    fontWeight: 500,
-                    transition: "color 0.3s ease",
-                  }}>
-                    {isScrolledToBottom ? "✓ Telah membaca semua syarat" : "⬇️ Gulir ke bawah untuk menyetujui"}
-                  </p>
-                </div>
-
-                {/* Checkbox Persetujuan */}
-                <label style={{
+              {/* ===== FORM PERSYARATAN YANG LEBIH BAGUS ===== */}
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                   gap: "12px",
-                  fontSize: "14px",
-                  color: "#333",
-                  fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  padding: "4px 0",
+                  marginBottom: "8px",
                 }}>
                   <input
                     ref={checkboxRef}
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    disabled={!isScrolledToBottom}
                     style={{
-                      width: "20px",
-                      height: "20px",
-                      minWidth: "20px",
+                      width: "18px",
+                      height: "18px",
+                      minWidth: "18px",
+                      marginTop: "2px",
                       accentColor: "#0D3CFC",
-                      cursor: isScrolledToBottom ? "pointer" : "not-allowed",
+                      cursor: "pointer",
                       borderRadius: "4px",
-                      opacity: isScrolledToBottom ? 1 : 0.5,
                     }}
                   />
-                  <span>
+                  <label style={{
+                    fontSize: "14px",
+                    color: "#333",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.5,
+                    cursor: "pointer",
+                  }}>
                     Saya telah membaca dan menyetujui{" "}
                     <Link href="/ketentuan" style={{ color: "#0D3CFC", textDecoration: "underline" }}>
                       Syarat & Ketentuan
@@ -1085,29 +1216,103 @@ export default function SignUpPage() {
                     <Link href="/kebijakan" style={{ color: "#0D3CFC", textDecoration: "underline" }}>
                       Kebijakan Privasi
                     </Link>
-                  </span>
-                </label>
+                  </label>
+                </div>
+
+                {/* Area scrollable persyaratan - lebih besar dan konten seperti makalah */}
+                <div
+                  ref={termsContainerRef}
+                  className="terms-scroll"
+                  style={{
+                    maxHeight: "180px",
+                    overflowY: "auto",
+                    padding: "16px 20px",
+                    border: "1px solid #e8e8e8",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    color: "#444",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.7,
+                    backgroundColor: "#fafafa",
+                    marginTop: "8px",
+                    transition: "border-color 0.3s ease",
+                  }}
+                >
+                  <h4 style={{
+                    margin: "0 0 12px 0",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    color: "#1a1a1a",
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    Ketentuan Layanan Menuru
+                  </h4>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>1. Penerimaan Ketentuan</strong><br />
+                    Dengan mendaftar dan menggunakan layanan Menuru, Anda menyetujui untuk terikat dengan semua ketentuan yang tercantum dalam dokumen ini. Jika Anda tidak setuju dengan salah satu ketentuan, harap tidak menggunakan layanan kami.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>2. Perubahan Ketentuan</strong><br />
+                    Kami berhak untuk mengubah atau memperbarui ketentuan ini setiap saat tanpa pemberitahuan terlebih dahulu. Perubahan akan berlaku segera setelah dipublikasikan di situs web. Penggunaan layanan secara berkelanjutan menunjukkan persetujuan Anda terhadap perubahan tersebut.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>3. Akun Pengguna</strong><br />
+                    Anda bertanggung jawab penuh untuk menjaga kerahasiaan kredensial akun Anda dan semua aktivitas yang terjadi di bawah akun Anda. Segera beri tahu kami jika Anda menduga adanya penggunaan tidak sah.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>4. Konten dan Perilaku</strong><br />
+                    Anda setuju untuk tidak mengunggah, memposting, atau mengirimkan konten yang melanggar hukum, mengandung kebencian, diskriminatif, cabul, atau yang melanggar hak cipta dan kekayaan intelektual pihak lain.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>5. Privasi dan Data</strong><br />
+                    Informasi pribadi Anda akan dikumpulkan, digunakan, dan dilindungi sesuai dengan Kebijakan Privasi kami. Kami menggunakan data untuk meningkatkan layanan dan memberikan pengalaman yang lebih baik.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>6. Batasan Tanggung Jawab</strong><br />
+                    Layanan disediakan "sebagaimana adanya". Kami tidak memberikan jaminan bahwa layanan akan bebas dari gangguan, aman, atau bebas dari kesalahan. Kami tidak bertanggung jawab atas kerugian langsung atau tidak langsung yang timbul dari penggunaan layanan.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>7. Pengakhiran</strong><br />
+                    Kami berhak untuk menangguhkan atau mengakhiri akun Anda jika melanggar ketentuan. Anda juga dapat menghapus akun Anda kapan saja melalui pengaturan akun.
+                  </p>
+                  
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>8. Hukum yang Berlaku</strong><br />
+                    Ketentuan ini diatur dan ditafsirkan sesuai dengan hukum yang berlaku di Indonesia. Setiap sengketa yang timbul akan diselesaikan secara musyawarah atau melalui jalur hukum yang berlaku.
+                  </p>
+                  
+                  <p style={{ margin: "8px 0 0 0", color: "#888", fontSize: "12px", fontStyle: "italic" }}>
+                    Terakhir diperbarui: 7 Agustus 2026
+                  </p>
+                </div>
               </div>
 
               <motion.button
                 type="submit"
-                disabled={isLoading || !acceptedTerms || !isScrolledToBottom}
+                disabled={isLoading || !acceptedTerms}
                 style={{
                   width: "100%",
                   padding: "16px 20px",
-                  backgroundColor: (isLoading || !acceptedTerms || !isScrolledToBottom) ? "#ccc" : "#0D3CFC",
+                  backgroundColor: (isLoading || !acceptedTerms) ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
                   borderRadius: "12px",
                   fontSize: "18px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
-                  cursor: (isLoading || !acceptedTerms || !isScrolledToBottom) ? "not-allowed" : "pointer",
-                  opacity: (isLoading || !acceptedTerms || !isScrolledToBottom) ? 0.7 : 1,
+                  cursor: (isLoading || !acceptedTerms) ? "not-allowed" : "pointer",
+                  opacity: (isLoading || !acceptedTerms) ? 0.7 : 1,
                   transition: "all 0.3s ease",
                 }}
-                whileHover={(!isLoading && acceptedTerms && isScrolledToBottom) ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={(!isLoading && acceptedTerms && isScrolledToBottom) ? { scale: 0.98 } : {}}
+                whileHover={(!isLoading && acceptedTerms) ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                whileTap={(!isLoading && acceptedTerms) ? { scale: 0.98 } : {}}
               >
                 {isLoading ? "Creating Account..." : "Get Started"}
               </motion.button>
