@@ -11,7 +11,6 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   onAuthStateChanged,
-  signOut,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -20,10 +19,6 @@ import {
   getDoc, 
   updateDoc,
   onSnapshot,
-  collection,
-  query,
-  where,
-  getDocs,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
@@ -69,15 +64,6 @@ const CloseIcon = () => (
   </svg>
 );
 
-const ShopIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -102,7 +88,7 @@ const StoreIcon = ({ size = 24 }: { size?: number }) => (
 );
 
 const NotificationsIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
@@ -168,6 +154,7 @@ Dengan menggunakan Menuru, Anda menyatakan telah membaca, memahami, dan menyetuj
 `;
 
 export default function SignUpPage() {
+  // ===== STATE =====
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -187,25 +174,34 @@ export default function SignUpPage() {
   const [pin, setPin] = useState(['', '', '', '', '', '']);
   const [pinError, setPinError] = useState("");
   const [pinSuccess, setPinSuccess] = useState(false);
-  
-  // ===== State untuk Notifikasi (dikosongkan) =====
   const [showNotifications, setShowNotifications] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
-
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [rollingIndex, setRollingIndex] = useState(0);
   const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
+  
+  // ===== REFS =====
   const rollingRef = useRef<HTMLSpanElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
-  const termsContainerRef = useRef<HTMLDivElement>(null);
   const termsContentRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // ===== Cek Admin =====
+  // ===== EFFECTS (dijalankan hanya di client) =====
+  useEffect(() => {
+    // Mobile detection
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // ===== Admin check =====
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -218,7 +214,7 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
-  // ===== Load Terms dari Firestore =====
+  // ===== Load Terms =====
   useEffect(() => {
     if (!db) return;
     const loadTerms = async () => {
@@ -226,10 +222,10 @@ export default function SignUpPage() {
         const docRef = doc(db, "terms", "main");
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setTermsContent(docSnap.data().content || DEFAULT_TERMS);
-          setEditTermsContent(docSnap.data().content || DEFAULT_TERMS);
+          const content = docSnap.data().content || DEFAULT_TERMS;
+          setTermsContent(content);
+          setEditTermsContent(content);
         } else {
-          // Set default
           await setDoc(docRef, { content: DEFAULT_TERMS });
         }
       } catch (error) {
@@ -238,134 +234,18 @@ export default function SignUpPage() {
     };
     loadTerms();
 
-    // Subscribe ke real-time updates
     const docRef = doc(db, "terms", "main");
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setTermsContent(docSnap.data().content || DEFAULT_TERMS);
-        setEditTermsContent(docSnap.data().content || DEFAULT_TERMS);
+        const content = docSnap.data().content || DEFAULT_TERMS;
+        setTermsContent(content);
+        setEditTermsContent(content);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  // ===== SAVE TERMS (Admin) =====
-  const saveTerms = async () => {
-    if (!db || !isAdmin) return;
-    try {
-      const docRef = doc(db, "terms", "main");
-      await setDoc(docRef, { content: editTermsContent });
-      setTermsContent(editTermsContent);
-      setIsEditingTerms(false);
-    } catch (error) {
-      console.error("Error saving terms:", error);
-    }
-  };
-
-  // ===== PIN Setup =====
-  const handlePinChange = (index: number, value: string) => {
-    const newPin = [...pin];
-    newPin[index] = value.replace(/\D/g, '').slice(0, 1);
-    setPin(newPin);
-    setPinError("");
-    // Auto focus next
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`pin-${index+1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
-
-  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !pin[index] && index > 0) {
-      const prevInput = document.getElementById(`pin-${index-1}`);
-      if (prevInput) prevInput.focus();
-    }
-  };
-
-  const handlePinSubmit = async () => {
-    const pinString = pin.join('');
-    if (pinString.length !== 6) {
-      setPinError("Harap masukkan 6 digit angka.");
-      return;
-    }
-    if (!auth || !auth.currentUser) {
-      setPinError("User tidak terautentikasi.");
-      return;
-    }
-    try {
-      const userRef = doc(db, "users", auth.currentUser.uid);
-      await updateDoc(userRef, { pin: pinString });
-      setPinSuccess(true);
-      setShowPinModal(false);
-      // Redirect after success
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
-    } catch (error) {
-      console.error("Error saving PIN:", error);
-      setPinError("Gagal menyimpan PIN. Silakan coba lagi.");
-    }
-  };
-
-  // ===== Sign Up =====
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!acceptedTerms) {
-      setError("Harap setujui Syarat & Ketentuan terlebih dahulu.");
-      return;
-    }
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
-      await updateProfile(userCredential.user, {
-        displayName: formData.name
-      });
-
-      // Simpan user ke Firestore
-      const userRef = doc(db, "users", userCredential.user.uid);
-      await setDoc(userRef, {
-        name: formData.name,
-        email: formData.email,
-        createdAt: new Date().toISOString(),
-        pin: null,
-      });
-
-      // Tampilkan modal PIN
-      setShowPinModal(true);
-      setIsLoading(false);
-      
-    } catch (error: any) {
-      console.error("Sign up error:", error);
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          setError("Email sudah digunakan. Coba email lain atau login.");
-          break;
-        case 'auth/invalid-email':
-          setError("Email tidak valid.");
-          break;
-        case 'auth/weak-password':
-          setError("Password terlalu lemah. Minimal 6 karakter.");
-          break;
-        case 'auth/operation-not-allowed':
-          setError("Registrasi email/password tidak diaktifkan.");
-          break;
-        default:
-          setError("Terjadi kesalahan. Silakan coba lagi.");
-      }
-      
-      setIsLoading(false);
-    }
-  };
-
-  // ===== GSAP Animations for Terms =====
+  // ===== GSAP Animation for Terms =====
   useEffect(() => {
     if (isTermsOpen && termsContentRef.current) {
       gsap.fromTo(termsContentRef.current,
@@ -382,17 +262,7 @@ export default function SignUpPage() {
     }
   }, [isTermsOpen]);
 
-  // ===== Mobile detection =====
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // ===== Rolling text =====
+  // ===== Rolling Text =====
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -424,7 +294,7 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // ===== Search expand =====
+  // ===== Search Expand =====
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -435,7 +305,7 @@ export default function SignUpPage() {
     }
   }, [isSearchOpen]);
 
-  // ===== Click outside search =====
+  // ===== Click Outside =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -455,6 +325,119 @@ export default function SignUpPage() {
     setSearchResults([]);
   }, [searchQuery]);
 
+  // ===== Save Terms =====
+  const saveTerms = async () => {
+    if (!db || !isAdmin) return;
+    try {
+      const docRef = doc(db, "terms", "main");
+      await setDoc(docRef, { content: editTermsContent });
+      setTermsContent(editTermsContent);
+      setIsEditingTerms(false);
+    } catch (error) {
+      console.error("Error saving terms:", error);
+    }
+  };
+
+  // ===== PIN Handling =====
+  const handlePinChange = (index: number, value: string) => {
+    const newPin = [...pin];
+    newPin[index] = value.replace(/\D/g, '').slice(0, 1);
+    setPin(newPin);
+    setPinError("");
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`pin-${index+1}`);
+      if (nextInput) (nextInput as HTMLInputElement).focus();
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      const prevInput = document.getElementById(`pin-${index-1}`);
+      if (prevInput) (prevInput as HTMLInputElement).focus();
+    }
+  };
+
+  const handlePinSubmit = async () => {
+    const pinString = pin.join('');
+    if (pinString.length !== 6) {
+      setPinError("Harap masukkan 6 digit angka.");
+      return;
+    }
+    if (!auth || !auth.currentUser) {
+      setPinError("User tidak terautentikasi.");
+      return;
+    }
+    try {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, { pin: pinString });
+      setPinSuccess(true);
+      setShowPinModal(false);
+      setTimeout(() => {
+        router.push('/');
+      }, 1500);
+    } catch (error) {
+      console.error("Error saving PIN:", error);
+      setPinError("Gagal menyimpan PIN. Silakan coba lagi.");
+    }
+  };
+
+  // ===== Sign Up =====
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!acceptedTerms) {
+      setError("Harap setujui Syarat & Ketentuan terlebih dahulu.");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      await updateProfile(userCredential.user, {
+        displayName: formData.name
+      });
+
+      const userRef = doc(db, "users", userCredential.user.uid);
+      await setDoc(userRef, {
+        name: formData.name,
+        email: formData.email,
+        createdAt: new Date().toISOString(),
+        pin: null,
+      });
+
+      setShowPinModal(true);
+      setIsLoading(false);
+      
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError("Email sudah digunakan. Coba email lain atau login.");
+          break;
+        case 'auth/invalid-email':
+          setError("Email tidak valid.");
+          break;
+        case 'auth/weak-password':
+          setError("Password terlalu lemah. Minimal 6 karakter.");
+          break;
+        case 'auth/operation-not-allowed':
+          setError("Registrasi email/password tidak diaktifkan.");
+          break;
+        default:
+          setError("Terjadi kesalahan. Silakan coba lagi.");
+      }
+      
+      setIsLoading(false);
+    }
+  };
+
+  // ===== Render =====
   return (
     <>
       <Head>
@@ -598,7 +581,6 @@ export default function SignUpPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI: Menuru + Search */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -620,7 +602,6 @@ export default function SignUpPage() {
               </motion.a>
             </Link>
 
-            {/* Search */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -689,7 +670,6 @@ export default function SignUpPage() {
                 ) : null}
               </motion.div>
 
-              {/* Search Expanded */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -801,7 +781,6 @@ export default function SignUpPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH: Note Donations News Calendar */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -851,7 +830,6 @@ export default function SignUpPage() {
             </span>
           </motion.div>
 
-          {/* KANAN: Shop + Pusat bantuan + Notif + Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -915,7 +893,6 @@ export default function SignUpPage() {
               </motion.a>
             </Link>
 
-            {/* Notification - hanya icon, tanpa konten */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -971,7 +948,6 @@ export default function SignUpPage() {
               </AnimatePresence>
             </div>
 
-            {/* Profile - Login/Signup link */}
             <div style={{ position: "relative" }}>
               <Link href="/signin" passHref style={{ textDecoration: "none" }}>
                 <motion.a
@@ -1021,7 +997,6 @@ export default function SignUpPage() {
           minHeight: "calc(100vh - 260px)",
           justifyContent: "center",
         }}>
-          {/* SISI KIRI: Sign Up 200px + Form */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1034,7 +1009,6 @@ export default function SignUpPage() {
               justifyContent: "center",
             }}
           >
-            {/* Teks Sign Up 200px */}
             <h1 style={{
               fontSize: isMobile ? "80px" : "200px",
               fontWeight: 700,
@@ -1059,7 +1033,6 @@ export default function SignUpPage() {
               Create your account to join the Menuru community
             </p>
 
-            {/* Error Message */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -1082,7 +1055,6 @@ export default function SignUpPage() {
               )}
             </AnimatePresence>
 
-            {/* Form */}
             <motion.form
               onSubmit={handleSignUp}
               style={{ width: "100%" }}
@@ -1136,7 +1108,6 @@ export default function SignUpPage() {
                 onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
 
-              {/* Password dengan icon mata */}
               <div style={{
                 position: "relative",
                 marginBottom: "16px",
@@ -1185,7 +1156,6 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {/* ===== KETENTUAN LAYANAN ===== */}
               <div style={{ marginBottom: "16px" }}>
                 <div style={{
                   display: "flex",
@@ -1244,7 +1214,6 @@ export default function SignUpPage() {
                   )}
                 </div>
 
-                {/* Area konten terms (expand/collapse) */}
                 <div
                   ref={termsContentRef}
                   style={{
@@ -1321,12 +1290,14 @@ export default function SignUpPage() {
                         </div>
                       </div>
                     ) : (
-                      <div dangerouslySetInnerHTML={{ __html: termsContent.replace(/\n/g, '<br/>') }} />
+                      // Gunakan dangerouslySetInnerHTML dengan aman
+                      <div dangerouslySetInnerHTML={{ 
+                        __html: termsContent.replace(/\n/g, '<br/>') 
+                      }} />
                     )}
                   </div>
                 </div>
 
-                {/* Checkbox persetujuan */}
                 <label style={{
                   display: "flex",
                   alignItems: "center",
@@ -1381,7 +1352,6 @@ export default function SignUpPage() {
               </motion.button>
             </motion.form>
 
-            {/* Link ke Sign In */}
             <div style={{
               textAlign: "center",
               fontSize: "16px",
@@ -1403,7 +1373,6 @@ export default function SignUpPage() {
               </Link>
             </div>
 
-            {/* Pusat Bantuan */}
             <div style={{
               textAlign: "center",
               marginTop: "20px",
@@ -1432,7 +1401,6 @@ export default function SignUpPage() {
             </div>
           </motion.div>
 
-          {/* SISI KANAN: Kosong */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1445,7 +1413,7 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* ===== MODAL PIN SETUP ===== */}
+      {/* ===== MODAL PIN ===== */}
       <AnimatePresence>
         {showPinModal && (
           <motion.div
@@ -1466,7 +1434,6 @@ export default function SignUpPage() {
               justifyContent: "center",
               padding: "20px",
             }}
-            onClick={() => {}} // prevent close on backdrop
           >
             <motion.div
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -1611,7 +1578,6 @@ export default function SignUpPage() {
 
                   <button
                     onClick={() => {
-                      // Skip PIN setup (optional)
                       setShowPinModal(false);
                       router.push('/');
                     }}
