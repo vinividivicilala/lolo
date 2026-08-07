@@ -20,10 +20,12 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  Timestamp 
+  updateDoc,
+  serverTimestamp 
 } from "firebase/firestore";
 import gsap from 'gsap';
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -40,14 +42,17 @@ let auth = null;
 let db = null;
 
 if (typeof window !== "undefined") {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
   auth = getAuth(app);
   db = getFirestore(app);
 }
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// ===== ICONS (sama seperti Sign Up) =====
+// ===== ICONS (sama seperti Pusat Bantuan & Sign Up) =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -129,9 +134,6 @@ const searchRollingTexts = [
 ];
 
 export default function SignInPage() {
-  const router = useRouter();
-  
-  // --- STATE ---
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
@@ -141,14 +143,15 @@ export default function SignInPage() {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
   
-  // PIN state
-  const [showPinModal, setShowPinModal] = useState(false);
-  const [pinInput, setPinInput] = useState("");
+  // State untuk PIN
+  const [showPinScreen, setShowPinScreen] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinConfirm, setPinConfirm] = useState("");
   const [pinError, setPinError] = useState("");
-  const [storedPin, setStoredPin] = useState("");
-  const [userData, setUserData] = useState<any>(null);
-  
-  // Search
+  const [isNewPin, setIsNewPin] = useState(false);
+  const [tempUser, setTempUser] = useState<any>(null); // user sementara setelah auth berhasil
+
+  // State untuk search
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -158,18 +161,17 @@ export default function SignInPage() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
-  // Notification
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  // ===== EFFECTS =====
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
     if (!isMounted) return;
-    const checkScreenSize = () => setIsMobile(window.innerWidth < 768);
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
@@ -177,6 +179,7 @@ export default function SignInPage() {
 
   // Rolling text
   useEffect(() => {
+    if (!isMounted) return;
     let isForward = true;
     let currentIndex = 0;
     const interval = setInterval(() => {
@@ -204,7 +207,7 @@ export default function SignInPage() {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMounted]);
 
   // Search expand
   useEffect(() => {
@@ -217,16 +220,12 @@ export default function SignInPage() {
     }
   }, [isSearchOpen]);
 
-  // Click outside search & notification
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -242,38 +241,86 @@ export default function SignInPage() {
     if (!isMounted || !auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Cek apakah user punya PIN
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.pin) {
-              setStoredPin(data.pin);
-              setUserData(data);
-              setShowPinModal(true); // Tampilkan modal PIN
-              setUser(currentUser);
-              return;
-            }
-          }
-          // Tidak ada PIN -> langsung redirect
-          setUser(currentUser);
-          router.push('/');
-        } catch (error) {
-          console.error("Error checking PIN:", error);
-          setUser(currentUser);
-          router.push('/');
+        // User sudah login, cek PIN
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userData = userDoc.data();
+        if (userData && userData.pin) {
+          // PIN sudah ada, minta input PIN
+          setTempUser(currentUser);
+          setShowPinScreen(true);
+          setIsNewPin(false);
+          setUser(null); // belum dianggap login sampai PIN valid
+        } else {
+          // Belum ada PIN, minta buat PIN
+          setTempUser(currentUser);
+          setShowPinScreen(true);
+          setIsNewPin(true);
+          setUser(null);
         }
       } else {
         setUser(null);
-        setShowPinModal(false);
-        setPinInput("");
-        setPinError("");
+        setShowPinScreen(false);
+        setTempUser(null);
       }
     });
     return () => unsubscribe();
-  }, [isMounted, router]);
+  }, [isMounted]);
 
-  // ===== LOGIN HANDLERS =====
+  // Fungsi untuk menyimpan PIN ke Firestore
+  const savePin = async (uid: string, pinValue: string) => {
+    if (!db) return;
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { pin: pinValue }, { merge: true });
+  };
+
+  // Handle PIN submit
+  const handlePinSubmit = async () => {
+    if (isNewPin) {
+      // Buat PIN baru
+      if (pin.length !== 6) {
+        setPinError("PIN harus 6 digit");
+        return;
+      }
+      if (pin !== pinConfirm) {
+        setPinError("PIN tidak cocok");
+        return;
+      }
+      setPinError("");
+      // Simpan PIN
+      await savePin(tempUser.uid, pin);
+      // Login sukses
+      setUser(tempUser);
+      setShowPinScreen(false);
+      setTempUser(null);
+      router.push('/');
+    } else {
+      // Verifikasi PIN
+      if (pin.length !== 6) {
+        setPinError("PIN harus 6 digit");
+        return;
+      }
+      const userDoc = await getDoc(doc(db, "users", tempUser.uid));
+      const userData = userDoc.data();
+      if (userData && userData.pin === pin) {
+        // PIN benar
+        setUser(tempUser);
+        setShowPinScreen(false);
+        setTempUser(null);
+        router.push('/');
+      } else {
+        setPinError("PIN salah");
+      }
+    }
+  };
+
+  // Reset PIN state
+  const resetPin = () => {
+    setPin("");
+    setPinConfirm("");
+    setPinError("");
+  };
+
+  // Login handlers
   const handleGoogleLogin = async () => {
     if (!auth) return;
     setLoading(true);
@@ -281,9 +328,9 @@ export default function SignInPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged akan handle sisanya
+      // Setelah auth state listener akan menangani PIN
     } catch (error: any) {
-      setError(error.message || "Google login gagal");
+      setError(error.message || "Login dengan Google gagal");
     } finally {
       setLoading(false);
     }
@@ -297,7 +344,7 @@ export default function SignInPage() {
       const provider = new GithubAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (error: any) {
-      setError(error.message || "GitHub login gagal");
+      setError(error.message || "Login dengan GitHub gagal");
     } finally {
       setLoading(false);
     }
@@ -310,54 +357,62 @@ export default function SignInPage() {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle PIN check
     } catch (error: any) {
       switch (error.code) {
-        case 'auth/invalid-email': setError("Email tidak valid"); break;
-        case 'auth/user-disabled': setError("Akun dinonaktifkan"); break;
-        case 'auth/user-not-found': setError("Akun tidak ditemukan"); break;
-        case 'auth/wrong-password': setError("Password salah"); break;
-        default: setError("Login gagal. Periksa email dan password Anda");
+        case 'auth/invalid-email':
+          setError("Email tidak valid");
+          break;
+        case 'auth/user-not-found':
+          setError("Akun tidak ditemukan");
+          break;
+        case 'auth/wrong-password':
+          setError("Password salah");
+          break;
+        default:
+          setError("Login gagal. Periksa email dan password Anda");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== PIN VERIFICATION =====
-  const handlePinSubmit = () => {
-    if (pinInput.length !== 6) {
-      setPinError("PIN harus 6 digit");
-      return;
-    }
-    if (pinInput === storedPin) {
-      setShowPinModal(false);
-      setPinInput("");
-      setPinError("");
-      router.push('/');
-    } else {
-      setPinError("PIN salah");
-      setPinInput("");
-    }
+  const handleSignUp = () => {
+    router.push('/signup');
   };
 
-  // ===== SIGN OUT =====
+  const handleForgotPassword = () => {
+    router.push('/forgot-password');
+  };
+
+  const handleGoToNotes = () => {
+    router.push('/notes');
+  };
+
   const handleLogout = async () => {
     if (!auth) return;
     try {
       await signOut(auth);
       setUser(null);
-      setShowPinModal(false);
-      setPinInput("");
-      setPinError("");
+      setShowPinScreen(false);
+      setTempUser(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  // ===== RENDER (hanya jika sudah mounted) =====
   if (!isMounted) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#fff' }} />;
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: FONT_FAMILY,
+      }}>
+        <div style={{ color: '#000', fontSize: '1.5rem' }}>Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -377,12 +432,14 @@ export default function SignInPage() {
           -ms-overflow-style: none;
           scroll-behavior: smooth;
         }
-        body::-webkit-scrollbar { display: none; }
-        * { scrollbar-width: none; }
-        *::-webkit-scrollbar { display: none; }
-        input::placeholder {
-          color: #bbb;
-          font-weight: 300;
+        body::-webkit-scrollbar {
+          display: none;
+        }
+        * {
+          scrollbar-width: none;
+        }
+        *::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
 
@@ -413,6 +470,7 @@ export default function SignInPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            borderBottom: "none",
             gap: "20px",
           }}
         >
@@ -435,24 +493,31 @@ export default function SignInPage() {
               Website sedang dalam pengembangan, Terima kasih
             </motion.span>
           </AnimatePresence>
-          <div style={{
-            backgroundColor: "#EB2227",
-            padding: "6px 16px",
-            borderRadius: "20px",
-          }}>
-            <span style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "#ffffff",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.01em",
-            }}>
+          <div
+            style={{
+              backgroundColor: "#EB2227",
+              padding: "6px 16px",
+              borderRadius: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.01em",
+              }}
+            >
               #lifeatmenuru
             </span>
           </div>
         </motion.div>
 
-        {/* HEADER */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -463,6 +528,7 @@ export default function SignInPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
+          {/* KIRI: Menuru + Search */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -475,6 +541,7 @@ export default function SignInPage() {
                   color: "#000000",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "-0.03em",
+                  background: "transparent",
                   textDecoration: "none",
                   cursor: "pointer",
                 }}
@@ -498,6 +565,8 @@ export default function SignInPage() {
                   backgroundColor: "#0D3CFC",
                   borderRadius: "12px",
                   padding: "4px 8px",
+                  border: "none",
+                  position: "relative",
                   minWidth: "240px",
                   width: "240px",
                   boxShadow: "0 2px 12px rgba(13,60,252,0.2)",
@@ -550,6 +619,7 @@ export default function SignInPage() {
                 ) : null}
               </motion.div>
 
+              {/* Search Expanded */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -569,6 +639,7 @@ export default function SignInPage() {
                       width: "700px",
                       minHeight: "500px",
                       boxShadow: "0 20px 80px rgba(13,60,252,0.4)",
+                      overflow: "hidden",
                       zIndex: 100,
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -619,6 +690,7 @@ export default function SignInPage() {
                         <CloseIcon />
                       </button>
                     </div>
+
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
@@ -636,6 +708,7 @@ export default function SignInPage() {
                         Tidak ada hasil
                       </div>
                     </div>
+
                     <div style={{
                       marginTop: "20px",
                       paddingTop: "16px",
@@ -658,7 +731,7 @@ export default function SignInPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH */}
+          {/* TENGAH: Note Donations News Calendar */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -670,13 +743,45 @@ export default function SignInPage() {
               padding: "0 20px",
             }}
           >
-            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Note</span>
-            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Donations</span>
-            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>News</span>
-            <span style={{ fontSize: "29px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Calendar</span>
+            <span style={{
+              fontSize: "29px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Note
+            </span>
+            <span style={{
+              fontSize: "29px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Donations
+            </span>
+            <span style={{
+              fontSize: "29px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              News
+            </span>
+            <span style={{
+              fontSize: "29px",
+              fontWeight: 500,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+            }}>
+              Calendar
+            </span>
           </motion.div>
 
-          {/* KANAN */}
+          {/* KANAN: Shop + Pusat bantuan + Notif + Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -741,14 +846,13 @@ export default function SignInPage() {
             </Link>
 
             {/* Notification */}
-            <div ref={notificationsRef} style={{ position: "relative" }}>
+            <div style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowNotifications(!showNotifications)}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -766,76 +870,40 @@ export default function SignInPage() {
               >
                 <NotificationsIcon size={24} hasBadge={false} />
               </motion.button>
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      minWidth: "320px",
-                      maxWidth: "380px",
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(0,0,0,0.04)",
-                      zIndex: 60,
-                      fontFamily: FONT_FAMILY,
-                      padding: "12px 0",
-                    }}
-                  >
-                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
-                      Notifikasi
-                    </div>
-                    <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
-                      Tidak ada notifikasi
-                    </div>
-                    <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0", textAlign: "center" }}>
-                      <Link href="/" style={{ background: "none", border: "none", color: "#0D3CFC", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, textDecoration: "none" }}>
-                        Lihat semua pesan
-                      </Link>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
-            {/* Profile - Login */}
-            <Link href="/signin" passHref style={{ textDecoration: "none" }}>
-              <motion.a
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  borderRadius: "30px",
-                  backgroundColor: "transparent",
-                  color: "#000000",
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  textDecoration: "none",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              >
-                <UserAvatarIcon size={22} />
-                <span>Login</span>
-              </motion.a>
-            </Link>
+            {/* Profile - Login/Signup link */}
+            <div style={{ position: "relative" }}>
+              <Link href="/signin" passHref style={{ textDecoration: "none" }}>
+                <motion.a
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    borderRadius: "30px",
+                    backgroundColor: "transparent",
+                    color: "#000000",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    fontFamily: FONT_FAMILY,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <UserAvatarIcon size={22} />
+                  <span>Login</span>
+                </motion.a>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -867,258 +935,475 @@ export default function SignInPage() {
               justifyContent: "center",
             }}
           >
-            <h1 style={{
-              fontSize: isMobile ? "80px" : "200px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-              margin: "0 0 10px 0",
-              textAlign: "left",
-              wordBreak: "break-word",
-            }}>
-              Sign In
-            </h1>
-
-            <p style={{
-              fontSize: "18px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "32px",
-              textAlign: "left",
-            }}>
-              Masuk ke akun Menuru Anda
-            </p>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                style={{
+            {!showPinScreen && !user ? (
+              // === FORM SIGN IN ===
+              <>
+                <h1 style={{
+                  fontSize: isMobile ? "80px" : "200px",
+                  fontWeight: 700,
                   color: "#0D3CFC",
-                  fontSize: "15px",
                   fontFamily: FONT_FAMILY,
-                  marginBottom: "16px",
+                  letterSpacing: "-0.05em",
+                  lineHeight: 1,
+                  margin: "0 0 10px 0",
+                  textAlign: "left",
+                  wordBreak: "break-word",
+                }}>
+                  Sign In
+                </h1>
+
+                <p style={{
+                  fontSize: "18px",
+                  color: "#666666",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "32px",
+                  textAlign: "left",
+                }}>
+                  Welcome back! Sign in to your account
+                </p>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      color: "#0D3CFC",
+                      fontSize: "15px",
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "16px",
+                      padding: "0",
+                    }}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                {/* SOCIAL LOGIN */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
+                  <button
+                    onClick={handleGoogleLogin}
+                    disabled={loading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '14px 20px',
+                      border: '2px solid #e8e8e8',
+                      borderRadius: '12px',
+                      background: '#ffffff',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      width: '100%',
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '16px',
+                      color: '#333',
+                    }}
+                    onMouseEnter={(e) => !loading && (e.currentTarget.style.borderColor = '#0D3CFC')}
+                    onMouseLeave={(e) => !loading && (e.currentTarget.style.borderColor = '#e8e8e8')}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                  </button>
+
+                  <button
+                    onClick={handleGitHubLogin}
+                    disabled={loading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '14px 20px',
+                      border: '2px solid #e8e8e8',
+                      borderRadius: '12px',
+                      background: '#ffffff',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      width: '100%',
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '16px',
+                      color: '#333',
+                    }}
+                    onMouseEnter={(e) => !loading && (e.currentTarget.style.borderColor = '#0D3CFC')}
+                    onMouseLeave={(e) => !loading && (e.currentTarget.style.borderColor = '#e8e8e8')}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                      <path fill="#333" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>Continue with GitHub</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                  <span style={{ color: '#999', fontSize: '14px', fontFamily: FONT_FAMILY }}>or</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e8e8e8' }} />
+                </div>
+
+                {/* EMAIL/PASSWORD FORM */}
+                <form onSubmit={handleEmailLogin} style={{ width: '100%' }}>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      border: "2px solid #e8e8e8",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
+                      outline: "none",
+                      marginBottom: "16px",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+
+                  <div style={{ position: "relative", marginBottom: "24px" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      style={{
+                        width: "100%",
+                        padding: "16px 50px 16px 20px",
+                        border: "2px solid #e8e8e8",
+                        borderRadius: "12px",
+                        fontSize: "16px",
+                        fontFamily: FONT_FAMILY,
+                        background: "#ffffff",
+                        color: "#000000",
+                        outline: "none",
+                        transition: "border-color 0.2s ease",
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#999",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <EyeIcon open={showPassword} />
+                    </button>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      backgroundColor: loading ? "#ccc" : "#0D3CFC",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "12px",
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      fontFamily: FONT_FAMILY,
+                      cursor: loading ? "not-allowed" : "pointer",
+                      opacity: loading ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                    }}
+                    whileHover={!loading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                    whileTap={!loading ? { scale: 0.98 } : {}}
+                  >
+                    {loading ? "Signing In..." : "Sign In"}
+                  </motion.button>
+                </form>
+
+                {/* Forgot Password & Sign Up */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  marginTop: '20px',
+                  gap: '12px',
+                }}>
+                  <button
+                    onClick={handleForgotPassword}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#0D3CFC',
+                      fontSize: '15px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Forgot password?
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#666', fontSize: '15px', fontFamily: FONT_FAMILY }}>Don't have an account?</span>
+                    <button
+                      onClick={handleSignUp}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0D3CFC',
+                        fontSize: '15px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        fontFamily: FONT_FAMILY,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Sign up
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pusat Bantuan link */}
+                <div style={{
+                  textAlign: "center",
+                  marginTop: "30px",
+                  paddingTop: "20px",
+                  borderTop: "1px solid #f0f0f0",
+                }}>
+                  <Link
+                    href="/pusat-bantuan"
+                    style={{
+                      color: "#0D3CFC",
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                  >
+                    <HelpDeskIcon size={18} />
+                    <span>Pusat Bantuan</span>
+                  </Link>
+                </div>
+
+                {/* Kebijakan Privasi & Ketentuan Kami */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '24px',
+                  marginTop: '16px',
+                  flexWrap: 'wrap',
+                }}>
+                  <Link href="/kebijakan" style={{
+                    color: '#666',
+                    fontSize: '14px',
+                    fontFamily: FONT_FAMILY,
+                    textDecoration: 'underline',
+                  }}>
+                    Kebijakan Privasi
+                  </Link>
+                  <Link href="/ketentuan" style={{
+                    color: '#666',
+                    fontSize: '14px',
+                    fontFamily: FONT_FAMILY,
+                    textDecoration: 'underline',
+                  }}>
+                    Ketentuan Kami
+                  </Link>
+                </div>
+              </>
+            ) : (
+              // === PIN SCREEN ===
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "100%",
                 }}
               >
-                {error}
+                <h2 style={{
+                  fontSize: "36px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "8px",
+                }}>
+                  {isNewPin ? "Buat PIN 6 Digit" : "Masukkan PIN"}
+                </h2>
+                <p style={{
+                  fontSize: "18px",
+                  color: "#666",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "32px",
+                  textAlign: "center",
+                }}>
+                  {isNewPin ? "Buat PIN 6 digit untuk keamanan tambahan" : "Masukkan PIN 6 digit Anda"}
+                </p>
+
+                {isNewPin ? (
+                  // Dua input untuk PIN dan konfirmasi
+                  <div style={{ display: 'flex', gap: '24px', width: '100%', maxWidth: '400px', marginBottom: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '14px', color: '#666', fontFamily: FONT_FAMILY, display: 'block', marginBottom: '4px' }}>
+                        PIN
+                      </label>
+                      <input
+                        type="password"
+                        maxLength={6}
+                        value={pin}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 6) setPin(val);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '20px',
+                          fontSize: '32px',
+                          textAlign: 'center',
+                          border: '2px solid #e8e8e8',
+                          borderRadius: '12px',
+                          fontFamily: FONT_FAMILY,
+                          outline: 'none',
+                          letterSpacing: '8px',
+                          transition: 'border-color 0.2s ease',
+                        }}
+                        onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                        onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '14px', color: '#666', fontFamily: FONT_FAMILY, display: 'block', marginBottom: '4px' }}>
+                        Konfirmasi PIN
+                      </label>
+                      <input
+                        type="password"
+                        maxLength={6}
+                        value={pinConfirm}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 6) setPinConfirm(val);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '20px',
+                          fontSize: '32px',
+                          textAlign: 'center',
+                          border: '2px solid #e8e8e8',
+                          borderRadius: '12px',
+                          fontFamily: FONT_FAMILY,
+                          outline: 'none',
+                          letterSpacing: '8px',
+                          transition: 'border-color 0.2s ease',
+                        }}
+                        onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                        onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // Satu input untuk verifikasi PIN
+                  <div style={{ width: '100%', maxWidth: '200px', marginBottom: '16px' }}>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      value={pin}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 6) setPin(val);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '20px',
+                        fontSize: '32px',
+                        textAlign: 'center',
+                        border: '2px solid #e8e8e8',
+                        borderRadius: '12px',
+                        fontFamily: FONT_FAMILY,
+                        outline: 'none',
+                        letterSpacing: '8px',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                    />
+                  </div>
+                )}
+
+                {pinError && (
+                  <div style={{
+                    color: '#0D3CFC',
+                    fontSize: '16px',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '16px',
+                  }}>
+                    {pinError}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={resetPin}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: 'transparent',
+                      color: '#666',
+                      border: '2px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Reset
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handlePinSubmit}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: '#0D3CFC',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {isNewPin ? "Simpan PIN" : "Verifikasi"}
+                  </motion.button>
+                </div>
               </motion.div>
             )}
-
-            {/* Social Login */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px', width: '100%' }}>
-              <button
-                onClick={handleGoogleLogin}
-                disabled={loading}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '14px 20px',
-                  backgroundColor: '#f5f5f5',
-                  border: '1px solid #e8e8e8',
-                  borderRadius: '12px',
-                  fontSize: '16px',
-                  fontFamily: FONT_FAMILY,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  color: '#000',
-                  width: '100%',
-                }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#eeeeee')}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#f5f5f5')}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                <span>{loading ? 'Loading...' : 'Continue with Google'}</span>
-              </button>
-
-              <button
-                onClick={handleGitHubLogin}
-                disabled={loading}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '14px 20px',
-                  backgroundColor: '#f5f5f5',
-                  border: '1px solid #e8e8e8',
-                  borderRadius: '12px',
-                  fontSize: '16px',
-                  fontFamily: FONT_FAMILY,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  color: '#000',
-                  width: '100%',
-                }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#eeeeee')}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#f5f5f5')}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#181717">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-                <span>{loading ? 'Loading...' : 'Continue with GitHub'}</span>
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', width: '100%' }}>
-              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #e8e8e8' }} />
-              <span style={{ color: '#999', fontSize: '14px', fontFamily: FONT_FAMILY }}>atau</span>
-              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #e8e8e8' }} />
-            </div>
-
-            {/* Email/Password Form */}
-            <form onSubmit={handleEmailLogin} style={{ width: '100%' }}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: FONT_FAMILY,
-                  background: "#ffffff",
-                  color: "#000000",
-                  outline: "none",
-                  marginBottom: "16px",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
-
-              <div style={{ position: 'relative', marginBottom: '24px' }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "16px 50px 16px 20px",
-                    border: "2px solid #e8e8e8",
-                    borderRadius: "12px",
-                    fontSize: "16px",
-                    fontFamily: FONT_FAMILY,
-                    background: "#ffffff",
-                    color: "#000000",
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "14px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                  }}
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-
-              <motion.button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  backgroundColor: loading ? "#ccc" : "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  transition: "all 0.3s ease",
-                }}
-                whileHover={!loading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={!loading ? { scale: 0.98 } : {}}
-              >
-                {loading ? "Signing In..." : "Sign In"}
-              </motion.button>
-            </form>
-
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: '16px',
-              width: '100%',
-              fontFamily: FONT_FAMILY,
-            }}>
-              <Link
-                href="/forgot-password"
-                style={{
-                  color: "#0D3CFC",
-                  fontSize: "14px",
-                  textDecoration: "none",
-                }}
-              >
-                Lupa password?
-              </Link>
-              <Link
-                href="/signup"
-                style={{
-                  color: "#0D3CFC",
-                  fontSize: "14px",
-                  textDecoration: "none",
-                }}
-              >
-                Buat akun
-              </Link>
-            </div>
-
-            <div style={{
-              textAlign: "center",
-              marginTop: "24px",
-              paddingTop: "20px",
-              borderTop: "1px solid #f0f0f0",
-            }}>
-              <Link
-                href="/pusat-bantuan"
-                style={{
-                  color: "#0D3CFC",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                  textDecoration: "none",
-                  transition: "color 0.2s ease",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-              >
-                <HelpDeskIcon size={18} />
-                <span>Pusat Bantuan</span>
-              </Link>
-            </div>
           </motion.div>
 
           {/* SISI KANAN kosong */}
@@ -1133,177 +1418,6 @@ export default function SignInPage() {
           />
         </div>
       </div>
-
-      {/* ===== PIN MODAL ===== */}
-      <AnimatePresence>
-        {showPinModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(255,255,255,0.95)",
-              backdropFilter: "blur(8px)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              padding: "20px",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{
-                maxWidth: "480px",
-                width: "100%",
-                backgroundColor: "#ffffff",
-                borderRadius: "20px",
-                padding: "40px",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-                border: "1px solid #f0f0f0",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              <h2 style={{
-                fontSize: "32px",
-                fontWeight: 600,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                marginBottom: "8px",
-                textAlign: "center",
-              }}>
-                Verifikasi PIN
-              </h2>
-              <p style={{
-                fontSize: "16px",
-                color: "#666",
-                fontFamily: FONT_FAMILY,
-                textAlign: "center",
-                marginBottom: "32px",
-              }}>
-                Masukkan PIN 6 digit untuk keamanan
-              </p>
-
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "12px",
-                marginBottom: "24px",
-              }}>
-                {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: "48px",
-                      height: "56px",
-                      borderBottom: `3px solid ${pinInput.length > i ? '#0D3CFC' : '#ddd'}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "28px",
-                      fontWeight: 600,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    {pinInput[i] || ''}
-                  </div>
-                ))}
-              </div>
-
-              {pinError && (
-                <div style={{
-                  color: "#ef4444",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  marginBottom: "16px",
-                  fontFamily: FONT_FAMILY,
-                }}>
-                  {pinError}
-                </div>
-              )}
-
-              <input
-                type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                value={pinInput}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  if (val.length <= 6) setPinInput(val);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handlePinSubmit();
-                }}
-                autoFocus
-                style={{
-                  position: "absolute",
-                  opacity: 0,
-                  width: 0,
-                  height: 0,
-                  pointerEvents: "none",
-                }}
-              />
-
-              <div style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-              }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setShowPinModal(false);
-                    setPinInput("");
-                    setPinError("");
-                    handleLogout();
-                  }}
-                  style={{
-                    padding: "10px 24px",
-                    backgroundColor: "transparent",
-                    color: "#666",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Keluar
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handlePinSubmit}
-                  style={{
-                    padding: "10px 24px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Verifikasi
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }
