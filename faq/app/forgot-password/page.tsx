@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -486,8 +486,8 @@ const LiveChatAgentGuest = ({
   );
 };
 
-// ===== MAIN PAGE =====
-export default function ForgotPasswordPage() {
+// ===== KOMPONEN UTAMA YANG MENGGUNAKAN useSearchParams =====
+function ForgotPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState(false);
@@ -1773,6 +1773,26 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
     </>
+  );
+}
+
+// ===== WRAPPER DENGAN SUSPENSE UNTUK useSearchParams =====
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: FONT_FAMILY,
+      }}>
+        <div style={{ color: '#000', fontSize: '1.5rem' }}>Loading...</div>
+      </div>
+    }>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }
 
