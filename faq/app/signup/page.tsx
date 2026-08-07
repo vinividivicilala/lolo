@@ -190,9 +190,9 @@ export default function SignUpPage() {
   const notificationsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // ===== EFFECTS (CLIENT-SIDE ONLY) =====
+  // ===== EFFECTS =====
+  // 1. Mobile detection - HANYA di client
   useEffect(() => {
-    // Mobile detection
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -201,18 +201,16 @@ export default function SignUpPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // 2. Admin check
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === ADMIN_EMAIL) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
+      setIsAdmin(user?.email === ADMIN_EMAIL);
     });
     return () => unsubscribe();
   }, []);
 
+  // 3. Load Terms
   useEffect(() => {
     if (!db) return;
     const loadTerms = async () => {
@@ -243,6 +241,7 @@ export default function SignUpPage() {
     return () => unsubscribe();
   }, []);
 
+  // 4. GSAP terms animation
   useEffect(() => {
     if (isTermsOpen && termsContentRef.current) {
       gsap.fromTo(termsContentRef.current,
@@ -259,6 +258,7 @@ export default function SignUpPage() {
     }
   }, [isTermsOpen]);
 
+  // 5. Rolling text
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -290,6 +290,7 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // 6. Search expand
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -300,6 +301,7 @@ export default function SignUpPage() {
     }
   }, [isSearchOpen]);
 
+  // 7. Click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -315,6 +317,7 @@ export default function SignUpPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 8. Reset search results
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
@@ -365,9 +368,7 @@ export default function SignUpPage() {
       await updateDoc(userRef, { pin: pinString });
       setPinSuccess(true);
       setShowPinModal(false);
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
+      setTimeout(() => router.push('/'), 1500);
     } catch (error) {
       console.error("Error saving PIN:", error);
       setPinError("Gagal menyimpan PIN. Silakan coba lagi.");
@@ -1000,6 +1001,7 @@ export default function SignUpPage() {
               flexDirection: "column",
               justifyContent: "center",
             }}
+            suppressHydrationWarning
           >
             <h1 style={{
               fontSize: isMobile ? "80px" : "200px",
@@ -1224,6 +1226,7 @@ export default function SignUpPage() {
                       lineHeight: 1.8,
                       whiteSpace: "pre-wrap",
                     }}
+                    suppressHydrationWarning
                   >
                     {isEditingTerms ? (
                       <div>
