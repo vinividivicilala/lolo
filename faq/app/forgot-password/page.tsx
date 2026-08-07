@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -24,7 +24,6 @@ import {
   onSnapshot,
   orderBy,
   updateDoc,
-  deleteDoc,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
@@ -57,7 +56,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// ===== ICONS =====
+// ===== ICONS (sama seperti sebelumnya) =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -113,7 +112,6 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
-// ===== NORTH EAST ARROW =====
 const NorthEastArrow = ({ width = 60, height = 60 }: { width?: number; height?: number }) => (
   <svg width={width} height={height} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -129,23 +127,7 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
-// ===== TICKET INTERFACE =====
-interface Ticket {
-  id: string;
-  userId: string | null;
-  userName: string;
-  userEmail: string;
-  topic: string;
-  status: 'waiting' | 'active' | 'resolved' | 'closed';
-  createdAt: any;
-  lastMessage?: string;
-  lastMessageTime?: any;
-  detail?: string;
-  agentId?: string;
-  agentName?: string;
-}
-
-// ===== LIVE CHAT AGENT COMPONENT (GUEST VERSION) =====
+// ===== LIVE CHAT AGENT COMPONENT (GUEST) =====
 interface LiveChatMessage {
   id: string;
   senderId: string;
@@ -156,20 +138,37 @@ interface LiveChatMessage {
 }
 
 const LiveChatAgentGuest = ({ 
-  ticket, 
+  ticketId, 
   onClose,
-  onResolved,
 }: { 
-  ticket: Ticket; 
+  ticketId: string;
   onClose: () => void;
-  onResolved: () => void;
 }) => {
   const [messages, setMessages] = useState<LiveChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
   const [agentName, setAgentName] = useState(AGENT_NAME);
-  const [ticketStatus, setTicketStatus] = useState<string>(ticket.status || "waiting");
+  const [ticketStatus, setTicketStatus] = useState<string>("waiting");
+  const [userName, setUserName] = useState<string>("Pengguna");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load ticket data
+  useEffect(() => {
+    if (!db || !ticketId) return;
+    const ticketRef = doc(db, "livechat_tickets", ticketId);
+    const unsubscribe = onSnapshot(ticketRef, (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        setUserName(data.userName || "Pengguna");
+        setUserEmail(data.userEmail || "");
+        setTicketStatus(data.status || "waiting");
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [ticketId]);
 
   // Subscribe agent online status
   useEffect(() => {
@@ -186,27 +185,11 @@ const LiveChatAgentGuest = ({
     return () => unsubscribe();
   }, []);
 
-  // Subscribe ticket status
-  useEffect(() => {
-    if (!db || !ticket.id) return;
-    const ticketRef = doc(db, "livechat_tickets", ticket.id);
-    const unsubscribe = onSnapshot(ticketRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
-        setTicketStatus(data.status || "waiting");
-        if (data.status === "resolved" || data.status === "closed") {
-          onResolved();
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, [ticket.id, onResolved]);
-
   // Subscribe messages
   useEffect(() => {
-    if (!db || !ticket.id) return;
+    if (!db || !ticketId) return;
     const q = query(
-      collection(db, "livechat_tickets", ticket.id, "messages"),
+      collection(db, "livechat_tickets", ticketId, "messages"),
       orderBy("timestamp", "asc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -220,20 +203,19 @@ const LiveChatAgentGuest = ({
       }, 100);
     });
     return () => unsubscribe();
-  }, [ticket.id]);
+  }, [ticketId]);
 
-  // Send message
   const sendMessage = async () => {
-    if (!db || !ticket.id || !messageText.trim()) return;
+    if (!db || !ticketId || !messageText.trim()) return;
     if (ticketStatus === "resolved" || ticketStatus === "closed") {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
     }
     try {
-      const ticketRef = doc(db, "livechat_tickets", ticket.id);
-      await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
-        senderId: "guest_" + ticket.id,
-        senderName: ticket.userName || "Pengguna",
+      const ticketRef = doc(db, "livechat_tickets", ticketId);
+      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
+        senderId: "guest_" + ticketId,
+        senderName: userName || "Pengguna",
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
@@ -257,11 +239,15 @@ const LiveChatAgentGuest = ({
 
   const isResolved = ticketStatus === "resolved" || ticketStatus === "closed";
 
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: '#999', fontFamily: FONT_FAMILY }}>Memuat chat...</div>;
+  }
+
   return (
     <div style={{
-      marginTop: "24px",
+      marginTop: "40px",
       borderTop: "1px solid #e8e8e8",
-      paddingTop: "24px",
+      paddingTop: "40px",
       width: "100%",
       maxWidth: "700px",
     }}>
@@ -269,11 +255,11 @@ const LiveChatAgentGuest = ({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "16px",
+        marginBottom: "20px",
       }}>
         <div>
           <h3 style={{
-            fontSize: "20px",
+            fontSize: "24px",
             fontWeight: 600,
             color: "#0D3CFC",
             fontFamily: FONT_FAMILY,
@@ -282,7 +268,7 @@ const LiveChatAgentGuest = ({
             Live Chat Agent
           </h3>
           <div style={{
-            fontSize: "13px",
+            fontSize: "14px",
             color: "#666",
             fontFamily: FONT_FAMILY,
             marginTop: "2px",
@@ -307,7 +293,7 @@ const LiveChatAgentGuest = ({
               <span style={{
                 backgroundColor: "#d1fae5",
                 color: "#065f46",
-                fontSize: "9px",
+                fontSize: "10px",
                 fontWeight: 600,
                 padding: "1px 10px",
                 borderRadius: "12px",
@@ -317,8 +303,8 @@ const LiveChatAgentGuest = ({
               </span>
             </span>
             <span style={{ color: "#ccc" }}>•</span>
-            <span style={{ fontSize: "12px", color: "#999" }}>
-              {ticket.topic}
+            <span style={{ color: "#999", fontSize: "12px" }}>
+              {userName}
             </span>
             {isResolved && (
               <span style={{
@@ -352,14 +338,14 @@ const LiveChatAgentGuest = ({
         backgroundColor: "#f9f9f9",
         borderRadius: "12px",
         border: "1px solid #e8e8e8",
-        height: "360px",
+        height: "400px",
         display: "flex",
         flexDirection: "column",
       }}>
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "14px",
+          padding: "16px",
           display: "flex",
           flexDirection: "column",
           gap: "6px",
@@ -376,14 +362,14 @@ const LiveChatAgentGuest = ({
             </div>
           ) : (
             messages.map((msg) => {
-              const isMine = msg.senderId === "guest_" + ticket.id;
+              const isMine = msg.senderId === "guest_" + ticketId;
               return (
                 <div
                   key={msg.id}
                   style={{
                     alignSelf: isMine ? "flex-end" : "flex-start",
                     maxWidth: "75%",
-                    padding: "8px 12px",
+                    padding: "10px 14px",
                     borderRadius: "12px",
                     backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                     color: isMine ? "#fff" : "#000",
@@ -433,7 +419,7 @@ const LiveChatAgentGuest = ({
               textAlign: "center",
               color: "#6b7280",
               fontSize: "14px",
-              padding: "16px",
+              padding: "20px",
               fontFamily: FONT_FAMILY,
               borderTop: "1px solid #e8e8e8",
               marginTop: "8px",
@@ -445,7 +431,7 @@ const LiveChatAgentGuest = ({
         </div>
         {!isResolved && (
           <div style={{
-            padding: "10px 14px",
+            padding: "12px 16px",
             borderTop: "1px solid #e8e8e8",
             display: "flex",
             gap: "8px",
@@ -464,7 +450,7 @@ const LiveChatAgentGuest = ({
               placeholder="Ketik pesan..."
               style={{
                 flex: 1,
-                padding: "8px 12px",
+                padding: "10px 14px",
                 border: "1px solid #e8e8e8",
                 borderRadius: "8px",
                 fontSize: "14px",
@@ -476,7 +462,7 @@ const LiveChatAgentGuest = ({
               onClick={sendMessage}
               disabled={!messageText.trim()}
               style={{
-                padding: "8px 16px",
+                padding: "10px 20px",
                 backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
                 color: "#fff",
                 border: "none",
@@ -489,7 +475,7 @@ const LiveChatAgentGuest = ({
               }}
             >
               <span>Kirim</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
@@ -502,9 +488,10 @@ const LiveChatAgentGuest = ({
 
 // ===== MAIN PAGE =====
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
 
   // State untuk search
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -529,10 +516,7 @@ export default function ForgotPasswordPage() {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  // State untuk ticket
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [ticketId, setTicketId] = useState<string | null>(null);
   const [showLiveChat, setShowLiveChat] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
 
@@ -540,7 +524,7 @@ export default function ForgotPasswordPage() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
-  // ===== MOUNTING =====
+  // ===== Mounting =====
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -554,6 +538,16 @@ export default function ForgotPasswordPage() {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isMounted]);
+
+  // ===== BACA TICKET ID DARI URL =====
+  useEffect(() => {
+    if (!isMounted) return;
+    const ticketParam = searchParams.get('ticket');
+    if (ticketParam) {
+      setTicketId(ticketParam);
+      setShowLiveChat(true);
+    }
+  }, [searchParams, isMounted]);
 
   // ===== ROLLING TEXT =====
   useEffect(() => {
@@ -617,44 +611,6 @@ export default function ForgotPasswordPage() {
   useEffect(() => {
     setSearchResults([]);
   }, [searchQuery]);
-
-  // ===== SUBSCRIBE TICKETS BY EMAIL (REAL-TIME) =====
-  useEffect(() => {
-    if (!db) return;
-    
-    // Subscribe semua ticket yang memiliki userEmail yang sama dengan formData.email
-    // atau userName yang sama dengan formData.name
-    let q;
-    if (formData.email) {
-      q = query(
-        collection(db, "livechat_tickets"),
-        where("userEmail", "==", formData.email),
-        orderBy("createdAt", "desc")
-      );
-    } else if (formData.name) {
-      q = query(
-        collection(db, "livechat_tickets"),
-        where("userName", "==", formData.name),
-        orderBy("createdAt", "desc")
-      );
-    } else {
-      return;
-    }
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ticketList: Ticket[] = [];
-      snapshot.forEach((doc) => {
-        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
-      });
-      setTickets(ticketList);
-      
-      // Jika ada ticket yang statusnya resolved/closed, set isResolved
-      const hasResolved = ticketList.some(t => t.status === 'resolved' || t.status === 'closed');
-      setIsResolved(hasResolved);
-    });
-
-    return () => unsubscribe();
-  }, [formData.email, formData.name]);
 
   // ===== GSAP UNTUK PERNYATAAN PERSETUJUAN =====
   const toggleAgreement = () => {
@@ -730,25 +686,13 @@ export default function ForgotPasswordPage() {
       };
 
       const docRef = await addDoc(collection(db, "livechat_tickets"), ticketData);
-      const newTicket = { id: docRef.id, ...ticketData } as Ticket;
-      setSelectedTicket(newTicket);
+      const newTicketId = docRef.id;
+      
+      // Redirect ke URL dengan ticketId
+      router.push(`?ticket=${newTicketId}`);
+      setTicketId(newTicketId);
       setShowLiveChat(true);
-      setIsResolved(false);
       setLoading(false);
-      
-      // Refresh tickets list
-      const q = query(
-        collection(db, "livechat_tickets"),
-        where("userEmail", "==", formData.email || ""),
-        orderBy("createdAt", "desc")
-      );
-      const snap = await getDocs(q);
-      const list: Ticket[] = [];
-      snap.forEach((doc) => {
-        list.push({ id: doc.id, ...doc.data() } as Ticket);
-      });
-      setTickets(list);
-      
     } catch (err: any) {
       console.error("Error creating ticket:", err);
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
@@ -763,13 +707,13 @@ export default function ForgotPasswordPage() {
     setAgreed(false);
     setError("");
     setShowLiveChat(false);
+    setTicketId(null);
     setIsResolved(false);
-    setSelectedTicket(null);
-    setTickets([]);
     setShowAgreement(false);
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
+    router.push('/forgot-password'); // Hapus query parameter
   };
 
   const handleResolved = () => {
@@ -791,11 +735,6 @@ export default function ForgotPasswordPage() {
       </div>
     );
   }
-
-  // Cek apakah ada ticket berdasarkan email atau nama
-  const hasTickets = tickets.length > 0;
-  const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-  const resolvedTicket = tickets.find(t => t.status === 'resolved' || t.status === 'closed');
 
   return (
     <>
@@ -899,7 +838,7 @@ export default function ForgotPasswordPage() {
           </div>
         </motion.div>
 
-        {/* ===== HEADER ===== */}
+        {/* ===== HEADER (sama seperti sebelumnya) ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -910,7 +849,6 @@ export default function ForgotPasswordPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -932,7 +870,6 @@ export default function ForgotPasswordPage() {
               </motion.a>
             </Link>
 
-            {/* Search */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -1001,7 +938,6 @@ export default function ForgotPasswordPage() {
                 ) : null}
               </motion.div>
 
-              {/* Search Expanded */}
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
@@ -1113,7 +1049,6 @@ export default function ForgotPasswordPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1163,7 +1098,6 @@ export default function ForgotPasswordPage() {
             </span>
           </motion.div>
 
-          {/* KANAN */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -1227,7 +1161,6 @@ export default function ForgotPasswordPage() {
               </motion.a>
             </Link>
 
-            {/* Notification */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -1294,7 +1227,6 @@ export default function ForgotPasswordPage() {
               </AnimatePresence>
             </div>
 
-            {/* Profile - Login */}
             <Link href="/signin" passHref style={{ textDecoration: "none" }}>
               <motion.a
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -1351,7 +1283,7 @@ export default function ForgotPasswordPage() {
                 maxWidth: "900px",
               }}
             >
-              {!selectedOption && !showLiveChat && (
+              {!selectedOption ? (
                 // ===== TAMPILAN AWAL: 3 OPSI =====
                 <>
                   <h1 style={{
@@ -1448,9 +1380,7 @@ export default function ForgotPasswordPage() {
                     </Link>
                   </div>
                 </>
-              )}
-
-              {selectedOption && !showLiveChat && (
+              ) : (
                 // ===== FORM TIKET =====
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
@@ -1460,7 +1390,7 @@ export default function ForgotPasswordPage() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
                     <button
-                      onClick={resetForm}
+                      onClick={() => setSelectedOption(null)}
                       style={{
                         background: 'none',
                         border: 'none',
@@ -1707,7 +1637,6 @@ export default function ForgotPasswordPage() {
                     </button>
                   </form>
 
-                  {/* Link Kebijakan & Ketentuan */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'flex-start',
@@ -1762,14 +1691,14 @@ export default function ForgotPasswordPage() {
                   fontFamily: FONT_FAMILY,
                   marginBottom: '4px',
                 }}>
-                  Tiket berhasil dibuat!
+                  Tiket Aktif
                 </h2>
                 <p style={{
                   fontSize: '16px',
                   color: '#666',
                   fontFamily: FONT_FAMILY,
                 }}>
-                  Anda sekarang dapat chat langsung dengan agent. Tunggu hingga agent merespons.
+                  Chat dengan agent. Pesan akan tetap tersimpan meskipun Anda refresh halaman.
                 </p>
                 <p style={{
                   fontSize: '14px',
@@ -1777,7 +1706,7 @@ export default function ForgotPasswordPage() {
                   fontFamily: FONT_FAMILY,
                   marginTop: '4px',
                 }}>
-                  ID Tiket: <strong style={{ color: '#0D3CFC' }}>{selectedTicket?.id}</strong>
+                  ID Tiket: <strong style={{ color: '#0D3CFC' }}>{ticketId}</strong>
                 </p>
                 {isResolved && (
                   <p style={{
@@ -1791,14 +1720,12 @@ export default function ForgotPasswordPage() {
                 )}
               </div>
 
-              {selectedTicket && (
+              {ticketId && (
                 <LiveChatAgentGuest
-                  ticket={selectedTicket}
+                  ticketId={ticketId}
                   onClose={() => {
-                    setShowLiveChat(false);
                     resetForm();
                   }}
-                  onResolved={handleResolved}
                 />
               )}
 
@@ -1826,7 +1753,6 @@ export default function ForgotPasswordPage() {
                 </Link>
                 <button
                   onClick={() => {
-                    setShowLiveChat(false);
                     resetForm();
                   }}
                   style={{
