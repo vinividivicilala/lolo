@@ -130,6 +130,8 @@ export default function SignUpPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -139,6 +141,8 @@ export default function SignUpPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
+  const termsContainerRef = useRef<HTMLDivElement>(null);
+  const checkboxRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -212,8 +216,57 @@ export default function SignUpPage() {
     setSearchResults([]);
   }, [searchQuery]);
 
+  // Scroll detection untuk terms
+  useEffect(() => {
+    const handleScroll = () => {
+      if (termsContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = termsContainerRef.current;
+        const isBottom = scrollTop + clientHeight >= scrollHeight - 10;
+        setIsScrolledToBottom(isBottom);
+        
+        // GSAP animasi border saat mencapai bottom
+        if (isBottom) {
+          gsap.to(termsContainerRef.current, {
+            borderColor: '#22c55e',
+            duration: 0.5,
+            ease: 'power2.out',
+          });
+        } else {
+          gsap.to(termsContainerRef.current, {
+            borderColor: '#e8e8e8',
+            duration: 0.3,
+            ease: 'power2.in',
+          });
+        }
+      }
+    };
+    
+    const container = termsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  // GSAP animasi checkbox saat dicentang
+  useEffect(() => {
+    if (checkboxRef.current) {
+      if (acceptedTerms) {
+        gsap.fromTo(checkboxRef.current,
+          { scale: 0.8 },
+          { scale: 1, duration: 0.3, ease: 'back.out(1.7)' }
+        );
+      }
+    }
+  }, [acceptedTerms]);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedTerms || !isScrolledToBottom) {
+      setError("Harap baca dan setujui syarat & ketentuan terlebih dahulu.");
+      return;
+    }
+    
     setIsLoading(true);
     setError("");
 
@@ -280,6 +333,21 @@ export default function SignUpPage() {
         }
         *::-webkit-scrollbar {
           display: none;
+        }
+        .terms-scroll::-webkit-scrollbar {
+          width: 4px;
+          display: block;
+        }
+        .terms-scroll::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+        .terms-scroll::-webkit-scrollbar-thumb {
+          background: #0D3CFC;
+          border-radius: 4px;
+        }
+        .terms-scroll {
+          scrollbar-width: thin;
         }
       `}</style>
 
@@ -926,62 +994,120 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {/* Kebijakan dan Ketentuan */}
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                marginBottom: "24px",
-                flexWrap: "wrap",
-                fontSize: "14px",
-                fontFamily: FONT_FAMILY,
-                color: "#666666",
-              }}>
-                <span>Dengan mendaftar, Anda menyetujui</span>
-                <Link href="/kebijakan" style={{
-                  color: "#0D3CFC",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  transition: "color 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+              {/* ===== PERNYATAAN PERSETUJUAN DENGAN SCROLL ===== */}
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  ref={termsContainerRef}
+                  className="terms-scroll"
+                  style={{
+                    maxHeight: "120px",
+                    overflowY: "auto",
+                    padding: "12px 16px",
+                    border: `2px solid ${isScrolledToBottom ? '#22c55e' : '#e8e8e8'}`,
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    color: "#666",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.6,
+                    transition: "border-color 0.3s ease",
+                    backgroundColor: "#fafafa",
+                    marginBottom: "10px",
+                  }}
                 >
-                  Kebijakan Privasi
-                </Link>
-                <span style={{ color: "#ccc" }}>•</span>
-                <Link href="/ketentuan" style={{
-                  color: "#0D3CFC",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  transition: "color 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-                >
-                  Ketentuan Layanan
-                </Link>
+                  <p style={{ margin: "0 0 8px 0", fontWeight: 600, color: "#333" }}>📋 Persyaratan Layanan:</p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    1. Anda setuju untuk menggunakan layanan ini sesuai dengan ketentuan yang berlaku.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    2. Data pribadi Anda akan dilindungi sesuai dengan Kebijakan Privasi kami.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    3. Anda bertanggung jawab penuh atas akun dan aktivitas Anda.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    4. Kami berhak mengubah ketentuan ini setiap saat dengan pemberitahuan.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    5. Penggunaan layanan ini menunjukkan persetujuan Anda terhadap semua ketentuan.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    6. Dilarang menggunakan layanan untuk tujuan ilegal atau merugikan.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    7. Akun yang melanggar ketentuan dapat ditangguhkan atau dihapus.
+                  </p>
+                  <p style={{ margin: "0 0 6px 0" }}>
+                    8. Kami tidak bertanggung jawab atas kerugian yang timbul dari penggunaan layanan.
+                  </p>
+                  <p style={{ 
+                    margin: "6px 0 0 0", 
+                    color: isScrolledToBottom ? "#22c55e" : "#999",
+                    fontWeight: 500,
+                    transition: "color 0.3s ease",
+                  }}>
+                    {isScrolledToBottom ? "✓ Telah membaca semua syarat" : "⬇️ Gulir ke bawah untuk menyetujui"}
+                  </p>
+                </div>
+
+                {/* Checkbox Persetujuan */}
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  fontSize: "14px",
+                  color: "#333",
+                  fontFamily: FONT_FAMILY,
+                  cursor: "pointer",
+                  padding: "4px 0",
+                }}>
+                  <input
+                    ref={checkboxRef}
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    disabled={!isScrolledToBottom}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      minWidth: "20px",
+                      accentColor: "#0D3CFC",
+                      cursor: isScrolledToBottom ? "pointer" : "not-allowed",
+                      borderRadius: "4px",
+                      opacity: isScrolledToBottom ? 1 : 0.5,
+                    }}
+                  />
+                  <span>
+                    Saya telah membaca dan menyetujui{" "}
+                    <Link href="/ketentuan" style={{ color: "#0D3CFC", textDecoration: "underline" }}>
+                      Syarat & Ketentuan
+                    </Link>
+                    {" "}dan{" "}
+                    <Link href="/kebijakan" style={{ color: "#0D3CFC", textDecoration: "underline" }}>
+                      Kebijakan Privasi
+                    </Link>
+                  </span>
+                </label>
               </div>
 
               <motion.button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !acceptedTerms || !isScrolledToBottom}
                 style={{
                   width: "100%",
                   padding: "16px 20px",
-                  backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
+                  backgroundColor: (isLoading || !acceptedTerms || !isScrolledToBottom) ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
                   borderRadius: "12px",
                   fontSize: "18px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
+                  cursor: (isLoading || !acceptedTerms || !isScrolledToBottom) ? "not-allowed" : "pointer",
+                  opacity: (isLoading || !acceptedTerms || !isScrolledToBottom) ? 0.7 : 1,
                   transition: "all 0.3s ease",
                 }}
-                whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
+                whileHover={(!isLoading && acceptedTerms && isScrolledToBottom) ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                whileTap={(!isLoading && acceptedTerms && isScrolledToBottom) ? { scale: 0.98 } : {}}
               >
                 {isLoading ? "Creating Account..." : "Get Started"}
               </motion.button>
@@ -1009,7 +1135,7 @@ export default function SignUpPage() {
               </Link>
             </div>
 
-            {/* Pusat Bantuan - Link tambahan di bawah */}
+            {/* Pusat Bantuan */}
             <div style={{
               textAlign: "center",
               marginTop: "20px",
@@ -1038,7 +1164,7 @@ export default function SignUpPage() {
             </div>
           </motion.div>
 
-          {/* SISI KANAN: Kosong - tidak ada foto */}
+          {/* SISI KANAN: Kosong */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
