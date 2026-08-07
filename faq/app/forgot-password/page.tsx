@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -56,7 +56,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// ===== ICONS (sama seperti sebelumnya) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -539,10 +539,11 @@ export default function ForgotPasswordPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isMounted]);
 
-  // ===== BACA TICKET ID DARI URL =====
+  // ===== BACA TICKET ID DARI URL (GUARD UNTUK build) =====
   useEffect(() => {
     if (!isMounted) return;
-    const ticketParam = searchParams.get('ticket');
+    // Gunakan searchParams setelah mount
+    const ticketParam = searchParams?.get('ticket');
     if (ticketParam) {
       setTicketId(ticketParam);
       setShowLiveChat(true);
@@ -689,7 +690,7 @@ export default function ForgotPasswordPage() {
       const newTicketId = docRef.id;
       
       // Redirect ke URL dengan ticketId
-      router.push(`?ticket=${newTicketId}`);
+      router.push(`/forgot-password?ticket=${newTicketId}`);
       setTicketId(newTicketId);
       setShowLiveChat(true);
       setLoading(false);
@@ -838,7 +839,7 @@ export default function ForgotPasswordPage() {
           </div>
         </motion.div>
 
-        {/* ===== HEADER (sama seperti sebelumnya) ===== */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -1775,3 +1776,6 @@ export default function ForgotPasswordPage() {
     </>
   );
 }
+
+// ===== KUNCI UNTUK MENCEGAH PRERENDER ERROR =====
+export const dynamic = 'force-dynamic';
