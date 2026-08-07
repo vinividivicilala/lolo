@@ -8,26 +8,17 @@ import { useRouter } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
-  signInWithEmailAndPassword,
-  updatePassword,
   sendPasswordResetEmail,
-  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { 
   getFirestore, 
   collection, 
   addDoc, 
   serverTimestamp,
-  doc,
-  getDoc,
-  setDoc,
-  query,
-  where,
-  getDocs,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
-// Firebase Config (sama dengan yang lain)
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -54,7 +45,7 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// ===== ICONS (sama seperti SignInPage) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -110,6 +101,13 @@ const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; has
   </svg>
 );
 
+// ===== NORTH EAST ARROW SVG =====
+const NorthEastArrow = ({ width = 60, height = 60 }: { width?: number; height?: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // ===== SEARCH ROLLING TEXT =====
 const searchRollingTexts = [
   "Tentang Note", 
@@ -134,15 +132,15 @@ export default function ForgotPasswordPage() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
 
+  // State untuk notifikasi
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
   // State untuk opsi lupa
   const [selectedOption, setSelectedOption] = useState<'password' | 'email' | 'pin' | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    pin: "",
   });
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -150,7 +148,7 @@ export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [ticketId, setTicketId] = useState("");
 
-  // State untuk menampilkan pernyataan persetujuan (GSAP)
+  // State untuk pernyataan persetujuan (GSAP)
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
@@ -212,12 +210,16 @@ export default function ForgotPasswordPage() {
     }
   }, [isSearchOpen]);
 
+  // ===== CLICK OUTSIDE =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -257,33 +259,36 @@ export default function ForgotPasswordPage() {
     setError("");
 
     try {
-      // Validasi dasar
+      // Validasi
+      if (selectedOption === 'password' && !formData.email) {
+        setError("Email harus diisi.");
+        setLoading(false);
+        return;
+      }
+      if (selectedOption === 'email' && !formData.name) {
+        setError("Nama harus diisi.");
+        setLoading(false);
+        return;
+      }
+      if (selectedOption === 'pin' && (!formData.email || !formData.name)) {
+        setError("Email dan Nama harus diisi.");
+        setLoading(false);
+        return;
+      }
+
+      // Kirim email reset password jika opsi password
       if (selectedOption === 'password') {
-        if (!formData.email || !formData.name) {
-          setError("Email dan Nama harus diisi.");
-          setLoading(false);
-          return;
-        }
-        // Kirim email reset password
-        await sendPasswordResetEmail(auth, formData.email);
-      } else if (selectedOption === 'email') {
-        if (!formData.name) {
-          setError("Nama harus diisi.");
-          setLoading(false);
-          return;
-        }
-        // Untuk lupa email, kita hanya butuh name, nanti agent akan membantu
-      } else if (selectedOption === 'pin') {
-        if (!formData.email || !formData.name) {
-          setError("Email dan Nama harus diisi.");
-          setLoading(false);
-          return;
+        try {
+          await sendPasswordResetEmail(auth, formData.email);
+        } catch (err: any) {
+          // Jika email tidak terdaftar, tetap buat ticket
+          console.log("Email reset password error:", err.message);
         }
       }
 
       // Buat ticket di Firestore (livechat_tickets)
       const ticketData = {
-        userId: null, // karena belum login
+        userId: null,
         userName: formData.name || "Pengguna",
         userEmail: formData.email || "tidakada@email.com",
         topic: selectedOption === 'password' ? 'Lupa Password' :
@@ -294,7 +299,6 @@ export default function ForgotPasswordPage() {
         typing: false,
         typingUserId: null,
         typingUserName: null,
-        // tambahan informasi
         detail: selectedOption === 'password' ? `Email: ${formData.email}` :
                 selectedOption === 'email' ? `Nama: ${formData.name}` :
                 `Email: ${formData.email}, Nama: ${formData.name}`,
@@ -314,7 +318,7 @@ export default function ForgotPasswordPage() {
   // ===== RESET FORM =====
   const resetForm = () => {
     setSelectedOption(null);
-    setFormData({ email: "", name: "", currentPassword: "", newPassword: "", confirmPassword: "", pin: "" });
+    setFormData({ email: "", name: "" });
     setAgreed(false);
     setError("");
     setSuccess(false);
@@ -772,13 +776,14 @@ export default function ForgotPasswordPage() {
             </Link>
 
             {/* Notification */}
-            <div style={{ position: "relative" }}>
+            <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowNotifications(!showNotifications)}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -796,40 +801,77 @@ export default function ForgotPasswordPage() {
               >
                 <NotificationsIcon size={24} hasBadge={false} />
               </motion.button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      minWidth: "320px",
+                      maxWidth: "380px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+                      border: "1px solid rgba(0,0,0,0.04)",
+                      zIndex: 60,
+                      fontFamily: FONT_FAMILY,
+                      padding: "12px 0",
+                    }}
+                  >
+                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
+                      Notifikasi
+                    </div>
+                    <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                      Tidak ada notifikasi
+                    </div>
+                    <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0", textAlign: "center" }}>
+                      <Link href="/" style={{ background: "none", border: "none", color: "#0D3CFC", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, textDecoration: "none" }}>
+                        Lihat semua pesan
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Profile - Login/Signup link */}
-            <div style={{ position: "relative" }}>
-              <Link href="/signin" passHref style={{ textDecoration: "none" }}>
-                <motion.a
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 12px",
-                    borderRadius: "30px",
-                    backgroundColor: "transparent",
-                    color: "#000000",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    fontFamily: FONT_FAMILY,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                >
-                  <UserAvatarIcon size={22} />
-                  <span>Login</span>
-                </motion.a>
-              </Link>
-            </div>
+            {/* Profile - Login */}
+            <Link href="/signin" passHref style={{ textDecoration: "none" }}>
+              <motion.a
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  borderRadius: "30px",
+                  backgroundColor: "transparent",
+                  color: "#000000",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  fontFamily: FONT_FAMILY,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <UserAvatarIcon size={22} />
+                <span>Login</span>
+              </motion.a>
+            </Link>
           </div>
         </div>
 
@@ -853,11 +895,11 @@ export default function ForgotPasswordPage() {
             transition={{ duration: 0.6, ease: "power2.out" }}
             style={{
               width: "100%",
-              maxWidth: "800px",
+              maxWidth: "900px",
             }}
           >
             {!selectedOption && !success ? (
-              // ===== TAMPILAN AWAL: 3 OPSI =====
+              // ===== TAMPILAN AWAL: 3 OPSI (tanpa icon, border, hover) =====
               <>
                 <h1 style={{
                   fontSize: isMobile ? "60px" : "120px",
@@ -875,66 +917,54 @@ export default function ForgotPasswordPage() {
                   fontSize: "18px",
                   color: "#666",
                   fontFamily: FONT_FAMILY,
-                  marginBottom: "40px",
+                  marginBottom: "48px",
                 }}>
                   Pilih masalah yang Anda alami:
                 </p>
 
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-                  gap: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
                   width: '100%',
+                  maxWidth: '500px',
                 }}>
                   {[
-                    { id: 'password', label: 'Lupa Password', icon: '🔑', desc: 'Reset password Anda' },
-                    { id: 'email', label: 'Lupa Email', icon: '📧', desc: 'Cari tahu email terdaftar' },
-                    { id: 'pin', label: 'Lupa Pola Sandi', icon: '🔒', desc: 'Reset PIN 6 digit' },
+                    { id: 'password', label: 'Lupa Password' },
+                    { id: 'email', label: 'Lupa Email' },
+                    { id: 'pin', label: 'Lupa Pola Sandi' },
                   ].map((item) => (
                     <motion.div
                       key={item.id}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ x: 8 }}
+                      transition={{ duration: 0.2 }}
                       style={{
-                        padding: '30px 20px',
-                        backgroundColor: '#f8faff',
-                        borderRadius: '16px',
-                        border: '2px solid #e8e8e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '16px 0',
                         cursor: 'pointer',
-                        textAlign: 'center',
-                        transition: 'border-color 0.2s ease',
+                        borderBottom: '1px solid #f0f0f0',
                       }}
                       onClick={() => setSelectedOption(item.id as any)}
-                      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                      onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
                     >
-                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>{item.icon}</div>
-                      <h3 style={{
+                      <span style={{
                         fontSize: '24px',
-                        fontWeight: 600,
+                        fontWeight: 400,
                         color: '#0D3CFC',
                         fontFamily: FONT_FAMILY,
-                        marginBottom: '8px',
                       }}>
                         {item.label}
-                      </h3>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#666',
-                        fontFamily: FONT_FAMILY,
-                        margin: 0,
-                      }}>
-                        {item.desc}
-                      </p>
+                      </span>
+                      <NorthEastArrow width={40} height={40} />
                     </motion.div>
                   ))}
                 </div>
 
                 <div style={{
-                  marginTop: '40px',
+                  marginTop: '48px',
                   display: 'flex',
-                  justifyContent: 'center',
-                  gap: '16px',
+                  gap: '24px',
                   flexWrap: 'wrap',
                 }}>
                   <Link href="/signin" style={{
@@ -954,6 +984,15 @@ export default function ForgotPasswordPage() {
                   }}>
                     Buat Akun Baru
                   </Link>
+                  <span style={{ color: '#ccc' }}>|</span>
+                  <Link href="/pusat-bantuan" style={{
+                    color: '#0D3CFC',
+                    fontSize: '16px',
+                    fontFamily: FONT_FAMILY,
+                    textDecoration: 'underline',
+                  }}>
+                    Pusat Bantuan
+                  </Link>
                 </div>
               </>
             ) : success ? (
@@ -965,12 +1004,12 @@ export default function ForgotPasswordPage() {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   width: '100%',
-                  padding: '40px 0',
+                  padding: '20px 0',
                 }}
               >
-                <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
+                <div style={{ fontSize: '48px', marginBottom: '8px' }}>✓</div>
                 <h2 style={{
                   fontSize: '32px',
                   fontWeight: 600,
@@ -984,13 +1023,13 @@ export default function ForgotPasswordPage() {
                   fontSize: '18px',
                   color: '#666',
                   fontFamily: FONT_FAMILY,
-                  textAlign: 'center',
                   maxWidth: '500px',
+                  lineHeight: 1.6,
                 }}>
                   Permintaan Anda telah dikirim ke tim support. Kami akan segera merespon melalui email atau live chat.
                   <br />
                   <span style={{ fontSize: '14px', color: '#999', marginTop: '8px', display: 'block' }}>
-                    ID Tiket: {ticketId}
+                    ID Tiket: <strong style={{ color: '#0D3CFC' }}>{ticketId}</strong>
                   </span>
                 </p>
                 <div style={{ display: 'flex', gap: '16px', marginTop: '30px' }}>
@@ -1045,76 +1084,64 @@ export default function ForgotPasswordPage() {
                       fontSize: '24px',
                       cursor: 'pointer',
                       fontFamily: FONT_FAMILY,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
                     }}
                   >
-                    ←
+                    <NorthEastArrow width={30} height={30} style={{ transform: 'rotate(180deg)' }} />
+                    <span style={{ fontSize: '18px' }}>Kembali</span>
                   </button>
-                  <h2 style={{
-                    fontSize: '32px',
-                    fontWeight: 600,
-                    color: '#0D3CFC',
-                    fontFamily: FONT_FAMILY,
-                    margin: 0,
-                  }}>
-                    {selectedOption === 'password' && 'Lupa Password'}
-                    {selectedOption === 'email' && 'Lupa Email'}
-                    {selectedOption === 'pin' && 'Lupa Pola Sandi'}
-                  </h2>
                 </div>
 
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: 600,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: '8px',
+                }}>
+                  {selectedOption === 'password' && 'Lupa Password'}
+                  {selectedOption === 'email' && 'Lupa Email'}
+                  {selectedOption === 'pin' && 'Lupa Pola Sandi'}
+                </h2>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#666',
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: '32px',
+                }}>
+                  {selectedOption === 'password' && 'Masukkan email terdaftar Anda untuk reset password.'}
+                  {selectedOption === 'email' && 'Masukkan nama lengkap Anda untuk mencari email terdaftar.'}
+                  {selectedOption === 'pin' && 'Masukkan nama dan email Anda untuk reset pola sandi.'}
+                </p>
+
                 <form onSubmit={handleSubmitTicket} style={{ width: '100%', maxWidth: '500px' }}>
-                  {/* Input fields sesuai opsi */}
                   {selectedOption === 'password' && (
-                    <>
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                          Nama Lengkap
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Masukkan nama Anda"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                          style={{
-                            width: '100%',
-                            padding: '14px 16px',
-                            border: '2px solid #e8e8e8',
-                            borderRadius: '12px',
-                            fontSize: '16px',
-                            fontFamily: FONT_FAMILY,
-                            outline: 'none',
-                            transition: 'border-color 0.2s ease',
-                          }}
-                          onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                          onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
-                        />
-                      </div>
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                          Email Terdaftar
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="Masukkan email Anda"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
-                          style={{
-                            width: '100%',
-                            padding: '14px 16px',
-                            border: '2px solid #e8e8e8',
-                            borderRadius: '12px',
-                            fontSize: '16px',
-                            fontFamily: FONT_FAMILY,
-                            outline: 'none',
-                            transition: 'border-color 0.2s ease',
-                          }}
-                          onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
-                          onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
-                        />
-                      </div>
-                    </>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
+                        Email Terdaftar
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="Masukkan email Anda"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '14px 16px',
+                          border: '2px solid #e8e8e8',
+                          borderRadius: '12px',
+                          fontSize: '16px',
+                          fontFamily: FONT_FAMILY,
+                          outline: 'none',
+                          transition: 'border-color 0.2s ease',
+                        }}
+                        onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                        onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                      />
+                    </div>
                   )}
 
                   {selectedOption === 'email' && (
@@ -1198,7 +1225,7 @@ export default function ForgotPasswordPage() {
                   )}
 
                   {/* Pernyataan Persetujuan */}
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '20px', marginTop: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                       <input
                         type="checkbox"
@@ -1300,7 +1327,7 @@ export default function ForgotPasswordPage() {
                 {/* Link Kebijakan & Ketentuan */}
                 <div style={{
                   display: 'flex',
-                  justifyContent: 'center',
+                  justifyContent: 'flex-start',
                   gap: '24px',
                   marginTop: '30px',
                   flexWrap: 'wrap',
