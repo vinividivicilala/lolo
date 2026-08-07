@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -539,10 +539,9 @@ export default function ForgotPasswordPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isMounted]);
 
-  // ===== BACA TICKET ID DARI URL (GUARD UNTUK build) =====
+  // ===== BACA TICKET ID DARI URL =====
   useEffect(() => {
     if (!isMounted) return;
-    // Gunakan searchParams setelah mount
     const ticketParam = searchParams?.get('ticket');
     if (ticketParam) {
       setTicketId(ticketParam);
@@ -714,7 +713,7 @@ export default function ForgotPasswordPage() {
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
-    router.push('/forgot-password'); // Hapus query parameter
+    router.push('/forgot-password');
   };
 
   const handleResolved = () => {
