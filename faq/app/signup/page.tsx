@@ -11,6 +11,12 @@ import {
   createUserWithEmailAndPassword,
   updateProfile 
 } from "firebase/auth";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc,
+  serverTimestamp 
+} from "firebase/firestore";
 import gsap from 'gsap';
 
 // Firebase Config
@@ -27,6 +33,7 @@ const firebaseConfig = {
 
 let app = null;
 let auth = null;
+let db = null;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0
@@ -34,11 +41,12 @@ if (typeof window !== "undefined") {
     : getApps()[0];
 
   auth = getAuth(app);
+  db = getFirestore(app);
 }
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// ===== ICONS (sama seperti Pusat Bantuan) =====
+// ===== ICONS =====
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
@@ -120,55 +128,58 @@ const searchRollingTexts = [
 ];
 
 export default function SignUpPage() {
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<string[]>([]);
   
-  // Rolling text state
-  const [rollingText, setRollingText] = useState<string>(searchRollingTexts[0]);
-  const rollingRef = useRef<HTMLSpanElement>(null);
-  
-  // ===== PERNYATAAN PERSETUJUAN =====
+  // State untuk Persetujuan
   const [agreed, setAgreed] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
   
-  // ===== POLA SANDI 6 ANGKA =====
-  const [showPin, setShowPin] = useState(false);
+  // State untuk PIN
+  const [showPinScreen, setShowPinScreen] = useState(false);
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
   const [pinError, setPinError] = useState("");
+  const [tempUser, setTempUser] = useState<any>(null);
   
-  // ===== NOTIFIKASI =====
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
-  
+  // State untuk search
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [rollingText, setRollingText] = useState<string>(searchRollingTexts[0]);
+  const rollingRef = useRef<HTMLSpanElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
+  
   const router = useRouter();
 
-  // Mobile detection
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    setIsMounted(true);
   }, []);
 
-  // Rolling text effect
   useEffect(() => {
+    if (!isMounted) return;
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, [isMounted]);
+
+  // Rolling text
+  useEffect(() => {
+    if (!isMounted) return;
     let isForward = true;
     let currentIndex = 0;
     const interval = setInterval(() => {
@@ -196,9 +207,9 @@ export default function SignUpPage() {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMounted]);
 
-  // Search expand effect
+  // Search expand
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -209,16 +220,12 @@ export default function SignUpPage() {
     }
   }, [isSearchOpen]);
 
-  // Click outside search
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -247,6 +254,17 @@ export default function SignUpPage() {
     }
   };
 
+  // Fungsi untuk menyimpan PIN ke Firestore
+  const savePin = async (uid: string, pinValue: string) => {
+    if (!db) return;
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { 
+      pin: pinValue,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  };
+
   // Handle Sign Up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,8 +288,9 @@ export default function SignUpPage() {
 
       console.log("User created successfully:", userCredential.user);
       
-      // Tampilkan pola PIN
-      setShowPin(true);
+      // Simpan user sementara untuk PIN
+      setTempUser(userCredential.user);
+      setShowPinScreen(true);
       setIsLoading(false);
       
     } catch (error: any) {
@@ -296,8 +315,8 @@ export default function SignUpPage() {
     }
   };
 
-  // Handle PIN
-  const handlePinComplete = () => {
+  // Handle PIN submit
+  const handlePinSubmit = async () => {
     if (pin.length !== 6) {
       setPinError("PIN harus 6 digit");
       return;
@@ -307,19 +326,40 @@ export default function SignUpPage() {
       return;
     }
     setPinError("");
-    // Simpan PIN (simulasi)
-    console.log("PIN saved:", pin);
+    
+    // Simpan PIN ke Firestore
+    await savePin(tempUser.uid, pin);
+    
+    // Redirect ke halaman utama
     router.push('/');
   };
 
-  // Reset PIN
   const resetPin = () => {
     setPin("");
     setPinConfirm("");
     setPinError("");
   };
 
-  // ===== RENDER =====
+  const handleSignInClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/signin');
+  };
+
+  if (!isMounted) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: FONT_FAMILY,
+      }}>
+        <div style={{ color: '#000', fontSize: '1.5rem' }}>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -422,7 +462,7 @@ export default function SignUpPage() {
           </div>
         </motion.div>
 
-        {/* HEADER - sama seperti Pusat Bantuan */}
+        {/* ===== HEADER ===== */}
         <div style={{
           position: "absolute",
           top: "80px",
@@ -433,7 +473,7 @@ export default function SignUpPage() {
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          {/* KIRI */}
+          {/* KIRI: Menuru + Search */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -636,7 +676,7 @@ export default function SignUpPage() {
             </motion.div>
           </div>
 
-          {/* TENGAH */}
+          {/* TENGAH: Note Donations News Calendar */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -686,7 +726,7 @@ export default function SignUpPage() {
             </span>
           </motion.div>
 
-          {/* KANAN */}
+          {/* KANAN: Shop + Pusat bantuan + Notif + Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Link href="/shop" passHref style={{ textDecoration: "none" }}>
               <motion.a
@@ -750,15 +790,14 @@ export default function SignUpPage() {
               </motion.a>
             </Link>
 
-            {/* NOTIFIKASI - seperti Pusat Bantuan */}
-            <div ref={notificationsRef} style={{ position: "relative" }}>
+            {/* Notification */}
+            <div style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowNotifications(!showNotifications)}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -776,77 +815,40 @@ export default function SignUpPage() {
               >
                 <NotificationsIcon size={24} hasBadge={false} />
               </motion.button>
-
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      minWidth: "320px",
-                      maxWidth: "380px",
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(0,0,0,0.04)",
-                      zIndex: 60,
-                      fontFamily: FONT_FAMILY,
-                      padding: "12px 0",
-                    }}
-                  >
-                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
-                      Notifikasi
-                    </div>
-                    <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
-                      Tidak ada notifikasi
-                    </div>
-                    <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0", textAlign: "center" }}>
-                      <Link href="/" style={{ background: "none", border: "none", color: "#0D3CFC", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, textDecoration: "none" }}>
-                        Lihat semua pesan
-                      </Link>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
-            {/* Profile - Login */}
-            <Link href="/signin" passHref style={{ textDecoration: "none" }}>
-              <motion.a
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  borderRadius: "30px",
-                  backgroundColor: "transparent",
-                  color: "#000000",
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  textDecoration: "none",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              >
-                <UserAvatarIcon size={22} />
-                <span>Login</span>
-              </motion.a>
-            </Link>
+            {/* Profile - Login/Signup link */}
+            <div style={{ position: "relative" }}>
+              <Link href="/signin" passHref style={{ textDecoration: "none" }}>
+                <motion.a
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    borderRadius: "30px",
+                    backgroundColor: "transparent",
+                    color: "#000000",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    fontFamily: FONT_FAMILY,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <UserAvatarIcon size={22} />
+                  <span>Login</span>
+                </motion.a>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -878,7 +880,7 @@ export default function SignUpPage() {
               justifyContent: "center",
             }}
           >
-            {!showPin ? (
+            {!showPinScreen ? (
               // === FORM SIGN UP ===
               <>
                 <h1 style={{
@@ -905,7 +907,7 @@ export default function SignUpPage() {
                   Create your account to join the Menuru community
                 </p>
 
-                {/* Error Message - tanpa background, teks biru */}
+                {/* Error Message */}
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -1062,7 +1064,7 @@ export default function SignUpPage() {
                     </label>
                   </div>
 
-                  {/* ===== ISI PERNYATAAN PERSETUJUAN (expand) ===== */}
+                  {/* ===== ISI PERNYATAAN PERSETUJUAN ===== */}
                   <div
                     ref={agreementRef}
                     style={{
@@ -1107,7 +1109,7 @@ export default function SignUpPage() {
                     </div>
                   </div>
 
-                  {/* ===== LINK KEBIJAKAN & KETENTUAN (tetap di baris ceklist) ===== */}
+                  {/* ===== LINK KEBIJAKAN & KETENTUAN ===== */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1237,10 +1239,9 @@ export default function SignUpPage() {
                   marginBottom: "32px",
                   textAlign: "center",
                 }}>
-                  Masukkan PIN 6 digit untuk keamanan tambahan
+                  Buat PIN 6 digit untuk keamanan tambahan
                 </p>
 
-                {/* PIN & Konfirmasi */}
                 <div style={{
                   display: 'flex',
                   gap: '24px',
@@ -1354,7 +1355,7 @@ export default function SignUpPage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handlePinComplete}
+                    onClick={handlePinSubmit}
                     style={{
                       padding: '12px 28px',
                       backgroundColor: '#0D3CFC',
