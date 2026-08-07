@@ -8,23 +8,26 @@ import { useRouter } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
+  createUserWithEmailAndPassword,
+  updateProfile,
   onAuthStateChanged,
   signOut,
-  updateProfile,
-  sendEmailVerification,
 } from "firebase/auth";
 import { 
   getFirestore, 
-  collection, 
   doc, 
   setDoc, 
-  getDoc,
+  getDoc, 
   updateDoc,
-  serverTimestamp,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
-// Firebase Config
+// Konfigurasi Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -66,13 +69,6 @@ const CloseIcon = () => (
   </svg>
 );
 
-const EditIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 20H21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16.5 3.5L20.5 7.5L7 21L3 21L3 17L16.5 3.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const ShopIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -105,13 +101,33 @@ const StoreIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
+const NotificationsIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
     <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    {hasBadge && (
-      <circle cx="19" cy="5" r="5" fill="#ef4444" stroke="white" strokeWidth="2"/>
+  </svg>
+);
+
+const EyeIcon = ({ open }: { open: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {open ? (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
+    ) : (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
     )}
+  </svg>
+);
+
+const EditIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 20H21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16.5 3.5L20.5 7.5L7 21L3 21L3 17L16.5 3.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -124,315 +140,58 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
-// ===== KOMPONEN KETENTUAN =====
-const TermsSection = ({ 
-  title, 
-  content, 
-  isOpen, 
-  onToggle,
-  index,
-}: { 
-  title: string; 
-  content: string; 
-  isOpen: boolean; 
-  onToggle: () => void;
-  index: number;
-}) => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<HTMLSpanElement>(null);
+// ===== DEFAULT TERMS CONTENT =====
+const DEFAULT_TERMS = `
+**Ketentuan Layanan Menuru**
 
-  useEffect(() => {
-    if (contentRef.current && iconRef.current) {
-      if (isOpen) {
-        gsap.to(contentRef.current, {
-          height: 'auto',
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-        });
-        gsap.to(iconRef.current, {
-          rotate: 45,
-          duration: 0.3,
-          ease: 'power2.out',
-        });
-      } else {
-        gsap.to(contentRef.current, {
-          height: 0,
-          opacity: 0,
-          duration: 0.4,
-          ease: 'power2.in',
-        });
-        gsap.to(iconRef.current, {
-          rotate: 0,
-          duration: 0.3,
-          ease: 'power2.out',
-        });
-      }
-    }
-  }, [isOpen]);
+1. **Penerimaan Syarat** – Dengan mengakses dan menggunakan layanan Menuru, Anda menyetujui untuk terikat dengan Ketentuan Layanan ini. Jika Anda tidak setuju, harap tidak menggunakan layanan kami.
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.5 }}
-      style={{
-        borderBottom: '1px solid #f0f0f0',
-        padding: '4px 0',
-      }}
-    >
-      <div
-        onClick={onToggle}
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-          padding: '12px 4px',
-          transition: 'background 0.2s ease',
-          borderRadius: '8px',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(13,60,252,0.03)'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-      >
-        <span style={{
-          fontSize: '22px',
-          fontWeight: 500,
-          color: '#0D3CFC',
-          fontFamily: FONT_FAMILY,
-          letterSpacing: '-0.01em',
-        }}>
-          {title}
-        </span>
-        <span ref={iconRef} style={{
-          fontSize: '28px',
-          fontWeight: 300,
-          color: '#0D3CFC',
-          display: 'inline-block',
-          transition: 'transform 0.3s ease',
-        }}>
-          +
-        </span>
-      </div>
-      <div
-        ref={contentRef}
-        style={{
-          height: 0,
-          opacity: 0,
-          overflow: 'hidden',
-          paddingLeft: '4px',
-        }}
-      >
-        <div style={{
-          fontSize: '18px',
-          color: '#333',
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.8,
-          padding: '0 4px 16px 4px',
-        }}>
-          {content}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+2. **Perubahan Ketentuan** – Kami berhak untuk mengubah atau memperbarui ketentuan ini sewaktu-waktu tanpa pemberitahuan sebelumnya. Perubahan akan berlaku segera setelah dipublikasikan.
 
-// ===== KOMPONEN VERIFIKASI 6 DIGIT =====
-const VerificationModal = ({ 
-  isOpen, 
-  onClose, 
-  onVerify,
-  email,
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onVerify: (code: string) => void;
-  email: string;
-}) => {
-  const [code, setCode] = useState(['', '', '', '', '', '']);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const modalRef = useRef<HTMLDivElement>(null);
+3. **Akun Pengguna** – Anda bertanggung jawab penuh atas kerahasiaan kata sandi dan semua aktivitas yang terjadi di akun Anda. Beri tahu kami segera jika ada akses tidak sah.
 
-  useEffect(() => {
-    if (isOpen && modalRef.current) {
-      gsap.fromTo(modalRef.current,
-        { scale: 0.9, opacity: 0, y: 20 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
-      );
-      setTimeout(() => inputRefs.current[0]?.focus(), 300);
-    }
-  }, [isOpen]);
+4. **Privasi** – Pengumpulan dan penggunaan data pribadi Anda diatur dalam Kebijakan Privasi kami.
 
-  const handleChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
+5. **Penggunaan yang Dilarang** – Anda tidak boleh menggunakan layanan untuk tujuan ilegal, mengganggu, atau merugikan pengguna lain.
 
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
+6. **Hak Kekayaan Intelektual** – Semua konten di Menuru dilindungi oleh hak cipta dan merek dagang. Dilarang menyalin, mendistribusikan, atau membuat karya turunan tanpa izin.
 
-    // Auto submit jika semua terisi
-    if (newCode.every(c => c !== '')) {
-      setTimeout(() => onVerify(newCode.join('')), 300);
-    }
-  };
+7. **Penghentian Layanan** – Kami berhak untuk menangguhkan atau menghentikan akun Anda jika terjadi pelanggaran ketentuan.
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
+8. **Tautan ke Pihak Ketiga** – Layanan kami mungkin berisi tautan ke situs eksternal. Kami tidak bertanggung jawab atas konten atau kebijakan mereka.
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-          }}
-          onClick={onClose}
-        >
-          <div
-            ref={modalRef}
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '24px',
-              padding: '40px',
-              maxWidth: '480px',
-              width: '100%',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-              fontFamily: FONT_FAMILY,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(13,60,252,0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
-              }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D3CFC" strokeWidth="1.5">
-                  <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
-                  <path d="M22 10L12 15L2 10" />
-                </svg>
-              </div>
-              <h2 style={{
-                fontSize: '28px',
-                fontWeight: 600,
-                color: '#0D3CFC',
-                fontFamily: FONT_FAMILY,
-                margin: '0 0 4px 0',
-              }}>
-                Verifikasi Email
-              </h2>
-              <p style={{
-                fontSize: '16px',
-                color: '#666',
-                fontFamily: FONT_FAMILY,
-                margin: '0',
-              }}>
-                Masukkan kode 6 digit yang dikirim ke
-                <br />
-                <strong style={{ color: '#0D3CFC' }}>{email}</strong>
-              </p>
-            </div>
+9. **Ganti Rugi** – Anda setuju untuk mengganti rugi Menuru dari klaim atau kerugian yang timbul dari pelanggaran ketentuan ini.
 
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'center',
-              marginBottom: '32px',
-            }}>
-              {code.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => { inputRefs.current[index] = el; }}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  style={{
-                    width: '52px',
-                    height: '64px',
-                    textAlign: 'center',
-                    fontSize: '28px',
-                    fontWeight: 600,
-                    fontFamily: FONT_FAMILY,
-                    border: `2px solid ${digit ? '#0D3CFC' : '#e0e0e0'}`,
-                    borderRadius: '12px',
-                    outline: 'none',
-                    transition: 'all 0.2s ease',
-                    background: digit ? 'rgba(13,60,252,0.04)' : '#ffffff',
-                    color: '#0D3CFC',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#0D3CFC';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(13,60,252,0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = digit ? '#0D3CFC' : '#e0e0e0';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              ))}
-            </div>
+10. **Hukum yang Berlaku** – Ketentuan ini diatur oleh hukum yang berlaku di Indonesia.
 
-            <div style={{ textAlign: 'center' }}>
-              <button
-                onClick={() => {
-                  // Kirim ulang kode
-                  alert('Kode verifikasi baru telah dikirim ke email Anda.');
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#0D3CFC',
-                  fontSize: '14px',
-                  fontFamily: FONT_FAMILY,
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: '8px',
-                }}
-              >
-                Kirim ulang kode
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+Dengan menggunakan Menuru, Anda menyatakan telah membaca, memahami, dan menyetujui semua ketentuan di atas.
+`;
 
-// ============================================================
-// ===== KOMPONEN UTAMA =====
-// ============================================================
-export default function KetentuanPage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default function SignUpPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsContent, setTermsContent] = useState(DEFAULT_TERMS);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditingTerms, setIsEditingTerms] = useState(false);
+  const [editTermsContent, setEditTermsContent] = useState(DEFAULT_TERMS);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pin, setPin] = useState(['', '', '', '', '', '']);
+  const [pinError, setPinError] = useState("");
+  const [pinSuccess, setPinSuccess] = useState(false);
+  
+  // ===== State untuk Notifikasi (dikosongkan) =====
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -442,180 +201,198 @@ export default function KetentuanPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
-  const [showVerification, setShowVerification] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
-  const [totalUnread, setTotalUnread] = useState(0);
+  const termsContainerRef = useRef<HTMLDivElement>(null);
+  const termsContentRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // State untuk terms
-  const [openSections, setOpenSections] = useState<number[]>([]);
-  const [termsData, setTermsData] = useState([
-    {
-      id: 1,
-      title: "1. Ketentuan Umum",
-      content: "Ketentuan Layanan Menuru (\"Ketentuan\") ini mengatur penggunaan platform Menuru, termasuk semua fitur, layanan, dan konten yang tersedia. Dengan mengakses atau menggunakan platform Menuru, Anda menyetujui untuk terikat dengan Ketentuan ini. Jika Anda tidak setuju dengan Ketentuan ini, Anda tidak boleh menggunakan platform Menuru."
-    },
-    {
-      id: 2,
-      title: "2. Akun Pengguna",
-      content: "Untuk menggunakan fitur tertentu, Anda harus membuat akun. Anda bertanggung jawab penuh atas semua aktivitas yang terjadi di bawah akun Anda. Anda setuju untuk memberikan informasi yang akurat dan terkini. Kami berhak untuk menangguhkan atau menghentikan akun Anda jika terjadi pelanggaran terhadap Ketentuan ini."
-    },
-    {
-      id: 3,
-      title: "3. Konten dan Hak Kekayaan Intelektual",
-      content: "Semua konten yang tersedia di platform Menuru, termasuk teks, gambar, logo, dan perangkat lunak, dilindungi oleh hak cipta dan hak kekayaan intelektual lainnya. Anda tidak diperbolehkan untuk menyalin, mendistribusikan, atau menggunakan konten tanpa izin tertulis dari Menuru."
-    },
-    {
-      id: 4,
-      title: "4. Penggunaan yang Dilarang",
-      content: "Dilarang menggunakan platform untuk tujuan ilegal, mengirimkan konten yang melanggar hukum, atau mengganggu fungsi platform. Kami berhak untuk menghapus konten yang dianggap melanggar dan mengambil tindakan hukum yang diperlukan."
-    },
-    {
-      id: 5,
-      title: "5. Privasi dan Data",
-      content: "Kami mengumpulkan dan memproses data pribadi sesuai dengan Kebijakan Privasi kami. Anda setuju bahwa kami dapat menggunakan data Anda untuk meningkatkan layanan dan memberikan pengalaman yang lebih baik."
-    },
-    {
-      id: 6,
-      title: "6. Perubahan Ketentuan",
-      content: "Kami dapat memperbarui Ketentuan ini sewaktu-waktu. Perubahan akan diberlakukan setelah dipublikasikan di platform. Anda diharapkan untuk memeriksa Ketentuan secara berkala."
-    },
-    {
-      id: 7,
-      title: "7. Penangguhan dan Penghentian",
-      content: "Kami berhak untuk menangguhkan atau menghentikan akses Anda ke platform jika terjadi pelanggaran terhadap Ketentuan ini. Penghentian dapat dilakukan tanpa pemberitahuan sebelumnya."
-    },
-    {
-      id: 8,
-      title: "8. Hukum yang Berlaku",
-      content: "Ketentuan ini diatur oleh hukum Indonesia. Setiap sengketa yang timbul akan diselesaikan melalui pengadilan yang berwenang di Indonesia."
-    }
-  ]);
-
-  const [editingSection, setEditingSection] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [lastUpdate, setLastUpdate] = useState<string>("");
-  const [authorName, setAuthorName] = useState<string>("");
-  const [authorEmail, setAuthorEmail] = useState<string>("");
-
-  // Load terms dari Firestore
-  const loadTermsFromFirestore = async () => {
-    if (!db) return;
-    try {
-      const docRef = doc(db, "terms", "main");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.terms) {
-          setTermsData(data.terms);
-        }
-        setLastUpdate(data.lastUpdate || "");
-        setAuthorName(data.authorName || "");
-        setAuthorEmail(data.authorEmail || "");
-      }
-    } catch (error) {
-      console.error("Error loading terms:", error);
-    }
-  };
-
-  // Save terms ke Firestore
-  const saveTermsToFirestore = async (newTerms: typeof termsData) => {
-    if (!db || !isAdmin) return;
-    try {
-      const docRef = doc(db, "terms", "main");
-      await setDoc(docRef, {
-        terms: newTerms,
-        lastUpdate: new Date().toLocaleString('id-ID', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        authorName: user?.displayName || user?.email || "Admin",
-        authorEmail: user?.email || "",
-        updatedBy: user?.uid || "",
-      });
-      setTermsData(newTerms);
-      setLastUpdate(new Date().toLocaleString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }));
-      setAuthorName(user?.displayName || user?.email || "Admin");
-      setAuthorEmail(user?.email || "");
-      setEditingSection(null);
-    } catch (error) {
-      console.error("Error saving terms:", error);
-    }
-  };
-
-  // Toggle section
-  const toggleSection = (index: number) => {
-    setOpenSections(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
-    );
-  };
-
-  // Handle edit
-  const handleEdit = (index: number) => {
-    setEditingSection(index);
-    setEditContent(termsData[index].content);
-  };
-
-  const handleSaveEdit = (index: number) => {
-    const newTerms = [...termsData];
-    newTerms[index].content = editContent;
-    saveTermsToFirestore(newTerms);
-  };
-
-  // Handle submit (verifikasi)
-  const handleSubmit = () => {
-    setShowVerification(true);
-  };
-
-  const handleVerify = (code: string) => {
-    console.log("Verification code:", code);
-    setShowVerification(false);
-    // Lanjutkan ke proses sign up
-    alert("Verifikasi berhasil! Akun Anda telah dibuat.");
-    router.push('/');
-  };
-
-  // Auth listener
+  // ===== Cek Admin =====
   useEffect(() => {
     if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-      if (currentUser) {
-        setIsAdmin(currentUser.email === ADMIN_EMAIL);
-        // Simpan user data ke Firestore
-        try {
-          const userRef = doc(db, "users", currentUser.uid);
-          await setDoc(userRef, {
-            name: currentUser.displayName || currentUser.email,
-            email: currentUser.email,
-            photoURL: currentUser.photoURL || "",
-            lastLogin: serverTimestamp(),
-          }, { merge: true });
-        } catch (error) {
-          console.error("Error saving user:", error);
-        }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  // Load terms on mount
+  // ===== Load Terms dari Firestore =====
   useEffect(() => {
-    loadTermsFromFirestore();
+    if (!db) return;
+    const loadTerms = async () => {
+      try {
+        const docRef = doc(db, "terms", "main");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setTermsContent(docSnap.data().content || DEFAULT_TERMS);
+          setEditTermsContent(docSnap.data().content || DEFAULT_TERMS);
+        } else {
+          // Set default
+          await setDoc(docRef, { content: DEFAULT_TERMS });
+        }
+      } catch (error) {
+        console.error("Error loading terms:", error);
+      }
+    };
+    loadTerms();
+
+    // Subscribe ke real-time updates
+    const docRef = doc(db, "terms", "main");
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setTermsContent(docSnap.data().content || DEFAULT_TERMS);
+        setEditTermsContent(docSnap.data().content || DEFAULT_TERMS);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  // Rolling text
+  // ===== SAVE TERMS (Admin) =====
+  const saveTerms = async () => {
+    if (!db || !isAdmin) return;
+    try {
+      const docRef = doc(db, "terms", "main");
+      await setDoc(docRef, { content: editTermsContent });
+      setTermsContent(editTermsContent);
+      setIsEditingTerms(false);
+    } catch (error) {
+      console.error("Error saving terms:", error);
+    }
+  };
+
+  // ===== PIN Setup =====
+  const handlePinChange = (index: number, value: string) => {
+    const newPin = [...pin];
+    newPin[index] = value.replace(/\D/g, '').slice(0, 1);
+    setPin(newPin);
+    setPinError("");
+    // Auto focus next
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`pin-${index+1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      const prevInput = document.getElementById(`pin-${index-1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handlePinSubmit = async () => {
+    const pinString = pin.join('');
+    if (pinString.length !== 6) {
+      setPinError("Harap masukkan 6 digit angka.");
+      return;
+    }
+    if (!auth || !auth.currentUser) {
+      setPinError("User tidak terautentikasi.");
+      return;
+    }
+    try {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, { pin: pinString });
+      setPinSuccess(true);
+      setShowPinModal(false);
+      // Redirect after success
+      setTimeout(() => {
+        router.push('/');
+      }, 1500);
+    } catch (error) {
+      console.error("Error saving PIN:", error);
+      setPinError("Gagal menyimpan PIN. Silakan coba lagi.");
+    }
+  };
+
+  // ===== Sign Up =====
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!acceptedTerms) {
+      setError("Harap setujui Syarat & Ketentuan terlebih dahulu.");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      await updateProfile(userCredential.user, {
+        displayName: formData.name
+      });
+
+      // Simpan user ke Firestore
+      const userRef = doc(db, "users", userCredential.user.uid);
+      await setDoc(userRef, {
+        name: formData.name,
+        email: formData.email,
+        createdAt: new Date().toISOString(),
+        pin: null,
+      });
+
+      // Tampilkan modal PIN
+      setShowPinModal(true);
+      setIsLoading(false);
+      
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError("Email sudah digunakan. Coba email lain atau login.");
+          break;
+        case 'auth/invalid-email':
+          setError("Email tidak valid.");
+          break;
+        case 'auth/weak-password':
+          setError("Password terlalu lemah. Minimal 6 karakter.");
+          break;
+        case 'auth/operation-not-allowed':
+          setError("Registrasi email/password tidak diaktifkan.");
+          break;
+        default:
+          setError("Terjadi kesalahan. Silakan coba lagi.");
+      }
+      
+      setIsLoading(false);
+    }
+  };
+
+  // ===== GSAP Animations for Terms =====
+  useEffect(() => {
+    if (isTermsOpen && termsContentRef.current) {
+      gsap.fromTo(termsContentRef.current,
+        { height: 0, opacity: 0 },
+        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    } else if (!isTermsOpen && termsContentRef.current) {
+      gsap.to(termsContentRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.in'
+      });
+    }
+  }, [isTermsOpen]);
+
+  // ===== Mobile detection =====
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // ===== Rolling text =====
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
@@ -647,7 +424,7 @@ export default function KetentuanPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Search expand
+  // ===== Search expand =====
   useEffect(() => {
     if (isSearchOpen && searchExpandedRef.current) {
       gsap.fromTo(searchExpandedRef.current,
@@ -658,7 +435,7 @@ export default function KetentuanPage() {
     }
   }, [isSearchOpen]);
 
-  // Click outside search
+  // ===== Click outside search =====
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -678,19 +455,11 @@ export default function KetentuanPage() {
     setSearchResults([]);
   }, [searchQuery]);
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-        <div style={{ fontSize: "18px", color: "#000", fontFamily: FONT_FAMILY }}>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <>
       <Head>
-        <title>Ketentuan Layanan | Menuru</title>
-        <meta name="description" content="Ketentuan Layanan Menuru" />
+        <title>Sign Up | Menuru</title>
+        <meta name="description" content="Buat akun Menuru" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
@@ -712,6 +481,36 @@ export default function KetentuanPage() {
         *::-webkit-scrollbar {
           display: none;
         }
+        .terms-content {
+          line-height: 1.8;
+          white-space: pre-wrap;
+          font-size: 22px;
+        }
+        .terms-content strong {
+          font-weight: 600;
+          color: #0D3CFC;
+        }
+        .pin-input {
+          width: 48px;
+          height: 56px;
+          text-align: center;
+          font-size: 24px;
+          font-weight: 600;
+          border: 2px solid #e8e8e8;
+          border-radius: 8px;
+          outline: none;
+          transition: all 0.2s ease;
+          font-family: ${FONT_FAMILY};
+          color: #0D3CFC;
+        }
+        .pin-input:focus {
+          border-color: #0D3CFC;
+          box-shadow: 0 0 0 3px rgba(13,60,252,0.1);
+        }
+        .pin-input-filled {
+          border-color: #0D3CFC;
+          background-color: rgba(13,60,252,0.04);
+        }
       `}</style>
 
       <div style={{
@@ -724,7 +523,7 @@ export default function KetentuanPage() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* BANNER */}
+        {/* ===== BANNER ===== */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1116,7 +915,7 @@ export default function KetentuanPage() {
               </motion.a>
             </Link>
 
-            {/* Notification - Isi dihapus */}
+            {/* Notification - hanya icon, tanpa konten */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -1140,9 +939,8 @@ export default function KetentuanPage() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
-                <NotificationsIcon size={24} hasBadge={false} />
+                <NotificationsIcon size={24} />
               </motion.button>
-              {/* Notifikasi kosong */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
@@ -1163,342 +961,680 @@ export default function KetentuanPage() {
                       fontFamily: FONT_FAMILY,
                       padding: "16px",
                       textAlign: "center",
+                      color: "#999",
+                      fontSize: "14px",
                     }}
                   >
-                    <div style={{ fontSize: "14px", color: "#999" }}>
-                      Tidak ada notifikasi
-                    </div>
+                    Tidak ada notifikasi
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Profile */}
+            {/* Profile - Login/Signup link */}
             <div style={{ position: "relative" }}>
-              {user ? (
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "4px 8px",
-                  borderRadius: "30px",
-                  backgroundColor: "transparent",
-                }}>
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="avatar" style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
-                  ) : (
-                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: "14px", fontFamily: FONT_FAMILY }}>
-                      {user.displayName?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
-                  )}
-                  <span style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY }}>{user.displayName || user.email}</span>
-                </div>
-              ) : (
-                <Link href="/signin" passHref style={{ textDecoration: "none" }}>
-                  <motion.a
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "8px 12px",
-                      borderRadius: "30px",
-                      backgroundColor: "transparent",
-                      color: "#000000",
-                      fontSize: "16px",
-                      fontWeight: 500,
-                      fontFamily: FONT_FAMILY,
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                  >
-                    <UserAvatarIcon size={22} />
-                    <span>Login</span>
-                  </motion.a>
-                </Link>
-              )}
+              <Link href="/signin" passHref style={{ textDecoration: "none" }}>
+                <motion.a
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    borderRadius: "30px",
+                    backgroundColor: "transparent",
+                    color: "#000000",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    fontFamily: FONT_FAMILY,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <UserAvatarIcon size={22} />
+                  <span>Login</span>
+                </motion.a>
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* ===== KONTEN KETENTUAN ===== */}
+        {/* ===== KONTEN SIGN UP ===== */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 80px",
           width: "100%",
-          maxWidth: "900px",
+          maxWidth: "1400px",
           marginLeft: "auto",
           marginRight: "auto",
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? "40px" : "80px",
+          alignItems: isMobile ? "center" : "flex-start",
+          minHeight: "calc(100vh - 260px)",
+          justifyContent: "center",
         }}>
+          {/* SISI KIRI: Sign Up 200px + Form */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "power2.out" }}
+            style={{
+              flex: isMobile ? "1" : "0 0 55%",
+              maxWidth: isMobile ? "100%" : "600px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
           >
+            {/* Teks Sign Up 200px */}
             <h1 style={{
-              fontSize: "70px",
+              fontSize: isMobile ? "80px" : "200px",
               fontWeight: 700,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              margin: "0 0 12px 0",
+              letterSpacing: "-0.05em",
+              lineHeight: 1,
+              margin: "0 0 10px 0",
               textAlign: "left",
+              wordBreak: "break-word",
             }}>
-              Ketentuan Layanan
+              Sign Up
             </h1>
+
             <p style={{
               fontSize: "18px",
-              color: "#666",
+              color: "#666666",
               fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
+              marginBottom: "32px",
               textAlign: "left",
             }}>
-              Memahami hak dan kewajiban Anda
+              Create your account to join the Menuru community
             </p>
-            {lastUpdate && (
-              <p style={{
-                fontSize: "14px",
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                marginBottom: "8px",
-                textAlign: "left",
-              }}>
-                Terakhir diperbarui: {lastUpdate}
-              </p>
-            )}
-            {authorName && (
-              <p style={{
-                fontSize: "14px",
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                marginBottom: "32px",
-                textAlign: "left",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}>
-                <span>Author by</span>
-                <span style={{ fontWeight: 600 }}>{authorName}</span>
-                <span style={{ fontSize: "12px", color: "#666" }}>({authorEmail})</span>
-              </p>
-            )}
-          </motion.div>
 
-          {/* Daftar Ketentuan - tanpa bg, tanpa border box */}
-          <div style={{
-            marginTop: "8px",
-          }}>
-            {termsData.map((item, index) => (
-              <TermsSection
-                key={item.id}
-                title={item.title}
-                content={item.content}
-                isOpen={openSections.includes(index)}
-                onToggle={() => toggleSection(index)}
-                index={index}
-              />
-            ))}
-          </div>
+            {/* Error Message */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    backgroundColor: "rgba(239,68,68,0.1)",
+                    border: "1px solid rgba(239,68,68,0.3)",
+                    borderRadius: "8px",
+                    padding: "12px 16px",
+                    marginBottom: "16px",
+                    color: "#ef4444",
+                    fontSize: "14px",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Admin Edit */}
-          {isAdmin && (
-            <motion.div
+            {/* Form */}
+            <motion.form
+              onSubmit={handleSignUp}
+              style={{ width: "100%" }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              style={{
-                marginTop: "40px",
-                padding: "20px 0",
-                borderTop: "1px solid #e8e8e8",
-              }}
+              transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <h3 style={{
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+                style={{
+                  width: "100%",
+                  padding: "16px 20px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontFamily: FONT_FAMILY,
+                  background: "#ffffff",
+                  color: "#000000",
+                  outline: "none",
+                  marginBottom: "16px",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+              />
+              
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                style={{
+                  width: "100%",
+                  padding: "16px 20px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontFamily: FONT_FAMILY,
+                  background: "#ffffff",
+                  color: "#000000",
+                  outline: "none",
+                  marginBottom: "16px",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+              />
+
+              {/* Password dengan icon mata */}
+              <div style={{
+                position: "relative",
                 marginBottom: "16px",
               }}>
-                Edit Ketentuan (Admin)
-              </h3>
-              {editingSection !== null ? (
-                <div>
-                  <div style={{
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password (min. 6 characters)"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  minLength={6}
+                  style={{
+                    width: "100%",
+                    padding: "16px 50px 16px 20px",
+                    border: "2px solid #e8e8e8",
+                    borderRadius: "12px",
                     fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    marginBottom: "8px",
-                  }}>
-                    {termsData[editingSection].title}
-                  </div>
-                  <textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    style={{
-                      width: "100%",
-                      minHeight: "150px",
-                      padding: "14px 18px",
-                      border: "2px solid #0D3CFC",
-                      borderRadius: "12px",
-                      fontSize: "16px",
-                      fontFamily: FONT_FAMILY,
-                      outline: "none",
-                      resize: "vertical",
-                      color: "#333",
-                      background: "#fafafa",
-                    }}
-                  />
-                  <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleSaveEdit(editingSection)}
-                      style={{
-                        padding: "10px 28px",
-                        backgroundColor: "#0D3CFC",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                        transition: "background 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0a2fc9"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#0D3CFC"}
-                    >
-                      Simpan
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setEditingSection(null)}
-                      style={{
-                        padding: "10px 28px",
-                        backgroundColor: "transparent",
-                        color: "#666",
-                        border: "1px solid #ddd",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Batal
-                    </motion.button>
-                  </div>
-                </div>
-              ) : (
+                    background: "#ffffff",
+                    color: "#000000",
+                    outline: "none",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "14px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#999",
+                    padding: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <EyeIcon open={showPassword} />
+                </button>
+              </div>
+
+              {/* ===== KETENTUAN LAYANAN ===== */}
+              <div style={{ marginBottom: "16px" }}>
                 <div style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
+                  alignItems: "center",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  marginBottom: "8px",
                 }}>
-                  {termsData.map((item, index) => (
-                    <div
-                      key={item.id}
+                  <button
+                    type="button"
+                    onClick={() => setIsTermsOpen(!isTermsOpen)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "22px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      padding: "4px 0",
+                      textDecoration: "underline",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span>Ketentuan Layanan Menuru</span>
+                    <span style={{
+                      fontSize: "20px",
+                      transform: isTermsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.3s ease",
+                      display: "inline-block",
+                    }}>
+                      ▼
+                    </span>
+                  </button>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingTerms(!isEditingTerms);
+                        setEditTermsContent(termsContent);
+                      }}
                       style={{
-                        display: "flex",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#0D3CFC",
+                        padding: "4px",
+                        display: "inline-flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        backgroundColor: "#f8f8f8",
                       }}
                     >
-                      <span style={{
-                        fontSize: "15px",
-                        color: "#333",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {item.title}
-                      </span>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleEdit(index)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#0D3CFC",
-                          cursor: "pointer",
-                          padding: "4px 8px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontSize: "13px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        <EditIcon size={16} />
-                        <span>Edit</span>
-                      </motion.button>
-                    </div>
-                  ))}
+                      <EditIcon size={18} />
+                    </button>
+                  )}
                 </div>
-              )}
-            </motion.div>
-          )}
 
-          {/* Tombol Submit - Verifikasi */}
-          {user && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              style={{
-                marginTop: "40px",
-                paddingTop: "30px",
-                borderTop: "1px solid #e8e8e8",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
+                {/* Area konten terms (expand/collapse) */}
+                <div
+                  ref={termsContentRef}
+                  style={{
+                    height: 0,
+                    overflow: 'hidden',
+                    opacity: 0,
+                  }}
+                >
+                  <div
+                    className="terms-content"
+                    style={{
+                      padding: "8px 0 12px 0",
+                      fontSize: "22px",
+                      color: "#333",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.8,
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {isEditingTerms ? (
+                      <div>
+                        <textarea
+                          value={editTermsContent}
+                          onChange={(e) => setEditTermsContent(e.target.value)}
+                          style={{
+                            width: "100%",
+                            minHeight: "300px",
+                            padding: "12px",
+                            fontSize: "18px",
+                            fontFamily: FONT_FAMILY,
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            outline: "none",
+                            color: "#333",
+                            backgroundColor: "#fafafa",
+                            resize: "vertical",
+                          }}
+                        />
+                        <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+                          <button
+                            onClick={saveTerms}
+                            style={{
+                              padding: "6px 20px",
+                              backgroundColor: "#0D3CFC",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "6px",
+                              fontSize: "14px",
+                              fontFamily: FONT_FAMILY,
+                              cursor: "pointer",
+                              fontWeight: 500,
+                            }}
+                          >
+                            Simpan Perubahan
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsEditingTerms(false);
+                              setEditTermsContent(termsContent);
+                            }}
+                            style={{
+                              padding: "6px 20px",
+                              backgroundColor: "transparent",
+                              color: "#666",
+                              border: "1px solid #ccc",
+                              borderRadius: "6px",
+                              fontSize: "14px",
+                              fontFamily: FONT_FAMILY,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: termsContent.replace(/\n/g, '<br/>') }} />
+                    )}
+                  </div>
+                </div>
+
+                {/* Checkbox persetujuan */}
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  fontSize: "16px",
+                  color: "#333",
+                  fontFamily: FONT_FAMILY,
+                  cursor: "pointer",
+                  padding: "4px 0",
+                  marginTop: "8px",
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      accentColor: "#0D3CFC",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                    }}
+                  />
+                  <span>
+                    Saya telah membaca dan menyetujui{" "}
+                    <span style={{ color: "#0D3CFC", fontWeight: 500 }}>Ketentuan Layanan</span>
+                  </span>
+                </label>
+              </div>
+
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleSubmit}
+                type="submit"
+                disabled={isLoading || !acceptedTerms}
                 style={{
-                  padding: "14px 48px",
-                  backgroundColor: "#0D3CFC",
+                  width: "100%",
+                  padding: "16px 20px",
+                  backgroundColor: (isLoading || !acceptedTerms) ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
                   borderRadius: "12px",
                   fontSize: "18px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "background 0.2s ease",
-                  boxShadow: "0 4px 20px rgba(13,60,252,0.3)",
+                  cursor: (isLoading || !acceptedTerms) ? "not-allowed" : "pointer",
+                  opacity: (isLoading || !acceptedTerms) ? 0.7 : 1,
+                  transition: "all 0.3s ease",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0a2fc9"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#0D3CFC"}
+                whileHover={(!isLoading && acceptedTerms) ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                whileTap={(!isLoading && acceptedTerms) ? { scale: 0.98 } : {}}
               >
-                Verifikasi Akun
+                {isLoading ? "Creating Account..." : "Get Started"}
               </motion.button>
-            </motion.div>
-          )}
-        </div>
+            </motion.form>
 
-        {/* Modal Verifikasi */}
-        <VerificationModal
-          isOpen={showVerification}
-          onClose={() => setShowVerification(false)}
-          onVerify={handleVerify}
-          email={user?.email || "email@example.com"}
-        />
+            {/* Link ke Sign In */}
+            <div style={{
+              textAlign: "center",
+              fontSize: "16px",
+              color: "#666666",
+              fontFamily: FONT_FAMILY,
+              marginTop: "16px",
+            }}>
+              Already have an account?{" "}
+              <Link
+                href="/signin"
+                style={{
+                  color: "#0D3CFC",
+                  textDecoration: "underline",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Sign in
+              </Link>
+            </div>
+
+            {/* Pusat Bantuan */}
+            <div style={{
+              textAlign: "center",
+              marginTop: "20px",
+              paddingTop: "20px",
+              borderTop: "1px solid #f0f0f0",
+            }}>
+              <Link
+                href="/pusat-bantuan"
+                style={{
+                  color: "#0D3CFC",
+                  fontSize: "15px",
+                  fontWeight: 500,
+                  fontFamily: FONT_FAMILY,
+                  textDecoration: "none",
+                  transition: "color 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+              >
+                <HelpDeskIcon size={18} />
+                <span>Pusat Bantuan</span>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* SISI KANAN: Kosong */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "power2.out" }}
+            style={{
+              flex: isMobile ? "0" : "1",
+              display: isMobile ? "none" : "block",
+            }}
+          />
+        </div>
       </div>
+
+      {/* ===== MODAL PIN SETUP ===== */}
+      <AnimatePresence>
+        {showPinModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(10px)",
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px",
+            }}
+            onClick={() => {}} // prevent close on backdrop
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              style={{
+                backgroundColor: "#ffffff",
+                borderRadius: "20px",
+                padding: "40px 32px",
+                maxWidth: "480px",
+                width: "100%",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {pinSuccess ? (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  style={{
+                    textAlign: "center",
+                    padding: "20px 0",
+                  }}
+                >
+                  <div style={{
+                    fontSize: "48px",
+                    marginBottom: "16px",
+                  }}>✅</div>
+                  <h2 style={{
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    margin: "0 0 8px 0",
+                  }}>
+                    PIN Berhasil Disimpan!
+                  </h2>
+                  <p style={{
+                    fontSize: "16px",
+                    color: "#666",
+                    fontFamily: FONT_FAMILY,
+                    margin: 0,
+                  }}>
+                    Mengalihkan ke halaman utama...
+                  </p>
+                </motion.div>
+              ) : (
+                <>
+                  <h2 style={{
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    margin: "0 0 8px 0",
+                    textAlign: "center",
+                  }}>
+                    🔒 Atur PIN Keamanan
+                  </h2>
+                  <p style={{
+                    fontSize: "16px",
+                    color: "#666",
+                    fontFamily: FONT_FAMILY,
+                    textAlign: "center",
+                    marginBottom: "24px",
+                  }}>
+                    Masukkan 6 digit angka untuk keamanan akun Anda
+                  </p>
+
+                  <div style={{
+                    display: "flex",
+                    gap: "12px",
+                    justifyContent: "center",
+                    marginBottom: "24px",
+                  }}>
+                    {pin.map((digit, index) => (
+                      <input
+                        key={index}
+                        id={`pin-${index}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handlePinChange(index, e.target.value)}
+                        onKeyDown={(e) => handlePinKeyDown(index, e)}
+                        className={`pin-input ${digit ? 'pin-input-filled' : ''}`}
+                        autoFocus={index === 0}
+                        style={{
+                          width: "48px",
+                          height: "56px",
+                          textAlign: "center",
+                          fontSize: "24px",
+                          fontWeight: 600,
+                          border: `2px solid ${digit ? '#0D3CFC' : '#e8e8e8'}`,
+                          borderRadius: "8px",
+                          outline: "none",
+                          transition: "all 0.2s ease",
+                          fontFamily: FONT_FAMILY,
+                          color: "#0D3CFC",
+                          backgroundColor: digit ? "rgba(13,60,252,0.04)" : "#ffffff",
+                          boxShadow: digit ? "0 0 0 3px rgba(13,60,252,0.1)" : "none",
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {pinError && (
+                    <p style={{
+                      color: "#ef4444",
+                      fontSize: "14px",
+                      fontFamily: FONT_FAMILY,
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}>
+                      {pinError}
+                    </p>
+                  )}
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handlePinSubmit}
+                    disabled={pin.some(d => d === '')}
+                    style={{
+                      width: "100%",
+                      padding: "14px",
+                      backgroundColor: pin.some(d => d === '') ? "#ccc" : "#0D3CFC",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "12px",
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      fontFamily: FONT_FAMILY,
+                      cursor: pin.some(d => d === '') ? "not-allowed" : "pointer",
+                      opacity: pin.some(d => d === '') ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    Simpan PIN
+                  </motion.button>
+
+                  <button
+                    onClick={() => {
+                      // Skip PIN setup (optional)
+                      setShowPinModal(false);
+                      router.push('/');
+                    }}
+                    style={{
+                      display: "block",
+                      margin: "12px auto 0",
+                      background: "none",
+                      border: "none",
+                      color: "#999",
+                      fontSize: "14px",
+                      fontFamily: FONT_FAMILY,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Lewati (tidak disarankan)
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
