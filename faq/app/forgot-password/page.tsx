@@ -24,6 +24,7 @@ import {
   onSnapshot,
   orderBy,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import gsap from 'gsap';
 
@@ -128,6 +129,22 @@ const searchRollingTexts = [
   "Tentang Pusat bantuan"
 ];
 
+// ===== TICKET INTERFACE =====
+interface Ticket {
+  id: string;
+  userId: string | null;
+  userName: string;
+  userEmail: string;
+  topic: string;
+  status: 'waiting' | 'active' | 'resolved' | 'closed';
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  detail?: string;
+  agentId?: string;
+  agentName?: string;
+}
+
 // ===== LIVE CHAT AGENT COMPONENT (GUEST VERSION) =====
 interface LiveChatMessage {
   id: string;
@@ -139,15 +156,11 @@ interface LiveChatMessage {
 }
 
 const LiveChatAgentGuest = ({ 
-  ticketId, 
-  userName, 
-  userEmail, 
+  ticket, 
   onClose,
   onResolved,
 }: { 
-  ticketId: string; 
-  userName: string; 
-  userEmail: string; 
+  ticket: Ticket; 
   onClose: () => void;
   onResolved: () => void;
 }) => {
@@ -155,8 +168,7 @@ const LiveChatAgentGuest = ({
   const [messageText, setMessageText] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
   const [agentName, setAgentName] = useState(AGENT_NAME);
-  const [ticketStatus, setTicketStatus] = useState<string>("waiting");
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [ticketStatus, setTicketStatus] = useState<string>(ticket.status || "waiting");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Subscribe agent online status
@@ -176,26 +188,25 @@ const LiveChatAgentGuest = ({
 
   // Subscribe ticket status
   useEffect(() => {
-    if (!db || !ticketId) return;
-    const ticketRef = doc(db, "livechat_tickets", ticketId);
+    if (!db || !ticket.id) return;
+    const ticketRef = doc(db, "livechat_tickets", ticket.id);
     const unsubscribe = onSnapshot(ticketRef, (doc) => {
       if (doc.exists()) {
         const data = doc.data();
         setTicketStatus(data.status || "waiting");
-        // Jika resolved, panggil onResolved
         if (data.status === "resolved" || data.status === "closed") {
           onResolved();
         }
       }
     });
     return () => unsubscribe();
-  }, [ticketId, onResolved]);
+  }, [ticket.id, onResolved]);
 
   // Subscribe messages
   useEffect(() => {
-    if (!db || !ticketId) return;
+    if (!db || !ticket.id) return;
     const q = query(
-      collection(db, "livechat_tickets", ticketId, "messages"),
+      collection(db, "livechat_tickets", ticket.id, "messages"),
       orderBy("timestamp", "asc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -209,20 +220,20 @@ const LiveChatAgentGuest = ({
       }, 100);
     });
     return () => unsubscribe();
-  }, [ticketId]);
+  }, [ticket.id]);
 
   // Send message
   const sendMessage = async () => {
-    if (!db || !ticketId || !messageText.trim()) return;
+    if (!db || !ticket.id || !messageText.trim()) return;
     if (ticketStatus === "resolved" || ticketStatus === "closed") {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
     }
     try {
-      const ticketRef = doc(db, "livechat_tickets", ticketId);
-      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
-        senderId: "guest_" + ticketId,
-        senderName: userName || "Pengguna",
+      const ticketRef = doc(db, "livechat_tickets", ticket.id);
+      await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
+        senderId: "guest_" + ticket.id,
+        senderName: ticket.userName || "Pengguna",
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
@@ -248,9 +259,9 @@ const LiveChatAgentGuest = ({
 
   return (
     <div style={{
-      marginTop: "40px",
+      marginTop: "24px",
       borderTop: "1px solid #e8e8e8",
-      paddingTop: "40px",
+      paddingTop: "24px",
       width: "100%",
       maxWidth: "700px",
     }}>
@@ -258,11 +269,11 @@ const LiveChatAgentGuest = ({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "20px",
+        marginBottom: "16px",
       }}>
         <div>
           <h3 style={{
-            fontSize: "24px",
+            fontSize: "20px",
             fontWeight: 600,
             color: "#0D3CFC",
             fontFamily: FONT_FAMILY,
@@ -271,13 +282,14 @@ const LiveChatAgentGuest = ({
             Live Chat Agent
           </h3>
           <div style={{
-            fontSize: "14px",
+            fontSize: "13px",
             color: "#666",
             fontFamily: FONT_FAMILY,
             marginTop: "2px",
             display: "flex",
             alignItems: "center",
             gap: "8px",
+            flexWrap: "wrap",
           }}>
             <span style={{
               display: "inline-block",
@@ -295,7 +307,7 @@ const LiveChatAgentGuest = ({
               <span style={{
                 backgroundColor: "#d1fae5",
                 color: "#065f46",
-                fontSize: "10px",
+                fontSize: "9px",
                 fontWeight: 600,
                 padding: "1px 10px",
                 borderRadius: "12px",
@@ -303,6 +315,10 @@ const LiveChatAgentGuest = ({
               }}>
                 Agent
               </span>
+            </span>
+            <span style={{ color: "#ccc" }}>•</span>
+            <span style={{ fontSize: "12px", color: "#999" }}>
+              {ticket.topic}
             </span>
             {isResolved && (
               <span style={{
@@ -336,14 +352,14 @@ const LiveChatAgentGuest = ({
         backgroundColor: "#f9f9f9",
         borderRadius: "12px",
         border: "1px solid #e8e8e8",
-        height: "400px",
+        height: "360px",
         display: "flex",
         flexDirection: "column",
       }}>
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "16px",
+          padding: "14px",
           display: "flex",
           flexDirection: "column",
           gap: "6px",
@@ -360,14 +376,14 @@ const LiveChatAgentGuest = ({
             </div>
           ) : (
             messages.map((msg) => {
-              const isMine = msg.senderId === "guest_" + ticketId;
+              const isMine = msg.senderId === "guest_" + ticket.id;
               return (
                 <div
                   key={msg.id}
                   style={{
                     alignSelf: isMine ? "flex-end" : "flex-start",
                     maxWidth: "75%",
-                    padding: "10px 14px",
+                    padding: "8px 12px",
                     borderRadius: "12px",
                     backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                     color: isMine ? "#fff" : "#000",
@@ -417,7 +433,7 @@ const LiveChatAgentGuest = ({
               textAlign: "center",
               color: "#6b7280",
               fontSize: "14px",
-              padding: "20px",
+              padding: "16px",
               fontFamily: FONT_FAMILY,
               borderTop: "1px solid #e8e8e8",
               marginTop: "8px",
@@ -429,7 +445,7 @@ const LiveChatAgentGuest = ({
         </div>
         {!isResolved && (
           <div style={{
-            padding: "12px 16px",
+            padding: "10px 14px",
             borderTop: "1px solid #e8e8e8",
             display: "flex",
             gap: "8px",
@@ -448,7 +464,7 @@ const LiveChatAgentGuest = ({
               placeholder="Ketik pesan..."
               style={{
                 flex: 1,
-                padding: "10px 14px",
+                padding: "8px 12px",
                 border: "1px solid #e8e8e8",
                 borderRadius: "8px",
                 fontSize: "14px",
@@ -460,7 +476,7 @@ const LiveChatAgentGuest = ({
               onClick={sendMessage}
               disabled={!messageText.trim()}
               style={{
-                padding: "10px 20px",
+                padding: "8px 16px",
                 backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
                 color: "#fff",
                 border: "none",
@@ -473,7 +489,7 @@ const LiveChatAgentGuest = ({
               }}
             >
               <span>Kirim</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
@@ -513,8 +529,10 @@ export default function ForgotPasswordPage() {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [ticketId, setTicketId] = useState("");
+  
+  // State untuk ticket
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showLiveChat, setShowLiveChat] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
 
@@ -600,6 +618,44 @@ export default function ForgotPasswordPage() {
     setSearchResults([]);
   }, [searchQuery]);
 
+  // ===== SUBSCRIBE TICKETS BY EMAIL (REAL-TIME) =====
+  useEffect(() => {
+    if (!db) return;
+    
+    // Subscribe semua ticket yang memiliki userEmail yang sama dengan formData.email
+    // atau userName yang sama dengan formData.name
+    let q;
+    if (formData.email) {
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userEmail", "==", formData.email),
+        orderBy("createdAt", "desc")
+      );
+    } else if (formData.name) {
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userName", "==", formData.name),
+        orderBy("createdAt", "desc")
+      );
+    } else {
+      return;
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((doc) => {
+        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
+      });
+      setTickets(ticketList);
+      
+      // Jika ada ticket yang statusnya resolved/closed, set isResolved
+      const hasResolved = ticketList.some(t => t.status === 'resolved' || t.status === 'closed');
+      setIsResolved(hasResolved);
+    });
+
+    return () => unsubscribe();
+  }, [formData.email, formData.name]);
+
   // ===== GSAP UNTUK PERNYATAAN PERSETUJUAN =====
   const toggleAgreement = () => {
     setShowAgreement(!showAgreement);
@@ -674,11 +730,25 @@ export default function ForgotPasswordPage() {
       };
 
       const docRef = await addDoc(collection(db, "livechat_tickets"), ticketData);
-      setTicketId(docRef.id);
-      setSuccess(true);
+      const newTicket = { id: docRef.id, ...ticketData } as Ticket;
+      setSelectedTicket(newTicket);
       setShowLiveChat(true);
       setIsResolved(false);
       setLoading(false);
+      
+      // Refresh tickets list
+      const q = query(
+        collection(db, "livechat_tickets"),
+        where("userEmail", "==", formData.email || ""),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const list: Ticket[] = [];
+      snap.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as Ticket);
+      });
+      setTickets(list);
+      
     } catch (err: any) {
       console.error("Error creating ticket:", err);
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
@@ -692,10 +762,10 @@ export default function ForgotPasswordPage() {
     setFormData({ email: "", name: "" });
     setAgreed(false);
     setError("");
-    setSuccess(false);
-    setTicketId("");
     setShowLiveChat(false);
     setIsResolved(false);
+    setSelectedTicket(null);
+    setTickets([]);
     setShowAgreement(false);
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
@@ -721,6 +791,11 @@ export default function ForgotPasswordPage() {
       </div>
     );
   }
+
+  // Cek apakah ada ticket berdasarkan email atau nama
+  const hasTickets = tickets.length > 0;
+  const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+  const resolvedTicket = tickets.find(t => t.status === 'resolved' || t.status === 'closed');
 
   return (
     <>
@@ -1276,7 +1351,7 @@ export default function ForgotPasswordPage() {
                 maxWidth: "900px",
               }}
             >
-              {!selectedOption && !success ? (
+              {!selectedOption && !showLiveChat && (
                 // ===== TAMPILAN AWAL: 3 OPSI =====
                 <>
                   <h1 style={{
@@ -1373,7 +1448,9 @@ export default function ForgotPasswordPage() {
                     </Link>
                   </div>
                 </>
-              ) : (
+              )}
+
+              {selectedOption && !showLiveChat && (
                 // ===== FORM TIKET =====
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
@@ -1700,7 +1777,7 @@ export default function ForgotPasswordPage() {
                   fontFamily: FONT_FAMILY,
                   marginTop: '4px',
                 }}>
-                  ID Tiket: <strong style={{ color: '#0D3CFC' }}>{ticketId}</strong>
+                  ID Tiket: <strong style={{ color: '#0D3CFC' }}>{selectedTicket?.id}</strong>
                 </p>
                 {isResolved && (
                   <p style={{
@@ -1714,16 +1791,16 @@ export default function ForgotPasswordPage() {
                 )}
               </div>
 
-              <LiveChatAgentGuest
-                ticketId={ticketId}
-                userName={formData.name || "Pengguna"}
-                userEmail={formData.email || "tidakada@email.com"}
-                onClose={() => {
-                  setShowLiveChat(false);
-                  resetForm();
-                }}
-                onResolved={handleResolved}
-              />
+              {selectedTicket && (
+                <LiveChatAgentGuest
+                  ticket={selectedTicket}
+                  onClose={() => {
+                    setShowLiveChat(false);
+                    resetForm();
+                  }}
+                  onResolved={handleResolved}
+                />
+              )}
 
               <div style={{
                 marginTop: '30px',
