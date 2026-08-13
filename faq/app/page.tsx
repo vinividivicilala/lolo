@@ -155,17 +155,17 @@ export default function HomePage(): React.JSX.Element {
       // Buka menu - animasi dari atas ke bawah
       if (menuOverlayRef.current) {
         gsap.fromTo(menuOverlayRef.current,
-          { y: -300, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }
+          { y: "-100%", opacity: 0 },
+          { y: "0%", opacity: 1, duration: 0.7, ease: "power2.out" }
         );
       }
     } else {
       // Tutup menu - animasi ke atas
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
-          y: -300,
+          y: "-100%",
           opacity: 0,
-          duration: 0.4,
+          duration: 0.5,
           ease: "power2.in"
         });
       }
@@ -458,7 +458,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay - FULL BLUE BG, KOSONG TANPA DESIGN */}
+        {/* Menu Overlay - FULL BLUE BG, animasi dari atas ke bawah */}
         {isMenuOpen && (
           <div
             ref={menuOverlayRef}
@@ -516,7 +516,7 @@ export default function HomePage(): React.JSX.Element {
               <CloseIcon />
             </div>
 
-            {/* Kosong - tidak ada design */}
+            {/* Kosong - hanya background biru */}
           </div>
         )}
 
