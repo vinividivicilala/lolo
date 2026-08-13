@@ -93,23 +93,33 @@ export default function HomePage(): React.JSX.Element {
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          position: "relative",
           fontFamily: FONT_FAMILY,
         }}
       >
-        <span
+        {/* ===== ONLY MENURU TITLE ON THE LEFT ===== */}
+        <div
           style={{
-            fontSize: "72px",
-            fontWeight: 700,
-            color: "#000000",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.03em",
+            position: "absolute",
+            top: "50%",
+            left: "60px",
+            transform: "translateY(-50%)",
+            zIndex: 15,
           }}
         >
-          Menuru
-        </span>
+          <span
+            style={{
+              fontSize: "72px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              background: "transparent",
+            }}
+          >
+            Menuru
+          </span>
+        </div>
       </div>
     </>
   );
