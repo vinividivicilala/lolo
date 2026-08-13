@@ -250,17 +250,17 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle di kanan atas, rata kanan, jarak 90px dari tepi kanan */}
+        {/* Subtitle di sisi kiri, rata kanan, 2 baris, menuju ke kanan dengan margin 90px */}
         <div
           ref={subtitleRef}
           className="subtitle"
           style={{
             position: "fixed",
-            top: "40px",
-            right: "90px",
+            top: "150px",
+            left: "40px",
+            right: "90px", // membuat container membentang hingga 90px dari kanan
             zIndex: 15,
-            textAlign: "right",
-            maxWidth: "50%",
+            textAlign: "right", // rata kanan
           }}
         >
           <p
@@ -275,7 +275,7 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: "pre-line",
             }}
           >
-            You can take notes, find ideas,<br />and donate money to those in need
+            {`You can take notes, find ideas,\nand donate money to those in need`}
           </p>
         </div>
 
@@ -307,9 +307,6 @@ export default function HomePage(): React.JSX.Element {
 
         /* Responsif */
         @media (max-width: 1400px) {
-          .title {
-            font-size: 40px !important;
-          }
           .subtitle p {
             font-size: 120px !important;
           }
@@ -318,27 +315,24 @@ export default function HomePage(): React.JSX.Element {
           .subtitle p {
             font-size: 80px !important;
           }
+          .subtitle {
+            top: 120px !important;
+          }
           .title {
             font-size: 36px !important;
-          }
-          .subtitle {
-            max-width: 60% !important;
-            right: 60px !important;
           }
         }
         @media (max-width: 768px) {
           .subtitle p {
             font-size: 50px !important;
           }
+          .subtitle {
+            top: 100px !important;
+            left: 20px !important;
+            right: 30px !important;
+          }
           .title {
             font-size: 28px !important;
-          }
-          .subtitle {
-            max-width: 70% !important;
-            right: 30px !important;
-            top: 80px !important;
-          }
-          .title {
             top: 20px !important;
             left: 20px !important;
           }
@@ -347,15 +341,13 @@ export default function HomePage(): React.JSX.Element {
           .subtitle p {
             font-size: 32px !important;
           }
+          .subtitle {
+            top: 80px !important;
+            left: 16px !important;
+            right: 16px !important;
+          }
           .title {
             font-size: 24px !important;
-          }
-          .subtitle {
-            max-width: 80% !important;
-            right: 16px !important;
-            top: 70px !important;
-          }
-          .title {
             top: 16px !important;
             left: 16px !important;
           }
