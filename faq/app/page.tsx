@@ -97,19 +97,18 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== ONLY MENURU TITLE ON THE LEFT ===== */}
+        {/* ===== MENURU TITLE - TOP LEFT ===== */}
         <div
           style={{
             position: "absolute",
-            top: "50%",
-            left: "60px",
-            transform: "translateY(-50%)",
+            top: "40px",
+            left: "40px",
             zIndex: 15,
           }}
         >
           <span
             style={{
-              fontSize: "72px",
+              fontSize: "48px",
               fontWeight: 700,
               color: "#000000",
               fontFamily: FONT_FAMILY,
