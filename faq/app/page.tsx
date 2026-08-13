@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import gsap from 'gsap';
 
 // Firebase Config
 const firebaseConfig = {
@@ -35,30 +36,134 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 export default function HomePage(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
+  const [showMain, setShowMain] = useState(false);
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const words = ["Shop", "Note"];
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
+  // Animasi teks berganti (Shop / Note)
+  useEffect(() => {
+    if (!textRef.current) return;
+    let interval: NodeJS.Timeout;
+    let tl: gsap.core.Timeline;
+
+    const animateText = () => {
+      tl = gsap.timeline({
+        onComplete: () => {
+          setCurrentWordIndex((prev) => (prev + 1) % words.length);
+        }
+      });
+      tl.to(textRef.current, {
+        opacity: 0,
+        y: -20,
+        duration: 0.4,
+        ease: "power2.out"
+      }).to(textRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        delay: 0.2
+      });
+    };
+
+    // Jalankan pertama kali setelah mount
+    const timeout = setTimeout(() => {
+      animateText();
+    }, 500);
+
+    interval = setInterval(() => {
+      animateText();
+    }, 2000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+      if (tl) tl.kill();
+    };
+  }, [words]);
+
+  // Efek fade out preloader setelah loading selesai
+  useEffect(() => {
+    if (!loading && preloaderRef.current) {
+      // Beri delay kecil agar animasi terlihat
+      setTimeout(() => {
+        gsap.to(preloaderRef.current, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setShowMain(true);
+          }
+        });
+      }, 500);
+    }
+  }, [loading]);
+
+  // Auth listener
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      setLoading(false);
+      // Set loading false setelah auth selesai, tapi kita tambah delay agar preloader terlihat
+      setTimeout(() => {
+        setLoading(false);
+      }, 1500);
     });
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
+  if (!showMain && loading) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#ffffff",
-        fontFamily: FONT_FAMILY,
-      }}>
-        <div style={{ fontSize: "18px", color: "#000", fontFamily: FONT_FAMILY }}>Loading...</div>
+      <div
+        ref={preloaderRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
+          {/* Kiri: MENURU biru 100px */}
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            MENURU
+          </span>
+          {/* Kanan: teks berganti Shop/Note hitam 50px */}
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+            }}
+          >
+            {words[currentWordIndex]}
+          </span>
+        </div>
       </div>
     );
   }
 
+  // Halaman utama setelah preloader hilang
   return (
     <>
       <Head>
