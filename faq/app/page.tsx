@@ -46,6 +46,7 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -188,7 +189,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -264,11 +265,58 @@ export default function HomePage(): React.JSX.Element {
               lineHeight: 1.2,
               margin: 0,
               padding: 0,
+              paddingBottom: "30px",
               whiteSpace: "pre-line",
             }}
           >
             {`You can take notes, find ideas,\nand donate money to those in need`}
           </p>
+        </div>
+
+        {/* Button / CTA - kotak border biru, tanpa panah */}
+        <div
+          ref={buttonRef}
+          className="cta-button"
+          style={{
+            position: "fixed",
+            top: "400px",
+            left: "40px",
+            zIndex: 15,
+            display: "inline-block",
+            border: "2px solid #0D3CFC",
+            borderRadius: "8px",
+            padding: "16px 40px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backgroundColor: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+            e.currentTarget.style.color = "#ffffff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#0D3CFC";
+          }}
+        >
+          <span
+            style={{
+              fontSize: "24px",
+              fontWeight: 500,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+              transition: "color 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#0D3CFC";
+            }}
+          >
+            Let's build now
+          </span>
         </div>
 
         <div style={{ height: "100vh" }} />
@@ -305,6 +353,13 @@ export default function HomePage(): React.JSX.Element {
           .title {
             font-size: 36px !important;
           }
+          .cta-button {
+            top: 350px !important;
+            padding: 14px 32px !important;
+          }
+          .cta-button span {
+            font-size: 20px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -319,6 +374,14 @@ export default function HomePage(): React.JSX.Element {
             top: 20px !important;
             left: 20px !important;
           }
+          .cta-button {
+            top: 280px !important;
+            left: 20px !important;
+            padding: 12px 24px !important;
+          }
+          .cta-button span {
+            font-size: 18px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -332,6 +395,14 @@ export default function HomePage(): React.JSX.Element {
             font-size: 22px !important;
             top: 16px !important;
             left: 16px !important;
+          }
+          .cta-button {
+            top: 220px !important;
+            left: 16px !important;
+            padding: 10px 20px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
           }
         }
       `}</style>
