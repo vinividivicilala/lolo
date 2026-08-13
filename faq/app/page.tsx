@@ -66,7 +66,6 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              // Inisialisasi animasi scroll setelah halaman muncul
               initScrollAnimations();
             }
           });
@@ -76,7 +75,6 @@ export default function HomePage(): React.JSX.Element {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    // 1. Muncul dari bawah (Shop)
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -84,7 +82,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "back.out(1.7)"
     })
     .to(textRef.current, { duration: 0.6 })
-    // 2. Ganti ke "Note"
     .to(textRef.current, {
       opacity: 0,
       y: -20,
@@ -103,7 +100,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "back.out(1.7)"
     })
     .to(textRef.current, { duration: 0.8 })
-    // 3. Hilang ke belakang
     .to(textRef.current, {
       scale: 0.3,
       opacity: 0,
@@ -119,7 +115,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initScrollAnimations = () => {
-    // Animasi judul: dari 48px ke 400px saat scroll
     if (titleRef.current) {
       gsap.to(titleRef.current, {
         fontSize: "400px",
@@ -136,7 +131,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Jika preloader masih aktif
   if (!showMain) {
     return (
       <div
@@ -186,7 +180,6 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // Halaman utama
   return (
     <>
       <Head>
@@ -222,7 +215,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* Judul di kiri atas */}
+        {/* Judul Menuru - kiri atas */}
         <div
           style={{
             position: "fixed",
@@ -250,17 +243,17 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle di sisi kiri, rata kanan, 2 baris, menuju ke kanan dengan margin 90px */}
+        {/* Subtitle - 2 baris, di sisi kiri di bawah judul, rata kanan, 60px dari kanan */}
         <div
           ref={subtitleRef}
           className="subtitle"
           style={{
             position: "fixed",
-            top: "150px",
+            top: "120px",
             left: "40px",
-            right: "90px", // membuat container membentang hingga 90px dari kanan
+            right: "60px",
             zIndex: 15,
-            textAlign: "right", // rata kanan
+            textAlign: "right",
           }}
         >
           <p
@@ -273,13 +266,13 @@ export default function HomePage(): React.JSX.Element {
               margin: 0,
               padding: 0,
               whiteSpace: "pre-line",
+              wordWrap: "break-word",
             }}
           >
             {`You can take notes, find ideas,\nand donate money to those in need`}
           </p>
         </div>
 
-        {/* Spacer untuk scroll */}
         <div style={{ height: "100vh" }} />
         <div
           style={{
@@ -295,7 +288,6 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx global>{`
-        /* Sembunyikan scrollbar di semua browser */
         body {
           overflow: hidden !important;
           -ms-overflow-style: none;
@@ -305,7 +297,6 @@ export default function HomePage(): React.JSX.Element {
           display: none;
         }
 
-        /* Responsif */
         @media (max-width: 1400px) {
           .subtitle p {
             font-size: 120px !important;
@@ -316,7 +307,7 @@ export default function HomePage(): React.JSX.Element {
             font-size: 80px !important;
           }
           .subtitle {
-            top: 120px !important;
+            top: 100px !important;
           }
           .title {
             font-size: 36px !important;
@@ -327,9 +318,9 @@ export default function HomePage(): React.JSX.Element {
             font-size: 50px !important;
           }
           .subtitle {
-            top: 100px !important;
+            top: 80px !important;
             left: 20px !important;
-            right: 30px !important;
+            right: 20px !important;
           }
           .title {
             font-size: 28px !important;
@@ -342,7 +333,7 @@ export default function HomePage(): React.JSX.Element {
             font-size: 32px !important;
           }
           .subtitle {
-            top: 80px !important;
+            top: 70px !important;
             left: 16px !important;
             right: 16px !important;
           }
