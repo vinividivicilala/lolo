@@ -38,73 +38,93 @@ export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const words = ["Shop", "Note"];
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Animasi teks berganti (Shop / Note) - modern Awwwards style
-  useEffect(() => {
-    if (!textRef.current) return;
-    let interval: NodeJS.Timeout;
-    let tl: gsap.core.Timeline;
-
-    const animateText = () => {
-      tl = gsap.timeline();
-      tl.to(textRef.current, {
-        opacity: 0,
-        y: -30,
-        scale: 0.8,
-        duration: 0.5,
-        ease: "power2.out"
-      }).to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-        delay: 0.2,
-        onComplete: () => {
-          setCurrentWordIndex((prev) => (prev + 1) % words.length);
-        }
-      });
-    };
-
-    // Jalankan pertama kali
-    const timeout = setTimeout(() => {
-      animateText();
-    }, 300);
-
-    interval = setInterval(() => {
-      animateText();
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(interval);
-      if (tl) tl.kill();
-    };
-  }, [words]);
-
-  // Auth listener - tunggu auth selesai, lalu beri delay agar preloader terlihat
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      // Setelah auth selesai, biarkan preloader berjalan selama 4 detik
-      // agar animasi pergantian teks terlihat beberapa kali
-      setTimeout(() => {
+      // Mulai animasi loading setelah auth selesai
+      startLoadingAnimation();
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const startLoadingAnimation = () => {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Setelah animasi selesai, fade out preloader dan tampilkan halaman
         if (preloaderRef.current) {
           gsap.to(preloaderRef.current, {
             opacity: 0,
-            duration: 0.8,
+            duration: 0.6,
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
             }
           });
         }
-      }, 4000);
+      }
     });
-    return () => unsubscribe();
-  }, []);
+
+    // Reset posisi awal teks dari bawah
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    // 1. Muncul dari bawah ke posisi tengah (efek spring)
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    });
+
+    // Tunggu sebentar
+    tl.to(textRef.current, {
+      duration: 0.5
+    });
+
+    // 2. Ganti teks ke "Note" dengan animasi fade
+    tl.to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) {
+          textRef.current.textContent = "Note";
+        }
+      }
+    });
+
+    tl.to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    });
+
+    // Tunggu sebentar
+    tl.to(textRef.current, {
+      duration: 0.8
+    });
+
+    // 3. Hilang ke belakang (zoom out + fade)
+    tl.to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    });
+
+    // 4. Efek keseluruhan preloader mundur ke belakang (opsional)
+    tl.to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
 
   // Jika preloader masih muncul
   if (!showMain) {
@@ -125,8 +145,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-          {/* Kiri: MENURU biru 100px */}
+        <div ref={containerRef} style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          {/* Kiri: MENURU biru 100px - tetap statis */}
           <span
             style={{
               fontSize: "100px",
@@ -138,7 +158,7 @@ export default function HomePage(): React.JSX.Element {
           >
             MENURU
           </span>
-          {/* Kanan: teks berganti Shop/Note hitam 50px */}
+          {/* Kanan: teks berganti Shop/Note */}
           <span
             ref={textRef}
             style={{
@@ -148,9 +168,10 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.02em",
               display: "inline-block",
+              willChange: "transform, opacity",
             }}
           >
-            {words[currentWordIndex]}
+            Shop
           </span>
         </div>
       </div>
