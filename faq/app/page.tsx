@@ -47,14 +47,23 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -137,6 +146,30 @@ export default function HomePage(): React.JSX.Element {
           invalidateOnRefresh: true,
         }
       });
+    }
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen) {
+      // Buka menu dengan animasi GSAP
+      if (menuOverlayRef.current) {
+        gsap.fromTo(menuOverlayRef.current,
+          { opacity: 0, scale: 0.95, y: -20 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    } else {
+      // Tutup menu dengan animasi GSAP
+      if (menuOverlayRef.current) {
+        gsap.to(menuOverlayRef.current, {
+          opacity: 0,
+          scale: 0.95,
+          y: -20,
+          duration: 0.3,
+          ease: "power2.in"
+        });
+      }
     }
   };
 
@@ -325,7 +358,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Kotak border kecil dengan panah North East Arrow - tanpa warna full */}
+        {/* Kotak border kecil dengan panah North East Arrow */}
         <div
           ref={arrowRef}
           className="arrow-box"
@@ -358,6 +391,172 @@ export default function HomePage(): React.JSX.Element {
         >
           <NorthEastArrow size={24} />
         </div>
+
+        {/* Menu Button - "+ Menu" di kanan atas */}
+        <div
+          ref={menuButtonRef}
+          className="menu-button"
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            zIndex: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            padding: "8px 16px",
+            borderRadius: "8px",
+          }}
+          onClick={toggleMenu}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.06)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
+          <span
+            style={{
+              fontSize: "28px",
+              fontWeight: 300,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              transition: "transform 0.3s ease",
+              transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+            }}
+          >
+            +
+          </span>
+          <span
+            style={{
+              fontSize: "20px",
+              fontWeight: 500,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Menu
+          </span>
+        </div>
+
+        {/* Menu Overlay - Full blue background, muncul dengan GSAP */}
+        {isMenuOpen && (
+          <div
+            ref={menuOverlayRef}
+            className="menu-overlay"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#0D3CFC",
+              zIndex: 19,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "40px",
+            }}
+          >
+            {/* Close button inside menu */}
+            <div
+              style={{
+                position: "absolute",
+                top: "40px",
+                right: "40px",
+                cursor: "pointer",
+                color: "#ffffff",
+                transition: "all 0.3s ease",
+                padding: "8px",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+              onClick={toggleMenu}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 400,
+                  color: "#ffffff",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Close
+              </span>
+              <CloseIcon />
+            </div>
+
+            {/* Menu items */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "30px",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "72px",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
+                  margin: 0,
+                }}
+              >
+                Menu
+              </h2>
+              <nav
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                {["Home", "About", "Services", "Contact"].map((item) => (
+                  <a
+                    key={item}
+                    href="#"
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: 400,
+                      color: "rgba(255,255,255,0.8)",
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#ffffff";
+                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </div>
+        )}
 
         <div style={{ height: "100vh" }} />
         <div
@@ -407,6 +606,13 @@ export default function HomePage(): React.JSX.Element {
             height: 44px !important;
             padding: 8px !important;
           }
+          .menu-button {
+            top: 30px !important;
+            right: 30px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 18px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -440,6 +646,22 @@ export default function HomePage(): React.JSX.Element {
             width: 18px !important;
             height: 18px !important;
           }
+          .menu-button {
+            top: 20px !important;
+            right: 20px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 16px !important;
+          }
+          .menu-button span:first-child {
+            font-size: 24px !important;
+          }
+          .menu-overlay h2 {
+            font-size: 48px !important;
+          }
+          .menu-overlay nav a {
+            font-size: 24px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -472,6 +694,25 @@ export default function HomePage(): React.JSX.Element {
           .arrow-box svg {
             width: 14px !important;
             height: 14px !important;
+          }
+          .menu-button {
+            top: 16px !important;
+            right: 16px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 14px !important;
+          }
+          .menu-button span:first-child {
+            font-size: 20px !important;
+          }
+          .menu-overlay h2 {
+            font-size: 36px !important;
+          }
+          .menu-overlay nav a {
+            font-size: 20px !important;
+          }
+          .menu-overlay {
+            padding: 20px !important;
           }
         }
       `}</style>
