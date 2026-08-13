@@ -6,7 +6,7 @@ import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
-import Lenis from 'lenis';
+import Lenis from '@studio-freight/lenis'; // ✅ perbaikan import Lenis dari studio freight
 import {
   getAuth,
   onAuthStateChanged,
