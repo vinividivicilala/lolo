@@ -123,7 +123,7 @@ export default function HomePage(): React.JSX.Element {
     if (titleRef.current) {
       gsap.to(titleRef.current, {
         fontSize: "400px",
-        fontWeight: 400, // tidak tebal saat besar
+        fontWeight: 400,
         ease: "none",
         scrollTrigger: {
           trigger: "body",
@@ -222,20 +222,15 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* KIRI: Judul + Subtitle */}
+        {/* Judul di kiri atas */}
         <div
           style={{
             position: "fixed",
             top: "40px",
             left: "40px",
             zIndex: 15,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end", // right-align text di dalam container
-            maxWidth: "60%",
           }}
         >
-          {/* Judul "Menuru" */}
           <h1
             ref={titleRef}
             className="title"
@@ -249,36 +244,39 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               transformOrigin: "left center",
-              alignSelf: "flex-start", // judul tetap left-aligned
             }}
           >
             Menuru
           </h1>
+        </div>
 
-          {/* Subtitle 2 baris - di bawah judul, rata kanan */}
-          <div
-            ref={subtitleRef}
+        {/* Subtitle di kanan atas, rata kanan, jarak 90px dari tepi kanan */}
+        <div
+          ref={subtitleRef}
+          className="subtitle"
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "90px",
+            zIndex: 15,
+            textAlign: "right",
+            maxWidth: "50%",
+          }}
+        >
+          <p
             style={{
-              marginTop: "20px",
-              textAlign: "right",
-              width: "100%",
+              fontSize: "150px",
+              fontWeight: 400,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.1,
+              margin: 0,
+              padding: 0,
+              whiteSpace: "pre-line",
             }}
           >
-            <p
-              style={{
-                fontSize: "150px",
-                fontWeight: 400,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.1,
-                margin: 0,
-                padding: 0,
-                whiteSpace: "pre-line",
-              }}
-            >
-              You can take notes,<br />find ideas, and donate<br />money to those in need
-            </p>
-          </div>
+            You can take notes, find ideas,<br />and donate money to those in need
+          </p>
         </div>
 
         {/* Spacer untuk scroll */}
@@ -312,45 +310,54 @@ export default function HomePage(): React.JSX.Element {
           .title {
             font-size: 40px !important;
           }
-          [ref="subtitleRef"] p {
+          .subtitle p {
             font-size: 120px !important;
           }
         }
         @media (max-width: 1024px) {
-          [ref="subtitleRef"] p {
+          .subtitle p {
             font-size: 80px !important;
           }
           .title {
             font-size: 36px !important;
           }
+          .subtitle {
+            max-width: 60% !important;
+            right: 60px !important;
+          }
         }
         @media (max-width: 768px) {
-          [ref="subtitleRef"] p {
+          .subtitle p {
             font-size: 50px !important;
-          }
-          [ref="subtitleRef"] {
-            margin-top: 10px !important;
           }
           .title {
             font-size: 28px !important;
           }
-          [style*="position: fixed"][style*="top: 40px"][style*="left: 40px"] {
+          .subtitle {
+            max-width: 70% !important;
+            right: 30px !important;
+            top: 80px !important;
+          }
+          .title {
             top: 20px !important;
             left: 20px !important;
-            max-width: 80% !important;
           }
         }
         @media (max-width: 480px) {
-          [ref="subtitleRef"] p {
+          .subtitle p {
             font-size: 32px !important;
           }
           .title {
             font-size: 24px !important;
           }
-          [style*="position: fixed"][style*="top: 40px"][style*="left: 40px"] {
+          .subtitle {
+            max-width: 80% !important;
+            right: 16px !important;
+            top: 70px !important;
+          }
+          .title {
             top: 16px !important;
             left: 16px !important;
-            max-width: 90% !important;
           }
         }
       `}</style>
