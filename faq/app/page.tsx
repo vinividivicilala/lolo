@@ -63,9 +63,7 @@ export default function HomePage(): React.JSX.Element {
   const buttonRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
-  const menuTextRef = useRef<HTMLSpanElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const menuContentRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -157,7 +155,7 @@ export default function HomePage(): React.JSX.Element {
       // Buka menu - animasi dari atas ke bawah
       if (menuOverlayRef.current) {
         gsap.fromTo(menuOverlayRef.current,
-          { y: -200, opacity: 0 },
+          { y: -300, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       }
@@ -165,7 +163,7 @@ export default function HomePage(): React.JSX.Element {
       // Tutup menu - animasi ke atas
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
-          y: -200,
+          y: -300,
           opacity: 0,
           duration: 0.4,
           ease: "power2.in"
@@ -440,7 +438,6 @@ export default function HomePage(): React.JSX.Element {
             +
           </span>
           <span
-            ref={menuTextRef}
             style={{
               fontSize: "40px",
               fontWeight: 500,
@@ -461,7 +458,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay - FULL BLUE BG, muncul dari atas ke bawah */}
+        {/* Menu Overlay - FULL BLUE BG, KOSONG TANPA DESIGN */}
         {isMenuOpen && (
           <div
             ref={menuOverlayRef}
@@ -478,7 +475,6 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "40px",
             }}
           >
             {/* Close button */}
@@ -520,68 +516,7 @@ export default function HomePage(): React.JSX.Element {
               <CloseIcon />
             </div>
 
-            {/* Menu items - full blue bg */}
-            <div
-              ref={menuContentRef}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "30px",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "72px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.03em",
-                  margin: 0,
-                }}
-              >
-                Menu
-              </h2>
-              <nav
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "16px",
-                }}
-              >
-                {["Home", "About", "Services", "Contact"].map((item, index) => (
-                  <a
-                    key={item}
-                    href="#"
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: 400,
-                      color: "#ffffff",
-                      fontFamily: FONT_FAMILY,
-                      textDecoration: "none",
-                      padding: "8px 24px",
-                      borderRadius: "8px",
-                      opacity: 0.8,
-                      transition: "all 0.3s ease",
-                      border: "2px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-                      e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "0.8";
-                      e.currentTarget.style.borderColor = "transparent";
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    {item}
-                  </a>
-                ))}
-              </nav>
-            </div>
+            {/* Kosong - tidak ada design */}
           </div>
         )}
 
@@ -682,12 +617,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 28px !important;
           }
-          .menu-overlay h2 {
-            font-size: 48px !important;
-          }
-          .menu-overlay nav a {
-            font-size: 24px !important;
-          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -728,15 +657,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 24px !important;
-          }
-          .menu-overlay h2 {
-            font-size: 36px !important;
-          }
-          .menu-overlay nav a {
-            font-size: 20px !important;
-          }
-          .menu-overlay {
-            padding: 20px !important;
           }
           .menu-overlay [style*="position: absolute"][style*="top: 40px"] {
             top: 20px !important;
