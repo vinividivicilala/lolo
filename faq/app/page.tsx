@@ -188,7 +188,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -215,7 +215,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* Judul di kiri atas */}
+        {/* Judul di kiri atas - berubah ukuran saat scroll */}
         <div
           style={{
             position: "fixed",
@@ -243,7 +243,7 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle - 2 baris, di bawah judul, menjorok ke kanan, text align right */}
+        {/* Subtitle - 2 baris, di bawah judul, rata kiri, warna biru */}
         <div
           ref={subtitleRef}
           className="subtitle"
@@ -251,16 +251,15 @@ export default function HomePage(): React.JSX.Element {
             position: "fixed",
             top: "150px",
             left: "40px",
-            right: "40px",
             zIndex: 15,
-            textAlign: "right",
+            textAlign: "left",
           }}
         >
           <p
             style={{
               fontSize: "60px",
               fontWeight: 400,
-              color: "#000000",
+              color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               lineHeight: 1.2,
               margin: 0,
@@ -314,7 +313,6 @@ export default function HomePage(): React.JSX.Element {
           .subtitle {
             top: 110px !important;
             left: 20px !important;
-            right: 20px !important;
           }
           .title {
             font-size: 28px !important;
@@ -329,7 +327,6 @@ export default function HomePage(): React.JSX.Element {
           .subtitle {
             top: 90px !important;
             left: 16px !important;
-            right: 16px !important;
           }
           .title {
             font-size: 22px !important;
