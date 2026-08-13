@@ -46,6 +46,7 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -243,7 +244,7 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle 2 baris di sisi kiri, rata kanan, ukuran 60px */}
+        {/* Subtitle - 2 baris, di sisi kiri, menjorok ke kanan, rata kanan, ukuran 60px */}
         <div
           ref={subtitleRef}
           className="subtitle"
@@ -268,7 +269,9 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: "pre-line",
             }}
           >
-            {`You can take notes, find ideas,\nand donate money to those in need`}
+            <span style={{ color: "#0D3CFC" }}>You can take notes, find ideas,</span>
+            <br />
+            <span style={{ color: "#0D3CFC" }}>and donate money to those in need</span>
           </p>
         </div>
 
