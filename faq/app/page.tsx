@@ -47,12 +47,6 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const CloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -150,41 +144,29 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
     if (!isMenuOpen) {
-      // Buka menu - animasi bergulir dari atas ke bawah (seperti tirai turun)
+      // BUKA MENU - seperti tirai turun dari atas
+      setIsMenuOpen(true);
       if (menuOverlayRef.current) {
-        // Set posisi awal di atas layar
-        gsap.set(menuOverlayRef.current, { 
-          y: "-100%", 
-          opacity: 0,
-          scaleY: 0,
-          transformOrigin: "top center"
-        });
-        // Animasi bergulir ke bawah
-        gsap.to(menuOverlayRef.current, {
-          y: "0%",
-          opacity: 1,
-          scaleY: 1,
-          duration: 0.8,
-          ease: "power2.out"
-        });
+        gsap.fromTo(menuOverlayRef.current,
+          { y: "-100%", opacity: 0 },
+          { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
+        );
       }
     } else {
-      // Tutup menu - animasi bergulir ke atas (seperti tirai naik)
+      // TUTUP MENU - seperti tirai naik ke atas
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
           y: "-100%",
           opacity: 0,
-          scaleY: 0,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.in",
-          transformOrigin: "top center",
           onComplete: () => {
-            // Reset setelah animasi selesai
-            gsap.set(menuOverlayRef.current, { scaleY: 1 });
+            setIsMenuOpen(false);
           }
         });
+      } else {
+        setIsMenuOpen(false);
       }
     }
   };
@@ -475,68 +457,28 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay - FULL BLUE BG, animasi bergulir dari atas ke bawah (seperti tirai) */}
-        {isMenuOpen && (
-          <div
-            ref={menuOverlayRef}
-            className="menu-overlay"
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "#0D3CFC",
-              zIndex: 19,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              transformOrigin: "top center",
-            }}
-          >
-            {/* Close button */}
-            <div
-              style={{
-                position: "absolute",
-                top: "40px",
-                right: "40px",
-                cursor: "pointer",
-                color: "#ffffff",
-                padding: "8px 16px",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid rgba(255,255,255,0.3)",
-                transition: "all 0.3s ease",
-              }}
-              onClick={toggleMenu}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-                e.currentTarget.style.borderColor = "#ffffff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 400,
-                  color: "#ffffff",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Close
-              </span>
-              <CloseIcon />
-            </div>
-
-            {/* Kosong - hanya background biru */}
-          </div>
-        )}
+        {/* Menu Overlay - FULL BLUE BG, animasi tirai dari atas ke bawah */}
+        <div
+          ref={menuOverlayRef}
+          className="menu-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#0D3CFC",
+            zIndex: 19,
+            display: isMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: "translateY(-100%)",
+            opacity: 0,
+          }}
+        >
+          {/* Kosong - hanya background biru */}
+        </div>
 
         <div style={{ height: "100vh" }} />
         <div
@@ -675,14 +617,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 24px !important;
-          }
-          .menu-overlay [style*="position: absolute"][style*="top: 40px"] {
-            top: 20px !important;
-            right: 20px !important;
-            padding: 4px 12px !important;
-          }
-          .menu-overlay [style*="position: absolute"][style*="top: 40px"] span {
-            font-size: 16px !important;
           }
         }
       `}</style>
