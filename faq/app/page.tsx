@@ -6,18 +6,19 @@ import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
-import { 
-  getAuth, 
-  onAuthStateChanged, 
+import Lenis from 'lenis';
+import {
+  getAuth,
+  onAuthStateChanged,
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
   onSnapshot,
   serverTimestamp,
   doc,
@@ -299,7 +300,7 @@ const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
 // Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       <svg
@@ -380,7 +381,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
   const [showTooltip, setShowTooltip] = useState(false);
   const pulseRef = useRef<HTMLDivElement>(null);
   const color = online ? "#0D3CFC" : "#999";
-  
+
   useEffect(() => {
     if (online && pulseRef.current) {
       gsap.to(pulseRef.current, {
@@ -393,7 +394,7 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
       });
     }
   }, [online]);
-  
+
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
       <div
@@ -464,9 +465,9 @@ const OnlineIndicator = ({ online, lastSeen }: { online: boolean; lastSeen?: str
 // Read Status with bright color
 const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
   if (!isMine) return null;
-  
+
   const status = (() => {
     if (msg.senderId !== auth?.currentUser?.uid) return null;
     if (msg.read && msg.readAt) {
@@ -474,12 +475,12 @@ const ReadStatus = ({ msg, isMine }: { msg: Message; isMine: boolean }) => {
     }
     return { icon: "✓", color: "#FFD700", label: "Terkirim", bg: "rgba(255,215,0,0.15)" };
   })();
-  
+
   if (!status) return null;
-  
+
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <span 
+      <span
         style={{
           fontSize: "11px",
           color: status.color,
@@ -533,33 +534,33 @@ const StoriesSection = ({ userEmail, onImageClick }: { userEmail: string; onImag
 
   return (
     <div style={{ width: "100%", marginBottom: "16px" }}>
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
         marginBottom: "8px",
         borderBottom: "1px solid #f0f0f0",
         paddingBottom: "6px",
       }}>
-        <span style={{ 
-          fontSize: "14px", 
-          fontWeight: 600, 
-          color: "#000000", 
+        <span style={{
+          fontSize: "14px",
+          fontWeight: 600,
+          color: "#000000",
           fontFamily: FONT_FAMILY,
         }}>
           Photos
         </span>
-        <span style={{ 
-          fontSize: "11px", 
-          color: "#999", 
+        <span style={{
+          fontSize: "11px",
+          color: "#999",
           fontFamily: FONT_FAMILY,
         }}>
           {storyImages.length} photos
         </span>
       </div>
-      <div style={{ 
-        display: "grid", 
-        gridTemplateColumns: "repeat(3, 1fr)", 
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
         gap: "6px",
       }}>
         {storyImages.map((num) => (
@@ -658,10 +659,10 @@ export default function HomePage(): React.JSX.Element {
 
   // ROLLING TEXT SEARCH
   const searchRollingTexts = [
-    "Tentang Note", 
-    "Tentang Donasi", 
-    "Tentang Blog", 
-    "Tentang Shop", 
+    "Tentang Note",
+    "Tentang Donasi",
+    "Tentang Blog",
+    "Tentang Shop",
     "Tentang Pusat bantuan"
   ];
   const [rollingIndex, setRollingIndex] = useState(0);
@@ -671,6 +672,29 @@ export default function HomePage(): React.JSX.Element {
   // GREETING - DETEKSI WAKTU OTOMATIS
   const [greetingText, setGreetingText] = useState(getGreeting());
   const greetingRef = useRef<HTMLSpanElement>(null);
+
+  // LENIS SMOOTH SCROLL
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   // Update greeting every minute
   useEffect(() => {
@@ -698,11 +722,11 @@ export default function HomePage(): React.JSX.Element {
   const [searchUserResult, setSearchUserResult] = useState<ChatUser | null>(null);
   const [searchUserStatus, setSearchUserStatus] = useState("");
 
-  const [blockedByBanner, setBlockedByBanner] = useState<{userId: string, userName: string} | null>(null);
+  const [blockedByBanner, setBlockedByBanner] = useState<{ userId: string, userName: string } | null>(null);
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
-  
+
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
   const [blockNotification, setBlockNotification] = useState<string | null>(null);
@@ -723,6 +747,20 @@ export default function HomePage(): React.JSX.Element {
 
   // ===== REFS UNTUK ROLLING TEXT NAVBAR =====
   const navItemRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  // ===== UNREAD COUNTER ANIMATION =====
+  const unreadCounterRef = useRef<HTMLSpanElement>(null);
+  const prevUnreadRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (totalUnread > 0 && unreadCounterRef.current) {
+      // GSAP animation for the counter
+      gsap.fromTo(unreadCounterRef.current,
+        { scale: 0.5, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+      );
+    }
+  }, [totalUnread]);
 
   const updates: UpdateItem[] = [
     {
@@ -783,7 +821,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     let isForward = true;
     let currentIndex = 0;
-    
+
     const interval = setInterval(() => {
       if (isForward) {
         currentIndex++;
@@ -798,11 +836,11 @@ export default function HomePage(): React.JSX.Element {
           isForward = true;
         }
       }
-      
+
       if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
         setRollingIndex(currentIndex);
         setRollingText(searchRollingTexts[currentIndex]);
-        
+
         if (rollingRef.current) {
           gsap.fromTo(rollingRef.current,
             { y: 10, opacity: 0 },
@@ -811,7 +849,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
     }, 3000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -919,7 +957,7 @@ export default function HomePage(): React.JSX.Element {
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("email", "==", searchUserInput.trim()));
       const querySnapshot = await getDocs(q);
-      
+
       if (querySnapshot.empty) {
         setSearchUserStatus("User tidak ditemukan di database");
         setSearchUserResult(null);
@@ -928,7 +966,7 @@ export default function HomePage(): React.JSX.Element {
 
       const userDoc = querySnapshot.docs[0];
       const userData = userDoc.data();
-      
+
       if (userDoc.id === user.uid) {
         setSearchUserStatus("Ini adalah akun Anda sendiri");
         setSearchUserResult(null);
@@ -949,7 +987,7 @@ export default function HomePage(): React.JSX.Element {
 
       setSearchUserResult(foundUser);
       setSearchUserStatus(`User ditemukan: ${foundUser.name}`);
-      
+
     } catch (error) {
       console.error("Error searching user:", error);
       setSearchUserStatus("Terjadi kesalahan saat mencari user");
@@ -968,7 +1006,7 @@ export default function HomePage(): React.JSX.Element {
       const chatId = [user.uid, searchUserResult.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
-      
+
       if (chatSnap.exists()) {
         setSearchUserStatus(`Chat dengan ${searchUserResult.name} sudah ada`);
         return;
@@ -984,9 +1022,9 @@ export default function HomePage(): React.JSX.Element {
       setSearchUserStatus(`Chat dengan ${searchUserResult.name} berhasil dibuat!`);
       setSearchUserResult(null);
       setSearchUserInput("");
-      
+
       setTimeout(() => setSearchUserStatus(""), 3000);
-      
+
     } catch (error) {
       console.error("Error adding manual user:", error);
       setSearchUserStatus("Gagal menambahkan user");
@@ -996,14 +1034,14 @@ export default function HomePage(): React.JSX.Element {
   // ===== SAVE MESSAGE =====
   const handleSaveMessage = async (chatId: string, messageId: string, currentSaved: boolean) => {
     if (!db || !user) return;
-    
+
     try {
       const msgRef = doc(db, "chats", chatId, "messages", messageId);
       const msgSnap = await getDoc(msgRef);
-      
+
       if (!msgSnap.exists()) return;
       const msgData = msgSnap.data() as Message;
-      
+
       if (currentSaved) {
         const savedRef = collection(db, "users", user.uid, "savedMessages");
         const q = query(savedRef, where("messageId", "==", messageId));
@@ -1011,11 +1049,11 @@ export default function HomePage(): React.JSX.Element {
         querySnap.forEach(async (doc) => {
           await deleteDoc(doc.ref);
         });
-        
+
         await updateDoc(msgRef, {
           savedBy: arrayRemove(user.uid)
         });
-        
+
         setShowMessageMenu(null);
       } else {
         const savedRef = collection(db, "users", user.uid, "savedMessages");
@@ -1030,16 +1068,16 @@ export default function HomePage(): React.JSX.Element {
           isGroupMessage: msgData.isGroupMessage || false,
           groupName: selectedChat?.groupName || null
         });
-        
+
         await updateDoc(msgRef, {
           savedBy: arrayUnion(user.uid)
         });
-        
+
         setShowMessageMenu(null);
       }
-      
+
       loadSavedMessages();
-      
+
     } catch (error) {
       console.error("Error saving message:", error);
     }
@@ -1048,17 +1086,17 @@ export default function HomePage(): React.JSX.Element {
   // ===== LOAD SAVED MESSAGES =====
   const loadSavedMessages = async () => {
     if (!db || !user) return;
-    
+
     try {
       const savedRef = collection(db, "users", user.uid, "savedMessages");
       const q = query(savedRef, orderBy("savedAt", "desc"));
       const querySnap = await getDocs(q);
-      
+
       const savedList: SavedMessage[] = [];
       querySnap.forEach((doc) => {
         savedList.push({ id: doc.id, ...doc.data() } as SavedMessage);
       });
-      
+
       setSavedMessages(savedList);
       setTotalSavedCount(savedList.length);
     } catch (error) {
@@ -1081,11 +1119,11 @@ export default function HomePage(): React.JSX.Element {
         try {
           const userRef = doc(db, "users", currentUser.uid);
           const userSnap = await getDoc(userRef);
-          
+
           const googlePhotoURL = currentUser.photoURL || "";
           const googleName = currentUser.displayName || currentUser.email || "";
           const isAdminUser = currentUser.email === ADMIN_EMAIL;
-          
+
           if (!userSnap.exists()) {
             await setDoc(userRef, {
               id: currentUser.uid,
@@ -1101,7 +1139,7 @@ export default function HomePage(): React.JSX.Element {
               blocked: [],
               blockedBy: []
             });
-            
+
             if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
               await updateProfile(currentUser, {
                 photoURL: googlePhotoURL,
@@ -1111,7 +1149,7 @@ export default function HomePage(): React.JSX.Element {
           } else {
             const userData = userSnap.data();
             const currentPhotoURL = userData?.photoURL || "";
-            
+
             if (googlePhotoURL && currentPhotoURL !== googlePhotoURL) {
               await updateDoc(userRef, {
                 photoURL: googlePhotoURL,
@@ -1120,13 +1158,13 @@ export default function HomePage(): React.JSX.Element {
                 isAdmin: isAdminUser
               });
             }
-            
+
             await updateDoc(userRef, {
               online: true,
               lastSeen: serverTimestamp()
             });
           }
-          
+
           const updatedSnap = await getDoc(userRef);
           const updatedData = updatedSnap.data();
           if (updatedData) {
@@ -1138,9 +1176,9 @@ export default function HomePage(): React.JSX.Element {
               blockedBy: updatedData.blockedBy || []
             }));
           }
-          
+
           loadSavedMessages();
-          
+
         } catch (error) {
           console.error("Error saving user:", error);
         }
@@ -1161,8 +1199,8 @@ export default function HomePage(): React.JSX.Element {
           snapshot.forEach((doc) => {
             if (doc.id !== user.uid) {
               const data = doc.data();
-              userList.push({ 
-                id: doc.id, 
+              userList.push({
+                id: doc.id,
                 ...data,
                 online: data.online || false,
                 lastSeen: data.lastSeen || null,
@@ -1180,7 +1218,7 @@ export default function HomePage(): React.JSX.Element {
               } as ChatUser);
             }
           });
-          
+
           const selfUser: ChatUser = {
             id: user.uid,
             name: user.displayName || user.email || "Me",
@@ -1194,7 +1232,7 @@ export default function HomePage(): React.JSX.Element {
             blocked: user.blocked || [],
             blockedBy: user.blockedBy || []
           };
-          
+
           const selfExists = userList.some(u => u.id === user.uid);
           if (!selfExists) {
             userList.push(selfUser);
@@ -1211,7 +1249,7 @@ export default function HomePage(): React.JSX.Element {
               };
             }
           }
-          
+
           userList.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
@@ -1233,12 +1271,12 @@ export default function HomePage(): React.JSX.Element {
 
     const chatsRef = collection(db, "chats");
     const q = query(chatsRef);
-    
+
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const rooms: ChatRoom[] = [];
       let totalUnreadCount = 0;
       const allMessages: string[] = [];
-      
+
       let blockedByUser = null;
       for (const u of users) {
         if (u.id !== user.uid && (u.blockedBy || []).includes(user.uid)) {
@@ -1246,7 +1284,7 @@ export default function HomePage(): React.JSX.Element {
           break;
         }
       }
-      
+
       if (blockedByUser) {
         setBlockedByBanner({
           userId: blockedByUser.id,
@@ -1255,49 +1293,49 @@ export default function HomePage(): React.JSX.Element {
       } else {
         setBlockedByBanner(null);
       }
-      
+
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         if (data.participants && data.participants.includes(user.uid)) {
           const isGroup = data.isGroup || false;
-          
+
           if (!isGroup) {
             const otherId = data.participants.find((id: string) => id !== user.uid);
             const otherUser = users.find(u => u.id === otherId);
-            
+
             if (otherUser) {
               const messagesRef = collection(db, "chats", docSnap.id, "messages");
               const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
               const msgSnap = await getDocs(qMsg);
-              
+
               let lastMessage = "";
               let lastMessageTime = null;
               let lastMessageSenderId = "";
               let unreadCount = 0;
-              
+
               if (!msgSnap.empty) {
                 const lastMsg = msgSnap.docs[0].data() as Message;
                 lastMessage = lastMsg.text;
                 lastMessageTime = lastMsg.timestamp;
                 lastMessageSenderId = lastMsg.senderId;
               }
-              
+
               const unreadQuery = query(
-                messagesRef, 
+                messagesRef,
                 where("read", "==", false),
                 where("senderId", "!=", user.uid)
               );
               const unreadSnap = await getDocs(unreadQuery);
               unreadCount = unreadSnap.size;
               totalUnreadCount += unreadCount;
-              
+
               unreadSnap.forEach((doc) => {
                 const msg = doc.data() as Message;
                 allMessages.push(`${otherUser.name}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
               });
-              
+
               const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
-              
+
               rooms.push({
                 id: docSnap.id,
                 participants: data.participants,
@@ -1316,34 +1354,34 @@ export default function HomePage(): React.JSX.Element {
             const messagesRef = collection(db, "chats", docSnap.id, "messages");
             const qMsg = query(messagesRef, orderBy("timestamp", "desc"));
             const msgSnap = await getDocs(qMsg);
-            
+
             let lastMessage = "";
             let lastMessageTime = null;
             let lastMessageSenderId = "";
             let unreadCount = 0;
-            
+
             if (!msgSnap.empty) {
               const lastMsg = msgSnap.docs[0].data() as Message;
               lastMessage = lastMsg.text;
               lastMessageTime = lastMsg.timestamp;
               lastMessageSenderId = lastMsg.senderId;
             }
-            
+
             const unreadQuery = query(
-              messagesRef, 
+              messagesRef,
               where("read", "==", false),
               where("senderId", "!=", user.uid)
             );
             const unreadSnap = await getDocs(unreadQuery);
             unreadCount = unreadSnap.size;
             totalUnreadCount += unreadCount;
-            
+
             unreadSnap.forEach((doc) => {
               const msg = doc.data() as Message;
               const sender = users.find(u => u.id === msg.senderId);
               allMessages.push(`${data.groupName || 'Group'}: ${sender?.name || 'Unknown'}: ${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}`);
             });
-            
+
             rooms.push({
               id: docSnap.id,
               participants: data.participants,
@@ -1365,7 +1403,7 @@ export default function HomePage(): React.JSX.Element {
           }
         }
       }
-      
+
       rooms.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -1374,10 +1412,10 @@ export default function HomePage(): React.JSX.Element {
         }
         return 0;
       });
-      
+
       setChatRooms(rooms);
       setTotalUnread(totalUnreadCount);
-      
+
       if (allMessages.length > 0) {
         setChatButtonMessages(allMessages);
         setChatButtonIndex(0);
@@ -1402,7 +1440,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const messageList: Message[] = [];
       const pinnedList: Message[] = [];
-      
+
       snapshot.forEach((doc) => {
         const msg = { id: doc.id, ...doc.data() } as Message;
         if (selectedChat.isGroup && !msg.groupId) {
@@ -1413,10 +1451,10 @@ export default function HomePage(): React.JSX.Element {
           pinnedList.push(msg);
         }
       });
-      
+
       setMessages(messageList);
       setPinnedMessages(pinnedList);
-      
+
       const unreadMessages = messageList.filter(m => !m.read && m.senderId !== user.uid);
       for (const msg of unreadMessages) {
         const msgRef = doc(db, "chats", chatId, "messages", msg.id);
@@ -1425,7 +1463,7 @@ export default function HomePage(): React.JSX.Element {
           readAt: serverTimestamp()
         });
       }
-      
+
       if (unreadMessages.length > 0) {
         setChatRooms(prev => prev.map(room => {
           if (room.id === chatId) {
@@ -1435,7 +1473,7 @@ export default function HomePage(): React.JSX.Element {
         }));
         setTotalUnread(prev => Math.max(0, prev - unreadMessages.length));
       }
-      
+
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -1451,7 +1489,7 @@ export default function HomePage(): React.JSX.Element {
     const usersRef = collection(db, "users");
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const typingMap: { [key: string]: { names: string[], ids: string[] } } = {};
-      
+
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.typing && data.id !== user?.uid) {
@@ -1471,13 +1509,13 @@ export default function HomePage(): React.JSX.Element {
           }
         }
       });
-      
+
       const newTypingMap: { [key: string]: string[] } = {};
       Object.keys(typingMap).forEach(roomId => {
         newTypingMap[roomId] = typingMap[roomId].names;
       });
       setTypingUsersMap(newTypingMap);
-      
+
       setChatRooms(prev => prev.map(room => {
         const typingData = typingMap[room.id];
         return {
@@ -1493,10 +1531,10 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (!selectedChat || !user || !db) return;
-    
+
     return () => {
       const userRef = doc(db, "users", user.uid);
-      updateDoc(userRef, { typing: false }).catch(() => {});
+      updateDoc(userRef, { typing: false }).catch(() => { });
     };
   }, [selectedChat, user, db]);
 
@@ -1526,7 +1564,7 @@ export default function HomePage(): React.JSX.Element {
         lastSeen: serverTimestamp(),
         typing: false
       });
-      
+
       await signOut(auth);
       setIsChatOpen(false);
       setSelectedChat(null);
@@ -1570,13 +1608,13 @@ export default function HomePage(): React.JSX.Element {
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessage(value);
-    
+
     if (!selectedChat || !user || !db) return;
-    
+
     if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) return;
-    
+
     const userRef = doc(db, "users", user.uid);
-    
+
     if (value.length > 0) {
       await updateDoc(userRef, {
         typing: true
@@ -1586,24 +1624,24 @@ export default function HomePage(): React.JSX.Element {
         typing: false
       });
     }
-    
+
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
-    
+
     const newTimeout = setTimeout(async () => {
       const userRef2 = doc(db, "users", user.uid);
       await updateDoc(userRef2, {
         typing: false
       });
     }, 2000);
-    
+
     setTypingTimeout(newTimeout);
   };
 
   const handleOpenProfile = (chatUser: ChatUser) => {
     if (!chatUser || !user) return;
-    
+
     setProfileUser(chatUser);
     setShowProfile(true);
     setShowBlockDropdown(false);
@@ -1620,11 +1658,11 @@ export default function HomePage(): React.JSX.Element {
 
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
     if (!db || !user || !userId) return;
-    
+
     try {
       const userRef = doc(db, "users", user.uid);
       const targetRef = doc(db, "users", userId);
-      
+
       if (isBlocked) {
         await updateDoc(userRef, {
           blocked: arrayRemove(userId)
@@ -1632,12 +1670,12 @@ export default function HomePage(): React.JSX.Element {
         await updateDoc(targetRef, {
           blockedBy: arrayRemove(user.uid)
         });
-        
+
         setUser((prev: any) => ({
           ...prev,
           blocked: (prev.blocked || []).filter((id: string) => id !== userId)
         }));
-        
+
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: (u.blocked || []).filter((id: string) => id !== userId) };
@@ -1647,13 +1685,13 @@ export default function HomePage(): React.JSX.Element {
           }
           return u;
         }));
-        
+
         if (blockedByBanner?.userId === userId) {
           setBlockedByBanner(null);
         }
-        
+
         setBlockNotification(null);
-        
+
       } else {
         await updateDoc(userRef, {
           blocked: arrayUnion(userId)
@@ -1661,12 +1699,12 @@ export default function HomePage(): React.JSX.Element {
         await updateDoc(targetRef, {
           blockedBy: arrayUnion(user.uid)
         });
-        
+
         setUser((prev: any) => ({
           ...prev,
           blocked: [...(prev.blocked || []), userId]
         }));
-        
+
         setUsers(prev => prev.map(u => {
           if (u.id === user.uid) {
             return { ...u, blocked: [...(u.blocked || []), userId] };
@@ -1676,15 +1714,16 @@ export default function HomePage(): React.JSX.Element {
           }
           return u;
         }));
-        
+
         const blockedUser = users.find(u => u.id === userId);
+        // Block notification - only once, no extra background
         setBlockNotification(`Akun ${blockedUser?.name || 'User'} telah diblokir oleh anda`);
-        
+
         setTimeout(() => setBlockNotification(null), 5000);
       }
-      
+
       setShowBlockDropdown(false);
-      
+
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
     }
@@ -1700,9 +1739,9 @@ export default function HomePage(): React.JSX.Element {
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { typing: false });
-      
+
       const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-      
+
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
@@ -1727,9 +1766,9 @@ export default function HomePage(): React.JSX.Element {
           });
         }
       }
-      
+
       const encryptedText = encryptMessage(message.trim());
-      
+
       const messagesRef = collection(db, "chats", chatId, "messages");
       const msgData: any = {
         text: encryptedText,
@@ -1746,18 +1785,18 @@ export default function HomePage(): React.JSX.Element {
         savedBy: [],
         encrypted: true
       };
-      
+
       if (replyTo) {
         msgData.replyTo = replyTo.id;
         msgData.replyToText = encryptMessage(replyTo.text);
         msgData.replyToSender = replyTo.senderName;
       }
-      
+
       await addDoc(messagesRef, msgData);
 
       setMessage("");
       setReplyTo(null);
-      
+
       if (typingTimeout) {
         clearTimeout(typingTimeout);
         setTypingTimeout(null);
@@ -1769,20 +1808,20 @@ export default function HomePage(): React.JSX.Element {
 
   const handleShareMessage = async () => {
     if (!shareMessage || !selectedShareUser || !user || !db) return;
-    
+
     if (isUserBlocked(selectedShareUser) || isBlockedByUser(selectedShareUser)) {
       setShowShareModal(false);
       setShareMessage(null);
       setSelectedShareUser("");
       return;
     }
-    
+
     try {
       const targetUser = users.find(u => u.id === selectedShareUser);
       if (!targetUser) return;
-      
+
       const chatId = [user.uid, targetUser.id].sort().join("_");
-      
+
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
@@ -1793,7 +1832,7 @@ export default function HomePage(): React.JSX.Element {
           isGroup: false
         });
       }
-      
+
       const messagesRef = collection(db, "chats", chatId, "messages");
       const sharedText = `From ${shareMessage.senderName}: ${shareMessage.text}`;
       await addDoc(messagesRef, {
@@ -1812,7 +1851,7 @@ export default function HomePage(): React.JSX.Element {
         savedBy: [],
         encrypted: true
       });
-      
+
       setShowShareModal(false);
       setShareMessage(null);
       setSelectedShareUser("");
@@ -1837,11 +1876,11 @@ export default function HomePage(): React.JSX.Element {
 
   const handleResendMessage = async (msg: Message) => {
     if (!selectedChat || !user || !db) return;
-    
+
     if (isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) {
       return;
     }
-    
+
     try {
       const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
       const messagesRef = collection(db, "chats", chatId, "messages");
@@ -1863,7 +1902,7 @@ export default function HomePage(): React.JSX.Element {
         savedBy: [],
         encrypted: true
       });
-      
+
       setShowMessageMenu(null);
     } catch (error) {
       console.error("Error resending message:", error);
@@ -1877,7 +1916,7 @@ export default function HomePage(): React.JSX.Element {
       await updateDoc(chatRef, {
         isPinned: !currentPinned
       });
-      
+
       setChatRooms(prev => prev.map(room => {
         if (room.id === chatId) {
           return { ...room, isPinned: !currentPinned };
@@ -1896,7 +1935,7 @@ export default function HomePage(): React.JSX.Element {
       await updateDoc(userRef, {
         isPinned: !currentPinned
       });
-      
+
       setUsers(prev => prev.map(u => {
         if (u.id === userId) {
           return { ...u, isPinned: !currentPinned };
@@ -1910,23 +1949,23 @@ export default function HomePage(): React.JSX.Element {
 
   const handleAddExistingUser = async () => {
     if (!selectedNewUser || !user || !db) return;
-    
+
     if (isUserBlocked(selectedNewUser) || isBlockedByUser(selectedNewUser)) {
       setAddUserStatus("User is blocked");
       return;
     }
-    
+
     try {
       const targetUser = users.find(u => u.id === selectedNewUser);
       if (!targetUser) {
         setAddUserStatus("User not found");
         return;
       }
-      
+
       const chatId = [user.uid, targetUser.id].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
-      
+
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
           participants: [user.uid, targetUser.id],
@@ -1938,10 +1977,10 @@ export default function HomePage(): React.JSX.Element {
       } else {
         setAddUserStatus(`Chat with ${targetUser.name} already exists`);
       }
-      
+
       setSelectedNewUser("");
       setShowAddUser(false);
-      
+
     } catch (error) {
       console.error("Error adding user:", error);
       setAddUserStatus("Failed to add user");
@@ -1950,55 +1989,55 @@ export default function HomePage(): React.JSX.Element {
 
   const handleAddMemberToGroup = async () => {
     if (!profileUser || !selectedGroupMember || !user || !db) return;
-    
+
     if (!profileUser.isGroup) return;
-    
+
     try {
       const targetUser = users.find(u => u.id === selectedGroupMember);
       if (!targetUser) {
         setAddUserStatus("User not found");
         return;
       }
-      
+
       const groupRef = doc(db, "chats", profileUser.id);
       const groupSnap = await getDoc(groupRef);
-      
+
       if (groupSnap.exists()) {
         const groupData = groupSnap.data();
         const currentMembers = groupData.groupMembers || [];
-        
+
         if (currentMembers.includes(selectedGroupMember)) {
           setAddUserStatus(`${targetUser.name} already in group`);
           return;
         }
-        
+
         const newMembers = [...currentMembers, selectedGroupMember];
         const newParticipants = [...groupData.participants, selectedGroupMember];
-        
+
         await updateDoc(groupRef, {
           groupMembers: newMembers,
           participants: newParticipants
         });
-        
+
         setProfileUser({
           ...profileUser,
           groupMembers: newMembers
         });
-        
+
         setUsers(prev => prev.map(u => {
           if (u.id === profileUser.id) {
             return { ...u, groupMembers: newMembers };
           }
           return u;
         }));
-        
+
         setChatRooms(prev => prev.map(room => {
           if (room.id === profileUser.id) {
             return { ...room, groupMembers: newMembers, participants: newParticipants };
           }
           return room;
         }));
-        
+
         setAddUserStatus(`${targetUser.name} added to group!`);
         setSelectedGroupMember("");
         setShowAddMemberToGroup(false);
@@ -2017,10 +2056,10 @@ export default function HomePage(): React.JSX.Element {
     }
 
     try {
-      const existingGroup = chatRooms.find(room => 
+      const existingGroup = chatRooms.find(room =>
         room.isGroup && room.groupName === groupName.trim()
       );
-      
+
       if (existingGroup) {
         setAddUserStatus(`Group "${groupName}" already exists!`);
         return;
@@ -2029,7 +2068,7 @@ export default function HomePage(): React.JSX.Element {
       const members = [user.uid, ...selectedGroupMembers];
       const admins = [user.uid, ...groupAdmins];
       const groupId = `group_${Date.now()}`;
-      
+
       const chatRef = doc(db, "chats", groupId);
       await setDoc(chatRef, {
         participants: members,
@@ -2049,7 +2088,7 @@ export default function HomePage(): React.JSX.Element {
       setSelectedGroupMembers([]);
       setGroupAdmins([]);
       setShowAddGroup(false);
-      
+
       const newGroup: ChatUser = {
         id: groupId,
         name: groupName.trim(),
@@ -2069,9 +2108,9 @@ export default function HomePage(): React.JSX.Element {
         blocked: [],
         blockedBy: []
       };
-      
+
       setUsers(prev => [...prev, newGroup]);
-      
+
       setTimeout(() => setAddUserStatus(""), 3000);
     } catch (error) {
       console.error("Error creating group:", error);
@@ -2091,7 +2130,7 @@ export default function HomePage(): React.JSX.Element {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
@@ -2126,9 +2165,9 @@ export default function HomePage(): React.JSX.Element {
   const pinnedUsers = users.filter(u => u.isPinned && !u.isGroup);
   const pinnedChats = chatRooms.filter(r => r.isPinned);
   const unpinnedChats = chatRooms.filter(r => !r.isPinned);
-  
-  const availableUsers = users.filter(u => 
-    u.id !== user?.uid && 
+
+  const availableUsers = users.filter(u =>
+    u.id !== user?.uid &&
     !chatRooms.some(room => room.participants.includes(u.id)) &&
     !isUserBlocked(u.id) &&
     !isBlockedByUser(u.id) &&
@@ -2225,17 +2264,17 @@ export default function HomePage(): React.JSX.Element {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
-        
+
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
-        
+
         <meta property="og:title" content="Menuru Official | Home" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Menuru Official" />
-        
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Menuru Official | Home" />
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
@@ -2253,7 +2292,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* BANNER */}
+        {/* BANNER - lifeatmenuru tanpa background, font besar */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -2293,31 +2332,22 @@ export default function HomePage(): React.JSX.Element {
               Website sedang dalam pengembangan, Terima kasih
             </motion.span>
           </AnimatePresence>
-          <div
+          {/* lifeatmenuru - tanpa background, font besar */}
+          <span
             style={{
-              backgroundColor: "#EB2227",
-              padding: "6px 16px",
-              borderRadius: "20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
+              fontSize: "28px",
+              fontWeight: 700,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.01em",
+              background: "transparent",
             }}
           >
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              #lifeatmenuru
-            </span>
-          </div>
+            #lifeatmenuru
+          </span>
         </motion.div>
 
-        {/* Block Notification Banner */}
+        {/* Block Notification - hanya sekali, tanpa background tambahan */}
         <AnimatePresence>
           {blockNotification && (
             <motion.div
@@ -2446,9 +2476,9 @@ export default function HomePage(): React.JSX.Element {
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <SearchIcon size={18} />
-                      <span 
+                      <span
                         ref={rollingRef}
-                        style={{ 
+                        style={{
                           color: "#ffffff",
                           fontWeight: 400,
                           display: "inline-block",
@@ -2458,8 +2488,8 @@ export default function HomePage(): React.JSX.Element {
                         {rollingText}
                       </span>
                     </div>
-                    <span style={{ 
-                      color: "rgba(255,255,255,0.4)", 
+                    <span style={{
+                      color: "rgba(255,255,255,0.4)",
                       fontSize: "12px",
                       fontWeight: 300,
                     }}>
@@ -2624,7 +2654,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </motion.div>
 
-          {/* ===== KANAN: Shop + Pusat bantuan + Notif + Profile ===== */}
+          {/* ===== KANAN: Shop + Pusat bantuan + Notif + Profile + SIGN UP ===== */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             {/* Shop Button */}
             <motion.button
@@ -2688,6 +2718,39 @@ export default function HomePage(): React.JSX.Element {
               </motion.a>
             </Link>
 
+            {/* SIGN UP - untuk user belum login */}
+            {!user && (
+              <Link href="/signup" passHref>
+                <motion.a
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#000000",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "18px",
+                    fontWeight: 600,
+                    fontFamily: FONT_FAMILY,
+                    padding: "8px 16px",
+                    borderRadius: "30px",
+                    transition: "all 0.2s ease",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <span>SIGN UP</span>
+                </motion.a>
+              </Link>
+            )}
+
             {/* Notification Button */}
             <div ref={notificationsRef} style={{ position: "relative" }}>
               <motion.button
@@ -2714,28 +2777,34 @@ export default function HomePage(): React.JSX.Element {
               >
                 <NotificationsIcon size={24} hasBadge={totalUnread > 0} />
                 {totalUnread > 0 && (
-                  <span style={{
-                    position: "absolute",
-                    top: "2px",
-                    right: "2px",
-                    backgroundColor: "#ef4444",
-                    color: "#fff",
-                    fontSize: "9px",
-                    fontWeight: 700,
-                    borderRadius: "50%",
-                    width: "18px",
-                    height: "18px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: FONT_FAMILY,
-                  }}>
+                  <motion.span
+                    ref={unreadCounterRef}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                    style={{
+                      position: "absolute",
+                      top: "2px",
+                      right: "2px",
+                      backgroundColor: "#ef4444",
+                      color: "#fff",
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      borderRadius: "50%",
+                      width: "18px",
+                      height: "18px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
                     {totalUnread > 9 ? "9+" : totalUnread}
-                  </span>
+                  </motion.span>
                 )}
               </motion.button>
 
-              {/* Notification Dropdown */}
+              {/* Notification Dropdown - BLUE BG, WHITE TEXT, LARGE */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
@@ -2747,31 +2816,53 @@ export default function HomePage(): React.JSX.Element {
                       position: "absolute",
                       top: "calc(100% + 8px)",
                       right: 0,
-                      minWidth: "320px",
-                      maxWidth: "380px",
-                      maxHeight: "400px",
+                      minWidth: "420px",
+                      maxWidth: "480px",
+                      maxHeight: "500px",
                       overflowY: "auto",
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(0,0,0,0.04)",
+                      backgroundColor: "#0D3CFC",
+                      borderRadius: "16px",
+                      boxShadow: "0 10px 40px rgba(13,60,252,0.35)",
+                      border: "1px solid rgba(255,255,255,0.08)",
                       zIndex: 60,
                       fontFamily: FONT_FAMILY,
-                      padding: "12px 0",
+                      padding: "16px 0",
                     }}
                   >
-                    <div style={{ padding: "0 16px 8px 16px", borderBottom: "1px solid #f0f0f0", fontWeight: 600, fontSize: "14px", color: "#000" }}>
+                    <div style={{
+                      padding: "0 20px 12px 20px",
+                      borderBottom: "1px solid rgba(255,255,255,0.1)",
+                      fontWeight: 700,
+                      fontSize: "18px",
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                    }}>
                       Notifikasi
                     </div>
                     {chatRooms.filter(r => r.unreadCount > 0).length === 0 ? (
-                      <div style={{ padding: "24px 16px", textAlign: "center", color: "#999", fontSize: "13px" }}>
+                      <div style={{
+                        padding: "32px 20px",
+                        textAlign: "center",
+                        color: "rgba(255,255,255,0.6)",
+                        fontSize: "15px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
                         Tidak ada notifikasi
                       </div>
                     ) : (
                       chatRooms.filter(r => r.unreadCount > 0).map((room) => {
                         if (room.isGroup) {
                           return (
-                            <div key={room.id} style={{ padding: "10px 16px", borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
+                            <div
+                              key={room.id}
+                              style={{
+                                padding: "14px 20px",
+                                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                cursor: "pointer",
+                                transition: "background 0.15s ease",
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                               onClick={() => {
                                 const groupUser: ChatUser = {
                                   id: room.id,
@@ -2796,8 +2887,22 @@ export default function HomePage(): React.JSX.Element {
                                 setShowNotifications(false);
                               }}
                             >
-                              <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{room.groupName || "Group Chat"}</div>
-                              <div style={{ fontSize: "11px", color: "#666" }}>{room.unreadCount} pesan baru</div>
+                              <div style={{
+                                fontSize: "16px",
+                                fontWeight: 600,
+                                color: "#ffffff",
+                                fontFamily: FONT_FAMILY,
+                              }}>
+                                {room.groupName || "Group Chat"}
+                              </div>
+                              <div style={{
+                                fontSize: "14px",
+                                color: "rgba(255,255,255,0.7)",
+                                fontFamily: FONT_FAMILY,
+                                marginTop: "2px",
+                              }}>
+                                {room.unreadCount} pesan baru dari grup
+                              </div>
                             </div>
                           );
                         }
@@ -2805,20 +2910,62 @@ export default function HomePage(): React.JSX.Element {
                         const otherUser = users.find(u => u.id === otherId);
                         if (!otherUser) return null;
                         return (
-                          <div key={room.id} style={{ padding: "10px 16px", borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
+                          <div
+                            key={room.id}
+                            style={{
+                              padding: "14px 20px",
+                              borderBottom: "1px solid rgba(255,255,255,0.06)",
+                              cursor: "pointer",
+                              transition: "background 0.15s ease",
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                             onClick={() => {
                               setSelectedChat(otherUser);
                               setShowNotifications(false);
                             }}
                           >
-                            <div style={{ fontSize: "13px", fontWeight: 500, color: "#000" }}>{otherUser.name}</div>
-                            <div style={{ fontSize: "11px", color: "#666" }}>{room.unreadCount} pesan baru</div>
+                            <div style={{
+                              fontSize: "16px",
+                              fontWeight: 600,
+                              color: "#ffffff",
+                              fontFamily: FONT_FAMILY,
+                            }}>
+                              {otherUser.name}
+                              {otherUser.isAdmin && <InstagramVerifiedBadge size={14} />}
+                            </div>
+                            <div style={{
+                              fontSize: "14px",
+                              color: "rgba(255,255,255,0.7)",
+                              fontFamily: FONT_FAMILY,
+                              marginTop: "2px",
+                            }}>
+                              {room.unreadCount} pesan baru dari {otherUser.name}
+                            </div>
                           </div>
                         );
                       })
                     )}
-                    <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0", textAlign: "center" }}>
-                      <button style={{ background: "none", border: "none", color: "#0D3CFC", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY }}
+                    <div style={{
+                      padding: "12px 20px",
+                      borderTop: "1px solid rgba(255,255,255,0.08)",
+                      textAlign: "center",
+                    }}>
+                      <button
+                        style={{
+                          background: "rgba(255,255,255,0.1)",
+                          border: "none",
+                          color: "#ffffff",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          padding: "6px 16px",
+                          borderRadius: "8px",
+                          transition: "background 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
                         onClick={() => {
                           setShowNotifications(false);
                           setIsChatOpen(true);
@@ -2861,9 +3008,9 @@ export default function HomePage(): React.JSX.Element {
                     onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}
                   >
                     {user.photoURL ? (
-                      <img 
-                        src={user.photoURL} 
-                        alt="avatar" 
+                      <img
+                        src={user.photoURL}
+                        alt="avatar"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
@@ -3093,9 +3240,9 @@ export default function HomePage(): React.JSX.Element {
                 <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
                   Forward Message
                 </h3>
-                <div style={{ 
-                  fontSize: "13px", 
-                  color: "#666", 
+                <div style={{
+                  fontSize: "13px",
+                  color: "#666",
                   marginBottom: "16px",
                   padding: "10px",
                   backgroundColor: "#f5f5f5",
@@ -3122,8 +3269,8 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <option value="">Select user...</option>
-                  {users.filter(u => 
-                    u.id !== user.uid && 
+                  {users.filter(u =>
+                    u.id !== user.uid &&
                     u.id !== shareMessage.senderId &&
                     !isUserBlocked(u.id) &&
                     !isBlockedByUser(u.id) &&
@@ -3388,21 +3535,26 @@ export default function HomePage(): React.JSX.Element {
                 {isChatOpen ? "Tutup Chat" : "Buka Chat"}
               </span>
               {totalUnread > 0 && !isChatOpen && (
-                <span style={{
-                  backgroundColor: "#ef4444",
-                  color: "#fff",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  borderRadius: "50%",
-                  width: "22px",
-                  height: "22px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: FONT_FAMILY,
-                }}>
+                <motion.span
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  style={{
+                    backgroundColor: "#ef4444",
+                    color: "#fff",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    borderRadius: "50%",
+                    width: "22px",
+                    height: "22px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
                   {totalUnread > 9 ? "9+" : totalUnread}
-                </span>
+                </motion.span>
               )}
             </div>
 
@@ -3461,8 +3613,8 @@ export default function HomePage(): React.JSX.Element {
                           <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                             {selectedChat.email}
                           </span>
-                          <OnlineIndicator 
-                            online={getOnlineStatus(selectedChat.id)} 
+                          <OnlineIndicator
+                            online={getOnlineStatus(selectedChat.id)}
                             lastSeen={getLastSeen(selectedChat.id)}
                           />
                         </>
@@ -3823,10 +3975,10 @@ export default function HomePage(): React.JSX.Element {
                           const isLive = item.status === "live";
                           const isComing = item.status === "coming";
                           const isDone = item.status === "done";
-                          
+
                           const dotColor = isLive ? "#3b82f6" : (isComing ? "#ef4444" : "#000000");
                           const isActive = isLive || isComing;
-                          
+
                           return (
                             <motion.div
                               key={item.id}
@@ -3867,7 +4019,7 @@ export default function HomePage(): React.JSX.Element {
                                     }}
                                   />
                                 )}
-                                
+
                                 <div
                                   style={{
                                     width: "10px",
@@ -3879,7 +4031,7 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 />
                               </div>
-                              
+
                               <div
                                 style={{
                                   position: "absolute",
@@ -3891,7 +4043,7 @@ export default function HomePage(): React.JSX.Element {
                                   zIndex: 0,
                                 }}
                               />
-                              
+
                               <div style={{ padding: "0" }}>
                                 <div
                                   style={{
@@ -4314,7 +4466,7 @@ export default function HomePage(): React.JSX.Element {
                               >
                                 {isUserBlocked(profileUser.id) ? "Unblock" : "Block"}
                               </motion.button>
-                              
+
                               <AnimatePresence>
                                 {showBlockDropdown && (
                                   <motion.div
@@ -4367,8 +4519,8 @@ export default function HomePage(): React.JSX.Element {
                         </div>
 
                         {!profileUser.isGroup && (isUserBlocked(profileUser.id) || isBlockedByUser(profileUser.id)) && (
-                          <div style={{ 
-                            width: "100%", 
+                          <div style={{
+                            width: "100%",
                             marginTop: "16px",
                             padding: "16px",
                             backgroundColor: "#0D3CFC",
@@ -4388,17 +4540,17 @@ export default function HomePage(): React.JSX.Element {
 
                         {profileUser.isGroup && (
                           <div style={{ width: "100%", marginBottom: "16px" }}>
-                            <div style={{ 
+                            <div style={{
                               display: "flex",
                               alignItems: "center",
                               gap: "16px",
                               marginBottom: "16px",
                               cursor: "pointer",
                             }}
-                            onClick={() => {
-                              handleCloseProfile();
-                              setSelectedChat(profileUser);
-                            }}
+                              onClick={() => {
+                                handleCloseProfile();
+                                setSelectedChat(profileUser);
+                              }}
                             >
                               <div
                                 style={{
@@ -4461,9 +4613,9 @@ export default function HomePage(): React.JSX.Element {
                             </div>
 
                             {profileUser.groupDescription && (
-                              <div style={{ 
-                                fontSize: "14px", 
-                                color: "#333", 
+                              <div style={{
+                                fontSize: "14px",
+                                color: "#333",
                                 fontFamily: FONT_FAMILY,
                                 marginBottom: "12px",
                                 padding: "12px",
@@ -4503,11 +4655,11 @@ export default function HomePage(): React.JSX.Element {
                                     fontFamily: FONT_FAMILY,
                                     cursor: member.id !== user.uid ? "pointer" : "default",
                                   }}
-                                  onClick={() => {
-                                    if (member.id !== user.uid) {
-                                      handleOpenProfile(member);
-                                    }
-                                  }}
+                                    onClick={() => {
+                                      if (member.id !== user.uid) {
+                                        handleOpenProfile(member);
+                                      }
+                                    }}
                                   >
                                     <span style={{
                                       fontSize: "13px",
@@ -4557,7 +4709,7 @@ export default function HomePage(): React.JSX.Element {
                                 >
                                   + Add Member
                                 </motion.button>
-                                
+
                                 <AnimatePresence>
                                   {showAddMemberToGroup && (
                                     <motion.div
@@ -4583,7 +4735,7 @@ export default function HomePage(): React.JSX.Element {
                                         }}
                                       >
                                         <option value="">Select user...</option>
-                                        {users.filter(u => 
+                                        {users.filter(u =>
                                           u.id !== user.uid &&
                                           !profileUser.groupMembers?.includes(u.id) &&
                                           !u.isGroup &&
@@ -4715,8 +4867,8 @@ export default function HomePage(): React.JSX.Element {
                               </div>
                             </div>
 
-                            <StoriesSection 
-                              userEmail={profileUser.email} 
+                            <StoriesSection
+                              userEmail={profileUser.email}
                               onImageClick={(url) => setShowFullImage(url)}
                             />
 
@@ -4809,8 +4961,8 @@ export default function HomePage(): React.JSX.Element {
                       </div>
 
                       {hasBlockedUsers && (
-                        <div style={{ 
-                          width: "100%", 
+                        <div style={{
+                          width: "100%",
                           marginBottom: "10px",
                           padding: "12px 16px",
                           backgroundColor: "#0D3CFC",
@@ -4826,8 +4978,8 @@ export default function HomePage(): React.JSX.Element {
                       )}
 
                       {hasBlockedByUsers && (
-                        <div style={{ 
-                          width: "100%", 
+                        <div style={{
+                          width: "100%",
                           marginBottom: "10px",
                           padding: "12px 16px",
                           backgroundColor: "#ef4444",
@@ -4892,10 +5044,10 @@ export default function HomePage(): React.JSX.Element {
                             Cari
                           </motion.button>
                         </div>
-                        
+
                         {searchUserStatus && (
-                          <div style={{ 
-                            fontSize: "12px", 
+                          <div style={{
+                            fontSize: "12px",
                             color: searchUserResult ? "#22c55e" : "#ef4444",
                             marginBottom: "8px",
                             fontFamily: FONT_FAMILY,
@@ -5046,7 +5198,7 @@ export default function HomePage(): React.JSX.Element {
                           New Group
                         </span>
                       </motion.button>
-                      
+
                       <AnimatePresence>
                         {showAddUser && (
                           <motion.div
@@ -5367,7 +5519,7 @@ export default function HomePage(): React.JSX.Element {
                                     </div>
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                       <div>
-                                        <div 
+                                        <div
                                           style={{ fontSize: "12px", fontWeight: 500, color: "#000", cursor: "pointer", fontFamily: FONT_FAMILY }}
                                           onClick={() => handleOpenProfile(u)}
                                         >
@@ -5551,7 +5703,7 @@ export default function HomePage(): React.JSX.Element {
                                   const otherUser = users.find(u => u.id === otherId);
                                   if (!otherUser) return null;
                                   const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
-                                  
+
                                   return (
                                     <motion.div
                                       key={room.id}
@@ -5602,7 +5754,7 @@ export default function HomePage(): React.JSX.Element {
                                       </div>
                                       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
                                         <div>
-                                          <div 
+                                          <div
                                             style={{ fontSize: "12px", fontWeight: 500, color: isBlocked ? "#999" : "#000", cursor: isBlocked ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -5815,11 +5967,11 @@ export default function HomePage(): React.JSX.Element {
                             const otherId = room.participants.find(id => id !== user.uid);
                             const otherUser = users.find(u => u.id === otherId);
                             if (!otherUser) return null;
-                            
+
                             const isBlocked = isUserBlocked(otherId) || isBlockedByUser(otherId);
                             const isLastMessageFromMe = room.lastMessageSenderId === user.uid;
                             const typingDisplay = getTypingUsersDisplay(room);
-                            
+
                             return (
                               <motion.div
                                 key={room.id}
@@ -5864,9 +6016,9 @@ export default function HomePage(): React.JSX.Element {
                                   }}
                                 >
                                   {otherUser.photoURL ? (
-                                    <img 
-                                      src={otherUser.photoURL} 
-                                      alt="avatar" 
+                                    <img
+                                      src={otherUser.photoURL}
+                                      alt="avatar"
                                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                     />
                                   ) : (
@@ -5880,7 +6032,7 @@ export default function HomePage(): React.JSX.Element {
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontSize: "14px", fontWeight: 500, color: isBlocked ? "#999" : "#000", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY }}>
-                                    <span 
+                                    <span
                                       style={{ cursor: "pointer" }}
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -6033,7 +6185,7 @@ export default function HomePage(): React.JSX.Element {
                           >
                             <BackIcon />
                           </motion.button>
-                          
+
                           {selectedChat.isGroup ? (
                             <div
                               style={{
@@ -6077,9 +6229,9 @@ export default function HomePage(): React.JSX.Element {
                               }}
                             >
                               {selectedChat.photoURL ? (
-                                <img 
-                                  src={selectedChat.photoURL} 
-                                  alt="avatar" 
+                                <img
+                                  src={selectedChat.photoURL}
+                                  alt="avatar"
                                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 />
                               ) : (
@@ -6087,9 +6239,9 @@ export default function HomePage(): React.JSX.Element {
                               )}
                             </motion.div>
                           )}
-                          
+
                           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1px", minWidth: 0 }}>
-                            <div 
+                            <div
                               style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", flexWrap: "wrap" }}
                               onClick={() => {
                                 if (!selectedChat.isGroup) {
@@ -6149,8 +6301,8 @@ export default function HomePage(): React.JSX.Element {
                             )}
                             {!selectedChat.isGroup && !(isUserBlocked(selectedChat.id) || isBlockedByUser(selectedChat.id)) && (
                               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <OnlineIndicator 
-                                  online={getOnlineStatus(selectedChat.id)} 
+                                <OnlineIndicator
+                                  online={getOnlineStatus(selectedChat.id)}
                                   lastSeen={getLastSeen(selectedChat.id)}
                                 />
                                 {getOnlineStatus(selectedChat.id) ? (
@@ -6434,17 +6586,17 @@ export default function HomePage(): React.JSX.Element {
                                 messages.map((msg, idx) => {
                                   const isMine = msg.senderId === user?.uid;
                                   const chatId = selectedChat.isGroup ? selectedChat.id : [user.uid, selectedChat.id].sort().join("_");
-                                  const showDate = idx === 0 || !messages[idx-1]?.timestamp || 
-                                    formatDate(msg.timestamp) !== formatDate(messages[idx-1]?.timestamp);
-                                  
+                                  const showDate = idx === 0 || !messages[idx - 1]?.timestamp ||
+                                    formatDate(msg.timestamp) !== formatDate(messages[idx - 1]?.timestamp);
+
                                   const replySenderName = msg.replyToSender === user?.displayName ? "You" : msg.replyToSender;
                                   const displayText = msg.encrypted ? decryptMessage(msg.text) : msg.text;
                                   const displayReplyText = msg.replyToText && msg.encrypted ? decryptMessage(msg.replyToText) : msg.replyToText;
-                                  
+
                                   const messageColor = isMine ? "#4A90D9" : "#FF6B6B";
                                   const isSaved = isMessageSaved(msg.id);
                                   const showSenderName = selectedChat.isGroup && !isMine;
-                                  
+
                                   return (
                                     <React.Fragment key={idx}>
                                       {showDate && (
@@ -6509,6 +6661,28 @@ export default function HomePage(): React.JSX.Element {
                                             }}
                                           >
                                             {msg.senderName}
+                                            {msg.isGroupMessage && (
+                                              <span style={{
+                                                fontSize: "9px",
+                                                fontWeight: 400,
+                                                color: "rgba(255,255,255,0.6)",
+                                                marginLeft: "4px",
+                                              }}>
+                                                • Grup
+                                              </span>
+                                            )}
+                                          </div>
+                                        )}
+                                        {!isMine && !selectedChat.isGroup && !showSenderName && msg.isGroupMessage && (
+                                          <div
+                                            style={{
+                                              fontSize: "10px",
+                                              color: "rgba(255,255,255,0.6)",
+                                              marginBottom: "4px",
+                                              fontFamily: FONT_FAMILY,
+                                            }}
+                                          >
+                                            Dari grup: {selectedChat.groupName || "Group"}
                                           </div>
                                         )}
                                         {msg.isShared && msg.sharedFromName && (
@@ -6524,7 +6698,7 @@ export default function HomePage(): React.JSX.Element {
                                             From {msg.sharedFromName}
                                           </div>
                                         )}
-                                        
+
                                         {msg.replyTo && displayReplyText && (
                                           <div
                                             style={{
@@ -6544,9 +6718,9 @@ export default function HomePage(): React.JSX.Element {
                                             <span style={{ fontFamily: FONT_FAMILY }}> {displayReplyText}</span>
                                           </div>
                                         )}
-                                        
+
                                         <span style={{ fontFamily: FONT_FAMILY, wordBreak: "break-word" }}>{displayText}</span>
-                                        
+
                                         <div
                                           style={{
                                             display: "flex",
@@ -6588,7 +6762,7 @@ export default function HomePage(): React.JSX.Element {
                                           >
                                             <MoreIcon />
                                           </motion.button>
-                                          
+
                                           <AnimatePresence>
                                             {showMessageMenu === msg.id && (
                                               <motion.div
@@ -6734,9 +6908,9 @@ export default function HomePage(): React.JSX.Element {
                                                   <span>{isSaved ? "Unsave" : "Save"}</span>
                                                 </motion.button>
                                                 {msg.encrypted && (
-                                                  <div style={{ 
-                                                    padding: "4px 12px", 
-                                                    fontSize: "9px", 
+                                                  <div style={{
+                                                    padding: "4px 12px",
+                                                    fontSize: "9px",
                                                     color: "#22c55e",
                                                     borderTop: "1px solid #f0f0f0",
                                                     marginTop: "2px",
