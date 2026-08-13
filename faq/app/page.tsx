@@ -45,7 +45,7 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const rightTextRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -134,9 +134,6 @@ export default function HomePage(): React.JSX.Element {
         }
       });
     }
-
-    // Opsional: animasi untuk teks kanan (misal opacity atau pergeseran)
-    // Bisa diabaikan karena permintaan hanya judul yang berubah ukuran
   };
 
   // Jika preloader masih aktif
@@ -222,18 +219,23 @@ export default function HomePage(): React.JSX.Element {
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden", // scrollbar disembunyikan via CSS global
+          overflow: "hidden",
         }}
       >
-        {/* Judul di kiri atas */}
+        {/* KIRI: Judul + Subtitle */}
         <div
           style={{
             position: "fixed",
             top: "40px",
             left: "40px",
             zIndex: 15,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end", // right-align text di dalam container
+            maxWidth: "60%",
           }}
         >
+          {/* Judul "Menuru" */}
           <h1
             ref={titleRef}
             className="title"
@@ -247,38 +249,36 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               transformOrigin: "left center",
+              alignSelf: "flex-start", // judul tetap left-aligned
             }}
           >
             Menuru
           </h1>
-        </div>
 
-        {/* Teks panjang di kanan atas - rata kanan */}
-        <div
-          ref={rightTextRef}
-          className="right-text"
-          style={{
-            position: "fixed",
-            top: "40px",
-            right: "40px",
-            zIndex: 15,
-            textAlign: "right",
-            maxWidth: "60%",
-          }}
-        >
-          <p
+          {/* Subtitle 2 baris - di bawah judul, rata kanan */}
+          <div
+            ref={subtitleRef}
             style={{
-              fontSize: "150px",
-              fontWeight: 400,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              lineHeight: 1.1,
-              margin: 0,
-              padding: 0,
+              marginTop: "20px",
+              textAlign: "right",
+              width: "100%",
             }}
           >
-            You can take notes,<br />find ideas, and donate<br />money to those in need
-          </p>
+            <p
+              style={{
+                fontSize: "150px",
+                fontWeight: 400,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.1,
+                margin: 0,
+                padding: 0,
+                whiteSpace: "pre-line",
+              }}
+            >
+              You can take notes,<br />find ideas, and donate<br />money to those in need
+            </p>
+          </div>
         </div>
 
         {/* Spacer untuk scroll */}
@@ -307,31 +307,50 @@ export default function HomePage(): React.JSX.Element {
           display: none;
         }
 
-        /* Responsif untuk layar kecil */
-        @media (max-width: 1200px) {
-          .right-text p {
-            font-size: 100px !important;
+        /* Responsif */
+        @media (max-width: 1400px) {
+          .title {
+            font-size: 40px !important;
+          }
+          [ref="subtitleRef"] p {
+            font-size: 120px !important;
+          }
+        }
+        @media (max-width: 1024px) {
+          [ref="subtitleRef"] p {
+            font-size: 80px !important;
+          }
+          .title {
+            font-size: 36px !important;
           }
         }
         @media (max-width: 768px) {
-          .right-text p {
-            font-size: 60px !important;
+          [ref="subtitleRef"] p {
+            font-size: 50px !important;
           }
-          .right-text {
-            max-width: 80% !important;
-            top: 80px !important;
+          [ref="subtitleRef"] {
+            margin-top: 10px !important;
           }
           .title {
-            font-size: 32px !important; /* initial size */
+            font-size: 28px !important;
+          }
+          [style*="position: fixed"][style*="top: 40px"][style*="left: 40px"] {
+            top: 20px !important;
+            left: 20px !important;
+            max-width: 80% !important;
           }
         }
         @media (max-width: 480px) {
-          .right-text p {
-            font-size: 40px !important;
+          [ref="subtitleRef"] p {
+            font-size: 32px !important;
           }
-          .right-text {
+          .title {
+            font-size: 24px !important;
+          }
+          [style*="position: fixed"][style*="top: 40px"][style*="left: 40px"] {
+            top: 16px !important;
+            left: 16px !important;
             max-width: 90% !important;
-            top: 70px !important;
           }
         }
       `}</style>
