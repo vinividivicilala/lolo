@@ -152,21 +152,38 @@ export default function HomePage(): React.JSX.Element {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (!isMenuOpen) {
-      // Buka menu - animasi dari atas ke bawah
+      // Buka menu - animasi bergulir dari atas ke bawah (seperti tirai turun)
       if (menuOverlayRef.current) {
-        gsap.fromTo(menuOverlayRef.current,
-          { y: "-100%", opacity: 0 },
-          { y: "0%", opacity: 1, duration: 0.7, ease: "power2.out" }
-        );
+        // Set posisi awal di atas layar
+        gsap.set(menuOverlayRef.current, { 
+          y: "-100%", 
+          opacity: 0,
+          scaleY: 0,
+          transformOrigin: "top center"
+        });
+        // Animasi bergulir ke bawah
+        gsap.to(menuOverlayRef.current, {
+          y: "0%",
+          opacity: 1,
+          scaleY: 1,
+          duration: 0.8,
+          ease: "power2.out"
+        });
       }
     } else {
-      // Tutup menu - animasi ke atas
+      // Tutup menu - animasi bergulir ke atas (seperti tirai naik)
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
           y: "-100%",
           opacity: 0,
-          duration: 0.5,
-          ease: "power2.in"
+          scaleY: 0,
+          duration: 0.6,
+          ease: "power2.in",
+          transformOrigin: "top center",
+          onComplete: () => {
+            // Reset setelah animasi selesai
+            gsap.set(menuOverlayRef.current, { scaleY: 1 });
+          }
         });
       }
     }
@@ -458,7 +475,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay - FULL BLUE BG, animasi dari atas ke bawah */}
+        {/* Menu Overlay - FULL BLUE BG, animasi bergulir dari atas ke bawah (seperti tirai) */}
         {isMenuOpen && (
           <div
             ref={menuOverlayRef}
@@ -475,6 +492,7 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              transformOrigin: "top center",
             }}
           >
             {/* Close button */}
