@@ -40,6 +40,13 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
+// SVG Icons
+const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -47,6 +54,7 @@ export default function HomePage(): React.JSX.Element {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -273,7 +281,7 @@ export default function HomePage(): React.JSX.Element {
           </p>
         </div>
 
-        {/* Button / CTA - kotak border biru, tanpa panah */}
+        {/* Tombol "Let's build now" - kotak border kecil */}
         <div
           ref={buttonRef}
           className="cta-button"
@@ -285,23 +293,21 @@ export default function HomePage(): React.JSX.Element {
             display: "inline-block",
             border: "2px solid #0D3CFC",
             borderRadius: "8px",
-            padding: "16px 40px",
+            padding: "12px 28px",
             cursor: "pointer",
             transition: "all 0.3s ease",
             backgroundColor: "transparent",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "#0D3CFC";
-            e.currentTarget.style.color = "#ffffff";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#0D3CFC";
           }}
         >
           <span
             style={{
-              fontSize: "24px",
+              fontSize: "18px",
               fontWeight: 500,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
@@ -317,6 +323,40 @@ export default function HomePage(): React.JSX.Element {
           >
             Let's build now
           </span>
+        </div>
+
+        {/* Kotak border kecil dengan panah North East Arrow - tanpa warna full */}
+        <div
+          ref={arrowRef}
+          className="arrow-box"
+          style={{
+            position: "fixed",
+            top: "400px",
+            left: "240px",
+            zIndex: 15,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid #0D3CFC",
+            borderRadius: "8px",
+            padding: "10px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backgroundColor: "transparent",
+            color: "#0D3CFC",
+            width: "50px",
+            height: "50px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+            e.currentTarget.style.color = "#ffffff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#0D3CFC";
+          }}
+        >
+          <NorthEastArrow size={24} />
         </div>
 
         <div style={{ height: "100vh" }} />
@@ -355,10 +395,17 @@ export default function HomePage(): React.JSX.Element {
           }
           .cta-button {
             top: 350px !important;
-            padding: 14px 32px !important;
+            padding: 10px 22px !important;
           }
           .cta-button span {
-            font-size: 20px !important;
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            top: 350px !important;
+            left: 200px !important;
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
           }
         }
         @media (max-width: 768px) {
@@ -377,10 +424,21 @@ export default function HomePage(): React.JSX.Element {
           .cta-button {
             top: 280px !important;
             left: 20px !important;
-            padding: 12px 24px !important;
+            padding: 8px 18px !important;
           }
           .cta-button span {
-            font-size: 18px !important;
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            top: 280px !important;
+            left: 170px !important;
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
           }
         }
         @media (max-width: 480px) {
@@ -399,10 +457,21 @@ export default function HomePage(): React.JSX.Element {
           .cta-button {
             top: 220px !important;
             left: 16px !important;
-            padding: 10px 20px !important;
+            padding: 6px 14px !important;
           }
           .cta-button span {
-            font-size: 16px !important;
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            top: 220px !important;
+            left: 145px !important;
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
           }
         }
       `}</style>
