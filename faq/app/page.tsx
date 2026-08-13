@@ -35,43 +35,43 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 export default function HomePage(): React.JSX.Element {
-  const [loading, setLoading] = useState(true);
   const [showMain, setShowMain] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const words = ["Shop", "Note"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
-  // Animasi teks berganti (Shop / Note)
+  // Animasi teks berganti (Shop / Note) - modern Awwwards style
   useEffect(() => {
     if (!textRef.current) return;
     let interval: NodeJS.Timeout;
     let tl: gsap.core.Timeline;
 
     const animateText = () => {
-      tl = gsap.timeline({
-        onComplete: () => {
-          setCurrentWordIndex((prev) => (prev + 1) % words.length);
-        }
-      });
+      tl = gsap.timeline();
       tl.to(textRef.current, {
         opacity: 0,
-        y: -20,
-        duration: 0.4,
+        y: -30,
+        scale: 0.8,
+        duration: 0.5,
         ease: "power2.out"
       }).to(textRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.4,
-        ease: "power2.in",
-        delay: 0.2
+        scale: 1,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+        delay: 0.2,
+        onComplete: () => {
+          setCurrentWordIndex((prev) => (prev + 1) % words.length);
+        }
       });
     };
 
-    // Jalankan pertama kali setelah mount
+    // Jalankan pertama kali
     const timeout = setTimeout(() => {
       animateText();
-    }, 500);
+    }, 300);
 
     interval = setInterval(() => {
       animateText();
@@ -84,36 +84,30 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [words]);
 
-  // Efek fade out preloader setelah loading selesai
-  useEffect(() => {
-    if (!loading && preloaderRef.current) {
-      // Beri delay kecil agar animasi terlihat
-      setTimeout(() => {
-        gsap.to(preloaderRef.current, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
-          onComplete: () => {
-            setShowMain(true);
-          }
-        });
-      }, 500);
-    }
-  }, [loading]);
-
-  // Auth listener
+  // Auth listener - tunggu auth selesai, lalu beri delay agar preloader terlihat
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      // Set loading false setelah auth selesai, tapi kita tambah delay agar preloader terlihat
+      // Setelah auth selesai, biarkan preloader berjalan selama 4 detik
+      // agar animasi pergantian teks terlihat beberapa kali
       setTimeout(() => {
-        setLoading(false);
-      }, 1500);
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMain(true);
+            }
+          });
+        }
+      }, 4000);
     });
     return () => unsubscribe();
   }, []);
 
-  if (!showMain && loading) {
+  // Jika preloader masih muncul
+  if (!showMain) {
     return (
       <div
         ref={preloaderRef}
