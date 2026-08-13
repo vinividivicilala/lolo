@@ -6,6 +6,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
+import Lenis from '@studio-freight/lenis';
 
 // Firebase Config
 const firebaseConfig = {
@@ -38,21 +39,23 @@ export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [titleSize, setTitleSize] = useState(48);
 
+  // Auth listener - setelah auth selesai, mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      // Mulai animasi loading setelah auth selesai
-      startLoadingAnimation();
+      // Mulai animasi preloader
+      startPreloaderAnimation();
     });
     return () => unsubscribe();
   }, []);
 
-  const startLoadingAnimation = () => {
+  const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
-        // Setelah animasi selesai, fade out preloader dan tampilkan halaman
+        // Setelah animasi selesai, fade out preloader
         if (preloaderRef.current) {
           gsap.to(preloaderRef.current, {
             opacity: 0,
@@ -60,16 +63,18 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
+              // Inisialisasi Lenis setelah preloader hilang
+              initLenis();
             }
           });
         }
       }
     });
 
-    // Reset posisi awal teks dari bawah
+    // Reset posisi teks kanan
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    // 1. Muncul dari bawah ke posisi tengah (efek spring)
+    // 1. Muncul dari bawah ke tengah (Shop)
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -79,10 +84,10 @@ export default function HomePage(): React.JSX.Element {
 
     // Tunggu sebentar
     tl.to(textRef.current, {
-      duration: 0.5
+      duration: 0.6
     });
 
-    // 2. Ganti teks ke "Note" dengan animasi fade
+    // 2. Ganti teks ke "Note" dengan animasi
     tl.to(textRef.current, {
       opacity: 0,
       y: -20,
@@ -117,13 +122,46 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
 
-    // 4. Efek keseluruhan preloader mundur ke belakang (opsional)
+    // 4. Efek preloader sedikit mengecil
     tl.to(preloaderRef.current, {
       scale: 0.95,
       opacity: 0.8,
       duration: 0.3,
       ease: "power2.inOut"
     }, "-=0.3");
+  };
+
+  // Setup Lenis untuk smooth scroll
+  const initLenis = () => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+    });
+
+    // Update ukuran judul berdasarkan scroll
+    lenis.on('scroll', (e: any) => {
+      const scrollY = e.animatedScroll || e.scrollY || 0;
+      const maxScroll = window.innerHeight; // tinggi viewport
+      const progress = Math.min(scrollY / maxScroll, 1);
+      const newSize = 48 + (250 - 48) * progress;
+      setTitleSize(newSize);
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    // Cleanup
+    return () => {
+      lenis.destroy();
+    };
   };
 
   // Jika preloader masih muncul
@@ -145,8 +183,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div ref={containerRef} style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          {/* Kiri: MENURU biru 100px - tetap statis */}
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          {/* Kiri: Menuru biru 100px */}
           <span
             style={{
               fontSize: "100px",
@@ -156,7 +194,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: "-0.03em",
             }}
           >
-            MENURU
+            Menuru
           </span>
           {/* Kanan: teks berganti Shop/Note */}
           <span
@@ -209,35 +247,39 @@ export default function HomePage(): React.JSX.Element {
 
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "200vh", // biar bisa di-scroll
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
+          overflow: "hidden", // scrollbar disembunyikan oleh Lenis
         }}
       >
-        {/* ===== MENURU TITLE - TOP LEFT ===== */}
+        {/* Judul Menuru di kiri atas dengan ukuran dinamis */}
         <div
           style={{
-            position: "absolute",
+            position: "fixed",
             top: "40px",
             left: "40px",
             zIndex: 15,
           }}
         >
-          <span
+          <h1
+            ref={titleRef}
             style={{
-              fontSize: "48px",
+              fontSize: `${titleSize}px`,
               fontWeight: 700,
               color: "#000000",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
-              background: "transparent",
+              margin: 0,
+              padding: 0,
+              transition: "font-size 0.1s ease-out",
             }}
           >
             Menuru
-          </span>
+          </h1>
         </div>
       </div>
     </>
