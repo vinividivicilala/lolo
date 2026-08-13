@@ -6,7 +6,12 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
-import Lenis from '@studio-freight/lenis';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Firebase Config
 const firebaseConfig = {
@@ -40,14 +45,15 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const [titleSize, setTitleSize] = useState(48);
 
-  // Auth listener - setelah auth selesai, mulai animasi preloader
+  // Auth listener - mulai animasi preloader setelah auth selesai
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      // Mulai animasi preloader
-      startPreloaderAnimation();
+      // Beri sedikit delay agar preloader terlihat
+      setTimeout(() => {
+        startPreloaderAnimation();
+      }, 500);
     });
     return () => unsubscribe();
   }, []);
@@ -55,7 +61,7 @@ export default function HomePage(): React.JSX.Element {
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
-        // Setelah animasi selesai, fade out preloader
+        // Fade out preloader
         if (preloaderRef.current) {
           gsap.to(preloaderRef.current, {
             opacity: 0,
@@ -63,8 +69,8 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              // Inisialisasi Lenis setelah preloader hilang
-              initLenis();
+              // Inisialisasi ScrollTrigger setelah halaman muncul
+              initScrollAnimation();
             }
           });
         }
@@ -131,37 +137,28 @@ export default function HomePage(): React.JSX.Element {
     }, "-=0.3");
   };
 
-  // Setup Lenis untuk smooth scroll
-  const initLenis = () => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
+  // Inisialisasi GSAP ScrollTrigger untuk animasi judul
+  const initScrollAnimation = () => {
+    if (!titleRef.current) return;
+
+    // Buat timeline untuk judul
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1.2,
+        invalidateOnRefresh: true,
+      }
     });
 
-    // Update ukuran judul berdasarkan scroll
-    lenis.on('scroll', (e: any) => {
-      const scrollY = e.animatedScroll || e.scrollY || 0;
-      const maxScroll = window.innerHeight; // tinggi viewport
-      const progress = Math.min(scrollY / maxScroll, 1);
-      const newSize = 48 + (250 - 48) * progress;
-      setTitleSize(newSize);
+    // Animasi ukuran font dari 48px ke 400px
+    tl.to(titleRef.current, {
+      fontSize: "400px",
+      fontWeight: 400, // tidak tebal
+      duration: 1,
+      ease: "power2.inOut",
     });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    // Cleanup
-    return () => {
-      lenis.destroy();
-    };
   };
 
   // Jika preloader masih muncul
@@ -247,20 +244,20 @@ export default function HomePage(): React.JSX.Element {
 
       <div
         style={{
-          minHeight: "200vh", // biar bisa di-scroll
+          minHeight: "200vh", // tinggi agar bisa scroll
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden", // scrollbar disembunyikan oleh Lenis
+          overflow: "hidden", // scrollbar disembunyikan, tapi tetap bisa scroll
         }}
       >
-        {/* Judul Menuru di kiri atas dengan ukuran dinamis */}
+        {/* Judul Menuru di kiri atas - ukuran akan berubah via GSAP */}
         <div
           style={{
             position: "fixed",
-            top: "40px",
+            top: "20px", // diberi jarak agar tidak terlalu ke pinggir
             left: "40px",
             zIndex: 15,
           }}
@@ -268,18 +265,25 @@ export default function HomePage(): React.JSX.Element {
           <h1
             ref={titleRef}
             style={{
-              fontSize: `${titleSize}px`,
-              fontWeight: 700,
+              fontSize: "48px",
+              fontWeight: 700, // awal tebal, nanti akan menjadi 400 (tidak tebal) saat besar
               color: "#000000",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
               padding: 0,
-              transition: "font-size 0.1s ease-out",
+              lineHeight: 1,
+              transformOrigin: "left center",
             }}
           >
             Menuru
           </h1>
+        </div>
+
+        {/* Tambahan konten dummy untuk memberi ruang scroll */}
+        <div style={{ height: "100vh" }} />
+        <div style={{ height: "50vh", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.1 }}>
+          <span style={{ fontSize: "24px", color: "#ccc" }}>Scroll lebih banyak</span>
         </div>
       </div>
     </>
