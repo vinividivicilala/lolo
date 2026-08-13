@@ -45,12 +45,12 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader setelah auth selesai
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      // Beri sedikit delay agar preloader terlihat
       setTimeout(() => {
         startPreloaderAnimation();
       }, 500);
@@ -61,7 +61,6 @@ export default function HomePage(): React.JSX.Element {
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
-        // Fade out preloader
         if (preloaderRef.current) {
           gsap.to(preloaderRef.current, {
             opacity: 0,
@@ -69,15 +68,17 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              // Inisialisasi ScrollTrigger setelah halaman muncul
-              initScrollAnimation();
+              // Inisialisasi animasi setelah halaman muncul
+              setTimeout(() => {
+                initScrollAnimation();
+                initSmoothScroll();
+              }, 100);
             }
           });
         }
       }
     });
 
-    // Reset posisi teks kanan
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
     // 1. Muncul dari bawah ke tengah (Shop)
@@ -88,12 +89,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "back.out(1.7)"
     });
 
-    // Tunggu sebentar
-    tl.to(textRef.current, {
-      duration: 0.6
-    });
+    tl.to(textRef.current, { duration: 0.6 });
 
-    // 2. Ganti teks ke "Note" dengan animasi
+    // 2. Ganti teks ke "Note"
     tl.to(textRef.current, {
       opacity: 0,
       y: -20,
@@ -115,12 +113,9 @@ export default function HomePage(): React.JSX.Element {
       ease: "back.out(1.7)"
     });
 
-    // Tunggu sebentar
-    tl.to(textRef.current, {
-      duration: 0.8
-    });
+    tl.to(textRef.current, { duration: 0.8 });
 
-    // 3. Hilang ke belakang (zoom out + fade)
+    // 3. Hilang ke belakang
     tl.to(textRef.current, {
       scale: 0.3,
       opacity: 0,
@@ -128,7 +123,6 @@ export default function HomePage(): React.JSX.Element {
       ease: "power2.in"
     });
 
-    // 4. Efek preloader sedikit mengecil
     tl.to(preloaderRef.current, {
       scale: 0.95,
       opacity: 0.8,
@@ -137,12 +131,65 @@ export default function HomePage(): React.JSX.Element {
     }, "-=0.3");
   };
 
+  // Inisialisasi Smooth Scroll dengan GSAP
+  const initSmoothScroll = () => {
+    // Smooth scroll dengan menganimasikan scroll posisi
+    const scrollContainer = containerRef.current;
+    if (!scrollContainer) return;
+
+    // Sembunyikan scrollbar default
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Scroll event handler untuk smooth scroll
+    let targetScroll = window.scrollY;
+    let currentScroll = window.scrollY;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      targetScroll += e.deltaY;
+      targetScroll = Math.max(0, Math.min(targetScroll, document.body.scrollHeight - window.innerHeight));
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+
+    // GSAP animation loop untuk smooth scroll
+    const animateScroll = () => {
+      currentScroll += (targetScroll - currentScroll) * 0.08;
+      if (Math.abs(currentScroll - targetScroll) > 0.5) {
+        window.scrollTo(0, currentScroll);
+        requestAnimationFrame(animateScroll);
+      } else {
+        window.scrollTo(0, targetScroll);
+        // Refresh ScrollTrigger
+        ScrollTrigger.refresh();
+      }
+    };
+
+    // Mulai animasi smooth scroll
+    animateScroll();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  };
+
   // Inisialisasi GSAP ScrollTrigger untuk animasi judul
   const initScrollAnimation = () => {
     if (!titleRef.current) return;
 
+    // Pastikan ScrollTrigger sudah di-refresh
+    ScrollTrigger.refresh();
+
     // Buat timeline untuk judul
-    const tl = gsap.timeline({
+    gsap.to(titleRef.current, {
+      fontSize: "400px",
+      fontWeight: 400,
+      duration: 1,
+      ease: "power2.inOut",
       scrollTrigger: {
         trigger: "body",
         start: "top top",
@@ -152,13 +199,8 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
-    // Animasi ukuran font dari 48px ke 400px
-    tl.to(titleRef.current, {
-      fontSize: "400px",
-      fontWeight: 400, // tidak tebal
-      duration: 1,
-      ease: "power2.inOut",
-    });
+    // Refresh ScrollTrigger setelah animasi dibuat
+    ScrollTrigger.refresh();
   };
 
   // Jika preloader masih muncul
@@ -181,7 +223,6 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          {/* Kiri: Menuru biru 100px */}
           <span
             style={{
               fontSize: "100px",
@@ -193,7 +234,6 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </span>
-          {/* Kanan: teks berganti Shop/Note */}
           <span
             ref={textRef}
             style={{
@@ -213,7 +253,7 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // Halaman utama setelah preloader hilang
+  // Halaman utama
   return (
     <>
       <Head>
@@ -243,22 +283,23 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <div
+        ref={containerRef}
         style={{
-          minHeight: "200vh", // tinggi agar bisa scroll
+          minHeight: "200vh",
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden", // scrollbar disembunyikan, tapi tetap bisa scroll
+          overflow: "hidden",
         }}
       >
-        {/* Judul Menuru di kiri atas - ukuran akan berubah via GSAP */}
+        {/* Judul Menuru di kiri atas */}
         <div
           style={{
             position: "fixed",
-            top: "20px", // diberi jarak agar tidak terlalu ke pinggir
-            left: "40px",
+            top: "20px",
+            left: "20px",
             zIndex: 15,
           }}
         >
@@ -266,7 +307,7 @@ export default function HomePage(): React.JSX.Element {
             ref={titleRef}
             style={{
               fontSize: "48px",
-              fontWeight: 700, // awal tebal, nanti akan menjadi 400 (tidak tebal) saat besar
+              fontWeight: 700,
               color: "#000000",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
@@ -280,11 +321,9 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Tambahan konten dummy untuk memberi ruang scroll */}
+        {/* Spacer untuk scroll */}
         <div style={{ height: "100vh" }} />
-        <div style={{ height: "50vh", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.1 }}>
-          <span style={{ fontSize: "24px", color: "#ccc" }}>Scroll lebih banyak</span>
-        </div>
+        <div style={{ height: "50vh" }} />
       </div>
     </>
   );
