@@ -8,7 +8,7 @@ import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Register ScrollTrigger plugin
+// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -45,15 +45,13 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const rightTextRef = useRef<HTMLDivElement>(null);
 
-  // Auth listener - mulai animasi preloader setelah auth selesai
+  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      setTimeout(() => {
-        startPreloaderAnimation();
-      }, 500);
+      setTimeout(() => startPreloaderAnimation(), 500);
     });
     return () => unsubscribe();
   }, []);
@@ -68,11 +66,8 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              // Inisialisasi animasi setelah halaman muncul
-              setTimeout(() => {
-                initScrollAnimation();
-                initSmoothScroll();
-              }, 100);
+              // Inisialisasi animasi scroll setelah halaman muncul
+              initScrollAnimations();
             }
           });
         }
@@ -81,49 +76,41 @@ export default function HomePage(): React.JSX.Element {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    // 1. Muncul dari bawah ke tengah (Shop)
+    // 1. Muncul dari bawah (Shop)
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
       duration: 0.8,
       ease: "back.out(1.7)"
-    });
-
-    tl.to(textRef.current, { duration: 0.6 });
-
-    // 2. Ganti teks ke "Note"
-    tl.to(textRef.current, {
+    })
+    .to(textRef.current, { duration: 0.6 })
+    // 2. Ganti ke "Note"
+    .to(textRef.current, {
       opacity: 0,
       y: -20,
       scale: 0.9,
       duration: 0.4,
       ease: "power2.out",
       onComplete: () => {
-        if (textRef.current) {
-          textRef.current.textContent = "Note";
-        }
+        if (textRef.current) textRef.current.textContent = "Note";
       }
-    });
-
-    tl.to(textRef.current, {
+    })
+    .to(textRef.current, {
       opacity: 1,
       y: 0,
       scale: 1,
       duration: 0.6,
       ease: "back.out(1.7)"
-    });
-
-    tl.to(textRef.current, { duration: 0.8 });
-
+    })
+    .to(textRef.current, { duration: 0.8 })
     // 3. Hilang ke belakang
-    tl.to(textRef.current, {
+    .to(textRef.current, {
       scale: 0.3,
       opacity: 0,
       duration: 0.7,
       ease: "power2.in"
-    });
-
-    tl.to(preloaderRef.current, {
+    })
+    .to(preloaderRef.current, {
       scale: 0.95,
       opacity: 0.8,
       duration: 0.3,
@@ -131,79 +118,28 @@ export default function HomePage(): React.JSX.Element {
     }, "-=0.3");
   };
 
-  // Inisialisasi Smooth Scroll dengan GSAP
-  const initSmoothScroll = () => {
-    // Smooth scroll dengan menganimasikan scroll posisi
-    const scrollContainer = containerRef.current;
-    if (!scrollContainer) return;
+  const initScrollAnimations = () => {
+    // Animasi judul: dari 48px ke 400px saat scroll
+    if (titleRef.current) {
+      gsap.to(titleRef.current, {
+        fontSize: "400px",
+        fontWeight: 400, // tidak tebal saat besar
+        ease: "none",
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        }
+      });
+    }
 
-    // Sembunyikan scrollbar default
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
-    // Scroll event handler untuk smooth scroll
-    let targetScroll = window.scrollY;
-    let currentScroll = window.scrollY;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      targetScroll += e.deltaY;
-      targetScroll = Math.max(0, Math.min(targetScroll, document.body.scrollHeight - window.innerHeight));
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-    // GSAP animation loop untuk smooth scroll
-    const animateScroll = () => {
-      currentScroll += (targetScroll - currentScroll) * 0.08;
-      if (Math.abs(currentScroll - targetScroll) > 0.5) {
-        window.scrollTo(0, currentScroll);
-        requestAnimationFrame(animateScroll);
-      } else {
-        window.scrollTo(0, targetScroll);
-        // Refresh ScrollTrigger
-        ScrollTrigger.refresh();
-      }
-    };
-
-    // Mulai animasi smooth scroll
-    animateScroll();
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    };
+    // Opsional: animasi untuk teks kanan (misal opacity atau pergeseran)
+    // Bisa diabaikan karena permintaan hanya judul yang berubah ukuran
   };
 
-  // Inisialisasi GSAP ScrollTrigger untuk animasi judul
-  const initScrollAnimation = () => {
-    if (!titleRef.current) return;
-
-    // Pastikan ScrollTrigger sudah di-refresh
-    ScrollTrigger.refresh();
-
-    // Buat timeline untuk judul
-    gsap.to(titleRef.current, {
-      fontSize: "400px",
-      fontWeight: 400,
-      duration: 1,
-      ease: "power2.inOut",
-      scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.2,
-        invalidateOnRefresh: true,
-      }
-    });
-
-    // Refresh ScrollTrigger setelah animasi dibuat
-    ScrollTrigger.refresh();
-  };
-
-  // Jika preloader masih muncul
+  // Jika preloader masih aktif
   if (!showMain) {
     return (
       <div
@@ -265,17 +201,13 @@ export default function HomePage(): React.JSX.Element {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
-
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
-
         <meta property="og:title" content="Menuru Official | Home" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Menuru Official" />
-
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Menuru Official | Home" />
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
@@ -283,7 +215,6 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <div
-        ref={containerRef}
         style={{
           minHeight: "200vh",
           backgroundColor: "#ffffff",
@@ -291,20 +222,21 @@ export default function HomePage(): React.JSX.Element {
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden",
+          overflow: "hidden", // scrollbar disembunyikan via CSS global
         }}
       >
-        {/* Judul Menuru di kiri atas */}
+        {/* Judul di kiri atas */}
         <div
           style={{
             position: "fixed",
-            top: "20px",
-            left: "20px",
+            top: "40px",
+            left: "40px",
             zIndex: 15,
           }}
         >
           <h1
             ref={titleRef}
+            className="title"
             style={{
               fontSize: "48px",
               fontWeight: 700,
@@ -321,10 +253,88 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
+        {/* Teks panjang di kanan atas - rata kanan */}
+        <div
+          ref={rightTextRef}
+          className="right-text"
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            zIndex: 15,
+            textAlign: "right",
+            maxWidth: "60%",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "150px",
+              fontWeight: 400,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.1,
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            You can take notes,<br />find ideas, and donate<br />money to those in need
+          </p>
+        </div>
+
         {/* Spacer untuk scroll */}
         <div style={{ height: "100vh" }} />
-        <div style={{ height: "50vh" }} />
+        <div
+          style={{
+            height: "50vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0.1,
+          }}
+        >
+          <span style={{ fontSize: "24px", color: "#ccc" }}>Scroll lebih banyak</span>
+        </div>
       </div>
+
+      <style jsx global>{`
+        /* Sembunyikan scrollbar di semua browser */
+        body {
+          overflow: hidden !important;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        body::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Responsif untuk layar kecil */
+        @media (max-width: 1200px) {
+          .right-text p {
+            font-size: 100px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .right-text p {
+            font-size: 60px !important;
+          }
+          .right-text {
+            max-width: 80% !important;
+            top: 80px !important;
+          }
+          .title {
+            font-size: 32px !important; /* initial size */
+          }
+        }
+        @media (max-width: 480px) {
+          .right-text p {
+            font-size: 40px !important;
+          }
+          .right-text {
+            max-width: 90% !important;
+            top: 70px !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
