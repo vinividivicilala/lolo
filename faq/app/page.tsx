@@ -5,6 +5,12 @@ import Head from "next/head";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Firebase Config
 const firebaseConfig = {
@@ -47,10 +53,8 @@ export default function HomePage(): React.JSX.Element {
   const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const cardContainerRef = useRef<HTMLDivElement>(null);
-  const card1Ref = useRef<HTMLDivElement>(null);
-  const card2Ref = useRef<HTMLDivElement>(null);
-  const card3Ref = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -61,12 +65,65 @@ export default function HomePage(): React.JSX.Element {
           preloaderRef.current.style.transition = "opacity 0.6s ease";
           setTimeout(() => {
             setShowMain(true);
+            initScrollAnimations();
           }, 600);
         }
       }, 1500);
     });
     return () => unsubscribe();
   }, []);
+
+  const initScrollAnimations = () => {
+    // Smooth scroll with GSAP
+    gsap.to(window, {
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1.5,
+        onUpdate: (self) => {
+          // Tidak perlu melakukan apa-apa, hanya untuk smooth scroll
+        }
+      }
+    });
+
+    // Animasi section background berubah menjadi biru saat scroll
+    const sections = sectionsRef.current.filter(s => s !== null);
+    sections.forEach((section, index) => {
+      if (!section) return;
+      
+      const isEven = index % 2 === 0;
+      
+      gsap.to(section, {
+        backgroundColor: isEven ? "#0D3CFC" : "#ffffff",
+        color: isEven ? "#ffffff" : "#000000",
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top bottom",
+          end: "top top",
+          scrub: 1.5,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // Animasi teks di dalam section
+      const textElements = section.querySelectorAll('.section-text');
+      textElements.forEach((el) => {
+        gsap.to(el, {
+          color: isEven ? "#ffffff" : "#0D3CFC",
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "top top",
+            scrub: 1.5,
+            invalidateOnRefresh: true,
+          }
+        });
+      });
+    });
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -123,6 +180,7 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <div
+        ref={mainContainerRef}
         style={{
           minHeight: "100vh",
           backgroundColor: "#ffffff",
@@ -179,137 +237,131 @@ export default function HomePage(): React.JSX.Element {
           />
         )}
 
-        {/* SCROLLABLE CONTENT */}
-        <div style={{ position: "relative", zIndex: 1, paddingTop: "180px", paddingLeft: "40px", paddingRight: "40px", paddingBottom: "100px" }}>
-          
-          {/* Subtitle */}
-          <div ref={subtitleRef} style={{ marginBottom: "60px", textAlign: "left" }}>
-            <p style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, whiteSpace: "pre-line" }}>
+        {/* SECTION 1 - HITAM PUTIH */}
+        <div
+          ref={(el) => { if (el) sectionsRef.current[0] = el; }}
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div style={{ maxWidth: "900px", textAlign: "left" }}>
+            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, whiteSpace: "pre-line" }}>
               {`You can take notes, find ideas,\nand donate money to those in need`}
             </p>
-          </div>
-
-          {/* Tombol Let's build now + Arrow */}
-          <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "120px" }}>
-            <div
-              ref={buttonRef}
-              style={{
-                display: "inline-block",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "12px 28px",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                backgroundColor: "transparent",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-            >
-              <span style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"} onMouseLeave={(e) => e.currentTarget.style.color = "#0D3CFC"}>Let's build now</span>
-            </div>
-            <div
-              ref={arrowRef}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "10px",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                backgroundColor: "transparent",
-                color: "#0D3CFC",
-                width: "50px",
-                height: "50px",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; e.currentTarget.style.color = "#ffffff"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#0D3CFC"; }}
-            >
-              <NorthEastArrow size={24} />
-            </div>
-          </div>
-
-          {/* STACKED CARDS - Sticky, menumpuk saat scroll */}
-          <div ref={cardContainerRef} style={{ maxWidth: "900px", margin: "0 auto" }}>
-            
-            {/* Card 1 - 01 Note (paling atas) */}
-            <div
-              ref={card1Ref}
-              style={{
-                position: "sticky",
-                top: "200px",
-                padding: "40px 60px",
-                backgroundColor: "#ffffff",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                zIndex: 3,
-                borderBottom: "1px solid rgba(13,60,252,0.1)",
-                minHeight: "100px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "30px", width: "100%" }}>
-                <div style={{ fontSize: "20px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, minWidth: "40px" }}>01</div>
-                <div style={{ fontSize: "48px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, flex: 1 }}>Note</div>
-                <div style={{ color: "#0D3CFC" }}><NorthEastArrow size={32} /></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "40px" }}>
+              <div
+                ref={buttonRef}
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+              >
+                <span className="section-text" style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"} onMouseLeave={(e) => e.currentTarget.style.color = "#0D3CFC"}>Let's build now</span>
+              </div>
+              <div
+                ref={arrowRef}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  backgroundColor: "transparent",
+                  color: "#0D3CFC",
+                  width: "50px",
+                  height: "50px",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; e.currentTarget.style.color = "#ffffff"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#0D3CFC"; }}
+              >
+                <NorthEastArrow size={24} />
               </div>
             </div>
-
-            {/* Card 2 - 02 Donation (tengah) */}
-            <div
-              ref={card2Ref}
-              style={{
-                position: "sticky",
-                top: "200px",
-                padding: "40px 60px",
-                backgroundColor: "#ffffff",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                zIndex: 2,
-                borderBottom: "1px solid rgba(13,60,252,0.1)",
-                minHeight: "100px",
-                marginTop: "-100px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "30px", width: "100%" }}>
-                <div style={{ fontSize: "20px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, minWidth: "40px" }}>02</div>
-                <div style={{ fontSize: "48px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, flex: 1 }}>Donation</div>
-                <div style={{ color: "#0D3CFC" }}><NorthEastArrow size={32} /></div>
-              </div>
-            </div>
-
-            {/* Card 3 - 03 Calendar (bawah) */}
-            <div
-              ref={card3Ref}
-              style={{
-                position: "sticky",
-                top: "200px",
-                padding: "40px 60px",
-                backgroundColor: "#ffffff",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                zIndex: 1,
-                borderBottom: "1px solid rgba(13,60,252,0.1)",
-                minHeight: "100px",
-                marginTop: "-100px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "30px", width: "100%" }}>
-                <div style={{ fontSize: "20px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, minWidth: "40px" }}>03</div>
-                <div style={{ fontSize: "48px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, flex: 1 }}>Calendar</div>
-                <div style={{ color: "#0D3CFC" }}><NorthEastArrow size={32} /></div>
-              </div>
-            </div>
-
-            {/* Spacer agar bisa scroll melewati cards */}
-            <div style={{ height: "400px" }} />
           </div>
+        </div>
 
-          <div style={{ height: "50vh", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.1 }}>
-            <span style={{ fontSize: "24px", color: "#ccc" }}>Scroll lebih banyak</span>
+        {/* SECTION 2 - BIRU */}
+        <div
+          ref={(el) => { if (el) sectionsRef.current[1] = el; }}
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "#0D3CFC",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div style={{ maxWidth: "900px", textAlign: "left" }}>
+            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+              Explore More
+            </p>
+            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+              Discover new features and opportunities
+            </p>
+          </div>
+        </div>
+
+        {/* SECTION 3 - PUTIH */}
+        <div
+          ref={(el) => { if (el) sectionsRef.current[2] = el; }}
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div style={{ maxWidth: "900px", textAlign: "left" }}>
+            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+              Join Our Community
+            </p>
+            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+              Be part of something bigger
+            </p>
+          </div>
+        </div>
+
+        {/* SECTION 4 - BIRU */}
+        <div
+          ref={(el) => { if (el) sectionsRef.current[3] = el; }}
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "#0D3CFC",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div style={{ maxWidth: "900px", textAlign: "left" }}>
+            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+              Get Started Today
+            </p>
+            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+              Start your journey with Menuru
+            </p>
           </div>
         </div>
       </div>
@@ -333,9 +385,12 @@ export default function HomePage(): React.JSX.Element {
         body::-webkit-scrollbar {
           display: none;
         }
+        html {
+          scroll-behavior: smooth;
+        }
 
         @media (max-width: 1024px) {
-          .subtitle p {
+          .section-text {
             font-size: 48px !important;
           }
           .title {
@@ -344,15 +399,9 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 32px !important;
           }
-          .card {
-            padding: 30px 40px !important;
-          }
-          .card div[style*="font-size: 48px"] {
-            font-size: 36px !important;
-          }
         }
         @media (max-width: 768px) {
-          .subtitle p {
+          .section-text {
             font-size: 36px !important;
           }
           .title {
@@ -361,43 +410,8 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 28px !important;
           }
-          .card {
-            padding: 20px 24px !important;
-          }
-          .card div[style*="font-size: 48px"] {
-            font-size: 28px !important;
-          }
-          .card div[style*="font-size: 20px"] {
-            font-size: 16px !important;
-          }
-          .card div[style*="gap: 30px"] {
-            gap: 16px !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .menu-button span {
-            font-size: 24px !important;
-          }
-          .card {
-            padding: 16px 16px !important;
-          }
-          .card div[style*="font-size: 48px"] {
-            font-size: 22px !important;
-          }
-          .card div[style*="font-size: 20px"] {
-            font-size: 14px !important;
-          }
-          .card div[style*="gap: 30px"] {
-            gap: 12px !important;
-          }
           .cta-button {
-            padding: 8px 16px !important;
+            padding: 8px 18px !important;
           }
           .cta-button span {
             font-size: 14px !important;
@@ -410,6 +424,32 @@ export default function HomePage(): React.JSX.Element {
           .arrow-box svg {
             width: 18px !important;
             height: 18px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .section-text {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .menu-button span {
+            font-size: 24px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
           }
         }
       `}</style>
