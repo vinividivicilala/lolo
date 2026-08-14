@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -44,6 +45,13 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Arrow Right SVG
+const ArrowRight = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -389,6 +397,54 @@ export default function HomePage(): React.JSX.Element {
           <NorthEastArrow size={24} />
         </div>
 
+        {/* Pusat Bantuan - di sebelah kiri menu */}
+        <Link href="/pusat-bantuan">
+          <div
+            style={{
+              position: "fixed",
+              top: "40px",
+              right: "160px",
+              zIndex: 15,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              border: "2px solid #0D3CFC",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              backgroundColor: "transparent",
+              color: "#0D3CFC",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#0D3CFC";
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "#0D3CFC";
+            }}
+          >
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                fontFamily: FONT_FAMILY,
+                transition: "color 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#ffffff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#0D3CFC";
+              }}
+            >
+              Pusat Bantuan
+            </span>
+            <ArrowRight size={18} />
+          </div>
+        </Link>
+
         {/* Menu Button */}
         <div
           ref={menuButtonRef}
@@ -539,6 +595,18 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 32px !important;
           }
+          /* Pusat Bantuan responsive */
+          .pusat-bantuan {
+            right: 140px !important;
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -580,6 +648,18 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 28px !important;
           }
+          /* Pusat Bantuan responsive */
+          .pusat-bantuan {
+            right: 100px !important;
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -620,6 +700,18 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 24px !important;
+          }
+          /* Pusat Bantuan responsive */
+          .pusat-bantuan {
+            right: 75px !important;
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan svg {
+            width: 12px !important;
+            height: 12px !important;
           }
         }
       `}</style>
