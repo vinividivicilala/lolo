@@ -74,6 +74,7 @@ export default function HomePage(): React.JSX.Element {
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const aboutRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -149,13 +150,23 @@ export default function HomePage(): React.JSX.Element {
 
   const initScrollAnimations = () => {
     // Animasi judul: dari 48px ke 400px saat scroll ke bawah
-    if (titleRef.current) {
+    if (titleRef.current && heroRef.current) {
+      // Reset posisi judul ke posisi awal
+      gsap.set(titleRef.current, {
+        position: "fixed",
+        top: "40px",
+        left: "40px",
+        fontSize: "48px",
+        zIndex: 15,
+      });
+
+      // Animasi ukuran font dari 48px ke 400px
       gsap.to(titleRef.current, {
         fontSize: "400px",
         fontWeight: 400,
         ease: "none",
         scrollTrigger: {
-          trigger: "body",
+          trigger: heroRef.current,
           start: "top top",
           end: "bottom bottom",
           scrub: 1.5,
@@ -166,14 +177,14 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initBlurAnimations = () => {
-    // Blur effect pada navbar dan judul saat scroll
+    // Blur effect pada navbar saat scroll - tapi tidak tembus ke menu overlay
     if (navbarRef.current) {
       gsap.to(navbarRef.current, {
         backdropFilter: "blur(10px)",
         backgroundColor: "rgba(255,255,255,0.8)",
         duration: 0.5,
         scrollTrigger: {
-          trigger: "body",
+          trigger: heroRef.current,
           start: "top top",
           end: "bottom bottom",
           scrub: 1,
@@ -181,6 +192,7 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
+    // Blur effect pada judul
     if (titleRef.current) {
       gsap.to(titleRef.current, {
         backdropFilter: "blur(10px)",
@@ -189,7 +201,7 @@ export default function HomePage(): React.JSX.Element {
         borderRadius: "12px",
         duration: 0.5,
         scrollTrigger: {
-          trigger: "body",
+          trigger: heroRef.current,
           start: "top top",
           end: "bottom bottom",
           scrub: 1,
@@ -358,6 +370,7 @@ export default function HomePage(): React.JSX.Element {
       >
         {/* HERO SECTION */}
         <div
+          ref={heroRef}
           style={{
             minHeight: "100vh",
             display: "flex",
@@ -471,7 +484,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan blur effect */}
+        {/* NAVBAR - FIXED di atas dengan blur effect, di atas menu overlay */}
         <div
           ref={navbarRef}
           style={{
@@ -487,9 +500,10 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "rgba(255,255,255,0)",
             backdropFilter: "blur(0px)",
             transition: "all 0.3s ease",
+            pointerEvents: isMenuOpen ? "none" : "auto",
           }}
         >
-          {/* Get in Touch dengan panah SVG biru full dalam kotak */}
+          {/* Get in Touch - border biru, panah biru full di dalam kotak */}
           <Link href="/contact">
             <div
               className="get-in-touch"
@@ -524,6 +538,7 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "4px",
                   padding: "4px",
                   color: "#ffffff",
+                  border: "2px solid #0D3CFC",
                 }}
               >
                 <ArrowRight size={16} />
@@ -531,7 +546,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Pusat Bantuan dengan panah SVG hitam full dalam kotak */}
+          {/* Pusat Bantuan - border hitam, panah hitam full di dalam kotak */}
           <Link href="/pusat-bantuan">
             <div
               className="pusat-bantuan"
@@ -539,7 +554,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                border: "2px solid #0D3CFC",
+                border: "2px solid #000000",
                 borderRadius: "8px",
                 padding: "8px 16px",
                 cursor: "pointer",
@@ -550,7 +565,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "16px",
                   fontWeight: 500,
-                  color: "#0D3CFC",
+                  color: "#000000",
                   fontFamily: FONT_FAMILY,
                   display: "inline-block",
                 }}
@@ -566,6 +581,7 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "4px",
                   padding: "4px",
                   color: "#ffffff",
+                  border: "2px solid #000000",
                 }}
               >
                 <ArrowRight size={16} />
@@ -573,14 +589,14 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu dengan tanda + hitam full dalam kotak */}
+          {/* Menu - border hitam, tanda + hitam full di dalam kotak */}
           <div
             className="menu-button"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              border: "2px solid #0D3CFC",
+              border: "2px solid #000000",
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
@@ -597,6 +613,7 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "4px",
                 padding: "4px",
                 color: "#ffffff",
+                border: "2px solid #000000",
                 transition: "transform 0.4s ease",
                 transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
               }}
@@ -616,7 +633,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 fontSize: "16px",
                 fontWeight: 500,
-                color: "#0D3CFC",
+                color: "#000000",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "0.02em",
                 display: "inline-block",
@@ -627,7 +644,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay */}
+        {/* Menu Overlay - di bawah navbar */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -646,7 +663,29 @@ export default function HomePage(): React.JSX.Element {
             transform: "translateY(-100%)",
             opacity: 0,
           }}
-        />
+        >
+          {/* Menu content */}
+          <div style={{ 
+            color: "#ffffff", 
+            fontSize: "48px", 
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+          }}>
+            Menu
+          </div>
+          <div style={{ 
+            display: "flex", 
+            gap: "40px", 
+            marginTop: "40px",
+            flexDirection: "column",
+            alignItems: "center",
+          }}>
+            <Link href="/" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Home</Link>
+            <Link href="/about" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>About</Link>
+            <Link href="/contact" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Pusat Bantuan</Link>
+          </div>
+        </div>
 
         {/* SPACER */}
         <div style={{ height: "100vh" }} />
