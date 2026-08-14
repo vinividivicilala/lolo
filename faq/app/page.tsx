@@ -42,13 +42,12 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Section data
+// Section data - 4 sections dengan warna bergantian
 const sections = [
-  { id: 'home', bg: '#ffffff', titleColor: '#000000', menuColor: '#0D3CFC' },
-  { id: 'about', bg: '#0D3CFC', titleColor: '#ffffff', menuColor: '#ffffff' },
-  { id: 'features', bg: '#f5f5f5', titleColor: '#000000', menuColor: '#0D3CFC' },
-  { id: 'donate', bg: '#1a1a1a', titleColor: '#ffffff', menuColor: '#ffffff' },
-  { id: 'contact', bg: '#0D3CFC', titleColor: '#ffffff', menuColor: '#ffffff' },
+  { id: 0, bg: '#ffffff', titleColor: '#000000', menuColor: '#0D3CFC', textColor: '#000000' },
+  { id: 1, bg: '#0D3CFC', titleColor: '#ffffff', menuColor: '#ffffff', textColor: '#ffffff' },
+  { id: 2, bg: '#ffffff', titleColor: '#000000', menuColor: '#0D3CFC', textColor: '#000000' },
+  { id: 3, bg: '#0D3CFC', titleColor: '#ffffff', menuColor: '#ffffff', textColor: '#ffffff' },
 ];
 
 export default function HomePage(): React.JSX.Element {
@@ -65,6 +64,7 @@ export default function HomePage(): React.JSX.Element {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const highlightTextRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -149,11 +149,12 @@ export default function HomePage(): React.JSX.Element {
     lenis.on('scroll', (e: any) => {
       const scroll = e.animatedScroll;
       const height = window.innerHeight;
-      const sectionIndex = Math.round(scroll / height);
+      const sectionIndex = Math.min(Math.round(scroll / height), sections.length - 1);
       
-      if (sectionIndex !== currentSection && sectionIndex < sections.length) {
+      if (sectionIndex !== currentSection) {
         setCurrentSection(sectionIndex);
         updateColors(sectionIndex);
+        updateHighlightText(sectionIndex);
       }
     });
 
@@ -166,6 +167,7 @@ export default function HomePage(): React.JSX.Element {
 
     // Update colors on initial load
     updateColors(0);
+    updateHighlightText(0);
 
     return () => {
       lenis.destroy();
@@ -261,12 +263,42 @@ export default function HomePage(): React.JSX.Element {
       const subP = subtitleRef.current.querySelector('p');
       if (subP) {
         gsap.to(subP, {
-          color: section.menuColor,
+          color: section.textColor,
           duration: 0.8,
           ease: "power2.inOut",
         });
       }
     }
+  };
+
+  const updateHighlightText = (index: number) => {
+    if (!highlightTextRef.current) return;
+    
+    const words = highlightTextRef.current.querySelectorAll('.highlight-word');
+    const section = sections[index];
+    
+    words.forEach((word) => {
+      const el = word as HTMLElement;
+      const isHighlight = el.dataset.highlight === 'true';
+      
+      if (isHighlight) {
+        // Highlight words become blue on white bg, white on blue bg
+        const highlightColor = section.bg === '#ffffff' ? '#0D3CFC' : '#ffffff';
+        gsap.to(el, {
+          color: highlightColor,
+          duration: 0.6,
+          ease: "power2.inOut",
+        });
+      } else {
+        // Regular words become dark on white bg, light on blue bg
+        const regularColor = section.bg === '#ffffff' ? '#000000' : 'rgba(255,255,255,0.8)';
+        gsap.to(el, {
+          color: regularColor,
+          duration: 0.6,
+          ease: "power2.inOut",
+        });
+      }
+    });
   };
 
   const toggleMenu = () => {
@@ -416,7 +448,7 @@ export default function HomePage(): React.JSX.Element {
           ))}
         </div>
 
-        {/* Section 1: Home */}
+        {/* Section 1: White */}
         <div className="section" style={{ height: "100vh", width: "100%", position: "relative" }}>
           {/* Judul di kiri atas */}
           <div
@@ -447,7 +479,7 @@ export default function HomePage(): React.JSX.Element {
             </h1>
           </div>
 
-          {/* Subtitle - 2 baris */}
+          {/* Subtitle */}
           <div
             ref={subtitleRef}
             className="subtitle"
@@ -463,7 +495,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 fontSize: "60px",
                 fontWeight: 400,
-                color: "#0D3CFC",
+                color: "#000000",
                 fontFamily: FONT_FAMILY,
                 lineHeight: 1.2,
                 margin: 0,
@@ -521,7 +553,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* Arrow box - posisi di samping tombol */}
+          {/* Arrow box */}
           <div
             ref={arrowRef}
             className="arrow-box"
@@ -555,7 +587,7 @@ export default function HomePage(): React.JSX.Element {
             <NorthEastArrow size={24} />
           </div>
 
-          {/* About Us - kotak border di kanan atas */}
+          {/* About Us */}
           <div
             className="about-us"
             style={{
@@ -665,80 +697,55 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Section 2: About */}
+        {/* Section 2: Blue */}
         <div className="section" style={{ height: "100vh", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
-          <div style={{ textAlign: "center", maxWidth: "800px" }}>
-            <h2 style={{ fontSize: "72px", fontWeight: 700, color: "#ffffff", fontFamily: FONT_FAMILY, marginBottom: "30px" }}>
-              About Us
-            </h2>
-            <p style={{ fontSize: "24px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
-              Menuru is a platform where creativity meets generosity. 
-              We provide tools for you to take notes, find ideas, 
-              and make a difference through donations.
-            </p>
-          </div>
-        </div>
-
-        {/* Section 3: Features */}
-        <div className="section" style={{ height: "100vh", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
-          <div style={{ textAlign: "center", maxWidth: "900px" }}>
-            <h2 style={{ fontSize: "64px", fontWeight: 700, color: "#000000", fontFamily: FONT_FAMILY, marginBottom: "40px" }}>
-              Features
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "30px" }}>
-              <div style={{ padding: "30px", background: "white", borderRadius: "16px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
-                <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", marginBottom: "12px" }}>Notes</h3>
-                <p style={{ fontSize: "16px", color: "#666" }}>Take and organize your ideas</p>
-              </div>
-              <div style={{ padding: "30px", background: "white", borderRadius: "16px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
-                <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", marginBottom: "12px" }}>Shop</h3>
-                <p style={{ fontSize: "16px", color: "#666" }}>Find unique products</p>
-              </div>
-              <div style={{ padding: "30px", background: "white", borderRadius: "16px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
-                <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", marginBottom: "12px" }}>Donate</h3>
-                <p style={{ fontSize: "16px", color: "#666" }}>Support those in need</p>
-              </div>
+          <div ref={highlightTextRef} style={{ textAlign: "center", maxWidth: "900px" }}>
+            <div style={{ fontSize: "48px", fontWeight: 400, lineHeight: 1.4 }}>
+              <span className="highlight-word" data-highlight="true" style={{ color: "#0D3CFC", transition: "color 0.6s ease" }}>About</span>
+              <span className="highlight-word" style={{ color: "rgba(255,255,255,0.8)", transition: "color 0.6s ease" }}> </span>
+              <span className="highlight-word" data-highlight="true" style={{ color: "#0D3CFC", transition: "color 0.6s ease" }}>note</span>
+              <span className="highlight-word" style={{ color: "rgba(255,255,255,0.8)", transition: "color 0.6s ease" }}>, </span>
+              <span className="highlight-word" data-highlight="true" style={{ color: "#0D3CFC", transition: "color 0.6s ease" }}>shop</span>
+              <span className="highlight-word" style={{ color: "rgba(255,255,255,0.8)", transition: "color 0.6s ease" }}> </span>
+              <span className="highlight-word" style={{ color: "rgba(255,255,255,0.8)", transition: "color 0.6s ease" }}>and </span>
+              <span className="highlight-word" data-highlight="true" style={{ color: "#0D3CFC", transition: "color 0.6s ease" }}>donasi</span>
+              <br />
+              <span className="highlight-word" style={{ fontSize: "32px", fontWeight: 300, color: "rgba(255,255,255,0.8)", transition: "color 0.6s ease" }}>
+                We provide a platform for you to take notes, find ideas, and donate money to those in need.
+                <br />
+                Menuru is a place where creativity meets generosity.
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Section 4: Donate */}
+        {/* Section 3: White */}
         <div className="section" style={{ height: "100vh", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
-          <div style={{ textAlign: "center", maxWidth: "800px" }}>
-            <h2 style={{ fontSize: "72px", fontWeight: 700, color: "#ffffff", fontFamily: FONT_FAMILY, marginBottom: "30px" }}>
-              Make a Donation
-            </h2>
-            <p style={{ fontSize: "24px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, lineHeight: 1.6, marginBottom: "40px" }}>
-              Every contribution helps. Join us in making the world a better place.
-            </p>
-            <button style={{
-              padding: "16px 48px",
-              fontSize: "20px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              background: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "transform 0.3s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-            >
-              Donate Now
-            </button>
+          <div style={{ textAlign: "center", maxWidth: "900px" }}>
+            <div style={{ fontSize: "48px", fontWeight: 400, lineHeight: 1.4 }}>
+              <span style={{ color: "#000000" }}>Create, </span>
+              <span style={{ color: "#0D3CFC" }}>Innovate</span>
+              <span style={{ color: "#000000" }}>, and </span>
+              <span style={{ color: "#0D3CFC" }}>Inspire</span>
+              <br />
+              <span style={{ fontSize: "32px", fontWeight: 300, color: "#666666" }}>
+                Turn your ideas into reality with Menuru's powerful tools.
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Section 5: Contact */}
+        {/* Section 4: Blue */}
         <div className="section" style={{ height: "100vh", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
-          <div style={{ textAlign: "center", maxWidth: "800px" }}>
-            <h2 style={{ fontSize: "72px", fontWeight: 700, color: "#ffffff", fontFamily: FONT_FAMILY, marginBottom: "30px" }}>
-              Get in Touch
-            </h2>
-            <p style={{ fontSize: "24px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
-              Have questions? We'd love to hear from you.
-            </p>
+          <div style={{ textAlign: "center", maxWidth: "900px" }}>
+            <div style={{ fontSize: "48px", fontWeight: 400, lineHeight: 1.4 }}>
+              <span style={{ color: "#ffffff" }}>Make a </span>
+              <span style={{ color: "rgba(255,255,255,0.6)" }}>Difference</span>
+              <br />
+              <span style={{ fontSize: "32px", fontWeight: 300, color: "rgba(255,255,255,0.8)" }}>
+                Every donation counts. Join us in creating positive change.
+              </span>
+            </div>
           </div>
         </div>
 
@@ -783,7 +790,10 @@ export default function HomePage(): React.JSX.Element {
                 onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
                 onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
               >
-                {section.id.charAt(0).toUpperCase() + section.id.slice(1)}
+                {index === 0 && "Home"}
+                {index === 1 && "About"}
+                {index === 2 && "Features"}
+                {index === 3 && "Donate"}
               </button>
             ))}
           </div>
@@ -841,6 +851,9 @@ export default function HomePage(): React.JSX.Element {
           .about-us span {
             font-size: 14px !important;
           }
+          .highlight-text {
+            font-size: 36px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -890,13 +903,10 @@ export default function HomePage(): React.JSX.Element {
           .about-us span {
             font-size: 12px !important;
           }
-          [ref="highlightRef"] {
-            width: 90% !important;
-          }
-          [ref="highlightRef"] div {
+          .highlight-text {
             font-size: 28px !important;
           }
-          [ref="highlightRef"] div span:last-child {
+          .highlight-text span:last-child {
             font-size: 20px !important;
           }
         }
@@ -948,13 +958,10 @@ export default function HomePage(): React.JSX.Element {
           .about-us span {
             font-size: 11px !important;
           }
-          [ref="highlightRef"] {
-            width: 95% !important;
-          }
-          [ref="highlightRef"] div {
+          .highlight-text {
             font-size: 22px !important;
           }
-          [ref="highlightRef"] div span:last-child {
+          .highlight-text span:last-child {
             font-size: 16px !important;
           }
         }
