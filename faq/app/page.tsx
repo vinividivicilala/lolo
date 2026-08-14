@@ -614,16 +614,18 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
-        {/* ABOUT SECTION - di bawah tombol Let's build now */}
+        {/* SPACER - agar bisa scroll */}
+        <div style={{ height: "100vh" }} />
+
+        {/* ABOUT SECTION */}
         <div
           ref={aboutRef}
           style={{
             position: "relative",
-            marginTop: "550px",
-            padding: "80px 40px",
+            padding: "100px 40px",
             backgroundColor: "#f8f9fa",
             width: "100%",
-            minHeight: "60vh",
+            minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -827,7 +829,10 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* TIMELINE SECTION - Scroll driven accordion */}
+        {/* SPACER */}
+        <div style={{ height: "50vh" }} />
+
+        {/* TIMELINE SECTION */}
         <div
           ref={timelineRef}
           style={{
@@ -850,7 +855,6 @@ export default function HomePage(): React.JSX.Element {
               height: "500px",
             }}
           >
-            {/* Timeline Item 1 - Note */}
             <div
               ref={(el) => { timelineItemsRef.current[0] = el; }}
               style={{
@@ -879,7 +883,6 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Timeline Item 2 - Donasi */}
             <div
               ref={(el) => { timelineItemsRef.current[1] = el; }}
               style={{
@@ -908,7 +911,6 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Timeline Item 3 - Shop */}
             <div
               ref={(el) => { timelineItemsRef.current[2] = el; }}
               style={{
@@ -938,7 +940,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Scroll indicator */}
           <div
             style={{
               position: "absolute",
@@ -957,6 +958,71 @@ export default function HomePage(): React.JSX.Element {
             <ArrowDown size={24} style={{ color: "#0D3CFC" }} />
           </div>
         </div>
+
+        {/* SPACER */}
+        <div style={{ height: "30vh" }} />
+
+        {/* DUMMY CONTENT - Untuk scroll lebih banyak */}
+        <div
+          style={{
+            padding: "80px 40px",
+            backgroundColor: "#ffffff",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "48px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "30px",
+            }}
+          >
+            Bergabunglah dengan Komunitas Menuru
+          </h2>
+          <p
+            style={{
+              fontSize: "20px",
+              color: "#666666",
+              fontFamily: FONT_FAMILY,
+              maxWidth: "700px",
+              margin: "0 auto",
+              lineHeight: 1.8,
+            }}
+          >
+            Ribuan kreator telah bergabung dan menciptakan perubahan. 
+            Mulai perjalanan Anda hari ini dan jadilah bagian dari gerakan 
+            yang menggabungkan kreativitas dengan kepedulian.
+          </p>
+          
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "60px",
+              marginTop: "50px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>10K+</div>
+              <div style={{ fontSize: "16px", color: "#999999" }}>Pengguna Aktif</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>5K+</div>
+              <div style={{ fontSize: "16px", color: "#999999" }}>Ide Tercatat</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>Rp 2M+</div>
+              <div style={{ fontSize: "16px", color: "#999999" }}>Donasi Terkumpul</div>
+            </div>
+          </div>
+        </div>
+
+        {/* SPACER */}
+        <div style={{ height: "20vh" }} />
 
         {/* Footer */}
         <div
@@ -1136,7 +1202,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .about-section {
             padding: 50px 20px !important;
-            margin-top: 450px !important;
           }
           .about-section h2 {
             font-size: 48px !important;
@@ -1226,7 +1291,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .about-section {
             padding: 40px 16px !important;
-            margin-top: 380px !important;
           }
           .about-section h2 {
             font-size: 36px !important;
