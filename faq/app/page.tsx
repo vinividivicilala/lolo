@@ -60,6 +60,13 @@ const ArrowDown = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+// Green Arrow SVG untuk Get in touch
+const GreenArrowRight = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#00D27F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,6 +80,11 @@ export default function HomePage(): React.JSX.Element {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Refs untuk navbar items
+  const pusatBantuanRef = useRef<HTMLDivElement>(null);
+  const getInTouchRef = useRef<HTMLDivElement>(null);
+  const menuTextRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -95,6 +107,7 @@ export default function HomePage(): React.JSX.Element {
               setShowMain(true);
               initScrollAnimations();
               initTimelineAnimations();
+              initNavbarAnimations();
             }
           });
         }
@@ -213,6 +226,68 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.5,
       ease: "power2.inOut"
     }, 1.5);
+  };
+
+  // Animasi Rolling Text untuk Navbar
+  const initNavbarAnimations = () => {
+    const navItems = [pusatBantuanRef.current, getInTouchRef.current, menuTextRef.current];
+    
+    navItems.forEach((item) => {
+      if (!item) return;
+      
+      const text = item.querySelector('span');
+      if (!text) return;
+
+      // Buat teks duplikat untuk efek rolling
+      const originalText = text.textContent || '';
+      const clone = text.cloneNode(true) as HTMLElement;
+      clone.textContent = originalText;
+      clone.style.position = 'absolute';
+      clone.style.top = '0';
+      clone.style.left = '0';
+      clone.style.width = '100%';
+      clone.style.height = '100%';
+      clone.style.display = 'flex';
+      clone.style.alignItems = 'center';
+      clone.style.justifyContent = 'center';
+      clone.style.transform = 'translateY(100%)';
+      clone.style.opacity = '0';
+      
+      item.style.position = 'relative';
+      item.style.overflow = 'hidden';
+      item.appendChild(clone);
+
+      // Animasi hover
+      item.addEventListener('mouseenter', () => {
+        gsap.to(text, {
+          y: '-100%',
+          opacity: 0,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+        gsap.to(clone, {
+          y: '0%',
+          opacity: 1,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+      });
+
+      item.addEventListener('mouseleave', () => {
+        gsap.to(text, {
+          y: '0%',
+          opacity: 1,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+        gsap.to(clone, {
+          y: '100%',
+          opacity: 0,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+      });
+    });
   };
 
   const toggleMenu = () => {
@@ -463,18 +538,19 @@ export default function HomePage(): React.JSX.Element {
         {/* Pusat Bantuan - teks dengan kotak border sendiri */}
         <Link href="/pusat-bantuan">
           <div
+            ref={pusatBantuanRef}
             className="pusat-bantuan"
             style={{
               position: "fixed",
               top: "40px",
-              right: "240px",
+              right: "360px",
               zIndex: 15,
               display: "inline-block",
               border: "2px solid #0D3CFC",
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
-              transition: "all 0.3s ease",
+              transition: "background-color 0.3s ease",
               backgroundColor: "transparent",
             }}
             onMouseEnter={(e) => {
@@ -491,12 +567,7 @@ export default function HomePage(): React.JSX.Element {
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
                 transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "#ffffff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "#0D3CFC";
+                display: "inline-block",
               }}
             >
               Pusat Bantuan
@@ -504,10 +575,50 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Arrow Right box - kotak border terpisah untuk panah SVG */}
-        <Link href="/pusat-bantuan">
+        {/* Get in Touch - teks dengan kotak border sendiri */}
+        <Link href="/contact">
           <div
-            className="arrow-right-box"
+            ref={getInTouchRef}
+            className="get-in-touch"
+            style={{
+              position: "fixed",
+              top: "40px",
+              right: "220px",
+              zIndex: 15,
+              display: "inline-block",
+              border: "2px solid #0D3CFC",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+              backgroundColor: "transparent",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#0D3CFC";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                transition: "color 0.3s ease",
+                display: "inline-block",
+              }}
+            >
+              Get in touch
+            </span>
+          </div>
+        </Link>
+
+        {/* Green Arrow Right box - untuk Get in touch, warna hijau stabilo tanpa hover */}
+        <Link href="/contact">
+          <div
+            className="green-arrow-box"
             style={{
               position: "fixed",
               top: "40px",
@@ -516,32 +627,22 @@ export default function HomePage(): React.JSX.Element {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "2px solid #0D3CFC",
               borderRadius: "8px",
               padding: "10px",
               cursor: "pointer",
-              transition: "all 0.3s ease",
               backgroundColor: "transparent",
-              color: "#0D3CFC",
+              color: "#00D27F",
               width: "40px",
               height: "40px",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0D3CFC";
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "#0D3CFC";
-            }}
           >
-            <ArrowRight size={20} />
+            <GreenArrowRight size={24} />
           </div>
         </Link>
 
         {/* Menu - teks dengan kotak border sendiri */}
         <div
-          ref={menuButtonRef}
+          ref={menuTextRef}
           className="menu-button-text"
           style={{
             position: "fixed",
@@ -553,7 +654,7 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: "8px",
             padding: "8px 16px",
             cursor: "pointer",
-            transition: "all 0.3s ease",
+            transition: "background-color 0.3s ease",
             backgroundColor: "transparent",
           }}
           onClick={toggleMenu}
@@ -572,12 +673,7 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "0.02em",
               transition: "color 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#0D3CFC";
+              display: "inline-block",
             }}
           >
             Menu
@@ -836,21 +932,28 @@ export default function HomePage(): React.JSX.Element {
             padding: 8px !important;
           }
           .pusat-bantuan {
-            right: 200px !important;
+            right: 300px !important;
             padding: 6px 12px !important;
           }
           .pusat-bantuan span {
             font-size: 14px !important;
           }
-          .arrow-right-box {
+          .get-in-touch {
+            right: 180px !important;
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .green-arrow-box {
             right: 130px !important;
             width: 36px !important;
             height: 36px !important;
             padding: 8px !important;
           }
-          .arrow-right-box svg {
-            width: 18px !important;
-            height: 18px !important;
+          .green-arrow-box svg {
+            width: 20px !important;
+            height: 20px !important;
           }
           .menu-button-text {
             right: 80px !important;
@@ -902,21 +1005,28 @@ export default function HomePage(): React.JSX.Element {
             height: 18px !important;
           }
           .pusat-bantuan {
-            right: 150px !important;
+            right: 220px !important;
             padding: 4px 10px !important;
           }
           .pusat-bantuan span {
             font-size: 12px !important;
           }
-          .arrow-right-box {
-            right: 100px !important;
+          .get-in-touch {
+            right: 130px !important;
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .green-arrow-box {
+            right: 90px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 6px !important;
           }
-          .arrow-right-box svg {
-            width: 16px !important;
-            height: 16px !important;
+          .green-arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
           }
           .menu-button-text {
             right: 60px !important;
@@ -968,21 +1078,28 @@ export default function HomePage(): React.JSX.Element {
             height: 14px !important;
           }
           .pusat-bantuan {
-            right: 110px !important;
+            right: 160px !important;
             padding: 4px 8px !important;
           }
           .pusat-bantuan span {
             font-size: 10px !important;
           }
-          .arrow-right-box {
-            right: 75px !important;
+          .get-in-touch {
+            right: 95px !important;
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .green-arrow-box {
+            right: 65px !important;
             width: 28px !important;
             height: 28px !important;
             padding: 4px !important;
           }
-          .arrow-right-box svg {
-            width: 14px !important;
-            height: 14px !important;
+          .green-arrow-box svg {
+            width: 16px !important;
+            height: 16px !important;
           }
           .menu-button-text {
             right: 45px !important;
