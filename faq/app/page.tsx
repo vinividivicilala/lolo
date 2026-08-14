@@ -5,10 +5,10 @@ import Head from "next/head";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -30,13 +30,17 @@ let auth = null;
 let db = null;
 
 if (typeof window !== "undefined") {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
   auth = getAuth(app);
   db = getFirestore(app);
 }
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
+// SVG Icons
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -46,89 +50,125 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentSection, setCurrentSection] = useState(0);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const sectionColors = [
-    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
-    { bg: '#0D3CFC', text: '#ffffff', title: '#ffffff', menu: '#ffffff' },
-    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
-    { bg: '#0D3CFC', text: '#ffffff', title: '#ffffff', menu: '#ffffff' },
-    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
-  ];
-
+  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
-      setTimeout(() => {
-        if (preloaderRef.current) {
-          preloaderRef.current.style.opacity = "0";
-          preloaderRef.current.style.transition = "opacity 0.6s ease";
-          setTimeout(() => {
-            setShowMain(true);
-            initScrollAnimations();
-          }, 600);
-        }
-      }, 1500);
+      setTimeout(() => startPreloaderAnimation(), 500);
     });
     return () => unsubscribe();
   }, []);
 
-  const initScrollAnimations = () => {
-    const sections = sectionsRef.current.filter(s => s !== null);
-
-    sections.forEach((section, index) => {
-      if (!section) return;
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          setCurrentSection(index);
-          // Update title color
-          if (titleRef.current) {
-            titleRef.current.style.color = sectionColors[index].title;
-          }
-          // Update menu button color
-          if (menuButtonRef.current) {
-            const spans = menuButtonRef.current.querySelectorAll('span');
-            spans.forEach(span => {
-              span.style.color = sectionColors[index].menu;
-            });
-            menuButtonRef.current.style.borderColor = sectionColors[index].menu;
-            if (!isMenuOpen) {
-              menuButtonRef.current.style.backgroundColor = 'transparent';
+  const startPreloaderAnimation = () => {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMain(true);
+              initScrollAnimations();
             }
-          }
-        },
-        onEnterBack: () => {
-          setCurrentSection(index);
-          if (titleRef.current) {
-            titleRef.current.style.color = sectionColors[index].title;
-          }
-          if (menuButtonRef.current) {
-            const spans = menuButtonRef.current.querySelectorAll('span');
-            spans.forEach(span => {
-              span.style.color = sectionColors[index].menu;
-            });
-            menuButtonRef.current.style.borderColor = sectionColors[index].menu;
-            if (!isMenuOpen) {
-              menuButtonRef.current.style.backgroundColor = 'transparent';
-            }
-          }
-        },
-      });
+          });
+        }
+      }
     });
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
+
+  const initScrollAnimations = () => {
+    if (titleRef.current) {
+      gsap.to(titleRef.current, {
+        fontSize: "400px",
+        fontWeight: 400,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        }
+      });
+    }
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen) {
+      // BUKA MENU - seperti tirai turun dari atas
+      setIsMenuOpen(true);
+      if (menuOverlayRef.current) {
+        gsap.fromTo(menuOverlayRef.current,
+          { y: "-100%", opacity: 0 },
+          { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
+        );
+      }
+    } else {
+      // TUTUP MENU - seperti tirai naik ke atas
+      if (menuOverlayRef.current) {
+        gsap.to(menuOverlayRef.current, {
+          y: "-100%",
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => {
+            setIsMenuOpen(false);
+          }
+        });
+      } else {
+        setIsMenuOpen(false);
+      }
+    }
   };
 
   if (!showMain) {
@@ -150,8 +190,31 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
-          <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block" }}>Shop</span>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
         </div>
       </div>
     );
@@ -183,19 +246,27 @@ export default function HomePage(): React.JSX.Element {
 
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "200vh",
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflowX: "hidden",
+          overflow: "hidden",
         }}
       >
-        {/* JUDUL - FIXED TOP LEFT */}
-        <div style={{ position: "fixed", top: "40px", left: "40px", zIndex: 15 }}>
+        {/* Judul di kiri atas - berubah ukuran saat scroll */}
+        <div
+          style={{
+            position: "fixed",
+            top: "40px",
+            left: "40px",
+            zIndex: 15,
+          }}
+        >
           <h1
             ref={titleRef}
+            className="title"
             style={{
               fontSize: "48px",
               fontWeight: 700,
@@ -205,16 +276,124 @@ export default function HomePage(): React.JSX.Element {
               margin: 0,
               padding: 0,
               lineHeight: 1,
-              transition: "color 0.6s ease",
+              transformOrigin: "left center",
             }}
           >
             Menuru
           </h1>
         </div>
 
-        {/* MENU BUTTON - FIXED TOP RIGHT */}
+        {/* Subtitle - 2 baris, di bawah judul, rata kiri, warna biru */}
+        <div
+          ref={subtitleRef}
+          className="subtitle"
+          style={{
+            position: "fixed",
+            top: "150px",
+            left: "40px",
+            zIndex: 15,
+            textAlign: "left",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "60px",
+              fontWeight: 400,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.2,
+              margin: 0,
+              padding: 0,
+              paddingBottom: "30px",
+              whiteSpace: "pre-line",
+            }}
+          >
+            {`You can take notes, find ideas,\nand donate money to those in need`}
+          </p>
+        </div>
+
+        {/* Tombol "Let's build now" - kotak border kecil */}
+        <div
+          ref={buttonRef}
+          className="cta-button"
+          style={{
+            position: "fixed",
+            top: "400px",
+            left: "40px",
+            zIndex: 15,
+            display: "inline-block",
+            border: "2px solid #0D3CFC",
+            borderRadius: "8px",
+            padding: "12px 28px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backgroundColor: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
+          <span
+            style={{
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+              transition: "color 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#0D3CFC";
+            }}
+          >
+            Let's build now
+          </span>
+        </div>
+
+        {/* Kotak border kecil dengan panah North East Arrow */}
+        <div
+          ref={arrowRef}
+          className="arrow-box"
+          style={{
+            position: "fixed",
+            top: "400px",
+            left: "240px",
+            zIndex: 15,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid #0D3CFC",
+            borderRadius: "8px",
+            padding: "10px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backgroundColor: "transparent",
+            color: "#0D3CFC",
+            width: "50px",
+            height: "50px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+            e.currentTarget.style.color = "#ffffff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#0D3CFC";
+          }}
+        >
+          <NorthEastArrow size={24} />
+        </div>
+
+        {/* Menu Button - "+ Menu" dengan kotak border */}
         <div
           ref={menuButtonRef}
+          className="menu-button"
           style={{
             position: "fixed",
             top: "40px",
@@ -227,20 +406,32 @@ export default function HomePage(): React.JSX.Element {
             border: "2px solid #0D3CFC",
             borderRadius: "8px",
             padding: "8px 16px",
-            backgroundColor: isMenuOpen ? "#0D3CFC" : "transparent",
             transition: "all 0.3s ease",
+            backgroundColor: "transparent",
           }}
           onClick={toggleMenu}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
         >
           <span
             style={{
               fontSize: "40px",
               fontWeight: 300,
-              color: isMenuOpen ? "#ffffff" : "#0D3CFC",
+              color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               transition: "transform 0.4s ease, color 0.3s ease",
               transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
               lineHeight: 1,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#0D3CFC";
             }}
           >
             +
@@ -249,413 +440,183 @@ export default function HomePage(): React.JSX.Element {
             style={{
               fontSize: "40px",
               fontWeight: 500,
-              color: isMenuOpen ? "#ffffff" : "#0D3CFC",
+              color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               letterSpacing: "0.02em",
               display: "inline-block",
               transition: "color 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#0D3CFC";
             }}
           >
             Menu
           </span>
         </div>
 
-        {/* MENU OVERLAY - FULL BLUE */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              ref={menuOverlayRef}
-              initial={{ y: "-100%", opacity: 0 }}
-              animate={{ y: "0%", opacity: 1 }}
-              exit={{ y: "-100%", opacity: 0 }}
-              transition={{ duration: 0.6, ease: "power2.out" }}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "#0D3CFC",
-                zIndex: 19,
-              }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* SECTION 1 - PUTIH */}
-        <motion.div
-          ref={(el) => { if (el) sectionsRef.current[0] = el; }}
+        {/* Menu Overlay - FULL BLUE BG, animasi tirai dari atas ke bawah */}
+        <div
+          ref={menuOverlayRef}
+          className="menu-overlay"
           style={{
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px",
-            backgroundColor: "#ffffff",
-            transition: "background-color 0.6s ease",
-          }}
-          animate={{
-            backgroundColor: sectionColors[0].bg,
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-          <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <motion.p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: sectionColors[0].text,
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                whiteSpace: "pre-line",
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[0].text }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              {`You can take notes, find ideas,\nand donate money to those in need`}
-            </motion.p>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "40px" }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  border: `2px solid ${sectionColors[0].text}`,
-                  borderRadius: "8px",
-                  padding: "12px 28px",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = sectionColors[0].text; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 500,
-                    color: sectionColors[0].text,
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.02em",
-                    transition: "color 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
-                  onMouseLeave={(e) => e.currentTarget.style.color = sectionColors[0].text}
-                >
-                  Let's build now
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: `2px solid ${sectionColors[0].text}`,
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  backgroundColor: "transparent",
-                  color: sectionColors[0].text,
-                  width: "50px",
-                  height: "50px",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = sectionColors[0].text; e.currentTarget.style.color = "#ffffff"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = sectionColors[0].text; }}
-              >
-                <NorthEastArrow size={24} />
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* SECTION 2 - BIRU */}
-        <motion.div
-          ref={(el) => { if (el) sectionsRef.current[1] = el; }}
-          style={{
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
             backgroundColor: "#0D3CFC",
-            transition: "background-color 0.6s ease",
+            zIndex: 19,
+            display: isMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: "translateY(-100%)",
+            opacity: 0,
           }}
-          animate={{
-            backgroundColor: sectionColors[1].bg,
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
-          <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <motion.p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: sectionColors[1].text,
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[1].text }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Explore More
-            </motion.p>
-            <motion.p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "rgba(255,255,255,0.8)",
-                fontFamily: FONT_FAMILY,
-                marginTop: "20px",
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[1].text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Discover new features and opportunities
-            </motion.p>
-          </div>
-        </motion.div>
+          {/* Kosong - hanya background biru */}
+        </div>
 
-        {/* SECTION 3 - PUTIH */}
-        <motion.div
-          ref={(el) => { if (el) sectionsRef.current[2] = el; }}
+        <div style={{ height: "100vh" }} />
+        <div
           style={{
-            height: "100vh",
+            height: "50vh",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "40px",
-            backgroundColor: "#ffffff",
-            transition: "background-color 0.6s ease",
+            opacity: 0.1,
           }}
-          animate={{
-            backgroundColor: sectionColors[2].bg,
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
-          <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <motion.p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: sectionColors[2].text,
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[2].text }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Join Our Community
-            </motion.p>
-            <motion.p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "#666",
-                fontFamily: FONT_FAMILY,
-                marginTop: "20px",
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[2].text === '#0D3CFC' ? '#666' : 'rgba(255,255,255,0.7)' }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Be part of something bigger
-            </motion.p>
-          </div>
-        </motion.div>
-
-        {/* SECTION 4 - BIRU */}
-        <motion.div
-          ref={(el) => { if (el) sectionsRef.current[3] = el; }}
-          style={{
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px",
-            backgroundColor: "#0D3CFC",
-            transition: "background-color 0.6s ease",
-          }}
-          animate={{
-            backgroundColor: sectionColors[3].bg,
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-          <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <motion.p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: sectionColors[3].text,
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[3].text }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Get Started Today
-            </motion.p>
-            <motion.p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "rgba(255,255,255,0.8)",
-                fontFamily: FONT_FAMILY,
-                marginTop: "20px",
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[3].text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Start your journey with Menuru
-            </motion.p>
-          </div>
-        </motion.div>
-
-        {/* SECTION 5 - PUTIH */}
-        <motion.div
-          ref={(el) => { if (el) sectionsRef.current[4] = el; }}
-          style={{
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px",
-            backgroundColor: "#ffffff",
-            transition: "background-color 0.6s ease",
-          }}
-          animate={{
-            backgroundColor: sectionColors[4].bg,
-          }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-          <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <motion.p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: sectionColors[4].text,
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[4].text }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              Thank You
-            </motion.p>
-            <motion.p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "#666",
-                fontFamily: FONT_FAMILY,
-                marginTop: "20px",
-                transition: "color 0.6s ease",
-              }}
-              animate={{ color: sectionColors[4].text === '#0D3CFC' ? '#666' : 'rgba(255,255,255,0.7)' }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-            >
-              For visiting Menuru
-            </motion.p>
-          </div>
-        </motion.div>
+          <span style={{ fontSize: "24px", color: "#ccc" }}>Scroll lebih banyak</span>
+        </div>
       </div>
 
       <style jsx global>{`
-        /* HIDE SCROLLBAR */
-        html, body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
+        body {
+          overflow: hidden !important;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
-        html::-webkit-scrollbar, body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
+        body::-webkit-scrollbar {
+          display: none;
         }
 
         @media (max-width: 1024px) {
-          .section-text {
+          .subtitle p {
             font-size: 48px !important;
           }
-          .section-subtitle {
-            font-size: 20px !important;
+          .subtitle {
+            top: 130px !important;
           }
           .title {
             font-size: 36px !important;
+          }
+          .cta-button {
+            top: 350px !important;
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            top: 350px !important;
+            left: 200px !important;
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .menu-button {
+            top: 30px !important;
+            right: 30px !important;
+            padding: 6px 12px !important;
           }
           .menu-button span {
             font-size: 32px !important;
           }
         }
         @media (max-width: 768px) {
-          .section-text {
+          .subtitle p {
             font-size: 36px !important;
           }
-          .section-subtitle {
-            font-size: 18px !important;
+          .subtitle {
+            top: 110px !important;
+            left: 20px !important;
           }
           .title {
             font-size: 28px !important;
+            top: 20px !important;
+            left: 20px !important;
           }
-          .menu-button span {
-            font-size: 28px !important;
-          }
-          .button-text {
-            font-size: 14px !important;
-          }
-          .border-animate {
+          .cta-button {
+            top: 280px !important;
+            left: 20px !important;
             padding: 8px 18px !important;
           }
-          .arrow-icon {
-            width: 40px !important;
-            height: 40px !important;
-            padding: 8px !important;
+          .cta-button span {
+            font-size: 14px !important;
           }
-          .arrow-icon svg {
+          .arrow-box {
+            top: 280px !important;
+            left: 170px !important;
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
             width: 18px !important;
             height: 18px !important;
           }
+          .menu-button {
+            top: 20px !important;
+            right: 20px !important;
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 28px !important;
+          }
         }
         @media (max-width: 480px) {
-          .section-text {
+          .subtitle p {
             font-size: 24px !important;
           }
-          .section-subtitle {
-            font-size: 16px !important;
+          .subtitle {
+            top: 90px !important;
+            left: 16px !important;
           }
           .title {
             font-size: 22px !important;
+            top: 16px !important;
+            left: 16px !important;
           }
-          .menu-button span {
-            font-size: 24px !important;
-          }
-          .button-text {
-            font-size: 12px !important;
-          }
-          .border-animate {
+          .cta-button {
+            top: 220px !important;
+            left: 16px !important;
             padding: 6px 14px !important;
           }
-          .arrow-icon {
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            top: 220px !important;
+            left: 145px !important;
             width: 32px !important;
             height: 32px !important;
-            padding: 6px !important;
+            padding: 4px !important;
           }
-          .arrow-icon svg {
+          .arrow-box svg {
             width: 14px !important;
             height: 14px !important;
           }
           .menu-button {
-            padding: 4px 10px !important;
+            top: 16px !important;
+            right: 16px !important;
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 24px !important;
           }
         }
       `}</style>
