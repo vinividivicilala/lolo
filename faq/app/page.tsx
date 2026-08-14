@@ -94,8 +94,12 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              initScrollAnimations();
-              initTimelineAnimations();
+              // Refresh ScrollTrigger setelah showMain
+              setTimeout(() => {
+                ScrollTrigger.refresh();
+                initScrollAnimations();
+                initTimelineAnimations();
+              }, 100);
             }
           });
         }
@@ -315,18 +319,18 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
+      {/* MAIN CONTAINER - tanpa overflow hidden */}
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "200vh",
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden",
         }}
       >
-        {/* Judul di kiri atas */}
+        {/* Judul di kiri atas - FIXED */}
         <div
           style={{
             position: "fixed",
@@ -354,7 +358,7 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle - 2 baris */}
+        {/* Subtitle - FIXED */}
         <div
           ref={subtitleRef}
           className="subtitle"
@@ -383,7 +387,7 @@ export default function HomePage(): React.JSX.Element {
           </p>
         </div>
 
-        {/* Tombol "Let's build now" */}
+        {/* Tombol "Let's build now" - FIXED */}
         <div
           ref={buttonRef}
           className="cta-button"
@@ -413,7 +417,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Arrow box - kotak border dengan ikon NorthEast Arrow (warna biru full) */}
+        {/* Arrow box - FIXED */}
         <div
           ref={arrowRef}
           className="arrow-box"
@@ -438,7 +442,7 @@ export default function HomePage(): React.JSX.Element {
           <NorthEastArrow size={24} />
         </div>
 
-        {/* Get in Touch - teks dengan kotak border */}
+        {/* Get in Touch - FIXED */}
         <Link href="/contact">
           <div
             className="get-in-touch"
@@ -469,7 +473,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Arrow Right box - untuk Get in touch (warna biru full) */}
+        {/* Arrow Right box - FIXED */}
         <Link href="/contact">
           <div
             className="arrow-right-box"
@@ -495,7 +499,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Pusat Bantuan - teks dengan kotak border */}
+        {/* Pusat Bantuan - FIXED */}
         <Link href="/pusat-bantuan">
           <div
             className="pusat-bantuan"
@@ -526,7 +530,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Menu - teks dengan kotak border */}
+        {/* Menu - FIXED */}
         <div
           className="menu-button-text"
           style={{
@@ -557,7 +561,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Plus box - kotak border dengan tanda + (warna biru full) */}
+        {/* Plus box - FIXED */}
         <div
           className="plus-box"
           style={{
@@ -614,7 +618,7 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
-        {/* SPACER - agar bisa scroll */}
+        {/* SPACER - agar konten bisa di-scroll */}
         <div style={{ height: "100vh" }} />
 
         {/* ABOUT SECTION */}
@@ -962,7 +966,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "30vh" }} />
 
-        {/* DUMMY CONTENT - Untuk scroll lebih banyak */}
+        {/* DUMMY CONTENT */}
         <div
           style={{
             padding: "80px 40px",
@@ -1048,13 +1052,28 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx global>{`
+        /* HIDE SCROLLBAR tapi tetap bisa scroll */
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
         body {
-          overflow: hidden !important;
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
         }
         body::-webkit-scrollbar {
-          display: none;
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
 
         @media (max-width: 1024px) {
@@ -1120,12 +1139,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .plus-box span {
             font-size: 28px !important;
-          }
-          .about-section h2 {
-            font-size: 60px !important;
-          }
-          .about-section p {
-            font-size: 20px !important;
           }
         }
         @media (max-width: 768px) {
@@ -1200,22 +1213,6 @@ export default function HomePage(): React.JSX.Element {
           .plus-box span {
             font-size: 24px !important;
           }
-          .about-section {
-            padding: 50px 20px !important;
-          }
-          .about-section h2 {
-            font-size: 48px !important;
-          }
-          .about-section p {
-            font-size: 18px !important;
-          }
-          .about-cards {
-            gap: 20px !important;
-          }
-          .about-cards > div {
-            flex: 1 1 100% !important;
-            max-width: 100% !important;
-          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -1288,15 +1285,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .plus-box span {
             font-size: 20px !important;
-          }
-          .about-section {
-            padding: 40px 16px !important;
-          }
-          .about-section h2 {
-            font-size: 36px !important;
-          }
-          .about-section p {
-            font-size: 16px !important;
           }
         }
       `}</style>
