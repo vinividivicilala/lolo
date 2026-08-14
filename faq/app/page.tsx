@@ -60,7 +60,7 @@ const ArrowDown = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Green Arrow SVG untuk Get in touch
+// Green Arrow SVG untuk Get in touch dengan kotak border
 const GreenArrowRight = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#00D27F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -228,7 +228,7 @@ export default function HomePage(): React.JSX.Element {
     }, 1.5);
   };
 
-  // Animasi Rolling Text untuk Navbar
+  // Animasi Rolling Text untuk Navbar (maju-mundur)
   const initNavbarAnimations = () => {
     const navItems = [pusatBantuanRef.current, getInTouchRef.current, menuTextRef.current];
     
@@ -238,51 +238,23 @@ export default function HomePage(): React.JSX.Element {
       const text = item.querySelector('span');
       if (!text) return;
 
-      // Buat teks duplikat untuk efek rolling
-      const originalText = text.textContent || '';
-      const clone = text.cloneNode(true) as HTMLElement;
-      clone.textContent = originalText;
-      clone.style.position = 'absolute';
-      clone.style.top = '0';
-      clone.style.left = '0';
-      clone.style.width = '100%';
-      clone.style.height = '100%';
-      clone.style.display = 'flex';
-      clone.style.alignItems = 'center';
-      clone.style.justifyContent = 'center';
-      clone.style.transform = 'translateY(100%)';
-      clone.style.opacity = '0';
+      // Simpan posisi awal
+      const initialX = 0;
       
-      item.style.position = 'relative';
-      item.style.overflow = 'hidden';
-      item.appendChild(clone);
-
-      // Animasi hover
+      // Animasi hover - bergerak maju dan mundur
       item.addEventListener('mouseenter', () => {
         gsap.to(text, {
-          y: '-100%',
-          opacity: 0,
+          x: 10,
           duration: 0.3,
-          ease: 'power2.inOut'
-        });
-        gsap.to(clone, {
-          y: '0%',
-          opacity: 1,
-          duration: 0.3,
-          ease: 'power2.inOut'
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1
         });
       });
 
       item.addEventListener('mouseleave', () => {
         gsap.to(text, {
-          y: '0%',
-          opacity: 1,
-          duration: 0.3,
-          ease: 'power2.inOut'
-        });
-        gsap.to(clone, {
-          y: '100%',
-          opacity: 0,
+          x: 0,
           duration: 0.3,
           ease: 'power2.inOut'
         });
@@ -535,11 +507,11 @@ export default function HomePage(): React.JSX.Element {
           <NorthEastArrow size={24} />
         </div>
 
-        {/* Pusat Bantuan - teks dengan kotak border sendiri */}
-        <Link href="/pusat-bantuan">
+        {/* Get in Touch - teks dengan kotak border sendiri (sebelah kiri Pusat Bantuan) */}
+        <Link href="/contact">
           <div
-            ref={pusatBantuanRef}
-            className="pusat-bantuan"
+            ref={getInTouchRef}
+            className="get-in-touch"
             style={{
               position: "fixed",
               top: "40px",
@@ -568,22 +540,58 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: FONT_FAMILY,
                 transition: "color 0.3s ease",
                 display: "inline-block",
+                willChange: "transform",
               }}
             >
-              Pusat Bantuan
+              Get in touch
             </span>
           </div>
         </Link>
 
-        {/* Get in Touch - teks dengan kotak border sendiri */}
+        {/* Green Arrow Right box - dengan kotak border hijau stabilo */}
         <Link href="/contact">
           <div
-            ref={getInTouchRef}
-            className="get-in-touch"
+            className="green-arrow-box"
             style={{
               position: "fixed",
               top: "40px",
-              right: "220px",
+              right: "280px",
+              zIndex: 15,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px solid #00D27F",
+              borderRadius: "8px",
+              padding: "10px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+              color: "#00D27F",
+              width: "40px",
+              height: "40px",
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#00D27F";
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "#00D27F";
+            }}
+          >
+            <GreenArrowRight size={24} />
+          </div>
+        </Link>
+
+        {/* Pusat Bantuan - teks dengan kotak border sendiri */}
+        <Link href="/pusat-bantuan">
+          <div
+            ref={pusatBantuanRef}
+            className="pusat-bantuan"
+            style={{
+              position: "fixed",
+              top: "40px",
+              right: "160px",
               zIndex: 15,
               display: "inline-block",
               border: "2px solid #0D3CFC",
@@ -608,35 +616,11 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: FONT_FAMILY,
                 transition: "color 0.3s ease",
                 display: "inline-block",
+                willChange: "transform",
               }}
             >
-              Get in touch
+              Pusat Bantuan
             </span>
-          </div>
-        </Link>
-
-        {/* Green Arrow Right box - untuk Get in touch, warna hijau stabilo tanpa hover */}
-        <Link href="/contact">
-          <div
-            className="green-arrow-box"
-            style={{
-              position: "fixed",
-              top: "40px",
-              right: "160px",
-              zIndex: 15,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "8px",
-              padding: "10px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-              color: "#00D27F",
-              width: "40px",
-              height: "40px",
-            }}
-          >
-            <GreenArrowRight size={24} />
           </div>
         </Link>
 
@@ -674,6 +658,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: "0.02em",
               transition: "color 0.3s ease",
               display: "inline-block",
+              willChange: "transform",
             }}
           >
             Menu
@@ -931,22 +916,15 @@ export default function HomePage(): React.JSX.Element {
             height: 44px !important;
             padding: 8px !important;
           }
-          .pusat-bantuan {
-            right: 300px !important;
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
           .get-in-touch {
-            right: 180px !important;
+            right: 300px !important;
             padding: 6px 12px !important;
           }
           .get-in-touch span {
             font-size: 14px !important;
           }
           .green-arrow-box {
-            right: 130px !important;
+            right: 230px !important;
             width: 36px !important;
             height: 36px !important;
             padding: 8px !important;
@@ -954,6 +932,13 @@ export default function HomePage(): React.JSX.Element {
           .green-arrow-box svg {
             width: 20px !important;
             height: 20px !important;
+          }
+          .pusat-bantuan {
+            right: 130px !important;
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
           }
           .menu-button-text {
             right: 80px !important;
@@ -1004,22 +989,15 @@ export default function HomePage(): React.JSX.Element {
             width: 18px !important;
             height: 18px !important;
           }
-          .pusat-bantuan {
-            right: 220px !important;
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
           .get-in-touch {
-            right: 130px !important;
+            right: 220px !important;
             padding: 4px 10px !important;
           }
           .get-in-touch span {
             font-size: 12px !important;
           }
           .green-arrow-box {
-            right: 90px !important;
+            right: 170px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 6px !important;
@@ -1027,6 +1005,13 @@ export default function HomePage(): React.JSX.Element {
           .green-arrow-box svg {
             width: 18px !important;
             height: 18px !important;
+          }
+          .pusat-bantuan {
+            right: 100px !important;
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
           }
           .menu-button-text {
             right: 60px !important;
@@ -1077,22 +1062,15 @@ export default function HomePage(): React.JSX.Element {
             width: 14px !important;
             height: 14px !important;
           }
-          .pusat-bantuan {
-            right: 160px !important;
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
           .get-in-touch {
-            right: 95px !important;
+            right: 160px !important;
             padding: 4px 8px !important;
           }
           .get-in-touch span {
             font-size: 10px !important;
           }
           .green-arrow-box {
-            right: 65px !important;
+            right: 125px !important;
             width: 28px !important;
             height: 28px !important;
             padding: 4px !important;
@@ -1100,6 +1078,13 @@ export default function HomePage(): React.JSX.Element {
           .green-arrow-box svg {
             width: 16px !important;
             height: 16px !important;
+          }
+          .pusat-bantuan {
+            right: 75px !important;
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
           }
           .menu-button-text {
             right: 45px !important;
