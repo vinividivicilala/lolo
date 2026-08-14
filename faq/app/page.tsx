@@ -5,6 +5,7 @@ import Head from "next/head";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -45,12 +46,21 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentSection, setCurrentSection] = useState(0);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const sectionColors = [
+    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
+    { bg: '#0D3CFC', text: '#ffffff', title: '#ffffff', menu: '#ffffff' },
+    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
+    { bg: '#0D3CFC', text: '#ffffff', title: '#ffffff', menu: '#ffffff' },
+    { bg: '#ffffff', text: '#0D3CFC', title: '#000000', menu: '#0D3CFC' },
+  ];
 
   useEffect(() => {
     if (!auth) return;
@@ -71,58 +81,48 @@ export default function HomePage(): React.JSX.Element {
 
   const initScrollAnimations = () => {
     const sections = sectionsRef.current.filter(s => s !== null);
-    const colors = ['#ffffff', '#0D3CFC', '#ffffff', '#0D3CFC', '#ffffff'];
-    const textColors = ['#0D3CFC', '#ffffff', '#0D3CFC', '#ffffff', '#0D3CFC'];
 
     sections.forEach((section, index) => {
       if (!section) return;
 
-      // Background color animation
-      gsap.to(section, {
-        backgroundColor: colors[index % colors.length],
-        duration: 0.5,
-        ease: "power1.inOut",
-        scrollTrigger: {
-          trigger: section,
-          start: "top center",
-          end: "bottom center",
-          scrub: 1.5,
-          invalidateOnRefresh: true,
-        }
-      });
-
-      // Text color animation
-      const textElements = section.querySelectorAll('.section-text, .section-subtitle, .button-text, .arrow-icon');
-      textElements.forEach((el) => {
-        gsap.to(el, {
-          color: textColors[index % textColors.length],
-          duration: 0.5,
-          ease: "power1.inOut",
-          scrollTrigger: {
-            trigger: section,
-            start: "top center",
-            end: "bottom center",
-            scrub: 1.5,
-            invalidateOnRefresh: true,
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => {
+          setCurrentSection(index);
+          // Update title color
+          if (titleRef.current) {
+            titleRef.current.style.color = sectionColors[index].title;
           }
-        });
-      });
-
-      // Border color animation for buttons
-      const borders = section.querySelectorAll('.border-animate');
-      borders.forEach((el) => {
-        gsap.to(el, {
-          borderColor: textColors[index % textColors.length],
-          duration: 0.5,
-          ease: "power1.inOut",
-          scrollTrigger: {
-            trigger: section,
-            start: "top center",
-            end: "bottom center",
-            scrub: 1.5,
-            invalidateOnRefresh: true,
+          // Update menu button color
+          if (menuButtonRef.current) {
+            const spans = menuButtonRef.current.querySelectorAll('span');
+            spans.forEach(span => {
+              span.style.color = sectionColors[index].menu;
+            });
+            menuButtonRef.current.style.borderColor = sectionColors[index].menu;
+            if (!isMenuOpen) {
+              menuButtonRef.current.style.backgroundColor = 'transparent';
+            }
           }
-        });
+        },
+        onEnterBack: () => {
+          setCurrentSection(index);
+          if (titleRef.current) {
+            titleRef.current.style.color = sectionColors[index].title;
+          }
+          if (menuButtonRef.current) {
+            const spans = menuButtonRef.current.querySelectorAll('span');
+            spans.forEach(span => {
+              span.style.color = sectionColors[index].menu;
+            });
+            menuButtonRef.current.style.borderColor = sectionColors[index].menu;
+            if (!isMenuOpen) {
+              menuButtonRef.current.style.backgroundColor = 'transparent';
+            }
+          }
+        },
       });
     });
   };
@@ -194,7 +194,22 @@ export default function HomePage(): React.JSX.Element {
       >
         {/* JUDUL - FIXED TOP LEFT */}
         <div style={{ position: "fixed", top: "40px", left: "40px", zIndex: 15 }}>
-          <h1 ref={titleRef} style={{ fontSize: "48px", fontWeight: 700, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, padding: 0, lineHeight: 1 }}>Menuru</h1>
+          <h1
+            ref={titleRef}
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              transition: "color 0.6s ease",
+            }}
+          >
+            Menuru
+          </h1>
         </div>
 
         {/* MENU BUTTON - FIXED TOP RIGHT */}
@@ -217,29 +232,58 @@ export default function HomePage(): React.JSX.Element {
           }}
           onClick={toggleMenu}
         >
-          <span style={{ fontSize: "40px", fontWeight: 300, color: isMenuOpen ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, transition: "transform 0.4s ease, color 0.3s ease", transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)", lineHeight: 1 }}>+</span>
-          <span style={{ fontSize: "40px", fontWeight: 500, color: isMenuOpen ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", display: "inline-block", transition: "color 0.3s ease" }}>Menu</span>
+          <span
+            style={{
+              fontSize: "40px",
+              fontWeight: 300,
+              color: isMenuOpen ? "#ffffff" : "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              transition: "transform 0.4s ease, color 0.3s ease",
+              transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+              lineHeight: 1,
+            }}
+          >
+            +
+          </span>
+          <span
+            style={{
+              fontSize: "40px",
+              fontWeight: 500,
+              color: isMenuOpen ? "#ffffff" : "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+              display: "inline-block",
+              transition: "color 0.3s ease",
+            }}
+          >
+            Menu
+          </span>
         </div>
 
         {/* MENU OVERLAY - FULL BLUE */}
-        {isMenuOpen && (
-          <div
-            ref={menuOverlayRef}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "#0D3CFC",
-              zIndex: 19,
-              animation: "slideDown 0.6s ease forwards",
-            }}
-          />
-        )}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              ref={menuOverlayRef}
+              initial={{ y: "-100%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              exit={{ y: "-100%", opacity: 0 }}
+              transition={{ duration: 0.6, ease: "power2.out" }}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "#0D3CFC",
+                zIndex: 19,
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* SECTION 1 - PUTIH */}
-        <div
+        <motion.div
           ref={(el) => { if (el) sectionsRef.current[0] = el; }}
           style={{
             height: "100vh",
@@ -248,57 +292,85 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             padding: "40px",
             backgroundColor: "#ffffff",
-            transition: "background-color 0.3s ease",
+            transition: "background-color 0.6s ease",
           }}
+          animate={{
+            backgroundColor: sectionColors[0].bg,
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, whiteSpace: "pre-line" }}>
+            <motion.p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: sectionColors[0].text,
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                whiteSpace: "pre-line",
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[0].text }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               {`You can take notes, find ideas,\nand donate money to those in need`}
-            </p>
+            </motion.p>
             <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "40px" }}>
               <div
-                className="border-animate"
                 style={{
                   display: "inline-block",
-                  border: "2px solid #0D3CFC",
+                  border: `2px solid ${sectionColors[0].text}`,
                   borderRadius: "8px",
                   padding: "12px 28px",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   backgroundColor: "transparent",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = sectionColors[0].text; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
               >
-                <span className="button-text" style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"} onMouseLeave={(e) => e.currentTarget.style.color = "#0D3CFC"}>Let's build now</span>
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: sectionColors[0].text,
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                    transition: "color 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+                  onMouseLeave={(e) => e.currentTarget.style.color = sectionColors[0].text}
+                >
+                  Let's build now
+                </span>
               </div>
               <div
-                className="border-animate arrow-icon"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "2px solid #0D3CFC",
+                  border: `2px solid ${sectionColors[0].text}`,
                   borderRadius: "8px",
                   padding: "10px",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   backgroundColor: "transparent",
-                  color: "#0D3CFC",
+                  color: sectionColors[0].text,
                   width: "50px",
                   height: "50px",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; e.currentTarget.style.color = "#ffffff"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#0D3CFC"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = sectionColors[0].text; e.currentTarget.style.color = "#ffffff"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = sectionColors[0].text; }}
               >
                 <NorthEastArrow size={24} />
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* SECTION 2 - BIRU */}
-        <div
+        <motion.div
           ref={(el) => { if (el) sectionsRef.current[1] = el; }}
           style={{
             height: "100vh",
@@ -307,21 +379,48 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             padding: "40px",
             backgroundColor: "#0D3CFC",
-            transition: "background-color 0.3s ease",
+            transition: "background-color 0.6s ease",
           }}
+          animate={{
+            backgroundColor: sectionColors[1].bg,
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+            <motion.p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: sectionColors[1].text,
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[1].text }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Explore More
-            </p>
-            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            </motion.p>
+            <motion.p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "rgba(255,255,255,0.8)",
+                fontFamily: FONT_FAMILY,
+                marginTop: "20px",
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[1].text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Discover new features and opportunities
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
 
         {/* SECTION 3 - PUTIH */}
-        <div
+        <motion.div
           ref={(el) => { if (el) sectionsRef.current[2] = el; }}
           style={{
             height: "100vh",
@@ -330,21 +429,48 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             padding: "40px",
             backgroundColor: "#ffffff",
-            transition: "background-color 0.3s ease",
+            transition: "background-color 0.6s ease",
           }}
+          animate={{
+            backgroundColor: sectionColors[2].bg,
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+            <motion.p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: sectionColors[2].text,
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[2].text }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Join Our Community
-            </p>
-            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            </motion.p>
+            <motion.p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "#666",
+                fontFamily: FONT_FAMILY,
+                marginTop: "20px",
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[2].text === '#0D3CFC' ? '#666' : 'rgba(255,255,255,0.7)' }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Be part of something bigger
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
 
         {/* SECTION 4 - BIRU */}
-        <div
+        <motion.div
           ref={(el) => { if (el) sectionsRef.current[3] = el; }}
           style={{
             height: "100vh",
@@ -353,21 +479,48 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             padding: "40px",
             backgroundColor: "#0D3CFC",
-            transition: "background-color 0.3s ease",
+            transition: "background-color 0.6s ease",
           }}
+          animate={{
+            backgroundColor: sectionColors[3].bg,
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+            <motion.p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: sectionColors[3].text,
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[3].text }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Get Started Today
-            </p>
-            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            </motion.p>
+            <motion.p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "rgba(255,255,255,0.8)",
+                fontFamily: FONT_FAMILY,
+                marginTop: "20px",
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[3].text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Start your journey with Menuru
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
 
         {/* SECTION 5 - PUTIH */}
-        <div
+        <motion.div
           ref={(el) => { if (el) sectionsRef.current[4] = el; }}
           style={{
             height: "100vh",
@@ -376,32 +529,48 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             padding: "40px",
             backgroundColor: "#ffffff",
-            transition: "background-color 0.3s ease",
+            transition: "background-color 0.6s ease",
           }}
+          animate={{
+            backgroundColor: sectionColors[4].bg,
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div style={{ maxWidth: "900px", textAlign: "left" }}>
-            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+            <motion.p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: sectionColors[4].text,
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[4].text }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               Thank You
-            </p>
-            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            </motion.p>
+            <motion.p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "#666",
+                fontFamily: FONT_FAMILY,
+                marginTop: "20px",
+                transition: "color 0.6s ease",
+              }}
+              animate={{ color: sectionColors[4].text === '#0D3CFC' ? '#666' : 'rgba(255,255,255,0.7)' }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
               For visiting Menuru
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <style jsx global>{`
-        @keyframes slideDown {
-          from {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0%);
-            opacity: 1;
-          }
-        }
-        
         /* HIDE SCROLLBAR */
         html, body {
           overflow: auto !important;
