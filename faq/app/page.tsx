@@ -60,7 +60,7 @@ const ArrowDown = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Green Arrow SVG untuk Get in touch dengan kotak border
+// Green Arrow SVG untuk Get in touch dengan kotak border hijau
 const GreenArrowRight = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#00D27F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -80,11 +80,6 @@ export default function HomePage(): React.JSX.Element {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
-  
-  // Refs untuk navbar items
-  const pusatBantuanRef = useRef<HTMLDivElement>(null);
-  const getInTouchRef = useRef<HTMLDivElement>(null);
-  const menuTextRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -107,7 +102,6 @@ export default function HomePage(): React.JSX.Element {
               setShowMain(true);
               initScrollAnimations();
               initTimelineAnimations();
-              initNavbarAnimations();
             }
           });
         }
@@ -226,40 +220,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.5,
       ease: "power2.inOut"
     }, 1.5);
-  };
-
-  // Animasi Rolling Text untuk Navbar (maju-mundur)
-  const initNavbarAnimations = () => {
-    const navItems = [pusatBantuanRef.current, getInTouchRef.current, menuTextRef.current];
-    
-    navItems.forEach((item) => {
-      if (!item) return;
-      
-      const text = item.querySelector('span');
-      if (!text) return;
-
-      // Simpan posisi awal
-      const initialX = 0;
-      
-      // Animasi hover - bergerak maju dan mundur
-      item.addEventListener('mouseenter', () => {
-        gsap.to(text, {
-          x: 10,
-          duration: 0.3,
-          ease: 'power2.out',
-          yoyo: true,
-          repeat: 1
-        });
-      });
-
-      item.addEventListener('mouseleave', () => {
-        gsap.to(text, {
-          x: 0,
-          duration: 0.3,
-          ease: 'power2.inOut'
-        });
-      });
-    });
   };
 
   const toggleMenu = () => {
@@ -507,10 +467,9 @@ export default function HomePage(): React.JSX.Element {
           <NorthEastArrow size={24} />
         </div>
 
-        {/* Get in Touch - teks dengan kotak border sendiri (sebelah kiri Pusat Bantuan) */}
+        {/* Get in Touch - teks dengan kotak border */}
         <Link href="/contact">
           <div
-            ref={getInTouchRef}
             className="get-in-touch"
             style={{
               position: "fixed",
@@ -522,14 +481,7 @@ export default function HomePage(): React.JSX.Element {
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
-              transition: "background-color 0.3s ease",
               backgroundColor: "transparent",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0D3CFC";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
             <span
@@ -538,9 +490,6 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 500,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                transition: "color 0.3s ease",
-                display: "inline-block",
-                willChange: "transform",
               }}
             >
               Get in touch
@@ -548,7 +497,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Green Arrow Right box - dengan kotak border hijau stabilo */}
+        {/* Green Arrow Right box - kotak border hijau stabilo, tanpa hover */}
         <Link href="/contact">
           <div
             className="green-arrow-box"
@@ -568,25 +517,15 @@ export default function HomePage(): React.JSX.Element {
               color: "#00D27F",
               width: "40px",
               height: "40px",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#00D27F";
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "#00D27F";
             }}
           >
             <GreenArrowRight size={24} />
           </div>
         </Link>
 
-        {/* Pusat Bantuan - teks dengan kotak border sendiri */}
+        {/* Pusat Bantuan - teks dengan kotak border */}
         <Link href="/pusat-bantuan">
           <div
-            ref={pusatBantuanRef}
             className="pusat-bantuan"
             style={{
               position: "fixed",
@@ -598,14 +537,7 @@ export default function HomePage(): React.JSX.Element {
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
-              transition: "background-color 0.3s ease",
               backgroundColor: "transparent",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0D3CFC";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
             <span
@@ -614,9 +546,6 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 500,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                transition: "color 0.3s ease",
-                display: "inline-block",
-                willChange: "transform",
               }}
             >
               Pusat Bantuan
@@ -624,9 +553,8 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Menu - teks dengan kotak border sendiri */}
+        {/* Menu - teks dengan kotak border */}
         <div
-          ref={menuTextRef}
           className="menu-button-text"
           style={{
             position: "fixed",
@@ -638,16 +566,9 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: "8px",
             padding: "8px 16px",
             cursor: "pointer",
-            transition: "background-color 0.3s ease",
             backgroundColor: "transparent",
           }}
           onClick={toggleMenu}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0D3CFC";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
         >
           <span
             style={{
@@ -656,16 +577,13 @@ export default function HomePage(): React.JSX.Element {
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               letterSpacing: "0.02em",
-              transition: "color 0.3s ease",
-              display: "inline-block",
-              willChange: "transform",
             }}
           >
             Menu
           </span>
         </div>
 
-        {/* Plus box - kotak border terpisah untuk tanda + */}
+        {/* Plus box - kotak border biru, tanpa hover */}
         <div
           className="plus-box"
           style={{
@@ -680,30 +598,22 @@ export default function HomePage(): React.JSX.Element {
             borderRadius: "8px",
             padding: "10px",
             cursor: "pointer",
-            transition: "all 0.3s ease",
             backgroundColor: "transparent",
             color: "#0D3CFC",
             width: "40px",
             height: "40px",
           }}
           onClick={toggleMenu}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0D3CFC";
-            e.currentTarget.style.color = "#ffffff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#0D3CFC";
-          }}
         >
           <span
             style={{
               fontSize: "32px",
               fontWeight: 300,
               fontFamily: FONT_FAMILY,
-              transition: "transform 0.4s ease, color 0.3s ease",
+              transition: "transform 0.4s ease",
               transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
               lineHeight: 1,
+              color: "#0D3CFC",
             }}
           >
             +
