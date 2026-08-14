@@ -48,10 +48,15 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Arrow Right SVG
 const ArrowRight = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ArrowDown = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -66,6 +71,8 @@ export default function HomePage(): React.JSX.Element {
   const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -87,6 +94,7 @@ export default function HomePage(): React.JSX.Element {
             onComplete: () => {
               setShowMain(true);
               initScrollAnimations();
+              initTimelineAnimations();
             }
           });
         }
@@ -150,6 +158,61 @@ export default function HomePage(): React.JSX.Element {
         }
       });
     }
+  };
+
+  const initTimelineAnimations = () => {
+    const items = timelineItemsRef.current.filter(el => el !== null);
+    if (items.length === 0 || !timelineRef.current) return;
+
+    // Set initial positions
+    gsap.set(items[0], { y: 0, opacity: 1, scale: 1 });
+    gsap.set(items[1], { y: 100, opacity: 0.6, scale: 0.9 });
+    gsap.set(items[2], { y: 200, opacity: 0.3, scale: 0.8 });
+
+    // Create timeline with ScrollTrigger
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: timelineRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1.5,
+        pin: true,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    // Item 1 stays in place, Item 2 moves up to Item 1 position
+    tl.to(items[1], {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 1,
+      ease: "power2.inOut"
+    }, 0)
+    // Item 3 moves up to Item 1 position
+    .to(items[2], {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 1,
+      ease: "power2.inOut"
+    }, 0.5)
+    // Item 1 moves up and fades out slightly
+    .to(items[0], {
+      y: -50,
+      opacity: 0.3,
+      scale: 0.8,
+      duration: 1,
+      ease: "power2.inOut"
+    }, 0.7)
+    // Reset all to final positions
+    .to([items[0], items[1], items[2]], {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "power2.inOut"
+    }, 1.5);
   };
 
   const toggleMenu = () => {
@@ -400,6 +463,7 @@ export default function HomePage(): React.JSX.Element {
         {/* Pusat Bantuan - di sebelah kiri menu */}
         <Link href="/pusat-bantuan">
           <div
+            className="pusat-bantuan"
             style={{
               position: "fixed",
               top: "40px",
@@ -533,6 +597,137 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
+        {/* TIMELINE SECTION - Scroll driven accordion */}
+        <div
+          ref={timelineRef}
+          style={{
+            position: "relative",
+            height: "100vh",
+            marginTop: "100vh",
+            backgroundColor: "#f8f9fa",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "800px",
+              height: "500px",
+            }}
+          >
+            {/* Timeline Item 1 - Note */}
+            <div
+              ref={(el) => { timelineItemsRef.current[0] = el; }}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "600px",
+                padding: "40px",
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
+                border: "2px solid #0D3CFC",
+                willChange: "transform, opacity",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
+                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>01</span>
+                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
+                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Note</span>
+              </div>
+              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
+                Catat ide-ide kreatifmu dengan mudah
+              </p>
+            </div>
+
+            {/* Timeline Item 2 - Donasi */}
+            <div
+              ref={(el) => { timelineItemsRef.current[1] = el; }}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "600px",
+                padding: "40px",
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
+                border: "2px solid #0D3CFC",
+                willChange: "transform, opacity",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
+                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>02</span>
+                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
+                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Donasi</span>
+              </div>
+              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
+                Salurkan bantuan untuk mereka yang membutuhkan
+              </p>
+            </div>
+
+            {/* Timeline Item 3 - Shop */}
+            <div
+              ref={(el) => { timelineItemsRef.current[2] = el; }}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "600px",
+                padding: "40px",
+                backgroundColor: "#ffffff",
+                borderRadius: "16px",
+                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
+                border: "2px solid #0D3CFC",
+                willChange: "transform, opacity",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
+                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>03</span>
+                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
+                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Shop</span>
+              </div>
+              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
+                Temukan produk-produk menarik dari komunitas
+              </p>
+            </div>
+          </div>
+
+          {/* Scroll indicator */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "40px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+              color: "#999999",
+              fontSize: "14px",
+            }}
+          >
+            <span>Scroll untuk melihat timeline</span>
+            <ArrowDown size={24} style={{ color: "#0D3CFC" }} />
+          </div>
+        </div>
+
         {/* Teks dummy paling bawah */}
         <div
           style={{
@@ -595,7 +790,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 32px !important;
           }
-          /* Pusat Bantuan responsive */
           .pusat-bantuan {
             right: 140px !important;
             padding: 6px 12px !important;
@@ -606,6 +800,16 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 16px !important;
             height: 16px !important;
+          }
+          /* Timeline responsive */
+          .timeline-item {
+            padding: 30px !important;
+          }
+          .timeline-item span:first-child {
+            font-size: 36px !important;
+          }
+          .timeline-item span:last-child {
+            font-size: 24px !important;
           }
         }
         @media (max-width: 768px) {
@@ -648,7 +852,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 28px !important;
           }
-          /* Pusat Bantuan responsive */
           .pusat-bantuan {
             right: 100px !important;
             padding: 4px 10px !important;
@@ -659,6 +862,19 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 14px !important;
             height: 14px !important;
+          }
+          /* Timeline responsive */
+          .timeline-item {
+            padding: 20px !important;
+          }
+          .timeline-item span:first-child {
+            font-size: 28px !important;
+          }
+          .timeline-item span:last-child {
+            font-size: 20px !important;
+          }
+          .timeline-item p {
+            font-size: 14px !important;
           }
         }
         @media (max-width: 480px) {
@@ -701,7 +917,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 24px !important;
           }
-          /* Pusat Bantuan responsive */
           .pusat-bantuan {
             right: 75px !important;
             padding: 4px 8px !important;
@@ -712,6 +927,24 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 12px !important;
             height: 12px !important;
+          }
+          /* Timeline responsive */
+          .timeline-item {
+            padding: 16px !important;
+            max-width: 90% !important;
+          }
+          .timeline-item span:first-child {
+            font-size: 24px !important;
+          }
+          .timeline-item span:last-child {
+            font-size: 18px !important;
+          }
+          .timeline-item p {
+            font-size: 12px !important;
+          }
+          .timeline-item svg {
+            width: 20px !important;
+            height: 20px !important;
           }
         }
       `}</style>
