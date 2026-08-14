@@ -444,12 +444,14 @@ export default function HomePage(): React.JSX.Element {
             gap: "12px",
           }}
         >
-          {/* Get in Touch */}
+          {/* Get in Touch dengan panah SVG biru full dalam kotak */}
           <Link href="/contact">
             <div
               className="get-in-touch"
               style={{
-                display: "inline-block",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
                 border: "2px solid #0D3CFC",
                 borderRadius: "8px",
                 padding: "8px 16px",
@@ -468,10 +470,23 @@ export default function HomePage(): React.JSX.Element {
               >
                 Get in touch
               </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <ArrowRight size={16} />
+              </div>
             </div>
           </Link>
 
-          {/* Arrow Right - gabung dengan Pusat Bantuan */}
+          {/* Pusat Bantuan dengan panah SVG hitam full dalam kotak */}
           <Link href="/pusat-bantuan">
             <div
               className="pusat-bantuan"
@@ -497,11 +512,23 @@ export default function HomePage(): React.JSX.Element {
               >
                 Pusat Bantuan
               </span>
-              <ArrowRight size={18} style={{ color: "#0D3CFC" }} />
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#000000",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <ArrowRight size={16} />
+              </div>
             </div>
           </Link>
 
-          {/* Menu - gabung dengan tanda + */}
+          {/* Menu dengan tanda + hitam full dalam kotak */}
           <div
             className="menu-button"
             style={{
@@ -516,19 +543,30 @@ export default function HomePage(): React.JSX.Element {
             }}
             onClick={toggleMenu}
           >
-            <span
+            <div
               style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#ffffff",
                 transition: "transform 0.4s ease",
                 transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
-                lineHeight: 1,
               }}
             >
-              +
-            </span>
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 300,
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                }}
+              >
+                +
+              </span>
+            </div>
             <span
               style={{
                 fontSize: "16px",
@@ -1060,10 +1098,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-button {
             padding: 6px 12px !important;
           }
-          .menu-button span:first-child {
-            font-size: 20px !important;
-          }
-          .menu-button span:last-child {
+          .menu-button span {
             font-size: 14px !important;
           }
         }
@@ -1101,17 +1136,10 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan span {
             font-size: 12px !important;
           }
-          .pusat-bantuan svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
           .menu-button {
             padding: 4px 10px !important;
           }
-          .menu-button span:first-child {
-            font-size: 18px !important;
-          }
-          .menu-button span:last-child {
+          .menu-button span {
             font-size: 12px !important;
           }
         }
@@ -1149,17 +1177,10 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan span {
             font-size: 10px !important;
           }
-          .pusat-bantuan svg {
-            width: 12px !important;
-            height: 12px !important;
-          }
           .menu-button {
             padding: 4px 8px !important;
           }
-          .menu-button span:first-child {
-            font-size: 16px !important;
-          }
-          .menu-button span:last-child {
+          .menu-button span {
             font-size: 10px !important;
           }
         }
