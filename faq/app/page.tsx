@@ -73,6 +73,7 @@ export default function HomePage(): React.JSX.Element {
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function HomePage(): React.JSX.Element {
                 ScrollTrigger.refresh();
                 initScrollAnimations();
                 initTimelineAnimations();
+                initBlurAnimations();
               }, 200);
             }
           });
@@ -158,6 +160,39 @@ export default function HomePage(): React.JSX.Element {
           end: "bottom bottom",
           scrub: 1.5,
           invalidateOnRefresh: true,
+        }
+      });
+    }
+  };
+
+  const initBlurAnimations = () => {
+    // Blur effect pada navbar dan judul saat scroll
+    if (navbarRef.current) {
+      gsap.to(navbarRef.current, {
+        backdropFilter: "blur(10px)",
+        backgroundColor: "rgba(255,255,255,0.8)",
+        duration: 0.5,
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+        }
+      });
+    }
+
+    if (titleRef.current) {
+      gsap.to(titleRef.current, {
+        backdropFilter: "blur(10px)",
+        backgroundColor: "rgba(255,255,255,0.8)",
+        padding: "10px 20px",
+        borderRadius: "12px",
+        duration: 0.5,
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
         }
       });
     }
@@ -333,7 +368,7 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
           }}
         >
-          {/* Judul - FIXED di posisi */}
+          {/* Judul - FIXED di posisi dengan blur effect */}
           <h1
             ref={titleRef}
             className="title"
@@ -344,13 +379,17 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
-              padding: 0,
+              padding: "10px 20px",
               lineHeight: 1,
               transformOrigin: "left center",
               position: "fixed",
               top: "40px",
               left: "40px",
               zIndex: 15,
+              borderRadius: "12px",
+              backgroundColor: "rgba(255,255,255,0)",
+              backdropFilter: "blur(0px)",
+              transition: "all 0.3s ease",
             }}
           >
             Menuru
@@ -432,8 +471,9 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas */}
+        {/* NAVBAR - FIXED di atas dengan blur effect */}
         <div
+          ref={navbarRef}
           style={{
             position: "fixed",
             top: "40px",
@@ -442,6 +482,11 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             alignItems: "center",
             gap: "12px",
+            padding: "8px 16px",
+            borderRadius: "12px",
+            backgroundColor: "rgba(255,255,255,0)",
+            backdropFilter: "blur(0px)",
+            transition: "all 0.3s ease",
           }}
         >
           {/* Get in Touch dengan panah SVG biru full dalam kotak */}
@@ -1063,6 +1108,11 @@ export default function HomePage(): React.JSX.Element {
 
         * {
           background-color: transparent;
+        }
+
+        /* Animasi blur pada judul dan navbar */
+        .title {
+          transition: all 0.3s ease;
         }
 
         @media (max-width: 1024px) {
