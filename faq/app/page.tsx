@@ -69,12 +69,10 @@ export default function HomePage(): React.JSX.Element {
   const subtitleRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const aboutRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -95,7 +93,6 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              // Refresh ScrollTrigger setelah showMain
               setTimeout(() => {
                 ScrollTrigger.refresh();
                 initScrollAnimations();
@@ -170,12 +167,10 @@ export default function HomePage(): React.JSX.Element {
     const items = timelineItemsRef.current.filter(el => el !== null);
     if (items.length === 0 || !timelineRef.current) return;
 
-    // Set initial positions
     gsap.set(items[0], { y: 0, opacity: 1, scale: 1 });
     gsap.set(items[1], { y: 100, opacity: 0.6, scale: 0.9 });
     gsap.set(items[2], { y: 200, opacity: 0.3, scale: 0.8 });
 
-    // Create timeline with ScrollTrigger
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: timelineRef.current,
@@ -187,7 +182,6 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
-    // Item 1 stays in place, Item 2 moves up to Item 1 position
     tl.to(items[1], {
       y: 0,
       opacity: 1,
@@ -195,7 +189,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 1,
       ease: "power2.inOut"
     }, 0)
-    // Item 3 moves up to Item 1 position
     .to(items[2], {
       y: 0,
       opacity: 1,
@@ -203,7 +196,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 1,
       ease: "power2.inOut"
     }, 0.5)
-    // Item 1 moves up and fades out slightly
     .to(items[0], {
       y: -50,
       opacity: 0.3,
@@ -211,7 +203,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 1,
       ease: "power2.inOut"
     }, 0.7)
-    // Reset all to final positions
     .to([items[0], items[1], items[2]], {
       y: 0,
       opacity: 1,
@@ -320,7 +311,6 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* MAIN CONTAINER - semua halaman warna putih */}
       <div
         style={{
           minHeight: "100vh",
@@ -331,20 +321,19 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* HERO SECTION - Konten yang ikut scroll */}
+        {/* HERO SECTION */}
         <div
-          ref={heroRef}
           style={{
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            paddingLeft: "40px",
-            paddingRight: "40px",
+            padding: "40px",
             backgroundColor: "#ffffff",
+            position: "relative",
           }}
         >
-          {/* Judul - ikut scroll tapi tetap di posisi */}
+          {/* Judul - FIXED di posisi */}
           <h1
             ref={titleRef}
             className="title"
@@ -358,9 +347,10 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               transformOrigin: "left center",
-              position: "relative",
-              top: "0",
-              left: "0",
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
             }}
           >
             Menuru
@@ -371,7 +361,7 @@ export default function HomePage(): React.JSX.Element {
             ref={subtitleRef}
             className="subtitle"
             style={{
-              marginTop: "30px",
+              marginTop: "120px",
               textAlign: "left",
               position: "relative",
             }}
@@ -393,7 +383,7 @@ export default function HomePage(): React.JSX.Element {
             </p>
           </div>
 
-          {/* Tombol dan Arrow - ikut scroll */}
+          {/* Tombol dan Arrow */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px" }}>
             <div
               ref={buttonRef}
@@ -448,17 +438,14 @@ export default function HomePage(): React.JSX.Element {
             position: "fixed",
             top: "40px",
             right: "40px",
-            left: "40px",
             zIndex: 100,
             display: "flex",
-            justifyContent: "flex-end",
             alignItems: "center",
-            gap: "20px",
-            pointerEvents: "none",
+            gap: "12px",
           }}
         >
           {/* Get in Touch */}
-          <Link href="/contact" style={{ pointerEvents: "auto" }}>
+          <Link href="/contact">
             <div
               className="get-in-touch"
               style={{
@@ -484,34 +471,14 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Arrow Right box */}
-          <Link href="/contact" style={{ pointerEvents: "auto" }}>
-            <div
-              className="arrow-right-box"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "10px",
-                cursor: "pointer",
-                backgroundColor: "#0D3CFC",
-                color: "#ffffff",
-                width: "40px",
-                height: "40px",
-              }}
-            >
-              <ArrowRight size={20} />
-            </div>
-          </Link>
-
-          {/* Pusat Bantuan */}
-          <Link href="/pusat-bantuan" style={{ pointerEvents: "auto" }}>
+          {/* Arrow Right - gabung dengan Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
             <div
               className="pusat-bantuan"
               style={{
-                display: "inline-block",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
                 border: "2px solid #0D3CFC",
                 borderRadius: "8px",
                 padding: "8px 16px",
@@ -530,23 +497,38 @@ export default function HomePage(): React.JSX.Element {
               >
                 Pusat Bantuan
               </span>
+              <ArrowRight size={18} style={{ color: "#0D3CFC" }} />
             </div>
           </Link>
 
-          {/* Menu Text */}
+          {/* Menu - gabung dengan tanda + */}
           <div
-            className="menu-button-text"
+            className="menu-button"
             style={{
-              display: "inline-block",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
               border: "2px solid #0D3CFC",
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
               backgroundColor: "transparent",
-              pointerEvents: "auto",
             }}
             onClick={toggleMenu}
           >
+            <span
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                transition: "transform 0.4s ease",
+                transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+                lineHeight: 1,
+              }}
+            >
+              +
+            </span>
             <span
               style={{
                 fontSize: "16px",
@@ -558,39 +540,6 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               Menu
-            </span>
-          </div>
-
-          {/* Plus box */}
-          <div
-            className="plus-box"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid #0D3CFC",
-              borderRadius: "8px",
-              padding: "10px",
-              cursor: "pointer",
-              backgroundColor: "#0D3CFC",
-              color: "#ffffff",
-              width: "40px",
-              height: "40px",
-              pointerEvents: "auto",
-            }}
-            onClick={toggleMenu}
-          >
-            <span
-              style={{
-                fontSize: "32px",
-                fontWeight: 300,
-                fontFamily: FONT_FAMILY,
-                transition: "transform 0.4s ease",
-                transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
-                lineHeight: 1,
-              }}
-            >
-              +
             </span>
           </div>
         </div>
@@ -616,10 +565,10 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
-        {/* SPACER - agar konten bisa di-scroll */}
+        {/* SPACER */}
         <div style={{ height: "100vh" }} />
 
-        {/* ABOUT SECTION - warna putih */}
+        {/* ABOUT SECTION */}
         <div
           ref={aboutRef}
           style={{
@@ -834,7 +783,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "50vh" }} />
 
-        {/* TIMELINE SECTION - warna putih */}
+        {/* TIMELINE SECTION */}
         <div
           ref={timelineRef}
           style={{
@@ -964,7 +913,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "30vh" }} />
 
-        {/* DUMMY CONTENT - warna putih */}
+        {/* DUMMY CONTENT */}
         <div
           style={{
             padding: "80px 40px",
@@ -1026,7 +975,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "20vh" }} />
 
-        {/* Footer - warna putih */}
+        {/* Footer */}
         <div
           style={{
             position: "relative",
@@ -1050,7 +999,6 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       <style jsx global>{`
-        /* HIDE SCROLLBAR tapi tetap bisa scroll */
         html {
           overflow: auto !important;
           -ms-overflow-style: none !important;
@@ -1075,7 +1023,6 @@ export default function HomePage(): React.JSX.Element {
           height: 0 !important;
         }
 
-        /* Semua halaman warna putih */
         * {
           background-color: transparent;
         }
@@ -1104,34 +1051,20 @@ export default function HomePage(): React.JSX.Element {
           .get-in-touch span {
             font-size: 14px !important;
           }
-          .arrow-right-box {
-            width: 36px !important;
-            height: 36px !important;
-            padding: 8px !important;
-          }
-          .arrow-right-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
           .pusat-bantuan {
             padding: 6px 12px !important;
           }
           .pusat-bantuan span {
             font-size: 14px !important;
           }
-          .menu-button-text {
+          .menu-button {
             padding: 6px 12px !important;
           }
-          .menu-button-text span {
+          .menu-button span:first-child {
+            font-size: 20px !important;
+          }
+          .menu-button span:last-child {
             font-size: 14px !important;
-          }
-          .plus-box {
-            width: 36px !important;
-            height: 36px !important;
-            padding: 8px !important;
-          }
-          .plus-box span {
-            font-size: 28px !important;
           }
         }
         @media (max-width: 768px) {
@@ -1162,34 +1095,24 @@ export default function HomePage(): React.JSX.Element {
           .get-in-touch span {
             font-size: 12px !important;
           }
-          .arrow-right-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 6px !important;
-          }
-          .arrow-right-box svg {
-            width: 16px !important;
-            height: 16px !important;
-          }
           .pusat-bantuan {
             padding: 4px 10px !important;
           }
           .pusat-bantuan span {
             font-size: 12px !important;
           }
-          .menu-button-text {
+          .pusat-bantuan svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .menu-button {
             padding: 4px 10px !important;
           }
-          .menu-button-text span {
+          .menu-button span:first-child {
+            font-size: 18px !important;
+          }
+          .menu-button span:last-child {
             font-size: 12px !important;
-          }
-          .plus-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 6px !important;
-          }
-          .plus-box span {
-            font-size: 24px !important;
           }
         }
         @media (max-width: 480px) {
@@ -1220,34 +1143,24 @@ export default function HomePage(): React.JSX.Element {
           .get-in-touch span {
             font-size: 10px !important;
           }
-          .arrow-right-box {
-            width: 28px !important;
-            height: 28px !important;
-            padding: 4px !important;
-          }
-          .arrow-right-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
           .pusat-bantuan {
             padding: 4px 8px !important;
           }
           .pusat-bantuan span {
             font-size: 10px !important;
           }
-          .menu-button-text {
+          .pusat-bantuan svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .menu-button {
             padding: 4px 8px !important;
           }
-          .menu-button-text span {
+          .menu-button span:first-child {
+            font-size: 16px !important;
+          }
+          .menu-button span:last-child {
             font-size: 10px !important;
-          }
-          .plus-box {
-            width: 28px !important;
-            height: 28px !important;
-            padding: 4px !important;
-          }
-          .plus-box span {
-            font-size: 20px !important;
           }
         }
       `}</style>
