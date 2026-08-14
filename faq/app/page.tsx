@@ -74,6 +74,7 @@ export default function HomePage(): React.JSX.Element {
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function HomePage(): React.JSX.Element {
                 ScrollTrigger.refresh();
                 initScrollAnimations();
                 initTimelineAnimations();
-              }, 100);
+              }, 200);
             }
           });
         }
@@ -148,7 +149,7 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initScrollAnimations = () => {
-    // Animasi judul: dari 48px ke 400px
+    // Animasi judul: dari 48px ke 400px saat scroll ke bawah
     if (titleRef.current) {
       gsap.to(titleRef.current, {
         fontSize: "400px",
@@ -158,7 +159,7 @@ export default function HomePage(): React.JSX.Element {
           trigger: "body",
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.2,
+          scrub: 1.5,
           invalidateOnRefresh: true,
         }
       });
@@ -319,10 +320,10 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* MAIN CONTAINER - tanpa overflow hidden */}
+      {/* MAIN CONTAINER - semua halaman warna putih */}
       <div
         style={{
-          minHeight: "200vh",
+          minHeight: "100vh",
           backgroundColor: "#ffffff",
           margin: 0,
           padding: 0,
@@ -330,15 +331,20 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* Judul di kiri atas - FIXED */}
+        {/* HERO SECTION - Konten yang ikut scroll */}
         <div
+          ref={heroRef}
           style={{
-            position: "fixed",
-            top: "40px",
-            left: "40px",
-            zIndex: 15,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            paddingLeft: "40px",
+            paddingRight: "40px",
+            backgroundColor: "#ffffff",
           }}
         >
+          {/* Judul - ikut scroll tapi tetap di posisi */}
           <h1
             ref={titleRef}
             className="title"
@@ -352,112 +358,194 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               transformOrigin: "left center",
+              position: "relative",
+              top: "0",
+              left: "0",
             }}
           >
             Menuru
           </h1>
-        </div>
 
-        {/* Subtitle - FIXED */}
-        <div
-          ref={subtitleRef}
-          className="subtitle"
-          style={{
-            position: "fixed",
-            top: "150px",
-            left: "40px",
-            zIndex: 15,
-            textAlign: "left",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "60px",
-              fontWeight: 400,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              lineHeight: 1.2,
-              margin: 0,
-              padding: 0,
-              paddingBottom: "30px",
-              whiteSpace: "pre-line",
-            }}
-          >
-            {`You can take notes, find ideas,\nand donate money to those in need`}
-          </p>
-        </div>
-
-        {/* Tombol "Let's build now" - FIXED */}
-        <div
-          ref={buttonRef}
-          className="cta-button"
-          style={{
-            position: "fixed",
-            top: "400px",
-            left: "40px",
-            zIndex: 15,
-            display: "inline-block",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "12px 28px",
-            cursor: "pointer",
-            backgroundColor: "transparent",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "18px",
-              fontWeight: 500,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.02em",
-            }}
-          >
-            Let's build now
-          </span>
-        </div>
-
-        {/* Arrow box - FIXED */}
-        <div
-          ref={arrowRef}
-          className="arrow-box"
-          style={{
-            position: "fixed",
-            top: "400px",
-            left: "230px",
-            zIndex: 15,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "10px",
-            cursor: "pointer",
-            backgroundColor: "#0D3CFC",
-            color: "#ffffff",
-            width: "50px",
-            height: "50px",
-          }}
-        >
-          <NorthEastArrow size={24} />
-        </div>
-
-        {/* Get in Touch - FIXED */}
-        <Link href="/contact">
+          {/* Subtitle */}
           <div
-            className="get-in-touch"
+            ref={subtitleRef}
+            className="subtitle"
             style={{
-              position: "fixed",
-              top: "40px",
-              right: "420px",
-              zIndex: 15,
+              marginTop: "30px",
+              textAlign: "left",
+              position: "relative",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "60px",
+                fontWeight: 400,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.2,
+                margin: 0,
+                padding: 0,
+                paddingBottom: "30px",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {`You can take notes, find ideas,\nand donate money to those in need`}
+            </p>
+          </div>
+
+          {/* Tombol dan Arrow - ikut scroll */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px" }}>
+            <div
+              ref={buttonRef}
+              className="cta-button"
+              style={{
+                display: "inline-block",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "12px 28px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                Let's build now
+              </span>
+            </div>
+
+            <div
+              ref={arrowRef}
+              className="arrow-box"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "10px",
+                cursor: "pointer",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                width: "50px",
+                height: "50px",
+              }}
+            >
+              <NorthEastArrow size={24} />
+            </div>
+          </div>
+        </div>
+
+        {/* NAVBAR - FIXED di atas */}
+        <div
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            left: "40px",
+            zIndex: 100,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: "20px",
+            pointerEvents: "none",
+          }}
+        >
+          {/* Get in Touch */}
+          <Link href="/contact" style={{ pointerEvents: "auto" }}>
+            <div
+              className="get-in-touch"
+              style={{
+                display: "inline-block",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Get in touch
+              </span>
+            </div>
+          </Link>
+
+          {/* Arrow Right box */}
+          <Link href="/contact" style={{ pointerEvents: "auto" }}>
+            <div
+              className="arrow-right-box"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "10px",
+                cursor: "pointer",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                width: "40px",
+                height: "40px",
+              }}
+            >
+              <ArrowRight size={20} />
+            </div>
+          </Link>
+
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan" style={{ pointerEvents: "auto" }}>
+            <div
+              className="pusat-bantuan"
+              style={{
+                display: "inline-block",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Pusat Bantuan
+              </span>
+            </div>
+          </Link>
+
+          {/* Menu Text */}
+          <div
+            className="menu-button-text"
+            style={{
               display: "inline-block",
               border: "2px solid #0D3CFC",
               borderRadius: "8px",
               padding: "8px 16px",
               cursor: "pointer",
               backgroundColor: "transparent",
+              pointerEvents: "auto",
             }}
+            onClick={toggleMenu}
           >
             <span
               style={{
@@ -465,23 +553,18 @@ export default function HomePage(): React.JSX.Element {
                 fontWeight: 500,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
                 display: "inline-block",
               }}
             >
-              Get in touch
+              Menu
             </span>
           </div>
-        </Link>
 
-        {/* Arrow Right box - FIXED */}
-        <Link href="/contact">
+          {/* Plus box */}
           <div
-            className="arrow-right-box"
+            className="plus-box"
             style={{
-              position: "fixed",
-              top: "40px",
-              right: "340px",
-              zIndex: 15,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -493,108 +576,23 @@ export default function HomePage(): React.JSX.Element {
               color: "#ffffff",
               width: "40px",
               height: "40px",
+              pointerEvents: "auto",
             }}
-          >
-            <ArrowRight size={20} />
-          </div>
-        </Link>
-
-        {/* Pusat Bantuan - FIXED */}
-        <Link href="/pusat-bantuan">
-          <div
-            className="pusat-bantuan"
-            style={{
-              position: "fixed",
-              top: "40px",
-              right: "200px",
-              zIndex: 15,
-              display: "inline-block",
-              border: "2px solid #0D3CFC",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-            }}
+            onClick={toggleMenu}
           >
             <span
               style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#0D3CFC",
+                fontSize: "32px",
+                fontWeight: 300,
                 fontFamily: FONT_FAMILY,
-                display: "inline-block",
+                transition: "transform 0.4s ease",
+                transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+                lineHeight: 1,
               }}
             >
-              Pusat Bantuan
+              +
             </span>
           </div>
-        </Link>
-
-        {/* Menu - FIXED */}
-        <div
-          className="menu-button-text"
-          style={{
-            position: "fixed",
-            top: "40px",
-            right: "100px",
-            zIndex: 20,
-            display: "inline-block",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "8px 16px",
-            cursor: "pointer",
-            backgroundColor: "transparent",
-          }}
-          onClick={toggleMenu}
-        >
-          <span
-            style={{
-              fontSize: "16px",
-              fontWeight: 500,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.02em",
-              display: "inline-block",
-            }}
-          >
-            Menu
-          </span>
-        </div>
-
-        {/* Plus box - FIXED */}
-        <div
-          className="plus-box"
-          style={{
-            position: "fixed",
-            top: "40px",
-            right: "40px",
-            zIndex: 20,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "10px",
-            cursor: "pointer",
-            backgroundColor: "#0D3CFC",
-            color: "#ffffff",
-            width: "40px",
-            height: "40px",
-          }}
-          onClick={toggleMenu}
-        >
-          <span
-            style={{
-              fontSize: "32px",
-              fontWeight: 300,
-              fontFamily: FONT_FAMILY,
-              transition: "transform 0.4s ease",
-              transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
-              lineHeight: 1,
-            }}
-          >
-            +
-          </span>
         </div>
 
         {/* Menu Overlay */}
@@ -608,7 +606,7 @@ export default function HomePage(): React.JSX.Element {
             width: "100%",
             height: "100%",
             backgroundColor: "#0D3CFC",
-            zIndex: 19,
+            zIndex: 99,
             display: isMenuOpen ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
@@ -621,13 +619,13 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER - agar konten bisa di-scroll */}
         <div style={{ height: "100vh" }} />
 
-        {/* ABOUT SECTION */}
+        {/* ABOUT SECTION - warna putih */}
         <div
           ref={aboutRef}
           style={{
             position: "relative",
             padding: "100px 40px",
-            backgroundColor: "#f8f9fa",
+            backgroundColor: "#ffffff",
             width: "100%",
             minHeight: "100vh",
             display: "flex",
@@ -700,7 +698,7 @@ export default function HomePage(): React.JSX.Element {
                   flex: "1 1 200px",
                   maxWidth: "250px",
                   padding: "30px 20px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "#f8f9fa",
                   borderRadius: "12px",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
                   border: "1px solid #e8e8e8",
@@ -745,7 +743,7 @@ export default function HomePage(): React.JSX.Element {
                   flex: "1 1 200px",
                   maxWidth: "250px",
                   padding: "30px 20px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "#f8f9fa",
                   borderRadius: "12px",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
                   border: "1px solid #e8e8e8",
@@ -790,7 +788,7 @@ export default function HomePage(): React.JSX.Element {
                   flex: "1 1 200px",
                   maxWidth: "250px",
                   padding: "30px 20px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "#f8f9fa",
                   borderRadius: "12px",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
                   border: "1px solid #e8e8e8",
@@ -836,13 +834,13 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "50vh" }} />
 
-        {/* TIMELINE SECTION */}
+        {/* TIMELINE SECTION - warna putih */}
         <div
           ref={timelineRef}
           style={{
             position: "relative",
             height: "100vh",
-            backgroundColor: "#f8f9fa",
+            backgroundColor: "#ffffff",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -966,7 +964,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "30vh" }} />
 
-        {/* DUMMY CONTENT */}
+        {/* DUMMY CONTENT - warna putih */}
         <div
           style={{
             padding: "80px 40px",
@@ -1028,7 +1026,7 @@ export default function HomePage(): React.JSX.Element {
         {/* SPACER */}
         <div style={{ height: "20vh" }} />
 
-        {/* Footer */}
+        {/* Footer - warna putih */}
         <div
           style={{
             position: "relative",
@@ -1069,6 +1067,7 @@ export default function HomePage(): React.JSX.Element {
           scrollbar-width: none !important;
           margin: 0;
           padding: 0;
+          background-color: #ffffff !important;
         }
         body::-webkit-scrollbar {
           display: none !important;
@@ -1076,39 +1075,36 @@ export default function HomePage(): React.JSX.Element {
           height: 0 !important;
         }
 
+        /* Semua halaman warna putih */
+        * {
+          background-color: transparent;
+        }
+
         @media (max-width: 1024px) {
           .subtitle p {
             font-size: 48px !important;
-          }
-          .subtitle {
-            top: 130px !important;
           }
           .title {
             font-size: 36px !important;
           }
           .cta-button {
-            top: 350px !important;
             padding: 10px 22px !important;
           }
           .cta-button span {
             font-size: 16px !important;
           }
           .arrow-box {
-            top: 350px !important;
-            left: 200px !important;
             width: 44px !important;
             height: 44px !important;
             padding: 8px !important;
           }
           .get-in-touch {
-            right: 340px !important;
             padding: 6px 12px !important;
           }
           .get-in-touch span {
             font-size: 14px !important;
           }
           .arrow-right-box {
-            right: 270px !important;
             width: 36px !important;
             height: 36px !important;
             padding: 8px !important;
@@ -1118,21 +1114,18 @@ export default function HomePage(): React.JSX.Element {
             height: 18px !important;
           }
           .pusat-bantuan {
-            right: 150px !important;
             padding: 6px 12px !important;
           }
           .pusat-bantuan span {
             font-size: 14px !important;
           }
           .menu-button-text {
-            right: 80px !important;
             padding: 6px 12px !important;
           }
           .menu-button-text span {
             font-size: 14px !important;
           }
           .plus-box {
-            right: 30px !important;
             width: 36px !important;
             height: 36px !important;
             padding: 8px !important;
@@ -1145,26 +1138,16 @@ export default function HomePage(): React.JSX.Element {
           .subtitle p {
             font-size: 36px !important;
           }
-          .subtitle {
-            top: 110px !important;
-            left: 20px !important;
-          }
           .title {
             font-size: 28px !important;
-            top: 20px !important;
-            left: 20px !important;
           }
           .cta-button {
-            top: 280px !important;
-            left: 20px !important;
             padding: 8px 18px !important;
           }
           .cta-button span {
             font-size: 14px !important;
           }
           .arrow-box {
-            top: 280px !important;
-            left: 170px !important;
             width: 38px !important;
             height: 38px !important;
             padding: 6px !important;
@@ -1174,14 +1157,12 @@ export default function HomePage(): React.JSX.Element {
             height: 18px !important;
           }
           .get-in-touch {
-            right: 260px !important;
             padding: 4px 10px !important;
           }
           .get-in-touch span {
             font-size: 12px !important;
           }
           .arrow-right-box {
-            right: 200px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 6px !important;
@@ -1191,21 +1172,18 @@ export default function HomePage(): React.JSX.Element {
             height: 16px !important;
           }
           .pusat-bantuan {
-            right: 110px !important;
             padding: 4px 10px !important;
           }
           .pusat-bantuan span {
             font-size: 12px !important;
           }
           .menu-button-text {
-            right: 60px !important;
             padding: 4px 10px !important;
           }
           .menu-button-text span {
             font-size: 12px !important;
           }
           .plus-box {
-            right: 20px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 6px !important;
@@ -1218,26 +1196,16 @@ export default function HomePage(): React.JSX.Element {
           .subtitle p {
             font-size: 24px !important;
           }
-          .subtitle {
-            top: 90px !important;
-            left: 16px !important;
-          }
           .title {
             font-size: 22px !important;
-            top: 16px !important;
-            left: 16px !important;
           }
           .cta-button {
-            top: 220px !important;
-            left: 16px !important;
             padding: 6px 14px !important;
           }
           .cta-button span {
             font-size: 12px !important;
           }
           .arrow-box {
-            top: 220px !important;
-            left: 145px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 4px !important;
@@ -1247,14 +1215,12 @@ export default function HomePage(): React.JSX.Element {
             height: 14px !important;
           }
           .get-in-touch {
-            right: 190px !important;
             padding: 4px 8px !important;
           }
           .get-in-touch span {
             font-size: 10px !important;
           }
           .arrow-right-box {
-            right: 145px !important;
             width: 28px !important;
             height: 28px !important;
             padding: 4px !important;
@@ -1264,21 +1230,18 @@ export default function HomePage(): React.JSX.Element {
             height: 14px !important;
           }
           .pusat-bantuan {
-            right: 80px !important;
             padding: 4px 8px !important;
           }
           .pusat-bantuan span {
             font-size: 10px !important;
           }
           .menu-button-text {
-            right: 45px !important;
             padding: 4px 8px !important;
           }
           .menu-button-text span {
             font-size: 10px !important;
           }
           .plus-box {
-            right: 16px !important;
             width: 28px !important;
             height: 28px !important;
             padding: 4px !important;
