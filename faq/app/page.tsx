@@ -426,7 +426,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Arrow box - posisi di samping tombol */}
+        {/* Arrow box - kotak border terpisah dengan ikon NorthEast Arrow */}
         <div
           ref={arrowRef}
           className="arrow-box"
@@ -460,14 +460,14 @@ export default function HomePage(): React.JSX.Element {
           <NorthEastArrow size={24} />
         </div>
 
-        {/* Pusat Bantuan - di sebelah kiri menu */}
+        {/* Pusat Bantuan - di sebelah kiri menu dengan jarak */}
         <Link href="/pusat-bantuan">
           <div
             className="pusat-bantuan"
             style={{
               position: "fixed",
               top: "40px",
-              right: "160px",
+              right: "200px",
               zIndex: 15,
               display: "flex",
               alignItems: "center",
@@ -509,7 +509,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </Link>
 
-        {/* Menu Button */}
+        {/* Menu Button - kotak border terpisah */}
         <div
           ref={menuButtonRef}
           className="menu-button"
@@ -538,7 +538,7 @@ export default function HomePage(): React.JSX.Element {
         >
           <span
             style={{
-              fontSize: "40px",
+              fontSize: "24px",
               fontWeight: 300,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
@@ -557,7 +557,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
           <span
             style={{
-              fontSize: "40px",
+              fontSize: "16px",
               fontWeight: 500,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
@@ -787,11 +787,14 @@ export default function HomePage(): React.JSX.Element {
             right: 30px !important;
             padding: 6px 12px !important;
           }
-          .menu-button span {
-            font-size: 32px !important;
+          .menu-button span:first-child {
+            font-size: 20px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 14px !important;
           }
           .pusat-bantuan {
-            right: 140px !important;
+            right: 160px !important;
             padding: 6px 12px !important;
           }
           .pusat-bantuan span {
@@ -800,16 +803,6 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 16px !important;
             height: 16px !important;
-          }
-          /* Timeline responsive */
-          .timeline-item {
-            padding: 30px !important;
-          }
-          .timeline-item span:first-child {
-            font-size: 36px !important;
-          }
-          .timeline-item span:last-child {
-            font-size: 24px !important;
           }
         }
         @media (max-width: 768px) {
@@ -849,11 +842,14 @@ export default function HomePage(): React.JSX.Element {
             right: 20px !important;
             padding: 4px 10px !important;
           }
-          .menu-button span {
-            font-size: 28px !important;
+          .menu-button span:first-child {
+            font-size: 18px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 12px !important;
           }
           .pusat-bantuan {
-            right: 100px !important;
+            right: 120px !important;
             padding: 4px 10px !important;
           }
           .pusat-bantuan span {
@@ -862,19 +858,6 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 14px !important;
             height: 14px !important;
-          }
-          /* Timeline responsive */
-          .timeline-item {
-            padding: 20px !important;
-          }
-          .timeline-item span:first-child {
-            font-size: 28px !important;
-          }
-          .timeline-item span:last-child {
-            font-size: 20px !important;
-          }
-          .timeline-item p {
-            font-size: 14px !important;
           }
         }
         @media (max-width: 480px) {
@@ -914,11 +897,14 @@ export default function HomePage(): React.JSX.Element {
             right: 16px !important;
             padding: 4px 8px !important;
           }
-          .menu-button span {
-            font-size: 24px !important;
+          .menu-button span:first-child {
+            font-size: 16px !important;
+          }
+          .menu-button span:last-child {
+            font-size: 10px !important;
           }
           .pusat-bantuan {
-            right: 75px !important;
+            right: 90px !important;
             padding: 4px 8px !important;
           }
           .pusat-bantuan span {
@@ -927,24 +913,6 @@ export default function HomePage(): React.JSX.Element {
           .pusat-bantuan svg {
             width: 12px !important;
             height: 12px !important;
-          }
-          /* Timeline responsive */
-          .timeline-item {
-            padding: 16px !important;
-            max-width: 90% !important;
-          }
-          .timeline-item span:first-child {
-            font-size: 24px !important;
-          }
-          .timeline-item span:last-child {
-            font-size: 18px !important;
-          }
-          .timeline-item p {
-            font-size: 12px !important;
-          }
-          .timeline-item svg {
-            width: 20px !important;
-            height: 20px !important;
           }
         }
       `}</style>
