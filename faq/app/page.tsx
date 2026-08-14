@@ -48,13 +48,9 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -74,49 +70,55 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
   const initScrollAnimations = () => {
-    // Smooth scroll with GSAP
-    gsap.to(window, {
-      scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.5,
-        onUpdate: (self) => {
-          // Tidak perlu melakukan apa-apa, hanya untuk smooth scroll
-        }
-      }
-    });
-
-    // Animasi section background berubah menjadi biru saat scroll
     const sections = sectionsRef.current.filter(s => s !== null);
+    const colors = ['#ffffff', '#0D3CFC', '#ffffff', '#0D3CFC', '#ffffff'];
+    const textColors = ['#0D3CFC', '#ffffff', '#0D3CFC', '#ffffff', '#0D3CFC'];
+
     sections.forEach((section, index) => {
       if (!section) return;
-      
-      const isEven = index % 2 === 0;
-      
+
+      // Background color animation
       gsap.to(section, {
-        backgroundColor: isEven ? "#0D3CFC" : "#ffffff",
-        color: isEven ? "#ffffff" : "#000000",
-        ease: "none",
+        backgroundColor: colors[index % colors.length],
+        duration: 0.5,
+        ease: "power1.inOut",
         scrollTrigger: {
           trigger: section,
-          start: "top bottom",
-          end: "top top",
+          start: "top center",
+          end: "bottom center",
           scrub: 1.5,
           invalidateOnRefresh: true,
         }
       });
 
-      // Animasi teks di dalam section
-      const textElements = section.querySelectorAll('.section-text');
+      // Text color animation
+      const textElements = section.querySelectorAll('.section-text, .section-subtitle, .button-text, .arrow-icon');
       textElements.forEach((el) => {
         gsap.to(el, {
-          color: isEven ? "#ffffff" : "#0D3CFC",
-          ease: "none",
+          color: textColors[index % textColors.length],
+          duration: 0.5,
+          ease: "power1.inOut",
           scrollTrigger: {
             trigger: section,
-            start: "top bottom",
-            end: "top top",
+            start: "top center",
+            end: "bottom center",
+            scrub: 1.5,
+            invalidateOnRefresh: true,
+          }
+        });
+      });
+
+      // Border color animation for buttons
+      const borders = section.querySelectorAll('.border-animate');
+      borders.forEach((el) => {
+        gsap.to(el, {
+          borderColor: textColors[index % textColors.length],
+          duration: 0.5,
+          ease: "power1.inOut",
+          scrollTrigger: {
+            trigger: section,
+            start: "top center",
+            end: "bottom center",
             scrub: 1.5,
             invalidateOnRefresh: true,
           }
@@ -180,7 +182,6 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <div
-        ref={mainContainerRef}
         style={{
           minHeight: "100vh",
           backgroundColor: "#ffffff",
@@ -237,7 +238,7 @@ export default function HomePage(): React.JSX.Element {
           />
         )}
 
-        {/* SECTION 1 - HITAM PUTIH */}
+        {/* SECTION 1 - PUTIH */}
         <div
           ref={(el) => { if (el) sectionsRef.current[0] = el; }}
           style={{
@@ -256,7 +257,7 @@ export default function HomePage(): React.JSX.Element {
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "40px" }}>
               <div
-                ref={buttonRef}
+                className="border-animate"
                 style={{
                   display: "inline-block",
                   border: "2px solid #0D3CFC",
@@ -269,10 +270,10 @@ export default function HomePage(): React.JSX.Element {
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
               >
-                <span className="section-text" style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"} onMouseLeave={(e) => e.currentTarget.style.color = "#0D3CFC"}>Let's build now</span>
+                <span className="button-text" style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"} onMouseLeave={(e) => e.currentTarget.style.color = "#0D3CFC"}>Let's build now</span>
               </div>
               <div
-                ref={arrowRef}
+                className="border-animate arrow-icon"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -313,7 +314,7 @@ export default function HomePage(): React.JSX.Element {
             <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
               Explore More
             </p>
-            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
               Discover new features and opportunities
             </p>
           </div>
@@ -336,7 +337,7 @@ export default function HomePage(): React.JSX.Element {
             <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
               Join Our Community
             </p>
-            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
               Be part of something bigger
             </p>
           </div>
@@ -359,8 +360,31 @@ export default function HomePage(): React.JSX.Element {
             <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#ffffff", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
               Get Started Today
             </p>
-            <p className="section-text" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
               Start your journey with Menuru
+            </p>
+          </div>
+        </div>
+
+        {/* SECTION 5 - PUTIH */}
+        <div
+          ref={(el) => { if (el) sectionsRef.current[4] = el; }}
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div style={{ maxWidth: "900px", textAlign: "left" }}>
+            <p className="section-text" style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0 }}>
+              Thank You
+            </p>
+            <p className="section-subtitle" style={{ fontSize: "24px", fontWeight: 300, color: "#666", fontFamily: FONT_FAMILY, marginTop: "20px" }}>
+              For visiting Menuru
             </p>
           </div>
         </div>
@@ -377,21 +401,25 @@ export default function HomePage(): React.JSX.Element {
             opacity: 1;
           }
         }
-        body {
+        
+        /* HIDE SCROLLBAR */
+        html, body {
           overflow: auto !important;
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
         }
-        body::-webkit-scrollbar {
-          display: none;
-        }
-        html {
-          scroll-behavior: smooth;
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
 
         @media (max-width: 1024px) {
           .section-text {
             font-size: 48px !important;
+          }
+          .section-subtitle {
+            font-size: 20px !important;
           }
           .title {
             font-size: 36px !important;
@@ -404,24 +432,27 @@ export default function HomePage(): React.JSX.Element {
           .section-text {
             font-size: 36px !important;
           }
+          .section-subtitle {
+            font-size: 18px !important;
+          }
           .title {
             font-size: 28px !important;
           }
           .menu-button span {
             font-size: 28px !important;
           }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
+          .button-text {
             font-size: 14px !important;
           }
-          .arrow-box {
+          .border-animate {
+            padding: 8px 18px !important;
+          }
+          .arrow-icon {
             width: 40px !important;
             height: 40px !important;
             padding: 8px !important;
           }
-          .arrow-box svg {
+          .arrow-icon svg {
             width: 18px !important;
             height: 18px !important;
           }
@@ -430,26 +461,32 @@ export default function HomePage(): React.JSX.Element {
           .section-text {
             font-size: 24px !important;
           }
+          .section-subtitle {
+            font-size: 16px !important;
+          }
           .title {
             font-size: 22px !important;
           }
           .menu-button span {
             font-size: 24px !important;
           }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
+          .button-text {
             font-size: 12px !important;
           }
-          .arrow-box {
+          .border-animate {
+            padding: 6px 14px !important;
+          }
+          .arrow-icon {
             width: 32px !important;
             height: 32px !important;
             padding: 6px !important;
           }
-          .arrow-box svg {
+          .arrow-icon svg {
             width: 14px !important;
             height: 14px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
           }
         }
       `}</style>
