@@ -73,6 +73,7 @@ export default function HomePage(): React.JSX.Element {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const aboutRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -613,19 +614,232 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
+        {/* ABOUT SECTION - di bawah tombol Let's build now */}
+        <div
+          ref={aboutRef}
+          style={{
+            position: "relative",
+            marginTop: "550px",
+            padding: "80px 40px",
+            backgroundColor: "#f8f9fa",
+            width: "100%",
+            minHeight: "60vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1200px",
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "80px",
+                fontWeight: 700,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.03em",
+                margin: 0,
+                marginBottom: "20px",
+                lineHeight: 1,
+              }}
+            >
+              About
+            </h2>
+            
+            <div
+              style={{
+                width: "80px",
+                height: "4px",
+                backgroundColor: "#0D3CFC",
+                margin: "20px auto",
+                borderRadius: "2px",
+              }}
+            />
+
+            <p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "#333333",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.8,
+                maxWidth: "800px",
+                margin: "30px auto",
+                padding: "0 20px",
+              }}
+            >
+              Menuru adalah platform yang menggabungkan kreativitas dan kepedulian sosial. 
+              Kami menyediakan ruang bagi Anda untuk mencatat ide-ide brilian, menemukan inspirasi, 
+              dan berkontribusi melalui donasi untuk mereka yang membutuhkan. 
+              Bergabunglah dengan komunitas Menuru dan jadilah bagian dari perubahan positif.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: "40px",
+                marginTop: "50px",
+              }}
+            >
+              <div
+                style={{
+                  flex: "1 1 200px",
+                  maxWidth: "250px",
+                  padding: "30px 20px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                  border: "1px solid #e8e8e8",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "40px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  01
+                </div>
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    fontFamily: FONT_FAMILY,
+                    margin: "12px 0 8px",
+                  }}
+                >
+                  Note
+                </h3>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#666666",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}
+                >
+                  Catat ide-ide kreatif dan inspirasi Anda
+                </p>
+              </div>
+
+              <div
+                style={{
+                  flex: "1 1 200px",
+                  maxWidth: "250px",
+                  padding: "30px 20px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                  border: "1px solid #e8e8e8",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "40px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  02
+                </div>
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    fontFamily: FONT_FAMILY,
+                    margin: "12px 0 8px",
+                  }}
+                >
+                  Donasi
+                </h3>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#666666",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}
+                >
+                  Salurkan bantuan untuk mereka yang membutuhkan
+                </p>
+              </div>
+
+              <div
+                style={{
+                  flex: "1 1 200px",
+                  maxWidth: "250px",
+                  padding: "30px 20px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                  border: "1px solid #e8e8e8",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "40px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  03
+                </div>
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    fontFamily: FONT_FAMILY,
+                    margin: "12px 0 8px",
+                  }}
+                >
+                  Shop
+                </h3>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#666666",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}
+                >
+                  Temukan produk menarik dari komunitas
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* TIMELINE SECTION - Scroll driven accordion */}
         <div
           ref={timelineRef}
           style={{
             position: "relative",
             height: "100vh",
-            marginTop: "100vh",
             backgroundColor: "#f8f9fa",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
+            borderTop: "1px solid #e8e8e8",
           }}
         >
           <div
@@ -744,23 +958,26 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Teks dummy paling bawah */}
+        {/* Footer */}
         <div
           style={{
-            position: "absolute",
-            bottom: "100px",
-            left: "50%",
-            transform: "translateX(-50%)",
+            position: "relative",
+            bottom: 0,
+            left: 0,
+            width: "100%",
             textAlign: "center",
-            color: "#ccc",
+            color: "#999999",
             fontSize: "16px",
             fontFamily: FONT_FAMILY,
-            opacity: 0.3,
-            padding: "40px",
+            padding: "60px 40px",
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid #e8e8e8",
           }}
         >
-          <p>© 2026 Menuru. All rights reserved.</p>
-          <p style={{ marginTop: "8px", fontSize: "14px" }}>Scroll untuk melihat lebih banyak</p>
+          <p style={{ margin: 0, fontWeight: 500 }}>© 2026 Menuru. All rights reserved.</p>
+          <p style={{ marginTop: "8px", fontSize: "14px", color: "#bbb" }}>
+            Made with ❤️ for creativity and generosity
+          </p>
         </div>
       </div>
 
@@ -838,6 +1055,12 @@ export default function HomePage(): React.JSX.Element {
           .plus-box span {
             font-size: 28px !important;
           }
+          .about-section h2 {
+            font-size: 60px !important;
+          }
+          .about-section p {
+            font-size: 20px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -911,6 +1134,23 @@ export default function HomePage(): React.JSX.Element {
           .plus-box span {
             font-size: 24px !important;
           }
+          .about-section {
+            padding: 50px 20px !important;
+            margin-top: 450px !important;
+          }
+          .about-section h2 {
+            font-size: 48px !important;
+          }
+          .about-section p {
+            font-size: 18px !important;
+          }
+          .about-cards {
+            gap: 20px !important;
+          }
+          .about-cards > div {
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -983,6 +1223,16 @@ export default function HomePage(): React.JSX.Element {
           }
           .plus-box span {
             font-size: 20px !important;
+          }
+          .about-section {
+            padding: 40px 16px !important;
+            margin-top: 380px !important;
+          }
+          .about-section h2 {
+            font-size: 36px !important;
+          }
+          .about-section p {
+            font-size: 16px !important;
           }
         }
       `}</style>
