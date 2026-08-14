@@ -58,7 +58,7 @@ export default function HomePage(): React.JSX.Element {
   const arrowRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const aboutRef = useRef<HTMLDivElement>(null);
+  const aboutBoxRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
@@ -145,27 +145,24 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Scroll-driven text color reveal
+    // Scroll-driven text color reveal untuk highlightRef
     if (highlightRef.current) {
-      const words = highlightRef.current.querySelectorAll('.word');
-      words.forEach((word, index) => {
+      const words = highlightRef.current.querySelectorAll('.word-highlight');
+      words.forEach((word) => {
         const el = word as HTMLElement;
-        const isHighlight = el.dataset.highlight === 'true';
-        if (isHighlight) {
-          gsap.fromTo(el,
-            { color: "#666666" },
-            {
-              color: "#0D3CFC",
-              ease: "none",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 80%",
-                end: "top 40%",
-                scrub: 1,
-              }
+        gsap.fromTo(el,
+          { color: "#666666" },
+          {
+            color: "#0D3CFC",
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 80%",
+              end: "top 40%",
+              scrub: 1,
             }
-          );
-        }
+          }
+        );
       });
     }
   };
@@ -277,10 +274,101 @@ export default function HomePage(): React.JSX.Element {
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
-        {/* Judul di kiri atas */}
+
+        {/* ===== LEFT SIDE: About Us Box (fixed) ===== */}
+        <div
+          ref={aboutBoxRef}
+          style={{
+            position: "fixed",
+            left: "40px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 15,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid #0D3CFC",
+            borderRadius: "8px",
+            padding: "16px 20px",
+            backgroundColor: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(4px)",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease, color 0.3s ease",
+            writingMode: "vertical-rl",
+            letterSpacing: "0.1em",
+            userSelect: "none",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#0D3CFC";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.85)";
+          }}
+        >
+          <span
+            style={{
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              transition: "color 0.3s ease",
+              writingMode: "vertical-rl",
+              letterSpacing: "0.15em",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#0D3CFC";
+            }}
+          >
+            About Us
+          </span>
+        </div>
+
+        {/* ===== RIGHT-CENTER: Scroll-driven text ===== */}
+        <div
+          ref={highlightRef}
+          style={{
+            position: "absolute",
+            top: "110vh",
+            right: "5%",
+            width: "55%",
+            maxWidth: "900px",
+            textAlign: "left",
+            padding: "60px 20px",
+            fontFamily: FONT_FAMILY,
+            pointerEvents: "none",
+          }}
+        >
+          {/* Baris 1: "About note, shop, and donasi" dengan highlight */}
+          <div style={{ fontSize: "56px", fontWeight: 400, lineHeight: 1.3, marginBottom: "24px" }}>
+            <span style={{ color: "#666666" }}>About </span>
+            <span className="word-highlight" style={{ color: "#666666", transition: "color 0.3s" }}>note</span>
+            <span style={{ color: "#666666" }}>, </span>
+            <span className="word-highlight" style={{ color: "#666666", transition: "color 0.3s" }}>shop</span>
+            <span style={{ color: "#666666" }}>, and </span>
+            <span className="word-highlight" style={{ color: "#666666", transition: "color 0.3s" }}>donasi</span>
+          </div>
+
+          {/* Baris 2: paragraf deskriptif */}
+          <div style={{ fontSize: "28px", fontWeight: 300, lineHeight: 1.6, color: "#666666" }}>
+            <p style={{ margin: 0, padding: 0 }}>
+              We provide a platform for you to take notes, find ideas,
+              <br />
+              and donate money to those in need.
+            </p>
+            <p style={{ margin: "16px 0 0 0", padding: 0, fontSize: "24px", fontWeight: 300, color: "#888888" }}>
+              Menuru is a place where creativity meets generosity.
+            </p>
+          </div>
+        </div>
+
+        {/* ===== Judul di kiri atas ===== */}
         <div
           style={{
             position: "fixed",
@@ -308,7 +396,7 @@ export default function HomePage(): React.JSX.Element {
           </h1>
         </div>
 
-        {/* Subtitle - 2 baris */}
+        {/* ===== Subtitle - 2 baris ===== */}
         <div
           ref={subtitleRef}
           className="subtitle"
@@ -337,128 +425,91 @@ export default function HomePage(): React.JSX.Element {
           </p>
         </div>
 
-        {/* Tombol "Let's build now" */}
+        {/* ===== Tombol "Let's build now" + Arrow ===== */}
         <div
-          ref={buttonRef}
-          className="cta-button"
           style={{
             position: "fixed",
             top: "400px",
             left: "40px",
             zIndex: 15,
-            display: "inline-block",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "12px 28px",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0D3CFC";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          <span
-            style={{
-              fontSize: "18px",
-              fontWeight: 500,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.02em",
-              transition: "color 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#0D3CFC";
-            }}
-          >
-            Let's build now
-          </span>
-        </div>
-
-        {/* Arrow box - posisi di samping tombol */}
-        <div
-          ref={arrowRef}
-          className="arrow-box"
-          style={{
-            position: "fixed",
-            top: "400px",
-            left: "230px",
-            zIndex: 15,
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "10px",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            backgroundColor: "transparent",
-            color: "#0D3CFC",
-            width: "50px",
-            height: "50px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0D3CFC";
-            e.currentTarget.style.color = "#ffffff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#0D3CFC";
+            gap: "12px",
           }}
         >
-          <NorthEastArrow size={24} />
-        </div>
-
-        {/* About Us - kotak border di kanan atas */}
-        <div
-          ref={aboutRef}
-          className="about-us"
-          style={{
-            position: "fixed",
-            top: "40px",
-            right: "100px",
-            zIndex: 15,
-            display: "inline-block",
-            border: "2px solid #0D3CFC",
-            borderRadius: "8px",
-            padding: "8px 20px",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            backgroundColor: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0D3CFC";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          <span
+          {/* Button */}
+          <div
+            ref={buttonRef}
+            className="cta-button"
             style={{
-              fontSize: "16px",
-              fontWeight: 500,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              transition: "color 0.3s ease",
+              display: "inline-block",
+              border: "2px solid #0D3CFC",
+              borderRadius: "8px",
+              padding: "12px 28px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              backgroundColor: "transparent",
             }}
             onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#0D3CFC";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <span
+              style={{
+                fontSize: "18px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                transition: "color 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#ffffff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#0D3CFC";
+              }}
+            >
+              Let's build now
+            </span>
+          </div>
+
+          {/* Arrow box */}
+          <div
+            ref={arrowRef}
+            className="arrow-box"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px solid #0D3CFC",
+              borderRadius: "8px",
+              padding: "10px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              backgroundColor: "transparent",
+              color: "#0D3CFC",
+              width: "50px",
+              height: "50px",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#0D3CFC";
               e.currentTarget.style.color = "#ffffff";
             }}
             onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
               e.currentTarget.style.color = "#0D3CFC";
             }}
           >
-            About Us
-          </span>
+            <NorthEastArrow size={24} />
+          </div>
         </div>
 
-        {/* Menu Button */}
+        {/* ===== Menu Button ===== */}
         <div
           ref={menuButtonRef}
           className="menu-button"
@@ -525,7 +576,7 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay */}
+        {/* ===== Menu Overlay ===== */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -546,69 +597,64 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
 
-        {/* Scroll-driven text color reveal - About section di tengah */}
-        <div
-          ref={highlightRef}
-          style={{
-            position: "absolute",
-            top: "110vh",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "80%",
-            maxWidth: "1200px",
-            textAlign: "center",
-            padding: "80px 20px",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          <div style={{ fontSize: "48px", fontWeight: 400, lineHeight: 1.3 }}>
-            <span className="word" data-highlight="true" style={{ color: "#666666", transition: "color 0.3s" }}>About</span>
-            <span style={{ color: "#666666" }}> </span>
-            <span className="word" data-highlight="true" style={{ color: "#666666", transition: "color 0.3s" }}>note</span>
-            <span style={{ color: "#666666" }}>, </span>
-            <span className="word" data-highlight="true" style={{ color: "#666666", transition: "color 0.3s" }}>shop</span>
-            <span style={{ color: "#666666" }}> </span>
-            <span style={{ color: "#666666" }}>and </span>
-            <span className="word" data-highlight="true" style={{ color: "#666666", transition: "color 0.3s" }}>donasi</span>
-            <br />
-            <span style={{ color: "#666666", fontSize: "32px", fontWeight: 300 }}>
-              We provide a platform for you to take notes, find ideas, and donate money to those in need.
-              <br />
-              Menuru is a place where creativity meets generosity.
-            </span>
-          </div>
-        </div>
-
-        {/* Teks dummy paling bawah */}
+        {/* ===== DUMMY TEXT DI BAWAH (biar bisa scroll) ===== */}
         <div
           style={{
             position: "absolute",
-            bottom: "100px",
+            bottom: "60px",
             left: "50%",
             transform: "translateX(-50%)",
             textAlign: "center",
             color: "#ccc",
-            fontSize: "16px",
+            fontSize: "18px",
             fontFamily: FONT_FAMILY,
-            opacity: 0.3,
-            padding: "40px",
+            opacity: 0.4,
+            padding: "40px 20px",
+            width: "100%",
+            maxWidth: "800px",
+            pointerEvents: "none",
           }}
         >
-          <p>© 2026 Menuru. All rights reserved.</p>
-          <p style={{ marginTop: "8px", fontSize: "14px" }}>Scroll untuk melihat lebih banyak</p>
+          <p style={{ margin: "0 0 12px 0", fontSize: "22px", fontWeight: 300, letterSpacing: "0.05em" }}>
+            ——— scroll more ———
+          </p>
+          <p style={{ margin: "0 0 6px 0", fontSize: "16px", fontWeight: 300 }}>
+            © 2026 Menuru. All rights reserved.
+          </p>
+          <p style={{ margin: "0", fontSize: "14px", fontWeight: 300, color: "#ddd" }}>
+            Built with ❤️ from Love yourself
+          </p>
+          <div style={{ marginTop: "24px", display: "flex", justifyContent: "center", gap: "32px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "13px", color: "#d0d0d0" }}>Privacy Policy</span>
+            <span style={{ fontSize: "13px", color: "#d0d0d0" }}>Terms of Service</span>
+            <span style={{ fontSize: "13px", color: "#d0d0d0" }}>Contact</span>
+          </div>
+          <div style={{ marginTop: "12px", display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "12px", color: "#d5d5d5" }}>Instagram</span>
+            <span style={{ fontSize: "12px", color: "#d5d5d5" }}>Twitter</span>
+            <span style={{ fontSize: "12px", color: "#d5d5d5" }}>YouTube</span>
+          </div>
         </div>
 
-        <div style={{ height: "200vh" }} />
+        {/* Spacer besar agar scroll panjang */}
+        <div style={{ height: "220vh" }} />
       </div>
 
       <style jsx global>{`
         body {
-          overflow: hidden !important;
+          overflow: auto !important;
           -ms-overflow-style: none;
-          scrollbar-width: none;
+          scrollbar-width: thin;
         }
         body::-webkit-scrollbar {
-          display: none;
+          width: 6px;
+        }
+        body::-webkit-scrollbar-track {
+          background: #f0f0f0;
+        }
+        body::-webkit-scrollbar-thumb {
+          background: #0D3CFC;
+          border-radius: 4px;
         }
 
         @media (max-width: 1024px) {
@@ -621,16 +667,26 @@ export default function HomePage(): React.JSX.Element {
           .title {
             font-size: 36px !important;
           }
+          [ref="highlightRef"] {
+            width: 50% !important;
+            right: 4% !important;
+          }
+          [ref="highlightRef"] div:first-child {
+            font-size: 42px !important;
+          }
+          [ref="highlightRef"] div:last-child {
+            font-size: 22px !important;
+          }
+          [ref="highlightRef"] div:last-child p:last-child {
+            font-size: 20px !important;
+          }
           .cta-button {
-            top: 350px !important;
             padding: 10px 22px !important;
           }
           .cta-button span {
             font-size: 16px !important;
           }
           .arrow-box {
-            top: 350px !important;
-            left: 200px !important;
             width: 44px !important;
             height: 44px !important;
             padding: 8px !important;
@@ -643,20 +699,15 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 32px !important;
           }
-          .about-us {
-            right: 80px !important;
-            padding: 6px 16px !important;
+          [ref="aboutBoxRef"] {
+            left: 24px !important;
+            padding: 12px 14px !important;
           }
-          .about-us span {
-            font-size: 14px !important;
-          }
-          [ref="highlightRef"] div {
-            font-size: 36px !important;
-          }
-          [ref="highlightRef"] div span:last-child {
-            font-size: 24px !important;
+          [ref="aboutBoxRef"] span {
+            font-size: 16px !important;
           }
         }
+
         @media (max-width: 768px) {
           .subtitle p {
             font-size: 36px !important;
@@ -670,17 +721,27 @@ export default function HomePage(): React.JSX.Element {
             top: 20px !important;
             left: 20px !important;
           }
+          [ref="highlightRef"] {
+            width: 65% !important;
+            right: 3% !important;
+            top: 100vh !important;
+          }
+          [ref="highlightRef"] div:first-child {
+            font-size: 32px !important;
+          }
+          [ref="highlightRef"] div:last-child {
+            font-size: 18px !important;
+          }
+          [ref="highlightRef"] div:last-child p:last-child {
+            font-size: 16px !important;
+          }
           .cta-button {
-            top: 280px !important;
-            left: 20px !important;
             padding: 8px 18px !important;
           }
           .cta-button span {
             font-size: 14px !important;
           }
           .arrow-box {
-            top: 280px !important;
-            left: 170px !important;
             width: 38px !important;
             height: 38px !important;
             padding: 6px !important;
@@ -697,24 +758,20 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 28px !important;
           }
-          .about-us {
-            top: 20px !important;
-            right: 60px !important;
-            padding: 4px 12px !important;
+          [ref="aboutBoxRef"] {
+            left: 16px !important;
+            padding: 10px 12px !important;
           }
-          .about-us span {
-            font-size: 12px !important;
+          [ref="aboutBoxRef"] span {
+            font-size: 14px !important;
           }
-          [ref="highlightRef"] {
-            width: 90% !important;
-          }
-          [ref="highlightRef"] div {
-            font-size: 28px !important;
-          }
-          [ref="highlightRef"] div span:last-child {
-            font-size: 20px !important;
+          div[style*="position: fixed; top: 400px; left: 40px;"] {
+            top: 290px !important;
+            left: 20px !important;
+            gap: 8px !important;
           }
         }
+
         @media (max-width: 480px) {
           .subtitle p {
             font-size: 24px !important;
@@ -728,17 +785,27 @@ export default function HomePage(): React.JSX.Element {
             top: 16px !important;
             left: 16px !important;
           }
+          [ref="highlightRef"] {
+            width: 78% !important;
+            right: 2% !important;
+            top: 95vh !important;
+          }
+          [ref="highlightRef"] div:first-child {
+            font-size: 24px !important;
+          }
+          [ref="highlightRef"] div:last-child {
+            font-size: 15px !important;
+          }
+          [ref="highlightRef"] div:last-child p:last-child {
+            font-size: 14px !important;
+          }
           .cta-button {
-            top: 220px !important;
-            left: 16px !important;
             padding: 6px 14px !important;
           }
           .cta-button span {
             font-size: 12px !important;
           }
           .arrow-box {
-            top: 220px !important;
-            left: 145px !important;
             width: 32px !important;
             height: 32px !important;
             padding: 4px !important;
@@ -755,22 +822,17 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 24px !important;
           }
-          .about-us {
-            top: 16px !important;
-            right: 50px !important;
-            padding: 4px 10px !important;
+          [ref="aboutBoxRef"] {
+            left: 12px !important;
+            padding: 8px 10px !important;
           }
-          .about-us span {
-            font-size: 11px !important;
+          [ref="aboutBoxRef"] span {
+            font-size: 12px !important;
           }
-          [ref="highlightRef"] {
-            width: 95% !important;
-          }
-          [ref="highlightRef"] div {
-            font-size: 22px !important;
-          }
-          [ref="highlightRef"] div span:last-child {
-            font-size: 16px !important;
+          div[style*="position: fixed; top: 400px; left: 40px;"] {
+            top: 230px !important;
+            left: 16px !important;
+            gap: 6px !important;
           }
         }
       `}</style>
