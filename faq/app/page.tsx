@@ -177,7 +177,7 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initBlurAnimations = () => {
-    // Blur effect pada navbar saat scroll - tapi tidak tembus ke menu overlay
+    // Blur effect pada navbar saat scroll
     if (navbarRef.current) {
       gsap.to(navbarRef.current, {
         backdropFilter: "blur(10px)",
@@ -484,7 +484,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan blur effect, di atas menu overlay */}
+        {/* NAVBAR - FIXED di atas dengan blur effect */}
         <div
           ref={navbarRef}
           style={{
@@ -503,8 +503,8 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: isMenuOpen ? "none" : "auto",
           }}
         >
-          {/* Get in Touch - border biru, panah biru full di dalam kotak */}
-          <Link href="/contact">
+          {/* Get in Touch - border biru, panah SVG warna putih di dalam kotak biru */}
+          <Link href="/contact" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="get-in-touch"
               style={{
@@ -538,7 +538,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "4px",
                   padding: "4px",
                   color: "#ffffff",
-                  border: "2px solid #0D3CFC",
                 }}
               >
                 <ArrowRight size={16} />
@@ -546,8 +545,8 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Pusat Bantuan - border hitam, panah hitam full di dalam kotak */}
-          <Link href="/pusat-bantuan">
+          {/* Pusat Bantuan - border hitam, panah SVG putih di dalam kotak hitam */}
+          <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="pusat-bantuan"
               style={{
@@ -581,7 +580,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: "4px",
                   padding: "4px",
                   color: "#ffffff",
-                  border: "2px solid #000000",
                 }}
               >
                 <ArrowRight size={16} />
@@ -589,7 +587,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu - border hitam, tanda + hitam full di dalam kotak */}
+          {/* Menu - border hitam, tanda + putih di dalam kotak hitam */}
           <div
             className="menu-button"
             style={{
@@ -601,6 +599,7 @@ export default function HomePage(): React.JSX.Element {
               padding: "8px 16px",
               cursor: "pointer",
               backgroundColor: "transparent",
+              pointerEvents: isMenuOpen ? "none" : "auto",
             }}
             onClick={toggleMenu}
           >
@@ -613,7 +612,6 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "4px",
                 padding: "4px",
                 color: "#ffffff",
-                border: "2px solid #000000",
                 transition: "transform 0.4s ease",
                 transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
               }}
@@ -662,28 +660,62 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             transform: "translateY(-100%)",
             opacity: 0,
+            pointerEvents: isMenuOpen ? "auto" : "none",
           }}
         >
           {/* Menu content */}
           <div style={{ 
             color: "#ffffff", 
-            fontSize: "48px", 
+            fontSize: "64px", 
             fontWeight: 700,
             fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
           }}>
             Menu
           </div>
           <div style={{ 
             display: "flex", 
-            gap: "40px", 
-            marginTop: "40px",
+            gap: "30px", 
+            marginTop: "50px",
             flexDirection: "column",
             alignItems: "center",
           }}>
-            <Link href="/" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Home</Link>
-            <Link href="/about" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>About</Link>
-            <Link href="/contact" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Contact</Link>
-            <Link href="/pusat-bantuan" style={{ color: "#ffffff", fontSize: "24px", textDecoration: "none" }}>Pusat Bantuan</Link>
+            <Link href="/" style={{ 
+              color: "#ffffff", 
+              fontSize: "28px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Home</Link>
+            <Link href="/about" style={{ 
+              color: "#ffffff", 
+              fontSize: "28px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>About</Link>
+            <Link href="/contact" style={{ 
+              color: "#ffffff", 
+              fontSize: "28px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ 
+              color: "#ffffff", 
+              fontSize: "28px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Pusat Bantuan</Link>
           </div>
         </div>
 
