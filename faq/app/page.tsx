@@ -48,9 +48,15 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const ArrowRight = ({ size = 24 }: { size?: number }) => (
+const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -76,6 +82,8 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
+  const closeButtonRef = useRef<HTMLDivElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -101,6 +109,7 @@ export default function HomePage(): React.JSX.Element {
                 initScrollAnimations();
                 initTimelineAnimations();
                 initBlurAnimations();
+                initContentPinAnimation();
               }, 200);
             }
           });
@@ -149,6 +158,72 @@ export default function HomePage(): React.JSX.Element {
     }, "-=0.3");
   };
 
+  const initContentPinAnimation = () => {
+    // Pin konten utama saat judul membesar
+    if (contentWrapperRef.current && heroRef.current) {
+      // Buat wrapper untuk konten yang akan di-pin
+      const contentWrapper = contentWrapperRef.current;
+      
+      // Pin konten saat scroll
+      ScrollTrigger.create({
+        trigger: contentWrapper,
+        start: "top top",
+        end: "bottom bottom",
+        pin: true,
+        pinSpacing: true,
+        id: "contentPin",
+      });
+    }
+
+    // Animasi subtitle dan tombol naik ke atas saat judul membesar
+    if (subtitleRef.current && buttonRef.current && titleRef.current) {
+      // Subtitle naik ke atas
+      gsap.to(subtitleRef.current, {
+        y: -200,
+        opacity: 0.5,
+        scale: 0.8,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.5,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // Tombol naik ke atas
+      gsap.to(buttonRef.current, {
+        y: -200,
+        opacity: 0.3,
+        scale: 0.7,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.5,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // Arrow naik ke atas
+      gsap.to(arrowRef.current, {
+        y: -200,
+        opacity: 0.3,
+        scale: 0.7,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.5,
+          invalidateOnRefresh: true,
+        }
+      });
+    }
+  };
+
   const initScrollAnimations = () => {
     // Animasi judul: dari 48px ke 500px saat scroll ke bawah
     if (titleRef.current && heroRef.current) {
@@ -171,6 +246,20 @@ export default function HomePage(): React.JSX.Element {
           start: "top top",
           end: "bottom bottom",
           scrub: 1.5,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // Animasi judul kembali ke 48px setelah melewati hero
+      gsap.to(titleRef.current, {
+        fontSize: "48px",
+        fontWeight: 700,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "bottom bottom",
+          end: "bottom+=100px bottom",
+          scrub: 1,
           invalidateOnRefresh: true,
         }
       });
@@ -278,6 +367,32 @@ export default function HomePage(): React.JSX.Element {
         });
       }
     } else {
+      if (menuOverlayRef.current) {
+        gsap.to(menuOverlayRef.current, {
+          y: "-100%",
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => {
+            setIsMenuOpen(false);
+          }
+        });
+      } else {
+        setIsMenuOpen(false);
+      }
+      // Animasi plus icon kembali
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+      }
+    }
+  };
+
+  const closeMenu = () => {
+    if (isMenuOpen) {
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
           y: "-100%",
@@ -427,79 +542,81 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Subtitle */}
-          <div
-            ref={subtitleRef}
-            className="subtitle"
-            style={{
-              marginTop: "120px",
-              textAlign: "left",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            <p
-              style={{
-                fontSize: "60px",
-                fontWeight: 400,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.2,
-                margin: 0,
-                padding: 0,
-                paddingBottom: "30px",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {`You can take notes, find ideas,\nand donate money to those in need`}
-            </p>
-          </div>
-
-          {/* Tombol dan Arrow */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative", zIndex: 1 }}>
+          {/* Content Wrapper untuk di-pin */}
+          <div ref={contentWrapperRef} style={{ position: "relative", zIndex: 1 }}>
+            {/* Subtitle */}
             <div
-              ref={buttonRef}
-              className="cta-button"
+              ref={subtitleRef}
+              className="subtitle"
               style={{
-                display: "inline-block",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "12px 28px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
+                marginTop: "120px",
+                textAlign: "left",
+                position: "relative",
               }}
             >
-              <span
+              <p
                 style={{
-                  fontSize: "18px",
-                  fontWeight: 500,
+                  fontSize: "60px",
+                  fontWeight: 400,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.02em",
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "30px",
+                  whiteSpace: "pre-line",
                 }}
               >
-                Let's build now
-              </span>
+                {`You can take notes, find ideas,\nand donate money to those in need`}
+              </p>
             </div>
 
-            <div
-              ref={arrowRef}
-              className="arrow-box"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "10px",
-                cursor: "pointer",
-                backgroundColor: "#0D3CFC",
-                color: "#ffffff",
-                width: "50px",
-                height: "50px",
-              }}
-            >
-              <NorthEastArrow size={24} />
+            {/* Tombol dan Arrow */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                className="cta-button"
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Let's build now
+                </span>
+              </div>
+
+              <div
+                ref={arrowRef}
+                className="arrow-box"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <NorthEastArrow size={24} />
+              </div>
             </div>
           </div>
         </div>
@@ -523,7 +640,7 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: isMenuOpen ? "none" : "auto",
           }}
         >
-          {/* Get in Touch - border biru, panah SVG putih di dalam kotak biru */}
+          {/* Get in Touch - border biru, panah SouthEast di dalam kotak biru */}
           <Link href="/contact" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="get-in-touch"
@@ -560,12 +677,12 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <ArrowRight size={24} />
+                <SouthEastArrow size={24} />
               </div>
             </div>
           </Link>
 
-          {/* Pusat Bantuan - border hitam, panah SVG putih di dalam kotak hitam */}
+          {/* Pusat Bantuan - border hitam, panah NorthWest di dalam kotak hitam */}
           <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="pusat-bantuan"
@@ -602,7 +719,7 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <ArrowRight size={24} />
+                <NorthWestArrow size={24} />
               </div>
             </div>
           </Link>
@@ -663,7 +780,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - KOSONG, hanya background biru */}
+        {/* Menu Overlay - dengan judul dan tombol close */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -684,10 +801,80 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: isMenuOpen ? "auto" : "none",
           }}
         >
-          {/* Menu kosong - hanya background biru */}
+          {/* Judul di dalam menu */}
+          <h1
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+              pointerEvents: "none",
+            }}
+          >
+            Menuru
+          </h1>
+
+          {/* Tombol Close di dalam menu */}
+          <div
+            ref={closeButtonRef}
+            style={{
+              position: "absolute",
+              top: "40px",
+              right: "40px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+              border: "2px solid #ffffff",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              fontSize: "16px",
+              fontWeight: 500,
+              transition: "all 0.3s ease",
+            }}
+            onClick={closeMenu}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <span>Close</span>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#ffffff",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#0D3CFC",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 300,
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* SPACER */}
+        {/* SPACER - Tambahan untuk efek pin */}
         <div style={{ height: "100vh" }} />
 
         {/* ABOUT SECTION */}
@@ -704,7 +891,6 @@ export default function HomePage(): React.JSX.Element {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1,
-            position: "relative",
           }}
         >
           <div
@@ -921,7 +1107,6 @@ export default function HomePage(): React.JSX.Element {
             overflow: "hidden",
             borderTop: "1px solid #e8e8e8",
             zIndex: 1,
-            position: "relative",
           }}
         >
           <div
@@ -1118,7 +1303,6 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#ffffff",
             borderTop: "1px solid #e8e8e8",
             zIndex: 1,
-            position: "relative",
           }}
         >
           <p style={{ margin: 0, fontWeight: 500 }}>© 2026 Menuru. All rights reserved.</p>
