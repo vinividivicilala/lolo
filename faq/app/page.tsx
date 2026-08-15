@@ -82,8 +82,8 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
-  const closeButtonRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+  const menuTitleRef = useRef<HTMLHeadingElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -161,12 +161,9 @@ export default function HomePage(): React.JSX.Element {
   const initContentPinAnimation = () => {
     // Pin konten utama saat judul membesar
     if (contentWrapperRef.current && heroRef.current) {
-      // Buat wrapper untuk konten yang akan di-pin
-      const contentWrapper = contentWrapperRef.current;
-      
       // Pin konten saat scroll
       ScrollTrigger.create({
-        trigger: contentWrapper,
+        trigger: contentWrapperRef.current,
         start: "top top",
         end: "bottom bottom",
         pin: true,
@@ -175,13 +172,13 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Animasi subtitle dan tombol naik ke atas saat judul membesar
+    // Animasi subtitle dan tombol pindah ke atas bawah judul web
     if (subtitleRef.current && buttonRef.current && titleRef.current) {
-      // Subtitle naik ke atas
+      // Subtitle pindah ke atas (ke bawah judul)
       gsap.to(subtitleRef.current, {
-        y: -200,
-        opacity: 0.5,
-        scale: 0.8,
+        y: -300,
+        opacity: 0.8,
+        scale: 0.9,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
@@ -192,11 +189,11 @@ export default function HomePage(): React.JSX.Element {
         }
       });
 
-      // Tombol naik ke atas
+      // Tombol pindah ke atas
       gsap.to(buttonRef.current, {
-        y: -200,
-        opacity: 0.3,
-        scale: 0.7,
+        y: -300,
+        opacity: 0.7,
+        scale: 0.85,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
@@ -207,11 +204,11 @@ export default function HomePage(): React.JSX.Element {
         }
       });
 
-      // Arrow naik ke atas
+      // Arrow pindah ke atas
       gsap.to(arrowRef.current, {
-        y: -200,
-        opacity: 0.3,
-        scale: 0.7,
+        y: -300,
+        opacity: 0.7,
+        scale: 0.85,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
@@ -367,32 +364,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
     } else {
-      if (menuOverlayRef.current) {
-        gsap.to(menuOverlayRef.current, {
-          y: "-100%",
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-          onComplete: () => {
-            setIsMenuOpen(false);
-          }
-        });
-      } else {
-        setIsMenuOpen(false);
-      }
-      // Animasi plus icon kembali
-      if (plusIconRef.current) {
-        gsap.to(plusIconRef.current, {
-          rotation: 0,
-          duration: 0.4,
-          ease: "power2.in"
-        });
-      }
-    }
-  };
-
-  const closeMenu = () => {
-    if (isMenuOpen) {
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
           y: "-100%",
@@ -621,7 +592,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas */}
+        {/* NAVBAR - FIXED di atas - dengan background putih di menu overlay */}
         <div
           ref={navbarRef}
           style={{
@@ -634,10 +605,11 @@ export default function HomePage(): React.JSX.Element {
             gap: "12px",
             padding: "8px 16px",
             borderRadius: "12px",
-            backgroundColor: "rgba(255,255,255,0)",
-            backdropFilter: "blur(0px)",
+            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
+            backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
             transition: "all 0.3s ease",
             pointerEvents: isMenuOpen ? "none" : "auto",
+            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
           {/* Get in Touch - border biru, panah SouthEast di dalam kotak biru */}
@@ -780,7 +752,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - dengan judul dan tombol close */}
+        {/* Menu Overlay - dengan judul di kiri atas */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -794,17 +766,19 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 99,
             display: isMenuOpen ? "flex" : "none",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
             transform: "translateY(-100%)",
             opacity: 0,
             pointerEvents: isMenuOpen ? "auto" : "none",
+            padding: "40px",
           }}
         >
-          {/* Judul di dalam menu */}
+          {/* Judul di kiri atas menu */}
           <h1
+            ref={menuTitleRef}
             style={{
-              fontSize: "100px",
+              fontSize: "48px",
               fontWeight: 700,
               color: "#ffffff",
               fontFamily: FONT_FAMILY,
@@ -813,64 +787,62 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               opacity: 0.9,
-              pointerEvents: "none",
+              position: "absolute",
+              top: "40px",
+              left: "40px",
             }}
           >
             Menuru
           </h1>
 
-          {/* Tombol Close di dalam menu */}
+          {/* Menu items - tengah */}
           <div
-            ref={closeButtonRef}
             style={{
-              position: "absolute",
-              top: "40px",
-              right: "40px",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: "12px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-              border: "2px solid #ffffff",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              color: "#ffffff",
-              fontFamily: FONT_FAMILY,
-              fontSize: "16px",
-              fontWeight: 500,
-              transition: "all 0.3s ease",
-            }}
-            onClick={closeMenu}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+              gap: "30px",
             }}
           >
-            <span>Close</span>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#ffffff",
-                borderRadius: "4px",
-                padding: "4px",
-                color: "#0D3CFC",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                }}
-              >
-                ✕
-              </span>
-            </div>
+            <Link href="/" style={{ 
+              color: "#ffffff", 
+              fontSize: "48px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Home</Link>
+            <Link href="/about" style={{ 
+              color: "#ffffff", 
+              fontSize: "48px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>About</Link>
+            <Link href="/contact" style={{ 
+              color: "#ffffff", 
+              fontSize: "48px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ 
+              color: "#ffffff", 
+              fontSize: "48px", 
+              textDecoration: "none",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: "opacity 0.3s",
+              opacity: 0.8,
+            }}>Pusat Bantuan</Link>
           </div>
         </div>
 
