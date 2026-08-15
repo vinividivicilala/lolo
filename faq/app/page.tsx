@@ -48,9 +48,9 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const ArrowRight = ({ size = 20 }: { size?: number }) => (
+const ArrowRight = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -75,6 +75,7 @@ export default function HomePage(): React.JSX.Element {
   const aboutRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -149,7 +150,7 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initScrollAnimations = () => {
-    // Animasi judul: dari 48px ke 400px saat scroll ke bawah
+    // Animasi judul: dari 48px ke 500px saat scroll ke bawah
     if (titleRef.current && heroRef.current) {
       // Reset posisi judul ke posisi awal
       gsap.set(titleRef.current, {
@@ -160,9 +161,9 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 15,
       });
 
-      // Animasi ukuran font dari 48px ke 400px
+      // Animasi ukuran font dari 48px ke 500px
       gsap.to(titleRef.current, {
-        fontSize: "400px",
+        fontSize: "500px",
         fontWeight: 400,
         ease: "none",
         scrollTrigger: {
@@ -268,6 +269,14 @@ export default function HomePage(): React.JSX.Element {
           { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       }
+      // Animasi plus icon berputar
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 45,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
     } else {
       if (menuOverlayRef.current) {
         gsap.to(menuOverlayRef.current, {
@@ -281,6 +290,14 @@ export default function HomePage(): React.JSX.Element {
         });
       } else {
         setIsMenuOpen(false);
+      }
+      // Animasi plus icon kembali
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
       }
     }
   };
@@ -366,6 +383,7 @@ export default function HomePage(): React.JSX.Element {
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
+          overflow: "visible",
         }}
       >
         {/* HERO SECTION */}
@@ -403,6 +421,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: "rgba(255,255,255,0)",
               backdropFilter: "blur(0px)",
               transition: "all 0.3s ease",
+              pointerEvents: "none",
             }}
           >
             Menuru
@@ -416,6 +435,7 @@ export default function HomePage(): React.JSX.Element {
               marginTop: "120px",
               textAlign: "left",
               position: "relative",
+              zIndex: 1,
             }}
           >
             <p
@@ -436,7 +456,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           {/* Tombol dan Arrow */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative", zIndex: 1 }}>
             <div
               ref={buttonRef}
               className="cta-button"
@@ -484,7 +504,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan blur effect */}
+        {/* NAVBAR - FIXED di atas */}
         <div
           ref={navbarRef}
           style={{
@@ -503,7 +523,7 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: isMenuOpen ? "none" : "auto",
           }}
         >
-          {/* Get in Touch - border biru, panah SVG warna putih di dalam kotak biru */}
+          {/* Get in Touch - border biru, panah SVG putih di dalam kotak biru */}
           <Link href="/contact" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="get-in-touch"
@@ -540,7 +560,7 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <ArrowRight size={16} />
+                <ArrowRight size={24} />
               </div>
             </div>
           </Link>
@@ -582,7 +602,7 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <ArrowRight size={16} />
+                <ArrowRight size={24} />
               </div>
             </div>
           </Link>
@@ -612,16 +632,17 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "4px",
                 padding: "4px",
                 color: "#ffffff",
-                transition: "transform 0.4s ease",
-                transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
               }}
             >
               <span
+                ref={plusIconRef}
                 style={{
-                  fontSize: "18px",
+                  fontSize: "28px",
                   fontWeight: 300,
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1,
+                  display: "inline-block",
+                  transform: "rotate(0deg)",
                 }}
               >
                 +
@@ -642,7 +663,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - di bawah navbar */}
+        {/* Menu Overlay - KOSONG, hanya background biru */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -663,60 +684,7 @@ export default function HomePage(): React.JSX.Element {
             pointerEvents: isMenuOpen ? "auto" : "none",
           }}
         >
-          {/* Menu content */}
-          <div style={{ 
-            color: "#ffffff", 
-            fontSize: "64px", 
-            fontWeight: 700,
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.03em",
-          }}>
-            Menu
-          </div>
-          <div style={{ 
-            display: "flex", 
-            gap: "30px", 
-            marginTop: "50px",
-            flexDirection: "column",
-            alignItems: "center",
-          }}>
-            <Link href="/" style={{ 
-              color: "#ffffff", 
-              fontSize: "28px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Home</Link>
-            <Link href="/about" style={{ 
-              color: "#ffffff", 
-              fontSize: "28px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>About</Link>
-            <Link href="/contact" style={{ 
-              color: "#ffffff", 
-              fontSize: "28px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Contact</Link>
-            <Link href="/pusat-bantuan" style={{ 
-              color: "#ffffff", 
-              fontSize: "28px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Pusat Bantuan</Link>
-          </div>
+          {/* Menu kosong - hanya background biru */}
         </div>
 
         {/* SPACER */}
@@ -735,6 +703,8 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 1,
+            position: "relative",
           }}
         >
           <div
@@ -950,6 +920,8 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: "center",
             overflow: "hidden",
             borderTop: "1px solid #e8e8e8",
+            zIndex: 1,
+            position: "relative",
           }}
         >
           <div
@@ -1074,6 +1046,8 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#ffffff",
             width: "100%",
             textAlign: "center",
+            zIndex: 1,
+            position: "relative",
           }}
         >
           <h2
@@ -1143,6 +1117,8 @@ export default function HomePage(): React.JSX.Element {
             padding: "60px 40px",
             backgroundColor: "#ffffff",
             borderTop: "1px solid #e8e8e8",
+            zIndex: 1,
+            position: "relative",
           }}
         >
           <p style={{ margin: 0, fontWeight: 500 }}>© 2026 Menuru. All rights reserved.</p>
@@ -1157,6 +1133,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: auto !important;
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
+          height: 100% !important;
         }
         html::-webkit-scrollbar {
           display: none !important;
@@ -1170,6 +1147,8 @@ export default function HomePage(): React.JSX.Element {
           margin: 0;
           padding: 0;
           background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
         }
         body::-webkit-scrollbar {
           display: none !important;
