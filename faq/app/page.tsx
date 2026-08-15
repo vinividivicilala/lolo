@@ -414,10 +414,11 @@ export default function HomePage(): React.JSX.Element {
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             padding: "40px",
             backgroundColor: "#ffffff",
             position: "relative",
+            paddingTop: "120px",
           }}
         >
           {/* Judul - FIXED di posisi dengan blur effect */}
@@ -452,7 +453,7 @@ export default function HomePage(): React.JSX.Element {
           <div ref={contentWrapperRef} style={{ 
             position: "relative", 
             zIndex: 1,
-            marginTop: "100px",
+            marginTop: "20px",
           }}>
             {/* Subtitle */}
             <div
@@ -546,12 +547,12 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
             backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
             transition: "all 0.3s ease",
-            pointerEvents: isMenuOpen ? "none" : "auto",
+            pointerEvents: "auto",
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
           {/* Get in Touch */}
-          <Link href="/contact" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
+          <Link href="/contact">
             <div
               className="get-in-touch"
               style={{
@@ -593,7 +594,7 @@ export default function HomePage(): React.JSX.Element {
           </Link>
 
           {/* Pusat Bantuan */}
-          <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
+          <Link href="/pusat-bantuan">
             <div
               className="pusat-bantuan"
               style={{
@@ -634,7 +635,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu */}
+          {/* Menu - Tombol Close menggunakan tanda X */}
           <div
             className="menu-button"
             style={{
@@ -663,15 +664,15 @@ export default function HomePage(): React.JSX.Element {
               <span
                 ref={plusIconRef}
                 style={{
-                  fontSize: "28px",
-                  fontWeight: 300,
+                  fontSize: isMenuOpen ? "24px" : "28px",
+                  fontWeight: isMenuOpen ? 400 : 300,
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1,
                   display: "inline-block",
-                  transform: "rotate(0deg)",
+                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
                 }}
               >
-                +
+                {isMenuOpen ? "✕" : "+"}
               </span>
             </div>
             <span
@@ -684,7 +685,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "inline-block",
               }}
             >
-              Menu
+              {isMenuOpen ? "Close" : "Menu"}
             </span>
           </div>
         </div>
@@ -1083,7 +1084,8 @@ export default function HomePage(): React.JSX.Element {
         <div style={{ height: "30vh" }} />
 
         {/* DUMMY CONTENT */}
-        <div          style={{
+        <div
+          style={{
             padding: "80px 40px",
             backgroundColor: "#ffffff",
             width: "100%",
