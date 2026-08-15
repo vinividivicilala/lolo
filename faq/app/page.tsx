@@ -83,7 +83,7 @@ export default function HomePage(): React.JSX.Element {
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
-  const menuTitleRef = useRef<HTMLHeadingElement>(null);
+  const pinContainerRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -159,61 +159,61 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const initContentPinAnimation = () => {
-    // Pin konten utama saat judul membesar
-    if (contentWrapperRef.current && heroRef.current) {
-      // Pin konten saat scroll
+    // PIN konten: konten tetap diam di bawah judul sampai judul kembali ke 48px
+    if (pinContainerRef.current && heroRef.current) {
+      // Pin container agar konten tetap di posisi
       ScrollTrigger.create({
-        trigger: contentWrapperRef.current,
+        trigger: pinContainerRef.current,
         start: "top top",
-        end: "bottom bottom",
+        end: "bottom+=200px bottom",
         pin: true,
         pinSpacing: true,
         id: "contentPin",
       });
     }
 
-    // Animasi subtitle dan tombol pindah ke atas bawah judul web
-    if (subtitleRef.current && buttonRef.current && titleRef.current) {
-      // Subtitle pindah ke atas (ke bawah judul)
+    // Konten baru bergerak ke atas setelah judul kembali ke 48px
+    if (subtitleRef.current && buttonRef.current) {
+      // Subtitle bergerak ke atas setelah judul kembali 48px
       gsap.to(subtitleRef.current, {
         y: -300,
-        opacity: 0.8,
-        scale: 0.9,
+        opacity: 0.6,
+        scale: 0.85,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
+          start: "bottom+=100px bottom",
+          end: "bottom+=500px bottom",
           scrub: 1.5,
           invalidateOnRefresh: true,
         }
       });
 
-      // Tombol pindah ke atas
+      // Tombol bergerak ke atas
       gsap.to(buttonRef.current, {
         y: -300,
-        opacity: 0.7,
-        scale: 0.85,
+        opacity: 0.5,
+        scale: 0.8,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
+          start: "bottom+=100px bottom",
+          end: "bottom+=500px bottom",
           scrub: 1.5,
           invalidateOnRefresh: true,
         }
       });
 
-      // Arrow pindah ke atas
+      // Arrow bergerak ke atas
       gsap.to(arrowRef.current, {
         y: -300,
-        opacity: 0.7,
-        scale: 0.85,
+        opacity: 0.5,
+        scale: 0.8,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
+          start: "bottom+=100px bottom",
+          end: "bottom+=500px bottom",
           scrub: 1.5,
           invalidateOnRefresh: true,
         }
@@ -255,7 +255,7 @@ export default function HomePage(): React.JSX.Element {
         scrollTrigger: {
           trigger: heroRef.current,
           start: "bottom bottom",
-          end: "bottom+=100px bottom",
+          end: "bottom+=200px bottom",
           scrub: 1,
           invalidateOnRefresh: true,
         }
@@ -513,86 +513,89 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Content Wrapper untuk di-pin */}
-          <div ref={contentWrapperRef} style={{ position: "relative", zIndex: 1 }}>
-            {/* Subtitle */}
-            <div
-              ref={subtitleRef}
-              className="subtitle"
-              style={{
-                marginTop: "120px",
-                textAlign: "left",
-                position: "relative",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "60px",
-                  fontWeight: 400,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1.2,
-                  margin: 0,
-                  padding: 0,
-                  paddingBottom: "30px",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {`You can take notes, find ideas,\nand donate money to those in need`}
-              </p>
-            </div>
-
-            {/* Tombol dan Arrow */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+          {/* PIN CONTAINER - konten di-pin di sini */}
+          <div ref={pinContainerRef} style={{ position: "relative", zIndex: 1 }}>
+            {/* Content Wrapper */}
+            <div ref={contentWrapperRef} style={{ position: "relative" }}>
+              {/* Subtitle */}
               <div
-                ref={buttonRef}
-                className="cta-button"
+                ref={subtitleRef}
+                className="subtitle"
                 style={{
-                  display: "inline-block",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "12px 28px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
+                  marginTop: "120px",
+                  textAlign: "left",
+                  position: "relative",
                 }}
               >
-                <span
+                <p
                   style={{
-                    fontSize: "18px",
-                    fontWeight: 500,
+                    fontSize: "60px",
+                    fontWeight: 400,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.02em",
+                    lineHeight: 1.2,
+                    margin: 0,
+                    padding: 0,
+                    paddingBottom: "30px",
+                    whiteSpace: "pre-line",
                   }}
                 >
-                  Let's build now
-                </span>
+                  {`You can take notes, find ideas,\nand donate money to those in need`}
+                </p>
               </div>
 
-              <div
-                ref={arrowRef}
-                className="arrow-box"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  width: "50px",
-                  height: "50px",
-                }}
-              >
-                <NorthEastArrow size={24} />
+              {/* Tombol dan Arrow */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+                <div
+                  ref={buttonRef}
+                  className="cta-button"
+                  style={{
+                    display: "inline-block",
+                    border: "2px solid #0D3CFC",
+                    borderRadius: "8px",
+                    padding: "12px 28px",
+                    cursor: "pointer",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    Let's build now
+                  </span>
+                </div>
+
+                <div
+                  ref={arrowRef}
+                  className="arrow-box"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px solid #0D3CFC",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    cursor: "pointer",
+                    backgroundColor: "#0D3CFC",
+                    color: "#ffffff",
+                    width: "50px",
+                    height: "50px",
+                  }}
+                >
+                  <NorthEastArrow size={24} />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas - dengan background putih di menu overlay */}
+        {/* NAVBAR - FIXED di atas */}
         <div
           ref={navbarRef}
           style={{
@@ -612,7 +615,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Get in Touch - border biru, panah SouthEast di dalam kotak biru */}
+          {/* Get in Touch */}
           <Link href="/contact" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="get-in-touch"
@@ -654,7 +657,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Pusat Bantuan - border hitam, panah NorthWest di dalam kotak hitam */}
+          {/* Pusat Bantuan */}
           <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? "none" : "auto" }}>
             <div
               className="pusat-bantuan"
@@ -696,7 +699,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu - border hitam, tanda + putih di dalam kotak hitam */}
+          {/* Menu */}
           <div
             className="menu-button"
             style={{
@@ -708,7 +711,6 @@ export default function HomePage(): React.JSX.Element {
               padding: "8px 16px",
               cursor: "pointer",
               backgroundColor: "transparent",
-              pointerEvents: isMenuOpen ? "none" : "auto",
             }}
             onClick={toggleMenu}
           >
@@ -752,7 +754,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - dengan judul di kiri atas */}
+        {/* Menu Overlay - HANYA judul */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -776,7 +778,6 @@ export default function HomePage(): React.JSX.Element {
         >
           {/* Judul di kiri atas menu */}
           <h1
-            ref={menuTitleRef}
             style={{
               fontSize: "48px",
               fontWeight: 700,
@@ -794,56 +795,6 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </h1>
-
-          {/* Menu items - tengah */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              gap: "30px",
-            }}
-          >
-            <Link href="/" style={{ 
-              color: "#ffffff", 
-              fontSize: "48px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Home</Link>
-            <Link href="/about" style={{ 
-              color: "#ffffff", 
-              fontSize: "48px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>About</Link>
-            <Link href="/contact" style={{ 
-              color: "#ffffff", 
-              fontSize: "48px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Contact</Link>
-            <Link href="/pusat-bantuan" style={{ 
-              color: "#ffffff", 
-              fontSize: "48px", 
-              textDecoration: "none",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: "opacity 0.3s",
-              opacity: 0.8,
-            }}>Pusat Bantuan</Link>
-          </div>
         </div>
 
         {/* SPACER - Tambahan untuk efek pin */}
