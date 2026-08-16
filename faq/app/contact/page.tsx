@@ -1434,7 +1434,7 @@ export default function ContactPage(): React.JSX.Element {
                 maxWidth: '1100px',
                 gap: '40px',
               }}>
-                {/* Kiri - FAQ + Apakah kamu punya kesulitan? */}
+                {/* Kiri - FAQ + "Apakah kamu punya kesulitan?" */}
                 <div style={{
                   flex: '0 0 350px',
                   position: 'sticky',
@@ -1465,7 +1465,7 @@ export default function ContactPage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Kanan - FAQ Items */}
+                {/* Kanan - FAQ Items + Subscribe + Product */}
                 <div style={{
                   flex: 1,
                   display: 'flex',
@@ -1555,14 +1555,20 @@ export default function ContactPage(): React.JSX.Element {
                     </div>
                   ))}
 
-                  {/* Subscribe + Product - PALING BAWAH */}
+                  {/* FOOTER SECTION - Talk with an Menuru (Kiri) + Product (Tengah) */}
                   <div style={{
-                    marginTop: '40px',
-                    borderTop: '1px solid #e0e0e0',
-                    paddingTop: '40px',
+                    marginTop: '60px',
+                    borderTop: '2px solid #e0e0e0',
+                    paddingTop: '50px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '40px',
                   }}>
-                    {/* Subscribe */}
-                    <div>
+                    {/* Kiri - Talk with an Menuru */}
+                    <div style={{
+                      flex: '0 0 45%',
+                    }}>
                       <h3 style={{
                         fontFamily: FONT_FAMILY,
                         fontSize: '32px',
@@ -1674,11 +1680,9 @@ export default function ContactPage(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* Product - di bawah subscribe */}
+                    {/* Tengah - Product */}
                     <div style={{
-                      marginTop: '30px',
-                      borderTop: '1px solid #e0e0e0',
-                      paddingTop: '30px',
+                      flex: '0 0 35%',
                     }}>
                       <h3 style={{
                         fontFamily: FONT_FAMILY,
