@@ -561,11 +561,11 @@ export default function ContactPage(): React.JSX.Element {
               backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
               backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
               transition: 'all 0.3s ease',
-              pointerEvents: isMenuOpen ? 'none' : 'auto',
+              pointerEvents: 'auto',
               boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
             }}>
               {/* Get in Touch */}
-              <Link href="/contact" style={{ pointerEvents: isMenuOpen ? 'none' : 'auto' }}>
+              <Link href="/contact">
                 <div
                   style={{
                     display: 'inline-flex',
@@ -606,7 +606,7 @@ export default function ContactPage(): React.JSX.Element {
               </Link>
 
               {/* Pusat Bantuan */}
-              <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? 'none' : 'auto' }}>
+              <Link href="/pusat-bantuan">
                 <div
                   style={{
                     display: 'inline-flex',
@@ -661,7 +661,6 @@ export default function ContactPage(): React.JSX.Element {
                   padding: '8px 16px',
                   cursor: 'pointer',
                   backgroundColor: 'transparent',
-                  pointerEvents: isMenuOpen ? 'none' : 'auto',
                 }}
               >
                 <div
@@ -702,7 +701,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - BG BIRU #0D3CFC seperti halaman utama */}
+            {/* Menu Drawer - BG BIRU #0D3CFC */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -716,8 +715,8 @@ export default function ContactPage(): React.JSX.Element {
                 zIndex: 99,
                 display: 'none',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-start',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transform: 'translateY(-100%)',
                 opacity: 0,
                 pointerEvents: isMenuOpen ? 'auto' : 'none',
@@ -726,25 +725,36 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Judul di kiri atas menu */}
-              <h1
+              {/* Tombol Close (X) - BISA TUTUP BG MENU */}
+              <div
+                ref={closeButtonRef}
+                onClick={handleCloseMenu}
+                onMouseEnter={(e) => {
+                  gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
+                }}
                 style={{
-                  fontSize: '48px',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: '-0.03em',
-                  margin: 0,
-                  padding: 0,
-                  lineHeight: 1,
-                  opacity: 0.9,
                   position: 'absolute',
                   top: '40px',
-                  left: '40px',
+                  right: '40px',
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  zIndex: 101,
                 }}
               >
-                Menuru
-              </h1>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
 
               {/* Menu items - tengah */}
               <div
@@ -754,7 +764,6 @@ export default function ContactPage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '100%',
-                  height: '100%',
                   gap: '30px',
                 }}
               >
@@ -898,7 +907,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-04 Items dengan label ComingSoon biru di sisi kanan teks item */}
+            {/* 01-04 Items dengan label ComingSoon - teks item lebih kecil */}
             <div style={{
               position: 'relative',
               top: '150px',
@@ -910,9 +919,10 @@ export default function ContactPage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '60px',
+                gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '150px'
+                marginBottom: '150px',
+                maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
                 <div
@@ -921,17 +931,17 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '1000px',
+                    width: '100%',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('01')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '90px',
+                      fontSize: '60px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em',
@@ -941,7 +951,7 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '300px',
+                      fontSize: '160px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
@@ -949,12 +959,15 @@ export default function ContactPage(): React.JSX.Element {
                       Note
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#0D3CFC',
+                      backgroundColor: '#000000',
+                      padding: '6px 16px',
+                      borderRadius: '20px',
                       letterSpacing: '0.02em'
                     }}>
                       ComingSoon
@@ -964,7 +977,7 @@ export default function ContactPage(): React.JSX.Element {
                         ref={hoverText01Ref}
                         style={{
                           fontFamily: FONT_FAMILY,
-                          fontSize: '20px',
+                          fontSize: '18px',
                           fontWeight: '400',
                           color: '#000000',
                           whiteSpace: 'nowrap'
@@ -983,17 +996,17 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '1000px',
+                    width: '100%',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('02')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '90px',
+                      fontSize: '60px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em',
@@ -1003,7 +1016,7 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '300px',
+                      fontSize: '160px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
@@ -1011,12 +1024,15 @@ export default function ContactPage(): React.JSX.Element {
                       Calendar
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#0D3CFC',
+                      backgroundColor: '#000000',
+                      padding: '6px 16px',
+                      borderRadius: '20px',
                       letterSpacing: '0.02em'
                     }}>
                       ComingSoon
@@ -1026,7 +1042,7 @@ export default function ContactPage(): React.JSX.Element {
                         ref={hoverText02Ref}
                         style={{
                           fontFamily: FONT_FAMILY,
-                          fontSize: '20px',
+                          fontSize: '18px',
                           fontWeight: '400',
                           color: '#000000',
                           whiteSpace: 'nowrap'
@@ -1045,17 +1061,17 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '1000px',
+                    width: '100%',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('03')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '90px',
+                      fontSize: '60px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em',
@@ -1065,7 +1081,7 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '300px',
+                      fontSize: '160px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
@@ -1073,12 +1089,15 @@ export default function ContactPage(): React.JSX.Element {
                       Donation
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#0D3CFC',
+                      backgroundColor: '#000000',
+                      padding: '6px 16px',
+                      borderRadius: '20px',
                       letterSpacing: '0.02em'
                     }}>
                       ComingSoon
@@ -1088,7 +1107,7 @@ export default function ContactPage(): React.JSX.Element {
                         ref={hoverText03Ref}
                         style={{
                           fontFamily: FONT_FAMILY,
-                          fontSize: '20px',
+                          fontSize: '18px',
                           fontWeight: '400',
                           color: '#000000',
                           whiteSpace: 'nowrap'
@@ -1107,17 +1126,17 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '1000px',
+                    width: '100%',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('04')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '90px',
+                      fontSize: '60px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em',
@@ -1127,7 +1146,7 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '300px',
+                      fontSize: '160px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
@@ -1135,12 +1154,15 @@ export default function ContactPage(): React.JSX.Element {
                       Community
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#0D3CFC',
+                      backgroundColor: '#000000',
+                      padding: '6px 16px',
+                      borderRadius: '20px',
                       letterSpacing: '0.02em'
                     }}>
                       ComingSoon
@@ -1150,7 +1172,7 @@ export default function ContactPage(): React.JSX.Element {
                         ref={hoverText04Ref}
                         style={{
                           fontFamily: FONT_FAMILY,
-                          fontSize: '20px',
+                          fontSize: '18px',
                           fontWeight: '400',
                           color: '#000000',
                           whiteSpace: 'nowrap'
