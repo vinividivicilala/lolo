@@ -641,7 +641,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 480vh;
+          min-height: 280vh;
           width: 100%;
           will-change: transform;
         }
