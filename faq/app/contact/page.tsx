@@ -48,10 +48,12 @@ export default function ContactPage(): React.JSX.Element {
   const item02Ref = useRef<HTMLDivElement>(null);
   const item03Ref = useRef<HTMLDivElement>(null);
   const item04Ref = useRef<HTMLDivElement>(null);
+  const item05Ref = useRef<HTMLDivElement>(null);
   const hoverText01Ref = useRef<HTMLDivElement>(null);
   const hoverText02Ref = useRef<HTMLDivElement>(null);
   const hoverText03Ref = useRef<HTMLDivElement>(null);
   const hoverText04Ref = useRef<HTMLDivElement>(null);
+  const hoverText05Ref = useRef<HTMLDivElement>(null);
   
   // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
@@ -233,7 +235,7 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  // Animasi hover untuk item 01-04 menggunakan GSAP
+  // Animasi hover untuk item 01-05 menggunakan GSAP
   useEffect(() => {
     if (hoveredItem === '01' && hoverText01Ref.current && item01Ref.current) {
       gsap.fromTo(hoverText01Ref.current,
@@ -383,6 +385,43 @@ export default function ContactPage(): React.JSX.Element {
   }, [hoveredItem]);
 
   useEffect(() => {
+    if (hoveredItem === '05' && hoverText05Ref.current && item05Ref.current) {
+      gsap.fromTo(hoverText05Ref.current,
+        {
+          opacity: 0,
+          x: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.4,
+          ease: "power2.out"
+        }
+      );
+      gsap.to(item05Ref.current, {
+        scale: 1.02,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else if (hoveredItem !== '05' && hoverText05Ref.current) {
+      gsap.to(hoverText05Ref.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
+      });
+      if (item05Ref.current) {
+        gsap.to(item05Ref.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [hoveredItem]);
+
+  useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
         smootherRef.current = ScrollSmoother.create({
@@ -488,7 +527,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 200vh;
+          min-height: 250vh;
           width: 100%;
           will-change: transform;
         }
@@ -513,7 +552,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '200vh',
+            minHeight: '250vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -725,7 +764,7 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Tombol Close (X) - BISA TUTUP BG MENU */}
+              {/* Tombol Close (X) */}
               <div
                 ref={closeButtonRef}
                 onClick={handleCloseMenu}
@@ -907,21 +946,21 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-04 Items dengan label ComingSoon - teks item lebih kecil */}
+            {/* 01-05 Items dengan label ComingSoon - teks item lebih kecil */}
             <div style={{
               position: 'relative',
               top: '150px',
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '200px'
+              marginBottom: '100px'
             }}>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '150px',
+                marginBottom: '100px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -964,8 +1003,8 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '18px',
                       fontWeight: '500',
-                      color: '#0D3CFC',
-                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      backgroundColor: '#0D3CFC',
                       padding: '6px 16px',
                       borderRadius: '20px',
                       letterSpacing: '0.02em'
@@ -1029,8 +1068,8 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '18px',
                       fontWeight: '500',
-                      color: '#0D3CFC',
-                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      backgroundColor: '#0D3CFC',
                       padding: '6px 16px',
                       borderRadius: '20px',
                       letterSpacing: '0.02em'
@@ -1094,8 +1133,8 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '18px',
                       fontWeight: '500',
-                      color: '#0D3CFC',
-                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      backgroundColor: '#0D3CFC',
                       padding: '6px 16px',
                       borderRadius: '20px',
                       letterSpacing: '0.02em'
@@ -1159,8 +1198,8 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '18px',
                       fontWeight: '500',
-                      color: '#0D3CFC',
-                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      backgroundColor: '#0D3CFC',
                       padding: '6px 16px',
                       borderRadius: '20px',
                       letterSpacing: '0.02em'
@@ -1183,6 +1222,101 @@ export default function ContactPage(): React.JSX.Element {
                     )}
                   </div>
                 </div>
+
+                {/* 05 - Shop */}
+                <div
+                  ref={item05Ref}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={() => setHoveredItem('05')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '60px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      05
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '160px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Shop
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '500',
+                      color: '#ffffff',
+                      backgroundColor: '#0D3CFC',
+                      padding: '6px 16px',
+                      borderRadius: '20px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
+                    </span>
+                    {hoveredItem === '05' && (
+                      <div
+                        ref={hoverText05Ref}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '18px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / kamu bisa membeli apa yang kamu inginkan
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ Section */}
+              <div style={{
+                marginLeft: '80px',
+                marginTop: '80px',
+                maxWidth: '900px',
+              }}>
+                <h2 style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '600',
+                  color: '#000000',
+                  margin: 0,
+                  marginBottom: '20px',
+                  letterSpacing: '-0.02em'
+                }}>
+                  FAQ
+                </h2>
+                <p style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '50px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  margin: 0,
+                  letterSpacing: '-0.01em',
+                  lineHeight: 1.2
+                }}>
+                  Apakah kamu punya kesulitan?
+                </p>
               </div>
             </div>
           </div>
