@@ -111,6 +111,7 @@ export default function ContactPage(): React.JSX.Element {
   
   // Refs untuk teks yang akan di-split
   const contactTitleRef = useRef<HTMLDivElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk hover items
   const item01Ref = useRef<HTMLDivElement>(null);
@@ -525,6 +526,33 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
+    // Animasi teks MENURU di footer 500px muncul dari bawah ke atas
+    if (menuruFooterRef.current) {
+      const menuruChars = menuruFooterRef.current.querySelectorAll('.menuru-footer-char');
+      
+      gsap.fromTo(menuruChars,
+        {
+          y: 200,
+          opacity: 0,
+          scale: 0.5,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.5,
+          stagger: 0.03,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: menuruFooterRef.current,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: 1.5,
+          }
+        }
+      );
+    }
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
@@ -641,7 +669,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 380vh;
+          min-height: 450vh;
           width: 100%;
           will-change: transform;
         }
@@ -660,6 +688,11 @@ export default function ContactPage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
+        }
+
+        .menuru-footer-char {
+          display: inline-block;
+          will-change: transform, opacity;
         }
 
         .subscribe-input {
@@ -691,7 +724,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '380vh',
+            minHeight: '450vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -1557,133 +1590,74 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FOOTER - Tanpa garis samping */}
+              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
               <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
                 marginLeft: '80px',
                 marginTop: '50px',
                 maxWidth: '1100px',
+                gap: '40px',
                 borderTop: '2px solid #e0e0e0',
                 paddingTop: '40px',
               }}>
-                {/* Talk with an Menuru + Product (di bawah) */}
-                <div>
+                {/* Kiri - Get in Touch */}
+                <div style={{
+                  flex: '0 0 30%',
+                }}>
                   <h3 style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: '32px',
+                    fontSize: '28px',
                     fontWeight: '600',
-                    color: '#0D3CFC',
-                    margin: 0,
-                    marginBottom: '8px',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    Talk with an Menuru
-                  </h3>
-                  <p style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '14px',
-                    fontWeight: '300',
-                    color: '#666',
+                    color: '#000000',
                     margin: 0,
                     marginBottom: '16px',
-                    letterSpacing: '0.01em',
+                    letterSpacing: '-0.01em',
                   }}>
-                    Get the latest updates from Menuru
-                  </p>
-
-                  <form onSubmit={handleSubscribe} style={{
+                    Get in Touch
+                  </h3>
+                  <div style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    maxWidth: '400px',
+                    flexDirection: 'column',
+                    gap: '8px',
                   }}>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="subscribe-input"
-                      style={{
-                        flex: 1,
-                        background: '#f5f5f5',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px 14px',
-                        fontSize: '14px',
-                        fontFamily: FONT_FAMILY,
-                        outline: 'none',
-                        transition: 'all 0.3s ease',
-                        color: '#000000',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.boxShadow = '0 0 0 2px #0D3CFC';
-                        e.currentTarget.style.background = '#eeeeee';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.background = '#f5f5f5';
-                      }}
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#0D3CFC',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px 14px',
-                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                        color: '#ffffff',
-                        transition: 'all 0.3s ease',
-                        opacity: isSubmitting ? 0.6 : 1,
-                        flexShrink: 0,
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSubmitting) {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSubmitting) {
-                          e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        }
-                      }}
-                    >
-                      <ArrowRight size={20} />
-                    </button>
-                  </form>
-
-                  {subscribeStatus === 'success' && (
-                    <p style={{
+                    <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '13px',
+                      fontSize: '20px',
+                      fontWeight: '400',
                       color: '#0D3CFC',
-                      marginTop: '8px',
-                      marginBottom: 0,
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
                     }}>
-                      ✓ Berhasil berlangganan!
-                    </p>
-                  )}
-                  {subscribeStatus === 'error' && (
-                    <p style={{
+                      Contact Us
+                    </span>
+                    <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '13px',
-                      color: '#ff4444',
-                      marginTop: '8px',
-                      marginBottom: 0,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
                     }}>
-                      ✗ Email tidak valid atau terjadi kesalahan
-                    </p>
-                  )}
+                      Instagram
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                    }}>
+                      Live Chat
+                    </span>
+                  </div>
                 </div>
 
-                {/* Product - di bawah Talk with an Menuru */}
+                {/* Tengah - Product */}
                 <div style={{
-                  marginTop: '30px',
-                  borderTop: '1px solid #e8e8e8',
-                  paddingTop: '30px',
+                  flex: '0 0 30%',
                 }}>
                   <h3 style={{
                     fontFamily: FONT_FAMILY,
@@ -1699,66 +1673,64 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '6px',
+                    gap: '8px',
                   }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
+                      fontSize: '20px',
                       fontWeight: '400',
                       color: '#0D3CFC',
                       letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
+                      cursor: 'pointer',
                     }}>
                       Shop
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
+                      fontSize: '20px',
                       fontWeight: '400',
                       color: '#0D3CFC',
                       letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
+                      cursor: 'pointer',
                     }}>
                       Note
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
+                      fontSize: '20px',
                       fontWeight: '400',
                       color: '#0D3CFC',
                       letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
+                      cursor: 'pointer',
                     }}>
                       Calendar
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
+                      fontSize: '20px',
                       fontWeight: '400',
                       color: '#0D3CFC',
                       letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
+                      cursor: 'pointer',
                     }}>
                       Blog
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
+                      fontSize: '20px',
                       fontWeight: '400',
                       color: '#0D3CFC',
                       letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
+                      cursor: 'pointer',
                     }}>
                       Donation
                     </span>
                   </div>
                 </div>
 
-                {/* Attention - Privacy Policy, Kebijakan Privasi, Ketentuan Kami, Pusat Bantuan */}
+                {/* Kanan - Attention */}
                 <div style={{
-                  marginTop: '40px',
-                  borderTop: '1px solid #e8e8e8',
-                  paddingTop: '30px',
+                  flex: '0 0 30%',
                 }}>
                   <h3 style={{
                     fontFamily: FONT_FAMILY,
@@ -1818,6 +1790,46 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Teks MENURU 500px di footer - muncul dari bawah ke atas */}
+              <div
+                ref={menuruFooterRef}
+                style={{
+                  marginLeft: '80px',
+                  marginTop: '60px',
+                  maxWidth: '1100px',
+                  overflow: 'hidden',
+                  paddingBottom: '40px',
+                }}
+              >
+                <span style={{
+                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                  fontSize: '500px',
+                  fontWeight: '400',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  textTransform: 'uppercase',
+                  lineHeight: '0.8',
+                  display: 'block',
+                  textAlign: 'left',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                }}>
+                  {'MENURU'.split('').map((char, index) => (
+                    <span
+                      key={index}
+                      className="menuru-footer-char"
+                      style={{
+                        display: 'inline-block',
+                        opacity: 0,
+                        transform: 'translateY(200px) scale(0.5)',
+                      }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </span>
               </div>
             </div>
           </div>
