@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact)
+// app/contact/page.tsx (Halaman Contact - UPDATED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -9,7 +9,21 @@ import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { initializeApp, getApps } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  where,
+  getDocs,
+  deleteDoc,
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -30,12 +44,14 @@ const firebaseConfig = {
 
 let app = null;
 let db = null;
+let auth = null;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0];
   db = getFirestore(app);
+  auth = getAuth(app);
 }
 
 // SVG Icons
@@ -57,13 +73,1376 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const ArrowRight = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const AGENT_NAME = "Farid Ardiansyah";
+
+// ===== LIVE CHAT AGENT INTERFACES =====
+interface Ticket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  agentId?: string;
+  agentName?: string;
+  status: 'waiting' | 'active' | 'resolved' | 'closed';
+  topic: string;
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+  typing: boolean;
+  typingUserId?: string | null;
+  typingUserName?: string | null;
+}
+
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+}
+
+// ===== FEEDBACK INTERFACE =====
+interface Feedback {
+  id: string;
+  name: string;
+  message: string;
+  createdAt: any;
+  userId?: string;
+  userEmail?: string;
+}
+
+// ===== LIVE CHAT AGENT COMPONENT =====
+const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [showStartChat, setShowStartChat] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [agentOnline, setAgentOnline] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const topics = [
+    "Pertanyaan tentang produk",
+    "Bantuan teknis",
+    "Permasalahan akun",
+    "Donasi",
+    "Kerjasama",
+    "Lainnya"
+  ];
+
+  const generateTicketId = (createdAt: any): string => {
+    if (!createdAt) return "#TICKET-0000";
+    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+    const year = date.getFullYear().toString().slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `#TICKET-${year}${month}${day}${hours}${minutes}`;
+  };
+
+  const formatReceivedDate = (timestamp: any): string => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        setAgentOnline(data.online || false);
+      }
+    });
+    return () => unsubscribe();
+  }, [db]);
+
+  useEffect(() => {
+    if (!db || !user) return;
+    let q;
+    if (isAdmin) {
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
+    } else {
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+    }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((doc) => {
+        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
+      });
+      setTickets(ticketList);
+      if (selectedTicket) {
+        const stillExists = ticketList.some(t => t.id === selectedTicket.id);
+        if (!stillExists) {
+          setSelectedTicket(null);
+          setMessages([]);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [db, user, isAdmin, selectedTicket]);
+
+  useEffect(() => {
+    if (!db || !selectedTicket) return;
+    const q = query(
+      collection(db, "livechat_tickets", selectedTicket.id, "messages"),
+      orderBy("timestamp", "asc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgList: ChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
+      });
+      setMessages(msgList);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    });
+    return () => unsubscribe();
+  }, [db, selectedTicket]);
+
+  useEffect(() => {
+    if (!db || !selectedTicket || !user || !isAdmin) return;
+    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true });
+    });
+  }, [messages, selectedTicket, db, user, isAdmin]);
+
+  useEffect(() => {
+    if (!user || isAdmin) return;
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+    if (activeTicket) {
+      setSelectedTicket(activeTicket);
+    } else if (tickets.length > 0 && !selectedTicket) {
+      setSelectedTicket(tickets[0]);
+    } else if (tickets.length === 0) {
+      setSelectedTicket(null);
+      setMessages([]);
+    }
+  }, [tickets, user, isAdmin, selectedTicket]);
+
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessageText(value);
+    if (!selectedTicket || !user || !db) return;
+    const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
+    if (value.length > 0) {
+      await updateDoc(ticketRef, {
+        typing: true,
+        typingUserId: user.uid,
+        typingUserName: user.displayName || user.email || "User",
+      });
+    } else {
+      await updateDoc(ticketRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+    }, 2000);
+  };
+
+  const startChat = async () => {
+    if (!db || !user || !selectedTopic) return;
+    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
+    if (hasActiveTicket) {
+      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+      return;
+    }
+    try {
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: selectedTopic,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      setSelectedTopic("");
+      setShowStartChat(false);
+    } catch (error) {
+      console.error("Error starting chat:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!db || !selectedTicket || !messageText.trim() || !user) return;
+    if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
+      alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
+      return;
+    }
+    try {
+      const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
+      await updateDoc(ticketRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
+        senderId: user.uid,
+        senderName: senderName,
+        text: messageText.trim(),
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        ...(selectedTicket.status === "waiting" && { status: "active" }),
+        agentId: isAdmin ? user.uid : selectedTicket.agentId,
+        agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
+      });
+      setMessageText("");
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const takeTicket = async (ticketId: string) => {
+    if (!db || !isAdmin || !user) return;
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), {
+        agentId: user.uid,
+        agentName: AGENT_NAME,
+        status: "active",
+      });
+    } catch (error) {
+      console.error("Error taking ticket:", error);
+    }
+  };
+
+  const resolveTicket = async (ticketId: string) => {
+    if (!db || !isAdmin) return;
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), {
+        status: "resolved",
+      });
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket(null);
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Error resolving ticket:", error);
+    }
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getTypingText = (ticket: Ticket | null) => {
+    if (!ticket || !ticket.typing) return null;
+    const name = ticket.typingUserName || "Seseorang";
+    return `${name} sedang mengetik...`;
+  };
+
+  // Chat Icon
+  const ChatIconSmall = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const SendIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+    </svg>
+  );
+
+  if (!user) {
+    return (
+      <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+        <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+          Live Chat Agent
+        </h3>
+        <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+          Silakan login untuk menggunakan Live Chat Agent
+        </p>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button style={{
+            padding: "10px 32px",
+            backgroundColor: "#0D3CFC",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: 500,
+            cursor: "pointer",
+            fontFamily: FONT_FAMILY,
+          }}>
+            Login
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+    const isWaiting = activeTicket?.status === 'waiting';
+
+    if (tickets.length === 0 && !showStartChat) {
+      return (
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+            Live Chat Agent
+          </h3>
+          <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+            Butuh bantuan? Chat langsung dengan agent kami.
+          </p>
+          <button
+            onClick={() => setShowStartChat(true)}
+            style={{
+              padding: "12px 28px",
+              backgroundColor: "#0D3CFC",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <ChatIconSmall />
+            <span>Mulai Live Chat</span>
+          </button>
+        </div>
+      );
+    }
+
+    if (showStartChat) {
+      return (
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+            Live Chat Agent
+          </h3>
+          <div style={{ maxWidth: "500px" }}>
+            <div style={{ fontSize: "16px", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+              Pilih topik permasalahan Anda:
+            </div>
+            <select
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                backgroundColor: "#fff",
+                marginBottom: "16px",
+                color: "#0D3CFC",
+              }}
+            >
+              <option value="">-- Pilih topik --</option>
+              {topics.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={startChat}
+                disabled={!selectedTopic}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Mulai Chat
+              </button>
+              <button
+                onClick={() => setShowStartChat(false)}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+        <div style={{ display: "flex", gap: "20px", height: "450px" }}>
+          <div style={{
+            width: "260px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "12px",
+            padding: "12px 0",
+            overflowY: "auto",
+            flexShrink: 0,
+            color: "#fff",
+            fontFamily: FONT_FAMILY,
+          }}>
+            <div style={{
+              padding: "0 16px 12px 16px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              fontWeight: 600,
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <ChatIconSmall />
+              <span>Riwayat Chat</span>
+              <span style={{
+                marginLeft: "auto",
+                fontSize: "11px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                padding: "2px 10px",
+                borderRadius: "12px",
+              }}>{tickets.length}</span>
+            </div>
+            {tickets.map((ticket) => {
+              const ticketId = generateTicketId(ticket.createdAt);
+              const isActive = selectedTicket?.id === ticket.id;
+              const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
+                                  ticket.status === 'active' ? 'Aktif' : 'Selesai';
+              const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                  ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+              return (
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setMessages([]);
+                  }}
+                  style={{
+                    padding: "10px 16px",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#fff" }}>
+                    {ticket.userName}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)" }}>
+                    {ticket.topic}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                    <span style={{
+                      fontSize: "10px",
+                      backgroundColor: statusColor,
+                      color: ticket.status === 'waiting' ? '#92400e' : ticket.status === 'active' ? '#065f46' : '#6b7280',
+                      padding: "1px 10px",
+                      borderRadius: "12px",
+                      fontWeight: 500,
+                    }}>
+                      {statusLabel}
+                    </span>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                      {ticketId}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {tickets.length === 0 && (
+              <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+                Belum ada chat
+              </div>
+            )}
+            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <button
+                onClick={() => setShowStartChat(true)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                + Chat Baru
+              </button>
+            </div>
+          </div>
+
+          <div style={{
+            flex: 1,
+            backgroundColor: "#ffffff",
+            borderRadius: "12px",
+            border: "1px solid #e8e8e8",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}>
+            {selectedTicket ? (
+              <>
+                <div style={{
+                  padding: "10px 16px",
+                  backgroundColor: "#0D3CFC",
+                  borderBottom: "1px solid #e8e8e8",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderRadius: "12px 12px 0 0",
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                      {selectedTicket.userName}
+                      <span style={{ fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
+                        {selectedTicket.topic}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "11px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                      </span>
+                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
+                        <span style={{ fontSize: "10px", color: "#ffd700", fontStyle: "italic" }}>
+                          {selectedTicket.typingUserName} mengetik...
+                        </span>
+                      )}
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                        {generateTicketId(selectedTicket.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "4px 12px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Selesaikan
+                    </button>
+                  )}
+                </div>
+                <div style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}>
+                  {messages.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                      Belum ada pesan
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "8px 12px",
+                            borderRadius: "10px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "13px",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          {!isMine && (
+                            <div style={{ fontSize: "10px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "8px", 
+                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                            marginTop: "2px",
+                          }}>
+                            {formatTime(msg.timestamp)}
+                            {isMine && msg.read && <span style={{ marginLeft: "4px" }}>✓✓ Dibaca</span>}
+                            {isMine && !msg.read && <span style={{ marginLeft: "4px" }}>✓ Terkirim</span>}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                  {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "12px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "2px 8px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {getTypingText(selectedTicket)}
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                  <div style={{
+                    padding: "10px 14px",
+                    borderTop: "1px solid #e8e8e8",
+                    display: "flex",
+                    gap: "8px",
+                    backgroundColor: "#fff",
+                    borderRadius: "0 0 12px 12px",
+                  }}>
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
+                      disabled={selectedTicket.status === 'waiting'}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                        backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff",
+                      }}
+                      onFocus={(e) => { if (selectedTicket.status !== 'waiting') e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={selectedTicket.status === 'waiting' || !messageText.trim()}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "not-allowed" : "pointer",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <SendIcon />
+                      <span>Kirim</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "14px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                Pilih chat dari daftar di kiri
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin view
+  const waitingTickets = tickets.filter(t => t.status === 'waiting');
+  const activeTickets = tickets.filter(t => t.status === 'active');
+  const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
+  const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
+
+  return (
+    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div>
+          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+            Live Chat Agent
+          </h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+            <span style={{ fontSize: "13px", color: agentOnline ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+              {agentOnline ? "● Online" : "● Offline"}
+            </span>
+            <span style={{ fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+              {waitingTickets.length} menunggu • {activeTickets.length} aktif
+            </span>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "16px" }}>
+            {AGENT_NAME.charAt(0)}
+          </div>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
+              {AGENT_NAME}
+              <span style={{
+                backgroundColor: "#d1fae5",
+                color: "#065f46",
+                fontSize: "9px",
+                fontWeight: 600,
+                padding: "2px 8px",
+                borderRadius: "10px",
+                marginLeft: "6px",
+              }}>
+                Agent
+              </span>
+            </div>
+            <div style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>Support</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "20px", height: "450px" }}>
+        <div style={{
+          width: "280px",
+          backgroundColor: "#f9f9f9",
+          borderRadius: "12px",
+          border: "1px solid #e8e8e8",
+          overflowY: "auto",
+          flexShrink: 0,
+        }}>
+          {waitingTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "10px 14px",
+                backgroundColor: "#fef3c7",
+                fontWeight: 600,
+                fontSize: "13px",
+                color: "#92400e",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>⏳</span>
+                <span>Menunggu ({waitingTickets.length})</span>
+              </div>
+              {waitingTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    takeTicket(ticket.id);
+                  }}
+                  style={{
+                    padding: "10px 14px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "10px 14px",
+                backgroundColor: "#d1fae5",
+                fontWeight: 600,
+                fontSize: "13px",
+                color: "#065f46",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>💬</span>
+                <span>Aktif ({activeTickets.length})</span>
+              </div>
+              {activeTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{
+                    padding: "10px 14px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.lastMessage && <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {resolvedTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "10px 14px",
+                backgroundColor: "#e5e7eb",
+                fontWeight: 600,
+                fontSize: "13px",
+                color: "#6b7280",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>✅</span>
+                <span>Selesai ({resolvedTickets.length})</span>
+              </div>
+              {resolvedTickets.map((ticket) => {
+                const ticketId = generateTicketId(ticket.createdAt);
+                return (
+                  <div
+                    key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
+                    style={{
+                      padding: "10px 14px",
+                      borderBottom: "1px solid #e8e8e8",
+                      cursor: "pointer",
+                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                      transition: "background 0.2s ease",
+                      opacity: 0.7,
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                    <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                    <div style={{ fontSize: "10px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+            <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+              Tidak ada chat masuk
+            </div>
+          )}
+        </div>
+
+        <div style={{
+          flex: 1,
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
+          border: "1px solid #e8e8e8",
+          display: "flex",
+          flexDirection: "column",
+        }}>
+          {selectedTicket ? (
+            <>
+              <div style={{
+                padding: "10px 16px",
+                backgroundColor: "#0D3CFC",
+                borderBottom: "1px solid #e8e8e8",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderRadius: "12px 12px 0 0",
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                    {selectedTicket.userName}
+                    <span style={{ fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
+                      {selectedTicket.topic}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                      {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                    </span>
+                    {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
+                      <span style={{ fontSize: "10px", color: "#ffd700", fontStyle: "italic" }}>
+                        {selectedTicket.typingUserName} mengetik...
+                      </span>
+                    )}
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                      {generateTicketId(selectedTicket.createdAt)}
+                    </span>
+                  </div>
+                </div>
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                  <button
+                    onClick={() => resolveTicket(selectedTicket.id)}
+                    style={{
+                      padding: "4px 12px",
+                      backgroundColor: "#22c55e",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Selesaikan
+                  </button>
+                )}
+              </div>
+              <div style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "12px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+              }}>
+                {messages.length === 0 ? (
+                  <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                    Belum ada pesan
+                  </div>
+                ) : (
+                  messages.map((msg, idx) => {
+                    const isMine = msg.senderId === user.uid;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          alignSelf: isMine ? "flex-end" : "flex-start",
+                          maxWidth: "75%",
+                          padding: "8px 12px",
+                          borderRadius: "10px",
+                          backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                          color: isMine ? "#fff" : "#000",
+                          fontSize: "13px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {!isMine && (
+                          <div style={{ fontSize: "10px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                            {msg.senderName}
+                          </div>
+                        )}
+                        <div>{msg.text}</div>
+                        <div style={{ 
+                          fontSize: "8px", 
+                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                          marginTop: "2px",
+                        }}>
+                          {formatTime(msg.timestamp)}
+                          {!isMine && msg.read && <span style={{ marginLeft: "4px" }}>✓✓ Dibaca</span>}
+                          {!isMine && !msg.read && <span style={{ marginLeft: "4px" }}>✓ Terkirim</span>}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                {typingText && selectedTicket.status !== 'resolved' && (
+                  <div style={{
+                    alignSelf: "flex-start",
+                    fontSize: "12px",
+                    color: "#666",
+                    fontStyle: "italic",
+                    padding: "2px 8px",
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    {typingText}
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                <div style={{
+                  padding: "10px 14px",
+                  borderTop: "1px solid #e8e8e8",
+                  display: "flex",
+                  gap: "8px",
+                  backgroundColor: "#fff",
+                  borderRadius: "0 0 12px 12px",
+                }}>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={handleTyping}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Ketik balasan..."
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      border: "1px solid #e8e8e8",
+                      borderRadius: "6px",
+                      fontSize: "13px",
+                      outline: "none",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!messageText.trim()}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: messageText.trim() ? "pointer" : "not-allowed",
+                      fontFamily: FONT_FAMILY,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <SendIcon />
+                    <span>Kirim</span>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#999",
+              fontSize: "14px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              Pilih chat dari daftar di kiri
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== KRITIK & SARAN COMPONENT =====
+const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list: Feedback[] = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as Feedback);
+      });
+      setFeedbacks(list);
+    });
+    return () => unsubscribe();
+  }, [db]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !message.trim()) {
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "feedbacks"), {
+        name: name.trim(),
+        message: message.trim(),
+        createdAt: serverTimestamp(),
+        userId: user?.uid || null,
+        userEmail: user?.email || null,
+      });
+      setName("");
+      setMessage("");
+      setSubmitStatus('success');
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  return (
+    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+      <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
+        Kritik & Saran
+      </h3>
+      <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "24px" }}>
+        Kirimkan kritik dan saran Anda untuk pengembangan Menuru menjadi lebih baik.
+      </p>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} style={{ maxWidth: "600px", marginBottom: "40px" }}>
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+            Nama
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Masukkan nama Anda"
+            style={{
+              width: "100%",
+              padding: "10px 14px",
+              border: "2px solid #e8e8e8",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontFamily: FONT_FAMILY,
+              outline: "none",
+              transition: "border-color 0.2s ease",
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+          />
+        </div>
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+            Keterangan / Saran
+          </label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Tulis kritik atau saran Anda..."
+            rows={4}
+            style={{
+              width: "100%",
+              padding: "10px 14px",
+              border: "2px solid #e8e8e8",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontFamily: FONT_FAMILY,
+              outline: "none",
+              resize: "vertical",
+              minHeight: "100px",
+              transition: "border-color 0.2s ease",
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            padding: "10px 32px",
+            backgroundColor: "#0D3CFC",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: 500,
+            cursor: isSubmitting ? "not-allowed" : "pointer",
+            fontFamily: FONT_FAMILY,
+            opacity: isSubmitting ? 0.7 : 1,
+            transition: "background 0.2s ease",
+          }}
+          onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0a2fc9"; }}
+          onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
+        >
+          {isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}
+        </button>
+        {submitStatus === 'success' && (
+          <p style={{ color: "#22c55e", fontSize: "14px", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+            ✓ Kritik & saran berhasil dikirim! Terima kasih.
+          </p>
+        )}
+        {submitStatus === 'error' && (
+          <p style={{ color: "#ef4444", fontSize: "14px", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+            ⚠️ Gagal mengirim. Silakan coba lagi.
+          </p>
+        )}
+      </form>
+
+      {/* Timeline Feedback */}
+      {feedbacks.length > 0 && (
+        <div style={{ position: "relative", paddingLeft: "30px" }}>
+          {/* Garis vertikal dengan titik-titik putus */}
+          <div style={{
+            position: "absolute",
+            left: "6px",
+            top: "0",
+            bottom: "0",
+            width: "2px",
+            borderLeft: "2px dashed #0D3CFC",
+            opacity: 0.3,
+          }} />
+          
+          {/* Titik awal - bulat hitam */}
+          <div style={{
+            position: "absolute",
+            left: "0",
+            top: "4px",
+            width: "14px",
+            height: "14px",
+            borderRadius: "50%",
+            backgroundColor: "#000000",
+            border: "2px solid #0D3CFC",
+            zIndex: 2,
+          }} />
+
+          {feedbacks.map((item, index) => (
+            <div key={item.id} style={{ position: "relative", paddingBottom: "24px", paddingLeft: "20px" }}>
+              {/* Titik biru kecil di setiap item */}
+              <div style={{
+                position: "absolute",
+                left: "-24px",
+                top: "4px",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                backgroundColor: "#0D3CFC",
+                border: "2px solid #ffffff",
+                boxShadow: "0 0 0 2px #0D3CFC",
+              }} />
+              
+              <div style={{
+                backgroundColor: "#f9f9f9",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                border: "1px solid #e8e8e8",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", flexWrap: "wrap", gap: "4px" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                    {item.name}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
+                    {formatDate(item.createdAt)}
+                  </span>
+                </div>
+                <p style={{ fontSize: "15px", color: "#000", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.6 }}>
+                  {item.message}
+                </p>
+              </div>
+            </div>
+          ))}
+
+          {/* Titik akhir - kedap kedip biru pemancar */}
+          <div style={{
+            position: "absolute",
+            left: "-4px",
+            bottom: "-4px",
+            width: "18px",
+            height: "18px",
+            borderRadius: "50%",
+            backgroundColor: "#0D3CFC",
+            border: "2px solid #ffffff",
+            boxShadow: "0 0 0 2px #0D3CFC",
+            zIndex: 2,
+            animation: "pulse-blink 1.5s ease-in-out infinite",
+          }} />
+          <style>{`
+            @keyframes pulse-blink {
+              0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(13,60,252,0.2); }
+              50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(13,60,252,0.1); }
+            }
+          `}</style>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // FAQ Data
 const faqData = [
@@ -104,16 +1483,14 @@ export default function ContactPage(): React.JSX.Element {
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const smootherRef = useRef<any>(null);
   
-  // Refs untuk teks yang akan di-split
   const contactTitleRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk hover items
   const item01Ref = useRef<HTMLDivElement>(null);
   const item02Ref = useRef<HTMLDivElement>(null);
   const item03Ref = useRef<HTMLDivElement>(null);
@@ -125,12 +1502,10 @@ export default function ContactPage(): React.JSX.Element {
   const hoverText04Ref = useRef<HTMLDivElement>(null);
   const hoverText05Ref = useRef<HTMLDivElement>(null);
   
-  // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Refs untuk menu items di drawer
   const menuItemRefs = {
     note: useRef<HTMLDivElement>(null),
     blog: useRef<HTMLDivElement>(null),
@@ -140,7 +1515,20 @@ export default function ContactPage(): React.JSX.Element {
     contact: useRef<HTMLDivElement>(null),
   };
 
-  // Animasi menu drawer muncul dari bawah ke atas
+  // Auth
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        setIsAdmin(currentUser.email === ADMIN_EMAIL);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Menu drawer animation
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -148,10 +1536,7 @@ export default function ContactPage(): React.JSX.Element {
       document.body.style.width = '100%';
       
       gsap.fromTo(menuDrawerRef.current,
-        {
-          y: '100%',
-          opacity: 0
-        },
+        { y: '100%', opacity: 0 },
         {
           y: '0%',
           opacity: 1,
@@ -178,11 +1563,7 @@ export default function ContactPage(): React.JSX.Element {
       menuItems.forEach((item, index) => {
         if (item.current) {
           gsap.fromTo(item.current,
-            {
-              opacity: 0,
-              x: -50,
-              filter: 'blur(10px)'
-            },
+            { opacity: 0, x: -50, filter: 'blur(10px)' },
             {
               opacity: 1,
               x: 0,
@@ -213,7 +1594,7 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuOpen]);
 
-  // Animasi hover menu button
+  // Menu button hover
   useEffect(() => {
     if (menuButtonRef.current) {
       if (isMenuHovered) {
@@ -232,239 +1613,43 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Animasi hover untuk menu items di drawer
-  const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
-    if (ref.current) {
-      if (isHover) {
-        gsap.to(ref.current, {
-          x: 15,
+  // Hover effects for items 01-05
+  useEffect(() => {
+    const itemRefs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
+    const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
+    
+    itemRefs.forEach((itemRef, index) => {
+      const id = String(index + 1).padStart(2, '0');
+      const textRef = textRefs[index];
+      
+      if (hoveredItem === id && textRef.current && itemRef.current) {
+        gsap.fromTo(textRef.current,
+          { opacity: 0, x: -20, filter: 'blur(5px)' },
+          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.4, ease: "power2.out" }
+        );
+        gsap.to(itemRef.current, {
+          scale: 1.02,
           duration: 0.3,
           ease: "power2.out"
         });
-      } else {
-        gsap.to(ref.current, {
-          x: 0,
-          duration: 0.3,
-          ease: "power2.out"
+      } else if (hoveredItem !== id && textRef.current) {
+        gsap.to(textRef.current, {
+          opacity: 0,
+          duration: 0.2,
+          ease: "power2.in"
         });
-      }
-    }
-  };
-
-  const handleMenuItemClick = (ref: React.RefObject<HTMLDivElement>, href: string) => {
-    if (ref.current) {
-      gsap.to(ref.current, {
-        scale: 0.95,
-        duration: 0.15,
-        ease: "power2.in",
-        onComplete: () => {
-          gsap.to(ref.current, {
+        if (itemRef.current) {
+          gsap.to(itemRef.current, {
             scale: 1,
-            duration: 0.15,
-            ease: "power2.out",
-            onComplete: () => {
-              setIsMenuOpen(false);
-              setTimeout(() => {
-                window.location.href = href;
-              }, 300);
-            }
+            duration: 0.3,
+            ease: "power2.out"
           });
         }
-      });
-    } else {
-      setIsMenuOpen(false);
-      setTimeout(() => {
-        window.location.href = href;
-      }, 300);
-    }
-  };
-
-  // Animasi hover untuk item 01-05 menggunakan GSAP
-  useEffect(() => {
-    if (hoveredItem === '01' && hoverText01Ref.current && item01Ref.current) {
-      gsap.fromTo(hoverText01Ref.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item01Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '01' && hoverText01Ref.current) {
-      gsap.to(hoverText01Ref.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item01Ref.current) {
-        gsap.to(item01Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
       }
-    }
+    });
   }, [hoveredItem]);
 
-  useEffect(() => {
-    if (hoveredItem === '02' && hoverText02Ref.current && item02Ref.current) {
-      gsap.fromTo(hoverText02Ref.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item02Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '02' && hoverText02Ref.current) {
-      gsap.to(hoverText02Ref.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item02Ref.current) {
-        gsap.to(item02Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '03' && hoverText03Ref.current && item03Ref.current) {
-      gsap.fromTo(hoverText03Ref.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item03Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '03' && hoverText03Ref.current) {
-      gsap.to(hoverText03Ref.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item03Ref.current) {
-        gsap.to(item03Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '04' && hoverText04Ref.current && item04Ref.current) {
-      gsap.fromTo(hoverText04Ref.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item04Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '04' && hoverText04Ref.current) {
-      gsap.to(hoverText04Ref.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item04Ref.current) {
-        gsap.to(item04Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [hoveredItem]);
-
-  useEffect(() => {
-    if (hoveredItem === '05' && hoverText05Ref.current && item05Ref.current) {
-      gsap.fromTo(hoverText05Ref.current,
-        {
-          opacity: 0,
-          x: -20,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: "power2.out"
-        }
-      );
-      gsap.to(item05Ref.current, {
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else if (hoveredItem !== '05' && hoverText05Ref.current) {
-      gsap.to(hoverText05Ref.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-      if (item05Ref.current) {
-        gsap.to(item05Ref.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [hoveredItem]);
-
+  // ScrollSmoother
   useEffect(() => {
     const initSmoother = () => {
       if (typeof window !== 'undefined' && !smootherRef.current) {
@@ -476,7 +1661,6 @@ export default function ContactPage(): React.JSX.Element {
           smoothTouch: 0.5,
           normalizeScroll: true,
           ignoreMobileResize: true,
-          onUpdate: () => {},
         });
       }
     };
@@ -495,7 +1679,7 @@ export default function ContactPage(): React.JSX.Element {
     };
   }, []);
 
-  // GSAP SplitText animations
+  // SplitText animation
   useEffect(() => {
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
@@ -504,11 +1688,7 @@ export default function ContactPage(): React.JSX.Element {
       });
 
       gsap.fromTo(splitContact.chars,
-        {
-          opacity: 0,
-          x: -50,
-          filter: 'blur(10px)'
-        },
+        { opacity: 0, x: -50, filter: 'blur(10px)' },
         {
           opacity: 1,
           x: 0,
@@ -576,39 +1756,13 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
-      setSubscribeStatus('error');
-      setTimeout(() => setSubscribeStatus('idle'), 3000);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubscribeStatus('idle');
-
-    try {
-      if (!db) {
-        throw new Error('Firebase not initialized');
-      }
-      
-      await addDoc(collection(db, 'subscribers'), {
-        email: email,
-        subscribedAt: new Date().toISOString(),
-        source: 'contact_page'
-      });
-
-      setSubscribeStatus('success');
-      setEmail('');
-      setTimeout(() => setSubscribeStatus('idle'), 3000);
-    } catch (error) {
-      console.error('Error saving email:', error);
-      setSubscribeStatus('error');
-      setTimeout(() => setSubscribeStatus('idle'), 3000);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
+        <div style={{ fontSize: "18px", color: "#000" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -617,11 +1771,9 @@ export default function ContactPage(): React.JSX.Element {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-        
         *::-webkit-scrollbar {
           display: none;
         }
-        
         html, body {
           margin: 0;
           padding: 0;
@@ -630,7 +1782,6 @@ export default function ContactPage(): React.JSX.Element {
           overflow: hidden;
           background-color: white;
         }
-        
         #smooth-wrapper-contact {
           position: fixed;
           top: 0;
@@ -640,62 +1791,26 @@ export default function ContactPage(): React.JSX.Element {
           overflow: hidden;
           z-index: 1;
         }
-        
         #smooth-content-contact {
           min-height: 480vh;
           width: 100%;
           will-change: transform;
         }
-
-        .split-char {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
         .split-char-contact {
           display: inline-block;
           will-change: transform, opacity, filter;
         }
-
-        .split-char-menuru-menu {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
         .menuru-footer-char {
           display: inline-block;
           will-change: transform, opacity;
         }
-
-        .subscribe-input {
-          background: transparent;
-          border: none;
-          border-bottom: none;
-          outline: none;
-          font-family: 'Poppins', sans-serif;
-          font-size: 18px;
-          padding: 12px 16px;
-          width: 100%;
-          color: #000000;
-          background: #f5f5f5;
-          border-radius: 8px;
-          transition: all 0.3s ease;
-        }
-
-        .subscribe-input:focus {
-          background: #eeeeee;
-          box-shadow: 0 0 0 2px #0D3CFC;
-        }
-
-        .subscribe-input::placeholder {
-          color: #999;
-          font-weight: 300;
-        }
-
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.2; }
+        }
+        @keyframes pulse-blink {
+          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(13,60,252,0.2); }
+          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(13,60,252,0.1); }
         }
       `}</style>
       
@@ -916,7 +2031,6 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Judul MENURU putih di bg menu */}
               <h1
                 style={{
                   position: 'absolute',
@@ -936,7 +2050,6 @@ export default function ContactPage(): React.JSX.Element {
                 Menuru
               </h1>
 
-              {/* Menu items - tengah */}
               <div
                 style={{
                   display: 'flex',
@@ -1151,7 +2264,7 @@ export default function ContactPage(): React.JSX.Element {
                       letterSpacing: '0.02em',
                       border: '2px solid #0D3CFC',
                     }}>
-                      ComingSoon
+                      Here
                     </span>
                     {hoveredItem === '01' && (
                       <div
@@ -1217,7 +2330,7 @@ export default function ContactPage(): React.JSX.Element {
                       letterSpacing: '0.02em',
                       border: '2px solid #0D3CFC',
                     }}>
-                      ComingSoon
+                      Here
                     </span>
                     {hoveredItem === '02' && (
                       <div
@@ -1283,7 +2396,7 @@ export default function ContactPage(): React.JSX.Element {
                       letterSpacing: '0.02em',
                       border: '2px solid #0D3CFC',
                     }}>
-                      ComingSoon
+                      Here
                     </span>
                     {hoveredItem === '03' && (
                       <div
@@ -1349,7 +2462,7 @@ export default function ContactPage(): React.JSX.Element {
                       letterSpacing: '0.02em',
                       border: '2px solid #0D3CFC',
                     }}>
-                      ComingSoon
+                      Here
                     </span>
                     {hoveredItem === '04' && (
                       <div
@@ -1415,7 +2528,7 @@ export default function ContactPage(): React.JSX.Element {
                       letterSpacing: '0.02em',
                       border: '2px solid #0D3CFC',
                     }}>
-                      ComingSoon
+                      Here
                     </span>
                     {hoveredItem === '05' && (
                       <div
@@ -1491,7 +2604,6 @@ export default function ContactPage(): React.JSX.Element {
                         overflow: 'hidden',
                       }}
                     >
-                      {/* Pertanyaan - Biru 50px */}
                       <div
                         onClick={() => toggleFaq(item.id)}
                         style={{
@@ -1536,7 +2648,6 @@ export default function ContactPage(): React.JSX.Element {
                         </motion.div>
                       </div>
 
-                      {/* Jawaban - Hitam 30px */}
                       <AnimatePresence>
                         {activeFaq === item.id && (
                           <motion.div
@@ -1599,7 +2710,6 @@ export default function ContactPage(): React.JSX.Element {
                     flexDirection: 'column',
                     gap: '12px',
                   }}>
-                    {/* Contact Us dengan titik bulat pemancar kedap kedip */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1645,7 +2755,6 @@ export default function ContactPage(): React.JSX.Element {
                           display: 'inline-block',
                         }} />
                       </div>
-                      {/* Tombol kecil */}
                       <Link href="/contact">
                         <div
                           style={{
@@ -1777,7 +2886,7 @@ export default function ContactPage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kanan - Attention */}
+                {/* Kanan - Attention (tanpa Privacy Policy) */}
                 <div style={{
                   flex: '0 0 30%',
                 }}>
@@ -1797,16 +2906,6 @@ export default function ContactPage(): React.JSX.Element {
                     flexDirection: 'column',
                     gap: '8px',
                   }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Privacy Policy
-                    </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '20px',
@@ -1841,7 +2940,13 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Teks MENURU 400px warna biru di kanan - muncul dari bawah ke atas */}
+              {/* ===== LIVE CHAT AGENT ===== */}
+              <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+
+              {/* ===== KRITIK & SARAN ===== */}
+              <FeedbackSection db={db} user={user} />
+
+              {/* Teks MENURU 400px warna biru di kanan */}
               <div
                 ref={menuruFooterRef}
                 style={{
