@@ -574,7 +574,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 320vh;
+          min-height: 350vh;
           width: 100%;
           will-change: transform;
         }
@@ -599,7 +599,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '320vh',
+            minHeight: '350vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -611,12 +611,12 @@ export default function ContactPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* JUDUL WEBSITE - pojok kiri atas */}
+            {/* JUDUL WEBSITE - pojok kiri atas - TIDAK NEMBUS BG MENU */}
             <div style={{
               position: 'fixed',
               top: '40px',
               left: '40px',
-              zIndex: 100,
+              zIndex: isMenuOpen ? 98 : 100,
               pointerEvents: 'none'
             }}>
               <span style={{
@@ -813,6 +813,26 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
+              {/* Judul MENURU putih di bg menu */}
+              <h1
+                style={{
+                  position: 'absolute',
+                  top: '40px',
+                  left: '40px',
+                  fontSize: '48px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                  padding: 0,
+                  lineHeight: 1,
+                  opacity: 0.9,
+                }}
+              >
+                Menuru
+              </h1>
+
               {/* Menu items - tengah */}
               <div
                 style={{
@@ -964,7 +984,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-05 Items dengan label ComingSoon kotak border */}
+            {/* 01-05 Items */}
             <div style={{
               position: 'relative',
               top: '150px',
@@ -1312,106 +1332,113 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section dengan GSAP + Framer Motion */}
+              {/* FAQ Section - "Apakah kamu punya kesulitan?" di atas, items di sisi kanan */}
               <div style={{
                 marginLeft: '80px',
-                marginTop: '40px',
+                marginTop: '60px',
                 maxWidth: '900px',
               }}>
-                {/* Judul FAQ */}
+                {/* Pertanyaan besar "Apakah kamu punya kesulitan?" */}
                 <h2 style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
+                  fontSize: '50px',
                   fontWeight: '600',
-                  color: '#000000',
+                  color: '#0D3CFC',
                   margin: 0,
-                  marginBottom: '30px',
+                  marginBottom: '40px',
                   letterSpacing: '-0.02em'
                 }}>
-                  FAQ
+                  Apakah kamu punya kesulitan?
                 </h2>
 
-                {/* FAQ Items */}
-                {faqData.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      borderBottom: '1px solid #e0e0e0',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {/* Pertanyaan */}
+                {/* FAQ Items - sisi kanan sejajar */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                }}>
+                  {faqData.map((item) => (
                     <div
-                      onClick={() => toggleFaq(item.id)}
+                      key={item.id}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        padding: '20px 0',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '0.7';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1';
+                        borderBottom: '1px solid #e8e8e8',
+                        overflow: 'hidden',
                       }}
                     >
-                      <span style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '28px',
-                        fontWeight: '500',
-                        color: '#0D3CFC',
-                        letterSpacing: '-0.01em',
-                      }}>
-                        {item.question}
-                      </span>
-                      <motion.div
-                        animate={{
-                          rotate: activeFaq === item.id ? 45 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
+                      {/* Pertanyaan - 100px */}
+                      <div
+                        onClick={() => toggleFaq(item.id)}
                         style={{
-                          fontSize: '30px',
-                          fontWeight: 300,
-                          color: '#0D3CFC',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
                           cursor: 'pointer',
+                          padding: '15px 0',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = '0.7';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = '1';
                         }}
                       >
-                        +
-                      </motion.div>
-                    </div>
-
-                    {/* Jawaban */}
-                    <AnimatePresence>
-                      {activeFaq === item.id && (
+                        <span style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '100px',
+                          fontWeight: '300',
+                          color: '#000000',
+                          letterSpacing: '-0.02em',
+                          lineHeight: '1',
+                        }}>
+                          {item.question}
+                        </span>
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.4, ease: 'easeInOut' }}
+                          animate={{
+                            rotate: activeFaq === item.id ? 45 : 0,
+                          }}
+                          transition={{ duration: 0.3 }}
                           style={{
-                            overflow: 'hidden',
+                            fontSize: '40px',
+                            fontWeight: 300,
+                            color: '#000000',
+                            cursor: 'pointer',
                           }}
                         >
-                          <p style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: '18px',
-                            fontWeight: '400',
-                            color: '#333333',
-                            padding: '0 0 20px 0',
-                            margin: 0,
-                            lineHeight: 1.8,
-                            letterSpacing: '0.01em',
-                          }}>
-                            {item.answer}
-                          </p>
+                          +
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+                      </div>
+
+                      {/* Jawaban - 70px */}
+                      <AnimatePresence>
+                        {activeFaq === item.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: 'easeInOut' }}
+                            style={{
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <p style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: '70px',
+                              fontWeight: '300',
+                              color: '#333333',
+                              padding: '0 0 20px 0',
+                              margin: 0,
+                              lineHeight: 1.3,
+                              letterSpacing: '-0.01em',
+                            }}>
+                              {item.answer}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
