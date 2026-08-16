@@ -641,7 +641,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 180vh;
+          min-height: 380vh;
           width: 100%;
           will-change: transform;
         }
@@ -692,7 +692,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '180vh',
+            minHeight: '380vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
