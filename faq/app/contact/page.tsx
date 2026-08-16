@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -34,11 +35,45 @@ const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
+// FAQ Data
+const faqData = [
+  {
+    id: 'shop',
+    question: 'Shop',
+    answer: 'Kamu bisa membeli produk-produk menarik dari komunitas Menuru. Tersedia berbagai merchandise eksklusif dan produk kreatif dari para creator.',
+  },
+  {
+    id: 'blog',
+    question: 'Blog',
+    answer: 'Temukan artikel-artikel inspiratif, tutorial, dan berita terbaru seputar kreativitas, teknologi, dan pengembangan diri di blog Menuru.',
+  },
+  {
+    id: 'donation',
+    question: 'Donation',
+    answer: 'Salurkan donasi Anda untuk membantu mereka yang membutuhkan. Setiap donasi akan disalurkan dengan transparan dan tepat sasaran.',
+  },
+  {
+    id: 'note',
+    question: 'Note',
+    answer: 'Catat ide-ide kreatif Anda dengan mudah. Fitur note memungkinkan Anda menyimpan, mengatur, dan berbagi inspirasi kapan saja.',
+  },
+  {
+    id: 'community',
+    question: 'Community',
+    answer: 'Bergabunglah dengan komunitas kreatif Menuru. Temukan teman baru, kolaborasi, dan dukungan untuk mengembangkan potensi Anda.',
+  },
+  {
+    id: 'calendar',
+    question: 'Calendar',
+    answer: 'Atur jadwal Anda dengan mudah. Fitur calendar membantu Anda merencanakan aktivitas, deadline, dan event penting.',
+  },
+];
+
 export default function ContactPage(): React.JSX.Element {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<string | null>(null);
   const smootherRef = useRef<any>(null);
   
   // Refs untuk teks yang akan di-split
@@ -70,11 +105,6 @@ export default function ContactPage(): React.JSX.Element {
     calendar: useRef<HTMLDivElement>(null),
     contact: useRef<HTMLDivElement>(null),
   };
-
-  // FAQ refs
-  const faqQuestionRef = useRef<HTMLDivElement>(null);
-  const faqAnswerRef = useRef<HTMLDivElement>(null);
-  const faqPlusRef = useRef<HTMLSpanElement>(null);
 
   // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
@@ -167,41 +197,6 @@ export default function ContactPage(): React.JSX.Element {
       }
     }
   }, [isMenuHovered]);
-
-  // Animasi FAQ
-  useEffect(() => {
-    if (faqAnswerRef.current) {
-      if (faqOpen) {
-        gsap.to(faqAnswerRef.current, {
-          height: 'auto',
-          opacity: 1,
-          duration: 0.5,
-          ease: "power2.out"
-        });
-        if (faqPlusRef.current) {
-          gsap.to(faqPlusRef.current, {
-            rotation: 45,
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        }
-      } else {
-        gsap.to(faqAnswerRef.current, {
-          height: 0,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.in"
-        });
-        if (faqPlusRef.current) {
-          gsap.to(faqPlusRef.current, {
-            rotation: 0,
-            duration: 0.4,
-            ease: "power2.in"
-          });
-        }
-      }
-    }
-  }, [faqOpen]);
 
   // Animasi hover untuk menu items di drawer
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
@@ -539,8 +534,12 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  const toggleFaq = () => {
-    setFaqOpen(!faqOpen);
+  const toggleFaq = (id: string) => {
+    if (activeFaq === id) {
+      setActiveFaq(null);
+    } else {
+      setActiveFaq(id);
+    }
   };
 
   return (
@@ -575,7 +574,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 280vh;
+          min-height: 320vh;
           width: 100%;
           will-change: transform;
         }
@@ -600,7 +599,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '280vh',
+            minHeight: '320vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -790,7 +789,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - BG BIRU #0D3CFC - TUTUP PAKAI TANDA + */}
+            {/* Menu Drawer - BG BIRU #0D3CFC */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -1313,73 +1312,106 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* FAQ Section dengan GSAP + Framer Motion */}
               <div style={{
                 marginLeft: '80px',
                 marginTop: '40px',
                 maxWidth: '900px',
               }}>
-                {/* Pertanyaan FAQ - Biru besar */}
-                <div
-                  ref={faqQuestionRef}
-                  onClick={toggleFaq}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    padding: '20px 0',
-                    borderBottom: '1px solid #e0e0e0',
-                  }}
-                >
-                  <h2 style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '50px',
-                    fontWeight: '600',
-                    color: '#0D3CFC',
-                    margin: 0,
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Apakah kamu punya kesulitan?
-                  </h2>
-                  <span
-                    ref={faqPlusRef}
+                {/* Judul FAQ */}
+                <h2 style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '600',
+                  color: '#000000',
+                  margin: 0,
+                  marginBottom: '30px',
+                  letterSpacing: '-0.02em'
+                }}>
+                  FAQ
+                </h2>
+
+                {/* FAQ Items */}
+                {faqData.map((item) => (
+                  <div
+                    key={item.id}
                     style={{
-                      fontSize: '40px',
-                      fontWeight: 300,
-                      color: '#0D3CFC',
-                      display: 'inline-block',
-                      transform: 'rotate(0deg)',
-                      transition: 'transform 0.3s ease',
+                      borderBottom: '1px solid #e0e0e0',
+                      overflow: 'hidden',
                     }}
                   >
-                    +
-                  </span>
-                </div>
+                    {/* Pertanyaan */}
+                    <div
+                      onClick={() => toggleFaq(item.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '20px 0',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                    >
+                      <span style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '28px',
+                        fontWeight: '500',
+                        color: '#0D3CFC',
+                        letterSpacing: '-0.01em',
+                      }}>
+                        {item.question}
+                      </span>
+                      <motion.div
+                        animate={{
+                          rotate: activeFaq === item.id ? 45 : 0,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          fontSize: '30px',
+                          fontWeight: 300,
+                          color: '#0D3CFC',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        +
+                      </motion.div>
+                    </div>
 
-                {/* Jawaban FAQ - Hitam */}
-                <div
-                  ref={faqAnswerRef}
-                  style={{
-                    overflow: 'hidden',
-                    height: 0,
-                    opacity: 0,
-                    paddingTop: 0,
-                  }}
-                >
-                  <p style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '24px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    margin: 0,
-                    padding: '20px 0',
-                    lineHeight: 1.6,
-                    letterSpacing: '0.01em'
-                  }}>
-                    Kami siap membantu Anda! Silakan hubungi tim support kami melalui email di contact.menuru@gmail.com atau melalui media sosial kami. Kami akan merespon dalam waktu 24 jam.
-                  </p>
-                </div>
+                    {/* Jawaban */}
+                    <AnimatePresence>
+                      {activeFaq === item.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.4, ease: 'easeInOut' }}
+                          style={{
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <p style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: '18px',
+                            fontWeight: '400',
+                            color: '#333333',
+                            padding: '0 0 20px 0',
+                            margin: 0,
+                            lineHeight: 1.8,
+                            letterSpacing: '0.01em',
+                          }}>
+                            {item.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
