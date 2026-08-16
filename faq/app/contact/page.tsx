@@ -685,7 +685,6 @@ export default function ContactPage(): React.JSX.Element {
         .subscribe-input::placeholder {
           color: #999;
           font-weight: 300;
-          
         }
       `}</style>
       
@@ -1010,7 +1009,7 @@ export default function ContactPage(): React.JSX.Element {
               left: '40px',
               zIndex: 10,
               width: 'calc(100% - 80px)',
-              marginBottom: '100px'
+              marginBottom: '80px'
             }}>
               <p
                 style={{
@@ -1077,21 +1076,21 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-05 Items + FAQ + Subscribe + Product */}
+            {/* 01-05 Items */}
             <div style={{
               position: 'relative',
               top: '150px',
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '40px'
+              marginBottom: '20px'
             }}>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '40px',
+                gap: '30px',
                 marginLeft: '80px',
-                marginBottom: '60px',
+                marginBottom: '40px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -1431,7 +1430,7 @@ export default function ContactPage(): React.JSX.Element {
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
                 marginLeft: '80px',
-                marginTop: '60px',
+                marginTop: '30px',
                 maxWidth: '1100px',
                 gap: '40px',
               }}>
@@ -1558,22 +1557,16 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FOOTER - Talk with an Menuru (Kiri) + Product (Tengah) - TANPA SECTION KOSONG */}
+              {/* FOOTER - Tanpa garis samping */}
               <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
                 marginLeft: '80px',
-                marginTop: '80px',
+                marginTop: '50px',
                 maxWidth: '1100px',
-                gap: '40px',
                 borderTop: '2px solid #e0e0e0',
-                paddingTop: '50px',
+                paddingTop: '40px',
               }}>
-                {/* Kiri - Talk with an Menuru */}
-                <div style={{
-                  flex: '0 0 45%',
-                }}>
+                {/* Talk with an Menuru + Product (di bawah) */}
+                <div>
                   <h3 style={{
                     fontFamily: FONT_FAMILY,
                     fontSize: '32px',
@@ -1601,6 +1594,7 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
+                    maxWidth: '400px',
                   }}>
                     <input
                       type="email"
@@ -1685,9 +1679,11 @@ export default function ContactPage(): React.JSX.Element {
                   )}
                 </div>
 
-                {/* Tengah - Product */}
+                {/* Product - di bawah Talk with an Menuru */}
                 <div style={{
-                  flex: '0 0 35%',
+                  marginTop: '30px',
+                  borderTop: '1px solid #e8e8e8',
+                  paddingTop: '30px',
                 }}>
                   <h3 style={{
                     fontFamily: FONT_FAMILY,
@@ -1754,6 +1750,71 @@ export default function ContactPage(): React.JSX.Element {
                       lineHeight: 1.2,
                     }}>
                       Donation
+                    </span>
+                  </div>
+                </div>
+
+                {/* Attention - Privacy Policy, Kebijakan Privasi, Ketentuan Kami, Pusat Bantuan */}
+                <div style={{
+                  marginTop: '40px',
+                  borderTop: '1px solid #e8e8e8',
+                  paddingTop: '30px',
+                }}>
+                  <h3 style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '28px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    margin: 0,
+                    marginBottom: '16px',
+                    letterSpacing: '-0.01em',
+                  }}>
+                    Attention
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                    }}>
+                      Privacy Policy
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                    }}>
+                      Kebijakan Privasi
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                    }}>
+                      Ketentuan Kami
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '20px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      cursor: 'pointer',
+                    }}>
+                      Pusat Bantuan
                     </span>
                   </div>
                 </div>
