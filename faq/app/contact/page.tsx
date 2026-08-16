@@ -695,7 +695,7 @@ export default function ContactPage(): React.JSX.Element {
 
         @keyframes blink {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
+          50% { opacity: 0.2; }
         }
       `}</style>
       
@@ -1597,18 +1597,90 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '8px',
+                    gap: '12px',
                   }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
+                    {/* Contact Us dengan titik bulat pemancar kedap kedip */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
                     }}>
-                      Contact Us
-                    </span>
+                      <span style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '20px',
+                        fontWeight: '400',
+                        color: '#0D3CFC',
+                        letterSpacing: '-0.01em',
+                        cursor: 'pointer',
+                      }}>
+                        Contact Us
+                      </span>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}>
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#0D3CFC',
+                          animation: 'blink 1s ease-in-out infinite',
+                          display: 'inline-block',
+                        }} />
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#0D3CFC',
+                          animation: 'blink 1s ease-in-out infinite 0.3s',
+                          display: 'inline-block',
+                        }} />
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#0D3CFC',
+                          animation: 'blink 1s ease-in-out infinite 0.6s',
+                          display: 'inline-block',
+                        }} />
+                      </div>
+                      {/* Tombol kecil */}
+                      <Link href="/contact">
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#0D3CFC',
+                            padding: '4px 12px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            border: '1px solid #0D3CFC',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                            e.currentTarget.style.borderColor = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#0D3CFC';
+                            e.currentTarget.style.borderColor = '#0D3CFC';
+                          }}
+                        >
+                          <span style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            color: '#ffffff',
+                            letterSpacing: '0.02em',
+                          }}>
+                            →
+                          </span>
+                        </div>
+                      </Link>
+                    </div>
+
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '20px',
@@ -1630,69 +1702,6 @@ export default function ContactPage(): React.JSX.Element {
                       Live Chat
                     </span>
                   </div>
-
-                  {/* Tombol "Kamu berada di sini" dengan blinking dots */}
-                  <Link href="/contact">
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginTop: '20px',
-                        backgroundColor: '#0D3CFC',
-                        padding: '10px 24px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        border: '2px solid #0D3CFC',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      <span style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        letterSpacing: '0.02em',
-                      }}>
-                        Kamu berada di sini
-                      </span>
-                      <span style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}>
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ffffff',
-                          animation: 'blink 1s ease-in-out infinite',
-                        }} />
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ffffff',
-                          animation: 'blink 1s ease-in-out infinite 0.2s',
-                        }} />
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ffffff',
-                          animation: 'blink 1s ease-in-out infinite 0.4s',
-                        }} />
-                      </span>
-                    </div>
-                  </Link>
                 </div>
 
                 {/* Tengah - Product */}
