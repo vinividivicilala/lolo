@@ -641,7 +641,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 560vh;
+          min-height: 480vh;
           width: 100%;
           will-change: transform;
         }
@@ -691,7 +691,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '560vh',
+            minHeight: '480vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -1076,7 +1076,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-05 Items */}
+            {/* 01-05 Items + FAQ + Subscribe + Product */}
             <div style={{
               position: 'relative',
               top: '150px',
@@ -1465,7 +1465,7 @@ export default function ContactPage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Kanan - FAQ Items + Subscribe + Product */}
+                {/* Kanan - FAQ Items */}
                 <div style={{
                   flex: 1,
                   display: 'flex',
@@ -1554,204 +1554,206 @@ export default function ContactPage(): React.JSX.Element {
                       </AnimatePresence>
                     </div>
                   ))}
+                </div>
+              </div>
 
-                  {/* FOOTER SECTION - Talk with an Menuru (Kiri) + Product (Tengah) */}
-                  <div style={{
-                    marginTop: '60px',
-                    borderTop: '2px solid #e0e0e0',
-                    paddingTop: '50px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: '40px',
+              {/* FOOTER - Talk with an Menuru (Kiri) + Product (Tengah) - TANPA SECTION KOSONG */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginLeft: '80px',
+                marginTop: '80px',
+                maxWidth: '1100px',
+                gap: '40px',
+                borderTop: '2px solid #e0e0e0',
+                paddingTop: '50px',
+              }}>
+                {/* Kiri - Talk with an Menuru */}
+                <div style={{
+                  flex: '0 0 45%',
+                }}>
+                  <h3 style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '32px',
+                    fontWeight: '600',
+                    color: '#0D3CFC',
+                    margin: 0,
+                    marginBottom: '8px',
+                    letterSpacing: '-0.01em',
                   }}>
-                    {/* Kiri - Talk with an Menuru */}
-                    <div style={{
-                      flex: '0 0 45%',
-                    }}>
-                      <h3 style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '32px',
-                        fontWeight: '600',
-                        color: '#0D3CFC',
-                        margin: 0,
-                        marginBottom: '8px',
-                        letterSpacing: '-0.01em',
-                      }}>
-                        Talk with an Menuru
-                      </h3>
-                      <p style={{
-                        fontFamily: FONT_FAMILY,
+                    Talk with an Menuru
+                  </h3>
+                  <p style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '14px',
+                    fontWeight: '300',
+                    color: '#666',
+                    margin: 0,
+                    marginBottom: '16px',
+                    letterSpacing: '0.01em',
+                  }}>
+                    Get the latest updates from Menuru
+                  </p>
+
+                  <form onSubmit={handleSubscribe} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                  }}>
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="subscribe-input"
+                      style={{
+                        flex: 1,
+                        background: '#f5f5f5',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
                         fontSize: '14px',
-                        fontWeight: '300',
-                        color: '#666',
-                        margin: 0,
-                        marginBottom: '16px',
-                        letterSpacing: '0.01em',
-                      }}>
-                        Get the latest updates from Menuru
-                      </p>
-
-                      <form onSubmit={handleSubscribe} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                      }}>
-                        <input
-                          type="email"
-                          placeholder="Enter your email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="subscribe-input"
-                          style={{
-                            flex: 1,
-                            background: '#f5f5f5',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '10px 14px',
-                            fontSize: '14px',
-                            fontFamily: FONT_FAMILY,
-                            outline: 'none',
-                            transition: 'all 0.3s ease',
-                            color: '#000000',
-                          }}
-                          onFocus={(e) => {
-                            e.currentTarget.style.boxShadow = '0 0 0 2px #0D3CFC';
-                            e.currentTarget.style.background = '#eeeeee';
-                          }}
-                          onBlur={(e) => {
-                            e.currentTarget.style.boxShadow = 'none';
-                            e.currentTarget.style.background = '#f5f5f5';
-                          }}
-                        />
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#0D3CFC',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '10px 14px',
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            color: '#ffffff',
-                            transition: 'all 0.3s ease',
-                            opacity: isSubmitting ? 0.6 : 1,
-                            flexShrink: 0,
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSubmitting) {
-                              e.currentTarget.style.backgroundColor = '#000000';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSubmitting) {
-                              e.currentTarget.style.backgroundColor = '#0D3CFC';
-                            }
-                          }}
-                        >
-                          <ArrowRight size={20} />
-                        </button>
-                      </form>
-
-                      {subscribeStatus === 'success' && (
-                        <p style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '13px',
-                          color: '#0D3CFC',
-                          marginTop: '8px',
-                          marginBottom: 0,
-                        }}>
-                          ✓ Berhasil berlangganan!
-                        </p>
-                      )}
-                      {subscribeStatus === 'error' && (
-                        <p style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '13px',
-                          color: '#ff4444',
-                          marginTop: '8px',
-                          marginBottom: 0,
-                        }}>
-                          ✗ Email tidak valid atau terjadi kesalahan
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Tengah - Product */}
-                    <div style={{
-                      flex: '0 0 35%',
-                    }}>
-                      <h3 style={{
                         fontFamily: FONT_FAMILY,
-                        fontSize: '28px',
-                        fontWeight: '600',
+                        outline: 'none',
+                        transition: 'all 0.3s ease',
                         color: '#000000',
-                        margin: 0,
-                        marginBottom: '16px',
-                        letterSpacing: '-0.01em',
-                      }}>
-                        Product
-                      </h3>
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '6px',
-                      }}>
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '400',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.2,
-                        }}>
-                          Shop
-                        </span>
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '400',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.2,
-                        }}>
-                          Note
-                        </span>
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '400',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.2,
-                        }}>
-                          Calendar
-                        </span>
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '400',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.2,
-                        }}>
-                          Blog
-                        </span>
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '400',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.2,
-                        }}>
-                          Donation
-                        </span>
-                      </div>
-                    </div>
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.boxShadow = '0 0 0 2px #0D3CFC';
+                        e.currentTarget.style.background = '#eeeeee';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.background = '#f5f5f5';
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#0D3CFC',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        color: '#ffffff',
+                        transition: 'all 0.3s ease',
+                        opacity: isSubmitting ? 0.6 : 1,
+                        flexShrink: 0,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSubmitting) {
+                          e.currentTarget.style.backgroundColor = '#000000';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSubmitting) {
+                          e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        }
+                      }}
+                    >
+                      <ArrowRight size={20} />
+                    </button>
+                  </form>
+
+                  {subscribeStatus === 'success' && (
+                    <p style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '13px',
+                      color: '#0D3CFC',
+                      marginTop: '8px',
+                      marginBottom: 0,
+                    }}>
+                      ✓ Berhasil berlangganan!
+                    </p>
+                  )}
+                  {subscribeStatus === 'error' && (
+                    <p style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '13px',
+                      color: '#ff4444',
+                      marginTop: '8px',
+                      marginBottom: 0,
+                    }}>
+                      ✗ Email tidak valid atau terjadi kesalahan
+                    </p>
+                  )}
+                </div>
+
+                {/* Tengah - Product */}
+                <div style={{
+                  flex: '0 0 35%',
+                }}>
+                  <h3 style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '28px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    margin: 0,
+                    marginBottom: '16px',
+                    letterSpacing: '-0.01em',
+                  }}>
+                    Product
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}>
+                      Shop
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}>
+                      Note
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}>
+                      Calendar
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}>
+                      Blog
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}>
+                      Donation
+                    </span>
                   </div>
                 </div>
               </div>
