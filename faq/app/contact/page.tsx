@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FINAL FIX)
+// app/contact/page.tsx (Halaman Contact - FINAL FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -123,11 +123,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const ticketListRef = useRef<HTMLDivElement>(null);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -147,94 +144,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
-  };
-
-  const createTicketFromItem = async (itemName: string) => {
-    if (!user) {
-      alert("Silakan login terlebih dahulu");
-      return;
-    }
-    if (!db) {
-      alert("Database tidak tersedia");
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      const q = query(
-        collection(db, "livechat_tickets"),
-        where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"])
-      );
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
-        setIsLoading(false);
-        return;
-      }
-
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: `Tentang ${itemName}`,
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
-        timestamp: serverTimestamp(),
-        read: false,
-      });
-      
-      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
-      
-      const liveChatElement = document.getElementById('live-chat-section');
-      if (liveChatElement) {
-        setTimeout(() => {
-          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-      }
-      
-      setTimeout(() => {
-        const q2 = query(
-          collection(db, "livechat_tickets"),
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc")
-        );
-        const unsubscribe = onSnapshot(q2, (snapshot) => {
-          const ticketList: Ticket[] = [];
-          snapshot.forEach((doc) => {
-            ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
-          });
-          setTickets(ticketList);
-          const newTicket = ticketList.find(t => t.topic === `Tentang ${itemName}`);
-          if (newTicket) {
-            setSelectedTicket(newTicket);
-            setMessages([]);
-            setTimeout(() => {
-              if (chatContainerRef.current) {
-                chatContainerRef.current.scrollTop = 0;
-              }
-            }, 300);
-          }
-          unsubscribe();
-        });
-      }, 500);
-      
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-      alert("Gagal membuat ticket. Silakan coba lagi.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -351,7 +260,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
     }
-    setIsLoading(true);
     try {
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
@@ -375,17 +283,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setSelectedTopic("");
       setShowStartChat(false);
-      
-      const liveChatElement = document.getElementById('live-chat-section');
-      if (liveChatElement) {
-        setTimeout(() => {
-          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-      }
     } catch (error) {
       console.error("Error starting chat:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -419,10 +318,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -482,21 +377,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   if (!user) {
     return (
-      <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
-        <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
           Live Chat Agent
         </h3>
-        <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+        <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
           Silakan login untuk menggunakan Live Chat Agent
         </p>
         <Link href="/" style={{ textDecoration: "none" }}>
           <button style={{
-            padding: "10px 32px",
+            padding: "8px 24px",
             backgroundColor: "#0D3CFC",
             color: "#fff",
             border: "none",
             borderRadius: "8px",
-            fontSize: "16px",
+            fontSize: "14px",
             fontWeight: 500,
             cursor: "pointer",
             fontFamily: FONT_FAMILY,
@@ -513,22 +408,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (tickets.length === 0 && !showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
-          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
             Live Chat Agent
           </h3>
-          <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+          <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
             Butuh bantuan? Chat langsung dengan agent kami.
           </p>
           <button
             onClick={() => setShowStartChat(true)}
             style={{
-              padding: "12px 28px",
+              padding: "10px 24px",
               backgroundColor: "#0D3CFC",
               color: "#fff",
               border: "none",
               borderRadius: "8px",
-              fontSize: "16px",
+              fontSize: "14px",
               fontWeight: 500,
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
@@ -546,12 +441,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
-          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
             Live Chat Agent
           </h3>
-          <div style={{ maxWidth: "500px" }}>
-            <div style={{ fontSize: "16px", marginBottom: "12px", fontFamily: FONT_FAMILY }}>
+          <div style={{ maxWidth: "400px" }}>
+            <div style={{ fontSize: "14px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>
               Pilih topik permasalahan Anda:
             </div>
             <select
@@ -559,14 +454,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onChange={(e) => setSelectedTopic(e.target.value)}
               style={{
                 width: "100%",
-                padding: "10px 14px",
+                padding: "8px 12px",
                 border: "2px solid #0D3CFC",
                 borderRadius: "8px",
-                fontSize: "16px",
+                fontSize: "14px",
                 fontFamily: FONT_FAMILY,
                 outline: "none",
                 backgroundColor: "#fff",
-                marginBottom: "16px",
+                marginBottom: "12px",
                 color: "#0D3CFC",
               }}
             >
@@ -575,33 +470,33 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
               <button
                 onClick={startChat}
-                disabled={!selectedTopic || isLoading}
+                disabled={!selectedTopic}
                 style={{
-                  padding: "10px 24px",
-                  backgroundColor: selectedTopic && !isLoading ? "#0D3CFC" : "#ccc",
+                  padding: "8px 20px",
+                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
                   color: "#fff",
                   border: "none",
                   borderRadius: "8px",
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontWeight: 500,
-                  cursor: selectedTopic && !isLoading ? "pointer" : "not-allowed",
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {isLoading ? "Memproses..." : "Mulai Chat"}
+                Mulai Chat
               </button>
               <button
                 onClick={() => setShowStartChat(false)}
                 style={{
-                  padding: "10px 24px",
+                  padding: "8px 20px",
                   backgroundColor: "transparent",
                   color: "#666",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontFamily: FONT_FAMILY,
@@ -615,145 +510,104 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - Tanpa height: 100% agar tidak mengganggu scroll halaman
     return (
-      <div style={{ 
-        marginTop: "40px", 
-        borderTop: "1px solid #e8e8e8", 
-        paddingTop: "40px",
-        width: "100%",
-        maxWidth: "100%",
-        overflow: "visible",
-      }}>
-        <div style={{ 
-          display: "flex", 
-          gap: "20px", 
-          width: "100%",
-          maxWidth: "100%",
-          overflow: "visible",
-          flexWrap: "wrap",
-        }}>
-          {/* Ticket List - Kiri */}
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
+          Live Chat Agent
+        </h3>
+        <div style={{ display: "flex", gap: "16px", height: "400px" }}>
           <div style={{
-            width: "280px",
-            minWidth: "200px",
+            width: "220px",
             backgroundColor: "#0D3CFC",
-            borderRadius: "12px",
-            padding: "12px 0",
+            borderRadius: "10px",
+            padding: "10px 0",
+            overflowY: "auto",
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            display: "flex",
-            flexDirection: "column",
-            maxHeight: "500px",
-            overflow: "hidden",
-            flex: "0 0 280px",
           }}>
             <div style={{
-              padding: "0 16px 12px 16px",
+              padding: "0 12px 10px 12px",
               borderBottom: "1px solid rgba(255,255,255,0.15)",
               fontWeight: 600,
-              fontSize: "14px",
+              fontSize: "13px",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
-              flexShrink: 0,
+              gap: "6px",
             }}>
               <ChatIconSmall />
               <span>Riwayat Chat</span>
               <span style={{
                 marginLeft: "auto",
-                fontSize: "11px",
+                fontSize: "10px",
                 backgroundColor: "rgba(255,255,255,0.2)",
-                padding: "2px 10px",
-                borderRadius: "12px",
+                padding: "1px 8px",
+                borderRadius: "10px",
               }}>{tickets.length}</span>
             </div>
-            
-            <div 
-              ref={ticketListRef}
-              style={{ 
-                flex: 1, 
-                overflowY: "auto",
-                overflowX: "hidden",
-                paddingBottom: "4px",
-                minHeight: "100px",
-              }}
-            >
-              {tickets.map((ticket) => {
-                const ticketId = generateTicketId(ticket.createdAt);
-                const isActive = selectedTicket?.id === ticket.id;
-                const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
-                                    ticket.status === 'active' ? 'Aktif' : 'Selesai';
-                const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
-                                    ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
-                return (
-                  <div
-                    key={ticket.id}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setMessages([]);
-                      setTimeout(() => {
-                        if (chatContainerRef.current) {
-                          chatContainerRef.current.scrollTop = 0;
-                        }
-                      }, 100);
-                    }}
-                    style={{
-                      padding: "10px 16px",
-                      borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
-                      backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <div style={{ fontWeight: 500, fontSize: "13px", color: "#fff" }}>
-                      {ticket.userName}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)" }}>
-                      {ticket.topic}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
-                      <span style={{
-                        fontSize: "10px",
-                        backgroundColor: statusColor,
-                        color: ticket.status === 'waiting' ? '#92400e' : ticket.status === 'active' ? '#065f46' : '#6b7280',
-                        padding: "1px 10px",
-                        borderRadius: "12px",
-                        fontWeight: 500,
-                      }}>
-                        {statusLabel}
-                      </span>
-                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
-                        {ticketId}
-                      </span>
-                    </div>
+            {tickets.map((ticket) => {
+              const ticketId = generateTicketId(ticket.createdAt);
+              const isActive = selectedTicket?.id === ticket.id;
+              const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
+                                  ticket.status === 'active' ? 'Aktif' : 'Selesai';
+              const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                  ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+              return (
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setMessages([]);
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>
+                    {ticket.userName}
                   </div>
-                );
-              })}
-              {tickets.length === 0 && (
-                <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
-                  Belum ada chat
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>
+                    {ticket.topic}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "3px" }}>
+                    <span style={{
+                      fontSize: "9px",
+                      backgroundColor: statusColor,
+                      color: ticket.status === 'waiting' ? '#92400e' : ticket.status === 'active' ? '#065f46' : '#6b7280',
+                      padding: "1px 8px",
+                      borderRadius: "10px",
+                      fontWeight: 500,
+                    }}>
+                      {statusLabel}
+                    </span>
+                    <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
+                      {ticketId}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-            
-            <div style={{ 
-              padding: "12px 16px", 
-              borderTop: "1px solid rgba(255,255,255,0.1)",
-              flexShrink: 0,
-            }}>
+              );
+            })}
+            {tickets.length === 0 && (
+              <div style={{ padding: "30px 12px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                Belum ada chat
+              </div>
+            )}
+            <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <button
                 onClick={() => setShowStartChat(true)}
                 style={{
                   width: "100%",
-                  padding: "8px",
+                  padding: "6px",
                   backgroundColor: "rgba(255,255,255,0.15)",
                   color: "#fff",
                   border: "none",
-                  borderRadius: "8px",
-                  fontSize: "13px",
+                  borderRadius: "6px",
+                  fontSize: "12px",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontFamily: FONT_FAMILY,
@@ -764,47 +618,38 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           </div>
 
-          {/* Chat Container - Kanan */}
           <div style={{
             flex: 1,
-            minWidth: "280px",
             backgroundColor: "#ffffff",
-            borderRadius: "12px",
+            borderRadius: "10px",
             border: "1px solid #e8e8e8",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
                 <div style={{
-                  padding: "10px 16px",
+                  padding: "8px 14px",
                   backgroundColor: "#0D3CFC",
                   borderBottom: "1px solid #e8e8e8",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  borderRadius: "12px 12px 0 0",
-                  flexShrink: 0,
+                  borderRadius: "10px 10px 0 0",
                 }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      <span style={{ fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
+                      <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "6px" }}>
                         {selectedTicket.topic}
                       </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "11px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <span style={{ fontSize: "10px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
                         {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
                       </span>
-                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
-                        <span style={{ fontSize: "10px", color: "#ffd700", fontStyle: "italic" }}>
-                          {selectedTicket.typingUserName} mengetik...
-                        </span>
-                      )}
-                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
                         {generateTicketId(selectedTicket.createdAt)}
                       </span>
                     </div>
@@ -813,12 +658,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
-                        padding: "4px 12px",
+                        padding: "3px 10px",
                         backgroundColor: "#22c55e",
                         color: "#fff",
                         border: "none",
                         borderRadius: "4px",
-                        fontSize: "11px",
+                        fontSize: "10px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
                       }}
@@ -827,23 +672,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     </button>
                   )}
                 </div>
-                
-                <div 
-                  ref={chatContainerRef}
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    overflowX: "hidden",
-                    padding: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                    minHeight: "200px",
-                    maxHeight: "400px",
-                  }}
-                >
+                <div style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}>
                   {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
                       Belum ada pesan
                     </div>
                   ) : (
@@ -855,28 +693,26 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           style={{
                             alignSelf: isMine ? "flex-end" : "flex-start",
                             maxWidth: "75%",
-                            padding: "8px 12px",
-                            borderRadius: "10px",
+                            padding: "6px 10px",
+                            borderRadius: "8px",
                             backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                             color: isMine ? "#fff" : "#000",
-                            fontSize: "13px",
+                            fontSize: "12px",
                             fontFamily: FONT_FAMILY,
                           }}
                         >
                           {!isMine && (
-                            <div style={{ fontSize: "10px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                            <div style={{ fontSize: "9px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
                               {msg.senderName}
                             </div>
                           )}
                           <div>{msg.text}</div>
                           <div style={{ 
-                            fontSize: "8px", 
+                            fontSize: "7px", 
                             color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
                             marginTop: "2px",
                           }}>
                             {formatTime(msg.timestamp)}
-                            {isMine && msg.read && <span style={{ marginLeft: "4px" }}>✓✓ Dibaca</span>}
-                            {isMine && !msg.read && <span style={{ marginLeft: "4px" }}>✓ Terkirim</span>}
                           </div>
                         </div>
                       );
@@ -885,10 +721,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
                     <div style={{
                       alignSelf: "flex-start",
-                      fontSize: "12px",
+                      fontSize: "11px",
                       color: "#666",
                       fontStyle: "italic",
-                      padding: "2px 8px",
+                      padding: "2px 6px",
                       fontFamily: FONT_FAMILY,
                     }}>
                       {getTypingText(selectedTicket)}
@@ -896,16 +732,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   )}
                   <div ref={messagesEndRef} />
                 </div>
-                
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
-                    padding: "10px 14px",
+                    padding: "8px 12px",
                     borderTop: "1px solid #e8e8e8",
                     display: "flex",
-                    gap: "8px",
+                    gap: "6px",
                     backgroundColor: "#fff",
-                    borderRadius: "0 0 12px 12px",
-                    flexShrink: 0,
+                    borderRadius: "0 0 10px 10px",
                   }}>
                     <input
                       type="text"
@@ -921,10 +755,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       disabled={selectedTicket.status === 'waiting'}
                       style={{
                         flex: 1,
-                        padding: "8px 12px",
+                        padding: "6px 10px",
                         border: "1px solid #e8e8e8",
                         borderRadius: "6px",
-                        fontSize: "13px",
+                        fontSize: "12px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
                         backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff",
@@ -936,7 +770,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       onClick={sendMessage}
                       disabled={selectedTicket.status === 'waiting' || !messageText.trim()}
                       style={{
-                        padding: "8px 16px",
+                        padding: "6px 14px",
                         backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC",
                         color: "#fff",
                         border: "none",
@@ -946,7 +780,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
-                        fontSize: "13px",
+                        fontSize: "12px",
                       }}
                     >
                       <SendIcon />
@@ -962,9 +796,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#999",
-                fontSize: "14px",
+                fontSize: "13px",
                 fontFamily: FONT_FAMILY,
-                minHeight: "200px",
               }}>
                 Pilih chat dari daftar di kiri
               </div>
@@ -982,271 +815,208 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
-    <div style={{ 
-      marginTop: "40px", 
-      borderTop: "1px solid #e8e8e8", 
-      paddingTop: "40px",
-      width: "100%",
-      maxWidth: "100%",
-      overflow: "visible",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
         <div>
-          <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
             Live Chat Agent
           </h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
-            <span style={{ fontSize: "13px", color: agentOnline ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+            <span style={{ fontSize: "12px", color: agentOnline ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
               {agentOnline ? "● Online" : "● Offline"}
             </span>
-            <span style={{ fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+            <span style={{ fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
               {waitingTickets.length} menunggu • {activeTickets.length} aktif
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "14px" }}>
             {AGENT_NAME.charAt(0)}
           </div>
           <div>
-            <div style={{ fontSize: "14px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
               {AGENT_NAME}
               <span style={{
                 backgroundColor: "#d1fae5",
                 color: "#065f46",
-                fontSize: "9px",
+                fontSize: "8px",
                 fontWeight: 600,
-                padding: "2px 8px",
-                borderRadius: "10px",
-                marginLeft: "6px",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                marginLeft: "4px",
               }}>
                 Agent
               </span>
             </div>
-            <div style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>Support</div>
+            <div style={{ fontSize: "10px", color: "#999", fontFamily: FONT_FAMILY }}>Support</div>
           </div>
         </div>
       </div>
 
-      <div style={{ 
-        display: "flex", 
-        gap: "20px", 
-        width: "100%",
-        maxWidth: "100%",
-        overflow: "visible",
-        flexWrap: "wrap",
-      }}>
+      <div style={{ display: "flex", gap: "16px", height: "400px" }}>
         <div style={{
-          width: "280px",
-          minWidth: "200px",
+          width: "240px",
           backgroundColor: "#f9f9f9",
-          borderRadius: "12px",
+          borderRadius: "10px",
           border: "1px solid #e8e8e8",
-          overflow: "hidden",
+          overflowY: "auto",
           flexShrink: 0,
-          display: "flex",
-          flexDirection: "column",
-          maxHeight: "500px",
-          flex: "0 0 280px",
         }}>
-          <div style={{ 
-            flex: 1, 
-            overflowY: "auto",
-            overflowX: "hidden",
-            minHeight: "100px",
-          }}>
-            {waitingTickets.length > 0 && (
-              <div>
-                <div style={{
-                  padding: "10px 14px",
-                  backgroundColor: "#fef3c7",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  color: "#92400e",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontFamily: FONT_FAMILY,
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}>
-                  <span>⏳</span>
-                  <span>Menunggu ({waitingTickets.length})</span>
+          {waitingTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "8px 12px",
+                backgroundColor: "#fef3c7",
+                fontWeight: 600,
+                fontSize: "12px",
+                color: "#92400e",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>⏳</span>
+                <span>Menunggu ({waitingTickets.length})</span>
+              </div>
+              {waitingTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    takeTicket(ticket.id);
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "9px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
                 </div>
-                {waitingTickets.map((ticket) => (
+              ))}
+            </div>
+          )}
+
+          {activeTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "8px 12px",
+                backgroundColor: "#d1fae5",
+                fontWeight: 600,
+                fontSize: "12px",
+                color: "#065f46",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>💬</span>
+                <span>Aktif ({activeTickets.length})</span>
+              </div>
+              {activeTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{
+                    padding: "8px 12px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "9px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.lastMessage && <div style={{ fontSize: "9px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 30)}{ticket.lastMessage.length > 30 ? "..." : ""}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {resolvedTickets.length > 0 && (
+            <div>
+              <div style={{
+                padding: "8px 12px",
+                backgroundColor: "#e5e7eb",
+                fontWeight: 600,
+                fontSize: "12px",
+                color: "#6b7280",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                <span>✅</span>
+                <span>Selesai ({resolvedTickets.length})</span>
+              </div>
+              {resolvedTickets.map((ticket) => {
+                const ticketId = generateTicketId(ticket.createdAt);
+                return (
                   <div
                     key={ticket.id}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      takeTicket(ticket.id);
-                      setTimeout(() => {
-                        if (chatContainerRef.current) {
-                          chatContainerRef.current.scrollTop = 0;
-                        }
-                      }, 100);
-                    }}
+                    onClick={() => setSelectedTicket(ticket)}
                     style={{
-                      padding: "10px 14px",
+                      padding: "8px 12px",
                       borderBottom: "1px solid #e8e8e8",
                       cursor: "pointer",
                       backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                       transition: "background 0.2s ease",
+                      opacity: 0.7,
                     }}
                   >
-                    <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                    <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                    {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                    <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                    <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                    <div style={{ fontSize: "9px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
+          )}
 
-            {activeTickets.length > 0 && (
-              <div>
-                <div style={{
-                  padding: "10px 14px",
-                  backgroundColor: "#d1fae5",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  color: "#065f46",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontFamily: FONT_FAMILY,
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}>
-                  <span>💬</span>
-                  <span>Aktif ({activeTickets.length})</span>
-                </div>
-                {activeTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setTimeout(() => {
-                        if (chatContainerRef.current) {
-                          chatContainerRef.current.scrollTop = 0;
-                        }
-                      }, 100);
-                    }}
-                    style={{
-                      padding: "10px 14px",
-                      borderBottom: "1px solid #e8e8e8",
-                      cursor: "pointer",
-                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
-                      transition: "background 0.2s ease",
-                    }}
-                  >
-                    <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                    <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                    {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
-                    {ticket.lastMessage && <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {resolvedTickets.length > 0 && (
-              <div>
-                <div style={{
-                  padding: "10px 14px",
-                  backgroundColor: "#e5e7eb",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  color: "#6b7280",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontFamily: FONT_FAMILY,
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}>
-                  <span>✅</span>
-                  <span>Selesai ({resolvedTickets.length})</span>
-                </div>
-                {resolvedTickets.map((ticket) => {
-                  const ticketId = generateTicketId(ticket.createdAt);
-                  return (
-                    <div
-                      key={ticket.id}
-                      onClick={() => {
-                        setSelectedTicket(ticket);
-                        setTimeout(() => {
-                          if (chatContainerRef.current) {
-                            chatContainerRef.current.scrollTop = 0;
-                          }
-                        }, 100);
-                      }}
-                      style={{
-                        padding: "10px 14px",
-                        borderBottom: "1px solid #e8e8e8",
-                        cursor: "pointer",
-                        backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
-                        transition: "background 0.2s ease",
-                        opacity: 0.7,
-                      }}
-                    >
-                      <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                      <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                      <div style={{ fontSize: "10px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
-              <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
-                Tidak ada chat masuk
-              </div>
-            )}
-          </div>
+          {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+            <div style={{ padding: "30px 12px", textAlign: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY }}>
+              Tidak ada chat masuk
+            </div>
+          )}
         </div>
 
         <div style={{
           flex: 1,
-          minWidth: "280px",
           backgroundColor: "#ffffff",
-          borderRadius: "12px",
+          borderRadius: "10px",
           border: "1px solid #e8e8e8",
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
               <div style={{
-                padding: "10px 16px",
+                padding: "8px 14px",
                 backgroundColor: "#0D3CFC",
                 borderBottom: "1px solid #e8e8e8",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                borderRadius: "12px 12px 0 0",
-                flexShrink: 0,
+                borderRadius: "10px 10px 0 0",
               }}>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                     {selectedTicket.userName}
-                    <span style={{ fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "6px" }}>
                       {selectedTicket.topic}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "11px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ fontSize: "10px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
                     </span>
-                    {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
-                      <span style={{ fontSize: "10px", color: "#ffd700", fontStyle: "italic" }}>
-                        {selectedTicket.typingUserName} mengetik...
-                      </span>
-                    )}
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                    <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
                       {generateTicketId(selectedTicket.createdAt)}
                     </span>
                   </div>
@@ -1255,12 +1025,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <button
                     onClick={() => resolveTicket(selectedTicket.id)}
                     style={{
-                      padding: "4px 12px",
+                      padding: "3px 10px",
                       backgroundColor: "#22c55e",
                       color: "#fff",
                       border: "none",
                       borderRadius: "4px",
-                      fontSize: "11px",
+                      fontSize: "10px",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
                     }}
@@ -1269,22 +1039,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </button>
                 )}
               </div>
-              <div 
-                ref={chatContainerRef}
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  overflowX: "hidden",
-                  padding: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  minHeight: "200px",
-                  maxHeight: "400px",
-                }}
-              >
+              <div style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+              }}>
                 {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                  <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
                     Belum ada pesan
                   </div>
                 ) : (
@@ -1296,28 +1060,26 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         style={{
                           alignSelf: isMine ? "flex-end" : "flex-start",
                           maxWidth: "75%",
-                          padding: "8px 12px",
-                          borderRadius: "10px",
+                          padding: "6px 10px",
+                          borderRadius: "8px",
                           backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                           color: isMine ? "#fff" : "#000",
-                          fontSize: "13px",
+                          fontSize: "12px",
                           fontFamily: FONT_FAMILY,
                         }}
                       >
                         {!isMine && (
-                          <div style={{ fontSize: "10px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                          <div style={{ fontSize: "9px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
                             {msg.senderName}
                           </div>
                         )}
                         <div>{msg.text}</div>
                         <div style={{ 
-                          fontSize: "8px", 
+                          fontSize: "7px", 
                           color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
                           marginTop: "2px",
                         }}>
                           {formatTime(msg.timestamp)}
-                          {!isMine && msg.read && <span style={{ marginLeft: "4px" }}>✓✓ Dibaca</span>}
-                          {!isMine && !msg.read && <span style={{ marginLeft: "4px" }}>✓ Terkirim</span>}
                         </div>
                       </div>
                     );
@@ -1326,10 +1088,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 {typingText && selectedTicket.status !== 'resolved' && (
                   <div style={{
                     alignSelf: "flex-start",
-                    fontSize: "12px",
+                    fontSize: "11px",
                     color: "#666",
                     fontStyle: "italic",
-                    padding: "2px 8px",
+                    padding: "2px 6px",
                     fontFamily: FONT_FAMILY,
                   }}>
                     {typingText}
@@ -1339,13 +1101,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               </div>
               {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
-                  padding: "10px 14px",
+                  padding: "8px 12px",
                   borderTop: "1px solid #e8e8e8",
                   display: "flex",
-                  gap: "8px",
+                  gap: "6px",
                   backgroundColor: "#fff",
-                  borderRadius: "0 0 12px 12px",
-                  flexShrink: 0,
+                  borderRadius: "0 0 10px 10px",
                 }}>
                   <input
                     type="text"
@@ -1360,10 +1121,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     placeholder="Ketik balasan..."
                     style={{
                       flex: 1,
-                      padding: "8px 12px",
+                      padding: "6px 10px",
                       border: "1px solid #e8e8e8",
                       borderRadius: "6px",
-                      fontSize: "13px",
+                      fontSize: "12px",
                       outline: "none",
                       fontFamily: FONT_FAMILY,
                     }}
@@ -1374,7 +1135,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     onClick={sendMessage}
                     disabled={!messageText.trim()}
                     style={{
-                      padding: "8px 16px",
+                      padding: "6px 14px",
                       backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
                       color: "#fff",
                       border: "none",
@@ -1384,7 +1145,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
-                      fontSize: "13px",
+                      fontSize: "12px",
                     }}
                   >
                     <SendIcon />
@@ -1400,9 +1161,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               alignItems: "center",
               justifyContent: "center",
               color: "#999",
-              fontSize: "14px",
+              fontSize: "13px",
               fontFamily: FONT_FAMILY,
-              minHeight: "200px",
             }}>
               Pilih chat dari daftar di kiri
             </div>
@@ -1477,17 +1237,17 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
   };
 
   return (
-    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
-      <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
+    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+      <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
         Kritik & Saran
       </h3>
-      <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "24px" }}>
+      <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
         Kirimkan kritik dan saran Anda untuk pengembangan Menuru menjadi lebih baik.
       </p>
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: "600px", marginBottom: "40px" }}>
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+      <form onSubmit={handleSubmit} style={{ maxWidth: "500px", marginBottom: "30px" }}>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "13px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "3px" }}>
             Nama
           </label>
           <input
@@ -1497,55 +1257,53 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             placeholder="Masukkan nama Anda"
             style={{
               width: "100%",
-              padding: "10px 14px",
+              padding: "8px 12px",
               border: "2px solid #e8e8e8",
               borderRadius: "8px",
-              fontSize: "16px",
+              fontSize: "14px",
               fontFamily: FONT_FAMILY,
               outline: "none",
-              transition: "border-color 0.2s ease, background-color 0.2s ease",
-              backgroundColor: "#f9f9f9",
+              transition: "border-color 0.2s ease",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "#0D3CFC"; e.currentTarget.style.backgroundColor = "#fff"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.backgroundColor = "#f9f9f9"; }}
+            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
           />
         </div>
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "13px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "3px" }}>
             Keterangan / Saran
           </label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tulis kritik atau saran Anda..."
-            rows={4}
+            rows={3}
             style={{
               width: "100%",
-              padding: "10px 14px",
+              padding: "8px 12px",
               border: "2px solid #e8e8e8",
               borderRadius: "8px",
-              fontSize: "16px",
+              fontSize: "14px",
               fontFamily: FONT_FAMILY,
               outline: "none",
               resize: "vertical",
-              minHeight: "100px",
-              transition: "border-color 0.2s ease, background-color 0.2s ease",
-              backgroundColor: "#f9f9f9",
+              minHeight: "80px",
+              transition: "border-color 0.2s ease",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "#0D3CFC"; e.currentTarget.style.backgroundColor = "#fff"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.backgroundColor = "#f9f9f9"; }}
+            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
           />
         </div>
         <button
           type="submit"
           disabled={isSubmitting}
           style={{
-            padding: "10px 32px",
+            padding: "8px 28px",
             backgroundColor: "#0D3CFC",
             color: "#fff",
             border: "none",
             borderRadius: "8px",
-            fontSize: "16px",
+            fontSize: "14px",
             fontWeight: 500,
             cursor: isSubmitting ? "not-allowed" : "pointer",
             fontFamily: FONT_FAMILY,
@@ -1558,12 +1316,12 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           {isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}
         </button>
         {submitStatus === 'success' && (
-          <p style={{ color: "#22c55e", fontSize: "14px", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+          <p style={{ color: "#22c55e", fontSize: "13px", marginTop: "6px", fontFamily: FONT_FAMILY }}>
             ✓ Kritik & saran berhasil dikirim! Terima kasih.
           </p>
         )}
         {submitStatus === 'error' && (
-          <p style={{ color: "#ef4444", fontSize: "14px", marginTop: "8px", fontFamily: FONT_FAMILY }}>
+          <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "6px", fontFamily: FONT_FAMILY }}>
             ⚠️ Gagal mengirim. Silakan coba lagi.
           </p>
         )}
@@ -1572,24 +1330,24 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
       {feedbacks.length > 0 && (
         <div style={{ 
           position: "relative", 
-          padding: "24px 20px 24px 40px",
+          padding: "20px 16px 20px 32px",
           backgroundColor: "#0D3CFC",
-          borderRadius: "12px",
-          maxWidth: "800px",
+          borderRadius: "10px",
+          maxWidth: "700px",
         }}>
           <div style={{
             position: "absolute",
-            left: "16px",
-            top: "30px",
-            bottom: "30px",
+            left: "12px",
+            top: "24px",
+            bottom: "24px",
             width: "2px",
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
           <div style={{
             position: "absolute",
-            left: "10px",
-            top: "28px",
+            left: "6px",
+            top: "22px",
             width: "14px",
             height: "14px",
             borderRadius: "50%",
@@ -1599,10 +1357,10 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           }} />
 
           {feedbacks.map((item, index) => (
-            <div key={item.id} style={{ position: "relative", paddingBottom: "20px", paddingLeft: "20px" }}>
+            <div key={item.id} style={{ position: "relative", paddingBottom: "16px", paddingLeft: "16px" }}>
               <div style={{
                 position: "absolute",
-                left: "-20px",
+                left: "-16px",
                 top: "4px",
                 width: "10px",
                 height: "10px",
@@ -1615,17 +1373,17 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               <div style={{
                 backgroundColor: "rgba(255,255,255,0.1)",
                 borderRadius: "8px",
-                padding: "12px 16px",
+                padding: "12px 14px",
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                    #{index + 1} - {item.name}
+                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                    {index + 1}. {item.name}
                   </span>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
+                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                     {formatDate(item.createdAt)}
                   </span>
                 </div>
-                <p style={{ fontSize: "15px", color: "#ffffff", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.6, opacity: 0.9 }}>
+                <p style={{ fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.5, opacity: 0.9 }}>
                   {item.message}
                 </p>
               </div>
@@ -1634,8 +1392,8 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
 
           <div style={{
             position: "absolute",
-            left: "6px",
-            bottom: "22px",
+            left: "2px",
+            bottom: "18px",
             width: "18px",
             height: "18px",
             borderRadius: "50%",
@@ -1718,6 +1476,7 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
+  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1760,22 +1519,19 @@ export default function ContactPage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
       });
-      
-      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
+      alert(`Ticket untuk "${itemName}" berhasil dibuat! Silakan cek Live Chat Agent.`);
       
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        setTimeout(() => {
-          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+        liveChatElement.scrollIntoView({ behavior: 'smooth' });
       }
-      
     } catch (error) {
       console.error("Error creating ticket:", error);
       alert("Gagal membuat ticket. Silakan coba lagi.");
     }
   };
 
+  // Auth
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1788,6 +1544,7 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
+  // Menu drawer animation
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -1828,6 +1585,7 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuOpen]);
 
+  // Menu button hover
   useEffect(() => {
     if (menuButtonRef.current) {
       if (isMenuHovered) {
@@ -1846,6 +1604,7 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
+  // Hover effects for items 01-05
   useEffect(() => {
     const itemRefs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
     const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
@@ -1881,6 +1640,7 @@ export default function ContactPage(): React.JSX.Element {
     });
   }, [hoveredItem]);
 
+  // SplitText animation
   useEffect(() => {
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
@@ -1980,7 +1740,6 @@ export default function ContactPage(): React.JSX.Element {
           padding: 0;
           background-color: white;
           overflow-x: hidden;
-          overflow-y: auto !important;
         }
         .split-char-contact {
           display: inline-block;
@@ -2013,9 +1772,8 @@ export default function ContactPage(): React.JSX.Element {
         MozOsxFontSmoothing: 'grayscale',
         position: 'relative',
         overflowX: 'hidden',
-        overflowY: 'visible',
       }}>
-        {/* Fixed Header */}
+        {/* JUDUL WEBSITE - pojok kiri atas */}
         <div style={{
           position: 'fixed',
           top: '40px',
@@ -2029,12 +1787,15 @@ export default function ContactPage(): React.JSX.Element {
             fontSize: '48px',
             color: '#000000',
             letterSpacing: '-0.03em',
+            textTransform: 'none',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale'
           }}>
             Menuru
           </span>
         </div>
 
-        {/* NAVBAR */}
+        {/* NAVBAR - pojok kanan atas */}
         <div style={{
           position: 'fixed',
           top: '40px',
@@ -2051,62 +1812,89 @@ export default function ContactPage(): React.JSX.Element {
           pointerEvents: 'auto',
           boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
         }}>
+          {/* Get in Touch - diubah jadi (here) */}
           <Link href="/contact">
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              border: '2px solid #0D3CFC',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              backgroundColor: 'transparent',
-            }}>
-              <span style={{ fontSize: '16px', fontWeight: 500, color: '#0D3CFC', fontFamily: FONT_FAMILY }}>
-                here
-              </span>
-              <div style={{
+            <div
+              style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#0D3CFC',
-                borderRadius: '4px',
-                padding: '4px',
-                color: '#ffffff',
-              }}>
+                gap: '8px',
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
+                }}
+              >
+                (here)
+              </span>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#0D3CFC',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
+                }}
+              >
                 <SouthEastArrow size={24} />
               </div>
             </div>
           </Link>
 
+          {/* Pusat Bantuan */}
           <Link href="/pusat-bantuan">
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              border: '2px solid #000000',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              backgroundColor: 'transparent',
-            }}>
-              <span style={{ fontSize: '16px', fontWeight: 500, color: '#000000', fontFamily: FONT_FAMILY }}>
-                Pusat Bantuan
-              </span>
-              <div style={{
+            <div
+              style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#000000',
-                borderRadius: '4px',
-                padding: '4px',
-                color: '#ffffff',
-              }}>
+                gap: '8px',
+                border: '2px solid #000000',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#000000',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
+                }}
+              >
+                Pusat Bantuan
+              </span>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#000000',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
+                }}
+              >
                 <NorthWestArrow size={24} />
               </div>
             </div>
           </Link>
 
+          {/* Menu */}
           <div
             ref={menuButtonRef}
             onClick={handleMenuClick}
@@ -2123,15 +1911,17 @@ export default function ContactPage(): React.JSX.Element {
               backgroundColor: 'transparent',
             }}
           >
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#000000',
-              borderRadius: '4px',
-              padding: '4px',
-              color: '#ffffff',
-            }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#000000',
+                borderRadius: '4px',
+                padding: '4px',
+                color: '#ffffff',
+              }}
+            >
               <span
                 ref={plusIconRef}
                 style={{
@@ -2146,13 +1936,22 @@ export default function ContactPage(): React.JSX.Element {
                 +
               </span>
             </div>
-            <span style={{ fontSize: '16px', fontWeight: 500, color: '#000000', fontFamily: FONT_FAMILY }}>
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#000000',
+                fontFamily: FONT_FAMILY,
+                letterSpacing: '0.02em',
+                display: 'inline-block',
+              }}
+            >
               Menu
             </span>
           </div>
         </div>
 
-        {/* Menu Drawer */}
+        {/* Menu Drawer - BG BIRU #0D3CFC */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -2176,39 +1975,75 @@ export default function ContactPage(): React.JSX.Element {
             overflow: 'hidden'
           }}
         >
-          <h1 style={{
-            position: 'absolute',
-            top: '40px',
-            left: '40px',
-            fontSize: '48px',
-            fontWeight: 700,
-            color: '#ffffff',
-            fontFamily: FONT_FAMILY,
-            letterSpacing: '-0.03em',
-            margin: 0,
-            padding: 0,
-            lineHeight: 1,
-            opacity: 0.9,
-          }}>
+          <h1
+            style={{
+              position: 'absolute',
+              top: '40px',
+              left: '40px',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#ffffff',
+              fontFamily: FONT_FAMILY,
+              letterSpacing: '-0.03em',
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}
+          >
             Menuru
           </h1>
 
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            gap: '30px',
-          }}>
-            <Link href="/" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Home</Link>
-            <Link href="/about" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>About</Link>
-            <Link href="/contact" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Contact</Link>
-            <Link href="/pusat-bantuan" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Pusat Bantuan</Link>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              gap: '30px',
+            }}
+          >
+            <Link href="/" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Home</Link>
+            <Link href="/about" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>About</Link>
+            <Link href="/contact" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Pusat Bantuan</Link>
           </div>
         </div>
 
-        {/* Teks Contact */}
+        {/* Teks Contact besar 300px */}
         <div style={{
           position: 'relative',
           top: '120px',
@@ -2228,12 +2063,14 @@ export default function ContactPage(): React.JSX.Element {
               letterSpacing: '-0.02em',
               textTransform: 'none',
               lineHeight: '1',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
             }}>
             Contact
           </div>
         </div>
 
-        {/* Subtitle */}
+        {/* Teks subtitle dan tombol di bawah Contact */}
         <div style={{
           position: 'relative',
           top: '120px',
@@ -2242,50 +2079,64 @@ export default function ContactPage(): React.JSX.Element {
           width: 'calc(100% - 80px)',
           marginBottom: '80px'
         }}>
-          <p style={{
-            fontSize: '40px',
-            fontWeight: 400,
-            color: '#0D3CFC',
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.2,
-            margin: 0,
-            padding: 0,
-            paddingBottom: '30px',
-            whiteSpace: 'pre-line',
-          }}>
+          <p
+            style={{
+              fontSize: '40px',
+              fontWeight: 400,
+              color: '#0D3CFC',
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.2,
+              margin: 0,
+              padding: 0,
+              paddingBottom: '30px',
+              whiteSpace: 'pre-line',
+            }}
+          >
             {`You can take notes, find ideas,\nand donate money to those in need`}
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
             <Link href="/signup">
-              <div style={{
-                display: 'inline-block',
-                border: '2px solid #0D3CFC',
-                borderRadius: '8px',
-                padding: '12px 28px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-              }}>
-                <span style={{ fontSize: '18px', fontWeight: 500, color: '#0D3CFC', fontFamily: FONT_FAMILY }}>
+              <div
+                style={{
+                  display: 'inline-block',
+                  border: '2px solid #0D3CFC',
+                  borderRadius: '8px',
+                  padding: '12px 28px',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 500,
+                    color: '#0D3CFC',
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: '0.02em',
+                  }}
+                >
                   Let's build now
                 </span>
               </div>
             </Link>
 
             <Link href="/signup">
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px solid #0D3CFC',
-                borderRadius: '8px',
-                padding: '10px',
-                cursor: 'pointer',
-                backgroundColor: '#0D3CFC',
-                color: '#ffffff',
-                width: '50px',
-                height: '50px',
-              }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #0D3CFC',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  cursor: 'pointer',
+                  backgroundColor: '#0D3CFC',
+                  color: '#ffffff',
+                  width: '50px',
+                  height: '50px',
+                }}
+              >
                 <NorthEastArrow size={24} />
               </div>
             </Link>
@@ -2309,97 +2160,410 @@ export default function ContactPage(): React.JSX.Element {
             marginBottom: '40px',
             maxWidth: '900px',
           }}>
-            {['Note', 'Calendar', 'Donation', 'Community', 'Shop'].map((item, idx) => {
-              const num = String(idx + 1).padStart(2, '0');
-              const refs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
-              const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
-              return (
-                <div
-                  key={item}
-                  ref={refs[idx]}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
+            {/* 01 - Note */}
+            <div
+              ref={item01Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('01')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  01
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Note
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Note');
                   }}
-                  onMouseEnter={() => setHoveredItem(num)}
-                  onMouseLeave={() => setHoveredItem(null)}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
+                  Ticket
+                </button>
+                {hoveredItem === '01' && (
+                  <div
+                    ref={hoverText01Ref}
+                    style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
+                      fontSize: '18px',
+                      fontWeight: '400',
                       color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      {num}
-                    </span>
-                    <span style={{
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa mencatat apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 02 - Calendar */}
+            <div
+              ref={item02Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('02')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  02
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Calendar
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Calendar');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '02' && (
+                  <div
+                    ref={hoverText02Ref}
+                    style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
+                      fontSize: '18px',
+                      fontWeight: '400',
                       color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      {item}
-                    </span>
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa memikirkan jadwal apa yang kamu inginkan
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        createTicketFromItem(item);
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === num && (
-                      <div
-                        ref={textRefs[idx]}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / {idx === 0 ? 'kamu bisa mencatat apa yang kamu inginkan' :
-                           idx === 1 ? 'kamu bisa memikirkan jadwal apa yang kamu inginkan' :
-                           idx === 2 ? 'kamu bisa membagikan uang apa yang kamu inginkan' :
-                           idx === 3 ? 'kamu bisa mencari apa yang kamu inginkan' :
-                           'kamu bisa membeli apa yang kamu inginkan'}
-                      </div>
-                    )}
+                )}
+              </div>
+            </div>
+
+            {/* 03 - Donation */}
+            <div
+              ref={item03Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('03')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  03
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Donation
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Donation');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '03' && (
+                  <div
+                    ref={hoverText03Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa membagikan uang apa yang kamu inginkan
                   </div>
-                </div>
-              );
-            })}
+                )}
+              </div>
+            </div>
+
+            {/* 04 - Community */}
+            <div
+              ref={item04Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('04')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  04
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Community
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Community');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '04' && (
+                  <div
+                    ref={hoverText04Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa mencari apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 05 - Shop */}
+            <div
+              ref={item05Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('05')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  05
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Shop
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Shop');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '05' && (
+                  <div
+                    ref={hoverText05Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa membeli apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* FAQ Section */}
@@ -2466,8 +2630,12 @@ export default function ContactPage(): React.JSX.Element {
                       padding: '15px 0',
                       transition: 'all 0.3s ease',
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
                   >
                     <span style={{
                       fontFamily: FONT_FAMILY,
@@ -2480,7 +2648,9 @@ export default function ContactPage(): React.JSX.Element {
                       {item.question}
                     </span>
                     <motion.div
-                      animate={{ rotate: activeFaq === item.id ? 45 : 0 }}
+                      animate={{
+                        rotate: activeFaq === item.id ? 45 : 0,
+                      }}
                       transition={{ duration: 0.3 }}
                       style={{
                         fontSize: '30px',
@@ -2501,7 +2671,9 @@ export default function ContactPage(): React.JSX.Element {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        style={{ overflow: 'hidden' }}
+                        style={{
+                          overflow: 'hidden',
+                        }}
                       >
                         <p style={{
                           fontFamily: FONT_FAMILY,
@@ -2523,7 +2695,7 @@ export default function ContactPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* FOOTER */}
+          {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -2534,80 +2706,262 @@ export default function ContactPage(): React.JSX.Element {
             gap: '40px',
             paddingTop: '40px',
           }}>
-            <div style={{ flex: '0 0 30%' }}>
-              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
+            <div style={{
+              flex: '0 0 30%',
+            }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
                 Get in Touch
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#0D3CFC',
+                    letterSpacing: '-0.01em',
+                    cursor: 'pointer',
+                  }}>
                     Contact Us
                   </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite', display: 'inline-block' }} />
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite 0.3s', display: 'inline-block' }} />
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite 0.6s', display: 'inline-block' }} />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}>
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite',
+                      display: 'inline-block',
+                    }} />
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite 0.3s',
+                      display: 'inline-block',
+                    }} />
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite 0.6s',
+                      display: 'inline-block',
+                    }} />
                   </div>
                   <Link href="/contact">
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#0D3CFC',
-                      padding: '4px 12px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      border: '1px solid #0D3CFC',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.borderColor = '#000000'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0D3CFC'; e.currentTarget.style.borderColor = '#0D3CFC'; }}
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#0D3CFC',
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        border: '1px solid #0D3CFC',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
                     >
-                      <span style={{ fontFamily: FONT_FAMILY, fontSize: '12px', fontWeight: '500', color: '#ffffff', letterSpacing: '0.02em' }}>
+                      <span style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        letterSpacing: '0.02em',
+                      }}>
                         →
                       </span>
                     </div>
                   </Link>
                 </div>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Instagram</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Live Chat</span>
+
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Instagram
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Live Chat
+                </span>
               </div>
             </div>
 
-            <div style={{ flex: '0 0 30%' }}>
-              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
+            <div style={{
+              flex: '0 0 30%',
+            }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
                 Product
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Shop</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Note</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Calendar</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Blog</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Donation</span>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Shop
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Note
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Calendar
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Blog
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Donation
+                </span>
               </div>
             </div>
 
-            <div style={{ flex: '0 0 30%' }}>
-              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
+            <div style={{
+              flex: '0 0 30%',
+            }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
                 Attention
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Kebijakan Privasi</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Ketentuan Kami</span>
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Pusat Bantuan</span>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Kebijakan Privasi
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Ketentuan Kami
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Pusat Bantuan
+                </span>
               </div>
             </div>
           </div>
 
           {/* ===== LIVE CHAT AGENT ===== */}
-          <div id="live-chat-section" style={{ marginTop: "40px" }}>
+          <div id="live-chat-section">
             <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
           </div>
 
           {/* ===== KRITIK & SARAN ===== */}
           <FeedbackSection db={db} user={user} />
 
-          {/* Teks MENURU 400px */}
+          {/* Teks MENURU 400px warna biru di kanan */}
           <div
             ref={menuruFooterRef}
             style={{
@@ -2631,6 +2985,8 @@ export default function ContactPage(): React.JSX.Element {
                 lineHeight: '0.8',
                 display: 'block',
                 textAlign: 'right',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
               }}
             >
               {'MENURU'.split('').map((char, index) => (
