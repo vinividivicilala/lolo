@@ -526,33 +526,6 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    // Animasi teks MENURU di footer 500px muncul dari bawah ke atas
-    if (menuruFooterRef.current) {
-      const menuruChars = menuruFooterRef.current.querySelectorAll('.menuru-footer-char');
-      
-      gsap.fromTo(menuruChars,
-        {
-          y: 200,
-          opacity: 0,
-          scale: 0.5,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          stagger: 0.03,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: menuruFooterRef.current,
-            start: "top bottom",
-            end: "bottom bottom",
-            scrub: 1.5,
-          }
-        }
-      );
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
@@ -669,7 +642,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 450vh;
+          min-height: 480vh;
           width: 100%;
           will-change: transform;
         }
@@ -724,7 +697,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '450vh',
+            minHeight: '480vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -1792,7 +1765,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Teks MENURU 500px di footer - muncul dari bawah ke atas */}
+              {/* Teks MENURU 500px warna biru di kanan - muncul dari bawah ke atas */}
               <div
                 ref={menuruFooterRef}
                 style={{
@@ -1801,35 +1774,52 @@ export default function ContactPage(): React.JSX.Element {
                   maxWidth: '1100px',
                   overflow: 'hidden',
                   paddingBottom: '40px',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
                 }}
               >
-                <span style={{
-                  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                  fontSize: '500px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
-                  lineHeight: '0.8',
-                  display: 'block',
-                  textAlign: 'left',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
-                }}>
+                <motion.span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '500px',
+                    fontWeight: '700',
+                    color: '#0D3CFC',
+                    letterSpacing: '-0.02em',
+                    textTransform: 'none',
+                    lineHeight: '0.8',
+                    display: 'block',
+                    textAlign: 'right',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                  }}
+                >
                   {'MENURU'.split('').map((char, index) => (
-                    <span
+                    <motion.span
                       key={index}
                       className="menuru-footer-char"
                       style={{
                         display: 'inline-block',
                         opacity: 0,
-                        transform: 'translateY(200px) scale(0.5)',
+                        y: 200,
+                        scale: 0.3,
                       }}
+                      initial={{ opacity: 0, y: 200, scale: 0.3 }}
+                      whileInView={{ 
+                        opacity: 1, 
+                        y: 0, 
+                        scale: 1,
+                        transition: {
+                          duration: 1.2,
+                          delay: index * 0.04,
+                          ease: [0.16, 1, 0.3, 1],
+                        }
+                      }}
+                      viewport={{ once: true, amount: 0.3 }}
                     >
                       {char}
-                    </span>
+                    </motion.span>
                   ))}
-                </span>
+                </motion.span>
               </div>
             </div>
           </div>
