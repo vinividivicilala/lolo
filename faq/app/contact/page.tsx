@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,13 +20,12 @@ import {
   updateDoc,
   where,
   getDocs,
-  deleteDoc,
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
 // Firebase Config
@@ -146,70 +144,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
-  };
-
-  const formatReceivedDate = (timestamp: any): string => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  // Fungsi untuk membuat ticket dari item
-  const createTicketFromItem = async (itemName: string) => {
-    if (!db || !user) {
-      alert("Silakan login terlebih dahulu");
-      return;
-    }
-    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
-    if (hasActiveTicket) {
-      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
-      return;
-    }
-    try {
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: `Tentang ${itemName}`,
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
-        timestamp: serverTimestamp(),
-        read: false,
-      });
-      setShowStartChat(false);
-      // Refresh tickets
-      const q = query(collection(db, "livechat_tickets"), where("userId", "==", user.uid));
-      const snapshot = await getDocs(q);
-      const ticketList: Ticket[] = [];
-      snapshot.forEach((doc) => {
-        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
-      });
-      setTickets(ticketList);
-      // Select the new ticket
-      const newTicket = ticketList.find(t => t.topic === `Tentang ${itemName}`);
-      if (newTicket) {
-        setSelectedTicket(newTicket);
-      }
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-      alert("Gagal membuat ticket. Silakan coba lagi.");
-    }
   };
 
   useEffect(() => {
@@ -429,7 +363,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  // Chat Icon
   const ChatIconSmall = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -472,7 +405,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-    const isWaiting = activeTicket?.status === 'waiting';
 
     if (tickets.length === 0 && !showStartChat) {
       return (
@@ -1324,7 +1256,6 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
         Kirimkan kritik dan saran Anda untuk pengembangan Menuru menjadi lebih baik.
       </p>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} style={{ maxWidth: "600px", marginBottom: "40px" }}>
         <div style={{ marginBottom: "16px" }}>
           <label style={{ fontSize: "14px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
@@ -1407,7 +1338,6 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
         )}
       </form>
 
-      {/* Timeline Feedback - dengan background biru dan teks putih */}
       {feedbacks.length > 0 && (
         <div style={{ 
           position: "relative", 
@@ -1416,7 +1346,6 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           borderRadius: "12px",
           maxWidth: "800px",
         }}>
-          {/* Garis vertikal dengan titik-titik putus - putih */}
           <div style={{
             position: "absolute",
             left: "16px",
@@ -1426,7 +1355,6 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
-          {/* Titik awal - bulat hitam */}
           <div style={{
             position: "absolute",
             left: "10px",
@@ -1439,9 +1367,8 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             zIndex: 2,
           }} />
 
-          {feedbacks.map((item, index) => (
+          {feedbacks.map((item) => (
             <div key={item.id} style={{ position: "relative", paddingBottom: "20px", paddingLeft: "20px" }}>
-              {/* Titik biru kecil di setiap item */}
               <div style={{
                 position: "absolute",
                 left: "-20px",
@@ -1470,7 +1397,6 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             </div>
           ))}
 
-          {/* Titik akhir - kedap kedip biru pemancar */}
           <div style={{
             position: "absolute",
             left: "6px",
@@ -1538,11 +1464,6 @@ export default function ContactPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isLiveChatVisible, setIsLiveChatVisible] = useState(false);
-  const smootherRef = useRef<any>(null);
-  
-  // Refs untuk live chat
-  const liveChatRef = useRef<HTMLDivElement>(null);
   
   const contactTitleRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
@@ -1562,23 +1483,61 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  const menuItemRefs = {
-    note: useRef<HTMLDivElement>(null),
-    blog: useRef<HTMLDivElement>(null),
-    community: useRef<HTMLDivElement>(null),
-    donation: useRef<HTMLDivElement>(null),
-    calendar: useRef<HTMLDivElement>(null),
-    contact: useRef<HTMLDivElement>(null),
-  };
-
-  // Fungsi untuk scroll ke live chat
-  const scrollToLiveChat = () => {
-    setIsLiveChatVisible(true);
-    setTimeout(() => {
-      if (liveChatRef.current) {
-        liveChatRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Fungsi untuk membuat ticket dari item
+  const createTicketFromItem = async (itemName: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    if (!db) {
+      alert("Database tidak tersedia");
+      return;
+    }
+    
+    try {
+      // Cek apakah ada ticket aktif
+      const q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        where("status", "in", ["waiting", "active"])
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+        return;
       }
-    }, 100);
+
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: `Tentang ${itemName}`,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      alert(`Ticket untuk "${itemName}" berhasil dibuat! Silakan cek Live Chat Agent.`);
+      
+      // Scroll ke live chat
+      const liveChatElement = document.getElementById('live-chat-section');
+      if (liveChatElement) {
+        liveChatElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      alert("Gagal membuat ticket. Silakan coba lagi.");
+    }
   };
 
   // Auth
@@ -1616,31 +1575,6 @@ export default function ContactPage(): React.JSX.Element {
           }
         }
       );
-      
-      const menuItems = [
-        menuItemRefs.note,
-        menuItemRefs.blog,
-        menuItemRefs.community,
-        menuItemRefs.donation,
-        menuItemRefs.calendar,
-        menuItemRefs.contact
-      ];
-      
-      menuItems.forEach((item, index) => {
-        if (item.current) {
-          gsap.fromTo(item.current,
-            { opacity: 0, x: -50, filter: 'blur(10px)' },
-            {
-              opacity: 1,
-              x: 0,
-              filter: 'blur(0px)',
-              duration: 0.6,
-              delay: 0.2 + (index * 0.08),
-              ease: "power2.out"
-            }
-          );
-        }
-      });
     } else if (!isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = '';
       document.body.style.position = '';
@@ -1714,36 +1648,6 @@ export default function ContactPage(): React.JSX.Element {
       }
     });
   }, [hoveredItem]);
-
-  // ScrollSmoother
-  useEffect(() => {
-    const initSmoother = () => {
-      if (typeof window !== 'undefined' && !smootherRef.current) {
-        smootherRef.current = ScrollSmoother.create({
-          wrapper: "#smooth-wrapper-contact",
-          content: "#smooth-content-contact",
-          smooth: 1.2,
-          effects: true,
-          smoothTouch: 0.5,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-        });
-      }
-    };
-
-    const timer = setTimeout(() => {
-      initSmoother();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (smootherRef.current) {
-        smootherRef.current.kill();
-        smootherRef.current = null;
-      }
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
 
   // SplitText animation
   useEffect(() => {
@@ -1843,24 +1747,8 @@ export default function ContactPage(): React.JSX.Element {
         html, body {
           margin: 0;
           padding: 0;
-          height: 100%;
-          width: 100%;
-          overflow: hidden;
           background-color: white;
-        }
-        #smooth-wrapper-contact {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          z-index: 1;
-        }
-        #smooth-content-contact {
-          min-height: 480vh;
-          width: 100%;
-          will-change: transform;
+          overflow-x: hidden;
         }
         .split-char-contact {
           display: inline-block;
@@ -1880,1401 +1768,1263 @@ export default function ContactPage(): React.JSX.Element {
         }
       `}</style>
       
-      <div id="smooth-wrapper-contact">
-        <div id="smooth-content-contact">
-          <div style={{
-            minHeight: '480vh',
-            backgroundColor: 'white',
-            margin: 0,
-            padding: 0,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'white',
+        margin: 0,
+        padding: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: FONT_FAMILY,
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        position: 'relative',
+        overflowX: 'hidden',
+      }}>
+        {/* JUDUL WEBSITE - pojok kiri atas */}
+        <div style={{
+          position: 'fixed',
+          top: '40px',
+          left: '40px',
+          zIndex: isMenuOpen ? 98 : 100,
+          pointerEvents: 'none'
+        }}>
+          <span style={{
             fontFamily: FONT_FAMILY,
+            fontWeight: 700,
+            fontSize: '48px',
+            color: '#000000',
+            letterSpacing: '-0.03em',
+            textTransform: 'none',
             WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale',
-            position: 'relative',
+            MozOsxFontSmoothing: 'grayscale'
           }}>
-            {/* JUDUL WEBSITE - pojok kiri atas */}
-            <div style={{
-              position: 'fixed',
-              top: '40px',
-              left: '40px',
-              zIndex: isMenuOpen ? 98 : 100,
-              pointerEvents: 'none'
-            }}>
-              <span style={{
-                fontFamily: FONT_FAMILY,
-                fontWeight: 700,
-                fontSize: '48px',
-                color: '#000000',
-                letterSpacing: '-0.03em',
-                textTransform: 'none',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
-              }}>
-                Menuru
+            Menuru
+          </span>
+        </div>
+
+        {/* NAVBAR - pojok kanan atas */}
+        <div style={{
+          position: 'fixed',
+          top: '40px',
+          right: '40px',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '8px 16px',
+          borderRadius: '12px',
+          backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
+          backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
+          transition: 'all 0.3s ease',
+          pointerEvents: 'auto',
+          boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
+        }}>
+          {/* Get in Touch */}
+          <Link href="/contact">
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
+                }}
+              >
+                Get in touch
               </span>
-            </div>
-
-            {/* NAVBAR - pojok kanan atas */}
-            <div style={{
-              position: 'fixed',
-              top: '40px',
-              right: '40px',
-              zIndex: 100,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '8px 16px',
-              borderRadius: '12px',
-              backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
-              backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
-              transition: 'all 0.3s ease',
-              pointerEvents: 'auto',
-              boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
-            }}>
-              {/* Get in Touch */}
-              <Link href="/contact">
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    border: '2px solid #0D3CFC',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    cursor: 'pointer',
-                    backgroundColor: 'transparent',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '16px',
-                      fontWeight: 500,
-                      color: '#0D3CFC',
-                      fontFamily: FONT_FAMILY,
-                      display: 'inline-block',
-                    }}
-                  >
-                    Get in touch
-                  </span>
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#0D3CFC',
-                      borderRadius: '4px',
-                      padding: '4px',
-                      color: '#ffffff',
-                    }}
-                  >
-                    <SouthEastArrow size={24} />
-                  </div>
-                </div>
-              </Link>
-
-              {/* Pusat Bantuan */}
-              <Link href="/pusat-bantuan">
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    border: '2px solid #000000',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    cursor: 'pointer',
-                    backgroundColor: 'transparent',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '16px',
-                      fontWeight: 500,
-                      color: '#000000',
-                      fontFamily: FONT_FAMILY,
-                      display: 'inline-block',
-                    }}
-                  >
-                    Pusat Bantuan
-                  </span>
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#000000',
-                      borderRadius: '4px',
-                      padding: '4px',
-                      color: '#ffffff',
-                    }}
-                  >
-                    <NorthWestArrow size={24} />
-                  </div>
-                </div>
-              </Link>
-
-              {/* Menu */}
               <div
-                ref={menuButtonRef}
-                onClick={handleMenuClick}
-                onMouseEnter={() => setIsMenuHovered(true)}
-                onMouseLeave={() => setIsMenuHovered(false)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  border: '2px solid #000000',
+                  justifyContent: 'center',
+                  backgroundColor: '#0D3CFC',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
+                }}
+              >
+                <SouthEastArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '2px solid #000000',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#000000',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
+                }}
+              >
+                Pusat Bantuan
+              </span>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#000000',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
+                }}
+              >
+                <NorthWestArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Menu */}
+          <div
+            ref={menuButtonRef}
+            onClick={handleMenuClick}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '2px solid #000000',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#000000',
+                borderRadius: '4px',
+                padding: '4px',
+                color: '#ffffff',
+              }}
+            >
+              <span
+                ref={plusIconRef}
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 300,
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  display: 'inline-block',
+                  transform: 'rotate(0deg)',
+                }}
+              >
+                +
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#000000',
+                fontFamily: FONT_FAMILY,
+                letterSpacing: '0.02em',
+                display: 'inline-block',
+              }}
+            >
+              Menu
+            </span>
+          </div>
+        </div>
+
+        {/* Menu Drawer - BG BIRU #0D3CFC */}
+        <div
+          ref={menuDrawerRef}
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#0D3CFC',
+            zIndex: 99,
+            display: 'none',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: 'translateY(-100%)',
+            opacity: 0,
+            pointerEvents: isMenuOpen ? 'auto' : 'none',
+            padding: '40px',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
+          }}
+        >
+          <h1
+            style={{
+              position: 'absolute',
+              top: '40px',
+              left: '40px',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#ffffff',
+              fontFamily: FONT_FAMILY,
+              letterSpacing: '-0.03em',
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}
+          >
+            Menuru
+          </h1>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              gap: '30px',
+            }}
+          >
+            <Link href="/" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Home</Link>
+            <Link href="/about" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>About</Link>
+            <Link href="/contact" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Pusat Bantuan</Link>
+          </div>
+        </div>
+
+        {/* Teks Contact besar 300px */}
+        <div style={{
+          position: 'relative',
+          top: '120px',
+          left: '40px',
+          zIndex: 10,
+          width: 'calc(100% - 80px)',
+          marginBottom: '40px'
+        }}>
+          <div 
+            ref={contactTitleRef}
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: '300px',
+              fontWeight: '300',
+              color: '#000000',
+              textAlign: 'left',
+              letterSpacing: '-0.02em',
+              textTransform: 'none',
+              lineHeight: '1',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
+            }}>
+            Contact
+          </div>
+        </div>
+
+        {/* Teks subtitle dan tombol di bawah Contact */}
+        <div style={{
+          position: 'relative',
+          top: '120px',
+          left: '40px',
+          zIndex: 10,
+          width: 'calc(100% - 80px)',
+          marginBottom: '80px'
+        }}>
+          <p
+            style={{
+              fontSize: '40px',
+              fontWeight: 400,
+              color: '#0D3CFC',
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.2,
+              margin: 0,
+              padding: 0,
+              paddingBottom: '30px',
+              whiteSpace: 'pre-line',
+            }}
+          >
+            {`You can take notes, find ideas,\nand donate money to those in need`}
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
+            <Link href="/signup">
+              <div
+                style={{
+                  display: 'inline-block',
+                  border: '2px solid #0D3CFC',
                   borderRadius: '8px',
-                  padding: '8px 16px',
+                  padding: '12px 28px',
                   cursor: 'pointer',
                   backgroundColor: 'transparent',
                 }}
               >
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#000000',
-                    borderRadius: '4px',
-                    padding: '4px',
-                    color: '#ffffff',
-                  }}
-                >
-                  <span
-                    ref={plusIconRef}
-                    style={{
-                      fontSize: '28px',
-                      fontWeight: 300,
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1,
-                      display: 'inline-block',
-                      transform: 'rotate(0deg)',
-                    }}
-                  >
-                    +
-                  </span>
-                </div>
                 <span
                   style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontWeight: 500,
-                    color: '#000000',
+                    color: '#0D3CFC',
                     fontFamily: FONT_FAMILY,
                     letterSpacing: '0.02em',
-                    display: 'inline-block',
                   }}
                 >
-                  Menu
+                  Let's build now
                 </span>
               </div>
-            </div>
+            </Link>
 
-            {/* Menu Drawer - BG BIRU #0D3CFC */}
-            <div
-              ref={menuDrawerRef}
-              style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#0D3CFC',
-                zIndex: 99,
-                display: 'none',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transform: 'translateY(-100%)',
-                opacity: 0,
-                pointerEvents: isMenuOpen ? 'auto' : 'none',
-                padding: '40px',
-                boxSizing: 'border-box',
-                overflow: 'hidden'
-              }}
-            >
-              <h1
-                style={{
-                  position: 'absolute',
-                  top: '40px',
-                  left: '40px',
-                  fontSize: '48px',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: '-0.03em',
-                  margin: 0,
-                  padding: 0,
-                  lineHeight: 1,
-                  opacity: 0.9,
-                }}
-              >
-                Menuru
-              </h1>
-
+            <Link href="/signup">
               <div
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '100%',
-                  gap: '30px',
+                  border: '2px solid #0D3CFC',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  cursor: 'pointer',
+                  backgroundColor: '#0D3CFC',
+                  color: '#ffffff',
+                  width: '50px',
+                  height: '50px',
                 }}
               >
-                <Link href="/" style={{ 
-                  color: '#ffffff', 
-                  fontSize: '48px', 
-                  textDecoration: 'none',
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 500,
-                  transition: 'opacity 0.3s',
-                  opacity: 0.8,
-                }}>Home</Link>
-                <Link href="/about" style={{ 
-                  color: '#ffffff', 
-                  fontSize: '48px', 
-                  textDecoration: 'none',
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 500,
-                  transition: 'opacity 0.3s',
-                  opacity: 0.8,
-                }}>About</Link>
-                <Link href="/contact" style={{ 
-                  color: '#ffffff', 
-                  fontSize: '48px', 
-                  textDecoration: 'none',
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 500,
-                  transition: 'opacity 0.3s',
-                  opacity: 0.8,
-                }}>Contact</Link>
-                <Link href="/pusat-bantuan" style={{ 
-                  color: '#ffffff', 
-                  fontSize: '48px', 
-                  textDecoration: 'none',
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 500,
-                  transition: 'opacity 0.3s',
-                  opacity: 0.8,
-                }}>Pusat Bantuan</Link>
+                <NorthEastArrow size={24} />
               </div>
-            </div>
+            </Link>
+          </div>
+        </div>
 
-            {/* Teks Contact besar 300px */}
-            <div style={{
-              position: 'relative',
-              top: '120px',
-              left: '40px',
-              zIndex: 10,
-              width: 'calc(100% - 80px)',
-              marginBottom: '40px'
-            }}>
-              <div 
-                ref={contactTitleRef}
-                style={{
+        {/* 01-05 Items */}
+        <div style={{
+          position: 'relative',
+          top: '150px',
+          left: '40px',
+          right: '40px',
+          zIndex: 10,
+          marginBottom: '20px'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '30px',
+            marginLeft: '80px',
+            marginBottom: '40px',
+            maxWidth: '900px',
+          }}>
+            {/* 01 - Note */}
+            <div
+              ref={item01Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('01')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: '300px',
+                  fontSize: '60px',
                   fontWeight: '300',
                   color: '#000000',
-                  textAlign: 'left',
                   letterSpacing: '-0.02em',
-                  textTransform: 'none',
-                  lineHeight: '1',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
+                  lineHeight: '1'
                 }}>
-                Contact
+                  01
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Note
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Note');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '01' && (
+                  <div
+                    ref={hoverText01Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa mencatat apa yang kamu inginkan
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Teks subtitle dan tombol di bawah Contact */}
-            <div style={{
-              position: 'relative',
-              top: '120px',
-              left: '40px',
-              zIndex: 10,
-              width: 'calc(100% - 80px)',
-              marginBottom: '80px'
-            }}>
-              <p
-                style={{
-                  fontSize: '40px',
-                  fontWeight: 400,
-                  color: '#0D3CFC',
+            {/* 02 - Calendar */}
+            <div
+              ref={item02Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('02')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
                   fontFamily: FONT_FAMILY,
-                  lineHeight: 1.2,
-                  margin: 0,
-                  padding: 0,
-                  paddingBottom: '30px',
-                  whiteSpace: 'pre-line',
-                }}
-              >
-                {`You can take notes, find ideas,\nand donate money to those in need`}
-              </p>
-
-              {/* Tombol dan Arrow */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
-                <Link href="/signup">
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  02
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Calendar
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Calendar');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '02' && (
                   <div
+                    ref={hoverText02Ref}
                     style={{
-                      display: 'inline-block',
-                      border: '2px solid #0D3CFC',
-                      borderRadius: '8px',
-                      padding: '12px 28px',
-                      cursor: 'pointer',
-                      backgroundColor: 'transparent',
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
                     }}
                   >
-                    <span
+                    / kamu bisa memikirkan jadwal apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 03 - Donation */}
+            <div
+              ref={item03Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('03')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  03
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Donation
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Donation');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '03' && (
+                  <div
+                    ref={hoverText03Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa membagikan uang apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 04 - Community */}
+            <div
+              ref={item04Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('04')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  04
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Community
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Community');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '04' && (
+                  <div
+                    ref={hoverText04Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa mencari apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 05 - Shop */}
+            <div
+              ref={item05Ref}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease'
+              }}
+              onMouseEnter={() => setHoveredItem('05')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '60px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1'
+                }}>
+                  05
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '160px',
+                  fontWeight: '300',
+                  color: '#000000',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Shop
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Shop');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    color: '#ffffff',
+                    backgroundColor: '#0D3CFC',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: '2px solid #0D3CFC',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                    e.currentTarget.style.borderColor = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0D3CFC';
+                    e.currentTarget.style.borderColor = '#0D3CFC';
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '05' && (
+                  <div
+                    ref={hoverText05Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#000000',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    / kamu bisa membeli apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginLeft: '80px',
+            marginTop: '30px',
+            maxWidth: '1100px',
+            gap: '40px',
+          }}>
+            <div style={{
+              flex: '0 0 350px',
+              position: 'sticky',
+              top: '200px',
+            }}>
+              <h2 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '50px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2,
+              }}>
+                FAQ
+              </h2>
+              <p style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '50px',
+                fontWeight: '400',
+                color: '#0D3CFC',
+                margin: 0,
+                marginTop: '20px',
+                letterSpacing: '-0.01em',
+                lineHeight: 1.2,
+              }}>
+                Apakah kamu punya kesulitan?
+              </p>
+            </div>
+
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px',
+            }}>
+              {faqData.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    borderBottom: '1px solid #e8e8e8',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    onClick={() => toggleFaq(item.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      padding: '15px 0',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                  >
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '50px',
+                      fontWeight: '500',
+                      color: '#0D3CFC',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1.2',
+                    }}>
+                      {item.question}
+                    </span>
+                    <motion.div
+                      animate={{
+                        rotate: activeFaq === item.id ? 45 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
                       style={{
-                        fontSize: '18px',
-                        fontWeight: 500,
+                        fontSize: '30px',
+                        fontWeight: 300,
                         color: '#0D3CFC',
-                        fontFamily: FONT_FAMILY,
-                        letterSpacing: '0.02em',
+                        cursor: 'pointer',
+                        flexShrink: 0,
                       }}
                     >
-                      Let's build now
-                    </span>
+                      +
+                    </motion.div>
                   </div>
-                </Link>
 
-                <Link href="/signup">
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid #0D3CFC',
-                      borderRadius: '8px',
-                      padding: '10px',
-                      cursor: 'pointer',
-                      backgroundColor: '#0D3CFC',
-                      color: '#ffffff',
-                      width: '50px',
-                      height: '50px',
-                    }}
-                  >
-                    <NorthEastArrow size={24} />
-                  </div>
-                </Link>
-              </div>
+                  <AnimatePresence>
+                    {activeFaq === item.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease: 'easeInOut' }}
+                        style={{
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <p style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '30px',
+                          fontWeight: '300',
+                          color: '#000000',
+                          padding: '0 0 20px 0',
+                          margin: 0,
+                          lineHeight: 1.5,
+                          letterSpacing: '-0.01em',
+                        }}>
+                          {item.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* 01-05 Items */}
+          {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginLeft: '80px',
+            marginTop: '50px',
+            maxWidth: '1100px',
+            gap: '40px',
+            paddingTop: '40px',
+          }}>
             <div style={{
-              position: 'relative',
-              top: '150px',
-              left: '40px',
-              right: '40px',
-              zIndex: 10,
-              marginBottom: '20px'
+              flex: '0 0 30%',
             }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
+                Get in Touch
+              </h3>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '30px',
-                marginLeft: '80px',
-                marginBottom: '40px',
-                maxWidth: '900px',
+                gap: '12px',
               }}>
-                {/* 01 - Note */}
-                <div
-                  ref={item01Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('01')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      01
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Note
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToLiveChat();
-                        // Create ticket
-                        if (user) {
-                          const ticketRef = db ? collection(db, "livechat_tickets") : null;
-                          if (ticketRef) {
-                            addDoc(ticketRef, {
-                              userId: user.uid,
-                              userName: user.displayName || user.email || "User",
-                              userEmail: user.email,
-                              userPhoto: user.photoURL || "",
-                              status: "waiting",
-                              topic: "Tentang Note",
-                              createdAt: serverTimestamp(),
-                              unreadCount: 0,
-                              typing: false,
-                              typingUserId: null,
-                              typingUserName: null,
-                            }).then((docRef) => {
-                              addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
-                                senderId: user.uid,
-                                senderName: user.displayName || user.email || "User",
-                                text: "Halo, saya ingin bertanya tentang: Note",
-                                timestamp: serverTimestamp(),
-                                read: false,
-                              });
-                            }).catch(err => console.error(err));
-                          }
-                        } else {
-                          alert("Silakan login terlebih dahulu");
-                        }
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === '01' && (
-                      <div
-                        ref={hoverText01Ref}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa mencatat apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 02 - Calendar */}
-                <div
-                  ref={item02Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('02')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      02
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Calendar
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToLiveChat();
-                        if (user && db) {
-                          addDoc(collection(db, "livechat_tickets"), {
-                            userId: user.uid,
-                            userName: user.displayName || user.email || "User",
-                            userEmail: user.email,
-                            userPhoto: user.photoURL || "",
-                            status: "waiting",
-                            topic: "Tentang Calendar",
-                            createdAt: serverTimestamp(),
-                            unreadCount: 0,
-                            typing: false,
-                            typingUserId: null,
-                            typingUserName: null,
-                          }).then((docRef) => {
-                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
-                              senderId: user.uid,
-                              senderName: user.displayName || user.email || "User",
-                              text: "Halo, saya ingin bertanya tentang: Calendar",
-                              timestamp: serverTimestamp(),
-                              read: false,
-                            });
-                          });
-                        } else {
-                          alert("Silakan login terlebih dahulu");
-                        }
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === '02' && (
-                      <div
-                        ref={hoverText02Ref}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa memikirkan jadwal apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 03 - Donation */}
-                <div
-                  ref={item03Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('03')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      03
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Donation
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToLiveChat();
-                        if (user && db) {
-                          addDoc(collection(db, "livechat_tickets"), {
-                            userId: user.uid,
-                            userName: user.displayName || user.email || "User",
-                            userEmail: user.email,
-                            userPhoto: user.photoURL || "",
-                            status: "waiting",
-                            topic: "Tentang Donation",
-                            createdAt: serverTimestamp(),
-                            unreadCount: 0,
-                            typing: false,
-                            typingUserId: null,
-                            typingUserName: null,
-                          }).then((docRef) => {
-                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
-                              senderId: user.uid,
-                              senderName: user.displayName || user.email || "User",
-                              text: "Halo, saya ingin bertanya tentang: Donation",
-                              timestamp: serverTimestamp(),
-                              read: false,
-                            });
-                          });
-                        } else {
-                          alert("Silakan login terlebih dahulu");
-                        }
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === '03' && (
-                      <div
-                        ref={hoverText03Ref}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa membagikan uang apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 04 - Community */}
-                <div
-                  ref={item04Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('04')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      04
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Community
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToLiveChat();
-                        if (user && db) {
-                          addDoc(collection(db, "livechat_tickets"), {
-                            userId: user.uid,
-                            userName: user.displayName || user.email || "User",
-                            userEmail: user.email,
-                            userPhoto: user.photoURL || "",
-                            status: "waiting",
-                            topic: "Tentang Community",
-                            createdAt: serverTimestamp(),
-                            unreadCount: 0,
-                            typing: false,
-                            typingUserId: null,
-                            typingUserName: null,
-                          }).then((docRef) => {
-                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
-                              senderId: user.uid,
-                              senderName: user.displayName || user.email || "User",
-                              text: "Halo, saya ingin bertanya tentang: Community",
-                              timestamp: serverTimestamp(),
-                              read: false,
-                            });
-                          });
-                        } else {
-                          alert("Silakan login terlebih dahulu");
-                        }
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === '04' && (
-                      <div
-                        ref={hoverText04Ref}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa mencari apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 05 - Shop */}
-                <div
-                  ref={item05Ref}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={() => setHoveredItem('05')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '60px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1'
-                    }}>
-                      05
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '160px',
-                      fontWeight: '300',
-                      color: '#000000',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Shop
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        scrollToLiveChat();
-                        if (user && db) {
-                          addDoc(collection(db, "livechat_tickets"), {
-                            userId: user.uid,
-                            userName: user.displayName || user.email || "User",
-                            userEmail: user.email,
-                            userPhoto: user.photoURL || "",
-                            status: "waiting",
-                            topic: "Tentang Shop",
-                            createdAt: serverTimestamp(),
-                            unreadCount: 0,
-                            typing: false,
-                            typingUserId: null,
-                            typingUserName: null,
-                          }).then((docRef) => {
-                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
-                              senderId: user.uid,
-                              senderName: user.displayName || user.email || "User",
-                              text: "Halo, saya ingin bertanya tentang: Shop",
-                              timestamp: serverTimestamp(),
-                              read: false,
-                            });
-                          });
-                        } else {
-                          alert("Silakan login terlebih dahulu");
-                        }
-                      }}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        backgroundColor: '#0D3CFC',
-                        padding: '8px 20px',
-                        borderRadius: '8px',
-                        border: '2px solid #0D3CFC',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      Ticket
-                    </button>
-                    {hoveredItem === '05' && (
-                      <div
-                        ref={hoverText05Ref}
-                        style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '18px',
-                          fontWeight: '400',
-                          color: '#000000',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        / kamu bisa membeli apa yang kamu inginkan
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* FAQ Section */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginLeft: '80px',
-                marginTop: '30px',
-                maxWidth: '1100px',
-                gap: '40px',
-              }}>
-                {/* Kiri - FAQ + "Apakah kamu punya kesulitan?" */}
                 <div style={{
-                  flex: '0 0 350px',
-                  position: 'sticky',
-                  top: '200px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
                 }}>
-                  <h2 style={{
+                  <span style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: '50px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0,
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.2,
-                  }}>
-                    FAQ
-                  </h2>
-                  <p style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '50px',
+                    fontSize: '20px',
                     fontWeight: '400',
                     color: '#0D3CFC',
-                    margin: 0,
-                    marginTop: '20px',
                     letterSpacing: '-0.01em',
-                    lineHeight: 1.2,
+                    cursor: 'pointer',
                   }}>
-                    Apakah kamu punya kesulitan?
-                  </p>
-                </div>
-
-                {/* Kanan - FAQ Items */}
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '15px',
-                }}>
-                  {faqData.map((item) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        borderBottom: '1px solid #e8e8e8',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div
-                        onClick={() => toggleFaq(item.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          cursor: 'pointer',
-                          padding: '15px 0',
-                          transition: 'all 0.3s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = '0.7';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = '1';
-                        }}
-                      >
-                        <span style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '50px',
-                          fontWeight: '500',
-                          color: '#0D3CFC',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1.2',
-                        }}>
-                          {item.question}
-                        </span>
-                        <motion.div
-                          animate={{
-                            rotate: activeFaq === item.id ? 45 : 0,
-                          }}
-                          transition={{ duration: 0.3 }}
-                          style={{
-                            fontSize: '30px',
-                            fontWeight: 300,
-                            color: '#0D3CFC',
-                            cursor: 'pointer',
-                            flexShrink: 0,
-                          }}
-                        >
-                          +
-                        </motion.div>
-                      </div>
-
-                      <AnimatePresence>
-                        {activeFaq === item.id && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.4, ease: 'easeInOut' }}
-                            style={{
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <p style={{
-                              fontFamily: FONT_FAMILY,
-                              fontSize: '30px',
-                              fontWeight: '300',
-                              color: '#000000',
-                              padding: '0 0 20px 0',
-                              margin: 0,
-                              lineHeight: 1.5,
-                              letterSpacing: '-0.01em',
-                            }}>
-                              {item.answer}
-                            </p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginLeft: '80px',
-                marginTop: '50px',
-                maxWidth: '1100px',
-                gap: '40px',
-                paddingTop: '40px',
-              }}>
-                {/* Kiri - Get in Touch */}
-                <div style={{
-                  flex: '0 0 30%',
-                }}>
-                  <h3 style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '28px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0,
-                    marginBottom: '16px',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    Get in Touch
-                  </h3>
+                    Contact Us
+                  </span>
                   <div style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                    }}>
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite',
+                      display: 'inline-block',
+                    }} />
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite 0.3s',
+                      display: 'inline-block',
+                    }} />
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0D3CFC',
+                      animation: 'blink 1s ease-in-out infinite 0.6s',
+                      display: 'inline-block',
+                    }} />
+                  </div>
+                  <Link href="/contact">
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#0D3CFC',
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        border: '1px solid #0D3CFC',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
                       <span style={{
                         fontFamily: FONT_FAMILY,
-                        fontSize: '20px',
-                        fontWeight: '400',
-                        color: '#0D3CFC',
-                        letterSpacing: '-0.01em',
-                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        letterSpacing: '0.02em',
                       }}>
-                        Contact Us
+                        →
                       </span>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}>
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#0D3CFC',
-                          animation: 'blink 1s ease-in-out infinite',
-                          display: 'inline-block',
-                        }} />
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#0D3CFC',
-                          animation: 'blink 1s ease-in-out infinite 0.3s',
-                          display: 'inline-block',
-                        }} />
-                        <span style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: '#0D3CFC',
-                          animation: 'blink 1s ease-in-out infinite 0.6s',
-                          display: 'inline-block',
-                        }} />
-                      </div>
-                      <Link href="/contact">
-                        <div
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#0D3CFC',
-                            padding: '4px 12px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            border: '1px solid #0D3CFC',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#000000';
-                            e.currentTarget.style.borderColor = '#000000';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#0D3CFC';
-                            e.currentTarget.style.borderColor = '#0D3CFC';
-                          }}
-                        >
-                          <span style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            color: '#ffffff',
-                            letterSpacing: '0.02em',
-                          }}>
-                            →
-                          </span>
-                        </div>
-                      </Link>
                     </div>
-
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Instagram
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Live Chat
-                    </span>
-                  </div>
+                  </Link>
                 </div>
 
-                {/* Tengah - Product */}
-                <div style={{
-                  flex: '0 0 30%',
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
                 }}>
-                  <h3 style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '28px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0,
-                    marginBottom: '16px',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    Product
-                  </h3>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Shop
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Note
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Calendar
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Blog
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Donation
-                    </span>
-                  </div>
-                </div>
-
-                {/* Kanan - Attention (tanpa Privacy Policy) */}
-                <div style={{
-                  flex: '0 0 30%',
+                  Instagram
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
                 }}>
-                  <h3 style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '28px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0,
-                    marginBottom: '16px',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    Attention
-                  </h3>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Kebijakan Privasi
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Ketentuan Kami
-                    </span>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '20px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.01em',
-                      cursor: 'pointer',
-                    }}>
-                      Pusat Bantuan
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== LIVE CHAT AGENT ===== */}
-              <div ref={liveChatRef}>
-                <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
-              </div>
-
-              {/* ===== KRITIK & SARAN ===== */}
-              <FeedbackSection db={db} user={user} />
-
-              {/* Teks MENURU 400px warna biru di kanan - tetap utuh tanpa terpotong */}
-              <div
-                ref={menuruFooterRef}
-                style={{
-                  marginLeft: '80px',
-                  marginTop: '60px',
-                  maxWidth: '1100px',
-                  overflow: 'hidden',
-                  paddingBottom: '40px',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '400px',
-                    fontWeight: '700',
-                    color: '#0D3CFC',
-                    letterSpacing: '-0.02em',
-                    textTransform: 'none',
-                    lineHeight: '0.8',
-                    display: 'block',
-                    textAlign: 'right',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale',
-                  }}
-                >
-                  {'MENURU'.split('').map((char, index) => (
-                    <motion.span
-                      key={index}
-                      className="menuru-footer-char"
-                      style={{
-                        display: 'inline-block',
-                        opacity: 0,
-                        y: 200,
-                        scale: 0.3,
-                      }}
-                      initial={{ opacity: 0, y: 200, scale: 0.3 }}
-                      whileInView={{ 
-                        opacity: 1, 
-                        y: 0, 
-                        scale: 1,
-                        transition: {
-                          duration: 1.2,
-                          delay: index * 0.04,
-                          ease: [0.16, 1, 0.3, 1],
-                        }
-                      }}
-                      viewport={{ once: true, amount: 0.3 }}
-                    >
-                      {char}
-                    </motion.span>
-                  ))}
+                  Live Chat
                 </span>
               </div>
             </div>
+
+            <div style={{
+              flex: '0 0 30%',
+            }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
+                Product
+              </h3>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Shop
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Note
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Calendar
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Blog
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Donation
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              flex: '0 0 30%',
+            }}>
+              <h3 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                marginBottom: '16px',
+                letterSpacing: '-0.01em',
+              }}>
+                Attention
+              </h3>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Kebijakan Privasi
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Ketentuan Kami
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '20px',
+                  fontWeight: '400',
+                  color: '#0D3CFC',
+                  letterSpacing: '-0.01em',
+                  cursor: 'pointer',
+                }}>
+                  Pusat Bantuan
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ===== LIVE CHAT AGENT ===== */}
+          <div id="live-chat-section">
+            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          </div>
+
+          {/* ===== KRITIK & SARAN ===== */}
+          <FeedbackSection db={db} user={user} />
+
+          {/* Teks MENURU 400px warna biru di kanan */}
+          <div
+            ref={menuruFooterRef}
+            style={{
+              marginLeft: '80px',
+              marginTop: '60px',
+              maxWidth: '1100px',
+              overflow: 'hidden',
+              paddingBottom: '40px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: '400px',
+                fontWeight: '700',
+                color: '#0D3CFC',
+                letterSpacing: '-0.02em',
+                textTransform: 'none',
+                lineHeight: '0.8',
+                display: 'block',
+                textAlign: 'right',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+              }}
+            >
+              {'MENURU'.split('').map((char, index) => (
+                <motion.span
+                  key={index}
+                  className="menuru-footer-char"
+                  style={{
+                    display: 'inline-block',
+                    opacity: 0,
+                    y: 200,
+                    scale: 0.3,
+                  }}
+                  initial={{ opacity: 0, y: 200, scale: 0.3 }}
+                  whileInView={{ 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    transition: {
+                      duration: 1.2,
+                      delay: index * 0.04,
+                      ease: [0.16, 1, 0.3, 1],
+                    }
+                  }}
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </span>
           </div>
         </div>
       </div>
