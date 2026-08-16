@@ -998,7 +998,7 @@ export default function ContactPage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '40px',
+                marginBottom: '60px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -1340,11 +1340,11 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginTop: '60px',
                 maxWidth: '1100px',
-                gap: '60px',
+                gap: '40px',
               }}>
-                {/* Kiri - Judul FAQ dan "Apakah kamu punya kesulitan?" */}
+                {/* Kiri - Judul FAQ */}
                 <div style={{
-                  flex: '0 0 300px',
+                  flex: '0 0 200px',
                   position: 'sticky',
                   top: '200px',
                 }}>
@@ -1359,6 +1359,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}>
                     FAQ
                   </h2>
+                  {/* "Apakah kamu punya kesulitan?" di bawah FAQ - seperti gaya item */}
                   <p style={{
                     fontFamily: FONT_FAMILY,
                     fontSize: '50px',
