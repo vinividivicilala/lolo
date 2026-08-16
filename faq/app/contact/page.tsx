@@ -1332,7 +1332,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section - Kiri: "FAQ" dan "Apakah kamu punya kesulitan?" di kanan */}
+              {/* FAQ Section */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1340,11 +1340,11 @@ export default function ContactPage(): React.JSX.Element {
                 marginLeft: '80px',
                 marginTop: '60px',
                 maxWidth: '1100px',
-                gap: '40px',
+                gap: '60px',
               }}>
-                {/* Kiri - Judul FAQ */}
+                {/* Kiri - Judul FAQ dan "Apakah kamu punya kesulitan?" */}
                 <div style={{
-                  flex: '0 0 250px',
+                  flex: '0 0 300px',
                   position: 'sticky',
                   top: '200px',
                 }}>
@@ -1359,117 +1359,109 @@ export default function ContactPage(): React.JSX.Element {
                   }}>
                     FAQ
                   </h2>
-                </div>
-
-                {/* Kanan - "Apakah kamu punya kesulitan?" + FAQ Items */}
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '30px',
-                }}>
-                  {/* "Apakah kamu punya kesulitan?" di kanan */}
                   <p style={{
                     fontFamily: FONT_FAMILY,
                     fontSize: '50px',
                     fontWeight: '400',
                     color: '#0D3CFC',
                     margin: 0,
+                    marginTop: '20px',
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                   }}>
                     Apakah kamu punya kesulitan?
                   </p>
+                </div>
 
-                  {/* FAQ Items */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '15px',
-                  }}>
-                    {faqData.map((item) => (
+                {/* Kanan - FAQ Items */}
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px',
+                }}>
+                  {faqData.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        borderBottom: '1px solid #e8e8e8',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {/* Pertanyaan - Biru 50px */}
                       <div
-                        key={item.id}
+                        onClick={() => toggleFaq(item.id)}
                         style={{
-                          borderBottom: '1px solid #e8e8e8',
-                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          padding: '15px 0',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = '0.7';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = '1';
                         }}
                       >
-                        {/* Pertanyaan - Biru 50px */}
-                        <div
-                          onClick={() => toggleFaq(item.id)}
+                        <span style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '50px',
+                          fontWeight: '500',
+                          color: '#0D3CFC',
+                          letterSpacing: '-0.02em',
+                          lineHeight: '1.2',
+                        }}>
+                          {item.question}
+                        </span>
+                        <motion.div
+                          animate={{
+                            rotate: activeFaq === item.id ? 45 : 0,
+                          }}
+                          transition={{ duration: 0.3 }}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
+                            fontSize: '30px',
+                            fontWeight: 300,
+                            color: '#0D3CFC',
                             cursor: 'pointer',
-                            padding: '15px 0',
-                            transition: 'all 0.3s ease',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.opacity = '0.7';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.opacity = '1';
+                            flexShrink: 0,
                           }}
                         >
-                          <span style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: '50px',
-                            fontWeight: '500',
-                            color: '#0D3CFC',
-                            letterSpacing: '-0.02em',
-                            lineHeight: '1.2',
-                          }}>
-                            {item.question}
-                          </span>
+                          +
+                        </motion.div>
+                      </div>
+
+                      {/* Jawaban - Hitam 30px */}
+                      <AnimatePresence>
+                        {activeFaq === item.id && (
                           <motion.div
-                            animate={{
-                              rotate: activeFaq === item.id ? 45 : 0,
-                            }}
-                            transition={{ duration: 0.3 }}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: 'easeInOut' }}
                             style={{
-                              fontSize: '30px',
-                              fontWeight: 300,
-                              color: '#0D3CFC',
-                              cursor: 'pointer',
-                              flexShrink: 0,
+                              overflow: 'hidden',
                             }}
                           >
-                            +
+                            <p style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: '30px',
+                              fontWeight: '300',
+                              color: '#000000',
+                              padding: '0 0 20px 0',
+                              margin: 0,
+                              lineHeight: 1.5,
+                              letterSpacing: '-0.01em',
+                            }}>
+                              {item.answer}
+                            </p>
                           </motion.div>
-                        </div>
-
-                        {/* Jawaban - Hitam 30px */}
-                        <AnimatePresence>
-                          {activeFaq === item.id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.4, ease: 'easeInOut' }}
-                              style={{
-                                overflow: 'hidden',
-                              }}
-                            >
-                              <p style={{
-                                fontFamily: FONT_FAMILY,
-                                fontSize: '30px',
-                                fontWeight: '300',
-                                color: '#000000',
-                                padding: '0 0 20px 0',
-                                margin: 0,
-                                lineHeight: 1.5,
-                                letterSpacing: '-0.01em',
-                              }}>
-                                {item.answer}
-                              </p>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
-                  </div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
