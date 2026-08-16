@@ -13,32 +13,45 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 }
 
+// SVG Icons
+const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+
 export default function ContactPage(): React.JSX.Element {
-  const [showPopup, setShowPopup] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const acceptBtnRef = useRef<HTMLButtonElement>(null);
-  const declineBtnRef = useRef<HTMLButtonElement>(null);
   const smootherRef = useRef<any>(null);
   
   // Refs untuk teks yang akan di-split
-  const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTitleRef = useRef<HTMLDivElement>(null);
-  const contactUnderlineRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const emailRef = useRef<HTMLDivElement>(null);
-  const igRef = useRef<HTMLDivElement>(null);
-  const xRef = useRef<HTMLDivElement>(null);
-  const linkedinRef = useRef<HTMLDivElement>(null);
-  const infoTextRef = useRef<HTMLDivElement>(null);
   
   // Refs untuk hover items
   const item01Ref = useRef<HTMLDivElement>(null);
   const item02Ref = useRef<HTMLDivElement>(null);
   const item03Ref = useRef<HTMLDivElement>(null);
   const item04Ref = useRef<HTMLDivElement>(null);
-  const hoverTextRef = useRef<HTMLDivElement>(null);
+  const hoverText01Ref = useRef<HTMLDivElement>(null);
+  const hoverText02Ref = useRef<HTMLDivElement>(null);
+  const hoverText03Ref = useRef<HTMLDivElement>(null);
+  const hoverText04Ref = useRef<HTMLDivElement>(null);
   
   // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
@@ -56,17 +69,9 @@ export default function ContactPage(): React.JSX.Element {
     contact: useRef<HTMLDivElement>(null),
   };
 
-  // Variabel untuk menyimpan teks asli medsos
-  const originalTexts = {
-    ig: 'Instagram',
-    x: 'X',
-    linkedin: 'LinkedIn'
-  };
-
   // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
-      // Disable scroll pada body saat menu terbuka
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -83,7 +88,6 @@ export default function ContactPage(): React.JSX.Element {
           ease: "power3.out",
           display: 'flex',
           onComplete: () => {
-            // Pastikan tidak ada scroll
             if (menuDrawerRef.current) {
               menuDrawerRef.current.style.overflow = 'hidden';
             }
@@ -91,7 +95,6 @@ export default function ContactPage(): React.JSX.Element {
         }
       );
       
-      // Animasi teks MENURU besar di halaman menu
       if (menuMenuruTextRef.current) {
         const splitMenuMenuru = new SplitText(menuMenuruTextRef.current, {
           type: "chars",
@@ -117,7 +120,6 @@ export default function ContactPage(): React.JSX.Element {
         );
       }
       
-      // Animasi menu items
       const menuItems = [
         menuItemRefs.note,
         menuItemRefs.blog,
@@ -147,7 +149,6 @@ export default function ContactPage(): React.JSX.Element {
         }
       });
     } else if (!isMenuOpen && menuDrawerRef.current) {
-      // Enable scroll kembali saat menu tertutup
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
@@ -204,7 +205,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  // Animasi saat klik menu item
   const handleMenuItemClick = (ref: React.RefObject<HTMLDivElement>, href: string) => {
     if (ref.current) {
       gsap.to(ref.current, {
@@ -233,54 +233,10 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk mendapatkan huruf random (A-Z)
-  const getRandomChar = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    return chars[Math.floor(Math.random() * chars.length)];
-  };
-
-  // Fungsi untuk mengacak huruf pada teks
-  const randomizeText = (element: HTMLElement, originalText: string, duration: number = 0.5) => {
-    const originalChars = originalText.split('');
-    const totalSteps = 15;
-    let currentStep = 0;
-    
-    const interval = setInterval(() => {
-      if (currentStep < totalSteps) {
-        const randomized = originalChars.map(() => getRandomChar()).join('');
-        element.textContent = randomized;
-        currentStep++;
-      } else {
-        clearInterval(interval);
-        element.textContent = originalText;
-      }
-    }, duration * 1000 / totalSteps);
-    
-    return interval;
-  };
-
-  // Animasi hover random huruf untuk medsos
-  const handleSocialHover = (element: HTMLElement, originalText: string) => {
-    if (!element.getAttribute('data-original')) {
-      element.setAttribute('data-original', originalText);
-    }
-    
-    const interval = randomizeText(element, originalText, 0.6);
-    element.setAttribute('data-interval', String(interval));
-  };
-  
-  const handleSocialLeave = (element: HTMLElement, originalText: string) => {
-    const interval = element.getAttribute('data-interval');
-    if (interval) {
-      clearInterval(Number(interval));
-    }
-    element.textContent = originalText;
-  };
-
   // Animasi hover untuk item 01-04 menggunakan GSAP
   useEffect(() => {
-    if (hoveredItem === '01' && hoverTextRef.current && item01Ref.current) {
-      gsap.fromTo(hoverTextRef.current,
+    if (hoveredItem === '01' && hoverText01Ref.current && item01Ref.current) {
+      gsap.fromTo(hoverText01Ref.current,
         {
           opacity: 0,
           x: -20,
@@ -299,8 +255,8 @@ export default function ContactPage(): React.JSX.Element {
         duration: 0.3,
         ease: "power2.out"
       });
-    } else if (hoveredItem !== '01' && hoverTextRef.current) {
-      gsap.to(hoverTextRef.current, {
+    } else if (hoveredItem !== '01' && hoverText01Ref.current) {
+      gsap.to(hoverText01Ref.current, {
         opacity: 0,
         duration: 0.2,
         ease: "power2.in"
@@ -316,50 +272,113 @@ export default function ContactPage(): React.JSX.Element {
   }, [hoveredItem]);
 
   useEffect(() => {
-    if (hoveredItem === '02' && item02Ref.current) {
+    if (hoveredItem === '02' && hoverText02Ref.current && item02Ref.current) {
+      gsap.fromTo(hoverText02Ref.current,
+        {
+          opacity: 0,
+          x: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.4,
+          ease: "power2.out"
+        }
+      );
       gsap.to(item02Ref.current, {
         scale: 1.02,
         duration: 0.3,
         ease: "power2.out"
       });
-    } else if (hoveredItem !== '02' && item02Ref.current) {
-      gsap.to(item02Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
+    } else if (hoveredItem !== '02' && hoverText02Ref.current) {
+      gsap.to(hoverText02Ref.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
       });
+      if (item02Ref.current) {
+        gsap.to(item02Ref.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
     }
   }, [hoveredItem]);
 
   useEffect(() => {
-    if (hoveredItem === '03' && item03Ref.current) {
+    if (hoveredItem === '03' && hoverText03Ref.current && item03Ref.current) {
+      gsap.fromTo(hoverText03Ref.current,
+        {
+          opacity: 0,
+          x: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.4,
+          ease: "power2.out"
+        }
+      );
       gsap.to(item03Ref.current, {
         scale: 1.02,
         duration: 0.3,
         ease: "power2.out"
       });
-    } else if (hoveredItem !== '03' && item03Ref.current) {
-      gsap.to(item03Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
+    } else if (hoveredItem !== '03' && hoverText03Ref.current) {
+      gsap.to(hoverText03Ref.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
       });
+      if (item03Ref.current) {
+        gsap.to(item03Ref.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
     }
   }, [hoveredItem]);
 
   useEffect(() => {
-    if (hoveredItem === '04' && item04Ref.current) {
+    if (hoveredItem === '04' && hoverText04Ref.current && item04Ref.current) {
+      gsap.fromTo(hoverText04Ref.current,
+        {
+          opacity: 0,
+          x: -20,
+          filter: 'blur(5px)'
+        },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 0.4,
+          ease: "power2.out"
+        }
+      );
       gsap.to(item04Ref.current, {
         scale: 1.02,
         duration: 0.3,
         ease: "power2.out"
       });
-    } else if (hoveredItem !== '04' && item04Ref.current) {
-      gsap.to(item04Ref.current, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out"
+    } else if (hoveredItem !== '04' && hoverText04Ref.current) {
+      gsap.to(hoverText04Ref.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
       });
+      if (item04Ref.current) {
+        gsap.to(item04Ref.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
     }
   }, [hoveredItem]);
 
@@ -424,231 +443,10 @@ export default function ContactPage(): React.JSX.Element {
       );
     }
 
-    if (contactUnderlineRef.current) {
-      gsap.fromTo(contactUnderlineRef.current,
-        {
-          width: '0%',
-          opacity: 0,
-          x: 100
-        },
-        {
-          width: '100%',
-          opacity: 1,
-          x: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: contactUnderlineRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    if (infoTextRef.current) {
-      const splitInfo = new SplitText(infoTextRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitInfo.chars,
-        {
-          opacity: 0,
-          y: 30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: infoTextRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    if (emailRef.current) {
-      const splitEmail = new SplitText(emailRef.current, {
-        type: "chars",
-        charsClass: "split-char"
-      });
-
-      gsap.fromTo(splitEmail.chars,
-        {
-          opacity: 0,
-          x: -30,
-          filter: 'blur(5px)'
-        },
-        {
-          opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 0.8,
-          stagger: 0.02,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: emailRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    if (menuruTextRef.current) {
-      const splitMenuru = new SplitText(menuruTextRef.current, {
-        type: "chars",
-        charsClass: "split-char-menuru"
-      });
-
-      gsap.set(splitMenuru.chars, {
-        opacity: 0,
-        y: 200,
-        rotationY: 90,
-        transformPerspective: 800,
-        filter: 'blur(20px)'
-      });
-
-      gsap.to(splitMenuru.chars, {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        filter: 'blur(0px)',
-        duration: 1.5,
-        stagger: {
-          each: 0.04,
-          from: "start",
-          ease: "power2.out"
-        },
-        ease: "back.out(0.8)",
-        scrollTrigger: {
-          trigger: menuruTextRef.current,
-          start: "top 85%",
-          end: "bottom 65%",
-          toggleActions: "play none none reverse",
-        }
-      });
-    }
-
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current,
-        {
-          width: '0%',
-          opacity: 0,
-          x: 100
-        },
-        {
-          width: '100%',
-          opacity: 1,
-          x: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: lineRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
-
-  useEffect(() => {
-    const consent = localStorage.getItem('cookieConsent');
-    if (consent === null) {
-      setShowPopup(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (showPopup && acceptBtnRef.current && declineBtnRef.current) {
-      const acceptBtn = acceptBtnRef.current;
-      const declineBtn = declineBtnRef.current;
-
-      [acceptBtn, declineBtn].forEach(btn => {
-        btn.style.position = 'relative';
-        btn.style.overflow = 'hidden';
-        btn.style.zIndex = '1';
-        
-        const pseudoStyle = document.createElement('style');
-        pseudoStyle.textContent = `
-          .btn-hover-effect {
-            position: relative;
-            isolation: isolate;
-          }
-          .btn-hover-effect::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background-color: #000000;
-            transition: height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            z-index: -1;
-            border-radius: 60px;
-          }
-          .btn-hover-effect:hover::before {
-            height: 100%;
-          }
-          .btn-hover-effect {
-            transition: color 0.3s ease;
-          }
-          .btn-hover-effect:hover {
-            color: white !important;
-          }
-        `;
-        document.head.appendChild(pseudoStyle);
-        btn.classList.add('btn-hover-effect');
-      });
-
-      return () => {
-        [acceptBtn, declineBtn].forEach(btn => {
-          const styles = document.querySelectorAll('style');
-          styles.forEach(style => {
-            if (style.textContent?.includes('btn-hover-effect')) {
-              style.remove();
-            }
-          });
-        });
-      };
-    }
-  }, [showPopup]);
-
-  const handleAccept = () => {
-    localStorage.setItem('cookieConsent', 'accepted');
-    setShowPopup(false);
-    console.log('Cookies accepted');
-  };
-
-  const handleDecline = () => {
-    localStorage.setItem('cookieConsent', 'declined');
-    setShowPopup(false);
-    console.log('Cookies declined');
-  };
-
-  const handleEmailClick = () => {
-    window.location.href = 'mailto:contact.menuru@gmail.com';
-  };
-
-  const handleSocialClick = (platform: string) => {
-    console.log(`${platform} clicked`);
-  };
 
   const handleMenuClick = () => {
     setIsMenuOpen(true);
@@ -690,7 +488,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 250vh;
+          min-height: 200vh;
           width: 100%;
           will-change: transform;
         }
@@ -705,112 +503,203 @@ export default function ContactPage(): React.JSX.Element {
           will-change: transform, opacity, filter;
         }
 
-        .split-char-menuru {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-          transform-style: preserve-3d;
-        }
-
         .split-char-menuru-menu {
           display: inline-block;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
-        }
-
-        .social-item {
-          transition: all 0.3s ease;
         }
       `}</style>
       
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '250vh',
+            minHeight: '200vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'Questrial, sans-serif',
+            fontFamily: FONT_FAMILY,
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* Tombol Menu */}
-            <div
-              ref={menuButtonRef}
-              onClick={handleMenuClick}
-              onMouseEnter={() => setIsMenuHovered(true)}
-              onMouseLeave={() => setIsMenuHovered(false)}
-              style={{
-                position: 'fixed',
-                top: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 100,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '20px',
-                padding: '20px 40px',
-                backgroundColor: '#000000',
-                borderRadius: '80px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            >
+            {/* JUDUL WEBSITE - pojok kiri atas */}
+            <div style={{
+              position: 'fixed',
+              top: '40px',
+              left: '40px',
+              zIndex: 100,
+              pointerEvents: 'none'
+            }}>
               <span style={{
-                fontFamily: "'Questrial', sans-serif",
-                fontSize: '24px',
-                fontWeight: '400',
-                color: '#ffffff',
-                letterSpacing: '0.02em'
+                fontFamily: FONT_FAMILY,
+                fontWeight: 700,
+                fontSize: '48px',
+                color: '#000000',
+                letterSpacing: '-0.03em',
+                textTransform: 'none',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}>
-                Menu
+                Menuru
               </span>
-              
-              <div style={{
-                position: 'relative',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+            </div>
+
+            {/* NAVBAR - pojok kanan atas */}
+            <div style={{
+              position: 'fixed',
+              top: '40px',
+              right: '40px',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255,255,255,0)',
+              backdropFilter: 'blur(0px)',
+              transition: 'all 0.3s ease',
+            }}>
+              {/* Get in Touch */}
+              <Link href="/contact">
                 <div
                   style={{
-                    width: isMenuHovered ? '40px' : '10px',
-                    height: isMenuHovered ? '40px' : '10px',
-                    borderRadius: '50%',
-                    backgroundColor: '#e49366',
-                    position: 'absolute',
-                    transition: 'width 0.3s ease, height 0.3s ease',
-                    opacity: isMenuHovered ? 0 : 1
-                  }}
-                />
-                <div
-                  style={{
-                    width: isMenuHovered ? '40px' : '0px',
-                    height: isMenuHovered ? '40px' : '0px',
-                    borderRadius: '50%',
-                    backgroundColor: '#e49366',
-                    position: 'absolute',
-                    display: 'flex',
-                    flexDirection: 'column',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    transition: 'width 0.3s ease, height 0.3s ease',
-                    opacity: isMenuHovered ? 1 : 0
+                    gap: '8px',
+                    border: '2px solid #0D3CFC',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
                   }}
                 >
-                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
-                  <div style={{ width: '20px', height: '2px', backgroundColor: '#000000', borderRadius: '2px' }} />
+                  <span
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: '#0D3CFC',
+                      fontFamily: FONT_FAMILY,
+                      display: 'inline-block',
+                    }}
+                  >
+                    Get in touch
+                  </span>
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#0D3CFC',
+                      borderRadius: '4px',
+                      padding: '4px',
+                      color: '#ffffff',
+                    }}
+                  >
+                    <SouthEastArrow size={24} />
+                  </div>
                 </div>
+              </Link>
+
+              {/* Pusat Bantuan */}
+              <Link href="/pusat-bantuan">
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    border: '2px solid #000000',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: '#000000',
+                      fontFamily: FONT_FAMILY,
+                      display: 'inline-block',
+                    }}
+                  >
+                    Pusat Bantuan
+                  </span>
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#000000',
+                      borderRadius: '4px',
+                      padding: '4px',
+                      color: '#ffffff',
+                    }}
+                  >
+                    <NorthWestArrow size={24} />
+                  </div>
+                </div>
+              </Link>
+
+              {/* Menu */}
+              <div
+                ref={menuButtonRef}
+                onClick={handleMenuClick}
+                onMouseEnter={() => setIsMenuHovered(true)}
+                onMouseLeave={() => setIsMenuHovered(false)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  border: '2px solid #000000',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#000000',
+                    borderRadius: '4px',
+                    padding: '4px',
+                    color: '#ffffff',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '28px',
+                      fontWeight: 300,
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1,
+                      display: 'inline-block',
+                    }}
+                  >
+                    +
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    color: '#000000',
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: '0.02em',
+                    display: 'inline-block',
+                  }}
+                >
+                  Menu
+                </span>
               </div>
             </div>
 
-            {/* Menu Drawer - tanpa scroll */}
+            {/* Menu Drawer */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -831,7 +720,7 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Tombol Close (X) besar bulat */}
+              {/* Tombol Close (X) */}
               <div
                 ref={closeButtonRef}
                 onClick={handleCloseMenu}
@@ -861,7 +750,7 @@ export default function ContactPage(): React.JSX.Element {
                 </svg>
               </div>
 
-              {/* Teks MENURU besar di sisi kanan bawah - font Archivo Black */}
+              {/* Teks MENURU besar di sisi kanan bawah */}
               <div
                 ref={menuMenuruTextRef}
                 style={{
@@ -887,16 +776,16 @@ export default function ContactPage(): React.JSX.Element {
                 position: 'absolute',
                 top: '40px',
                 left: '40px',
-                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+                fontFamily: FONT_FAMILY,
                 fontSize: '48px',
+                fontWeight: 700,
                 color: '#ffffff',
                 letterSpacing: '-0.02em',
-                textTransform: 'uppercase'
               }}>
-                MENURU
+                Menuru
               </div>
 
-              {/* 6 Menu Items - di sisi kiri tengah, jarak dekat */}
+              {/* 6 Menu Items */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -904,7 +793,6 @@ export default function ContactPage(): React.JSX.Element {
                 marginTop: '120px',
                 marginLeft: '40px'
               }}>
-                {/* Note */}
                 <div
                   ref={menuItemRefs.note}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
@@ -919,7 +807,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontFamily: FONT_FAMILY,
                     fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
@@ -929,7 +817,6 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Blog */}
                 <div
                   ref={menuItemRefs.blog}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
@@ -944,7 +831,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontFamily: FONT_FAMILY,
                     fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
@@ -954,7 +841,6 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Community */}
                 <div
                   ref={menuItemRefs.community}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
@@ -969,7 +855,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontFamily: FONT_FAMILY,
                     fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
@@ -979,7 +865,6 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Donation */}
                 <div
                   ref={menuItemRefs.donation}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
@@ -994,7 +879,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontFamily: FONT_FAMILY,
                     fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
@@ -1004,7 +889,6 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Calendar */}
                 <div
                   ref={menuItemRefs.calendar}
                   onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
@@ -1019,7 +903,7 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    fontFamily: FONT_FAMILY,
                     fontSize: '64px',
                     fontWeight: '300',
                     color: '#ffffff',
@@ -1029,7 +913,6 @@ export default function ContactPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Contact - dengan panah SVG */}
                 <div
                   ref={menuItemRefs.contact}
                   onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
@@ -1043,7 +926,7 @@ export default function ContactPage(): React.JSX.Element {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <span style={{
-                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                      fontFamily: FONT_FAMILY,
                       fontSize: '64px',
                       fontWeight: '300',
                       color: '#ffffff',
@@ -1059,60 +942,6 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Tombol Back ke Home */}
-            <div style={{
-              position: 'fixed',
-              top: '20px',
-              left: '40px',
-              zIndex: 100
-            }}>
-              <Link href="/">
-                <button style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '16px',
-                  color: '#000000',
-                  backgroundColor: 'transparent',
-                  border: '1px solid #000000',
-                  borderRadius: '60px',
-                  padding: '10px 24px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#000000';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#000000';
-                }}>
-                  ← Back to Home
-                </button>
-              </Link>
-            </div>
-
-            {/* Judul Website MENURU - pojok kanan atas */}
-            <div style={{
-              position: 'fixed',
-              top: '20px',
-              right: '40px',
-              zIndex: 100,
-              pointerEvents: 'none'
-            }}>
-              <span style={{
-                fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-                fontWeight: 'normal',
-                fontSize: '48px',
-                color: '#000000',
-                letterSpacing: '-0.02em',
-                textTransform: 'uppercase',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
-              }}>
-                MENURU
-              </span>
-            </div>
-
             {/* Teks Contact besar 300px */}
             <div style={{
               position: 'relative',
@@ -1120,12 +949,12 @@ export default function ContactPage(): React.JSX.Element {
               left: '40px',
               zIndex: 10,
               width: 'calc(100% - 80px)',
-              marginBottom: '100px'
+              marginBottom: '40px'
             }}>
               <div 
                 ref={contactTitleRef}
                 style={{
-                  fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                  fontFamily: FONT_FAMILY,
                   fontSize: '300px',
                   fontWeight: '300',
                   color: '#000000',
@@ -1138,19 +967,83 @@ export default function ContactPage(): React.JSX.Element {
                 }}>
                 Contact
               </div>
-              <div
-                ref={contactUnderlineRef}
-                style={{
-                  width: '0%',
-                  height: '2px',
-                  backgroundColor: '#000000',
-                  marginTop: '20px',
-                  opacity: 0
-                }}
-              />
             </div>
 
-            {/* Info Text di bawah garis */}
+            {/* Teks subtitle dan tombol di bawah Contact */}
+            <div style={{
+              position: 'relative',
+              top: '120px',
+              left: '40px',
+              zIndex: 10,
+              width: 'calc(100% - 80px)',
+              marginBottom: '100px'
+            }}>
+              <p
+                style={{
+                  fontSize: '40px',
+                  fontWeight: 400,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: '30px',
+                  whiteSpace: 'pre-line',
+                }}
+              >
+                {`You can take notes, find ideas,\nand donate money to those in need`}
+              </p>
+
+              {/* Tombol dan Arrow */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
+                <Link href="/signup">
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      border: '2px solid #0D3CFC',
+                      borderRadius: '8px',
+                      padding: '12px 28px',
+                      cursor: 'pointer',
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: 500,
+                        color: '#0D3CFC',
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      Let's build now
+                    </span>
+                  </div>
+                </Link>
+
+                <Link href="/signup">
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid #0D3CFC',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      cursor: 'pointer',
+                      backgroundColor: '#0D3CFC',
+                      color: '#ffffff',
+                      width: '50px',
+                      height: '50px',
+                    }}
+                  >
+                    <NorthEastArrow size={24} />
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* 01-04 Items dengan ComingSoon label */}
             <div style={{
               position: 'relative',
               top: '150px',
@@ -1159,21 +1052,6 @@ export default function ContactPage(): React.JSX.Element {
               zIndex: 10,
               marginBottom: '200px'
             }}>
-              <div 
-                ref={infoTextRef}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '64px',
-                  fontWeight: '400',
-                  color: '#000000',
-                  textAlign: 'center',
-                  letterSpacing: '-0.01em',
-                  lineHeight: '1.2',
-                  marginBottom: '100px'
-                }}>
-                You can know contact Website this Menuru
-              </div>
-
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1195,23 +1073,34 @@ export default function ContactPage(): React.JSX.Element {
                   onMouseEnter={() => setHoveredItem('01')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
-                  }}>
-                    01
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '90px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      01
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
+                    </span>
+                  </div>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '30px'
                   }}>
                     <span style={{
-                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                      fontFamily: FONT_FAMILY,
                       fontSize: '300px',
                       fontWeight: '300',
                       color: '#000000',
@@ -1221,9 +1110,9 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     {hoveredItem === '01' && (
                       <div
-                        ref={hoverTextRef}
+                        ref={hoverText01Ref}
                         style={{
-                          fontFamily: "'Questrial', sans-serif",
+                          fontFamily: FONT_FAMILY,
                           fontSize: '20px',
                           fontWeight: '400',
                           color: '#000000',
@@ -1250,25 +1139,56 @@ export default function ContactPage(): React.JSX.Element {
                   onMouseEnter={() => setHoveredItem('02')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '90px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      02
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
+                    </span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px'
                   }}>
-                    02
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Calendar
-                  </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '300px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Calendar
+                    </span>
+                    {hoveredItem === '02' && (
+                      <div
+                        ref={hoverText02Ref}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '20px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / kamu bisa memikirkan jadwal apa yang kamu inginkan
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 03 - Donation */}
@@ -1285,25 +1205,56 @@ export default function ContactPage(): React.JSX.Element {
                   onMouseEnter={() => setHoveredItem('03')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '90px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      03
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
+                    </span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px'
                   }}>
-                    03
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Donation
-                  </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '300px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Donation
+                    </span>
+                    {hoveredItem === '03' && (
+                      <div
+                        ref={hoverText03Ref}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '20px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / kamu bisa membagikan uang apa yang kamu inginkan
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 04 - Community */}
@@ -1320,177 +1271,62 @@ export default function ContactPage(): React.JSX.Element {
                   onMouseEnter={() => setHoveredItem('04')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '90px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1'
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '90px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      04
+                    </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '400',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
+                    </span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '30px'
                   }}>
-                    04
-                  </span>
-                  <span style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    fontSize: '300px',
-                    fontWeight: '300',
-                    color: '#000000',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Community
-                  </span>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '300px',
+                      fontWeight: '300',
+                      color: '#000000',
+                      letterSpacing: '-0.02em'
+                    }}>
+                      Community
+                    </span>
+                    {hoveredItem === '04' && (
+                      <div
+                        ref={hoverText04Ref}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '20px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / kamu bisa mencari apa yang kamu inginkan
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Email dan Medsos */}
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              padding: '0 80px',
-              marginBottom: '30px',
-              boxSizing: 'border-box',
-              marginTop: 'auto'
-            }}>
-              <div 
-                ref={emailRef}
-                onClick={handleEmailClick}
-                style={{
-                  fontFamily: "'Questrial', sans-serif",
-                  fontSize: '32px',
-                  color: '#000000',
-                  fontWeight: '400',
-                  letterSpacing: '0.02em',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.3s ease',
-                  opacity: 1,
-                  marginBottom: '20px'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-              >
-                contact.menuru@gmail.com
-              </div>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                marginBottom: '20px'
-              }}>
-                <div 
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.ig);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.ig);
-                  }}
-                  onClick={() => handleSocialClick('Instagram')}
-                >
-                  <span ref={igRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>Instagram</span>
-                </div>
-                <div 
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.x);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.x);
-                  }}
-                  onClick={() => handleSocialClick('X')}
-                >
-                  <span ref={xRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>X</span>
-                </div>
-                <div 
-                  className="social-item"
-                  style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                  onMouseEnter={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialHover(textElement, originalTexts.linkedin);
-                  }}
-                  onMouseLeave={(e) => {
-                    const textElement = e.currentTarget.querySelector('.social-text') as HTMLElement;
-                    if (textElement) handleSocialLeave(textElement, originalTexts.linkedin);
-                  }}
-                  onClick={() => handleSocialClick('LinkedIn')}
-                >
-                  <span ref={linkedinRef} className="social-text" style={{ fontFamily: "'Questrial', sans-serif", fontSize: '28px', color: '#000000', fontWeight: '400', letterSpacing: '0.02em' }}>LinkedIn</span>
-                </div>
-              </div>
-            </div>
-
-            <footer style={{
-              position: 'relative',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              padding: '0 80px 0 0',
-              margin: 0,
-              pointerEvents: 'none',
-              zIndex: 1
-            }}>
-              <div ref={lineRef} style={{ width: '0%', height: '2px', backgroundColor: '#000000', marginRight: '0', marginBottom: '60px', opacity: 0 }} />
-              <span ref={menuruTextRef} style={{ fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif", fontWeight: 'normal', fontSize: '600px', color: '#000000', textAlign: 'right', letterSpacing: '-0.02em', opacity: 1, textTransform: 'uppercase', lineHeight: '0.7', whiteSpace: 'nowrap', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontKerning: 'normal', margin: 0, padding: 0, transform: 'translateY(10px)', marginRight: '0' }}>MENURU</span>
-            </footer>
           </div>
         </div>
       </div>
-
-      {/* Cookie Popup */}
-      {showPopup && (
-        <div style={{
-          position: 'fixed',
-          bottom: '30px',
-          left: '30px',
-          width: 'auto',
-          maxWidth: 'calc(100vw - 60px)',
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          borderRadius: '32px',
-          padding: '24px 32px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 5px 12px rgba(0,0,0,0.05)',
-          zIndex: 1000,
-          fontFamily: 'Questrial, sans-serif',
-          animation: 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-          border: '1px solid rgba(0,0,0,0.05)',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: '32px',
-          flexWrap: 'wrap',
-        }}>
-          <style>{`@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '56px', display: 'inline-block' }}>🍪</span>
-              <span style={{ fontWeight: '700', fontSize: '36px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #000000 0%, #333333 100%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', fontFamily: 'Questrial, sans-serif' }}>cookies.</span>
-            </div>
-            <p style={{ fontSize: '20px', lineHeight: '1.4', marginBottom: 0, color: '#1a1a1a', fontWeight: '400', letterSpacing: '-0.01em', maxWidth: '280px', fontFamily: 'Questrial, sans-serif' }}>I use cookies to understand how you navigate<br />this site and what topics interest you most.</p>
-            <span style={{ color: '#666', fontSize: '18px', display: 'inline-block', marginTop: '4px', fontFamily: 'Questrial, sans-serif' }}>No ads, no data sold ever.</span>
-          </div>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-start', flexShrink: 0 }}>
-            <button ref={declineBtnRef} onClick={handleDecline} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Decline</button>
-            <button ref={acceptBtnRef} onClick={handleAccept} style={{ padding: '14px 32px', backgroundColor: '#ffffff', color: '#000000', border: '1.5px solid #e0e0e0', borderRadius: '60px', cursor: 'pointer', fontSize: '18px', fontWeight: '600', letterSpacing: '-0.01em', fontFamily: 'Questrial, sans-serif', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden', zIndex: 1, background: '#ffffff' }}>Accept</button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
