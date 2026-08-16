@@ -692,6 +692,11 @@ export default function ContactPage(): React.JSX.Element {
           color: #999;
           font-weight: 300;
         }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
       `}</style>
       
       <div id="smooth-wrapper-contact">
@@ -1563,7 +1568,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) - TANPA GARIS SAMPING */}
+              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1625,6 +1630,69 @@ export default function ContactPage(): React.JSX.Element {
                       Live Chat
                     </span>
                   </div>
+
+                  {/* Tombol "Kamu berada di sini" dengan blinking dots */}
+                  <Link href="/contact">
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginTop: '20px',
+                        backgroundColor: '#0D3CFC',
+                        padding: '10px 24px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        border: '2px solid #0D3CFC',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      <span style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        letterSpacing: '0.02em',
+                      }}>
+                        Kamu berada di sini
+                      </span>
+                      <span style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}>
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#ffffff',
+                          animation: 'blink 1s ease-in-out infinite',
+                        }} />
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#ffffff',
+                          animation: 'blink 1s ease-in-out infinite 0.2s',
+                        }} />
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#ffffff',
+                          animation: 'blink 1s ease-in-out infinite 0.4s',
+                        }} />
+                      </span>
+                    </div>
+                  </Link>
                 </div>
 
                 {/* Tengah - Product */}
