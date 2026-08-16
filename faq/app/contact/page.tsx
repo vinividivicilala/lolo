@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED)
+// app/contact/page.tsx (Halaman Contact - FINAL FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -197,10 +197,9 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (SAMA SEPERTI DI PUSAT BANTUAN) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
-  // ===== ALL HOOKS CALLED AT TOP LEVEL =====
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -209,7 +208,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -346,12 +347,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      // Auto scroll hanya jika shouldAutoScroll true
+      if (shouldAutoScroll) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
     });
     return () => unsubscribe();
-  }, [db, selectedTicket]);
+  }, [db, selectedTicket, shouldAutoScroll]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin) return;
@@ -465,6 +469,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      setShouldAutoScroll(true);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -508,6 +513,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Seseorang";
     return `${name} sedang mengetik...`;
+  };
+
+  // Handle scroll untuk mendeteksi apakah user sedang scroll manual
+  const handleMessagesScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+      setShouldAutoScroll(isAtBottom);
+    }
   };
 
   // ============================================================
@@ -704,7 +718,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - SAMA SEPERTI PUSAT BANTUAN
+    // USER VIEW
     return (
       <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
         <div style={{ display: "flex", gap: "24px", height: "500px" }}>
@@ -754,6 +768,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   onClick={() => {
                     setSelectedTicket(ticket);
                     setMessages([]);
+                    setShouldAutoScroll(true);
                   }}
                   style={{
                     padding: "12px 16px",
@@ -856,7 +871,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  borderRadius: "12px 12px 0 0",
+                  flexShrink: 0,
                 }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
@@ -900,14 +915,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     </button>
                   )}
                 </div>
-                <div style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}>
+                <div 
+                  ref={messagesContainerRef}
+                  onScroll={handleMessagesScroll}
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
                   {messages.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                       Belum ada pesan
@@ -980,7 +999,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     gap: "8px",
                     backgroundColor: "#fff",
-                    borderRadius: "0 0 12px 12px",
+                    flexShrink: 0,
                   }}>
                     <input
                       type="text"
@@ -1062,7 +1081,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ADMIN VIEW - SAMA SEPERTI PUSAT BANTUAN
+  // ADMIN VIEW
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1147,6 +1166,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   onClick={() => {
                     setSelectedTicket(ticket);
                     takeTicket(ticket.id);
+                    setShouldAutoScroll(true);
                   }}
                   style={{
                     padding: "12px 16px",
@@ -1185,7 +1205,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               {activeTickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setShouldAutoScroll(true);
+                  }}
                   style={{
                     padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
@@ -1226,7 +1249,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 return (
                   <div
                     key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setShouldAutoScroll(true);
+                    }}
                     style={{
                       padding: "12px 16px",
                       borderBottom: "1px solid #e8e8e8",
@@ -1271,7 +1297,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                borderRadius: "12px 12px 0 0",
+                flexShrink: 0,
               }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
@@ -1315,14 +1341,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </button>
                 )}
               </div>
-              <div style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "16px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
-              }}>
+              <div 
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
                 {messages.length === 0 ? (
                   <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                     Belum ada pesan
@@ -1391,7 +1421,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   gap: "8px",
                   backgroundColor: "#fff",
-                  borderRadius: "0 0 12px 12px",
+                  flexShrink: 0,
                 }}>
                   <input
                     type="text"
@@ -1630,9 +1660,8 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           backgroundColor: "#0D3CFC",
           borderRadius: "12px",
           maxWidth: "700px",
-          minHeight: "60px",
         }}>
-          {/* Garis vertikal dengan titik-titik putus - di tengah */}
+          {/* Garis vertikal dengan titik-titik putus */}
           <div style={{
             position: "absolute",
             left: "20px",
@@ -1642,28 +1671,42 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
-          {/* Hanya 1 titik bulat di tengah garis */}
+          {/* Titik awal - di submit pertama */}
           <div style={{
             position: "absolute",
             left: "14px",
-            top: "50%",
-            transform: "translateY(-50%)",
+            top: "20px",
             width: "14px",
             height: "14px",
             borderRadius: "50%",
-            backgroundColor: "#ffffff",
-            border: "2px solid #0D3CFC",
-            boxShadow: "0 0 0 2px #ffffff",
+            backgroundColor: "#000000",
+            border: "2px solid #ffffff",
             zIndex: 2,
           }} />
 
           {feedbacks.map((item, index) => (
             <div key={item.id} style={{ 
               position: "relative", 
-              paddingBottom: index < feedbacks.length - 1 ? "16px" : "0", 
+              paddingBottom: index < feedbacks.length - 1 ? "20px" : "0", 
               paddingLeft: "20px",
               paddingTop: index === 0 ? "0" : "4px",
             }}>
+              {/* Titik di setiap submit */}
+              {index > 0 && (
+                <div style={{
+                  position: "absolute",
+                  left: "-16px",
+                  top: "6px",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: "#ffffff",
+                  border: "2px solid #0D3CFC",
+                  boxShadow: "0 0 0 2px #ffffff",
+                  zIndex: 2,
+                }} />
+              )}
+              
               <div style={{
                 backgroundColor: "rgba(255,255,255,0.08)",
                 borderRadius: "8px",
@@ -1683,8 +1726,29 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               </div>
             </div>
           ))}
+
+          {/* Titik akhir - kedap kedip biru pemancar */}
+          <div style={{
+            position: "absolute",
+            left: "10px",
+            bottom: "16px",
+            width: "18px",
+            height: "18px",
+            borderRadius: "50%",
+            backgroundColor: "#0D3CFC",
+            border: "2px solid #ffffff",
+            boxShadow: "0 0 0 2px #0D3CFC",
+            zIndex: 2,
+            animation: "pulse-blink 1.5s ease-in-out infinite",
+          }} />
         </div>
       )}
+      <style>{`
+        @keyframes pulse-blink {
+          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
+          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -1750,7 +1814,6 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -2014,6 +2077,7 @@ export default function ContactPage(): React.JSX.Element {
           padding: 0;
           background-color: white;
           overflow-x: hidden;
+          overflow-y: auto !important;
         }
         .split-char-contact {
           display: inline-block;
