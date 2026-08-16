@@ -1563,7 +1563,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
+              {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) - TANPA GARIS SAMPING */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1572,7 +1572,6 @@ export default function ContactPage(): React.JSX.Element {
                 marginTop: '50px',
                 maxWidth: '1100px',
                 gap: '40px',
-                borderTop: '2px solid #e0e0e0',
                 paddingTop: '40px',
               }}>
                 {/* Kiri - Get in Touch */}
@@ -1765,7 +1764,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Teks MENURU 500px warna biru di kanan - muncul dari bawah ke atas */}
+              {/* Teks MENURU 400px warna biru di kanan - muncul dari bawah ke atas */}
               <div
                 ref={menuruFooterRef}
                 style={{
@@ -1781,7 +1780,7 @@ export default function ContactPage(): React.JSX.Element {
                 <motion.span
                   style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: '500px',
+                    fontSize: '400px',
                     fontWeight: '700',
                     color: '#0D3CFC',
                     letterSpacing: '-0.02em',
