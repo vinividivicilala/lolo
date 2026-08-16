@@ -58,7 +58,6 @@ export default function ContactPage(): React.JSX.Element {
   // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLDivElement>(null);
   const menuMenuruTextRef = useRef<HTMLSpanElement>(null);
 
   // Refs untuk menu items di drawer
@@ -527,7 +526,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 250vh;
+          min-height: 280vh;
           width: 100%;
           will-change: transform;
         }
@@ -552,7 +551,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '250vh',
+            minHeight: '280vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -740,7 +739,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - BG BIRU #0D3CFC */}
+            {/* Menu Drawer - BG BIRU #0D3CFC - TUTUP PAKAI TOMBOL MENU */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -764,36 +763,25 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Tombol Close (X) */}
-              <div
-                ref={closeButtonRef}
-                onClick={handleCloseMenu}
-                onMouseEnter={(e) => {
-                  gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
-                }}
-                onMouseLeave={(e) => {
-                  gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
-                }}
+              {/* Judul MENURU warna putih di bg menu */}
+              <h1
                 style={{
                   position: 'absolute',
                   top: '40px',
-                  right: '40px',
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  zIndex: 101,
+                  left: '40px',
+                  fontSize: '48px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                  padding: 0,
+                  lineHeight: 1,
+                  opacity: 0.9,
                 }}
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+                Menuru
+              </h1>
 
               {/* Menu items - tengah */}
               <div
@@ -946,21 +934,21 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-05 Items dengan label ComingSoon - teks item lebih kecil */}
+            {/* 01-05 Items dengan label ComingSoon kotak */}
             <div style={{
               position: 'relative',
               top: '150px',
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '100px'
+              marginBottom: '80px'
             }}>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '100px',
+                marginBottom: '80px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -1001,13 +989,14 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '500',
                       color: '#ffffff',
                       backgroundColor: '#0D3CFC',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      letterSpacing: '0.02em'
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.02em',
+                      border: '1px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1066,13 +1055,14 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '500',
                       color: '#ffffff',
                       backgroundColor: '#0D3CFC',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      letterSpacing: '0.02em'
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.02em',
+                      border: '1px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1131,13 +1121,14 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '500',
                       color: '#ffffff',
                       backgroundColor: '#0D3CFC',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      letterSpacing: '0.02em'
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.02em',
+                      border: '1px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1196,13 +1187,14 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '500',
                       color: '#ffffff',
                       backgroundColor: '#0D3CFC',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      letterSpacing: '0.02em'
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.02em',
+                      border: '1px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1261,13 +1253,14 @@ export default function ContactPage(): React.JSX.Element {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '500',
                       color: '#ffffff',
                       backgroundColor: '#0D3CFC',
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      letterSpacing: '0.02em'
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.02em',
+                      border: '1px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1289,34 +1282,109 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* FAQ Section dengan sidebar kanan */}
               <div style={{
                 marginLeft: '80px',
-                marginTop: '80px',
+                marginTop: '60px',
                 maxWidth: '900px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
               }}>
-                <h2 style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '600',
-                  color: '#000000',
-                  margin: 0,
-                  marginBottom: '20px',
-                  letterSpacing: '-0.02em'
+                <div style={{ flex: 1 }}>
+                  <h2 style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '60px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    margin: 0,
+                    marginBottom: '10px',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    FAQ
+                  </h2>
+                  <p style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '50px',
+                    fontWeight: '400',
+                    color: '#0D3CFC',
+                    margin: 0,
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1.2
+                  }}>
+                    Apakah kamu punya kesulitan?
+                  </p>
+                </div>
+
+                {/* Sidebar kanan - daftar menu */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  alignItems: 'flex-end',
+                  minWidth: '200px',
                 }}>
-                  FAQ
-                </h2>
-                <p style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '50px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  margin: 0,
-                  letterSpacing: '-0.01em',
-                  lineHeight: 1.2
-                }}>
-                  Apakah kamu punya kesulitan?
-                </p>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Shop
+                  </span>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Community
+                  </span>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Blog
+                  </span>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Note
+                  </span>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Donation
+                  </span>
+                  <span style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '20px',
+                    fontWeight: '400',
+                    color: '#000000',
+                    opacity: 0.6,
+                    letterSpacing: '0.02em'
+                  }}>
+                    Calendar
+                  </span>
+                </div>
               </div>
             </div>
           </div>
