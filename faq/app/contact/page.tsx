@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - UPDATED)
+// app/contact/page.tsx (Halaman Contact - FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -158,6 +158,58 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Fungsi untuk membuat ticket dari item
+  const createTicketFromItem = async (itemName: string) => {
+    if (!db || !user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
+    if (hasActiveTicket) {
+      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+      return;
+    }
+    try {
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: `Tentang ${itemName}`,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      setShowStartChat(false);
+      // Refresh tickets
+      const q = query(collection(db, "livechat_tickets"), where("userId", "==", user.uid));
+      const snapshot = await getDocs(q);
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((doc) => {
+        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
+      });
+      setTickets(ticketList);
+      // Select the new ticket
+      const newTicket = ticketList.find(t => t.topic === `Tentang ${itemName}`);
+      if (newTicket) {
+        setSelectedTicket(newTicket);
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      alert("Gagal membuat ticket. Silakan coba lagi.");
+    }
   };
 
   useEffect(() => {
@@ -1355,63 +1407,63 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
         )}
       </form>
 
-      {/* Timeline Feedback */}
+      {/* Timeline Feedback - dengan background biru dan teks putih */}
       {feedbacks.length > 0 && (
-        <div style={{ position: "relative", paddingLeft: "30px" }}>
-          {/* Garis vertikal dengan titik-titik putus */}
+        <div style={{ 
+          position: "relative", 
+          padding: "24px 20px 24px 40px",
+          backgroundColor: "#0D3CFC",
+          borderRadius: "12px",
+          maxWidth: "800px",
+        }}>
+          {/* Garis vertikal dengan titik-titik putus - putih */}
           <div style={{
             position: "absolute",
-            left: "6px",
-            top: "0",
-            bottom: "0",
+            left: "16px",
+            top: "30px",
+            bottom: "30px",
             width: "2px",
-            borderLeft: "2px dashed #0D3CFC",
-            opacity: 0.3,
+            borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
           {/* Titik awal - bulat hitam */}
           <div style={{
             position: "absolute",
-            left: "0",
-            top: "4px",
+            left: "10px",
+            top: "28px",
             width: "14px",
             height: "14px",
             borderRadius: "50%",
             backgroundColor: "#000000",
-            border: "2px solid #0D3CFC",
+            border: "2px solid #ffffff",
             zIndex: 2,
           }} />
 
           {feedbacks.map((item, index) => (
-            <div key={item.id} style={{ position: "relative", paddingBottom: "24px", paddingLeft: "20px" }}>
+            <div key={item.id} style={{ position: "relative", paddingBottom: "20px", paddingLeft: "20px" }}>
               {/* Titik biru kecil di setiap item */}
               <div style={{
                 position: "absolute",
-                left: "-24px",
+                left: "-20px",
                 top: "4px",
                 width: "10px",
                 height: "10px",
                 borderRadius: "50%",
-                backgroundColor: "#0D3CFC",
-                border: "2px solid #ffffff",
-                boxShadow: "0 0 0 2px #0D3CFC",
+                backgroundColor: "#ffffff",
+                border: "2px solid #0D3CFC",
+                boxShadow: "0 0 0 2px #ffffff",
               }} />
               
-              <div style={{
-                backgroundColor: "#f9f9f9",
-                borderRadius: "12px",
-                padding: "16px 20px",
-                border: "1px solid #e8e8e8",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", flexWrap: "wrap", gap: "4px" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
                     {item.name}
                   </span>
-                  <span style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                     {formatDate(item.createdAt)}
                   </span>
                 </div>
-                <p style={{ fontSize: "15px", color: "#000", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.6 }}>
+                <p style={{ fontSize: "15px", color: "#ffffff", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.6, opacity: 0.9 }}>
                   {item.message}
                 </p>
               </div>
@@ -1421,8 +1473,8 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           {/* Titik akhir - kedap kedip biru pemancar */}
           <div style={{
             position: "absolute",
-            left: "-4px",
-            bottom: "-4px",
+            left: "6px",
+            bottom: "22px",
             width: "18px",
             height: "18px",
             borderRadius: "50%",
@@ -1432,14 +1484,14 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             zIndex: 2,
             animation: "pulse-blink 1.5s ease-in-out infinite",
           }} />
-          <style>{`
-            @keyframes pulse-blink {
-              0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(13,60,252,0.2); }
-              50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(13,60,252,0.1); }
-            }
-          `}</style>
         </div>
       )}
+      <style>{`
+        @keyframes pulse-blink {
+          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
+          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -1486,7 +1538,11 @@ export default function ContactPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isLiveChatVisible, setIsLiveChatVisible] = useState(false);
   const smootherRef = useRef<any>(null);
+  
+  // Refs untuk live chat
+  const liveChatRef = useRef<HTMLDivElement>(null);
   
   const contactTitleRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
@@ -1513,6 +1569,16 @@ export default function ContactPage(): React.JSX.Element {
     donation: useRef<HTMLDivElement>(null),
     calendar: useRef<HTMLDivElement>(null),
     contact: useRef<HTMLDivElement>(null),
+  };
+
+  // Fungsi untuk scroll ke live chat
+  const scrollToLiveChat = () => {
+    setIsLiveChatVisible(true);
+    setTimeout(() => {
+      if (liveChatRef.current) {
+        liveChatRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   // Auth
@@ -1809,8 +1875,8 @@ export default function ContactPage(): React.JSX.Element {
           50% { opacity: 0.2; }
         }
         @keyframes pulse-blink {
-          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(13,60,252,0.2); }
-          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(13,60,252,0.1); }
+          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
+          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
         }
       `}</style>
       
@@ -2253,19 +2319,63 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      letterSpacing: '0.02em',
-                      border: '2px solid #0D3CFC',
-                    }}>
-                      Here
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToLiveChat();
+                        // Create ticket
+                        if (user) {
+                          const ticketRef = db ? collection(db, "livechat_tickets") : null;
+                          if (ticketRef) {
+                            addDoc(ticketRef, {
+                              userId: user.uid,
+                              userName: user.displayName || user.email || "User",
+                              userEmail: user.email,
+                              userPhoto: user.photoURL || "",
+                              status: "waiting",
+                              topic: "Tentang Note",
+                              createdAt: serverTimestamp(),
+                              unreadCount: 0,
+                              typing: false,
+                              typingUserId: null,
+                              typingUserName: null,
+                            }).then((docRef) => {
+                              addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
+                                senderId: user.uid,
+                                senderName: user.displayName || user.email || "User",
+                                text: "Halo, saya ingin bertanya tentang: Note",
+                                timestamp: serverTimestamp(),
+                                read: false,
+                              });
+                            }).catch(err => console.error(err));
+                          }
+                        } else {
+                          alert("Silakan login terlebih dahulu");
+                        }
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
                     {hoveredItem === '01' && (
                       <div
                         ref={hoverText01Ref}
@@ -2319,19 +2429,59 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      letterSpacing: '0.02em',
-                      border: '2px solid #0D3CFC',
-                    }}>
-                      Here
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToLiveChat();
+                        if (user && db) {
+                          addDoc(collection(db, "livechat_tickets"), {
+                            userId: user.uid,
+                            userName: user.displayName || user.email || "User",
+                            userEmail: user.email,
+                            userPhoto: user.photoURL || "",
+                            status: "waiting",
+                            topic: "Tentang Calendar",
+                            createdAt: serverTimestamp(),
+                            unreadCount: 0,
+                            typing: false,
+                            typingUserId: null,
+                            typingUserName: null,
+                          }).then((docRef) => {
+                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
+                              senderId: user.uid,
+                              senderName: user.displayName || user.email || "User",
+                              text: "Halo, saya ingin bertanya tentang: Calendar",
+                              timestamp: serverTimestamp(),
+                              read: false,
+                            });
+                          });
+                        } else {
+                          alert("Silakan login terlebih dahulu");
+                        }
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
                     {hoveredItem === '02' && (
                       <div
                         ref={hoverText02Ref}
@@ -2385,19 +2535,59 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      letterSpacing: '0.02em',
-                      border: '2px solid #0D3CFC',
-                    }}>
-                      Here
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToLiveChat();
+                        if (user && db) {
+                          addDoc(collection(db, "livechat_tickets"), {
+                            userId: user.uid,
+                            userName: user.displayName || user.email || "User",
+                            userEmail: user.email,
+                            userPhoto: user.photoURL || "",
+                            status: "waiting",
+                            topic: "Tentang Donation",
+                            createdAt: serverTimestamp(),
+                            unreadCount: 0,
+                            typing: false,
+                            typingUserId: null,
+                            typingUserName: null,
+                          }).then((docRef) => {
+                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
+                              senderId: user.uid,
+                              senderName: user.displayName || user.email || "User",
+                              text: "Halo, saya ingin bertanya tentang: Donation",
+                              timestamp: serverTimestamp(),
+                              read: false,
+                            });
+                          });
+                        } else {
+                          alert("Silakan login terlebih dahulu");
+                        }
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
                     {hoveredItem === '03' && (
                       <div
                         ref={hoverText03Ref}
@@ -2451,19 +2641,59 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      letterSpacing: '0.02em',
-                      border: '2px solid #0D3CFC',
-                    }}>
-                      Here
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToLiveChat();
+                        if (user && db) {
+                          addDoc(collection(db, "livechat_tickets"), {
+                            userId: user.uid,
+                            userName: user.displayName || user.email || "User",
+                            userEmail: user.email,
+                            userPhoto: user.photoURL || "",
+                            status: "waiting",
+                            topic: "Tentang Community",
+                            createdAt: serverTimestamp(),
+                            unreadCount: 0,
+                            typing: false,
+                            typingUserId: null,
+                            typingUserName: null,
+                          }).then((docRef) => {
+                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
+                              senderId: user.uid,
+                              senderName: user.displayName || user.email || "User",
+                              text: "Halo, saya ingin bertanya tentang: Community",
+                              timestamp: serverTimestamp(),
+                              read: false,
+                            });
+                          });
+                        } else {
+                          alert("Silakan login terlebih dahulu");
+                        }
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
                     {hoveredItem === '04' && (
                       <div
                         ref={hoverText04Ref}
@@ -2517,19 +2747,59 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      letterSpacing: '0.02em',
-                      border: '2px solid #0D3CFC',
-                    }}>
-                      Here
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToLiveChat();
+                        if (user && db) {
+                          addDoc(collection(db, "livechat_tickets"), {
+                            userId: user.uid,
+                            userName: user.displayName || user.email || "User",
+                            userEmail: user.email,
+                            userPhoto: user.photoURL || "",
+                            status: "waiting",
+                            topic: "Tentang Shop",
+                            createdAt: serverTimestamp(),
+                            unreadCount: 0,
+                            typing: false,
+                            typingUserId: null,
+                            typingUserName: null,
+                          }).then((docRef) => {
+                            addDoc(collection(db, "livechat_tickets", docRef.id, "messages"), {
+                              senderId: user.uid,
+                              senderName: user.displayName || user.email || "User",
+                              text: "Halo, saya ingin bertanya tentang: Shop",
+                              timestamp: serverTimestamp(),
+                              read: false,
+                            });
+                          });
+                        } else {
+                          alert("Silakan login terlebih dahulu");
+                        }
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
                     {hoveredItem === '05' && (
                       <div
                         ref={hoverText05Ref}
@@ -2941,12 +3211,14 @@ export default function ContactPage(): React.JSX.Element {
               </div>
 
               {/* ===== LIVE CHAT AGENT ===== */}
-              <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+              <div ref={liveChatRef}>
+                <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+              </div>
 
               {/* ===== KRITIK & SARAN ===== */}
               <FeedbackSection db={db} user={user} />
 
-              {/* Teks MENURU 400px warna biru di kanan */}
+              {/* Teks MENURU 400px warna biru di kanan - tetap utuh tanpa terpotong */}
               <div
                 ref={menuruFooterRef}
                 style={{
@@ -2959,7 +3231,7 @@ export default function ContactPage(): React.JSX.Element {
                   justifyContent: 'flex-end',
                 }}
               >
-                <motion.span
+                <span
                   style={{
                     fontFamily: FONT_FAMILY,
                     fontSize: '400px',
@@ -3000,7 +3272,7 @@ export default function ContactPage(): React.JSX.Element {
                       {char}
                     </motion.span>
                   ))}
-                </motion.span>
+                </span>
               </div>
             </div>
           </div>
