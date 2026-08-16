@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED SCROLL USER)
+// app/contact/page.tsx (Halaman Contact - FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -114,8 +114,93 @@ interface Feedback {
   userEmail?: string;
 }
 
-// ===== LIVE CHAT AGENT COMPONENT =====
+// ============================================================
+// ===== PULSING DOTS =====
+// ============================================================
+const PulsingDots = ({ active }: { active: boolean }) => {
+  if (!active) return <span style={{ color: '#999', fontSize: '14px' }}>● Offline</span>;
+  return (
+    <span style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+      <span className="dot" style={{ animationDelay: '0s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.2s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.4s' }}>●</span>
+      <style>{`
+        .dot {
+          animation: blink 1.4s infinite both;
+          font-size: 12px;
+          color: #22c55e;
+        }
+        @keyframes blink {
+          0% { opacity: 0.2; }
+          20% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+      `}</style>
+    </span>
+  );
+};
+
+// ===== INSTAGRAM VERIFIED BADGE =====
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "middle",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
+        />
+        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Official Account
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================
+// ===== LIVE CHAT AGENT COMPONENT (SAMA SEPERTI DI PUSAT BANTUAN) =====
+// ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
+  // ===== ALL HOOKS CALLED AT TOP LEVEL =====
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -146,6 +231,67 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
   };
 
+  const formatReceivedDate = (timestamp: any): string => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const WaitingIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
+
+  const ActiveIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  );
+
+  const ResolvedIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  );
+
+  const ChatIconSmall = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const SendIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+    </svg>
+  );
+
+  const ChatIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const LiveChatIllustration = () => (
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="8" cy="10" r="1" fill="#0D3CFC"/>
+      <circle cx="12" cy="10" r="1" fill="#0D3CFC"/>
+      <circle cx="16" cy="10" r="1" fill="#0D3CFC"/>
+    </svg>
+  );
+
+  // ===== ALL useEffect HOOKS =====
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -229,6 +375,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   }, [tickets, user, isAdmin, selectedTicket]);
 
+  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -363,42 +510,83 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  const ChatIconSmall = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  );
-
-  const SendIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
-    </svg>
-  );
-
+  // ============================================================
+  // ===== RENDER COMPONENT =====
+  // ============================================================
+  
   if (!user) {
     return (
-      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
-          Live Chat Agent
-        </h3>
-        <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
-          Silakan login untuk menggunakan Live Chat Agent
-        </p>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <button style={{
-            padding: "8px 24px",
-            backgroundColor: "#0D3CFC",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "14px",
-            fontWeight: 500,
-            cursor: "pointer",
-            fontFamily: FONT_FAMILY,
+      <div style={{
+        marginTop: "60px",
+        borderTop: "1px solid #e8e8e8",
+        paddingTop: "40px",
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "24px",
+          flexWrap: "wrap",
+        }}>
+          <div style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(13,60,252,0.06)",
+            borderRadius: "16px",
+            padding: "20px",
+            width: "120px",
+            height: "120px",
           }}>
-            Login
-          </button>
-        </Link>
+            <LiveChatIllustration />
+          </div>
+          <div style={{
+            textAlign: "left",
+            flex: 1,
+            minWidth: "200px",
+          }}>
+            <h3 style={{
+              fontSize: "28px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px",
+            }}>
+              Live Chat Agent
+            </h3>
+            <p style={{
+              fontSize: "16px",
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "16px",
+              opacity: 0.8,
+            }}>
+              Silakan login untuk menggunakan Live Chat Agent
+            </p>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  padding: "10px 32px",
+                  backgroundColor: "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  transition: "background 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0a2fc9"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#0D3CFC"}
+              >
+                Login
+              </motion.button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -408,45 +596,47 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (tickets.length === 0 && !showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
             Live Chat Agent
           </h3>
-          <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
+          <p style={{ fontSize: "16px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
             Butuh bantuan? Chat langsung dengan agent kami.
           </p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowStartChat(true)}
             style={{
-              padding: "10px 24px",
+              padding: "14px 32px",
               backgroundColor: "#0D3CFC",
               color: "#fff",
               border: "none",
-              borderRadius: "8px",
-              fontSize: "14px",
+              borderRadius: "12px",
+              fontSize: "18px",
               fontWeight: 500,
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "10px",
             }}
           >
-            <ChatIconSmall />
+            <ChatIcon />
             <span>Mulai Live Chat</span>
-          </button>
+          </motion.button>
         </div>
       );
     }
 
     if (showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
+        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+          <h3 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
             Live Chat Agent
           </h3>
-          <div style={{ maxWidth: "400px" }}>
-            <div style={{ fontSize: "14px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>
+          <div style={{ maxWidth: "500px" }}>
+            <div style={{ fontSize: "18px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>
               Pilih topik permasalahan Anda:
             </div>
             <select
@@ -454,14 +644,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onChange={(e) => setSelectedTopic(e.target.value)}
               style={{
                 width: "100%",
-                padding: "8px 12px",
+                padding: "12px 16px",
                 border: "2px solid #0D3CFC",
                 borderRadius: "8px",
-                fontSize: "14px",
+                fontSize: "16px",
                 fontFamily: FONT_FAMILY,
                 outline: "none",
                 backgroundColor: "#fff",
-                marginBottom: "12px",
+                marginBottom: "16px",
                 color: "#0D3CFC",
               }}
             >
@@ -470,208 +660,221 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
+            <div style={{ display: "flex", gap: "12px" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={startChat}
                 disabled={!selectedTopic}
                 style={{
-                  padding: "8px 20px",
+                  padding: "10px 24px",
                   backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
                   color: "#fff",
                   border: "none",
                   borderRadius: "8px",
-                  fontSize: "14px",
+                  fontSize: "16px",
                   fontWeight: 500,
                   cursor: selectedTopic ? "pointer" : "not-allowed",
                   fontFamily: FONT_FAMILY,
                 }}
               >
                 Mulai Chat
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowStartChat(false)}
                 style={{
-                  padding: "8px 20px",
+                  padding: "10px 24px",
                   backgroundColor: "transparent",
                   color: "#666",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  fontSize: "14px",
+                  fontSize: "16px",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontFamily: FONT_FAMILY,
                 }}
               >
                 Batal
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
       );
     }
 
-    // USER VIEW - DENGAN SCROLL NORMAL
+    // USER VIEW - SAMA SEPERTI PUSAT BANTUAN
     return (
-      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
-          Live Chat Agent
-        </h3>
-        <div style={{ 
-          display: "flex", 
-          gap: "16px", 
-          maxHeight: "500px", 
-          minHeight: "400px",
-          overflow: "hidden",
-          borderRadius: "10px",
-        }}>
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+        <div style={{ display: "flex", gap: "24px", height: "500px" }}>
           <div style={{
-            width: "220px",
+            width: "280px",
             backgroundColor: "#0D3CFC",
-            borderRadius: "10px",
-            padding: "10px 0",
+            borderRadius: "12px",
+            padding: "16px 0",
             overflowY: "auto",
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            maxHeight: "500px",
+            boxShadow: "0 4px 20px rgba(13,60,252,0.15)",
           }}>
             <div style={{
-              padding: "0 12px 10px 12px",
+              padding: "0 16px 12px 16px",
               borderBottom: "1px solid rgba(255,255,255,0.15)",
               fontWeight: 600,
-              fontSize: "13px",
+              fontSize: "14px",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              position: "sticky",
-              top: 0,
-              backgroundColor: "#0D3CFC",
-              zIndex: 1,
+              gap: "8px",
+              color: "#fff",
             }}>
               <ChatIconSmall />
               <span>Riwayat Chat</span>
               <span style={{
                 marginLeft: "auto",
-                fontSize: "10px",
+                fontSize: "11px",
                 backgroundColor: "rgba(255,255,255,0.2)",
-                padding: "1px 8px",
-                borderRadius: "10px",
+                padding: "2px 10px",
+                borderRadius: "12px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "400px" }}>
-              {tickets.map((ticket) => {
-                const ticketId = generateTicketId(ticket.createdAt);
-                const isActive = selectedTicket?.id === ticket.id;
-                const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
-                                    ticket.status === 'active' ? 'Aktif' : 'Selesai';
-                const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
-                                    ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
-                return (
-                  <div
-                    key={ticket.id}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setMessages([]);
-                    }}
-                    style={{
-                      padding: "8px 12px",
-                      borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
-                      backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>
-                      {ticket.userName}
-                    </div>
-                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>
-                      {ticket.topic}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "3px" }}>
-                      <span style={{
-                        fontSize: "9px",
-                        backgroundColor: statusColor,
-                        color: ticket.status === 'waiting' ? '#92400e' : ticket.status === 'active' ? '#065f46' : '#6b7280',
-                        padding: "1px 8px",
-                        borderRadius: "10px",
-                        fontWeight: 500,
-                      }}>
-                        {statusLabel}
-                      </span>
-                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>
-                        {ticketId}
-                      </span>
-                    </div>
+            {tickets.map((ticket) => {
+              const ticketId = generateTicketId(ticket.createdAt);
+              const isActive = selectedTicket?.id === ticket.id;
+              const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
+                                  ticket.status === 'active' ? 'Aktif' : 'Selesai';
+              const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                  ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+              const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
+                                      ticket.status === 'active' ? '#065f46' : '#6b7280';
+              return (
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setMessages([]);
+                  }}
+                  style={{
+                    padding: "12px 16px",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#fff" }}>
+                    {ticket.userName}
                   </div>
-                );
-              })}
-              {tickets.length === 0 && (
-                <div style={{ padding: "30px 12px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
-                  Belum ada chat
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                    {ticket.topic}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                    <span style={{
+                      fontSize: "10px",
+                      backgroundColor: statusColor,
+                      color: statusTextColor,
+                      padding: "1px 10px",
+                      borderRadius: "12px",
+                      fontWeight: 500,
+                    }}>
+                      {statusLabel}
+                    </span>
+                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                      {ticketId}
+                    </span>
+                  </div>
+                  {ticket.status === 'resolved' && (
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
+                      Diterima: {formatReceivedDate(ticket.createdAt)}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div style={{ 
-              padding: "10px 12px", 
-              borderTop: "1px solid rgba(255,255,255,0.1)",
-              position: "sticky",
-              bottom: 0,
-              backgroundColor: "#0D3CFC",
-            }}>
-              <button
+              );
+            })}
+            {tickets.length === 0 && (
+              <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+                Belum ada chat
+              </div>
+            )}
+            <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowStartChat(true)}
                 style={{
                   width: "100%",
-                  padding: "6px",
+                  padding: "10px",
                   backgroundColor: "rgba(255,255,255,0.15)",
                   color: "#fff",
                   border: "none",
-                  borderRadius: "6px",
-                  fontSize: "12px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "background 0.2s ease",
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"}
               >
-                + Chat Baru
-              </button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Chat Baru
+              </motion.button>
             </div>
           </div>
 
           <div style={{
             flex: 1,
             backgroundColor: "#ffffff",
-            borderRadius: "10px",
+            borderRadius: "12px",
             border: "1px solid #e8e8e8",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
                 <div style={{
-                  padding: "8px 14px",
+                  padding: "12px 16px",
                   backgroundColor: "#0D3CFC",
                   borderBottom: "1px solid #e8e8e8",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  flexShrink: 0,
+                  borderRadius: "12px 12px 0 0",
                 }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                    <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "6px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
                         {selectedTicket.topic}
                       </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ fontSize: "10px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "12px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : selectedTicket.status === 'resolved' ? "#e5e7eb" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.status === 'waiting' ? 'Menunggu' : selectedTicket.status === 'resolved' ? 'Selesai' : 'Aktif'}
                       </span>
-                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
+                        <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                          {selectedTicket.typingUserName} mengetik...
+                        </span>
+                      )}
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                         {generateTicketId(selectedTicket.createdAt)}
                       </span>
                     </div>
@@ -680,15 +883,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
-                        padding: "3px 10px",
+                        padding: "6px 14px",
                         backgroundColor: "#22c55e",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
-                        fontSize: "10px",
+                        borderRadius: "6px",
+                        fontSize: "12px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
+                        transition: "opacity 0.2s ease",
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                     >
                       Selesaikan
                     </button>
@@ -697,58 +903,69 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 <div style={{
                   flex: 1,
                   overflowY: "auto",
-                  padding: "10px",
+                  padding: "16px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "4px",
-                  minHeight: "250px",
-                  maxHeight: "400px",
+                  gap: "6px",
                 }}>
                   {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                       Belum ada pesan
                     </div>
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
+                      const isAgent = !isMine && msg.senderName === AGENT_NAME;
                       return (
-                        <div
+                        <motion.div
                           key={idx}
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.2 }}
                           style={{
                             alignSelf: isMine ? "flex-end" : "flex-start",
                             maxWidth: "75%",
-                            padding: "6px 10px",
-                            borderRadius: "8px",
+                            padding: "10px 14px",
+                            borderRadius: "12px",
                             backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                             color: isMine ? "#fff" : "#000",
-                            fontSize: "12px",
+                            fontSize: "14px",
                             fontFamily: FONT_FAMILY,
                           }}
                         >
                           {!isMine && (
-                            <div style={{ fontSize: "9px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                            <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
                               {msg.senderName}
+                              {isAgent && <InstagramVerifiedBadge size={12} />}
                             </div>
                           )}
                           <div>{msg.text}</div>
                           <div style={{ 
-                            fontSize: "7px", 
+                            fontSize: "9px", 
                             color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                            marginTop: "2px",
+                            marginTop: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontFamily: FONT_FAMILY,
                           }}>
                             {formatTime(msg.timestamp)}
+                            {isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
+                            {isMine && !msg.read && <span style={{ color: "#22c55e", fontWeight: 400 }}>✓ Terkirim</span>}
+                            {!isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
+                            {!isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     })
                   )}
                   {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
                     <div style={{
                       alignSelf: "flex-start",
-                      fontSize: "11px",
+                      fontSize: "13px",
                       color: "#666",
                       fontStyle: "italic",
-                      padding: "2px 6px",
+                      padding: "4px 8px",
                       fontFamily: FONT_FAMILY,
                     }}>
                       {getTypingText(selectedTicket)}
@@ -758,12 +975,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 </div>
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
-                    padding: "8px 12px",
+                    padding: "12px 16px",
                     borderTop: "1px solid #e8e8e8",
                     display: "flex",
-                    gap: "6px",
+                    gap: "8px",
                     backgroundColor: "#fff",
-                    flexShrink: 0,
+                    borderRadius: "0 0 12px 12px",
                   }}>
                     <input
                       type="text"
@@ -779,37 +996,50 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       disabled={selectedTicket.status === 'waiting'}
                       style={{
                         flex: 1,
-                        padding: "6px 10px",
+                        padding: "10px 14px",
                         border: "1px solid #e8e8e8",
-                        borderRadius: "6px",
-                        fontSize: "12px",
+                        borderRadius: "8px",
+                        fontSize: "14px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
+                        transition: "border-color 0.2s ease",
                         backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff",
                       }}
                       onFocus={(e) => { if (selectedTicket.status !== 'waiting') e.currentTarget.style.borderColor = "#0D3CFC"; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
                     />
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={sendMessage}
                       disabled={selectedTicket.status === 'waiting' || !messageText.trim()}
                       style={{
-                        padding: "6px 14px",
+                        padding: "10px 20px",
                         backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "6px",
+                        borderRadius: "8px",
                         cursor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "not-allowed" : "pointer",
                         fontFamily: FONT_FAMILY,
                         display: "flex",
                         alignItems: "center",
-                        gap: "4px",
-                        fontSize: "12px",
+                        gap: "6px",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedTicket.status !== 'waiting' && messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0a2fc9";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedTicket.status !== 'waiting' && messageText.trim()) {
+                          e.currentTarget.style.backgroundColor = "#0D3CFC";
+                        }
                       }}
                     >
                       <SendIcon />
                       <span>Kirim</span>
-                    </button>
+                    </motion.button>
                   </div>
                 )}
               </>
@@ -820,7 +1050,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#999",
-                fontSize: "13px",
+                fontSize: "16px",
                 fontFamily: FONT_FAMILY,
               }}>
                 Pilih chat dari daftar di kiri
@@ -832,86 +1062,83 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // Admin view
+  // ADMIN VIEW - SAMA SEPERTI PUSAT BANTUAN
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
-    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+    <div style={{ marginTop: "60px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <div>
-          <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+          <h2 style={{ fontSize: "30px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
             Live Chat Agent
-          </h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
-            <span style={{ fontSize: "12px", color: agentOnline ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? "● Online" : "● Offline"}
+          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+            <PulsingDots active={agentOnline} />
+            <span style={{ fontSize: "14px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
+              {agentOnline ? "Online" : "Offline"}
             </span>
-            <span style={{ fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+            <span style={{ fontSize: "14px", color: "#999" }}>•</span>
+            <span style={{ fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
               {waitingTickets.length} menunggu • {activeTickets.length} aktif
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "14px" }}>
-            {AGENT_NAME.charAt(0)}
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="Agent" style={{ width: "40px", height: "40px", borderRadius: "50%" }} />
+          ) : (
+            <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0D3CFC", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 600, fontSize: "18px" }}>
+              {AGENT_NAME.charAt(0)}
+            </div>
+          )}
           <div>
-            <div style={{ fontSize: "13px", fontWeight: 600, color: "#000", fontFamily: FONT_FAMILY }}>
+            <div style={{ fontSize: "16px", fontWeight: 600, color: "#000", display: "flex", alignItems: "center", gap: "6px", fontFamily: FONT_FAMILY }}>
               {AGENT_NAME}
               <span style={{
                 backgroundColor: "#d1fae5",
                 color: "#065f46",
-                fontSize: "8px",
+                fontSize: "10px",
                 fontWeight: 600,
-                padding: "1px 6px",
-                borderRadius: "8px",
-                marginLeft: "4px",
+                padding: "2px 10px",
+                borderRadius: "12px",
+                letterSpacing: "0.3px",
+                fontFamily: FONT_FAMILY,
               }}>
                 Agent
               </span>
+              <InstagramVerifiedBadge size={14} />
             </div>
-            <div style={{ fontSize: "10px", color: "#999", fontFamily: FONT_FAMILY }}>Support</div>
+            <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>Support</div>
           </div>
         </div>
       </div>
 
-      <div style={{ 
-        display: "flex", 
-        gap: "16px", 
-        maxHeight: "500px", 
-        minHeight: "400px",
-        overflow: "hidden",
-        borderRadius: "10px",
-      }}>
+      <div style={{ display: "flex", gap: "24px", height: "500px" }}>
         <div style={{
-          width: "240px",
+          width: "320px",
           backgroundColor: "#f9f9f9",
-          borderRadius: "10px",
+          borderRadius: "12px",
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          maxHeight: "500px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
               <div style={{
-                padding: "8px 12px",
+                padding: "12px 16px",
                 backgroundColor: "#fef3c7",
                 fontWeight: 600,
-                fontSize: "12px",
+                fontSize: "14px",
                 color: "#92400e",
                 display: "flex",
                 alignItems: "center",
-                gap: "4px",
+                gap: "8px",
                 fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
               }}>
-                <span>⏳</span>
+                <WaitingIcon />
                 <span>Menunggu ({waitingTickets.length})</span>
               </div>
               {waitingTickets.map((ticket) => (
@@ -922,16 +1149,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     takeTicket(ticket.id);
                   }}
                   style={{
-                    padding: "8px 12px",
+                    padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
                     cursor: "pointer",
                     backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                     transition: "background 0.2s ease",
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
                 >
-                  <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                  <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "9px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
                 </div>
               ))}
             </div>
@@ -940,20 +1169,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           {activeTickets.length > 0 && (
             <div>
               <div style={{
-                padding: "8px 12px",
+                padding: "12px 16px",
                 backgroundColor: "#d1fae5",
                 fontWeight: 600,
-                fontSize: "12px",
+                fontSize: "14px",
                 color: "#065f46",
                 display: "flex",
                 alignItems: "center",
-                gap: "4px",
+                gap: "8px",
                 fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
               }}>
-                <span>💬</span>
+                <ActiveIcon />
                 <span>Aktif ({activeTickets.length})</span>
               </div>
               {activeTickets.map((ticket) => (
@@ -961,17 +1187,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
                   style={{
-                    padding: "8px 12px",
+                    padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
                     cursor: "pointer",
                     backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                     transition: "background 0.2s ease",
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.04)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
                 >
-                  <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                  <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "9px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
-                  {ticket.lastMessage && <div style={{ fontSize: "9px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 30)}{ticket.lastMessage.length > 30 ? "..." : ""}</div>}
+                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                  <div style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                  {ticket.typing && <div style={{ fontSize: "11px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.lastMessage && <div style={{ fontSize: "11px", color: "#999", marginTop: "2px", fontFamily: FONT_FAMILY }}>{ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}</div>}
                 </div>
               ))}
             </div>
@@ -980,20 +1208,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           {resolvedTickets.length > 0 && (
             <div>
               <div style={{
-                padding: "8px 12px",
+                padding: "12px 16px",
                 backgroundColor: "#e5e7eb",
                 fontWeight: 600,
-                fontSize: "12px",
+                fontSize: "14px",
                 color: "#6b7280",
                 display: "flex",
                 alignItems: "center",
-                gap: "4px",
+                gap: "8px",
                 fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
               }}>
-                <span>✅</span>
+                <ResolvedIcon />
                 <span>Selesai ({resolvedTickets.length})</span>
               </div>
               {resolvedTickets.map((ticket) => {
@@ -1003,17 +1228,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     key={ticket.id}
                     onClick={() => setSelectedTicket(ticket)}
                     style={{
-                      padding: "8px 12px",
+                      padding: "12px 16px",
                       borderBottom: "1px solid #e8e8e8",
                       cursor: "pointer",
                       backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                       transition: "background 0.2s ease",
                       opacity: 0.7,
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.04)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent"}
                   >
-                    <div style={{ fontWeight: 500, fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                    <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                    <div style={{ fontSize: "9px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
+                    <div style={{ fontWeight: 500, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                    <div style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                    <div style={{ fontSize: "11px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId} • Diterima pada: {formatReceivedDate(ticket.createdAt)}</div>
                   </div>
                 );
               })}
@@ -1021,7 +1248,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           )}
 
           {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
-            <div style={{ padding: "30px 12px", textAlign: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY }}>
+            <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "14px", fontFamily: FONT_FAMILY }}>
               Tidak ada chat masuk
             </div>
           )}
@@ -1030,36 +1257,39 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         <div style={{
           flex: 1,
           backgroundColor: "#ffffff",
-          borderRadius: "10px",
+          borderRadius: "12px",
           border: "1px solid #e8e8e8",
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
               <div style={{
-                padding: "8px 14px",
+                padding: "12px 16px",
                 backgroundColor: "#0D3CFC",
                 borderBottom: "1px solid #e8e8e8",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                flexShrink: 0,
+                borderRadius: "12px 12px 0 0",
               }}>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ fontWeight: 600, fontSize: "16px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                     {selectedTicket.userName}
-                    <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "6px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "8px", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.topic}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ fontSize: "10px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                      {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ fontSize: "12px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : selectedTicket.status === 'resolved' ? "#e5e7eb" : "#d1fae5", fontFamily: FONT_FAMILY }}>
+                      {selectedTicket.status === 'waiting' ? 'Menunggu' : selectedTicket.status === 'resolved' ? 'Selesai' : 'Aktif'}
                     </span>
-                    <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                    {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
+                      <span style={{ fontSize: "11px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.typingUserName} mengetik...
+                      </span>
+                    )}
+                    <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
                       {generateTicketId(selectedTicket.createdAt)}
                     </span>
                   </div>
@@ -1068,15 +1298,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <button
                     onClick={() => resolveTicket(selectedTicket.id)}
                     style={{
-                      padding: "3px 10px",
+                      padding: "6px 14px",
                       backgroundColor: "#22c55e",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "4px",
-                      fontSize: "10px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
+                      transition: "opacity 0.2s ease",
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
                   >
                     Selesaikan
                   </button>
@@ -1085,58 +1318,65 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               <div style={{
                 flex: 1,
                 overflowY: "auto",
-                padding: "10px",
+                padding: "16px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "4px",
-                minHeight: "250px",
-                maxHeight: "400px",
+                gap: "6px",
               }}>
                 {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
+                  <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                     Belum ada pesan
                   </div>
                 ) : (
                   messages.map((msg, idx) => {
                     const isMine = msg.senderId === user.uid;
                     return (
-                      <div
+                      <motion.div
                         key={idx}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.2 }}
                         style={{
                           alignSelf: isMine ? "flex-end" : "flex-start",
                           maxWidth: "75%",
-                          padding: "6px 10px",
-                          borderRadius: "8px",
+                          padding: "10px 14px",
+                          borderRadius: "12px",
                           backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
                           color: isMine ? "#fff" : "#000",
-                          fontSize: "12px",
+                          fontSize: "14px",
                           fontFamily: FONT_FAMILY,
                         }}
                       >
                         {!isMine && (
-                          <div style={{ fontSize: "9px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
                             {msg.senderName}
                           </div>
                         )}
                         <div>{msg.text}</div>
                         <div style={{ 
-                          fontSize: "7px", 
+                          fontSize: "9px", 
                           color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                          marginTop: "2px",
+                          marginTop: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontFamily: FONT_FAMILY,
                         }}>
                           {formatTime(msg.timestamp)}
+                          {!isMine && msg.read && <span style={{ color: "#22c55e", fontWeight: 600 }}>✓✓ Dibaca</span>}
+                          {!isMine && !msg.read && <span style={{ color: "#999" }}>✓ Terkirim</span>}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })
                 )}
                 {typingText && selectedTicket.status !== 'resolved' && (
                   <div style={{
                     alignSelf: "flex-start",
-                    fontSize: "11px",
+                    fontSize: "13px",
                     color: "#666",
                     fontStyle: "italic",
-                    padding: "2px 6px",
+                    padding: "4px 8px",
                     fontFamily: FONT_FAMILY,
                   }}>
                     {typingText}
@@ -1146,12 +1386,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               </div>
               {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
-                  padding: "8px 12px",
+                  padding: "12px 16px",
                   borderTop: "1px solid #e8e8e8",
                   display: "flex",
-                  gap: "6px",
+                  gap: "8px",
                   backgroundColor: "#fff",
-                  flexShrink: 0,
+                  borderRadius: "0 0 12px 12px",
                 }}>
                   <input
                     type="text"
@@ -1166,36 +1406,45 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     placeholder="Ketik balasan..."
                     style={{
                       flex: 1,
-                      padding: "6px 10px",
+                      padding: "10px 14px",
                       border: "1px solid #e8e8e8",
-                      borderRadius: "6px",
-                      fontSize: "12px",
+                      borderRadius: "8px",
+                      fontSize: "14px",
                       outline: "none",
                       fontFamily: FONT_FAMILY,
+                      transition: "border-color 0.2s ease",
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                   />
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={sendMessage}
                     disabled={!messageText.trim()}
                     style={{
-                      padding: "6px 14px",
+                      padding: "10px 20px",
                       backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "6px",
+                      borderRadius: "8px",
                       cursor: messageText.trim() ? "pointer" : "not-allowed",
                       fontFamily: FONT_FAMILY,
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
-                      fontSize: "12px",
+                      gap: "6px",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (messageText.trim()) e.currentTarget.style.backgroundColor = "#0a2fc9";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (messageText.trim()) e.currentTarget.style.backgroundColor = "#0D3CFC";
                     }}
                   >
                     <SendIcon />
                     <span>Kirim</span>
-                  </button>
+                  </motion.button>
                 </div>
               )}
             </>
@@ -1206,7 +1455,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               alignItems: "center",
               justifyContent: "center",
               color: "#999",
-              fontSize: "13px",
+              fontSize: "16px",
               fontFamily: FONT_FAMILY,
             }}>
               Pilih chat dari daftar di kiri
@@ -1218,7 +1467,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   );
 };
 
+// ============================================================
 // ===== KRITIK & SARAN COMPONENT =====
+// ============================================================
 const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [name, setName] = useState("");
@@ -1375,50 +1626,48 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
       {feedbacks.length > 0 && (
         <div style={{ 
           position: "relative", 
-          padding: "20px 16px 20px 32px",
+          padding: "20px 20px 20px 40px",
           backgroundColor: "#0D3CFC",
-          borderRadius: "10px",
+          borderRadius: "12px",
           maxWidth: "700px",
+          minHeight: "60px",
         }}>
+          {/* Garis vertikal dengan titik-titik putus - di tengah */}
           <div style={{
             position: "absolute",
-            left: "12px",
-            top: "24px",
-            bottom: "24px",
+            left: "20px",
+            top: "20px",
+            bottom: "20px",
             width: "2px",
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
+          {/* Hanya 1 titik bulat di tengah garis */}
           <div style={{
             position: "absolute",
-            left: "6px",
-            top: "22px",
+            left: "14px",
+            top: "50%",
+            transform: "translateY(-50%)",
             width: "14px",
             height: "14px",
             borderRadius: "50%",
-            backgroundColor: "#000000",
-            border: "2px solid #ffffff",
+            backgroundColor: "#ffffff",
+            border: "2px solid #0D3CFC",
+            boxShadow: "0 0 0 2px #ffffff",
             zIndex: 2,
           }} />
 
           {feedbacks.map((item, index) => (
-            <div key={item.id} style={{ position: "relative", paddingBottom: "16px", paddingLeft: "16px" }}>
+            <div key={item.id} style={{ 
+              position: "relative", 
+              paddingBottom: index < feedbacks.length - 1 ? "16px" : "0", 
+              paddingLeft: "20px",
+              paddingTop: index === 0 ? "0" : "4px",
+            }}>
               <div style={{
-                position: "absolute",
-                left: "-16px",
-                top: "4px",
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                backgroundColor: "#ffffff",
-                border: "2px solid #0D3CFC",
-                boxShadow: "0 0 0 2px #ffffff",
-              }} />
-              
-              <div style={{
-                backgroundColor: "rgba(255,255,255,0.1)",
+                backgroundColor: "rgba(255,255,255,0.08)",
                 borderRadius: "8px",
-                padding: "12px 14px",
+                padding: "12px 16px",
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
@@ -1434,28 +1683,8 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               </div>
             </div>
           ))}
-
-          <div style={{
-            position: "absolute",
-            left: "2px",
-            bottom: "18px",
-            width: "18px",
-            height: "18px",
-            borderRadius: "50%",
-            backgroundColor: "#0D3CFC",
-            border: "2px solid #ffffff",
-            boxShadow: "0 0 0 2px #0D3CFC",
-            zIndex: 2,
-            animation: "pulse-blink 1.5s ease-in-out infinite",
-          }} />
         </div>
       )}
-      <style>{`
-        @keyframes pulse-blink {
-          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
-          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
-        }
-      `}</style>
     </div>
   );
 };
@@ -1564,7 +1793,7 @@ export default function ContactPage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
       });
-      alert(`Ticket untuk "${itemName}" berhasil dibuat! Silakan cek Live Chat Agent.`);
+      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
@@ -1589,11 +1818,12 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Menu drawer animation - TIDAK MENGGUNAKAN overflow: hidden pada body
+  // Menu drawer animation
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
-      // Hanya mengatur posisi body tanpa mengganggu scroll
-      document.body.style.position = 'relative';
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
       
       gsap.fromTo(menuDrawerRef.current,
         { y: '100%', opacity: 0 },
@@ -1611,8 +1841,8 @@ export default function ContactPage(): React.JSX.Element {
         }
       );
     } else if (!isMenuOpen && menuDrawerRef.current) {
-      document.body.style.position = '';
       document.body.style.overflow = '';
+      document.body.style.position = '';
       document.body.style.width = '';
       
       gsap.to(menuDrawerRef.current, {
@@ -1784,7 +2014,6 @@ export default function ContactPage(): React.JSX.Element {
           padding: 0;
           background-color: white;
           overflow-x: hidden;
-          overflow-y: auto !important;
         }
         .split-char-contact {
           display: inline-block;
@@ -1797,10 +2026,6 @@ export default function ContactPage(): React.JSX.Element {
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.2; }
-        }
-        @keyframes pulse-blink {
-          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
-          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
         }
       `}</style>
       
@@ -1857,7 +2082,7 @@ export default function ContactPage(): React.JSX.Element {
           pointerEvents: 'auto',
           boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
         }}>
-          {/* Get in Touch - diubah jadi (here) */}
+          {/* Get in Touch - (here) */}
           <Link href="/contact">
             <div
               style={{
@@ -2740,7 +2965,7 @@ export default function ContactPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* FOOTER - Get in Touch (Kiri) | Product (Tengah) | Attention (Kanan) */}
+          {/* FOOTER */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -2999,7 +3224,7 @@ export default function ContactPage(): React.JSX.Element {
           </div>
 
           {/* ===== LIVE CHAT AGENT ===== */}
-          <div id="live-chat-section" style={{ scrollMarginTop: "20px" }}>
+          <div id="live-chat-section">
             <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
           </div>
 
