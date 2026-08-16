@@ -38,6 +38,7 @@ export default function ContactPage(): React.JSX.Element {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
   const smootherRef = useRef<any>(null);
   
   // Refs untuk teks yang akan di-split
@@ -58,7 +59,7 @@ export default function ContactPage(): React.JSX.Element {
   // Ref untuk menu button dan menu drawer
   const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuDrawerRef = useRef<HTMLDivElement>(null);
-  const menuMenuruTextRef = useRef<HTMLSpanElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
 
   // Refs untuk menu items di drawer
   const menuItemRefs = {
@@ -69,6 +70,11 @@ export default function ContactPage(): React.JSX.Element {
     calendar: useRef<HTMLDivElement>(null),
     contact: useRef<HTMLDivElement>(null),
   };
+
+  // FAQ refs
+  const faqQuestionRef = useRef<HTMLDivElement>(null);
+  const faqAnswerRef = useRef<HTMLDivElement>(null);
+  const faqPlusRef = useRef<HTMLSpanElement>(null);
 
   // Animasi menu drawer muncul dari bawah ke atas
   useEffect(() => {
@@ -95,31 +101,6 @@ export default function ContactPage(): React.JSX.Element {
           }
         }
       );
-      
-      if (menuMenuruTextRef.current) {
-        const splitMenuMenuru = new SplitText(menuMenuruTextRef.current, {
-          type: "chars",
-          charsClass: "split-char-menuru-menu"
-        });
-        
-        gsap.fromTo(splitMenuMenuru.chars,
-          {
-            opacity: 0,
-            y: 100,
-            rotationX: -90,
-            filter: 'blur(10px)'
-          },
-          {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            filter: 'blur(0px)',
-            duration: 1,
-            stagger: 0.03,
-            ease: "back.out(1.2)"
-          }
-        );
-      }
       
       const menuItems = [
         menuItemRefs.note,
@@ -186,6 +167,41 @@ export default function ContactPage(): React.JSX.Element {
       }
     }
   }, [isMenuHovered]);
+
+  // Animasi FAQ
+  useEffect(() => {
+    if (faqAnswerRef.current) {
+      if (faqOpen) {
+        gsap.to(faqAnswerRef.current, {
+          height: 'auto',
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+        if (faqPlusRef.current) {
+          gsap.to(faqPlusRef.current, {
+            rotation: 45,
+            duration: 0.4,
+            ease: "power2.out"
+          });
+        }
+      } else {
+        gsap.to(faqAnswerRef.current, {
+          height: 0,
+          opacity: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+        if (faqPlusRef.current) {
+          gsap.to(faqPlusRef.current, {
+            rotation: 0,
+            duration: 0.4,
+            ease: "power2.in"
+          });
+        }
+      }
+    }
+  }, [faqOpen]);
 
   // Animasi hover untuk menu items di drawer
   const handleMenuItemHover = (ref: React.RefObject<HTMLDivElement>, isHover: boolean) => {
@@ -487,11 +503,44 @@ export default function ContactPage(): React.JSX.Element {
   }, []);
 
   const handleMenuClick = () => {
-    setIsMenuOpen(true);
+    if (!isMenuOpen) {
+      setIsMenuOpen(true);
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 45,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    } else {
+      if (menuDrawerRef.current) {
+        gsap.to(menuDrawerRef.current, {
+          y: '100%',
+          opacity: 0,
+          duration: 0.6,
+          ease: "power3.in",
+          onComplete: () => {
+            setIsMenuOpen(false);
+            if (menuDrawerRef.current) {
+              menuDrawerRef.current.style.display = 'none';
+            }
+          }
+        });
+      } else {
+        setIsMenuOpen(false);
+      }
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+      }
+    }
   };
 
-  const handleCloseMenu = () => {
-    setIsMenuOpen(false);
+  const toggleFaq = () => {
+    setFaqOpen(!faqOpen);
   };
 
   return (
@@ -713,12 +762,14 @@ export default function ContactPage(): React.JSX.Element {
                   }}
                 >
                   <span
+                    ref={plusIconRef}
                     style={{
                       fontSize: '28px',
                       fontWeight: 300,
                       fontFamily: FONT_FAMILY,
                       lineHeight: 1,
                       display: 'inline-block',
+                      transform: 'rotate(0deg)',
                     }}
                   >
                     +
@@ -739,7 +790,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer - BG BIRU #0D3CFC - TUTUP PAKAI TOMBOL MENU */}
+            {/* Menu Drawer - BG BIRU #0D3CFC - TUTUP PAKAI TANDA + */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -763,26 +814,6 @@ export default function ContactPage(): React.JSX.Element {
                 overflow: 'hidden'
               }}
             >
-              {/* Judul MENURU warna putih di bg menu */}
-              <h1
-                style={{
-                  position: 'absolute',
-                  top: '40px',
-                  left: '40px',
-                  fontSize: '48px',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: '-0.03em',
-                  margin: 0,
-                  padding: 0,
-                  lineHeight: 1,
-                  opacity: 0.9,
-                }}
-              >
-                Menuru
-              </h1>
-
               {/* Menu items - tengah */}
               <div
                 style={{
@@ -934,21 +965,21 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-05 Items dengan label ComingSoon kotak */}
+            {/* 01-05 Items dengan label ComingSoon kotak border */}
             <div style={{
               position: 'relative',
               top: '150px',
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '80px'
+              marginBottom: '60px'
             }}>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '80px',
+                marginBottom: '60px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -991,12 +1022,12 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '16px',
                       fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
+                      color: '#0D3CFC',
+                      backgroundColor: 'transparent',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       letterSpacing: '0.02em',
-                      border: '1px solid #0D3CFC',
+                      border: '2px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1057,12 +1088,12 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '16px',
                       fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
+                      color: '#0D3CFC',
+                      backgroundColor: 'transparent',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       letterSpacing: '0.02em',
-                      border: '1px solid #0D3CFC',
+                      border: '2px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1123,12 +1154,12 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '16px',
                       fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
+                      color: '#0D3CFC',
+                      backgroundColor: 'transparent',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       letterSpacing: '0.02em',
-                      border: '1px solid #0D3CFC',
+                      border: '2px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1189,12 +1220,12 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '16px',
                       fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
+                      color: '#0D3CFC',
+                      backgroundColor: 'transparent',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       letterSpacing: '0.02em',
-                      border: '1px solid #0D3CFC',
+                      border: '2px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1255,12 +1286,12 @@ export default function ContactPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       fontSize: '16px',
                       fontWeight: '500',
-                      color: '#ffffff',
-                      backgroundColor: '#0D3CFC',
+                      color: '#0D3CFC',
+                      backgroundColor: 'transparent',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       letterSpacing: '0.02em',
-                      border: '1px solid #0D3CFC',
+                      border: '2px solid #0D3CFC',
                     }}>
                       ComingSoon
                     </span>
@@ -1282,108 +1313,72 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section dengan sidebar kanan */}
+              {/* FAQ Section */}
               <div style={{
                 marginLeft: '80px',
-                marginTop: '60px',
+                marginTop: '40px',
                 maxWidth: '900px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
               }}>
-                <div style={{ flex: 1 }}>
+                {/* Pertanyaan FAQ - Biru besar */}
+                <div
+                  ref={faqQuestionRef}
+                  onClick={toggleFaq}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    padding: '20px 0',
+                    borderBottom: '1px solid #e0e0e0',
+                  }}
+                >
                   <h2 style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: '60px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    margin: 0,
-                    marginBottom: '10px',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    FAQ
-                  </h2>
-                  <p style={{
-                    fontFamily: FONT_FAMILY,
                     fontSize: '50px',
-                    fontWeight: '400',
+                    fontWeight: '600',
                     color: '#0D3CFC',
                     margin: 0,
-                    letterSpacing: '-0.01em',
-                    lineHeight: 1.2
+                    letterSpacing: '-0.02em'
                   }}>
                     Apakah kamu punya kesulitan?
-                  </p>
+                  </h2>
+                  <span
+                    ref={faqPlusRef}
+                    style={{
+                      fontSize: '40px',
+                      fontWeight: 300,
+                      color: '#0D3CFC',
+                      display: 'inline-block',
+                      transform: 'rotate(0deg)',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    +
+                  </span>
                 </div>
 
-                {/* Sidebar kanan - daftar menu */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  alignItems: 'flex-end',
-                  minWidth: '200px',
-                }}>
-                  <span style={{
+                {/* Jawaban FAQ - Hitam */}
+                <div
+                  ref={faqAnswerRef}
+                  style={{
+                    overflow: 'hidden',
+                    height: 0,
+                    opacity: 0,
+                    paddingTop: 0,
+                  }}
+                >
+                  <p style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
+                    fontSize: '24px',
                     fontWeight: '400',
                     color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
+                    margin: 0,
+                    padding: '20px 0',
+                    lineHeight: 1.6,
+                    letterSpacing: '0.01em'
                   }}>
-                    Shop
-                  </span>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
-                  }}>
-                    Community
-                  </span>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
-                  }}>
-                    Blog
-                  </span>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
-                  }}>
-                    Note
-                  </span>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
-                  }}>
-                    Donation
-                  </span>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#000000',
-                    opacity: 0.6,
-                    letterSpacing: '0.02em'
-                  }}>
-                    Calendar
-                  </span>
+                    Kami siap membantu Anda! Silakan hubungi tim support kami melalui email di contact.menuru@gmail.com atau melalui media sosial kami. Kami akan merespon dalam waktu 24 jam.
+                  </p>
                 </div>
               </div>
             </div>
