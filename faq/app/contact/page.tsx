@@ -1422,108 +1422,9 @@ export default function ContactPage(): React.JSX.Element {
                     )}
                   </div>
                 </div>
-
-                {/* Subscribe di bawah Calendar (05 - Shop) */}
-                <div style={{
-                  marginTop: '20px',
-                  borderTop: '1px solid #e0e0e0',
-                  paddingTop: '40px',
-                }}>
-                  <h3 style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '40px',
-                    fontWeight: '600',
-                    color: '#0D3CFC',
-                    margin: 0,
-                    marginBottom: '8px',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    Talk with an Menuru
-                  </h3>
-                  <p style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '300',
-                    color: '#666',
-                    margin: 0,
-                    marginBottom: '20px',
-                    letterSpacing: '0.01em',
-                  }}>
-                    Get the latest updates from Menuru
-                  </p>
-
-                  <form onSubmit={handleSubscribe} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    maxWidth: '500px',
-                  }}>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="subscribe-input"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#0D3CFC',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '12px 16px',
-                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                        color: '#ffffff',
-                        transition: 'all 0.3s ease',
-                        opacity: isSubmitting ? 0.6 : 1,
-                        flexShrink: 0,
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSubmitting) {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSubmitting) {
-                          e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        }
-                      }}
-                    >
-                      <ArrowRight size={24} />
-                    </button>
-                  </form>
-
-                  {/* Status Message */}
-                  {subscribeStatus === 'success' && (
-                    <p style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '14px',
-                      color: '#0D3CFC',
-                      marginTop: '10px',
-                      marginBottom: 0,
-                    }}>
-                      ✓ Berhasil berlangganan!
-                    </p>
-                  )}
-                  {subscribeStatus === 'error' && (
-                    <p style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '14px',
-                      color: '#ff4444',
-                      marginTop: '10px',
-                      marginBottom: 0,
-                    }}>
-                      ✗ Email tidak valid atau terjadi kesalahan
-                    </p>
-                  )}
-                </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* FAQ Section + Subscribe di bawah Calendar (05 - Shop) */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1564,7 +1465,7 @@ export default function ContactPage(): React.JSX.Element {
                   </p>
                 </div>
 
-                {/* Kanan - FAQ Items */}
+                {/* Kanan - FAQ Items + Subscribe */}
                 <div style={{
                   flex: 1,
                   display: 'flex',
@@ -1653,6 +1554,105 @@ export default function ContactPage(): React.JSX.Element {
                       </AnimatePresence>
                     </div>
                   ))}
+
+                  {/* Subscribe di bawah Calendar (setelah FAQ items) */}
+                  <div style={{
+                    marginTop: '30px',
+                    borderTop: '1px solid #e0e0e0',
+                    paddingTop: '30px',
+                  }}>
+                    <h3 style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '40px',
+                      fontWeight: '600',
+                      color: '#0D3CFC',
+                      margin: 0,
+                      marginBottom: '8px',
+                      letterSpacing: '-0.01em',
+                    }}>
+                      Talk with an Menuru
+                    </h3>
+                    <p style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '16px',
+                      fontWeight: '300',
+                      color: '#666',
+                      margin: 0,
+                      marginBottom: '20px',
+                      letterSpacing: '0.01em',
+                    }}>
+                      Get the latest updates from Menuru
+                    </p>
+
+                    <form onSubmit={handleSubscribe} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      maxWidth: '500px',
+                    }}>
+                      <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="subscribe-input"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#0D3CFC',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '12px 16px',
+                          cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                          color: '#ffffff',
+                          transition: 'all 0.3s ease',
+                          opacity: isSubmitting ? 0.6 : 1,
+                          flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = '#0D3CFC';
+                          }
+                        }}
+                      >
+                        <ArrowRight size={24} />
+                      </button>
+                    </form>
+
+                    {/* Status Message */}
+                    {subscribeStatus === 'success' && (
+                      <p style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '14px',
+                        color: '#0D3CFC',
+                        marginTop: '10px',
+                        marginBottom: 0,
+                      }}>
+                        ✓ Berhasil berlangganan!
+                      </p>
+                    )}
+                    {subscribeStatus === 'error' && (
+                      <p style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '14px',
+                        color: '#ff4444',
+                        marginTop: '10px',
+                        marginBottom: 0,
+                      }}>
+                        ✗ Email tidak valid atau terjadi kesalahan
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
