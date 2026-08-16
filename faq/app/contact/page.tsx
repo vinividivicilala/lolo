@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FINAL FIXED)
+// app/contact/page.tsx (Halaman Contact - FIXED SCROLL)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -123,8 +123,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const ticketListRef = useRef<HTMLDivElement>(null);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -144,6 +147,98 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
+  };
+
+  // Fungsi untuk membuat ticket dari item dengan scrolling
+  const createTicketFromItem = async (itemName: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    if (!db) {
+      alert("Database tidak tersedia");
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      // Cek ticket aktif
+      const q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        where("status", "in", ["waiting", "active"])
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+        setIsLoading(false);
+        return;
+      }
+
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: `Tentang ${itemName}`,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      
+      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
+      
+      // Scroll ke live chat section
+      const liveChatElement = document.getElementById('live-chat-section');
+      if (liveChatElement) {
+        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // Refresh tickets setelah delay
+      setTimeout(() => {
+        const q2 = query(
+          collection(db, "livechat_tickets"),
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
+        );
+        const unsubscribe = onSnapshot(q2, (snapshot) => {
+          const ticketList: Ticket[] = [];
+          snapshot.forEach((doc) => {
+            ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
+          });
+          setTickets(ticketList);
+          // Pilih ticket yang baru dibuat
+          const newTicket = ticketList.find(t => t.topic === `Tentang ${itemName}`);
+          if (newTicket) {
+            setSelectedTicket(newTicket);
+            setMessages([]);
+            // Scroll ke chat container
+            setTimeout(() => {
+              if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = 0;
+              }
+            }, 300);
+          }
+          unsubscribe();
+        });
+      }, 500);
+      
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      alert("Gagal membuat ticket. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -260,6 +355,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
     }
+    setIsLoading(true);
     try {
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
@@ -283,8 +379,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setSelectedTopic("");
       setShowStartChat(false);
+      
+      // Scroll ke live chat
+      const liveChatElement = document.getElementById('live-chat-section');
+      if (liveChatElement) {
+        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } catch (error) {
       console.error("Error starting chat:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -318,6 +422,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      
+      // Scroll ke bawah setelah kirim pesan
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -473,20 +582,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <div style={{ display: "flex", gap: "12px" }}>
               <button
                 onClick={startChat}
-                disabled={!selectedTopic}
+                disabled={!selectedTopic || isLoading}
                 style={{
                   padding: "10px 24px",
-                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
+                  backgroundColor: selectedTopic && !isLoading ? "#0D3CFC" : "#ccc",
                   color: "#fff",
                   border: "none",
                   borderRadius: "8px",
                   fontSize: "16px",
                   fontWeight: 500,
-                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  cursor: selectedTopic && !isLoading ? "pointer" : "not-allowed",
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Mulai Chat
+                {isLoading ? "Memproses..." : "Mulai Chat"}
               </button>
               <button
                 onClick={() => setShowStartChat(false)}
@@ -521,20 +630,23 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         <div style={{ 
           display: "flex", 
           gap: "20px", 
-          height: "500px",
+          height: "520px",
           maxWidth: "100%",
         }}>
+          {/* Ticket List - Kiri */}
           <div style={{
             width: "280px",
             minWidth: "200px",
             backgroundColor: "#0D3CFC",
             borderRadius: "12px",
             padding: "12px 0",
-            overflowY: "auto",
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            maxHeight: "500px",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
           }}>
             <div style={{
               padding: "0 16px 12px 16px",
@@ -544,10 +656,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              position: "sticky",
-              top: 0,
-              backgroundColor: "#0D3CFC",
-              zIndex: 1,
+              flexShrink: 0,
             }}>
               <ChatIconSmall />
               <span>Riwayat Chat</span>
@@ -559,7 +668,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "12px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "400px" }}>
+            
+            <div 
+              ref={ticketListRef}
+              style={{ 
+                flex: 1, 
+                overflowY: "auto",
+                paddingBottom: "4px",
+              }}
+            >
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
@@ -573,6 +690,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     onClick={() => {
                       setSelectedTicket(ticket);
                       setMessages([]);
+                      // Scroll ke atas chat container
+                      setTimeout(() => {
+                        if (chatContainerRef.current) {
+                          chatContainerRef.current.scrollTop = 0;
+                        }
+                      }, 100);
                     }}
                     style={{
                       padding: "10px 16px",
@@ -613,12 +736,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 </div>
               )}
             </div>
+            
             <div style={{ 
               padding: "12px 16px", 
               borderTop: "1px solid rgba(255,255,255,0.1)",
-              position: "sticky",
-              bottom: 0,
-              backgroundColor: "#0D3CFC",
+              flexShrink: 0,
             }}>
               <button
                 onClick={() => setShowStartChat(true)}
@@ -640,6 +762,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           </div>
 
+          {/* Chat Container - Kanan */}
           <div style={{
             flex: 1,
             minWidth: "200px",
@@ -649,10 +772,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "500px",
+            height: "100%",
           }}>
             {selectedTicket ? (
               <>
+                {/* Header Chat */}
                 <div style={{
                   padding: "10px 16px",
                   backgroundColor: "#0D3CFC",
@@ -702,15 +826,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     </button>
                   )}
                 </div>
-                <div style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  maxHeight: "380px",
-                }}>
+                
+                {/* Messages - Scrollable */}
+                <div 
+                  ref={chatContainerRef}
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    minHeight: "0",
+                  }}
+                >
                   {messages.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                       Belum ada pesan
@@ -765,6 +894,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   )}
                   <div ref={messagesEndRef} />
                 </div>
+                
+                {/* Input */}
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
                     padding: "10px 14px",
@@ -897,151 +1028,176 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       <div style={{ 
         display: "flex", 
         gap: "20px", 
-        height: "500px",
+        height: "520px",
         maxWidth: "100%",
       }}>
+        {/* Ticket List - Kiri Admin */}
         <div style={{
           width: "280px",
           minWidth: "200px",
           backgroundColor: "#f9f9f9",
           borderRadius: "12px",
           border: "1px solid #e8e8e8",
-          overflowY: "auto",
+          overflow: "hidden",
           flexShrink: 0,
-          maxHeight: "500px",
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
         }}>
-          {waitingTickets.length > 0 && (
-            <div>
-              <div style={{
-                padding: "10px 14px",
-                backgroundColor: "#fef3c7",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#92400e",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-              }}>
-                <span>⏳</span>
-                <span>Menunggu ({waitingTickets.length})</span>
-              </div>
-              {waitingTickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  onClick={() => {
-                    setSelectedTicket(ticket);
-                    takeTicket(ticket.id);
-                  }}
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid #e8e8e8",
-                    cursor: "pointer",
-                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
-                    transition: "background 0.2s ease",
-                  }}
-                >
-                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                  <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {waitingTickets.length > 0 && (
+              <div>
+                <div style={{
+                  padding: "10px 14px",
+                  backgroundColor: "#fef3c7",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  color: "#92400e",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontFamily: FONT_FAMILY,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                }}>
+                  <span>⏳</span>
+                  <span>Menunggu ({waitingTickets.length})</span>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {activeTickets.length > 0 && (
-            <div>
-              <div style={{
-                padding: "10px 14px",
-                backgroundColor: "#d1fae5",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#065f46",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-              }}>
-                <span>💬</span>
-                <span>Aktif ({activeTickets.length})</span>
-              </div>
-              {activeTickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid #e8e8e8",
-                    cursor: "pointer",
-                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
-                    transition: "background 0.2s ease",
-                  }}
-                >
-                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                  <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
-                  {ticket.lastMessage && <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}</div>}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {resolvedTickets.length > 0 && (
-            <div>
-              <div style={{
-                padding: "10px 14px",
-                backgroundColor: "#e5e7eb",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#6b7280",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-              }}>
-                <span>✅</span>
-                <span>Selesai ({resolvedTickets.length})</span>
-              </div>
-              {resolvedTickets.map((ticket) => {
-                const ticketId = generateTicketId(ticket.createdAt);
-                return (
+                {waitingTickets.map((ticket) => (
                   <div
                     key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      takeTicket(ticket.id);
+                      setTimeout(() => {
+                        if (chatContainerRef.current) {
+                          chatContainerRef.current.scrollTop = 0;
+                        }
+                      }, 100);
+                    }}
                     style={{
                       padding: "10px 14px",
                       borderBottom: "1px solid #e8e8e8",
                       cursor: "pointer",
                       backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
                       transition: "background 0.2s ease",
-                      opacity: 0.7,
                     }}
                   >
                     <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                     <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                    <div style={{ fontSize: "10px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
+                    {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
-            <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
-              Tidak ada chat masuk
-            </div>
-          )}
+            {activeTickets.length > 0 && (
+              <div>
+                <div style={{
+                  padding: "10px 14px",
+                  backgroundColor: "#d1fae5",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  color: "#065f46",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontFamily: FONT_FAMILY,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                }}>
+                  <span>💬</span>
+                  <span>Aktif ({activeTickets.length})</span>
+                </div>
+                {activeTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setTimeout(() => {
+                        if (chatContainerRef.current) {
+                          chatContainerRef.current.scrollTop = 0;
+                        }
+                      }, 100);
+                    }}
+                    style={{
+                      padding: "10px 14px",
+                      borderBottom: "1px solid #e8e8e8",
+                      cursor: "pointer",
+                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                    <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                    {ticket.typing && <div style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic" }}>{ticket.typingUserName} mengetik...</div>}
+                    {ticket.lastMessage && <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{ticket.lastMessage.substring(0, 40)}{ticket.lastMessage.length > 40 ? "..." : ""}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {resolvedTickets.length > 0 && (
+              <div>
+                <div style={{
+                  padding: "10px 14px",
+                  backgroundColor: "#e5e7eb",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontFamily: FONT_FAMILY,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                }}>
+                  <span>✅</span>
+                  <span>Selesai ({resolvedTickets.length})</span>
+                </div>
+                {resolvedTickets.map((ticket) => {
+                  const ticketId = generateTicketId(ticket.createdAt);
+                  return (
+                    <div
+                      key={ticket.id}
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setTimeout(() => {
+                          if (chatContainerRef.current) {
+                            chatContainerRef.current.scrollTop = 0;
+                          }
+                        }, 100);
+                      }}
+                      style={{
+                        padding: "10px 14px",
+                        borderBottom: "1px solid #e8e8e8",
+                        cursor: "pointer",
+                        backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                        transition: "background 0.2s ease",
+                        opacity: 0.7,
+                      }}
+                    >
+                      <div style={{ fontWeight: 500, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
+                      <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
+                      <div style={{ fontSize: "10px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+              <div style={{ padding: "40px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+                Tidak ada chat masuk
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Chat Container - Kanan Admin */}
         <div style={{
           flex: 1,
           minWidth: "200px",
@@ -1051,7 +1207,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "500px",
+          height: "100%",
         }}>
           {selectedTicket ? (
             <>
@@ -1104,15 +1260,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </button>
                 )}
               </div>
-              <div style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "12px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "4px",
-                maxHeight: "380px",
-              }}>
+              <div 
+                ref={chatContainerRef}
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  minHeight: "0",
+                }}
+              >
                 {messages.length === 0 ? (
                   <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
                     Belum ada pesan
@@ -1332,7 +1491,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               fontSize: "16px",
               fontFamily: FONT_FAMILY,
               outline: "none",
-              transition: "border-color 0.2s ease",
+              transition: "border-color 0.2s ease, background-color 0.2s ease",
               backgroundColor: "#f9f9f9",
             }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "#0D3CFC"; e.currentTarget.style.backgroundColor = "#fff"; }}
@@ -1547,7 +1706,7 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Fungsi untuk membuat ticket dari item
+  // Fungsi untuk membuat ticket dari item dengan scroll
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1590,12 +1749,15 @@ export default function ContactPage(): React.JSX.Element {
         timestamp: serverTimestamp(),
         read: false,
       });
-      alert(`Ticket untuk "${itemName}" berhasil dibuat! Silakan cek Live Chat Agent.`);
       
+      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
+      
+      // Scroll ke live chat section dengan smooth
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        liveChatElement.scrollIntoView({ behavior: 'smooth' });
+        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+      
     } catch (error) {
       console.error("Error creating ticket:", error);
       alert("Gagal membuat ticket. Silakan coba lagi.");
@@ -1883,7 +2045,7 @@ export default function ContactPage(): React.JSX.Element {
           pointerEvents: 'auto',
           boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
         }}>
-          {/* Get in Touch dengan tulisan "here" */}
+          {/* Get in Touch dengan "here" */}
           <Link href="/contact">
             <div
               style={{
