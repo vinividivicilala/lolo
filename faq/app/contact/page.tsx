@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED SCROLL)
+// app/contact/page.tsx (Halaman Contact - FIXED SCROLL USER)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -510,12 +510,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
+    // USER VIEW - DENGAN SCROLL NORMAL
     return (
       <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
         <h3 style={{ fontSize: "24px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
           Live Chat Agent
         </h3>
-        <div style={{ display: "flex", gap: "16px", maxHeight: "450px", minHeight: "350px" }}>
+        <div style={{ 
+          display: "flex", 
+          gap: "16px", 
+          maxHeight: "500px", 
+          minHeight: "400px",
+          overflow: "hidden",
+          borderRadius: "10px",
+        }}>
           <div style={{
             width: "220px",
             backgroundColor: "#0D3CFC",
@@ -525,7 +533,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            maxHeight: "450px",
+            maxHeight: "500px",
           }}>
             <div style={{
               padding: "0 12px 10px 12px",
@@ -535,6 +543,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               display: "flex",
               alignItems: "center",
               gap: "6px",
+              position: "sticky",
+              top: 0,
+              backgroundColor: "#0D3CFC",
+              zIndex: 1,
             }}>
               <ChatIconSmall />
               <span>Riwayat Chat</span>
@@ -546,7 +558,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "10px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "350px" }}>
+            <div style={{ overflowY: "auto", maxHeight: "400px" }}>
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
@@ -600,7 +612,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 </div>
               )}
             </div>
-            <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ 
+              padding: "10px 12px", 
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: "#0D3CFC",
+            }}>
               <button
                 onClick={() => setShowStartChat(true)}
                 style={{
@@ -629,7 +647,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "450px",
+            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
@@ -683,8 +701,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
-                  minHeight: "200px",
-                  maxHeight: "350px",
+                  minHeight: "250px",
+                  maxHeight: "400px",
                 }}>
                   {messages.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
@@ -860,7 +878,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "16px", maxHeight: "450px", minHeight: "350px" }}>
+      <div style={{ 
+        display: "flex", 
+        gap: "16px", 
+        maxHeight: "500px", 
+        minHeight: "400px",
+        overflow: "hidden",
+        borderRadius: "10px",
+      }}>
         <div style={{
           width: "240px",
           backgroundColor: "#f9f9f9",
@@ -868,7 +893,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          maxHeight: "450px",
+          maxHeight: "500px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1010,7 +1035,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "450px",
+          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
@@ -1064,8 +1089,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 display: "flex",
                 flexDirection: "column",
                 gap: "4px",
-                minHeight: "200px",
-                maxHeight: "350px",
+                minHeight: "250px",
+                maxHeight: "400px",
               }}>
                 {messages.length === 0 ? (
                   <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
@@ -1564,12 +1589,11 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Menu drawer animation
+  // Menu drawer animation - TIDAK MENGGUNAKAN overflow: hidden pada body
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
+      // Hanya mengatur posisi body tanpa mengganggu scroll
+      document.body.style.position = 'relative';
       
       gsap.fromTo(menuDrawerRef.current,
         { y: '100%', opacity: 0 },
@@ -1587,8 +1611,8 @@ export default function ContactPage(): React.JSX.Element {
         }
       );
     } else if (!isMenuOpen && menuDrawerRef.current) {
-      document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.overflow = '';
       document.body.style.width = '';
       
       gsap.to(menuDrawerRef.current, {
@@ -1760,6 +1784,7 @@ export default function ContactPage(): React.JSX.Element {
           padding: 0;
           background-color: white;
           overflow-x: hidden;
+          overflow-y: auto !important;
         }
         .split-char-contact {
           display: inline-block;
