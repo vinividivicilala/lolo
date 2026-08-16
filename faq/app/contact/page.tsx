@@ -558,12 +558,14 @@ export default function ContactPage(): React.JSX.Element {
               gap: '12px',
               padding: '8px 16px',
               borderRadius: '12px',
-              backgroundColor: 'rgba(255,255,255,0)',
-              backdropFilter: 'blur(0px)',
+              backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
+              backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
               transition: 'all 0.3s ease',
+              pointerEvents: isMenuOpen ? 'none' : 'auto',
+              boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
             }}>
               {/* Get in Touch */}
-              <Link href="/contact">
+              <Link href="/contact" style={{ pointerEvents: isMenuOpen ? 'none' : 'auto' }}>
                 <div
                   style={{
                     display: 'inline-flex',
@@ -604,7 +606,7 @@ export default function ContactPage(): React.JSX.Element {
               </Link>
 
               {/* Pusat Bantuan */}
-              <Link href="/pusat-bantuan">
+              <Link href="/pusat-bantuan" style={{ pointerEvents: isMenuOpen ? 'none' : 'auto' }}>
                 <div
                   style={{
                     display: 'inline-flex',
@@ -659,6 +661,7 @@ export default function ContactPage(): React.JSX.Element {
                   padding: '8px 16px',
                   cursor: 'pointer',
                   backgroundColor: 'transparent',
+                  pointerEvents: isMenuOpen ? 'none' : 'auto',
                 }}
               >
                 <div
@@ -699,7 +702,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Menu Drawer */}
+            {/* Menu Drawer - BG BIRU #0D3CFC seperti halaman utama */}
             <div
               ref={menuDrawerRef}
               style={{
@@ -709,236 +712,88 @@ export default function ContactPage(): React.JSX.Element {
                 right: 0,
                 width: '100%',
                 height: '100%',
-                backgroundColor: '#000000',
-                zIndex: 200,
+                backgroundColor: '#0D3CFC',
+                zIndex: 99,
                 display: 'none',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 justifyContent: 'flex-start',
-                padding: '60px',
+                transform: 'translateY(-100%)',
+                opacity: 0,
+                pointerEvents: isMenuOpen ? 'auto' : 'none',
+                padding: '40px',
                 boxSizing: 'border-box',
                 overflow: 'hidden'
               }}
             >
-              {/* Tombol Close (X) */}
-              <div
-                ref={closeButtonRef}
-                onClick={handleCloseMenu}
-                onMouseEnter={(e) => {
-                  gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
-                }}
-                onMouseLeave={(e) => {
-                  gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
-                }}
+              {/* Judul di kiri atas menu */}
+              <h1
                 style={{
+                  fontSize: '48px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                  padding: 0,
+                  lineHeight: 1,
+                  opacity: 0.9,
                   position: 'absolute',
                   top: '40px',
-                  right: '40px',
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '50%',
-                  backgroundColor: '#e49366',
+                  left: '40px',
+                }}
+              >
+                Menuru
+              </h1>
+
+              {/* Menu items - tengah */}
+              <div
+                style={{
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  width: '100%',
+                  height: '100%',
+                  gap: '30px',
                 }}
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-
-              {/* Teks MENURU besar di sisi kanan bawah */}
-              <div
-                ref={menuMenuruTextRef}
-                style={{
-                  position: 'absolute',
-                  bottom: '40px',
-                  right: '40px',
-                  fontFamily: "'Archivo Black', 'Impact', sans-serif",
-                  fontSize: '180px',
-                  fontWeight: '400',
-                  color: 'rgba(255,255,255,0.15)',
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
-                  lineHeight: '0.8',
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                MENURU
-              </div>
-
-              {/* Teks judul web di samping kiri atas */}
-              <div style={{
-                position: 'absolute',
-                top: '40px',
-                left: '40px',
-                fontFamily: FONT_FAMILY,
-                fontSize: '48px',
-                fontWeight: 700,
-                color: '#ffffff',
-                letterSpacing: '-0.02em',
-              }}>
-                Menuru
-              </div>
-
-              {/* 6 Menu Items */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px',
-                marginTop: '120px',
-                marginLeft: '40px'
-              }}>
-                <div
-                  ref={menuItemRefs.note}
-                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.note, true)}
-                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.note, false)}
-                  onClick={() => handleMenuItemClick(menuItemRefs.note, '/note')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '64px',
-                    fontWeight: '300',
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Note
-                  </span>
-                </div>
-
-                <div
-                  ref={menuItemRefs.blog}
-                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.blog, true)}
-                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.blog, false)}
-                  onClick={() => handleMenuItemClick(menuItemRefs.blog, '/blog')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '64px',
-                    fontWeight: '300',
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Blog
-                  </span>
-                </div>
-
-                <div
-                  ref={menuItemRefs.community}
-                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.community, true)}
-                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.community, false)}
-                  onClick={() => handleMenuItemClick(menuItemRefs.community, '/community')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '64px',
-                    fontWeight: '300',
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Community
-                  </span>
-                </div>
-
-                <div
-                  ref={menuItemRefs.donation}
-                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.donation, true)}
-                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.donation, false)}
-                  onClick={() => handleMenuItemClick(menuItemRefs.donation, '/donation')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '64px',
-                    fontWeight: '300',
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Donation
-                  </span>
-                </div>
-
-                <div
-                  ref={menuItemRefs.calendar}
-                  onMouseEnter={() => handleMenuItemHover(menuItemRefs.calendar, true)}
-                  onMouseLeave={() => handleMenuItemHover(menuItemRefs.calendar, false)}
-                  onClick={() => handleMenuItemClick(menuItemRefs.calendar, '/calendar')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '64px',
-                    fontWeight: '300',
-                    color: '#ffffff',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    Calendar
-                  </span>
-                </div>
-
-                <div
-                  ref={menuItemRefs.contact}
-                  onClick={() => handleMenuItemClick(menuItemRefs.contact, '/contact')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    cursor: 'pointer',
-                    opacity: 0
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '64px',
-                      fontWeight: '300',
-                      color: '#ffffff',
-                      letterSpacing: '-0.02em'
-                    }}>
-                      Contact
-                    </span>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                </div>
+                <Link href="/" style={{ 
+                  color: '#ffffff', 
+                  fontSize: '48px', 
+                  textDecoration: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 500,
+                  transition: 'opacity 0.3s',
+                  opacity: 0.8,
+                }}>Home</Link>
+                <Link href="/about" style={{ 
+                  color: '#ffffff', 
+                  fontSize: '48px', 
+                  textDecoration: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 500,
+                  transition: 'opacity 0.3s',
+                  opacity: 0.8,
+                }}>About</Link>
+                <Link href="/contact" style={{ 
+                  color: '#ffffff', 
+                  fontSize: '48px', 
+                  textDecoration: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 500,
+                  transition: 'opacity 0.3s',
+                  opacity: 0.8,
+                }}>Contact</Link>
+                <Link href="/pusat-bantuan" style={{ 
+                  color: '#ffffff', 
+                  fontSize: '48px', 
+                  textDecoration: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 500,
+                  transition: 'opacity 0.3s',
+                  opacity: 0.8,
+                }}>Pusat Bantuan</Link>
               </div>
             </div>
 
@@ -1043,7 +898,7 @@ export default function ContactPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* 01-04 Items dengan ComingSoon label */}
+            {/* 01-04 Items dengan label ComingSoon biru di sisi kanan teks item */}
             <div style={{
               position: 'relative',
               top: '150px',
@@ -1066,14 +921,14 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '800px',
+                    maxWidth: '1000px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('01')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '90px',
@@ -1086,27 +941,23 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '0.02em'
-                    }}>
-                      ComingSoon
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
                       fontSize: '300px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
                     }}>
                       Note
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '500',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
                     </span>
                     {hoveredItem === '01' && (
                       <div
@@ -1132,14 +983,14 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '800px',
+                    maxWidth: '1000px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('02')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '90px',
@@ -1152,27 +1003,23 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '0.02em'
-                    }}>
-                      ComingSoon
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
                       fontSize: '300px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
                     }}>
                       Calendar
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '500',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
                     </span>
                     {hoveredItem === '02' && (
                       <div
@@ -1198,14 +1045,14 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '800px',
+                    maxWidth: '1000px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('03')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '90px',
@@ -1218,27 +1065,23 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '0.02em'
-                    }}>
-                      ComingSoon
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
                       fontSize: '300px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
                     }}>
                       Donation
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '500',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
                     </span>
                     {hoveredItem === '03' && (
                       <div
@@ -1264,14 +1107,14 @@ export default function ContactPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    maxWidth: '800px',
+                    maxWidth: '1000px',
                     cursor: 'pointer',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseEnter={() => setHoveredItem('04')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                     <span style={{
                       fontFamily: FONT_FAMILY,
                       fontSize: '90px',
@@ -1284,27 +1127,23 @@ export default function ContactPage(): React.JSX.Element {
                     </span>
                     <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '24px',
-                      fontWeight: '400',
-                      color: '#0D3CFC',
-                      letterSpacing: '0.02em'
-                    }}>
-                      ComingSoon
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '30px'
-                  }}>
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
                       fontSize: '300px',
                       fontWeight: '300',
                       color: '#000000',
                       letterSpacing: '-0.02em'
                     }}>
                       Community
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '500',
+                      color: '#0D3CFC',
+                      letterSpacing: '0.02em'
+                    }}>
+                      ComingSoon
                     </span>
                     {hoveredItem === '04' && (
                       <div
