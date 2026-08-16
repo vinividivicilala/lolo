@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FINAL FIXED)
+// app/contact/page.tsx (Halaman Contact - FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -68,6 +68,12 @@ const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SendIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -268,12 +274,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const ChatIconSmall = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  );
-
-  const SendIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
     </svg>
   );
 
@@ -603,7 +603,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // USER VIEW - SAMA UNTUK USER BIASA DAN AGENT, BISA SCROLL BEBAS
+  // USER VIEW
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
 
@@ -1096,7 +1096,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ADMIN VIEW - SAMA, BISA SCROLL BEBAS
+  // ADMIN VIEW
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1536,6 +1536,13 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  // Icon Send untuk tombol submit
+  const SendIconFeedback = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
@@ -1671,7 +1678,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
           onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0a2fc9"; }}
           onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
         >
-          <SendIcon />
+          <SendIconFeedback />
           <span>{isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}</span>
         </button>
         {submitStatus === 'success' && (
@@ -1704,7 +1711,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
-          {/* Titik awal - submit pertama (#1) */}
+          {/* Titik awal - submit pertama (#1) - HITAM */}
           {feedbacks.length > 0 && (
             <div style={{
               position: "absolute",
@@ -1726,7 +1733,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               paddingLeft: "20px",
               paddingTop: index === 0 ? "0" : "4px",
             }}>
-              {/* Titik di setiap submit berikutnya (#2, #3, dst) */}
+              {/* Titik di setiap submit berikutnya (#2, #3, dst) - PUTIH */}
               {index > 0 && (
                 <div style={{
                   position: "absolute",
@@ -1916,7 +1923,7 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Menu drawer animation - HANYA JUDUL DAN NAVBAR
+  // Menu drawer animation
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -2320,7 +2327,7 @@ export default function ContactPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Drawer - HANYA JUDUL DAN NAVBAR (background biru) */}
+        {/* Menu Drawer - HANYA JUDUL DAN NAVBAR */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -2344,7 +2351,6 @@ export default function ContactPage(): React.JSX.Element {
             overflow: 'hidden'
           }}
         >
-          {/* Hanya judul Menuru putih di pojok kiri atas */}
           <h1
             style={{
               position: 'absolute',
@@ -2363,7 +2369,6 @@ export default function ContactPage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Menu items - sederhana di tengah */}
           <div
             style={{
               display: 'flex',
