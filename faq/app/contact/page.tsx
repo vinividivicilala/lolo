@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED SCROLL)
+// app/contact/page.tsx (Halaman Contact - FIXED SCROLL & LAYOUT)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -149,7 +149,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
   };
 
-  // Fungsi untuk membuat ticket dari item dengan scrolling
+  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -162,7 +162,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     
     setIsLoading(true);
     try {
-      // Cek ticket aktif
       const q = query(
         collection(db, "livechat_tickets"),
         where("userId", "==", user.uid),
@@ -198,13 +197,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
-      // Scroll ke live chat section
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
         liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
       
-      // Refresh tickets setelah delay
       setTimeout(() => {
         const q2 = query(
           collection(db, "livechat_tickets"),
@@ -217,12 +214,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
           });
           setTickets(ticketList);
-          // Pilih ticket yang baru dibuat
           const newTicket = ticketList.find(t => t.topic === `Tentang ${itemName}`);
           if (newTicket) {
             setSelectedTicket(newTicket);
             setMessages([]);
-            // Scroll ke chat container
             setTimeout(() => {
               if (chatContainerRef.current) {
                 chatContainerRef.current.scrollTop = 0;
@@ -380,7 +375,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTopic("");
       setShowStartChat(false);
       
-      // Scroll ke live chat
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
         liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -423,7 +417,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       
-      // Scroll ke bawah setelah kirim pesan
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -624,14 +617,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         marginTop: "40px", 
         borderTop: "1px solid #e8e8e8", 
         paddingTop: "40px",
+        width: "100%",
         maxWidth: "100%",
-        overflow: "hidden",
+        overflow: "visible",
       }}>
         <div style={{ 
           display: "flex", 
           gap: "20px", 
-          height: "520px",
+          height: "500px",
+          width: "100%",
           maxWidth: "100%",
+          overflow: "hidden",
         }}>
           {/* Ticket List - Kiri */}
           <div style={{
@@ -647,6 +643,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexDirection: "column",
             height: "100%",
             overflow: "hidden",
+            maxHeight: "500px",
           }}>
             <div style={{
               padding: "0 16px 12px 16px",
@@ -674,7 +671,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               style={{ 
                 flex: 1, 
                 overflowY: "auto",
+                overflowX: "hidden",
                 paddingBottom: "4px",
+                minHeight: "0",
               }}
             >
               {tickets.map((ticket) => {
@@ -690,7 +689,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     onClick={() => {
                       setSelectedTicket(ticket);
                       setMessages([]);
-                      // Scroll ke atas chat container
                       setTimeout(() => {
                         if (chatContainerRef.current) {
                           chatContainerRef.current.scrollTop = 0;
@@ -773,6 +771,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexDirection: "column",
             overflow: "hidden",
             height: "100%",
+            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
@@ -833,6 +832,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   style={{
                     flex: 1,
                     overflowY: "auto",
+                    overflowX: "hidden",
                     padding: "12px",
                     display: "flex",
                     flexDirection: "column",
@@ -984,10 +984,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       marginTop: "40px", 
       borderTop: "1px solid #e8e8e8", 
       paddingTop: "40px",
+      width: "100%",
       maxWidth: "100%",
-      overflow: "hidden",
+      overflow: "visible",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h3 style={{ fontSize: "28px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
             Live Chat Agent
@@ -1028,8 +1029,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       <div style={{ 
         display: "flex", 
         gap: "20px", 
-        height: "520px",
+        height: "500px",
+        width: "100%",
         maxWidth: "100%",
+        overflow: "hidden",
       }}>
         {/* Ticket List - Kiri Admin */}
         <div style={{
@@ -1043,8 +1046,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          maxHeight: "500px",
         }}>
-          <div style={{ flex: 1, overflowY: "auto" }}>
+          <div style={{ 
+            flex: 1, 
+            overflowY: "auto",
+            overflowX: "hidden",
+            minHeight: "0",
+          }}>
             {waitingTickets.length > 0 && (
               <div>
                 <div style={{
@@ -1208,6 +1217,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           flexDirection: "column",
           overflow: "hidden",
           height: "100%",
+          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
@@ -1265,6 +1275,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 style={{
                   flex: 1,
                   overflowY: "auto",
+                  overflowX: "hidden",
                   padding: "12px",
                   display: "flex",
                   flexDirection: "column",
@@ -1706,7 +1717,7 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Fungsi untuk membuat ticket dari item dengan scroll
+  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1752,7 +1763,6 @@ export default function ContactPage(): React.JSX.Element {
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
-      // Scroll ke live chat section dengan smooth
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
         liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2045,7 +2055,6 @@ export default function ContactPage(): React.JSX.Element {
           pointerEvents: 'auto',
           boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
         }}>
-          {/* Get in Touch dengan "here" */}
           <Link href="/contact">
             <div
               style={{
@@ -2086,7 +2095,6 @@ export default function ContactPage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Pusat Bantuan */}
           <Link href="/pusat-bantuan">
             <div
               style={{
@@ -2127,7 +2135,6 @@ export default function ContactPage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu */}
           <div
             ref={menuButtonRef}
             onClick={handleMenuClick}
