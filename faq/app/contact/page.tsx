@@ -574,7 +574,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 350vh;
+          min-height: 380vh;
           width: 100%;
           will-change: transform;
         }
@@ -599,7 +599,7 @@ export default function ContactPage(): React.JSX.Element {
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '350vh',
+            minHeight: '380vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -611,7 +611,7 @@ export default function ContactPage(): React.JSX.Element {
             MozOsxFontSmoothing: 'grayscale',
             position: 'relative',
           }}>
-            {/* JUDUL WEBSITE - pojok kiri atas - TIDAK NEMBUS BG MENU */}
+            {/* JUDUL WEBSITE - pojok kiri atas */}
             <div style={{
               position: 'fixed',
               top: '40px',
@@ -991,14 +991,14 @@ export default function ContactPage(): React.JSX.Element {
               left: '40px',
               right: '40px',
               zIndex: 10,
-              marginBottom: '60px'
+              marginBottom: '40px'
             }}>
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '40px',
                 marginLeft: '80px',
-                marginBottom: '60px',
+                marginBottom: '40px',
                 maxWidth: '900px',
               }}>
                 {/* 01 - Note */}
@@ -1332,30 +1332,53 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section - "Apakah kamu punya kesulitan?" di atas, items di sisi kanan */}
+              {/* FAQ Section - Kiri: "Apakah kamu punya kesulitan?", Kanan: FAQ items */}
               <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
                 marginLeft: '80px',
                 marginTop: '60px',
-                maxWidth: '900px',
+                maxWidth: '1100px',
+                gap: '60px',
               }}>
-                {/* Pertanyaan besar "Apakah kamu punya kesulitan?" */}
-                <h2 style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '50px',
-                  fontWeight: '600',
-                  color: '#0D3CFC',
-                  margin: 0,
-                  marginBottom: '40px',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Apakah kamu punya kesulitan?
-                </h2>
-
-                {/* FAQ Items - sisi kanan sejajar */}
+                {/* Kiri - Judul FAQ */}
                 <div style={{
+                  flex: '0 0 300px',
+                  position: 'sticky',
+                  top: '200px',
+                }}>
+                  <h2 style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '50px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    margin: 0,
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.2,
+                  }}>
+                    FAQ
+                  </h2>
+                  <p style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '50px',
+                    fontWeight: '400',
+                    color: '#0D3CFC',
+                    margin: 0,
+                    marginTop: '20px',
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1.2,
+                  }}>
+                    Apakah kamu punya kesulitan?
+                  </p>
+                </div>
+
+                {/* Kanan - FAQ Items */}
+                <div style={{
+                  flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '20px',
+                  gap: '15px',
                 }}>
                   {faqData.map((item) => (
                     <div
@@ -1365,7 +1388,7 @@ export default function ContactPage(): React.JSX.Element {
                         overflow: 'hidden',
                       }}
                     >
-                      {/* Pertanyaan - 100px */}
+                      {/* Pertanyaan - Biru 50px */}
                       <div
                         onClick={() => toggleFaq(item.id)}
                         style={{
@@ -1385,11 +1408,11 @@ export default function ContactPage(): React.JSX.Element {
                       >
                         <span style={{
                           fontFamily: FONT_FAMILY,
-                          fontSize: '100px',
-                          fontWeight: '300',
-                          color: '#000000',
+                          fontSize: '50px',
+                          fontWeight: '500',
+                          color: '#0D3CFC',
                           letterSpacing: '-0.02em',
-                          lineHeight: '1',
+                          lineHeight: '1.2',
                         }}>
                           {item.question}
                         </span>
@@ -1399,17 +1422,18 @@ export default function ContactPage(): React.JSX.Element {
                           }}
                           transition={{ duration: 0.3 }}
                           style={{
-                            fontSize: '40px',
+                            fontSize: '30px',
                             fontWeight: 300,
-                            color: '#000000',
+                            color: '#0D3CFC',
                             cursor: 'pointer',
+                            flexShrink: 0,
                           }}
                         >
                           +
                         </motion.div>
                       </div>
 
-                      {/* Jawaban - 70px */}
+                      {/* Jawaban - Hitam 50px */}
                       <AnimatePresence>
                         {activeFaq === item.id && (
                           <motion.div
@@ -1423,12 +1447,12 @@ export default function ContactPage(): React.JSX.Element {
                           >
                             <p style={{
                               fontFamily: FONT_FAMILY,
-                              fontSize: '70px',
+                              fontSize: '50px',
                               fontWeight: '300',
-                              color: '#333333',
+                              color: '#000000',
                               padding: '0 0 20px 0',
                               margin: 0,
-                              lineHeight: 1.3,
+                              lineHeight: 1.4,
                               letterSpacing: '-0.01em',
                             }}>
                               {item.answer}
