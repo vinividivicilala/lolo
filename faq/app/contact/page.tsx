@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED SCROLL ISSUE)
+// app/contact/page.tsx (Halaman Contact - FINAL FIX)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -149,7 +149,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
   };
 
-  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -197,16 +196,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
-      // Scroll ke live chat section dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        const rect = liveChatElement.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const targetPosition = rect.top + scrollTop - 100; // offset 100px dari atas
-        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        setTimeout(() => {
+          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
       }
       
-      // Refresh ticket list setelah delay
       setTimeout(() => {
         const q2 = query(
           collection(db, "livechat_tickets"),
@@ -380,13 +376,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTopic("");
       setShowStartChat(false);
       
-      // Scroll dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        const rect = liveChatElement.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const targetPosition = rect.top + scrollTop - 100;
-        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        setTimeout(() => {
+          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
       }
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -621,6 +615,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
+    // USER VIEW - Tanpa height: 100% agar tidak mengganggu scroll halaman
     return (
       <div style={{ 
         marginTop: "40px", 
@@ -628,13 +623,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         paddingTop: "40px",
         width: "100%",
         maxWidth: "100%",
+        overflow: "visible",
       }}>
         <div style={{ 
           display: "flex", 
           gap: "20px", 
-          height: "500px",
           width: "100%",
           maxWidth: "100%",
+          overflow: "visible",
+          flexWrap: "wrap",
         }}>
           {/* Ticket List - Kiri */}
           <div style={{
@@ -648,8 +645,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontFamily: FONT_FAMILY,
             display: "flex",
             flexDirection: "column",
-            height: "100%",
+            maxHeight: "500px",
             overflow: "hidden",
+            flex: "0 0 280px",
           }}>
             <div style={{
               padding: "0 16px 12px 16px",
@@ -679,7 +677,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 overflowY: "auto",
                 overflowX: "hidden",
                 paddingBottom: "4px",
-                minHeight: "0",
+                minHeight: "100px",
               }}
             >
               {tickets.map((ticket) => {
@@ -769,18 +767,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           {/* Chat Container - Kanan */}
           <div style={{
             flex: 1,
-            minWidth: "200px",
+            minWidth: "280px",
             backgroundColor: "#ffffff",
             borderRadius: "12px",
             border: "1px solid #e8e8e8",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "100%",
+            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
-                {/* Header Chat */}
                 <div style={{
                   padding: "10px 16px",
                   backgroundColor: "#0D3CFC",
@@ -831,7 +828,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   )}
                 </div>
                 
-                {/* Messages - Scrollable */}
                 <div 
                   ref={chatContainerRef}
                   style={{
@@ -842,7 +838,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    minHeight: "0",
+                    minHeight: "200px",
+                    maxHeight: "400px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -900,7 +897,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <div ref={messagesEndRef} />
                 </div>
                 
-                {/* Input */}
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
                     padding: "10px 14px",
@@ -968,6 +964,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 color: "#999",
                 fontSize: "14px",
                 fontFamily: FONT_FAMILY,
+                minHeight: "200px",
               }}>
                 Pilih chat dari daftar di kiri
               </div>
@@ -991,6 +988,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       paddingTop: "40px",
       width: "100%",
       maxWidth: "100%",
+      overflow: "visible",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
@@ -1033,11 +1031,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       <div style={{ 
         display: "flex", 
         gap: "20px", 
-        height: "500px",
         width: "100%",
         maxWidth: "100%",
+        overflow: "visible",
+        flexWrap: "wrap",
       }}>
-        {/* Ticket List - Kiri Admin */}
         <div style={{
           width: "280px",
           minWidth: "200px",
@@ -1048,13 +1046,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          maxHeight: "500px",
+          flex: "0 0 280px",
         }}>
           <div style={{ 
             flex: 1, 
             overflowY: "auto",
             overflowX: "hidden",
-            minHeight: "0",
+            minHeight: "100px",
           }}>
             {waitingTickets.length > 0 && (
               <div>
@@ -1208,17 +1207,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
         </div>
 
-        {/* Chat Container - Kanan Admin */}
         <div style={{
           flex: 1,
-          minWidth: "200px",
+          minWidth: "280px",
           backgroundColor: "#ffffff",
           borderRadius: "12px",
           border: "1px solid #e8e8e8",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          height: "100%",
+          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
@@ -1281,7 +1279,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
-                  minHeight: "0",
+                  minHeight: "200px",
+                  maxHeight: "400px",
                 }}
               >
                 {messages.length === 0 ? (
@@ -1403,6 +1402,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               color: "#999",
               fontSize: "14px",
               fontFamily: FONT_FAMILY,
+              minHeight: "200px",
             }}>
               Pilih chat dari daftar di kiri
             </div>
@@ -1598,7 +1598,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             zIndex: 2,
           }} />
 
-          {feedbacks.map((item) => (
+          {feedbacks.map((item, index) => (
             <div key={item.id} style={{ position: "relative", paddingBottom: "20px", paddingLeft: "20px" }}>
               <div style={{
                 position: "absolute",
@@ -1619,7 +1619,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
                   <span style={{ fontSize: "16px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                    {item.name}
+                    #{index + 1} - {item.name}
                   </span>
                   <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                     {formatDate(item.createdAt)}
@@ -1718,7 +1718,6 @@ export default function ContactPage(): React.JSX.Element {
   const menuDrawerRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Fungsi untuk membuat ticket dari item
   const createTicketFromItem = async (itemName: string) => {
     if (!user) {
       alert("Silakan login terlebih dahulu");
@@ -1764,13 +1763,11 @@ export default function ContactPage(): React.JSX.Element {
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
-      // Scroll dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        const rect = liveChatElement.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const targetPosition = rect.top + scrollTop - 80;
-        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        setTimeout(() => {
+          liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
       }
       
     } catch (error) {
@@ -1779,7 +1776,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
-  // Auth
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1792,7 +1788,6 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Menu drawer animation
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -1833,7 +1828,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuOpen]);
 
-  // Menu button hover
   useEffect(() => {
     if (menuButtonRef.current) {
       if (isMenuHovered) {
@@ -1852,7 +1846,6 @@ export default function ContactPage(): React.JSX.Element {
     }
   }, [isMenuHovered]);
 
-  // Hover effects for items 01-05
   useEffect(() => {
     const itemRefs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
     const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
@@ -1888,7 +1881,6 @@ export default function ContactPage(): React.JSX.Element {
     });
   }, [hoveredItem]);
 
-  // SplitText animation
   useEffect(() => {
     if (contactTitleRef.current) {
       const splitContact = new SplitText(contactTitleRef.current, {
@@ -2023,7 +2015,7 @@ export default function ContactPage(): React.JSX.Element {
         overflowX: 'hidden',
         overflowY: 'visible',
       }}>
-        {/* JUDUL WEBSITE - pojok kiri atas */}
+        {/* Fixed Header */}
         <div style={{
           position: 'fixed',
           top: '40px',
@@ -2037,15 +2029,12 @@ export default function ContactPage(): React.JSX.Element {
             fontSize: '48px',
             color: '#000000',
             letterSpacing: '-0.03em',
-            textTransform: 'none',
-            WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale'
           }}>
             Menuru
           </span>
         </div>
 
-        {/* NAVBAR - pojok kanan atas */}
+        {/* NAVBAR */}
         <div style={{
           position: 'fixed',
           top: '40px',
@@ -2063,80 +2052,56 @@ export default function ContactPage(): React.JSX.Element {
           boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
         }}>
           <Link href="/contact">
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: '2px solid #0D3CFC',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#0D3CFC',
-                  fontFamily: FONT_FAMILY,
-                  display: 'inline-block',
-                }}
-              >
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '2px solid #0D3CFC',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+            }}>
+              <span style={{ fontSize: '16px', fontWeight: 500, color: '#0D3CFC', fontFamily: FONT_FAMILY }}>
                 here
               </span>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#0D3CFC',
-                  borderRadius: '4px',
-                  padding: '4px',
-                  color: '#ffffff',
-                }}
-              >
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#0D3CFC',
+                borderRadius: '4px',
+                padding: '4px',
+                color: '#ffffff',
+              }}>
                 <SouthEastArrow size={24} />
               </div>
             </div>
           </Link>
 
           <Link href="/pusat-bantuan">
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: '2px solid #000000',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#000000',
-                  fontFamily: FONT_FAMILY,
-                  display: 'inline-block',
-                }}
-              >
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '2px solid #000000',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+            }}>
+              <span style={{ fontSize: '16px', fontWeight: 500, color: '#000000', fontFamily: FONT_FAMILY }}>
                 Pusat Bantuan
               </span>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#000000',
-                  borderRadius: '4px',
-                  padding: '4px',
-                  color: '#ffffff',
-                }}
-              >
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#000000',
+                borderRadius: '4px',
+                padding: '4px',
+                color: '#ffffff',
+              }}>
                 <NorthWestArrow size={24} />
               </div>
             </div>
@@ -2158,17 +2123,15 @@ export default function ContactPage(): React.JSX.Element {
               backgroundColor: 'transparent',
             }}
           >
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#000000',
-                borderRadius: '4px',
-                padding: '4px',
-                color: '#ffffff',
-              }}
-            >
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#000000',
+              borderRadius: '4px',
+              padding: '4px',
+              color: '#ffffff',
+            }}>
               <span
                 ref={plusIconRef}
                 style={{
@@ -2183,22 +2146,13 @@ export default function ContactPage(): React.JSX.Element {
                 +
               </span>
             </div>
-            <span
-              style={{
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#000000',
-                fontFamily: FONT_FAMILY,
-                letterSpacing: '0.02em',
-                display: 'inline-block',
-              }}
-            >
+            <span style={{ fontSize: '16px', fontWeight: 500, color: '#000000', fontFamily: FONT_FAMILY }}>
               Menu
             </span>
           </div>
         </div>
 
-        {/* Menu Drawer - BG BIRU #0D3CFC */}
+        {/* Menu Drawer */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -2222,75 +2176,39 @@ export default function ContactPage(): React.JSX.Element {
             overflow: 'hidden'
           }}
         >
-          <h1
-            style={{
-              position: 'absolute',
-              top: '40px',
-              left: '40px',
-              fontSize: '48px',
-              fontWeight: 700,
-              color: '#ffffff',
-              fontFamily: FONT_FAMILY,
-              letterSpacing: '-0.03em',
-              margin: 0,
-              padding: 0,
-              lineHeight: 1,
-              opacity: 0.9,
-            }}
-          >
+          <h1 style={{
+            position: 'absolute',
+            top: '40px',
+            left: '40px',
+            fontSize: '48px',
+            fontWeight: 700,
+            color: '#ffffff',
+            fontFamily: FONT_FAMILY,
+            letterSpacing: '-0.03em',
+            margin: 0,
+            padding: 0,
+            lineHeight: 1,
+            opacity: 0.9,
+          }}>
             Menuru
           </h1>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              gap: '30px',
-            }}
-          >
-            <Link href="/" style={{ 
-              color: '#ffffff', 
-              fontSize: '48px', 
-              textDecoration: 'none',
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: 'opacity 0.3s',
-              opacity: 0.8,
-            }}>Home</Link>
-            <Link href="/about" style={{ 
-              color: '#ffffff', 
-              fontSize: '48px', 
-              textDecoration: 'none',
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: 'opacity 0.3s',
-              opacity: 0.8,
-            }}>About</Link>
-            <Link href="/contact" style={{ 
-              color: '#ffffff', 
-              fontSize: '48px', 
-              textDecoration: 'none',
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: 'opacity 0.3s',
-              opacity: 0.8,
-            }}>Contact</Link>
-            <Link href="/pusat-bantuan" style={{ 
-              color: '#ffffff', 
-              fontSize: '48px', 
-              textDecoration: 'none',
-              fontFamily: FONT_FAMILY,
-              fontWeight: 500,
-              transition: 'opacity 0.3s',
-              opacity: 0.8,
-            }}>Pusat Bantuan</Link>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            gap: '30px',
+          }}>
+            <Link href="/" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Home</Link>
+            <Link href="/about" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>About</Link>
+            <Link href="/contact" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ color: '#ffffff', fontSize: '48px', textDecoration: 'none', fontFamily: FONT_FAMILY, fontWeight: 500, opacity: 0.8 }}>Pusat Bantuan</Link>
           </div>
         </div>
 
-        {/* Teks Contact besar 300px */}
+        {/* Teks Contact */}
         <div style={{
           position: 'relative',
           top: '120px',
@@ -2310,14 +2228,12 @@ export default function ContactPage(): React.JSX.Element {
               letterSpacing: '-0.02em',
               textTransform: 'none',
               lineHeight: '1',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale'
             }}>
             Contact
           </div>
         </div>
 
-        {/* Teks subtitle dan tombol di bawah Contact */}
+        {/* Subtitle */}
         <div style={{
           position: 'relative',
           top: '120px',
@@ -2326,64 +2242,50 @@ export default function ContactPage(): React.JSX.Element {
           width: 'calc(100% - 80px)',
           marginBottom: '80px'
         }}>
-          <p
-            style={{
-              fontSize: '40px',
-              fontWeight: 400,
-              color: '#0D3CFC',
-              fontFamily: FONT_FAMILY,
-              lineHeight: 1.2,
-              margin: 0,
-              padding: 0,
-              paddingBottom: '30px',
-              whiteSpace: 'pre-line',
-            }}
-          >
+          <p style={{
+            fontSize: '40px',
+            fontWeight: 400,
+            color: '#0D3CFC',
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1.2,
+            margin: 0,
+            padding: 0,
+            paddingBottom: '30px',
+            whiteSpace: 'pre-line',
+          }}>
             {`You can take notes, find ideas,\nand donate money to those in need`}
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
             <Link href="/signup">
-              <div
-                style={{
-                  display: 'inline-block',
-                  border: '2px solid #0D3CFC',
-                  borderRadius: '8px',
-                  padding: '12px 28px',
-                  cursor: 'pointer',
-                  backgroundColor: 'transparent',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 500,
-                    color: '#0D3CFC',
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: '0.02em',
-                  }}
-                >
+              <div style={{
+                display: 'inline-block',
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '12px 28px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+              }}>
+                <span style={{ fontSize: '18px', fontWeight: 500, color: '#0D3CFC', fontFamily: FONT_FAMILY }}>
                   Let's build now
                 </span>
               </div>
             </Link>
 
             <Link href="/signup">
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid #0D3CFC',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  cursor: 'pointer',
-                  backgroundColor: '#0D3CFC',
-                  color: '#ffffff',
-                  width: '50px',
-                  height: '50px',
-                }}
-              >
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '10px',
+                cursor: 'pointer',
+                backgroundColor: '#0D3CFC',
+                color: '#ffffff',
+                width: '50px',
+                height: '50px',
+              }}>
                 <NorthEastArrow size={24} />
               </div>
             </Link>
@@ -2407,410 +2309,97 @@ export default function ContactPage(): React.JSX.Element {
             marginBottom: '40px',
             maxWidth: '900px',
           }}>
-            {/* 01 - Note */}
-            <div
-              ref={item01Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('01')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  01
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Note
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Note');
-                  }}
+            {['Note', 'Calendar', 'Donation', 'Community', 'Shop'].map((item, idx) => {
+              const num = String(idx + 1).padStart(2, '0');
+              const refs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
+              const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
+              return (
+                <div
+                  key={item}
+                  ref={refs[idx]}
                   style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
+                    transition: 'transform 0.3s ease'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
+                  onMouseEnter={() => setHoveredItem(num)}
+                  onMouseLeave={() => setHoveredItem(null)}
                 >
-                  Ticket
-                </button>
-                {hoveredItem === '01' && (
-                  <div
-                    ref={hoverText01Ref}
-                    style={{
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
+                      fontSize: '60px',
+                      fontWeight: '300',
                       color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa mencatat apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 02 - Calendar */}
-            <div
-              ref={item02Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('02')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  02
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Calendar
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Calendar');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '02' && (
-                  <div
-                    ref={hoverText02Ref}
-                    style={{
+                      letterSpacing: '-0.02em',
+                      lineHeight: '1'
+                    }}>
+                      {num}
+                    </span>
+                    <span style={{
                       fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
+                      fontSize: '160px',
+                      fontWeight: '300',
                       color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa memikirkan jadwal apa yang kamu inginkan
+                      letterSpacing: '-0.02em'
+                    }}>
+                      {item}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* 03 - Donation */}
-            <div
-              ref={item03Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('03')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  03
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Donation
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Donation');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '03' && (
-                  <div
-                    ref={hoverText03Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa membagikan uang apa yang kamu inginkan
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        createTicketFromItem(item);
+                      }}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                        backgroundColor: '#0D3CFC',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        border: '2px solid #0D3CFC',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.borderColor = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0D3CFC';
+                        e.currentTarget.style.borderColor = '#0D3CFC';
+                      }}
+                    >
+                      Ticket
+                    </button>
+                    {hoveredItem === num && (
+                      <div
+                        ref={textRefs[idx]}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '18px',
+                          fontWeight: '400',
+                          color: '#000000',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        / {idx === 0 ? 'kamu bisa mencatat apa yang kamu inginkan' :
+                           idx === 1 ? 'kamu bisa memikirkan jadwal apa yang kamu inginkan' :
+                           idx === 2 ? 'kamu bisa membagikan uang apa yang kamu inginkan' :
+                           idx === 3 ? 'kamu bisa mencari apa yang kamu inginkan' :
+                           'kamu bisa membeli apa yang kamu inginkan'}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* 04 - Community */}
-            <div
-              ref={item04Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('04')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  04
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Community
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Community');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '04' && (
-                  <div
-                    ref={hoverText04Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa mencari apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 05 - Shop */}
-            <div
-              ref={item05Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('05')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  05
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Shop
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Shop');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '05' && (
-                  <div
-                    ref={hoverText05Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa membeli apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* FAQ Section */}
@@ -2877,12 +2466,8 @@ export default function ContactPage(): React.JSX.Element {
                       padding: '15px 0',
                       transition: 'all 0.3s ease',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = '0.7';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = '1';
-                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
                   >
                     <span style={{
                       fontFamily: FONT_FAMILY,
@@ -2895,9 +2480,7 @@ export default function ContactPage(): React.JSX.Element {
                       {item.question}
                     </span>
                     <motion.div
-                      animate={{
-                        rotate: activeFaq === item.id ? 45 : 0,
-                      }}
+                      animate={{ rotate: activeFaq === item.id ? 45 : 0 }}
                       transition={{ duration: 0.3 }}
                       style={{
                         fontSize: '30px',
@@ -2918,9 +2501,7 @@ export default function ContactPage(): React.JSX.Element {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        style={{
-                          overflow: 'hidden',
-                        }}
+                        style={{ overflow: 'hidden' }}
                       >
                         <p style={{
                           fontFamily: FONT_FAMILY,
@@ -2953,255 +2534,73 @@ export default function ContactPage(): React.JSX.Element {
             gap: '40px',
             paddingTop: '40px',
           }}>
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
+            <div style={{ flex: '0 0 30%' }}>
+              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
                 Get in Touch
               </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#0D3CFC',
-                    letterSpacing: '-0.01em',
-                    cursor: 'pointer',
-                  }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>
                     Contact Us
                   </span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite',
-                      display: 'inline-block',
-                    }} />
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite 0.3s',
-                      display: 'inline-block',
-                    }} />
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite 0.6s',
-                      display: 'inline-block',
-                    }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite', display: 'inline-block' }} />
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite 0.3s', display: 'inline-block' }} />
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D3CFC', animation: 'blink 1s ease-in-out infinite 0.6s', display: 'inline-block' }} />
                   </div>
                   <Link href="/contact">
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#0D3CFC',
-                        padding: '4px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        border: '1px solid #0D3CFC',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#0D3CFC',
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      border: '1px solid #0D3CFC',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.borderColor = '#000000'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0D3CFC'; e.currentTarget.style.borderColor = '#0D3CFC'; }}
                     >
-                      <span style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        letterSpacing: '0.02em',
-                      }}>
+                      <span style={{ fontFamily: FONT_FAMILY, fontSize: '12px', fontWeight: '500', color: '#ffffff', letterSpacing: '0.02em' }}>
                         →
                       </span>
                     </div>
                   </Link>
                 </div>
-
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Instagram
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Live Chat
-                </span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Instagram</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Live Chat</span>
               </div>
             </div>
 
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
+            <div style={{ flex: '0 0 30%' }}>
+              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
                 Product
               </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Shop
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Note
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Calendar
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Blog
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Donation
-                </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Shop</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Note</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Calendar</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Blog</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Donation</span>
               </div>
             </div>
 
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
+            <div style={{ flex: '0 0 30%' }}>
+              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: '28px', fontWeight: '600', color: '#000000', margin: 0, marginBottom: '16px', letterSpacing: '-0.01em' }}>
                 Attention
               </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Kebijakan Privasi
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Ketentuan Kami
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Pusat Bantuan
-                </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Kebijakan Privasi</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Ketentuan Kami</span>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: '400', color: '#0D3CFC', letterSpacing: '-0.01em', cursor: 'pointer' }}>Pusat Bantuan</span>
               </div>
             </div>
           </div>
 
           {/* ===== LIVE CHAT AGENT ===== */}
-          <div id="live-chat-section">
+          <div id="live-chat-section" style={{ marginTop: "40px" }}>
             <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
           </div>
 
@@ -3232,8 +2631,6 @@ export default function ContactPage(): React.JSX.Element {
                 lineHeight: '0.8',
                 display: 'block',
                 textAlign: 'right',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale',
               }}
             >
               {'MENURU'.split('').map((char, index) => (
