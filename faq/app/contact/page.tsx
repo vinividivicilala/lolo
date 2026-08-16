@@ -8,10 +8,34 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { initializeApp, getApps } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+}
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+let app = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+  db = getFirestore(app);
 }
 
 // SVG Icons
@@ -30,6 +54,12 @@ const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
 const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ArrowRight = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -74,6 +104,9 @@ export default function ContactPage(): React.JSX.Element {
   const [isMenuHovered, setIsMenuHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const smootherRef = useRef<any>(null);
   
   // Refs untuk teks yang akan di-split
@@ -542,6 +575,40 @@ export default function ContactPage(): React.JSX.Element {
     }
   };
 
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setSubscribeStatus('error');
+      setTimeout(() => setSubscribeStatus('idle'), 3000);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubscribeStatus('idle');
+
+    try {
+      if (!db) {
+        throw new Error('Firebase not initialized');
+      }
+      
+      await addDoc(collection(db, 'subscribers'), {
+        email: email,
+        subscribedAt: new Date().toISOString(),
+        source: 'contact_page'
+      });
+
+      setSubscribeStatus('success');
+      setEmail('');
+      setTimeout(() => setSubscribeStatus('idle'), 3000);
+    } catch (error) {
+      console.error('Error saving email:', error);
+      setSubscribeStatus('error');
+      setTimeout(() => setSubscribeStatus('idle'), 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <style jsx global>{`
@@ -574,7 +641,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 400vh;
+          min-height: 450vh;
           width: 100%;
           will-change: transform;
         }
@@ -594,12 +661,34 @@ export default function ContactPage(): React.JSX.Element {
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
         }
+
+        .subscribe-input {
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid #000000;
+          outline: none;
+          font-family: 'Poppins', sans-serif;
+          font-size: 20px;
+          padding: 10px 0;
+          width: 100%;
+          color: #000000;
+          transition: border-color 0.3s ease;
+        }
+
+        .subscribe-input:focus {
+          border-bottom-color: #0D3CFC;
+        }
+
+        .subscribe-input::placeholder {
+          color: #999;
+          font-weight: 300;
+        }
       `}</style>
       
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '400vh',
+            minHeight: '450vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
@@ -1332,7 +1421,7 @@ export default function ContactPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* FAQ Section + Subscribe */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1342,9 +1431,9 @@ export default function ContactPage(): React.JSX.Element {
                 maxWidth: '1100px',
                 gap: '40px',
               }}>
-                {/* Kiri - Judul FAQ */}
+                {/* Kiri - FAQ + Subscribe */}
                 <div style={{
-                  flex: '0 0 200px',
+                  flex: '0 0 350px',
                   position: 'sticky',
                   top: '200px',
                 }}>
@@ -1359,7 +1448,6 @@ export default function ContactPage(): React.JSX.Element {
                   }}>
                     FAQ
                   </h2>
-                  {/* "Apakah kamu punya kesulitan?" di bawah FAQ - seperti gaya item */}
                   <p style={{
                     fontFamily: FONT_FAMILY,
                     fontSize: '50px',
@@ -1372,6 +1460,124 @@ export default function ContactPage(): React.JSX.Element {
                   }}>
                     Apakah kamu punya kesulitan?
                   </p>
+
+                  {/* Subscribe Section */}
+                  <div style={{
+                    marginTop: '60px',
+                    borderTop: '1px solid #e0e0e0',
+                    paddingTop: '40px',
+                  }}>
+                    <h3 style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '24px',
+                      fontWeight: '600',
+                      color: '#000000',
+                      margin: 0,
+                      marginBottom: '10px',
+                      letterSpacing: '-0.01em',
+                    }}>
+                      Talk with an Menuru
+                    </h3>
+                    <p style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: '14px',
+                      fontWeight: '300',
+                      color: '#666',
+                      margin: 0,
+                      marginBottom: '20px',
+                      letterSpacing: '0.01em',
+                    }}>
+                      Get the latest updates from Menuru
+                    </p>
+
+                    <form onSubmit={handleSubscribe} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                    }}>
+                      <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="subscribe-input"
+                        style={{
+                          flex: 1,
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: '2px solid #000000',
+                          outline: 'none',
+                          fontFamily: FONT_FAMILY,
+                          fontSize: '16px',
+                          padding: '8px 0',
+                          color: '#000000',
+                          transition: 'border-color 0.3s ease',
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderBottomColor = '#0D3CFC';
+                        }}
+                        onBlur={(e) => {
+                          if (!e.currentTarget.value) {
+                            e.currentTarget.style.borderBottomColor = '#000000';
+                          }
+                        }}
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#0D3CFC',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '8px 12px',
+                          cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                          color: '#ffffff',
+                          transition: 'all 0.3s ease',
+                          opacity: isSubmitting ? 0.6 : 1,
+                          flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = '#000000';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = '#0D3CFC';
+                          }
+                        }}
+                      >
+                        <ArrowRight size={20} />
+                      </button>
+                    </form>
+
+                    {/* Status Message */}
+                    {subscribeStatus === 'success' && (
+                      <p style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '14px',
+                        color: '#0D3CFC',
+                        marginTop: '10px',
+                        marginBottom: 0,
+                      }}>
+                        ✓ Berhasil berlangganan!
+                      </p>
+                    )}
+                    {subscribeStatus === 'error' && (
+                      <p style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: '14px',
+                        color: '#ff4444',
+                        marginTop: '10px',
+                        marginBottom: 0,
+                      }}>
+                        ✗ Email tidak valid atau terjadi kesalahan
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Kanan - FAQ Items */}
