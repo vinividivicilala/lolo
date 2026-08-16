@@ -347,7 +347,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
-      // Auto scroll hanya jika shouldAutoScroll true
       if (shouldAutoScroll) {
         setTimeout(() => {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -515,7 +514,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  // Handle scroll untuk mendeteksi apakah user sedang scroll manual
   const handleMessagesScroll = () => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
@@ -605,6 +603,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
+  // USER VIEW - SAMA UNTUK USER BIASA DAN AGENT, BISA SCROLL BEBAS
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
 
@@ -718,10 +717,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW
+    // USER VIEW - BISA SCROLL BEBAS
     return (
       <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
-        <div style={{ display: "flex", gap: "24px", height: "500px" }}>
+        <div style={{ display: "flex", gap: "24px", maxHeight: "500px", minHeight: "400px" }}>
           <div style={{
             width: "280px",
             backgroundColor: "#0D3CFC",
@@ -732,6 +731,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             color: "#fff",
             fontFamily: FONT_FAMILY,
             boxShadow: "0 4px 20px rgba(13,60,252,0.15)",
+            maxHeight: "500px",
           }}>
             <div style={{
               padding: "0 16px 12px 16px",
@@ -742,6 +742,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               alignItems: "center",
               gap: "8px",
               color: "#fff",
+              position: "sticky",
+              top: 0,
+              backgroundColor: "#0D3CFC",
+              zIndex: 1,
             }}>
               <ChatIconSmall />
               <span>Riwayat Chat</span>
@@ -753,73 +757,81 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "12px",
               }}>{tickets.length}</span>
             </div>
-            {tickets.map((ticket) => {
-              const ticketId = generateTicketId(ticket.createdAt);
-              const isActive = selectedTicket?.id === ticket.id;
-              const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
-                                  ticket.status === 'active' ? 'Aktif' : 'Selesai';
-              const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
-                                  ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
-              const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
-                                      ticket.status === 'active' ? '#065f46' : '#6b7280';
-              return (
-                <div
-                  key={ticket.id}
-                  onClick={() => {
-                    setSelectedTicket(ticket);
-                    setMessages([]);
-                    setShouldAutoScroll(true);
-                  }}
-                  style={{
-                    padding: "12px 16px",
-                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
-                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div style={{ fontWeight: 500, fontSize: "14px", color: "#fff" }}>
-                    {ticket.userName}
-                  </div>
-                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
-                    {ticket.topic}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
-                    <span style={{
-                      fontSize: "10px",
-                      backgroundColor: statusColor,
-                      color: statusTextColor,
-                      padding: "1px 10px",
-                      borderRadius: "12px",
-                      fontWeight: 500,
-                    }}>
-                      {statusLabel}
-                    </span>
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
-                      {ticketId}
-                    </span>
-                  </div>
-                  {ticket.status === 'resolved' && (
-                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
-                      Diterima: {formatReceivedDate(ticket.createdAt)}
+            <div style={{ overflowY: "auto", maxHeight: "400px" }}>
+              {tickets.map((ticket) => {
+                const ticketId = generateTicketId(ticket.createdAt);
+                const isActive = selectedTicket?.id === ticket.id;
+                const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
+                                    ticket.status === 'active' ? 'Aktif' : 'Selesai';
+                const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                    ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+                const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
+                                        ticket.status === 'active' ? '#065f46' : '#6b7280';
+                return (
+                  <div
+                    key={ticket.id}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setMessages([]);
+                      setShouldAutoScroll(true);
+                    }}
+                    style={{
+                      padding: "12px 16px",
+                      borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                      backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, fontSize: "14px", color: "#fff" }}>
+                      {ticket.userName}
                     </div>
-                  )}
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                      {ticket.topic}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                      <span style={{
+                        fontSize: "10px",
+                        backgroundColor: statusColor,
+                        color: statusTextColor,
+                        padding: "1px 10px",
+                        borderRadius: "12px",
+                        fontWeight: 500,
+                      }}>
+                        {statusLabel}
+                      </span>
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                        {ticketId}
+                      </span>
+                    </div>
+                    {ticket.status === 'resolved' && (
+                      <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
+                        Diterima: {formatReceivedDate(ticket.createdAt)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {tickets.length === 0 && (
+                <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+                  Belum ada chat
                 </div>
-              );
-            })}
-            {tickets.length === 0 && (
-              <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
-                Belum ada chat
-              </div>
-            )}
-            <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              )}
+            </div>
+            <div style={{ 
+              padding: "16px", 
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: "#0D3CFC",
+            }}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
@@ -861,6 +873,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
@@ -925,6 +938,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "6px",
+                    minHeight: "200px",
+                    maxHeight: "400px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1081,7 +1096,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ADMIN VIEW
+  // ADMIN VIEW - SAMA, BISA SCROLL BEBAS
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1135,7 +1150,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "24px", height: "500px" }}>
+      <div style={{ display: "flex", gap: "24px", maxHeight: "500px", minHeight: "400px" }}>
         <div style={{
           width: "320px",
           backgroundColor: "#f9f9f9",
@@ -1143,6 +1158,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
+          maxHeight: "500px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1156,6 +1172,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 alignItems: "center",
                 gap: "8px",
                 fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
               }}>
                 <WaitingIcon />
                 <span>Menunggu ({waitingTickets.length})</span>
@@ -1198,6 +1217,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 alignItems: "center",
                 gap: "8px",
                 fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
               }}>
                 <ActiveIcon />
                 <span>Aktif ({activeTickets.length})</span>
@@ -1240,6 +1262,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 alignItems: "center",
                 gap: "8px",
                 fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
               }}>
                 <ResolvedIcon />
                 <span>Selesai ({resolvedTickets.length})</span>
@@ -1287,6 +1312,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
+          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
@@ -1351,6 +1378,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "6px",
+                  minHeight: "200px",
+                  maxHeight: "400px",
                 }}
               >
                 {messages.length === 0 ? (
@@ -1635,11 +1664,15 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             fontFamily: FONT_FAMILY,
             opacity: isSubmitting ? 0.7 : 1,
             transition: "background 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
           onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0a2fc9"; }}
           onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
         >
-          {isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}
+          <SendIcon />
+          <span>{isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}</span>
         </button>
         {submitStatus === 'success' && (
           <p style={{ color: "#22c55e", fontSize: "13px", marginTop: "6px", fontFamily: FONT_FAMILY }}>
@@ -1671,18 +1704,20 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
             borderLeft: "2px dashed rgba(255,255,255,0.3)",
           }} />
           
-          {/* Titik awal - di submit pertama */}
-          <div style={{
-            position: "absolute",
-            left: "14px",
-            top: "20px",
-            width: "14px",
-            height: "14px",
-            borderRadius: "50%",
-            backgroundColor: "#000000",
-            border: "2px solid #ffffff",
-            zIndex: 2,
-          }} />
+          {/* Titik awal - submit pertama (#1) */}
+          {feedbacks.length > 0 && (
+            <div style={{
+              position: "absolute",
+              left: "14px",
+              top: "20px",
+              width: "14px",
+              height: "14px",
+              borderRadius: "50%",
+              backgroundColor: "#000000",
+              border: "2px solid #ffffff",
+              zIndex: 2,
+            }} />
+          )}
 
           {feedbacks.map((item, index) => (
             <div key={item.id} style={{ 
@@ -1691,7 +1726,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               paddingLeft: "20px",
               paddingTop: index === 0 ? "0" : "4px",
             }}>
-              {/* Titik di setiap submit */}
+              {/* Titik di setiap submit berikutnya (#2, #3, dst) */}
               {index > 0 && (
                 <div style={{
                   position: "absolute",
@@ -1714,7 +1749,7 @@ const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", flexWrap: "wrap", gap: "4px" }}>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                    {index + 1}. {item.name}
+                    #{index + 1} {item.name}
                   </span>
                   <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                     {formatDate(item.createdAt)}
@@ -1881,7 +1916,7 @@ export default function ContactPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Menu drawer animation
+  // Menu drawer animation - HANYA JUDUL DAN NAVBAR
   useEffect(() => {
     if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
@@ -2285,7 +2320,7 @@ export default function ContactPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Drawer - BG BIRU #0D3CFC */}
+        {/* Menu Drawer - HANYA JUDUL DAN NAVBAR (background biru) */}
         <div
           ref={menuDrawerRef}
           style={{
@@ -2309,6 +2344,7 @@ export default function ContactPage(): React.JSX.Element {
             overflow: 'hidden'
           }}
         >
+          {/* Hanya judul Menuru putih di pojok kiri atas */}
           <h1
             style={{
               position: 'absolute',
@@ -2322,12 +2358,12 @@ export default function ContactPage(): React.JSX.Element {
               margin: 0,
               padding: 0,
               lineHeight: 1,
-              opacity: 0.9,
             }}
           >
             Menuru
           </h1>
 
+          {/* Menu items - sederhana di tengah */}
           <div
             style={{
               display: 'flex',
