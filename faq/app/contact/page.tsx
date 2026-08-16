@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - FIXED SCROLL & LAYOUT)
+// app/contact/page.tsx (Halaman Contact - FIXED SCROLL ISSUE)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -197,11 +197,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
+      // Scroll ke live chat section dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const rect = liveChatElement.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetPosition = rect.top + scrollTop - 100; // offset 100px dari atas
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
       }
       
+      // Refresh ticket list setelah delay
       setTimeout(() => {
         const q2 = query(
           collection(db, "livechat_tickets"),
@@ -375,9 +380,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTopic("");
       setShowStartChat(false);
       
+      // Scroll dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const rect = liveChatElement.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetPosition = rect.top + scrollTop - 100;
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
       }
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -619,7 +628,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         paddingTop: "40px",
         width: "100%",
         maxWidth: "100%",
-        overflow: "visible",
       }}>
         <div style={{ 
           display: "flex", 
@@ -627,7 +635,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           height: "500px",
           width: "100%",
           maxWidth: "100%",
-          overflow: "hidden",
         }}>
           {/* Ticket List - Kiri */}
           <div style={{
@@ -643,7 +650,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexDirection: "column",
             height: "100%",
             overflow: "hidden",
-            maxHeight: "500px",
           }}>
             <div style={{
               padding: "0 16px 12px 16px",
@@ -771,7 +777,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexDirection: "column",
             overflow: "hidden",
             height: "100%",
-            maxHeight: "500px",
           }}>
             {selectedTicket ? (
               <>
@@ -986,7 +991,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       paddingTop: "40px",
       width: "100%",
       maxWidth: "100%",
-      overflow: "visible",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
@@ -1032,7 +1036,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         height: "500px",
         width: "100%",
         maxWidth: "100%",
-        overflow: "hidden",
       }}>
         {/* Ticket List - Kiri Admin */}
         <div style={{
@@ -1046,7 +1049,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          maxHeight: "500px",
         }}>
           <div style={{ 
             flex: 1, 
@@ -1217,7 +1219,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           flexDirection: "column",
           overflow: "hidden",
           height: "100%",
-          maxHeight: "500px",
         }}>
           {selectedTicket ? (
             <>
@@ -1763,9 +1764,13 @@ export default function ContactPage(): React.JSX.Element {
       
       alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
       
+      // Scroll dengan offset yang lebih baik
       const liveChatElement = document.getElementById('live-chat-section');
       if (liveChatElement) {
-        liveChatElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const rect = liveChatElement.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetPosition = rect.top + scrollTop - 80;
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
       }
       
     } catch (error) {
@@ -1983,6 +1988,7 @@ export default function ContactPage(): React.JSX.Element {
           padding: 0;
           background-color: white;
           overflow-x: hidden;
+          overflow-y: auto !important;
         }
         .split-char-contact {
           display: inline-block;
@@ -2015,6 +2021,7 @@ export default function ContactPage(): React.JSX.Element {
         MozOsxFontSmoothing: 'grayscale',
         position: 'relative',
         overflowX: 'hidden',
+        overflowY: 'visible',
       }}>
         {/* JUDUL WEBSITE - pojok kiri atas */}
         <div style={{
