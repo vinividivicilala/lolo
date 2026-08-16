@@ -641,7 +641,7 @@ export default function ContactPage(): React.JSX.Element {
         }
         
         #smooth-content-contact {
-          min-height: 280vh;
+          min-height: 180vh;
           width: 100%;
           will-change: transform;
         }
@@ -685,13 +685,14 @@ export default function ContactPage(): React.JSX.Element {
         .subscribe-input::placeholder {
           color: #999;
           font-weight: 300;
+          
         }
       `}</style>
       
       <div id="smooth-wrapper-contact">
         <div id="smooth-content-contact">
           <div style={{
-            minHeight: '480vh',
+            minHeight: '180vh',
             backgroundColor: 'white',
             margin: 0,
             padding: 0,
