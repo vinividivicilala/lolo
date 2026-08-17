@@ -1,4 +1,4 @@
-// app/contact/page.tsx (Halaman Contact - LIVE CHAT AGENT SEPERTI PUSAT BANTUAN)
+// app/contact/page.tsx (Halaman Contact - LIVE CHAT AGENT FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -203,7 +203,7 @@ const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
 };
 
 // ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (SAMA SEPERTI PUSAT BANTUAN) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 // ============================================================
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -216,7 +216,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -347,14 +346,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
-      if (shouldAutoScroll) {
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket, shouldAutoScroll]);
+  }, [db, selectedTicket]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin) return;
@@ -468,7 +465,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      setShouldAutoScroll(true);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -514,16 +510,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `${name} sedang mengetik...`;
   };
 
-  const handleMessagesScroll = () => {
-    if (messagesContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-      setShouldAutoScroll(isAtBottom);
-    }
-  };
-
   // ============================================================
-  // ===== RENDER COMPONENT - SAMA SEPERTI PUSAT BANTUAN =====
+  // ===== RENDER COMPONENT =====
   // ============================================================
   
   if (!user) {
@@ -603,7 +591,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // USER VIEW - SAMA SEPERTI PUSAT BANTUAN
+  // USER VIEW
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
 
@@ -717,7 +705,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - SAMA SEPERTI PUSAT BANTUAN
+    // USER VIEW - TIDAK MENGHALANGI SCROLL
     return (
       <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
         <div style={{ display: "flex", gap: "24px", height: "500px" }}>
@@ -767,7 +755,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   onClick={() => {
                     setSelectedTicket(ticket);
                     setMessages([]);
-                    setShouldAutoScroll(true);
                   }}
                   style={{
                     padding: "12px 16px",
@@ -917,7 +904,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 </div>
                 <div 
                   ref={messagesContainerRef}
-                  onScroll={handleMessagesScroll}
                   style={{
                     flex: 1,
                     overflowY: "auto",
@@ -1082,7 +1068,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ADMIN VIEW - SAMA SEPERTI PUSAT BANTUAN
+  // ADMIN VIEW
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1167,7 +1153,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   onClick={() => {
                     setSelectedTicket(ticket);
                     takeTicket(ticket.id);
-                    setShouldAutoScroll(true);
                   }}
                   style={{
                     padding: "12px 16px",
@@ -1206,10 +1191,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               {activeTickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  onClick={() => {
-                    setSelectedTicket(ticket);
-                    setShouldAutoScroll(true);
-                  }}
+                  onClick={() => setSelectedTicket(ticket)}
                   style={{
                     padding: "12px 16px",
                     borderBottom: "1px solid #e8e8e8",
@@ -1250,10 +1232,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 return (
                   <div
                     key={ticket.id}
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setShouldAutoScroll(true);
-                    }}
+                    onClick={() => setSelectedTicket(ticket)}
                     style={{
                       padding: "12px 16px",
                       borderBottom: "1px solid #e8e8e8",
@@ -1345,7 +1324,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               </div>
               <div 
                 ref={messagesContainerRef}
-                onScroll={handleMessagesScroll}
                 style={{
                   flex: 1,
                   overflowY: "auto",
