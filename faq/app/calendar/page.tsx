@@ -1,32 +1,22 @@
+// app/calendar/page.tsx (Halaman Calendar - MODIFIED FROM CONTACT)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
-import { 
-  getAuth, 
-  onAuthStateChanged,
-  User
-} from "firebase/auth";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  serverTimestamp,
-  Timestamp,
-  doc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  writeBatch,
-  where
-} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Konfigurasi Firebase
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
+
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -39,3095 +29,611 @@ const firebaseConfig = {
 };
 
 let app = null;
-let auth = null;
 let db = null;
+let auth = null;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0];
-
-  auth = getAuth(app);
   db = getFirestore(app);
+  auth = getAuth(app);
 }
 
-// Type untuk event kalender
-interface CalendarEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: Date;
-  time?: string;
-  color: string;
-  label: string;
-  createdBy: string;
-  createdByEmail: string;
-  isAdmin: boolean;
-  createdAt: Timestamp | Date;
-}
+// SVG Icons
+const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
-// Type untuk event form
-interface EventFormData {
-  title: string;
-  description: string;
-  date: Date;
-  time: string;
-  color: string;
-  label: string;
-}
+const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
-// Type untuk notifikasi KALENDER
-interface CalendarNotification {
-  id: string;
-  eventId: string;
-  title: string;
-  message: string;
-  date: Date;
-  isRead: boolean;
-  createdBy: string;
-  createdAt: Timestamp | Date;
-  eventDate: Date;
-  eventLabel: string;
-}
+const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
-// Type untuk saved event KALENDER
-interface SavedCalendarEvent {
-  id: string;
-  eventId: string;
-  userId: string;
-  userEmail: string;
-  title: string;
-  date: Date;
-  description: string;
-  label: string;
-  createdBy: string;
-  savedAt: Timestamp | Date;
-}
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
-export default function CalendarPage(): React.JSX.Element {
-  const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [userDisplayName, setUserDisplayName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+// ============================================================
+// ===== KOMPONEN UTAMA =====
+// ============================================================
+export default function CalendarPage() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  // State untuk kalender
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [showAddEventModal, setShowAddEventModal] = useState(false);
-  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  
-  // State untuk form tambah event
-  const [eventForm, setEventForm] = useState<EventFormData>({
-    title: "",
-    description: "",
-    date: new Date(),
-    time: "09:00",
-    color: "#3B82F6",
-    label: "Meeting"
-  });
-  
-  // State untuk edit event
-  const [isEditingEvent, setIsEditingEvent] = useState(false);
-  const [editingEventId, setEditingEventId] = useState<string | null>(null);
-  
-  // State untuk notifikasi KALENDER
-  const [calendarNotifications, setCalendarNotifications] = useState<CalendarNotification[]>([]);
-  const [unreadCalendarNotifications, setUnreadCalendarNotifications] = useState(0);
-  const [showCalendarNotifications, setShowCalendarNotifications] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
-  
-  // State untuk saved events KALENDER
-  const [savedCalendarEvents, setSavedCalendarEvents] = useState<SavedCalendarEvent[]>([]);
-  const [showSavedCalendarEvents, setShowSavedCalendarEvents] = useState(false);
-  const [isSavingEvent, setIsSavingEvent] = useState(false);
-  
-  // Ref
-  const addEventModalRef = useRef<HTMLDivElement>(null);
-  const eventDetailsModalRef = useRef<HTMLDivElement>(null);
-  const notificationsRef = useRef<HTMLDivElement>(null);
-  const savedEventsRef = useRef<HTMLDivElement>(null);
-  
-  // Label preset saja (warna dihapus)
-  const labelOptions = [
-    { value: "Meeting", label: "Meeting" },
-    { value: "Event", label: "Event" },
-    { value: "Deadline", label: "Deadline" },
-    { value: "Reminder", label: "Reminder" },
-    { value: "Birthday", label: "Birthday" },
-    { value: "Holiday", label: "Holiday" },
-    { value: "Appointment", label: "Appointment" },
-    { value: "Task", label: "Task" },
-    { value: "Update", label: "Update" },
-    { value: "Maintenance", label: "Maintenance" },
-    { value: "Development", label: "Development" },
-    { value: "Security", label: "Security" },
-    { value: "Optimization", label: "Optimization" },
-    { value: "Feature", label: "Feature" }
-  ];
-  
-  // Fungsi untuk mendapatkan nama bulan
-  const getMonthName = (monthIndex: number): string => {
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    return months[monthIndex];
-  };
-  
-  // Fungsi untuk mendapatkan nama bulan singkat
-  const getShortMonthName = (monthIndex: number): string => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-    ];
-    return months[monthIndex];
-  };
-  
-  // Fungsi untuk mendapatkan hari dalam seminggu
-  const getDayName = (dayIndex: number): string => {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    return days[dayIndex];
-  };
-  
-  // Fungsi untuk mendapatkan hari dalam seminggu singkat
-  const getShortDayName = (dayIndex: number): string => {
-    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    return days[dayIndex];
-  };
-  
-  // Fungsi untuk mendapatkan jumlah hari dalam bulan
-  const getDaysInMonth = (year: number, month: number): number => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-  
-  // Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
-  const getFirstDayOfMonth = (year: number, month: number): number => {
-    return new Date(year, month, 1).getDay();
-  };
-  
-  // Fungsi untuk generate kalender
-  const generateCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-    const days = [];
-    
-    // Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(null);
-    }
-    
-    // Tambahkan hari-hari dalam bulan
-    for (let i = 1; i <= daysInMonth; i++) {
-      const currentDate = new Date(currentYear, currentMonth, i);
-      const dayEvents = calendarEvents.filter(event => {
-        const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
-        return (
-          eventDate.getDate() === i &&
-          eventDate.getMonth() === currentMonth &&
-          eventDate.getFullYear() === currentYear
-        );
-      });
-      
-      days.push({
-        date: i,
-        fullDate: currentDate,
-        isToday: currentDate.toDateString() === new Date().toDateString(),
-        isSelected: selectedDate ? currentDate.toDateString() === selectedDate.toDateString() : false,
-        events: dayEvents
-      });
-    }
-    
-    return days;
-  };
-  
-  // Fungsi untuk navigasi bulan
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      if (currentMonth === 0) {
-        setCurrentMonth(11);
-        setCurrentYear(currentYear - 1);
-      } else {
-        setCurrentMonth(currentMonth - 1);
-      }
-    } else {
-      if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear(currentYear + 1);
-      } else {
-        setCurrentMonth(currentMonth + 1);
-      }
-    }
-  };
-  
-  // Fungsi untuk pilih tahun
-  const handleYearSelect = (year: number) => {
-    setCurrentYear(year);
-  };
-  
-  // Fungsi untuk pilih bulan
-  const handleMonthSelect = (monthIndex: number) => {
-    setCurrentMonth(monthIndex);
-  };
-  
-  // Fungsi untuk pilih tanggal
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-    setEventForm(prev => ({
-      ...prev,
-      date: date
-    }));
-    setShowAddEventModal(true);
-  };
-  
-  // Fungsi untuk format tanggal
-  const formatDate = (date: Date): string => {
-    return `${getDayName(date.getDay())}, ${date.getDate()} ${getMonthName(date.getMonth())} ${date.getFullYear()}`;
-  };
-  
-  // Fungsi untuk format waktu
-  const formatTime = (date: Date, timeString?: string): string => {
-    if (timeString) {
-      const [hours, minutes] = timeString.split(':');
-      return `${hours}:${minutes}`;
-    }
-    return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
-  };
-  
-  // Fungsi untuk mengecek apakah user adalah admin
-  const checkIfAdmin = (email: string): boolean => {
-    const adminEmails = ['faridardiansyah061@gmail.com', 'admin@menuru.com'];
-    return adminEmails.includes(email.toLowerCase());
-  };
-  
-  // Fungsi untuk menghitung total event dalam tahun ini
-  const getTotalEventsThisYear = () => {
-    const eventsThisYear = calendarEvents.filter(event => {
-      const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
-      return eventDate.getFullYear() === currentYear;
-    });
-    return eventsThisYear.length;
-  };
-  
-  // Fungsi untuk membuat notifikasi KALENDER
-  const createCalendarNotification = async (eventId: string, eventTitle: string, createdBy: string, eventDate: Date, label: string) => {
-    if (!db || !userEmail) return;
-    
-    try {
-      const notificationData = {
-        eventId,
-        title: "Kegiatan Kalender Baru",
-        message: `${createdBy} menambahkan kegiatan kalender "${eventTitle}"`,
-        date: new Date(),
-        isRead: false,
-        createdBy,
-        createdAt: serverTimestamp(),
-        eventDate: eventDate,
-        eventLabel: label
-      };
-      
-      await addDoc(collection(db, 'calendarNotifications'), notificationData);
-      console.log("✅ Calendar notification created for event:", eventId);
-    } catch (error) {
-      console.error("❌ Error creating calendar notification:", error);
-    }
-  };
-  
-  // Fungsi untuk mark notifikasi KALENDER sebagai read
-  const markCalendarNotificationsAsRead = async () => {
-    if (!db || !userEmail) return;
-    
-    try {
-      const notificationsRef = collection(db, 'calendarNotifications');
-      const q = query(notificationsRef, where('isRead', '==', false));
-      
-      const querySnapshot = await getDocs(q);
-      const batch = writeBatch(db);
-      
-      querySnapshot.forEach((docSnapshot) => {
-        const notificationRef = doc(db, 'calendarNotifications', docSnapshot.id);
-        batch.update(notificationRef, { isRead: true });
-      });
-      
-      await batch.commit();
-      setUnreadCalendarNotifications(0);
-      
-      // Update local state
-      setCalendarNotifications(prev => prev.map(notification => ({
-        ...notification,
-        isRead: true
-      })));
-      
-    } catch (error) {
-      console.error("❌ Error marking calendar notifications as read:", error);
-    }
-  };
-  
-  // Fungsi untuk save event KALENDER
-  const handleSaveCalendarEvent = async (event: CalendarEvent) => {
-    if (!db || !user || isSavingEvent) return;
-    
-    setIsSavingEvent(true);
-    
-    // Cek apakah event sudah disimpan
-    const alreadySaved = savedCalendarEvents.some(saved => saved.eventId === event.id);
-    if (alreadySaved) {
-      alert("Kegiatan kalender ini sudah disimpan!");
-      setIsSavingEvent(false);
-      return;
-    }
-    
-    try {
-      const savedEventData = {
-        eventId: event.id,
-        userId: user.uid,
-        userEmail: userEmail,
-        title: event.title,
-        date: event.date instanceof Date ? event.date : event.date.toDate(),
-        description: event.description || "",
-        label: event.label || "Event",
-        createdBy: event.createdBy || "Unknown",
-        savedAt: serverTimestamp()
-      };
-      
-      const docRef = await addDoc(collection(db, 'savedCalendarEvents'), savedEventData);
-      console.log("✅ Calendar event saved:", docRef.id);
-      
-      // Refresh saved calendar events
-      loadSavedCalendarEvents();
-      
-      alert("Kegiatan kalender berhasil disimpan! Lihat di riwayat save Anda.");
-    } catch (error) {
-      console.error("❌ Error saving calendar event:", error);
-      alert("Gagal menyimpan kegiatan kalender. Silakan coba lagi.");
-    } finally {
-      setIsSavingEvent(false);
-    }
-  };
-  
-  // Fungsi untuk load saved events KALENDER
-  const loadSavedCalendarEvents = async () => {
-    if (!db || !user) return;
-    
-    try {
-      const savedEventsRef = collection(db, 'savedCalendarEvents');
-      const q = query(savedEventsRef, where('userId', '==', user.uid), orderBy('savedAt', 'desc'));
-      
-      const querySnapshot = await getDocs(q);
-      const savedData: SavedCalendarEvent[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        let savedDate = data.date;
-        
-        if (savedDate && typeof savedDate.toDate === 'function') {
-          savedDate = savedDate.toDate();
-        } else if (typeof savedDate === 'string') {
-          savedDate = new Date(savedDate);
-        } else if (!savedDate) {
-          savedDate = new Date();
-        }
-        
-        savedData.push({
-          id: doc.id,
-          eventId: data.eventId || '',
-          userId: data.userId || '',
-          userEmail: data.userEmail || '',
-          title: data.title || 'No Title',
-          date: savedDate,
-          description: data.description || '',
-          label: data.label || 'Event',
-          createdBy: data.createdBy || 'Unknown',
-          savedAt: data.savedAt || new Date()
-        });
-      });
-      
-      setSavedCalendarEvents(savedData);
-    } catch (error) {
-      console.error("❌ Error loading saved calendar events:", error);
-    }
-  };
-  
-  // Fungsi untuk menghapus saved event KALENDER
-  const handleRemoveSavedCalendarEvent = async (savedEventId: string) => {
-    if (!db) return;
-    
-    if (!confirm("Apakah Anda yakin ingin menghapus dari daftar save?")) {
-      return;
-    }
-    
-    try {
-      await deleteDoc(doc(db, 'savedCalendarEvents', savedEventId));
-      console.log("✅ Saved calendar event removed:", savedEventId);
-      loadSavedCalendarEvents();
-      alert("Kegiatan kalender dihapus dari daftar save!");
-    } catch (error) {
-      console.error("❌ Error removing saved calendar event:", error);
-      alert("Gagal menghapus dari daftar save.");
-    }
-  };
-  
-  // Load user dan events dari Firebase
+  const menuButtonRef = useRef<HTMLDivElement>(null);
+  const menuDrawerRef = useRef<HTMLDivElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
+  const calendarTitleRef = useRef<HTMLDivElement>(null);
+
+  // Auth
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        setUserDisplayName(currentUser.displayName || currentUser.email?.split('@')[0] || 'User');
-        setUserEmail(currentUser.email || '');
-        setIsAdmin(checkIfAdmin(currentUser.email || ''));
-        
-        // Load saved calendar events untuk user ini
-        loadSavedCalendarEvents();
-      } else {
-        setUser(null);
-        setUserDisplayName('');
-        setUserEmail('');
-        setIsAdmin(false);
-        setSavedCalendarEvents([]);
-      }
-      setIsLoading(false);
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
     });
-    
-    return () => unsubscribeAuth();
-  }, []);
-  
-  // Load events dari Firebase
-  useEffect(() => {
-    if (!db) return;
-    
-    setIsLoadingEvents(true);
-    
-    const eventsRef = collection(db, 'calendarEvents');
-    const q = query(eventsRef, orderBy('date', 'asc'));
-    
-    const unsubscribe = onSnapshot(q, 
-      (querySnapshot) => {
-        const eventsData: CalendarEvent[] = [];
-        
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          let eventDate = data.date;
-          
-          // Convert Firestore Timestamp to Date if needed
-          if (eventDate && typeof eventDate.toDate === 'function') {
-            eventDate = eventDate.toDate();
-          } else if (typeof eventDate === 'string') {
-            eventDate = new Date(eventDate);
-          } else if (!eventDate) {
-            eventDate = new Date();
-          }
-          
-          eventsData.push({
-            id: doc.id,
-            title: data.title || "No Title",
-            description: data.description || "",
-            date: eventDate,
-            time: data.time || "00:00",
-            color: data.color || "#3B82F6",
-            label: data.label || "Event",
-            createdBy: data.createdBy || "Unknown",
-            createdByEmail: data.createdByEmail || "",
-            isAdmin: data.isAdmin || false,
-            createdAt: data.createdAt || new Date()
-          });
-        });
-        
-        console.log(`✅ Loaded ${eventsData.length} calendar events`);
-        setCalendarEvents(eventsData);
-        setIsLoadingEvents(false);
-      },
-      (error) => {
-        console.error("❌ Error loading calendar events:", error);
-        setIsLoadingEvents(false);
-      }
-    );
-    
     return () => unsubscribe();
-  }, [db]);
-  
-  // Load notifications KALENDER dari Firebase
-  useEffect(() => {
-    if (!db) return;
-    
-    const notificationsRef = collection(db, 'calendarNotifications');
-    const q = query(notificationsRef, orderBy('createdAt', 'desc'));
-    
-    const unsubscribe = onSnapshot(q, 
-      (querySnapshot) => {
-        const notificationsData: CalendarNotification[] = [];
-        let unreadCount = 0;
-        
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          let notificationDate = data.date;
-          let eventDate = data.eventDate;
-          
-          // Handle dates safely
-          if (notificationDate && typeof notificationDate.toDate === 'function') {
-            notificationDate = notificationDate.toDate();
-          } else if (typeof notificationDate === 'string') {
-            notificationDate = new Date(notificationDate);
-          } else if (!notificationDate) {
-            notificationDate = new Date();
-          }
-          
-          if (eventDate && typeof eventDate.toDate === 'function') {
-            eventDate = eventDate.toDate();
-          } else if (typeof eventDate === 'string') {
-            eventDate = new Date(eventDate);
-          } else if (!eventDate) {
-            eventDate = new Date();
-          }
-          
-          notificationsData.push({
-            id: doc.id,
-            eventId: data.eventId || '',
-            title: data.title || "Notification",
-            message: data.message || "",
-            date: notificationDate,
-            isRead: data.isRead || false,
-            createdBy: data.createdBy || "System",
-            createdAt: data.createdAt || new Date(),
-            eventDate: eventDate,
-            eventLabel: data.eventLabel || "Event"
-          });
-          
-          if (!data.isRead) {
-            unreadCount++;
-          }
-        });
-        
-        setCalendarNotifications(notificationsData);
-        setUnreadCalendarNotifications(unreadCount);
-        
-        // Blink effect jika ada notifikasi baru - PERBAIKAN BLINK DOT
-        if (unreadCount > 0) {
-          setIsBlinking(true);
-          const blinkInterval = setInterval(() => {
-            setIsBlinking(prev => !prev);
-          }, 500); // Lebih cepat untuk blink yang jelas
-          
-          return () => clearInterval(blinkInterval);
-        } else {
-          setIsBlinking(false);
-        }
-      },
-      (error) => {
-        console.error("❌ Error loading calendar notifications:", error);
-      }
-    );
-    
-    return () => unsubscribe();
-  }, [db]);
-  
-  // Close modal when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (addEventModalRef.current && !addEventModalRef.current.contains(event.target as Node)) {
-        setShowAddEventModal(false);
-        setIsEditingEvent(false);
-        setEditingEventId(null);
-      }
-      if (eventDetailsModalRef.current && !eventDetailsModalRef.current.contains(event.target as Node)) {
-        setShowEventDetailsModal(false);
-        setSelectedEvent(null);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowCalendarNotifications(false);
-      }
-      if (savedEventsRef.current && !savedEventsRef.current.contains(event.target as Node)) {
-        setShowSavedCalendarEvents(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, []);
-  
-  // Handler untuk form input
-  const handleFormInputChange = (field: keyof EventFormData, value: string | Date) => {
-    setEventForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-  
-  // Handler untuk submit event baru
-  const handleSubmitEvent = async () => {
-    if (!user || !db) {
-      alert("Silakan login terlebih dahulu!");
-      return;
-    }
-    
-    if (!eventForm.title.trim()) {
-      alert("Judul kegiatan tidak boleh kosong!");
-      return;
-    }
-    
-    try {
-      // Combine date and time
-      const [hours, minutes] = eventForm.time.split(':');
-      const eventDate = new Date(eventForm.date);
-      eventDate.setHours(parseInt(hours), parseInt(minutes));
-      
-      const eventData = {
-        title: eventForm.title.trim(),
-        description: eventForm.description.trim(),
-        date: eventDate,
-        time: eventForm.time,
-        color: eventForm.color,
-        label: eventForm.label,
-        createdBy: userDisplayName,
-        createdByEmail: userEmail,
-        isAdmin: isAdmin,
-        createdAt: serverTimestamp()
-      };
-      
-      let eventId = "";
-      
-      if (isEditingEvent && editingEventId) {
-        // Update existing event
-        const eventRef = doc(db, 'calendarEvents', editingEventId);
-        await updateDoc(eventRef, eventData);
-        eventId = editingEventId;
-        console.log("✅ Event updated:", editingEventId);
-      } else {
-        // Add new event
-        const docRef = await addDoc(collection(db, 'calendarEvents'), eventData);
-        eventId = docRef.id;
-        console.log("✅ Event added with ID:", docRef.id);
-        
-        // Buat notifikasi KALENDER hanya untuk event baru (bukan edit)
-        if (isAdmin) {
-          await createCalendarNotification(eventId, eventForm.title.trim(), userDisplayName, eventDate, eventForm.label);
-        }
-      }
-      
-      // Reset form
-      setEventForm({
-        title: "",
-        description: "",
-        date: selectedDate || new Date(),
-        time: "09:00",
-        color: "#3B82F6",
-        label: "Meeting"
-      });
-      
-      setIsEditingEvent(false);
-      setEditingEventId(null);
-      setShowAddEventModal(false);
-      
-      alert(isEditingEvent ? "Kegiatan berhasil diperbarui!" : "Kegiatan berhasil ditambahkan!");
-      
-    } catch (error) {
-      console.error("❌ Error saving event:", error);
-      alert("Gagal menyimpan kegiatan. Silakan coba lagi.");
-    }
-  };
-  
-  // Handler untuk edit event
-  const handleEditEvent = (event: CalendarEvent) => {
-    const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
-    
-    setEventForm({
-      title: event.title,
-      description: event.description,
-      date: eventDate,
-      time: event.time || "09:00",
-      color: event.color,
-      label: event.label
-    });
-    
-    setIsEditingEvent(true);
-    setEditingEventId(event.id);
-    setShowAddEventModal(true);
-    setShowEventDetailsModal(false);
-  };
-  
-  // Handler untuk hapus event
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!db) return;
-    
-    if (!confirm("Apakah Anda yakin ingin menghapus kegiatan ini?")) {
-      return;
-    }
-    
-    try {
-      await deleteDoc(doc(db, 'calendarEvents', eventId));
-      console.log("✅ Event deleted:", eventId);
-      setShowEventDetailsModal(false);
-      setSelectedEvent(null);
-      alert("Kegiatan berhasil dihapus!");
-    } catch (error) {
-      console.error("❌ Error deleting event:", error);
-      alert("Gagal menghapus kegiatan. Silakan coba lagi.");
-    }
-  };
-  
-  // Handler untuk melihat detail event
-  const handleViewEventDetails = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setShowEventDetailsModal(true);
-  };
-  
-  // Effect untuk resize
+
+  // Menu drawer animation
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
-  
-  // Handle escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (showAddEventModal) {
-          setShowAddEventModal(false);
-          setIsEditingEvent(false);
-          setEditingEventId(null);
-        }
-        if (showEventDetailsModal) {
-          setShowEventDetailsModal(false);
-          setSelectedEvent(null);
-        }
-        if (showCalendarNotifications) {
-          setShowCalendarNotifications(false);
-        }
-        if (showSavedCalendarEvents) {
-          setShowSavedCalendarEvents(false);
-        }
-      }
-    };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showAddEventModal, showEventDetailsModal, showCalendarNotifications, showSavedCalendarEvents]);
-  
-  // Animasi untuk modal
-  useEffect(() => {
-    if (showAddEventModal || showEventDetailsModal || showCalendarNotifications || showSavedCalendarEvents) {
+    if (isMenuOpen && menuDrawerRef.current) {
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
+      gsap.fromTo(menuDrawerRef.current,
+        { y: '100%', opacity: 0 },
+        {
+          y: '0%',
+          opacity: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          display: 'flex',
+          onComplete: () => {
+            if (menuDrawerRef.current) {
+              menuDrawerRef.current.style.overflow = 'hidden';
+            }
+          }
+        }
+      );
+    } else if (!isMenuOpen && menuDrawerRef.current) {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      
+      gsap.to(menuDrawerRef.current, {
+        y: '100%',
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.in",
+        onComplete: () => {
+          if (menuDrawerRef.current) {
+            menuDrawerRef.current.style.display = 'none';
+          }
+        }
+      });
     }
-    
+  }, [isMenuOpen]);
+
+  // Menu button hover
+  useEffect(() => {
+    if (menuButtonRef.current) {
+      if (isMenuHovered) {
+        gsap.to(menuButtonRef.current, {
+          scale: 1.05,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      } else {
+        gsap.to(menuButtonRef.current, {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [isMenuHovered]);
+
+  // SplitText animation untuk judul Calendar
+  useEffect(() => {
+    if (calendarTitleRef.current) {
+      const splitTitle = new SplitText(calendarTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char-calendar"
+      });
+
+      gsap.fromTo(splitTitle.chars,
+        { opacity: 0, x: -50, filter: 'blur(10px)' },
+        {
+          opacity: 1,
+          x: 0,
+          filter: 'blur(0px)',
+          duration: 1,
+          stagger: 0.04,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: calendarTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
     return () => {
-      document.body.style.overflow = 'auto';
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showAddEventModal, showEventDetailsModal, showCalendarNotifications, showSavedCalendarEvents]);
-  
-  // Hitung total event
-  const totalEventsThisYear = getTotalEventsThisYear();
-  
-  // Fungsi untuk format tanggal saved event
-  const formatSavedDate = (date: Date): string => {
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) {
-      return "Hari ini";
-    } else if (diffDays === 1) {
-      return "Kemarin";
-    } else if (diffDays < 7) {
-      return `${diffDays} hari lalu`;
-    } else if (diffDays < 30) {
-      const weeks = Math.floor(diffDays / 7);
-      return `${weeks} minggu lalu`;
+  }, []);
+
+  const handleMenuClick = () => {
+    if (!isMenuOpen) {
+      setIsMenuOpen(true);
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 45,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
     } else {
-      return `${date.getDate()} ${getShortMonthName(date.getMonth())} ${date.getFullYear()}`;
+      if (menuDrawerRef.current) {
+        gsap.to(menuDrawerRef.current, {
+          y: '100%',
+          opacity: 0,
+          duration: 0.6,
+          ease: "power3.in",
+          onComplete: () => {
+            setIsMenuOpen(false);
+            if (menuDrawerRef.current) {
+              menuDrawerRef.current.style.display = 'none';
+            }
+          }
+        });
+      } else {
+        setIsMenuOpen(false);
+      }
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
+        <div style={{ fontSize: "18px", color: "#000" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'auto',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }}>
+    <>
+      <style jsx global>{`
+        * {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        *::-webkit-scrollbar {
+          display: none;
+        }
+        html, body {
+          margin: 0;
+          padding: 0;
+          background-color: white;
+          overflow-x: hidden;
+          overflow-y: auto !important;
+        }
+        .split-char-calendar {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.2; }
+        }
+      `}</style>
       
-      {/* Header dengan Back Button - TEKS & PANAH DIPERBESAR */}
       <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
+        minHeight: '100vh',
+        backgroundColor: 'white',
+        margin: 0,
+        padding: 0,
         width: '100%',
-        padding: isMobile ? '1.5rem 1rem' : '2rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        zIndex: 100,
-        backgroundColor: 'black',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(10px)'
-      }}>
-        {/* Back Button kiri - DIPERBESAR */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center'
-        }}>
-          <motion.button
-            onClick={() => router.push('/')}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              fontSize: isMobile ? '1.2rem' : '1.4rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              padding: '0.5rem',
-              gap: '0.5rem',
-              fontWeight: '400'
-            }}
-            whileHover={{ opacity: 0.7 }}
-          >
-            {/* North West Arrow Icon - DIPERBESAR */}
-            <svg 
-              width={isMobile ? "28" : "32"} 
-              height={isMobile ? "28" : "32"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5"
-            >
-              <path d="M7 17L17 7"/>
-              <path d="M7 7H17V17"/>
-            </svg>
-            
-            <span style={{
-              fontSize: isMobile ? '1.2rem' : '1.4rem',
-              fontWeight: '400',
-              color: 'white',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Halaman utama
-            </span>
-          </motion.button>
-        </div>
-        
-        {/* Judul kalender di tengah - DIPERBESAR */}
-        <div style={{
-          flex: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          gap: '0.3rem'
-        }}>
-          <h1 style={{
-            color: 'white',
-            fontSize: isMobile ? '1.8rem' : '2.4rem',
-            fontWeight: '400',
-            margin: 0,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '0.5px',
-            lineHeight: 1.2
-          }}>
-            Kalender MENURU
-          </h1>
-          
-          {/* Tahun + Total Event - DIPERBESAR */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.8rem',
-            marginTop: '0.3rem'
-          }}>
-            <div style={{
-              color: 'white',
-              fontSize: isMobile ? '1.2rem' : '1.5rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <span>{currentYear}</span>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem'
-              }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
-                  fontWeight: '400',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  {totalEventsThisYear}
-                </span>
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
-                  fontWeight: '400',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Event
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW - DIPERBESAR */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '1.5rem'
-        }}>
-          {/* Notifikasi Bell Icon dengan counter - BESAR */}
-          {user && (
-            <div style={{ position: 'relative' }}>
-              <motion.button
-                onClick={() => setShowCalendarNotifications(true)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  padding: '0.5rem'
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Bell Icon BESAR */}
-                <svg 
-                  width={isMobile ? "32" : "40"} 
-                  height={isMobile ? "32" : "40"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="white" 
-                  strokeWidth="2"
-                >
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-                
-                {/* Blink Dot Pemancar - BESAR dan JELAS - PERBAIKAN BLINK */}
-                {unreadCalendarNotifications > 0 && (
-                  <motion.div
-                    animate={{
-                      scale: isBlinking ? [1, 1.3, 1] : 1,
-                      opacity: isBlinking ? [1, 0.3, 1] : 1,
-                      boxShadow: isBlinking ? [
-                        '0 0 0 0 rgba(255, 59, 48, 0.7)',
-                        '0 0 0 10px rgba(255, 59, 48, 0)',
-                        '0 0 0 0 rgba(255, 59, 48, 0)'
-                      ] : 'none'
-                    }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '3px',
-                      right: '3px',
-                      width: isMobile ? '18px' : '22px',
-                      height: isMobile ? '18px' : '22px',
-                      backgroundColor: '#FF3B30',
-                      borderRadius: '50%',
-                      border: '3px solid black',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 10
-                    }}
-                  >
-                    <span style={{
-                      color: 'white',
-                      fontSize: isMobile ? '0.7rem' : '0.8rem',
-                      fontWeight: 'bold',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {unreadCalendarNotifications > 9 ? '9+' : unreadCalendarNotifications}
-                    </span>
-                  </motion.div>
-                )}
-              </motion.button>
-            </div>
-          )}
-          
-          {/* Save Events Icon - BESAR */}
-          {user && (
-            <div style={{ position: 'relative' }}>
-              <motion.button
-                onClick={() => setShowSavedCalendarEvents(true)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.5rem'
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Bookmark Icon BESAR */}
-                <svg 
-                  width={isMobile ? "32" : "40"} 
-                  height={isMobile ? "32" : "40"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="white" 
-                  strokeWidth="2"
-                >
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-                
-                {/* Counter untuk saved calendar events */}
-                {savedCalendarEvents.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '5px',
-                    right: '5px',
-                    width: isMobile ? '14px' : '18px',
-                    height: isMobile ? '14px' : '18px',
-                    backgroundColor: '#3B82F6',
-                    borderRadius: '50%',
-                    border: '2px solid black',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <span style={{
-                      color: 'white',
-                      fontSize: isMobile ? '0.7rem' : '0.8rem',
-                      fontWeight: 'bold',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {savedCalendarEvents.length > 9 ? '9+' : savedCalendarEvents.length}
-                    </span>
-                  </div>
-                )}
-              </motion.button>
-            </div>
-          )}
-          
-          {user && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem'
-            }}>
-              {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user - DIPERBESAR */}
-              <svg 
-                width={isMobile ? "28" : "36"} 
-                height={isMobile ? "28" : "36"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="2.5"
-                style={{ display: 'block' }}
-              >
-                <path d="M7 17L17 7" stroke="white" strokeWidth="2.5"/>
-                <path d="M7 7H17V17" stroke="white" strokeWidth="2.5"/>
-              </svg>
-              
-              {/* Nama user BESAR - DIPERBESAR */}
-              <span style={{
-                fontSize: isMobile ? '1.6rem' : '2.2rem',
-                fontWeight: '400',
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '140px' : '200px'
-              }}>
-                {userDisplayName}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Main Calendar Content */}
-      <div style={{
-        width: '100%',
-        maxWidth: '1400px',
-        marginTop: isMobile ? '9rem' : '12rem',
-        padding: isMobile ? '1rem' : '2rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '2rem'
+        fontFamily: FONT_FAMILY,
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        position: 'relative',
+        overflowX: 'hidden',
       }}>
-        
-        {/* Kontrol Tahun & Bulan */}
+        {/* JUDUL WEBSITE - pojok kiri atas */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          padding: '1.5rem',
-          backgroundColor: 'transparent',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '15px'
+          position: 'fixed',
+          top: '40px',
+          left: '40px',
+          zIndex: isMenuOpen ? 98 : 100,
+          pointerEvents: 'none'
         }}>
-          {/* Navigasi Bulan */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.5rem'
+          <span style={{
+            fontFamily: FONT_FAMILY,
+            fontWeight: 700,
+            fontSize: '48px',
+            color: '#000000',
+            letterSpacing: '-0.03em',
+            textTransform: 'none',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale'
           }}>
-            <motion.button
-              onClick={() => navigateMonth('prev')}
+            Menuru
+          </span>
+        </div>
+
+        {/* NAVBAR - pojok kanan atas */}
+        <div style={{
+          position: 'fixed',
+          top: '40px',
+          right: '40px',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '8px 16px',
+          borderRadius: '12px',
+          backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
+          backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
+          transition: 'all 0.3s ease',
+          pointerEvents: 'auto',
+          boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
+        }}>
+          {/* Get in Touch - (here) */}
+          <Link href="/contact">
+            <div
               style={{
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                width: '45px',
-                height: '45px',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '8px',
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
               }}
-              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 18l-6-6 6-6"/>
-              </svg>
-            </motion.button>
-            
-            <div style={{
-              color: 'white',
-              fontSize: isMobile ? '1.6rem' : '2rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              minWidth: '250px',
-              textAlign: 'center'
-            }}>
-              {getMonthName(currentMonth)} {currentYear}
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#0D3CFC',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
+                }}
+              >
+                (here)
+              </span>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#0D3CFC',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
+                }}
+              >
+                <SouthEastArrow size={24} />
+              </div>
             </div>
-            
-            <motion.button
-              onClick={() => navigateMonth('next')}
+          </Link>
+
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
+            <div
               style={{
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                width: '45px',
-                height: '45px',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '8px',
+                border: '2px solid #000000',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
               }}
-              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </motion.button>
-          </div>
-          
-          {/* Pilih Tahun */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            flexWrap: 'wrap'
-          }}>
-            {[2023, 2024, 2025, 2026, 2027, 2028].map(year => (
-              <motion.button
-                key={year}
-                onClick={() => handleYearSelect(year)}
+              <span
                 style={{
-                  backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  padding: '0.6rem 1.2rem',
-                  borderRadius: '20px',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  whiteSpace: 'nowrap',
-                  fontWeight: currentYear === year ? '500' : '400'
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#000000',
+                  fontFamily: FONT_FAMILY,
+                  display: 'inline-block',
                 }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
-                {year}
-              </motion.button>
-            ))}
-          </div>
-          
-          {/* Pilih Bulan */}
-          <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            flexWrap: 'wrap'
-          }}>
-            {[
-              'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-              'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-            ].map((month, index) => (
-              <motion.button
-                key={month}
-                onClick={() => handleMonthSelect(index)}
+                Pusat Bantuan
+              </span>
+              <div
                 style={{
-                  backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '15px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  minWidth: '45px',
-                  fontWeight: currentMonth === index ? '500' : '400'
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#000000',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: '#ffffff',
                 }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
-                {month}
-              </motion.button>
-            ))}
+                <NorthWestArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Menu */}
+          <div
+            ref={menuButtonRef}
+            onClick={handleMenuClick}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '2px solid #000000',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#000000',
+                borderRadius: '4px',
+                padding: '4px',
+                color: '#ffffff',
+              }}
+            >
+              <span
+                ref={plusIconRef}
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 300,
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  display: 'inline-block',
+                  transform: 'rotate(0deg)',
+                }}
+              >
+                +
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#000000',
+                fontFamily: FONT_FAMILY,
+                letterSpacing: '0.02em',
+                display: 'inline-block',
+              }}
+            >
+              Menu
+            </span>
           </div>
         </div>
-        
-        {/* Grid Kalender */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
-          {/* Header Hari */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: '0.5rem',
-            padding: '0.5rem 0'
-          }}>
-            {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
-              <div key={day} style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: isMobile ? '1rem' : '1.1rem',
-                fontWeight: '600',
-                textAlign: 'center',
-                padding: '0.8rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                {day}
-              </div>
-            ))}
+
+        {/* Menu Drawer - BG BIRU #0D3CFC */}
+        <div
+          ref={menuDrawerRef}
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#0D3CFC',
+            zIndex: 99,
+            display: 'none',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: 'translateY(-100%)',
+            opacity: 0,
+            pointerEvents: isMenuOpen ? 'auto' : 'none',
+            padding: '40px',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
+          }}
+        >
+          <h1
+            style={{
+              position: 'absolute',
+              top: '40px',
+              left: '40px',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#ffffff',
+              fontFamily: FONT_FAMILY,
+              letterSpacing: '-0.03em',
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}
+          >
+            Menuru
+          </h1>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              gap: '30px',
+            }}
+          >
+            <Link href="/" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Home</Link>
+            <Link href="/about" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>About</Link>
+            <Link href="/contact" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Contact</Link>
+            <Link href="/pusat-bantuan" style={{ 
+              color: '#ffffff', 
+              fontSize: '48px', 
+              textDecoration: 'none',
+              fontFamily: FONT_FAMILY,
+              fontWeight: 500,
+              transition: 'opacity 0.3s',
+              opacity: 0.8,
+            }}>Pusat Bantuan</Link>
           </div>
-          
-          {/* Grid Tanggal */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: '0.5rem'
-          }}>
-            {generateCalendar().map((day, index) => {
-              if (!day) {
-                return <div key={`empty-${index}`} style={{ height: isMobile ? '100px' : '140px' }} />;
-              }
-              
-              const hasEvents = day.events && day.events.length > 0;
-              
-              return (
-                <motion.div
-                  key={`day-${day.date}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.005 }}
-                  onClick={() => isAdmin && handleDateSelect(day.fullDate)}
+        </div>
+
+        {/* Teks Calendar besar 300px - DIGANTI DARI CONTACT MENJADI CALENDAR */}
+        <div style={{
+          position: 'relative',
+          top: '120px',
+          left: '40px',
+          zIndex: 10,
+          width: 'calc(100% - 80px)',
+          marginBottom: '40px'
+        }}>
+          <div 
+            ref={calendarTitleRef}
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: '300px',
+              fontWeight: '300',
+              color: '#000000',
+              textAlign: 'left',
+              letterSpacing: '-0.02em',
+              textTransform: 'none',
+              lineHeight: '1',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
+            }}>
+            Calendar
+          </div>
+        </div>
+
+        {/* Teks subtitle dan tombol di bawah Calendar */}
+        <div style={{
+          position: 'relative',
+          top: '120px',
+          left: '40px',
+          zIndex: 10,
+          width: 'calc(100% - 80px)',
+          marginBottom: '80px'
+        }}>
+          <p
+            style={{
+              fontSize: '40px',
+              fontWeight: 400,
+              color: '#0D3CFC',
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.2,
+              margin: 0,
+              padding: 0,
+              paddingBottom: '30px',
+              whiteSpace: 'pre-line',
+            }}
+          >
+            {`Plan your schedule, set reminders,\nand never miss an important event`}
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
+            <Link href="/signup">
+              <div
+                style={{
+                  display: 'inline-block',
+                  border: '2px solid #0D3CFC',
+                  borderRadius: '8px',
+                  padding: '12px 28px',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <span
                   style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '10px',
-                    padding: '1rem',
-                    minHeight: isMobile ? '100px' : '140px',
-                    cursor: isAdmin ? 'pointer' : 'default',
-                    position: 'relative',
-                    transition: 'all 0.3s ease'
+                    fontSize: '18px',
+                    fontWeight: 500,
+                    color: '#0D3CFC',
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: '0.02em',
                   }}
-                  whileHover={isAdmin ? { 
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.4)'
-                  } : {}}
                 >
-                  {/* Tanggal dengan North West Arrow jika ada event */}
-                  <div style={{
-                    color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
-                    fontSize: isMobile ? '1.2rem' : '1.3rem',
-                    fontWeight: day.isToday ? '700' : '400',
-                    marginBottom: '0.5rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span>{day.date}</span>
-                      {hasEvents && (
-                        <svg 
-                          width="16" 
-                          height="16" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="white" 
-                          strokeWidth="2"
-                          style={{ opacity: 0.7 }}
-                        >
-                          <path d="M7 17L17 7"/>
-                          <path d="M7 7H17V17"/>
-                        </svg>
-                      )}
-                    </div>
-                    {day.isToday && (
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        backgroundColor: '#3B82F6',
-                        borderRadius: '50%'
-                      }} />
-                    )}
-                  </div>
-                  
-                  {/* Event Indicators dengan North West Arrow */}
-                  {hasEvents && (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem',
-                      maxHeight: isMobile ? '65px' : '100px',
-                      overflowY: 'auto'
-                    }}>
-                      {day.events.slice(0, 3).map(event => (
-                        <div
-                          key={event.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewEventDetails(event);
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            padding: '0.3rem 0.5rem',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                          }}
-                        >
-                          {/* North West Arrow Icon untuk setiap event */}
-                          <svg 
-                            width="12" 
-                            height="12" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="white" 
-                            strokeWidth="2"
-                            style={{ flexShrink: 0 }}
-                          >
-                            <path d="M7 17L17 7"/>
-                            <path d="M7 7H17V17"/>
-                          </svg>
-                          
-                          <div style={{
-                            color: 'white',
-                            fontSize: isMobile ? '0.8rem' : '0.9rem',
-                            fontWeight: '500',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {event.title}
-                          </div>
-                        </div>
-                      ))}
-                      {day.events.length > 3 && (
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: isMobile ? '0.7rem' : '0.8rem',
-                          textAlign: 'center',
-                          padding: '0.2rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          +{day.events.length - 3} lainnya
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Add Event Button for Admin */}
-                  {isAdmin && !hasEvents && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.5 }}
-                      whileHover={{ opacity: 1 }}
-                      onClick={() => handleDateSelect(day.fullDate)}
-                      style={{
-                        position: 'absolute',
-                        bottom: '0.5rem',
-                        right: '0.5rem',
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                        color: 'white',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}
-                    >
-                      +
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
+                  Let's build now
+                </span>
+              </div>
+            </Link>
+
+            <Link href="/signup">
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #0D3CFC',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  cursor: 'pointer',
+                  backgroundColor: '#0D3CFC',
+                  color: '#ffffff',
+                  width: '50px',
+                  height: '50px',
+                }}
+              >
+                <NorthEastArrow size={24} />
+              </div>
+            </Link>
           </div>
         </div>
       </div>
-      
-      {/* Modal Add/Edit Event - DENGAN NORTH WEST ARROW BESAR & TANPA WARNA */}
-      <AnimatePresence>
-        {showAddEventModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10002,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              overflow: 'auto',
-              padding: isMobile ? '1rem' : '2rem'
-            }}
-          >
-            <motion.div
-              ref={addEventModalRef}
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '20px',
-                width: '100%',
-                maxWidth: '600px',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              {/* Header Modal dengan North West Arrow BESAR */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexShrink: 0
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  {/* North West Arrow Icon BESAR */}
-                  <svg 
-                    width={isMobile ? "32" : "40"} 
-                    height={isMobile ? "32" : "40"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <path d="M7 17L17 7"/>
-                    <path d="M7 7H17V17"/>
-                  </svg>
-                  
-                  <h2 style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.6rem' : '2rem',
-                    fontWeight: '400',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
-                  </h2>
-                </div>
-                
-                <motion.button
-                  onClick={() => {
-                    setShowAddEventModal(false);
-                    setIsEditingEvent(false);
-                    setEditingEventId(null);
-                  }}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.8rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  ×
-                </motion.button>
-              </div>
-              
-              {/* Form Content - TANPA PILIHAN WARNA */}
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: isMobile ? '1.5rem' : '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
-              }}>
-                {/* Title Input */}
-                <div>
-                  <label style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1.1rem',
-                    marginBottom: '0.8rem',
-                    display: 'block',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: '400'
-                  }}>
-                    Judul Kegiatan *
-                  </label>
-                  <input
-                    type="text"
-                    value={eventForm.title}
-                    onChange={(e) => handleFormInputChange('title', e.target.value)}
-                    placeholder="Masukkan judul kegiatan"
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1.2rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '10px',
-                      color: 'white',
-                      fontSize: '1.1rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      outline: 'none',
-                      transition: 'border-color 0.3s ease'
-                    }}
-                  />
-                </div>
-                
-                {/* Description Input */}
-                <div>
-                  <label style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1.1rem',
-                    marginBottom: '0.8rem',
-                    display: 'block',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: '400'
-                  }}>
-                    Deskripsi
-                  </label>
-                  <textarea
-                    value={eventForm.description}
-                    onChange={(e) => handleFormInputChange('description', e.target.value)}
-                    placeholder="Masukkan deskripsi kegiatan"
-                    rows={4}
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1.2rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '10px',
-                      color: 'white',
-                      fontSize: '1.1rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      outline: 'none',
-                      transition: 'border-color 0.3s ease',
-                      resize: 'vertical',
-                      minHeight: '120px'
-                    }}
-                  />
-                </div>
-                
-                {/* Date and Time */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                  gap: '1.5rem'
-                }}>
-                  <div>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '1.1rem',
-                      marginBottom: '0.8rem',
-                      display: 'block',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      fontWeight: '400'
-                    }}>
-                      Tanggal
-                    </label>
-                    <input
-                      type="date"
-                      value={eventForm.date.toISOString().split('T')[0]}
-                      onChange={(e) => handleFormInputChange('date', new Date(e.target.value))}
-                      style={{
-                        width: '100%',
-                        padding: '1rem 1.2rem',
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        borderRadius: '10px',
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '1.1rem',
-                      marginBottom: '0.8rem',
-                      display: 'block',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      fontWeight: '400'
-                    }}>
-                      Waktu
-                    </label>
-                    <input
-                      type="time"
-                      value={eventForm.time}
-                      onChange={(e) => handleFormInputChange('time', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '1rem 1.2rem',
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        borderRadius: '10px',
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                {/* Label Selection */}
-                <div>
-                  <label style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1.1rem',
-                    marginBottom: '0.8rem',
-                    display: 'block',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: '400'
-                  }}>
-                    Kategori
-                  </label>
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem'
-                  }}>
-                    {labelOptions.map(label => (
-                      <motion.button
-                        key={label.value}
-                        type="button"
-                        onClick={() => handleFormInputChange('label', label.value)}
-                        style={{
-                          padding: '0.6rem 1.2rem',
-                          backgroundColor: eventForm.label === label.value ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '20px',
-                          color: 'white',
-                          fontSize: '0.9rem',
-                          cursor: 'pointer',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          whiteSpace: 'nowrap',
-                          fontWeight: eventForm.label === label.value ? '500' : '400'
-                        }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                      >
-                        {label.label}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* User Info dengan North West Arrow */}
-                {user && (
-                  <div style={{
-                    padding: '1.2rem',
-                    backgroundColor: 'transparent',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem'
-                    }}>
-                      {/* North West Arrow Icon untuk User */}
-                      <svg 
-                        width="24" 
-                        height="24" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="white" 
-                        strokeWidth="2"
-                      >
-                        <path d="M7 17L17 7"/>
-                        <path d="M7 7H17V17"/>
-                      </svg>
-                      
-                      <div>
-                        <div style={{
-                          color: 'white',
-                          fontSize: '1.1rem',
-                          fontWeight: '500',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {userDisplayName}
-                        </div>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {userEmail}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '0.9rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      padding: '0.3rem 0.8rem',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '15px'
-                    }}>
-                      {isAdmin ? 'Admin' : 'User'}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Footer Modal */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '1.2rem',
-                flexShrink: 0
-              }}>
-                <motion.button
-                  onClick={() => {
-                    setShowAddEventModal(false);
-                    setIsEditingEvent(false);
-                    setEditingEventId(null);
-                  }}
-                  style={{
-                    padding: '0.9rem 1.8rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '10px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '400',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  Batal
-                </motion.button>
-                
-                <motion.button
-                  onClick={handleSubmitEvent}
-                  disabled={!eventForm.title.trim()}
-                  style={{
-                    padding: '0.9rem 1.8rem',
-                    backgroundColor: eventForm.title.trim() ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
-                    border: eventForm.title.trim() ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '10px',
-                    color: eventForm.title.trim() ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '1rem',
-                    fontWeight: '400',
-                    cursor: eventForm.title.trim() ? 'pointer' : 'not-allowed',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={eventForm.title.trim() ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
-                >
-                  {isEditingEvent ? 'Update Kegiatan' : 'Simpan Kegiatan'}
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Modal Event Details - DESIGN TABEL MINIMALIST DENGAN TEKS BESAR */}
-      <AnimatePresence>
-        {showEventDetailsModal && selectedEvent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10002,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              overflow: 'auto',
-              padding: isMobile ? '1rem' : '2rem'
-            }}
-          >
-            <motion.div
-              ref={eventDetailsModalRef}
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '20px',
-                width: '100%',
-                maxWidth: '700px',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              {/* Header Modal dengan North West Arrow BESAR */}
-              <div style={{
-                padding: isMobile ? '1.8rem' : '2.5rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                flexShrink: 0
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                  {/* North West Arrow Icon - BESAR */}
-                  <svg 
-                    width={isMobile ? "32" : "40"} 
-                    height={isMobile ? "32" : "40"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <path d="M7 17L17 7"/>
-                    <path d="M7 7H17V17"/>
-                  </svg>
-                  
-                  <div>
-                    <h2 style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.8rem' : '2.2rem',
-                      fontWeight: '400',
-                      margin: '0 0 0.8rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {selectedEvent.title}
-                    </h2>
-                    
-                    <div style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '1.1rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {selectedEvent.label}
-                    </div>
-                  </div>
-                </div>
-                
-                <motion.button
-                  onClick={() => {
-                    setShowEventDetailsModal(false);
-                    setSelectedEvent(null);
-                  }}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.8rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  ×
-                </motion.button>
-              </div>
-              
-              {/* Event Content dalam bentuk tabel dengan TEKS BESAR */}
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: isMobile ? '1.8rem' : '2.5rem'
-              }}>
-                {/* Tabel Informasi Event - TEKS BESAR */}
-                <div style={{
-                  display: 'table',
-                  width: '100%',
-                  borderCollapse: 'collapse'
-                }}>
-                  
-                  {/* Baris Tanggal */}
-                  <div style={{
-                    display: 'table-row',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
-                  }}>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0',
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: isMobile ? '1.2rem' : '1.4rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      width: isMobile ? '100px' : '120px',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                          <line x1="16" y1="2" x2="16" y2="6"/>
-                          <line x1="8" y1="2" x2="8" y2="6"/>
-                          <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        Tanggal
-                      </div>
-                    </div>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0 1.5rem 1.5rem',
-                      color: 'white',
-                      fontSize: isMobile ? '1.3rem' : '1.5rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      {formatDate(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate())}
-                    </div>
-                  </div>
-                  
-                  {/* Baris Waktu */}
-                  <div style={{
-                    display: 'table-row',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
-                  }}>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0',
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: isMobile ? '1.2rem' : '1.4rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      width: isMobile ? '100px' : '120px',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        Waktu
-                      </div>
-                    </div>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0 1.5rem 1.5rem',
-                      color: 'white',
-                      fontSize: isMobile ? '1.3rem' : '1.5rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      {formatTime(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate(), selectedEvent.time)} WIB
-                    </div>
-                  </div>
-                  
-                  {/* Baris Deskripsi */}
-                  {selectedEvent.description && (
-                    <div style={{
-                      display: 'table-row',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
-                    }}>
-                      <div style={{
-                        display: 'table-cell',
-                        padding: '1.5rem 0',
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        fontSize: isMobile ? '1.2rem' : '1.4rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        width: isMobile ? '100px' : '120px',
-                        verticalAlign: 'top',
-                        fontWeight: '400'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10 9 9 9 8 9"/>
-                          </svg>
-                          Deskripsi
-                        </div>
-                      </div>
-                      <div style={{
-                        display: 'table-cell',
-                        padding: '1.5rem 0 1.5rem 1.5rem',
-                        color: 'white',
-                        fontSize: isMobile ? '1.3rem' : '1.5rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        lineHeight: 1.6,
-                        verticalAlign: 'top',
-                        whiteSpace: 'pre-wrap',
-                        fontWeight: '400'
-                      }}>
-                        {selectedEvent.description}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Baris Dibuat Oleh */}
-                  <div style={{
-                    display: 'table-row'
-                  }}>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0',
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: isMobile ? '1.2rem' : '1.4rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      width: isMobile ? '100px' : '120px',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        Dibuat Oleh
-                      </div>
-                    </div>
-                    <div style={{
-                      display: 'table-cell',
-                      padding: '1.5rem 0 1.5rem 1.5rem',
-                      color: 'white',
-                      fontSize: isMobile ? '1.3rem' : '1.5rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      verticalAlign: 'top',
-                      fontWeight: '400'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.8rem'
-                        }}>
-                          {/* North West Arrow Icon di samping nama pembuat - BESAR */}
-                          <svg 
-                            width={isMobile ? "20" : "24"} 
-                            height={isMobile ? "20" : "24"} 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="white" 
-                            strokeWidth="2"
-                          >
-                            <path d="M7 17L17 7"/>
-                            <path d="M7 7H17V17"/>
-                          </svg>
-                          <div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1.2rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {selectedEvent.createdBy}
-                            </div>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '1rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {selectedEvent.createdByEmail}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Footer Modal dengan Actions */}
-              <div style={{
-                padding: isMobile ? '1.8rem' : '2.5rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '1rem',
-                flexShrink: 0
-              }}>
-                {/* Save Button untuk User */}
-                {user && !isAdmin && (
-                  <motion.button
-                    onClick={() => handleSaveCalendarEvent(selectedEvent)}
-                    disabled={isSavingEvent}
-                    style={{
-                      padding: '0.8rem 1.5rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '400',
-                      cursor: isSavingEvent ? 'not-allowed' : 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.6rem',
-                      opacity: isSavingEvent ? 0.7 : 1
-                    }}
-                    whileHover={!isSavingEvent ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
-                  >
-                    {isSavingEvent ? (
-                      <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                        </svg>
-                        Menyimpan...
-                      </>
-                    ) : (
-                      <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        Save Kegiatan Kalender
-                      </>
-                    )}
-                  </motion.button>
-                )}
-                
-                <div style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  marginLeft: 'auto'
-                }}>
-                  {isAdmin && (
-                    <>
-                      <motion.button
-                        onClick={() => handleEditEvent(selectedEvent)}
-                        style={{
-                          padding: '0.8rem 1.5rem',
-                          backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '8px',
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '400',
-                          cursor: 'pointer',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.6rem'
-                        }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                        Edit
-                      </motion.button>
-                      
-                      <motion.button
-                        onClick={() => handleDeleteEvent(selectedEvent.id)}
-                        style={{
-                          padding: '0.8rem 1.5rem',
-                          backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '8px',
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '400',
-                          cursor: 'pointer',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.6rem'
-                        }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M3 6h18"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        Hapus
-                      </motion.button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Modal Notifications KALENDER */}
-      <AnimatePresence>
-        {showCalendarNotifications && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10002,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              overflow: 'auto',
-              padding: isMobile ? '1rem' : '2rem'
-            }}
-          >
-            <motion.div
-              ref={notificationsRef}
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '20px',
-                width: '100%',
-                maxWidth: '600px',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              {/* Header Modal Notifications */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexShrink: 0
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  {/* Bell Icon BESAR */}
-                  <svg 
-                    width={isMobile ? "32" : "40"} 
-                    height={isMobile ? "32" : "40"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                  </svg>
-                  
-                  <h2 style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.6rem' : '2rem',
-                    fontWeight: '400',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Notifikasi Kalender
-                    {unreadCalendarNotifications > 0 && (
-                      <span style={{
-                        marginLeft: '0.8rem',
-                        backgroundColor: '#FF3B30',
-                        color: 'white',
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: '12px',
-                        fontSize: '0.9rem',
-                        fontWeight: '500'
-                      }}>
-                        {unreadCalendarNotifications} baru
-                      </span>
-                    )}
-                  </h2>
-                </div>
-                
-                <motion.button
-                  onClick={() => {
-                    setShowCalendarNotifications(false);
-                    markCalendarNotificationsAsRead();
-                  }}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.8rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  ×
-                </motion.button>
-              </div>
-              
-              {/* Notifications Content */}
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: isMobile ? '1rem' : '1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                {calendarNotifications.length === 0 ? (
-                  <div style={{
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '1.1rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Tidak ada notifikasi kalender
-                  </div>
-                ) : (
-                  calendarNotifications.map((notification) => {
-                    const notificationDate = notification.date instanceof Date ? 
-                      notification.date : 
-                      (notification.date && typeof notification.date.toDate === 'function' ? 
-                        notification.date.toDate() : 
-                        new Date());
-                    
-                    const eventDate = notification.eventDate instanceof Date ?
-                      notification.eventDate :
-                      (notification.eventDate && typeof notification.eventDate.toDate === 'function' ?
-                        notification.eventDate.toDate() :
-                        new Date());
-                    
-                    return (
-                      <motion.div
-                        key={notification.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                          backgroundColor: notification.isRead ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '12px',
-                          padding: '1.2rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.5rem'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}>
-                            {/* North West Arrow Icon untuk notifikasi */}
-                            <svg 
-                              width="16" 
-                              height="16" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              stroke="white" 
-                              strokeWidth="2"
-                            >
-                              <path d="M7 17L17 7"/>
-                              <path d="M7 7H17V17"/>
-                            </svg>
-                            
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1.1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {notification.title}
-                            </div>
-                          </div>
-                          {!notification.isRead && (
-                            <motion.div
-                              animate={{
-                                scale: [1, 1.2, 1],
-                                opacity: [1, 0.7, 1]
-                              }}
-                              transition={{
-                                duration: 1,
-                                repeat: Infinity
-                              }}
-                              style={{
-                                width: '12px',
-                                height: '12px',
-                                backgroundColor: '#FF3B30',
-                                borderRadius: '50%'
-                              }}
-                            />
-                          )}
-                        </div>
-                        
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          fontSize: '1rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.4,
-                          paddingLeft: '1.5rem'
-                        }}>
-                          {notification.message}
-                        </div>
-                        
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.3rem',
-                          marginTop: '0.5rem',
-                          paddingLeft: '1.5rem'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                              <line x1="16" y1="2" x2="16" y2="6"/>
-                              <line x1="8" y1="2" x2="8" y2="6"/>
-                              <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                            Tanggal Kegiatan: {formatDate(eventDate)}
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            Notifikasi: {formatDate(notificationDate)}
-                          </div>
-                        </div>
-                        
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginTop: '0.5rem',
-                          paddingLeft: '1.5rem'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                              <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                            oleh {notification.createdBy}
-                          </div>
-                          
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.8rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            padding: '0.2rem 0.6rem',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            borderRadius: '10px'
-                          }}>
-                            {notification.eventLabel}
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-              
-              {/* Footer Notifications */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '1.2rem',
-                flexShrink: 0
-              }}>
-                <motion.button
-                  onClick={() => {
-                    setShowCalendarNotifications(false);
-                    markCalendarNotificationsAsRead();
-                  }}
-                  style={{
-                    padding: '0.9rem 1.8rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '10px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '400',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  Tutup
-                </motion.button>
-                
-                {unreadCalendarNotifications > 0 && (
-                  <motion.button
-                    onClick={markCalendarNotificationsAsRead}
-                    style={{
-                      padding: '0.9rem 1.8rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '10px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '400',
-                      cursor: 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                  >
-                    Tandai Sudah Dibaca
-                  </motion.button>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Modal Saved Calendar Events */}
-      <AnimatePresence>
-        {showSavedCalendarEvents && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10002,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              overflow: 'auto',
-              padding: isMobile ? '1rem' : '2rem'
-            }}
-          >
-            <motion.div
-              ref={savedEventsRef}
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '20px',
-                width: '100%',
-                maxWidth: '700px',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              {/* Header Modal Saved Calendar Events */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexShrink: 0
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  {/* Bookmark Icon BESAR */}
-                  <svg 
-                    width={isMobile ? "32" : "40"} 
-                    height={isMobile ? "32" : "40"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  
-                  <h2 style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.6rem' : '2rem',
-                    fontWeight: '400',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Riwayat Save Kalender
-                    <span style={{
-                      marginLeft: '0.8rem',
-                      backgroundColor: '#3B82F6',
-                      color: 'white',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '12px',
-                      fontSize: '0.9rem',
-                      fontWeight: '500'
-                    }}>
-                      {savedCalendarEvents.length} kegiatan
-                    </span>
-                  </h2>
-                </div>
-                
-                <motion.button
-                  onClick={() => setShowSavedCalendarEvents(false)}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.8rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  ×
-                </motion.button>
-              </div>
-              
-              {/* Saved Calendar Events Content */}
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: isMobile ? '1rem' : '1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                {savedCalendarEvents.length === 0 ? (
-                  <div style={{
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '1.1rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Belum ada kegiatan kalender yang disimpan
-                  </div>
-                ) : (
-                  savedCalendarEvents.map((savedEvent) => {
-                    const savedDate = savedEvent.date instanceof Date ? 
-                      savedEvent.date : 
-                      (savedEvent.date && typeof savedEvent.date.toDate === 'function' ? 
-                        savedEvent.date.toDate() : 
-                        new Date());
-                    
-                    return (
-                      <motion.div
-                        key={savedEvent.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                          backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '12px',
-                          padding: '1.2rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.8rem'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.8rem'
-                          }}>
-                            {/* North West Arrow Icon di setiap saved event - BESAR */}
-                            <svg 
-                              width={isMobile ? "20" : "24"} 
-                              height={isMobile ? "20" : "24"} 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              stroke="white" 
-                              strokeWidth="2"
-                            >
-                              <path d="M7 17L17 7"/>
-                              <path d="M7 7H17V17"/>
-                            </svg>
-                            
-                            <div>
-                              <div style={{
-                                color: 'white',
-                                fontSize: '1.1rem',
-                                fontWeight: '500',
-                                fontFamily: 'Helvetica, Arial, sans-serif'
-                              }}>
-                                {savedEvent.title}
-                              </div>
-                              <div style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '0.9rem',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                marginTop: '0.2rem'
-                              }}>
-                                oleh {savedEvent.createdBy}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <motion.button
-                            onClick={() => handleRemoveSavedCalendarEvent(savedEvent.id)}
-                            style={{
-                              backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
-                              color: 'white',
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '50%',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '1.2rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                          >
-                            ×
-                          </motion.button>
-                        </div>
-                        
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.95rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          paddingLeft: '2rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                              <line x1="16" y1="2" x2="16" y2="6"/>
-                              <line x1="8" y1="2" x2="8" y2="6"/>
-                              <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                            Tanggal: {formatDate(savedDate)}
-                          </div>
-                          
-                          {savedEvent.description && (
-                            <div style={{ 
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              fontSize: '0.9rem',
-                              marginTop: '0.3rem',
-                              lineHeight: 1.4
-                            }}>
-                              {savedEvent.description.length > 100 
-                                ? `${savedEvent.description.substring(0, 100)}...` 
-                                : savedEvent.description}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          paddingLeft: '2rem',
-                          marginTop: '0.5rem'
-                        }}>
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            Disimpan {formatSavedDate(savedDate)}
-                          </div>
-                          
-                          <div style={{
-                            display: 'flex',
-                            gap: '0.5rem'
-                          }}>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              padding: '0.2rem 0.6rem',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              borderRadius: '10px'
-                            }}>
-                              {savedEvent.label}
-                            </div>
-                            
-                            <motion.button
-                              onClick={() => {
-                                const originalEvent = calendarEvents.find(e => e.id === savedEvent.eventId);
-                                if (originalEvent) {
-                                  handleViewEventDetails(originalEvent);
-                                  setShowSavedCalendarEvents(false);
-                                }
-                              }}
-                              style={{
-                                padding: '0.4rem 0.8rem',
-                                backgroundColor: 'transparent',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                borderRadius: '6px',
-                                color: 'white',
-                                fontSize: '0.8rem',
-                                fontWeight: '400',
-                                cursor: 'pointer',
-                                fontFamily: 'Helvetica, Arial, sans-serif'
-                              }}
-                              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                            >
-                              Lihat Detail
-                            </motion.button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-              
-              {/* Footer Saved Calendar Events */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '1.2rem',
-                flexShrink: 0
-              }}>
-                <motion.button
-                  onClick={() => setShowSavedCalendarEvents(false)}
-                  style={{
-                    padding: '0.9rem 1.8rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '10px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '400',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  Tutup
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Loading State */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 99999,
-              cursor: 'default'
-            }}
-          >
-            <div style={{
-              color: 'white',
-              textAlign: 'center',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                style={{ marginBottom: '1.5rem' }}
-              >
-                <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                </svg>
-              </motion.div>
-              <div style={{
-                fontSize: '1.4rem',
-                fontWeight: '400',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '0.5px'
-              }}>
-                Loading Calendar...
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </>
   );
 }
