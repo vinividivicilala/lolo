@@ -283,7 +283,7 @@ export default function HomePage(): React.JSX.Element {
             maxWidth: "900px",
             width: "100%",
           }}>
-            {/* Subtitle - 2 baris rata kiri */}
+            {/* Subtitle - 2 baris */}
             <div
               style={{
                 textAlign: "left",
