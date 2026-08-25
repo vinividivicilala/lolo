@@ -67,10 +67,17 @@ const ShieldCheck = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+// Arrow icon for link
+const ArrowRight = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAntiBot, setShowAntiBot] = useState(false); // state untuk tooltip
+  const [showTooltip, setShowTooltip] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -289,7 +296,6 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
-          {/* Judul - FIXED di posisi */}
           <h1
             ref={titleRef}
             className="title"
@@ -312,13 +318,11 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Content Wrapper - subtitle dan tombol */}
           <div style={{ 
             position: "relative", 
             zIndex: 1,
             marginTop: "60px",
           }}>
-            {/* Subtitle */}
             <div
               ref={subtitleRef}
               className="subtitle"
@@ -344,7 +348,6 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 ref={buttonRef}
@@ -394,7 +397,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan anti-fraud + hover tooltip */}
+        {/* NAVBAR */}
         <div
           ref={navbarRef}
           style={{
@@ -414,7 +417,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Anti-Fraud Badge dengan hover tooltip */}
+          {/* Anti-Fraud Badge dengan tooltip */}
           <div
             style={{
               position: "relative",
@@ -424,8 +427,8 @@ export default function HomePage(): React.JSX.Element {
               padding: "0",
               cursor: "default",
             }}
-            onMouseEnter={() => setShowAntiBot(true)}
-            onMouseLeave={() => setShowAntiBot(false)}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
           >
             <ShieldCheck size={28} />
             <span
@@ -440,27 +443,49 @@ export default function HomePage(): React.JSX.Element {
               Anti-Fraud
             </span>
 
-            {/* Tooltip anti-bot anonim */}
-            {showAntiBot && (
+            {showTooltip && (
               <div
                 style={{
                   position: "absolute",
-                  top: "calc(100% + 8px)",
-                  left: "0",
-                  backgroundColor: "#0D3CFC", // bg biru
-                  color: "#ffffff", // teks putih (agar kontras) – tapi jika ingin teks biru, ubah ke #0D3CFC dan bg transparan? Saya pilih bg biru & teks putih
-                  padding: "6px 14px",
-                  borderRadius: "8px",
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  whiteSpace: "nowrap",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  top: "calc(100% + 12px)",
+                  left: "-20px", // agar lebih ke kiri
+                  width: "340px",
+                  padding: "20px 24px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "12px",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                  border: "1px solid #e8e8e8",
                   zIndex: 10,
-                  fontFamily: FONT_FAMILY,
                   pointerEvents: "none",
                 }}
               >
-                anti-bot anonim
+                {/* Bagian atas: judul kiri, link kanan */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                    Anti Bot Anonim
+                  </h3>
+                  <a
+                    href="#"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      color: "#0D3CFC",
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      textDecoration: "none",
+                      fontFamily: FONT_FAMILY,
+                      pointerEvents: "auto",
+                    }}
+                  >
+                    Kunjungi
+                    <ArrowRight size={16} style={{ color: "#0D3CFC" }} />
+                  </a>
+                </div>
+                {/* Deskripsi di bawah */}
+                <p style={{ margin: 0, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
+                  Perlindungan terhadap bot dan anonimitas. Sistem keamanan canggih untuk melindungi data Anda.
+                </p>
               </div>
             )}
           </div>
