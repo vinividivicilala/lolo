@@ -65,17 +65,11 @@ export default function HomePage(): React.JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const arrowRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
-  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -268,7 +262,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* HERO SECTION - konten di bawah judul web, tanpa scroll besar */}
+        {/* HERO SECTION - di sisi kiri bawah judul web */}
         <div
           ref={heroRef}
           style={{
@@ -282,36 +276,15 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
-          {/* Judul Web - 50px di kiri atas */}
-          <h1
-            ref={titleRef}
-            className="title"
-            style={{
-              fontSize: "50px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              padding: 0,
-              lineHeight: 1,
-              position: "relative",
-              zIndex: 15,
-            }}
-          >
-            Menuru
-          </h1>
-
-          {/* Content Wrapper - konten langsung di bawah judul */}
-          <div ref={contentWrapperRef} style={{ 
+          {/* Content Wrapper - di sisi kiri */}
+          <div style={{ 
             position: "relative", 
             zIndex: 1,
-            marginTop: "20px",
+            maxWidth: "900px",
+            width: "100%",
           }}>
             {/* Subtitle */}
             <div
-              ref={subtitleRef}
-              className="subtitle"
               style={{
                 textAlign: "left",
                 position: "relative",
@@ -337,8 +310,6 @@ export default function HomePage(): React.JSX.Element {
             {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
-                ref={buttonRef}
-                className="cta-button"
                 style={{
                   display: "inline-block",
                   border: "2px solid #0D3CFC",
@@ -362,8 +333,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               <div
-                ref={arrowRef}
-                className="arrow-box"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -384,17 +353,18 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan Anti Fraud font 50px */}
+        {/* NAVBAR - FIXED di atas dengan judul di kiri */}
         <div
           ref={navbarRef}
           style={{
             position: "fixed",
             top: "40px",
+            left: "40px",
             right: "40px",
             zIndex: 100,
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            justifyContent: "space-between",
             padding: "8px 16px",
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
@@ -404,95 +374,145 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Anti Fraud - font 50px dengan panah */}
-          <Link href="/anti-fraud">
-            <div
-              className="anti-fraud"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "50px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                  lineHeight: 1,
-                }}
-              >
-                Anti Fraud
-              </span>
+          {/* Judul Menuru di kiri navbar - 40px */}
+          <h1
+            style={{
+              fontSize: "40px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+            }}
+          >
+            Menuru
+          </h1>
+
+          {/* Menu items di kanan */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Anti Fraud - 25px tanpa linebox */}
+            <Link href="/anti-fraud">
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#0D3CFC",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
+                  gap: "6px",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
                 }}
               >
-                <SouthEastArrow size={50} />
+                <span
+                  style={{
+                    fontSize: "25px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    display: "inline-block",
+                    lineHeight: 1,
+                  }}
+                >
+                  Anti Fraud
+                </span>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#0D3CFC",
+                  }}
+                >
+                  <SouthEastArrow size={25} />
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Get in Touch */}
-          <Link href="/contact">
-            <div
-              className="get-in-touch"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Get in touch
-              </span>
+            {/* Get in Touch */}
+            <Link href="/contact">
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#0D3CFC",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
+                  gap: "8px",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
                 }}
               >
-                <SouthEastArrow size={24} />
+                <span
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    display: "inline-block",
+                  }}
+                >
+                  Get in touch
+                </span>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#0D3CFC",
+                    borderRadius: "4px",
+                    padding: "4px",
+                    color: "#ffffff",
+                  }}
+                >
+                  <SouthEastArrow size={24} />
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Pusat Bantuan */}
-          <Link href="/pusat-bantuan">
+            {/* Pusat Bantuan */}
+            <Link href="/pusat-bantuan">
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "2px solid #000000",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    color: "#000000",
+                    fontFamily: FONT_FAMILY,
+                    display: "inline-block",
+                  }}
+                >
+                  Pusat Bantuan
+                </span>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#000000",
+                    borderRadius: "4px",
+                    padding: "4px",
+                    color: "#ffffff",
+                  }}
+                >
+                  <NorthWestArrow size={24} />
+                </div>
+              </div>
+            </Link>
+
+            {/* Menu */}
             <div
-              className="pusat-bantuan"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -503,18 +523,8 @@ export default function HomePage(): React.JSX.Element {
                 cursor: "pointer",
                 backgroundColor: "transparent",
               }}
+              onClick={toggleMenu}
             >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#000000",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Pusat Bantuan
-              </span>
               <div
                 style={{
                   display: "inline-flex",
@@ -526,69 +536,38 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <NorthWestArrow size={24} />
+                <span
+                  ref={plusIconRef}
+                  style={{
+                    fontSize: isMenuOpen ? "24px" : "28px",
+                    fontWeight: isMenuOpen ? 400 : 300,
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1,
+                    display: "inline-block",
+                  }}
+                >
+                  {isMenuOpen ? "✕" : "+"}
+                </span>
               </div>
-            </div>
-          </Link>
-
-          {/* Menu */}
-          <div
-            className="menu-button"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              border: "2px solid #000000",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-            }}
-            onClick={toggleMenu}
-          >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#000000",
-                borderRadius: "4px",
-                padding: "4px",
-                color: "#ffffff",
-              }}
-            >
               <span
-                ref={plusIconRef}
                 style={{
-                  fontSize: isMenuOpen ? "24px" : "28px",
-                  fontWeight: isMenuOpen ? 400 : 300,
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#000000",
                   fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
+                  letterSpacing: "0.02em",
                   display: "inline-block",
                 }}
               >
-                {isMenuOpen ? "✕" : "+"}
+                {isMenuOpen ? "Close" : "Menu"}
               </span>
             </div>
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                display: "inline-block",
-              }}
-            >
-              {isMenuOpen ? "Close" : "Menu"}
-            </span>
           </div>
         </div>
 
         {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
-          className="menu-overlay"
           style={{
             position: "fixed",
             top: 0,
@@ -660,127 +639,19 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
-        .title {
-          transition: all 0.3s ease;
-        }
-
         @media (max-width: 1024px) {
           .subtitle p {
             font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
           }
         }
         @media (max-width: 768px) {
           .subtitle p {
             font-size: 36px !important;
           }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
         }
         @media (max-width: 480px) {
           .subtitle p {
             font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
           }
         }
       `}</style>
