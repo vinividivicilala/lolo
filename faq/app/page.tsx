@@ -80,6 +80,8 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
+  const cardsContainerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -102,7 +104,8 @@ export default function HomePage(): React.JSX.Element {
               setShowMain(true);
               setTimeout(() => {
                 ScrollTrigger.refresh();
-              }, 200);
+                initCardStacking();
+              }, 300);
             }
           });
         }
@@ -148,6 +151,67 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.3,
       ease: "power2.inOut"
     }, "-=0.3");
+  };
+
+  const initCardStacking = () => {
+    const cards = cardRefs.current.filter(el => el !== null);
+    if (cards.length === 0 || !cardsContainerRef.current) return;
+
+    // Atur posisi awal card: card1 di posisi tengah, card2 di bawah, dst.
+    const container = cardsContainerRef.current;
+    const cardHeight = 300; // perkiraan tinggi card, sesuaikan
+    const gap = 40;
+
+    // Reset posisi awal
+    cards.forEach((card, i) => {
+      gsap.set(card, {
+        y: i * (cardHeight + gap),
+        opacity: i === 0 ? 1 : 0.9,
+        scale: 1 - i * 0.05,
+        zIndex: cards.length - i,
+      });
+    });
+
+    // Buat timeline untuk stacking
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1.5,
+        pin: true,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    // Animasi: semua card bergerak ke posisi card1 secara bertahap
+    // card2 naik ke posisi card1, card3 ke posisi card2 (yang sudah naik), dst.
+    // Kita lakukan secara berurutan dengan delay
+    const totalCards = cards.length;
+    for (let i = 1; i < totalCards; i++) {
+      // Card i akan bergerak ke posisi card i-1 (yang sudah bergerak)
+      // Kita buat target posisi y = 0 (posisi card1)
+      // dan skala = 1, opacity = 1
+      tl.to(cards[i], {
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, i * 0.2); // delay bertahap
+    }
+
+    // Setelah semua naik, kita bisa tambahkan efek tambahan
+    // Misalnya card1 sedikit mengecil atau berubah opacity
+    tl.to(cards[0], {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.5,
+      ease: "power2.inOut"
+    }, totalCards * 0.2);
+
+    // Saat scroll kembali, semua kembali ke posisi semula (otomatis karena scrub)
+    // Tapi karena scrub, animasi akan berbalik otomatis
   };
 
   const toggleMenu = () => {
@@ -239,6 +303,14 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
+  const cardData = [
+    { name: "Note", desc: "Catat ide-ide kreatifmu dengan mudah" },
+    { name: "Donasi", desc: "Salurkan bantuan untuk mereka yang membutuhkan" },
+    { name: "Shop", desc: "Temukan produk-produk menarik dari komunitas" },
+    { name: "Komunitas", desc: "Bergabung dengan sesama kreator dan berbagi" },
+    { name: "Inspirasi", desc: "Temukan inspirasi setiap hari untuk berkarya" },
+  ];
+
   return (
     <>
       <Head>
@@ -315,9 +387,9 @@ export default function HomePage(): React.JSX.Element {
           <div style={{ 
             position: "relative", 
             zIndex: 1,
-            marginTop: "60px", // dinaikkan (sebelumnya 100px)
+            marginTop: "60px",
           }}>
-            {/* Subtitle - gaya asli */}
+            {/* Subtitle */}
             <div
               ref={subtitleRef}
               className="subtitle"
@@ -343,7 +415,7 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Tombol dan Arrow - dikembalikan */}
+            {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 ref={buttonRef}
@@ -393,7 +465,68 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan anti-fraud badge (tanpa bg tambahan) */}
+        {/* SECTION CARDS STACKING - di bawah tombol */}
+        <div
+          ref={cardsContainerRef}
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "200vh", // memberikan ruang scroll
+            backgroundColor: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "800px",
+              height: "100%",
+            }}
+          >
+            {cardData.map((card, index) => (
+              <div
+                key={index}
+                ref={(el) => { cardRefs.current[index] = el; }}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "90%",
+                  maxWidth: "600px",
+                  height: "280px",
+                  padding: "30px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "16px",
+                  border: "2px solid #0D3CFC",
+                  boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
+                  willChange: "transform, opacity",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ textAlign: "left" }}>
+                  <h3 style={{ fontSize: "28px", fontWeight: 700, color: "#0D3CFC", margin: 0 }}>
+                    {card.name}
+                  </h3>
+                </div>
+                <div style={{ textAlign: "left", paddingBottom: "10px" }}>
+                  <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
+                    {card.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* NAVBAR - FIXED di atas dengan anti-fraud badge */}
         <div
           ref={navbarRef}
           style={{
@@ -413,16 +546,16 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Anti-Fraud Badge - tanpa background, hanya teks & ikon, font 30px */}
+          {/* Anti-Fraud Badge - tanpa background, hanya teks & ikon */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "0", // tanpa padding ekstra, tidak ada background
+              padding: "0",
             }}
           >
-            <ShieldCheck size={28} /> {/* ikon ukuran 28 */}
+            <ShieldCheck size={28} />
             <span
               style={{
                 fontSize: "30px",
