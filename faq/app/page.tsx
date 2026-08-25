@@ -67,7 +67,6 @@ const ShieldCheck = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-// Shopping Bag Icon for "Shop"
 const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M6 6H18L19 18H5L6 6Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -396,7 +395,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - Dua baris, sejajar dengan judul (top: 40px) */}
+        {/* NAVBAR - Dua baris, sejajar dengan judul (top: 40px), tanpa padding vertikal */}
         <div
           ref={navbarRef}
           style={{
@@ -407,8 +406,8 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            gap: "12px",
-            padding: "12px 16px",
+            gap: "8px",
+            padding: "0 16px", // hilangkan padding vertikal agar konten mulai dari top 40px
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
             backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
