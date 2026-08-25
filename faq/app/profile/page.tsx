@@ -54,18 +54,32 @@ const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-export default function HomePage(): React.JSX.Element {
+const ShieldCheck = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ShoppingBag = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 6H18L19 18H5L6 6Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export default function ProfilePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const profileRef = useRef<HTMLHeadingElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -272,7 +286,7 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
-          {/* Judul - FIXED di posisi dengan blur effect */}
+          {/* Judul - FIXED di posisi */}
           <h1
             ref={titleRef}
             className="title"
@@ -283,93 +297,51 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
-              padding: "10px 20px",
+              padding: 0,
               lineHeight: 1,
-              transformOrigin: "left center",
               position: "fixed",
               top: "40px",
               left: "40px",
               zIndex: 15,
-              borderRadius: "12px",
-              backgroundColor: "rgba(255,255,255,0)",
-              backdropFilter: "blur(0px)",
-              transition: "all 0.3s ease",
               pointerEvents: "none",
             }}
           >
             Menuru
           </h1>
 
-          {/* Teks "Profiles" besar di bawah judul */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              marginTop: "100px",
-              textAlign: "left",
-            }}
-          >
-            <span
+          <div style={{ 
+            position: "relative", 
+            zIndex: 1,
+            marginTop: "60px",
+          }}>
+            {/* Profiles - font 400px, warna biru, di bawah judul */}
+            <div
+              ref={profileRef}
+              className="profile-title"
               style={{
-                fontSize: "400px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                lineHeight: 1,
-                display: "block",
+                textAlign: "left",
+                position: "relative",
               }}
             >
-              Profiles
-            </span>
-          </div>
-
-          {/* SECTION ABOUT dengan background biru, teks putih, tanpa link */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              marginTop: "60px",
-              padding: "80px 60px",
-              backgroundColor: "#0D3CFC",
-              borderRadius: "20px",
-              maxWidth: "900px",
-              width: "100%",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "48px",
-                fontWeight: 700,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-                margin: 0,
-                marginBottom: "24px",
-              }}
-            >
-              About Menuru
-            </h2>
-            <p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.6,
-                margin: 0,
-                opacity: 0.9,
-              }}
-            >
-              Menuru adalah platform yang menggabungkan kreativitas dan kepedulian sosial.
-              Kami menyediakan ruang bagi Anda untuk mencatat ide-ide brilian, menemukan inspirasi,
-              dan berkontribusi melalui donasi untuk mereka yang membutuhkan.
-              Bergabunglah dengan komunitas Menuru dan jadilah bagian dari perubahan positif.
-            </p>
+              <h2
+                style={{
+                  fontSize: "400px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  margin: 0,
+                  padding: 0,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Profiles
+              </h2>
+            </div>
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas */}
+        {/* NAVBAR */}
         <div
           ref={navbarRef}
           style={{
@@ -378,9 +350,10 @@ export default function HomePage(): React.JSX.Element {
             right: "40px",
             zIndex: 100,
             display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "8px 16px",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "8px",
+            padding: "0 16px",
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
             backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
@@ -389,172 +362,87 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Profile link */}
-          <Link href="/profile">
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Profile
-              </span>
-            </div>
-          </Link>
-
-          {/* Get in Touch */}
-          <Link href="/contact">
-            <div
-              className="get-in-touch"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Get in touch
-              </span>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#0D3CFC",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
-                }}
-              >
-                <SouthEastArrow size={24} />
-              </div>
-            </div>
-          </Link>
-
-          {/* Pusat Bantuan */}
-          <Link href="/pusat-bantuan">
-            <div
-              className="pusat-bantuan"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #000000",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#000000",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Pusat Bantuan
-              </span>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#000000",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
-                }}
-              >
-                <NorthWestArrow size={24} />
-              </div>
-            </div>
-          </Link>
-
-          {/* Menu - Tombol Close menggunakan tanda X */}
+          {/* Baris atas: Shop, About, Sign Up, Profiles */}
           <div
-            className="menu-button"
             style={{
-              display: "inline-flex",
+              display: "flex",
               alignItems: "center",
-              gap: "8px",
-              border: "2px solid #000000",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
+              gap: "16px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
             }}
-            onClick={toggleMenu}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#000000",
-                borderRadius: "4px",
-                padding: "4px",
-                color: "#ffffff",
-              }}
-            >
-              <span
-                ref={plusIconRef}
-                style={{
-                  fontSize: isMenuOpen ? "24px" : "28px",
-                  fontWeight: isMenuOpen ? 400 : 300,
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                  display: "inline-block",
-                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
-                }}
-              >
-                {isMenuOpen ? "✕" : "+"}
+            <Link href="/shop">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <ShoppingBag size={20} />
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
+              </div>
+            </Link>
+            <Link href="/about">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              </div>
+            </Link>
+            <Link href="/signup">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+              </div>
+            </Link>
+            <Link href="/profile">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Profiles</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Fraud</span>
+            </div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Bot</span>
+            </div>
+            <Link href="/contact">
+              <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Get in touch</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <SouthEastArrow size={24} />
+                </div>
+              </div>
+            </Link>
+            <Link href="/pusat-bantuan">
+              <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Pusat Bantuan</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <NorthWestArrow size={24} />
+                </div>
+              </div>
+            </Link>
+            <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block", transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)" }}>
+                  {isMenuOpen ? "✕" : "+"}
+                </span>
+              </div>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>
+                {isMenuOpen ? "Close" : "Menu"}
               </span>
             </div>
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                display: "inline-block",
-              }}
-            >
-              {isMenuOpen ? "Close" : "Menu"}
-            </span>
           </div>
         </div>
 
-        {/* Menu Overlay - HANYA judul */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -629,7 +517,15 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
+        @media (max-width: 1400px) {
+          .profile-title h2 {
+            font-size: 300px !important;
+          }
+        }
         @media (max-width: 1024px) {
+          .profile-title h2 {
+            font-size: 200px !important;
+          }
           .title {
             font-size: 36px !important;
           }
@@ -653,6 +549,9 @@ export default function HomePage(): React.JSX.Element {
           }
         }
         @media (max-width: 768px) {
+          .profile-title h2 {
+            font-size: 120px !important;
+          }
           .title {
             font-size: 28px !important;
           }
@@ -676,6 +575,9 @@ export default function HomePage(): React.JSX.Element {
           }
         }
         @media (max-width: 480px) {
+          .profile-title h2 {
+            font-size: 80px !important;
+          }
           .title {
             font-size: 22px !important;
           }
