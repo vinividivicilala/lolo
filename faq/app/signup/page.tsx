@@ -438,7 +438,6 @@ export default function SignUpPage() {
         overflowY: "auto",
       }}>
         {/* ===== HEADER / NAVBAR ===== */}
-        {/* z-index: 101 agar berada di atas menu overlay (z-index: 100) */}
         <div style={{
           position: "fixed",
           top: "40px",
@@ -450,8 +449,15 @@ export default function SignUpPage() {
           justifyContent: "space-between",
           pointerEvents: "none",
         }}>
-          {/* KIRI: Menuru */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", pointerEvents: "auto" }}>
+          {/* KIRI: Menuru - Sembunyikan saat menu terbuka */}
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "16px", 
+            pointerEvents: "auto",
+            opacity: isMenuOpen ? 0 : 1,
+            transition: "opacity 0.3s ease",
+          }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <h1
                 style={{
@@ -588,6 +594,7 @@ export default function SignUpPage() {
             padding: "40px",
           }}
         >
+          {/* Hanya judul putih di menu overlay */}
           <h1
             style={{
               fontSize: "48px",
@@ -606,6 +613,16 @@ export default function SignUpPage() {
           >
             Menuru
           </h1>
+          
+          {/* Konten menu overlay lainnya bisa ditambahkan di sini */}
+          <div style={{
+            marginTop: "120px",
+            color: "#ffffff",
+            fontSize: "24px",
+            fontFamily: FONT_FAMILY,
+          }}>
+            {/* Menu items akan ditambahkan di sini */}
+          </div>
         </div>
 
         {/* ===== KONTEN SIGN UP ===== */}
