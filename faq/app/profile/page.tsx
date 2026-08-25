@@ -1,40 +1,20 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Head from "next/head";
+import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signOut,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  GithubAuthProvider
-} from "firebase/auth";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDoc
-} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Konfigurasi Firebase
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -59,1260 +39,666 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// Providers untuk login
-const googleProvider = new GoogleAuthProvider();
-const githubProvider = new GithubAuthProvider();
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [isLoginMode, setIsLoginMode] = useState(true);
-  const [authError, setAuthError] = useState("");
-  const [authName, setAuthName] = useState("");
-  const [expandedItem, setExpandedItem] = useState(null);
-  const chatEndRef = useRef(null);
-  const menuruTextRef = useRef(null);
-  const menuruContainerRef = useRef(null);
-  
-  const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+// SVG Icons
+const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
-  // Table data with detailed content
-  const tableData = [
-    {
-      id: 1,
-      title: "NOTES",
-      subtitle: "Capture & Organize",
-      description: "Buat dan kelola catatan penting Anda dengan mudah",
-      link: "/notes",
-      detailedContent: {
-        overview: "A comprehensive note-taking system designed for seamless ideation and information management. Transform your thoughts into structured, searchable knowledge. Elevate your productivity with a note-taking ecosystem that adapts to your workflow. Never lose an idea again with intelligent organization and instant retrieval."
-      }
-    },
-    {
-      id: 2,
-      title: "DONATION",
-      subtitle: "Support Causes",
-      description: "Bantu mereka yang membutuhkan melalui donasi Anda",
-      link: "/donation",
-      detailedContent: {
-        overview: "A transparent and secure platform for charitable giving. Connect with verified causes and track the impact of your contributions in real-time. Transform generosity into measurable change. Every contribution creates a ripple effect of positive impact in communities worldwide."
-      }
-    },
-    {
-      id: 3,
-      title: "COMMUNITY",
-      subtitle: "Connect & Share",
-      description: "Bergabung dengan komunitas dan berbagi ide",
-      link: "/community",
-      detailedContent: {
-        overview: "A vibrant ecosystem of creators, thinkers, and innovators. Engage in meaningful discussions and collaborative projects that shape the future. Join a network of forward-thinking individuals. Accelerate your growth through shared knowledge and collective intelligence."
-      }
-    },
-    {
-      id: 4,
-      title: "CALENDAR",
-      subtitle: "Schedule & Plan",
-      description: "Atur jadwal dan rencana kegiatan Anda",
-      link: "/calendar",
-      detailedContent: {
-        overview: "Intelligent time management solution that adapts to your rhythm. Seamlessly coordinate personal and professional commitments. Master your time with predictive scheduling and intelligent reminders. Focus on what matters while we handle the logistics."
-      }
-    }
-  ];
+const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
-  // Check if user is admin
-  const checkIsAdmin = (user) => {
-    return user?.email === ADMIN_EMAIL;
-  };
+export default function HomePage(): React.JSX.Element {
+  const [showMain, setShowMain] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
 
+  // Auth listener - mulai animasi preloader
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollButton(true);
-      } else {
-        setShowScrollButton(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const isAdmin = checkIsAdmin(user);
-        const userData = {
-          uid: user.uid,
-          name: user.displayName || user.email.split('@')[0],
-          email: user.email,
-          isAdmin: isAdmin,
-          photoURL: user.photoURL
-        };
-        setCurrentUser(userData);
-        setIsAdminMode(isAdmin);
-        
-        await setDoc(doc(db, "chat_users", user.uid), {
-          name: userData.name,
-          email: userData.email,
-          isAdmin: isAdmin,
-          lastSeen: serverTimestamp(),
-          createdAt: serverTimestamp()
-        }, { merge: true });
-      } else {
-        setCurrentUser(null);
-        setIsAdminMode(false);
-      }
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, () => {
+      setTimeout(() => startPreloaderAnimation(), 500);
     });
-
-    const q = query(collection(db, "chat_messages"), orderBy("timestamp", "asc"));
-    const unsubscribeMessages = onSnapshot(q, (snapshot) => {
-      const messagesData = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        messagesData.push({
-          id: doc.id,
-          text: data.text,
-          sender: data.sender,
-          userId: data.userId,
-          userName: data.userName,
-          userEmail: data.userEmail,
-          timestamp: data.timestamp?.toDate() || new Date()
-        });
-      });
-      
-      if (messagesData.length === 0) {
-        addDoc(collection(db, "chat_messages"), {
-          text: "Welcome to live chat! Please login to start chatting. Admin: faridardiansyah061@gmail.com",
-          sender: 'system',
-          userId: 'system',
-          userName: 'System',
-          userEmail: null,
-          timestamp: serverTimestamp()
-        });
-      } else {
-        setMessages(messagesData);
-      }
-    });
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('scroll', handleScroll);
-      unsubscribeAuth();
-      unsubscribeMessages();
-    };
+    return () => unsubscribe();
   }, []);
 
-  // Modern GSAP Scroll Animation for MENURU text
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!menuruTextRef.current || !menuruContainerRef.current) return;
-    
-    ScrollTrigger.refresh();
-    
-    gsap.set(menuruTextRef.current, {
-      opacity: 0,
-      y: 200,
-      scale: 0.8,
-      rotationX: 45,
-      filter: "blur(20px)",
-      transformOrigin: "center center",
-      transformStyle: "preserve-3d"
-    });
-    
+  const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: menuruContainerRef.current,
-        start: "top 90%",
-        end: "top 30%",
-        scrub: 1.2,
-        toggleActions: "play reverse play reverse",
-        markers: false,
-        invalidateOnRefresh: true
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMain(true);
+              setTimeout(() => {
+                ScrollTrigger.refresh();
+              }, 200);
+            }
+          });
+        }
       }
     });
-    
-    tl.to(menuruTextRef.current, {
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
       opacity: 1,
       y: 0,
       scale: 1,
-      rotationX: 0,
-      filter: "blur(0px)",
-      duration: 1.5,
-      ease: "power2.out",
-      stagger: 0.1
-    });
-    
-    ScrollTrigger.create({
-      trigger: menuruContainerRef.current,
-      start: "top 20%",
-      end: "top 0%",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        if (self.progress > 0.8 && menuruTextRef.current) {
-          gsap.to(menuruTextRef.current, {
-            scale: 1.02,
-            duration: 0.3,
-            ease: "power1.out"
-          });
-        }
-      }
-    });
-    
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === menuruContainerRef.current) {
-          trigger.kill();
-        }
-      });
-    };
-  }, []);
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
 
-  const handleAuth = async () => {
-    setAuthError("");
-    
-    try {
-      if (isLoginMode) {
-        const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
-        console.log("User signed in:", userCredential.user.email);
+  const toggleMenu = () => {
+    if (!isMenuOpen) {
+      setIsMenuOpen(true);
+      if (menuOverlayRef.current) {
+        gsap.fromTo(menuOverlayRef.current,
+          { y: "-100%", opacity: 0 },
+          { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
+        );
+      }
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 45,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    } else {
+      if (menuOverlayRef.current) {
+        gsap.to(menuOverlayRef.current, {
+          y: "-100%",
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => {
+            setIsMenuOpen(false);
+          }
+        });
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
-        
-        if (authName) {
-          await userCredential.user.updateProfile({
-            displayName: authName
-          });
-        }
-        
-        console.log("User created:", userCredential.user.email);
+        setIsMenuOpen(false);
       }
-      setShowAuthModal(false);
-      setAuthEmail("");
-      setAuthPassword("");
-      setAuthName("");
-    } catch (error) {
-      console.error("Auth error:", error);
-      setAuthError(error.message);
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+      }
     }
   };
 
-  const handleSocialLogin = async (provider) => {
-    setAuthError("");
-    try {
-      await signInWithPopup(auth, provider);
-      setShowAuthModal(false);
-    } catch (error) {
-      console.error("Social login error:", error);
-      setAuthError(error.message);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setCurrentUser(null);
-      setIsAdminMode(false);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
-    if (!currentUser) {
-      alert("Please login first!");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "chat_messages"), {
-        text: inputMessage,
-        sender: currentUser.isAdmin ? 'admin' : 'user',
-        userId: currentUser.uid,
-        userName: currentUser.name,
-        userEmail: currentUser.email,
-        timestamp: serverTimestamp()
-      });
-      setInputMessage("");
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Failed to send message");
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const formatTime = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatDate = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(timestamp);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    if (date.toDateString() === today.toDateString()) {
-      return `Today at ${formatTime(timestamp)}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday at ${formatTime(timestamp)}`;
-    } else {
-      return `${date.toLocaleDateString()} at ${formatTime(timestamp)}`;
-    }
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
-  const toggleExpand = (itemId) => {
-    if (expandedItem === itemId) {
-      setExpandedItem(null);
-    } else {
-      setExpandedItem(itemId);
-    }
-  };
+  if (!showMain) {
+    return (
+      <div
+        ref={preloaderRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#000000',
-      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-      paddingTop: '120px',
-      paddingBottom: '80px',
-      position: 'relative',
-      overflowX: 'hidden'
-    }}>
+    <>
+      <Head>
+        <title>Menuru Official | Profiles</title>
+        <meta name="description" content="Menuru Brand from Love yourself" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content="#0D3CFC" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Menuru" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/images/ai.jpg" />
+        <meta property="og:title" content="Menuru Official | Profiles" />
+        <meta property="og:description" content="Menuru Brand from Love yourself" />
+        <meta property="og:image" content="/images/ai.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Menuru Official | Profiles" />
+        <meta name="twitter:description" content="Menuru Brand from Love yourself" />
+        <meta name="twitter:image" content="/images/ai.jpg" />
+      </Head>
 
-      {/* HEADER with Breadcrumb */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        padding: isMobile ? '1.5rem' : '2rem',
-        zIndex: 100,
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255,255,255,0.05)'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: isMobile ? '0 1rem' : '0 2rem'
-        }}>
-          <motion.div
-            onClick={() => router.back()}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem',
-              cursor: 'pointer',
-              width: 'fit-content'
-            }}
-            whileHover={{ x: -3 }}
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-              <path d="M17 7L7 17" />
-              <path d="M7 7h10v10" />
-            </svg>
-            <span style={{ color: 'white', fontWeight: '400', letterSpacing: '0.5px' }}>Back</span>
-          </motion.div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {currentUser && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {currentUser.photoURL && (
-                  <img 
-                    src={currentUser.photoURL} 
-                    alt={currentUser.name}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '50%'
-                    }}
-                  />
-                )}
-                <span style={{ color: 'white', fontSize: '0.875rem', fontWeight: '400' }}>
-                  {currentUser.name}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    color: 'white',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontWeight: '400'
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-            
-            <motion.div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: 'white',
-                fontSize: isMobile ? '0.9rem' : '1rem',
-                fontWeight: '400'
-              }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <motion.span
-                onClick={() => router.push('/')}
-                style={{
-                  cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontWeight: '400',
-                  transition: 'color 0.2s ease'
-                }}
-                whileHover={{ color: 'white' }}
-              >
-                Home
-              </motion.span>
-              <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
-              <span style={{ color: 'white', fontWeight: '400' }}>MENURU</span>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* CHAT BUTTON */}
-      <motion.button
-        onClick={() => setIsChatOpen(!isChatOpen)}
+      <div
         style={{
-          position: 'fixed',
-          bottom: '2rem',
-          left: '2rem',
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          backgroundColor: '#ffffff',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 200,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          minHeight: "100vh",
+          backgroundColor: "#ffffff",
+          margin: 0,
+          padding: 0,
+          position: "relative",
+          fontFamily: FONT_FAMILY,
+          overflow: "visible",
         }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.5 }}
       >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      </motion.button>
-
-      {/* CHAT WIDGET */}
-      <AnimatePresence>
-        {isChatOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: -100, y: 0 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: -100, y: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        {/* HERO SECTION */}
+        <div
+          ref={heroRef}
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            paddingTop: "120px",
+          }}
+        >
+          {/* Judul - FIXED di posisi dengan blur effect */}
+          <h1
+            ref={titleRef}
+            className="title"
             style={{
-              position: 'fixed',
-              bottom: '6rem',
-              left: '2rem',
-              width: isMobile ? 'calc(100% - 2rem)' : '450px',
-              height: '600px',
-              backgroundColor: '#111111',
-              borderRadius: '12px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-              display: 'flex',
-              flexDirection: 'column',
-              zIndex: 199,
-              overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.1)'
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: "10px 20px",
+              lineHeight: 1,
+              transformOrigin: "left center",
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
+              borderRadius: "12px",
+              backgroundColor: "rgba(255,255,255,0)",
+              backdropFilter: "blur(0px)",
+              transition: "all 0.3s ease",
+              pointerEvents: "none",
             }}
           >
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#1a1a1a',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: '#4ade80',
-                  animation: 'pulse 2s infinite'
-                }} />
-                <span style={{ color: 'white', fontWeight: '500' }}>
-                  {isAdminMode ? 'Admin Panel' : 'Live Chat'}
-                </span>
-                {currentUser && (
-                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
-                    ({currentUser.name})
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {!currentUser && (
-                  <motion.button
-                    onClick={() => setShowAuthModal(true)}
-                    style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    Login / Sign Up
-                  </motion.button>
-                )}
-                <motion.button
-                  onClick={() => setIsChatOpen(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <path d="M18 6L6 18" />
-                    <path d="M6 6l12 12" />
-                  </svg>
-                </motion.button>
-              </div>
-            </div>
-
-            {showAuthModal && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.95)',
-                zIndex: 300,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <div style={{
-                  backgroundColor: '#1a1a1a',
-                  padding: '2rem',
-                  borderRadius: '12px',
-                  width: '320px',
-                  maxWidth: '90%'
-                }}>
-                  <h3 style={{ color: 'white', marginBottom: '1rem', fontWeight: '500' }}>
-                    {isLoginMode ? 'Login' : 'Sign Up'}
-                  </h3>
-                  
-                  {authError && (
-                    <div style={{
-                      backgroundColor: 'rgba(255,0,0,0.1)',
-                      color: '#ff6b6b',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      marginBottom: '1rem',
-                      fontSize: '0.875rem'
-                    }}>
-                      {authError}
-                    </div>
-                  )}
-                  
-                  {!isLoginMode && (
-                    <input
-                      type="text"
-                      placeholder="Name"
-                      value={authName}
-                      onChange={(e) => setAuthName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        marginBottom: '1rem',
-                        borderRadius: '4px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        backgroundColor: '#111111',
-                        color: 'white',
-                        fontSize: '0.9rem'
-                      }}
-                    />
-                  )}
-                  
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      marginBottom: '1rem',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#111111',
-                      color: 'white',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      marginBottom: '1rem',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#111111',
-                      color: 'white',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  
-                  <button
-                    onClick={handleAuth}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      backgroundColor: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      marginBottom: '1rem'
-                    }}
-                  >
-                    {isLoginMode ? 'Login' : 'Sign Up'}
-                  </button>
-                  
-                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <button
-                      onClick={() => handleSocialLogin(googleProvider)}
-                      style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: 'white',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Google
-                    </button>
-                    <button
-                      onClick={() => handleSocialLogin(githubProvider)}
-                      style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: 'white',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      GitHub
-                    </button>
-                  </div>
-                  
-                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', textAlign: 'center' }}>
-                    {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-                    <span
-                      onClick={() => {
-                        setIsLoginMode(!isLoginMode);
-                        setAuthError("");
-                        setAuthName("");
-                      }}
-                      style={{ color: 'white', cursor: 'pointer', textDecoration: 'underline' }}
-                    >
-                      {isLoginMode ? 'Sign Up' : 'Login'}
-                    </span>
-                  </p>
-                  
-                  <button
-                    onClick={() => setShowAuthModal(false)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '4px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      marginTop: '0.5rem'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem'
-            }}>
-              {messages.map((msg, index) => {
-                const isCurrentUser = currentUser && msg.userId === currentUser.uid;
-                const showDate = index === 0 || (messages[index - 1] && 
-                  new Date(msg.timestamp).toDateString() !== new Date(messages[index - 1].timestamp).toDateString());
-                
-                return (
-                  <React.Fragment key={msg.id}>
-                    {showDate && (
-                      <div style={{
-                        textAlign: 'center',
-                        margin: '0.5rem 0',
-                        fontSize: '0.7rem',
-                        color: 'rgba(255,255,255,0.5)'
-                      }}>
-                        {formatDate(msg.timestamp).split(' at ')[0]}
-                      </div>
-                    )}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{
-                        display: 'flex',
-                        justifyContent: msg.sender === 'system' ? 'center' : (isCurrentUser ? 'flex-end' : 'flex-start')
-                      }}
-                    >
-                      <div style={{
-                        maxWidth: msg.sender === 'system' ? '90%' : '80%',
-                        padding: msg.sender === 'system' ? '0.5rem 1rem' : '0.75rem 1rem',
-                        borderRadius: msg.sender === 'system' ? '8px' : '12px',
-                        backgroundColor: msg.sender === 'system' ? 'rgba(255,255,255,0.1)' :
-                                       msg.sender === 'admin' ? '#2a2a2a' : 
-                                       isCurrentUser ? '#fff' : '#2a2a2a',
-                        color: msg.sender === 'system' ? 'rgba(255,255,255,0.7)' :
-                              (msg.sender === 'user' && isCurrentUser) ? '#000' : '#fff'
-                      }}>
-                        {msg.sender !== 'system' && (
-                          <div style={{ 
-                            fontSize: '0.7rem', 
-                            marginBottom: '0.25rem', 
-                            opacity: 0.7,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.25rem'
-                          }}>
-                            {msg.userName}
-                            {msg.userEmail === ADMIN_EMAIL && (
-                              <span style={{ 
-                                fontSize: '0.6rem', 
-                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                padding: '0.1rem 0.3rem',
-                                borderRadius: '3px'
-                              }}>
-                                Admin
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <div style={{ fontSize: '0.85rem', wordWrap: 'break-word', lineHeight: 1.4 }}>
-                          {msg.text}
-                        </div>
-                        <div style={{
-                          fontSize: '0.6rem',
-                          marginTop: '0.25rem',
-                          opacity: 0.5,
-                          textAlign: 'right'
-                        }}>
-                          {formatTime(msg.timestamp)}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </React.Fragment>
-                );
-              })}
-              
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  style={{ display: 'flex', justifyContent: 'flex-start' }}
-                >
-                  <div style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '12px',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff'
-                  }}>
-                    <div style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Someone is typing</div>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <span className="typing-dot">•</span>
-                      <span className="typing-dot">•</span>
-                      <span className="typing-dot">•</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {currentUser && (
-              <div style={{
-                padding: '1rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-                backgroundColor: '#111111'
-              }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <textarea
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={`Type your message as ${currentUser.name}...`}
-                    style={{
-                      flex: 1,
-                      padding: '0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      backgroundColor: '#1a1a1a',
-                      color: 'white',
-                      fontSize: '0.85rem',
-                      resize: 'none',
-                      fontFamily: 'inherit',
-                      outline: 'none'
-                    }}
-                    rows="2"
-                  />
-                  <motion.button
-                    onClick={sendMessage}
-                    style={{
-                      padding: '0 1rem',
-                      borderRadius: '8px',
-                      border: 'none',
-                      backgroundColor: '#fff',
-                      color: '#000',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Send
-                  </motion.button>
-                </div>
-                {currentUser.email !== ADMIN_EMAIL && (
-                  <div style={{
-                    fontSize: '0.65rem',
-                    color: 'rgba(255,255,255,0.5)',
-                    marginTop: '0.5rem',
-                    textAlign: 'center'
-                  }}>
-                    Admin: faridardiansyah061@gmail.com
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {!currentUser && (
-              <div style={{
-                padding: '2rem',
-                textAlign: 'center',
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: '0.9rem'
-              }}>
-                Please login to start chatting
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  style={{
-                    display: 'block',
-                    margin: '1rem auto 0',
-                    padding: '0.5rem 1rem',
-                    backgroundColor: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Login / Sign Up
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* MAIN CONTENT */}
-      <div style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        padding: isMobile ? '0 1rem' : '0 2rem',
-        position: 'relative',
-        zIndex: 1
-      }}>
-        {/* TWO-LINE TITLE */}
-        <motion.div 
-          style={{ marginBottom: '4rem' }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 style={{
-            color: 'white',
-            fontSize: isMobile ? '2rem' : '72px',
-            lineHeight: 1.1,
-            margin: 0,
-            fontWeight: '400',
-            width: '100%',
-            letterSpacing: '-0.02em'
-          }}>
-            <div>You can take notes,</div>
-            <div>find ideas, and donate money to those in need</div>
+            Menuru
           </h1>
-        </motion.div>
 
-        <motion.p 
-          style={{
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: isMobile ? '1rem' : '20px',
-            maxWidth: '700px',
-            marginBottom: '6rem',
-            fontWeight: '400',
-            lineHeight: 1.5
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          From concept to brand, I work and think watch to watch with expert developers and designers to media social — perseverance the intuitive with the curious to create delightful and engaging experiences for the world wide web
-        </motion.p>
-
-        {/* LARGE TABLE */}
-        <div>
-          {tableData.map((item, index) => (
-            <React.Fragment key={item.id}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 * index }}
-                onClick={() => toggleExpand(item.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: isMobile ? '1.5rem 0' : '2rem 0',
-                  borderTop: index === 0 ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.08)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                whileHover={{
-                  backgroundColor: 'rgba(255,255,255,0.02)',
-                  paddingLeft: '1rem',
-                  paddingRight: '1rem',
-                  marginLeft: '-1rem',
-                  marginRight: '-1rem'
-                }}
-              >
-                {/* Left Column - Large Title */}
-                <div style={{
-                  width: '25%',
-                  flexShrink: 0
-                }}>
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2.5rem',
-                    fontWeight: '400',
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.2
-                  }}>
-                    {item.title}
-                  </div>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.3)',
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    fontWeight: '400',
-                    marginTop: '0.5rem',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {item.subtitle}
-                  </div>
-                </div>
-
-                {/* Middle Column - Description */}
-                <div style={{
-                  width: '50%',
-                  paddingRight: '2rem'
-                }}>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: isMobile ? '1rem' : '1.125rem',
-                    fontWeight: '400',
-                    lineHeight: 1.5
-                  }}>
-                    {item.description}
-                  </div>
-                </div>
-
-                {/* Right Column - Arrow */}
-                <motion.div
-                  style={{
-                    width: '25%',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center',
-                    transform: expandedItem === item.id ? 'rotate(45deg)' : 'rotate(0deg)'
-                  }}
-                  animate={{ rotate: expandedItem === item.id ? 45 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <svg
-                    width={isMobile ? "28" : "36"}
-                    height={isMobile ? "28" : "36"}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M7 7h10v10" />
-                    <path d="M7 17 17 7" />
-                  </svg>
-                </motion.div>
-              </motion.div>
-
-              {/* Expanded Content - Clean Awwwards Style Button No Effects */}
-              <AnimatePresence>
-                {expandedItem === item.id && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                  >
-                    <div style={{
-                      padding: isMobile ? '2rem 0' : '3rem 0 4rem 0',
-                      borderBottom: '1px solid rgba(255,255,255,0.08)'
-                    }}>
-                      {/* Overview only */}
-                      <div style={{
-                        marginBottom: '0',
-                        maxWidth: '900px'
-                      }}>
-                        <div style={{
-                          color: 'rgba(255,255,255,0.4)',
-                          fontSize: '0.75rem',
-                          fontWeight: '400',
-                          letterSpacing: '2px',
-                          textTransform: 'uppercase',
-                          marginBottom: '1rem'
-                        }}>
-                          Overview
-                        </div>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.85)',
-                          fontSize: isMobile ? '1rem' : '1.25rem',
-                          lineHeight: 1.7,
-                          margin: 0,
-                          fontWeight: '400'
-                        }}>
-                          {item.detailedContent.overview}
-                        </p>
-                      </div>
-
-                      {/* Clean Awwwards Style Button - No hover effects, no animations, no border */}
-                      <button
-  onClick={(e) => {
-    e.stopPropagation();
-    router.push(item.link);
-  }}
-  style={{
-    padding: '14px 28px',
-    backgroundColor: '#1e5bb8', // biru elegan (bisa kamu ganti)
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '14px', // rounded seperti gambar
-    fontSize: '15px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    marginTop: '32px',
-    display: 'inline-block',
-    fontFamily: 'inherit',
-    
-    // subtle modern shadow
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
-    
-    // smooth transition (biar modern)
-    transition: 'all 0.25s ease'
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = 'translateY(-2px)';
-    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.35)';
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.25)';
-  }}
->
-  EXPLORE {item.title}
-</button>
-
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </React.Fragment>
-          ))}
-        </div>
-          
-        {/* MENURU TEXT WITH MODERN GSAP SCROLL ANIMATION */}
-        <div 
-          ref={menuruContainerRef}
-          style={{
-            width: '100%',
-            marginTop: '120px',
-            marginBottom: '100px',
-            padding: '80px 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'visible',
-            perspective: '1000px',
-            minHeight: isMobile ? '300px' : '700px',
-            position: 'relative'
-          }}
-        >
+          {/* Teks "Profiles" besar di bawah judul */}
           <div
-            ref={menuruTextRef}
             style={{
-              fontSize: isMobile ? '80px' : '490px',
-              fontWeight: '400',
-              color: 'white',
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              letterSpacing: '-0.02em',
-              lineHeight: '0.9',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              willChange: 'transform, opacity, filter'
+              position: "relative",
+              zIndex: 1,
+              marginTop: "100px",
+              textAlign: "left",
             }}
           >
-            MENURU
+            <span
+              style={{
+                fontSize: "400px",
+                fontWeight: 700,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                display: "block",
+              }}
+            >
+              Profiles
+            </span>
           </div>
+
+          {/* SECTION ABOUT dengan background biru, teks putih, tanpa link */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              marginTop: "60px",
+              padding: "80px 60px",
+              backgroundColor: "#0D3CFC",
+              borderRadius: "20px",
+              maxWidth: "900px",
+              width: "100%",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "48px",
+                fontWeight: 700,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+                margin: 0,
+                marginBottom: "24px",
+              }}
+            >
+              About Menuru
+            </h2>
+            <p
+              style={{
+                fontSize: "24px",
+                fontWeight: 300,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.6,
+                margin: 0,
+                opacity: 0.9,
+              }}
+            >
+              Menuru adalah platform yang menggabungkan kreativitas dan kepedulian sosial.
+              Kami menyediakan ruang bagi Anda untuk mencatat ide-ide brilian, menemukan inspirasi,
+              dan berkontribusi melalui donasi untuk mereka yang membutuhkan.
+              Bergabunglah dengan komunitas Menuru dan jadilah bagian dari perubahan positif.
+            </p>
+          </div>
+        </div>
+
+        {/* NAVBAR - FIXED di atas */}
+        <div
+          ref={navbarRef}
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "8px 16px",
+            borderRadius: "12px",
+            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
+            backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
+            transition: "all 0.3s ease",
+            pointerEvents: "auto",
+            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
+          }}
+        >
+          {/* Profile link */}
+          <Link href="/profile">
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Profile
+              </span>
+            </div>
+          </Link>
+
+          {/* Get in Touch */}
+          <Link href="/contact">
+            <div
+              className="get-in-touch"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Get in touch
+              </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <SouthEastArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
+            <div
+              className="pusat-bantuan"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #000000",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#000000",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Pusat Bantuan
+              </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#000000",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <NorthWestArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Menu - Tombol Close menggunakan tanda X */}
+          <div
+            className="menu-button"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              border: "2px solid #000000",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+            }}
+            onClick={toggleMenu}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#ffffff",
+              }}
+            >
+              <span
+                ref={plusIconRef}
+                style={{
+                  fontSize: isMenuOpen ? "24px" : "28px",
+                  fontWeight: isMenuOpen ? 400 : 300,
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  display: "inline-block",
+                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
+                }}
+              >
+                {isMenuOpen ? "✕" : "+"}
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                display: "inline-block",
+              }}
+            >
+              {isMenuOpen ? "Close" : "Menu"}
+            </span>
+          </div>
+        </div>
+
+        {/* Menu Overlay - HANYA judul */}
+        <div
+          ref={menuOverlayRef}
+          className="menu-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#0D3CFC",
+            zIndex: 99,
+            display: isMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            transform: "translateY(-100%)",
+            opacity: 0,
+            pointerEvents: isMenuOpen ? "auto" : "none",
+            padding: "40px",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+              position: "absolute",
+              top: "40px",
+              left: "40px",
+            }}
+          >
+            Menuru
+          </h1>
         </div>
       </div>
 
-      {/* Scroll to Top Button */}
-      <motion.button
-        onClick={scrollToTop}
-        style={{
-          position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          backgroundColor: 'white',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ 
-          opacity: showScrollButton ? 1 : 0,
-          scale: showScrollButton ? 1 : 0,
-          pointerEvents: showScrollButton ? 'auto' : 'none'
-        }}
-        transition={{ duration: 0.3 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="black" 
-          strokeWidth="1.5"
-        >
-          <path d="M12 19V5M5 12L12 5L19 12" />
-        </svg>
-      </motion.button>
+      <style jsx global>{`
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
 
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+        * {
+          background-color: transparent;
         }
-        
-        .typing-dot {
-          animation: typing 1.4s infinite;
-          animation-fill-mode: both;
-          font-size: 20px;
-        }
-        
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-          0%, 60%, 100% {
-            opacity: 0.3;
-            transform: translateY(0);
+
+        @media (max-width: 1024px) {
+          .title {
+            font-size: 36px !important;
           }
-          30% {
-            opacity: 1;
-            transform: translateY(-4px);
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .title {
+            font-size: 28px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .title {
+            font-size: 22px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
           }
         }
       `}</style>
-    </div>
+    </>
   );
 }
