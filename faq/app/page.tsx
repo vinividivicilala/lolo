@@ -67,17 +67,9 @@ const ShieldCheck = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-// Arrow icon for link
-const ArrowRight = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -417,18 +409,14 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Anti-Fraud Badge dengan tooltip */}
+          {/* Badge Anti-Fraud */}
           <div
             style={{
-              position: "relative",
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "4px 0",
-              cursor: "default",
+              padding: "0",
             }}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
           >
             <ShieldCheck size={28} />
             <span
@@ -442,52 +430,29 @@ export default function HomePage(): React.JSX.Element {
             >
               Anti-Fraud
             </span>
+          </div>
 
-            {/* Tooltip dengan background biru dan teks hitam */}
-            {showTooltip && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 12px)",
-                  left: "-60px", // geser agar sejajar
-                  width: "340px",
-                  padding: "20px 24px",
-                  backgroundColor: "#0D3CFC", // biru
-                  borderRadius: "12px",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                  zIndex: 10,
-                  pointerEvents: "auto", // agar link bisa diklik
-                }}
-              >
-                {/* Judul dan link */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#000000", fontFamily: FONT_FAMILY }}>
-                    Anti Bot Anonim
-                  </h3>
-                  <a
-                    href="#"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      color: "#000000",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      textDecoration: "none",
-                      fontFamily: FONT_FAMILY,
-                      pointerEvents: "auto",
-                    }}
-                  >
-                    Kunjungi
-                    <ArrowRight size={16} style={{ color: "#000000" }} />
-                  </a>
-                </div>
-                {/* Deskripsi */}
-                <p style={{ margin: 0, fontSize: "14px", color: "#000000", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
-                  Perlindungan terhadap bot dan anonimitas. Sistem keamanan canggih untuk melindungi data Anda.
-                </p>
-              </div>
-            )}
+          {/* Badge Anti-Bot Anonim */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+            }}
+          >
+            <ShieldCheck size={28} />
+            <span
+              style={{
+                fontSize: "30px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1,
+              }}
+            >
+              Anti-Bot
+            </span>
           </div>
 
           {/* Get in Touch */}
