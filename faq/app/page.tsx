@@ -395,7 +395,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - Dua baris, sejajar dengan judul (top: 40px), tanpa padding vertikal */}
+        {/* NAVBAR */}
         <div
           ref={navbarRef}
           style={{
@@ -407,7 +407,7 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: "column",
             alignItems: "flex-end",
             gap: "8px",
-            padding: "0 16px", // hilangkan padding vertikal agar konten mulai dari top 40px
+            padding: "0 16px",
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
             backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
@@ -416,7 +416,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Baris atas: Shop, About, Sign Up */}
+          {/* Baris atas: Shop, About, Sign Up, Profiles */}
           <div
             style={{
               display: "flex",
@@ -426,16 +426,27 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: "flex-end",
             }}
           >
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-              <ShoppingBag size={20} />
-              <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
-            </div>
-            <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-              <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
-            </div>
-            <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-              <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
-            </div>
+            <Link href="/shop">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <ShoppingBag size={20} />
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
+              </div>
+            </Link>
+            <Link href="/about">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              </div>
+            </Link>
+            <Link href="/signup">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+              </div>
+            </Link>
+            <Link href="/profile">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Profiles</span>
+              </div>
+            </Link>
           </div>
 
           {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
