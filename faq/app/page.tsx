@@ -66,23 +66,25 @@ const ArrowDown = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+// Icon Shield untuk Anti Fraud
+const ShieldIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="fill"/>
+    <path d="M12 6V14L15 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const aboutRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
-  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   // Auth listener - mulai animasi preloader
   useEffect(() => {
@@ -105,9 +107,6 @@ export default function HomePage(): React.JSX.Element {
               setShowMain(true);
               setTimeout(() => {
                 ScrollTrigger.refresh();
-                initScrollAnimations();
-                initTimelineAnimations();
-                initBlurAnimations();
               }, 200);
             }
           });
@@ -156,131 +155,6 @@ export default function HomePage(): React.JSX.Element {
     }, "-=0.3");
   };
 
-  const initScrollAnimations = () => {
-    // Animasi judul: dari 48px ke 500px saat scroll ke bawah
-    if (titleRef.current && heroRef.current) {
-      // Reset posisi judul ke posisi awal
-      gsap.set(titleRef.current, {
-        position: "fixed",
-        top: "40px",
-        left: "40px",
-        fontSize: "48px",
-        zIndex: 15,
-      });
-
-      // Animasi ukuran font dari 48px ke 500px
-      gsap.to(titleRef.current, {
-        fontSize: "500px",
-        fontWeight: 400,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.5,
-          invalidateOnRefresh: true,
-        }
-      });
-
-      // Animasi judul kembali ke 48px setelah melewati hero
-      gsap.to(titleRef.current, {
-        fontSize: "48px",
-        fontWeight: 700,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "bottom bottom",
-          end: "bottom+=100px bottom",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        }
-      });
-    }
-  };
-
-  const initBlurAnimations = () => {
-    // Blur effect pada navbar saat scroll
-    if (navbarRef.current) {
-      gsap.to(navbarRef.current, {
-        backdropFilter: "blur(10px)",
-        backgroundColor: "rgba(255,255,255,0.8)",
-        duration: 0.5,
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        }
-      });
-    }
-
-    // Blur effect pada judul
-    if (titleRef.current) {
-      gsap.to(titleRef.current, {
-        backdropFilter: "blur(10px)",
-        backgroundColor: "rgba(255,255,255,0.8)",
-        padding: "10px 20px",
-        borderRadius: "12px",
-        duration: 0.5,
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        }
-      });
-    }
-  };
-
-  const initTimelineAnimations = () => {
-    const items = timelineItemsRef.current.filter(el => el !== null);
-    if (items.length === 0 || !timelineRef.current) return;
-
-    gsap.set(items[0], { y: 0, opacity: 1, scale: 1 });
-    gsap.set(items[1], { y: 100, opacity: 0.6, scale: 0.9 });
-    gsap.set(items[2], { y: 200, opacity: 0.3, scale: 0.8 });
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: timelineRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.5,
-        pin: true,
-        invalidateOnRefresh: true,
-      }
-    });
-
-    tl.to(items[1], {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      duration: 1,
-      ease: "power2.inOut"
-    }, 0)
-    .to(items[2], {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      duration: 1,
-      ease: "power2.inOut"
-    }, 0.5)
-    .to(items[0], {
-      y: -50,
-      opacity: 0.3,
-      scale: 0.8,
-      duration: 1,
-      ease: "power2.inOut"
-    }, 0.7)
-    .to([items[0], items[1], items[2]], {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      duration: 0.5,
-      ease: "power2.inOut"
-    }, 1.5);
-  };
-
   const toggleMenu = () => {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
@@ -290,7 +164,6 @@ export default function HomePage(): React.JSX.Element {
           { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       }
-      // Animasi plus icon berputar
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 45,
@@ -312,7 +185,6 @@ export default function HomePage(): React.JSX.Element {
       } else {
         setIsMenuOpen(false);
       }
-      // Animasi plus icon kembali
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -421,10 +293,8 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
-          {/* Judul - FIXED di posisi dengan blur effect */}
+          {/* Judul - Static tanpa scroll effect */}
           <h1
-            ref={titleRef}
-            className="title"
             style={{
               fontSize: "48px",
               fontWeight: 700,
@@ -432,33 +302,23 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
-              padding: "10px 20px",
+              padding: 0,
               lineHeight: 1,
-              transformOrigin: "left center",
-              position: "fixed",
-              top: "40px",
-              left: "40px",
+              position: "relative",
               zIndex: 15,
-              borderRadius: "12px",
-              backgroundColor: "rgba(255,255,255,0)",
-              backdropFilter: "blur(0px)",
-              transition: "all 0.3s ease",
-              pointerEvents: "none",
             }}
           >
             Menuru
           </h1>
 
-          {/* Content Wrapper - konten langsung di bawah judul */}
-          <div ref={contentWrapperRef} style={{ 
+          {/* Content Wrapper */}
+          <div style={{ 
             position: "relative", 
             zIndex: 1,
             marginTop: "20px",
           }}>
             {/* Subtitle */}
             <div
-              ref={subtitleRef}
-              className="subtitle"
               style={{
                 textAlign: "left",
                 position: "relative",
@@ -485,7 +345,6 @@ export default function HomePage(): React.JSX.Element {
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 ref={buttonRef}
-                className="cta-button"
                 style={{
                   display: "inline-block",
                   border: "2px solid #0D3CFC",
@@ -510,7 +369,6 @@ export default function HomePage(): React.JSX.Element {
 
               <div
                 ref={arrowRef}
-                className="arrow-box"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -551,10 +409,50 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
+          {/* Anti Fraud - Baru */}
+          <Link href="/anti-fraud">
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Anti Fraud
+              </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <ShieldIcon size={24} />
+              </div>
+            </div>
+          </Link>
+
           {/* Get in Touch */}
           <Link href="/contact">
             <div
-              className="get-in-touch"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -596,7 +494,6 @@ export default function HomePage(): React.JSX.Element {
           {/* Pusat Bantuan */}
           <Link href="/pusat-bantuan">
             <div
-              className="pusat-bantuan"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -635,9 +532,8 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu - Tombol Close menggunakan tanda X */}
+          {/* Menu */}
           <div
-            className="menu-button"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -669,7 +565,6 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1,
                   display: "inline-block",
-                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
                 }}
               >
                 {isMenuOpen ? "✕" : "+"}
@@ -690,10 +585,9 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - HANYA judul */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
-          className="menu-overlay"
           style={{
             position: "fixed",
             top: 0,
@@ -712,7 +606,6 @@ export default function HomePage(): React.JSX.Element {
             padding: "40px",
           }}
         >
-          {/* Judul di kiri atas menu */}
           <h1
             style={{
               fontSize: "48px",
@@ -731,443 +624,6 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </h1>
-        </div>
-
-        {/* SPACER */}
-        <div style={{ height: "100vh" }} />
-
-        {/* ABOUT SECTION */}
-        <div
-          ref={aboutRef}
-          style={{
-            position: "relative",
-            padding: "100px 40px",
-            backgroundColor: "#ffffff",
-            width: "100%",
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1,
-          }}
-        >
-          <div
-            style={{
-              maxWidth: "1200px",
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "80px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                margin: 0,
-                marginBottom: "20px",
-                lineHeight: 1,
-              }}
-            >
-              About
-            </h2>
-            
-            <div
-              style={{
-                width: "80px",
-                height: "4px",
-                backgroundColor: "#0D3CFC",
-                margin: "20px auto",
-                borderRadius: "2px",
-              }}
-            />
-
-            <p
-              style={{
-                fontSize: "24px",
-                fontWeight: 300,
-                color: "#333333",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.8,
-                maxWidth: "800px",
-                margin: "30px auto",
-                padding: "0 20px",
-              }}
-            >
-              Menuru adalah platform yang menggabungkan kreativitas dan kepedulian sosial. 
-              Kami menyediakan ruang bagi Anda untuk mencatat ide-ide brilian, menemukan inspirasi, 
-              dan berkontribusi melalui donasi untuk mereka yang membutuhkan. 
-              Bergabunglah dengan komunitas Menuru dan jadilah bagian dari perubahan positif.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: "40px",
-                marginTop: "50px",
-              }}
-            >
-              <div
-                style={{
-                  flex: "1 1 200px",
-                  maxWidth: "250px",
-                  padding: "30px 20px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                  border: "1px solid #e8e8e8",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "40px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  01
-                </div>
-                <h3
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    margin: "12px 0 8px",
-                  }}
-                >
-                  Note
-                </h3>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666666",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
-                    margin: 0,
-                  }}
-                >
-                  Catat ide-ide kreatif dan inspirasi Anda
-                </p>
-              </div>
-
-              <div
-                style={{
-                  flex: "1 1 200px",
-                  maxWidth: "250px",
-                  padding: "30px 20px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                  border: "1px solid #e8e8e8",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "40px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  02
-                </div>
-                <h3
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    margin: "12px 0 8px",
-                  }}
-                >
-                  Donasi
-                </h3>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666666",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
-                    margin: 0,
-                  }}
-                >
-                  Salurkan bantuan untuk mereka yang membutuhkan
-                </p>
-              </div>
-
-              <div
-                style={{
-                  flex: "1 1 200px",
-                  maxWidth: "250px",
-                  padding: "30px 20px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                  border: "1px solid #e8e8e8",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "40px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  03
-                </div>
-                <h3
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    margin: "12px 0 8px",
-                  }}
-                >
-                  Shop
-                </h3>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666666",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
-                    margin: 0,
-                  }}
-                >
-                  Temukan produk menarik dari komunitas
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* SPACER */}
-        <div style={{ height: "50vh" }} />
-
-        {/* TIMELINE SECTION */}
-        <div
-          ref={timelineRef}
-          style={{
-            position: "relative",
-            height: "100vh",
-            backgroundColor: "#ffffff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-            borderTop: "1px solid #e8e8e8",
-            zIndex: 1,
-          }}
-        >
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "800px",
-              height: "500px",
-            }}
-          >
-            <div
-              ref={(el) => { timelineItemsRef.current[0] = el; }}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "600px",
-                padding: "40px",
-                backgroundColor: "#ffffff",
-                borderRadius: "16px",
-                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
-                border: "2px solid #0D3CFC",
-                willChange: "transform, opacity",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>01</span>
-                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
-                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Note</span>
-              </div>
-              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
-                Catat ide-ide kreatifmu dengan mudah
-              </p>
-            </div>
-
-            <div
-              ref={(el) => { timelineItemsRef.current[1] = el; }}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "600px",
-                padding: "40px",
-                backgroundColor: "#ffffff",
-                borderRadius: "16px",
-                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
-                border: "2px solid #0D3CFC",
-                willChange: "transform, opacity",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>02</span>
-                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
-                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Donasi</span>
-              </div>
-              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
-                Salurkan bantuan untuk mereka yang membutuhkan
-              </p>
-            </div>
-
-            <div
-              ref={(el) => { timelineItemsRef.current[2] = el; }}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "600px",
-                padding: "40px",
-                backgroundColor: "#ffffff",
-                borderRadius: "16px",
-                boxShadow: "0 10px 40px rgba(13, 60, 252, 0.15)",
-                border: "2px solid #0D3CFC",
-                willChange: "transform, opacity",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>03</span>
-                <ArrowDown size={32} style={{ color: "#0D3CFC" }} />
-                <span style={{ fontSize: "32px", fontWeight: 600, color: "#000000" }}>Shop</span>
-              </div>
-              <p style={{ fontSize: "18px", color: "#666666", margin: 0 }}>
-                Temukan produk-produk menarik dari komunitas
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              bottom: "40px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "8px",
-              color: "#999999",
-              fontSize: "14px",
-            }}
-          >
-            <span>Scroll untuk melihat timeline</span>
-            <ArrowDown size={24} style={{ color: "#0D3CFC" }} />
-          </div>
-        </div>
-
-        {/* SPACER */}
-        <div style={{ height: "30vh" }} />
-
-        {/* DUMMY CONTENT */}
-        <div
-          style={{
-            padding: "80px 40px",
-            backgroundColor: "#ffffff",
-            width: "100%",
-            textAlign: "center",
-            zIndex: 1,
-            position: "relative",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "48px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "30px",
-            }}
-          >
-            Bergabunglah dengan Komunitas Menuru
-          </h2>
-          <p
-            style={{
-              fontSize: "20px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              maxWidth: "700px",
-              margin: "0 auto",
-              lineHeight: 1.8,
-            }}
-          >
-            Ribuan kreator telah bergabung dan menciptakan perubahan. 
-            Mulai perjalanan Anda hari ini dan jadilah bagian dari gerakan 
-            yang menggabungkan kreativitas dengan kepedulian.
-          </p>
-          
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "60px",
-              marginTop: "50px",
-              flexWrap: "wrap",
-            }}
-          >
-            <div>
-              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>10K+</div>
-              <div style={{ fontSize: "16px", color: "#999999" }}>Pengguna Aktif</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>5K+</div>
-              <div style={{ fontSize: "16px", color: "#999999" }}>Ide Tercatat</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "48px", fontWeight: 700, color: "#0D3CFC" }}>Rp 2M+</div>
-              <div style={{ fontSize: "16px", color: "#999999" }}>Donasi Terkumpul</div>
-            </div>
-          </div>
-        </div>
-
-        {/* SPACER */}
-        <div style={{ height: "20vh" }} />
-
-        {/* Footer */}
-        <div
-          style={{
-            position: "relative",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            textAlign: "center",
-            color: "#999999",
-            fontSize: "16px",
-            fontFamily: FONT_FAMILY,
-            padding: "60px 40px",
-            backgroundColor: "#ffffff",
-            borderTop: "1px solid #e8e8e8",
-            zIndex: 1,
-          }}
-        >
-          <p style={{ margin: 0, fontWeight: 500 }}>© 2026 Menuru. All rights reserved.</p>
-          <p style={{ marginTop: "8px", fontSize: "14px", color: "#bbb" }}>
-            Made with ❤️ for creativity and generosity
-          </p>
         </div>
       </div>
 
@@ -1203,17 +659,9 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
-        /* Animasi blur pada judul dan navbar */
-        .title {
-          transition: all 0.3s ease;
-        }
-
         @media (max-width: 1024px) {
           .subtitle p {
             font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
           }
           .cta-button {
             padding: 10px 22px !important;
@@ -1248,9 +696,6 @@ export default function HomePage(): React.JSX.Element {
         @media (max-width: 768px) {
           .subtitle p {
             font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
           }
           .cta-button {
             padding: 8px 18px !important;
@@ -1289,9 +734,6 @@ export default function HomePage(): React.JSX.Element {
         @media (max-width: 480px) {
           .subtitle p {
             font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
           }
           .cta-button {
             padding: 6px 14px !important;
