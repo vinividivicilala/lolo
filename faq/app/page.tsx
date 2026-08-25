@@ -151,15 +151,15 @@ export default function HomePage(): React.JSX.Element {
     if (cards.length === 0 || !cardsContainerRef.current) return;
 
     const container = cardsContainerRef.current;
-    const cardHeight = 100; // tinggi setiap card
-    const gap = 20;
+    const cardHeight = 70; // tinggi card lebih kecil
+    const gap = 15; // jarak sangat dekat
 
-    // Set initial positions: card1 at top, others below
+    // Set initial positions: card1 at top, others below with small gap
     cards.forEach((card, i) => {
       gsap.set(card, {
         y: i * (cardHeight + gap),
-        opacity: i === 0 ? 1 : 0.9,
-        scale: 1 - i * 0.03,
+        opacity: 1,
+        scale: 1 - i * 0.02,
         zIndex: cards.length - i,
       });
     });
@@ -182,18 +182,18 @@ export default function HomePage(): React.JSX.Element {
         y: 0,
         scale: 1,
         opacity: 1,
-        duration: 0.8,
+        duration: 0.6,
         ease: "power2.inOut"
-      }, (i - 1) * 0.2);
+      }, (i - 1) * 0.15);
     }
 
-    // Slight effect on first card when others stack
+    // Slight effect on first card
     tl.to(cards[0], {
       scale: 0.98,
-      opacity: 0.9,
-      duration: 0.5,
+      opacity: 0.95,
+      duration: 0.4,
       ease: "power2.inOut"
-    }, cards.length * 0.2);
+    }, cards.length * 0.15);
   };
 
   const toggleMenu = () => {
@@ -341,14 +341,14 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          <div style={{ position: "relative", zIndex: 1, marginTop: "60px" }}>
+          <div style={{ position: "relative", zIndex: 1, marginTop: "40px" }}>
             <div ref={subtitleRef} className="subtitle" style={{ textAlign: "left", position: "relative" }}>
-              <p style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, padding: 0, paddingBottom: "30px", whiteSpace: "pre-line" }}>
+              <p style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, padding: 0, paddingBottom: "20px", whiteSpace: "pre-line" }}>
                 {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
               <div ref={buttonRef} className="cta-button" style={{ display: "inline-block", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "12px 28px", cursor: "pointer", backgroundColor: "transparent" }}>
                 <span style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>Let's build now</span>
               </div>
@@ -359,15 +359,15 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* SECTION STACKING CARDS - di bawah tombol, sisi kiri */}
+        {/* SECTION STACKING CARDS - langsung di bawah tombol, jarak dekat */}
         <div
           ref={cardsContainerRef}
           style={{
             position: "relative",
             width: "100%",
-            height: "200vh", // ruang scroll
+            height: "150vh", // lebih pendek agar tidak banyak ruang kosong
             backgroundColor: "#ffffff",
-            padding: "40px",
+            padding: "20px 40px 40px 40px",
             boxSizing: "border-box",
             display: "flex",
             alignItems: "flex-start",
@@ -392,12 +392,12 @@ export default function HomePage(): React.JSX.Element {
                   left: 0,
                   width: "100%",
                   maxWidth: "500px",
-                  height: "80px",
-                  padding: "20px 30px",
+                  height: "70px",
+                  padding: "16px 24px",
                   backgroundColor: "#ffffff",
                   borderRadius: "12px",
                   border: "2px solid #0D3CFC",
-                  boxShadow: "0 10px 30px rgba(13, 60, 252, 0.08)",
+                  boxShadow: "0 8px 20px rgba(13, 60, 252, 0.08)",
                   willChange: "transform, opacity",
                   display: "flex",
                   alignItems: "center",
