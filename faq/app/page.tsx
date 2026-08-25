@@ -89,7 +89,6 @@ export default function HomePage(): React.JSX.Element {
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
-  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -397,7 +396,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas, dengan 2 baris: atas (Shop, About, Sign Up) dan bawah (badge & tombol) */}
+        {/* NAVBAR - Satu baris sejajar dengan judul (top: 40px) */}
         <div
           ref={navbarRef}
           style={{
@@ -406,10 +405,11 @@ export default function HomePage(): React.JSX.Element {
             right: "40px",
             zIndex: 100,
             display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
+            alignItems: "center",
             gap: "12px",
-            padding: "12px 16px",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            padding: "8px 16px",
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
             backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
@@ -418,220 +418,159 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Baris atas: Shop (icon + text), About, Sign Up */}
+          {/* Shop */}
           <div
             style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              gap: "16px",
-              flexWrap: "wrap",
-              justifyContent: "flex-end",
+              gap: "6px",
+              cursor: "pointer",
             }}
           >
-            {/* Shop */}
-            <div
+            <ShoppingBag size={20} />
+            <span
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
               }}
             >
-              <ShoppingBag size={20} />
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Shop
-              </span>
-            </div>
-
-            {/* About */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                cursor: "pointer",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                About
-              </span>
-            </div>
-
-            {/* Sign Up */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                cursor: "pointer",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Sign Up
-              </span>
-            </div>
+              Shop
+            </span>
           </div>
 
-          {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
+          {/* About */}
           <div
             style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              gap: "12px",
-              flexWrap: "wrap",
-              justifyContent: "flex-end",
+              cursor: "pointer",
             }}
           >
-            {/* Anti-Fraud */}
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              About
+            </span>
+          </div>
+
+          {/* Sign Up */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "pointer",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Sign Up
+            </span>
+          </div>
+
+          {/* Anti-Fraud */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+            }}
+          >
+            <ShieldCheck size={28} />
+            <span
+              style={{
+                fontSize: "30px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1,
+              }}
+            >
+              Anti-Fraud
+            </span>
+          </div>
+
+          {/* Anti-Bot Anonim */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+            }}
+          >
+            <ShieldCheck size={28} />
+            <span
+              style={{
+                fontSize: "30px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1,
+              }}
+            >
+              Anti-Bot
+            </span>
+          </div>
+
+          {/* Get in Touch */}
+          <Link href="/contact">
             <div
+              className="get-in-touch"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "0",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
               }}
             >
-              <ShieldCheck size={28} />
               <span
                 style={{
-                  fontSize: "30px",
+                  fontSize: "16px",
                   fontWeight: 500,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
                 }}
               >
-                Anti-Fraud
+                Get in touch
               </span>
-            </div>
-
-            {/* Anti-Bot Anonim */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0",
-              }}
-            >
-              <ShieldCheck size={28} />
-              <span
-                style={{
-                  fontSize: "30px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                }}
-              >
-                Anti-Bot
-              </span>
-            </div>
-
-            {/* Get in Touch */}
-            <Link href="/contact">
               <div
-                className="get-in-touch"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
+                  justifyContent: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Get in touch
-                </span>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#0D3CFC",
-                    borderRadius: "4px",
-                    padding: "4px",
-                    color: "#ffffff",
-                  }}
-                >
-                  <SouthEastArrow size={24} />
-                </div>
+                <SouthEastArrow size={24} />
               </div>
-            </Link>
+            </div>
+          </Link>
 
-            {/* Pusat Bantuan */}
-            <Link href="/pusat-bantuan">
-              <div
-                className="pusat-bantuan"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #000000",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Pusat Bantuan
-                </span>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#000000",
-                    borderRadius: "4px",
-                    padding: "4px",
-                    color: "#ffffff",
-                  }}
-                >
-                  <NorthWestArrow size={24} />
-                </div>
-              </div>
-            </Link>
-
-            {/* Menu */}
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
             <div
-              className="menu-button"
+              className="pusat-bantuan"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -642,8 +581,17 @@ export default function HomePage(): React.JSX.Element {
                 cursor: "pointer",
                 backgroundColor: "transparent",
               }}
-              onClick={toggleMenu}
             >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#000000",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Pusat Bantuan
+              </span>
               <div
                 style={{
                   display: "inline-flex",
@@ -655,32 +603,62 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <span
-                  ref={plusIconRef}
-                  style={{
-                    fontSize: isMenuOpen ? "24px" : "28px",
-                    fontWeight: isMenuOpen ? 400 : 300,
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1,
-                    display: "inline-block",
-                    transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
-                  }}
-                >
-                  {isMenuOpen ? "✕" : "+"}
-                </span>
+                <NorthWestArrow size={24} />
               </div>
+            </div>
+          </Link>
+
+          {/* Menu */}
+          <div
+            className="menu-button"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              border: "2px solid #000000",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+            }}
+            onClick={toggleMenu}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#ffffff",
+              }}
+            >
               <span
+                ref={plusIconRef}
                 style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#000000",
+                  fontSize: isMenuOpen ? "24px" : "28px",
+                  fontWeight: isMenuOpen ? 400 : 300,
                   fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.02em",
+                  lineHeight: 1,
+                  display: "inline-block",
+                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
                 }}
               >
-                {isMenuOpen ? "Close" : "Menu"}
+                {isMenuOpen ? "✕" : "+"}
               </span>
             </div>
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+              }}
+            >
+              {isMenuOpen ? "Close" : "Menu"}
+            </span>
           </div>
         </div>
 
