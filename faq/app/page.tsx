@@ -424,7 +424,7 @@ export default function HomePage(): React.JSX.Element {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "0",
+              padding: "4px 0",
               cursor: "default",
             }}
             onMouseEnter={() => setShowTooltip(true)}
@@ -443,25 +443,25 @@ export default function HomePage(): React.JSX.Element {
               Anti-Fraud
             </span>
 
+            {/* Tooltip dengan background biru dan teks hitam */}
             {showTooltip && (
               <div
                 style={{
                   position: "absolute",
                   top: "calc(100% + 12px)",
-                  left: "-20px", // agar lebih ke kiri
+                  left: "-60px", // geser agar sejajar
                   width: "340px",
                   padding: "20px 24px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "#0D3CFC", // biru
                   borderRadius: "12px",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  border: "1px solid #e8e8e8",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
                   zIndex: 10,
-                  pointerEvents: "none",
+                  pointerEvents: "auto", // agar link bisa diklik
                 }}
               >
-                {/* Bagian atas: judul kiri, link kanan */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                {/* Judul dan link */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#000000", fontFamily: FONT_FAMILY }}>
                     Anti Bot Anonim
                   </h3>
                   <a
@@ -470,7 +470,7 @@ export default function HomePage(): React.JSX.Element {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "6px",
-                      color: "#0D3CFC",
+                      color: "#000000",
                       fontSize: "14px",
                       fontWeight: 500,
                       textDecoration: "none",
@@ -479,11 +479,11 @@ export default function HomePage(): React.JSX.Element {
                     }}
                   >
                     Kunjungi
-                    <ArrowRight size={16} style={{ color: "#0D3CFC" }} />
+                    <ArrowRight size={16} style={{ color: "#000000" }} />
                   </a>
                 </div>
-                {/* Deskripsi di bawah */}
-                <p style={{ margin: 0, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
+                {/* Deskripsi */}
+                <p style={{ margin: 0, fontSize: "14px", color: "#000000", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
                   Perlindungan terhadap bot dan anonimitas. Sistem keamanan canggih untuk melindungi data Anda.
                 </p>
               </div>
