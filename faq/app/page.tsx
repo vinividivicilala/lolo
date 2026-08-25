@@ -42,12 +42,6 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // SVG Icons
-const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -60,16 +54,26 @@ const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+const ShieldCheck = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
 
+  // Auth listener - mulai animasi preloader
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -147,6 +151,7 @@ export default function HomePage(): React.JSX.Element {
           { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       }
+      // Animasi plus icon berputar
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 45,
@@ -168,6 +173,7 @@ export default function HomePage(): React.JSX.Element {
       } else {
         setIsMenuOpen(false);
       }
+      // Animasi plus icon kembali
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -262,109 +268,114 @@ export default function HomePage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* HERO SECTION - di sisi kiri bawah judul web */}
+        {/* HERO SECTION */}
         <div
           ref={heroRef}
           style={{
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-start",
+            justifyContent: "center",
+            alignItems: "center",
             padding: "40px",
             backgroundColor: "#ffffff",
             position: "relative",
-            paddingTop: "120px",
           }}
         >
-          {/* Content Wrapper - di sisi kiri */}
+          {/* Judul - FIXED di posisi */}
+          <h1
+            ref={titleRef}
+            className="title"
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
+              pointerEvents: "none",
+            }}
+          >
+            Menuru
+          </h1>
+
+          {/* Content Wrapper - hanya subtitle */}
           <div style={{ 
             position: "relative", 
             zIndex: 1,
             maxWidth: "900px",
             width: "100%",
+            textAlign: "center",
           }}>
-            {/* Subtitle - 2 baris */}
+            {/* Anti Fraud Badge */}
             <div
               style={{
-                textAlign: "left",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                backgroundColor: "rgba(13, 60, 252, 0.08)",
+                marginBottom: "30px",
+              }}
+            >
+              <ShieldCheck size={20} />
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Anti-Fraud Protection
+              </span>
+            </div>
+
+            {/* Subtitle */}
+            <div
+              ref={subtitleRef}
+              className="subtitle"
+              style={{
+                textAlign: "center",
                 position: "relative",
               }}
             >
               <p
                 style={{
-                  fontSize: "60px",
+                  fontSize: "72px",
                   fontWeight: 400,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1.2,
                   margin: 0,
                   padding: 0,
-                  paddingBottom: "30px",
+                  whiteSpace: "pre-line",
                 }}
               >
-                You can take notes, find ideas,<br />
-                and donate money to those in need
+                {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
-            </div>
-
-            {/* Tombol dan Arrow - panah 30px */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "12px 28px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  Let's build now
-                </span>
-              </div>
-
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  width: "56px",
-                  height: "56px",
-                }}
-              >
-                <NorthEastArrow size={30} />
-              </div>
             </div>
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas dengan judul di kiri */}
+        {/* NAVBAR - FIXED di atas */}
         <div
           ref={navbarRef}
           style={{
             position: "fixed",
             top: "40px",
-            left: "40px",
             right: "40px",
             zIndex: 100,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            gap: "12px",
             padding: "8px 16px",
             borderRadius: "12px",
             backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
@@ -374,145 +385,52 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Judul Menuru di kiri navbar - 40px */}
-          <h1
-            style={{
-              fontSize: "40px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              padding: 0,
-              lineHeight: 1,
-            }}
-          >
-            Menuru
-          </h1>
-
-          {/* Menu items di kanan */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Anti Fraud - 25px tanpa linebox */}
-            <Link href="/anti-fraud">
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 8px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "25px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    display: "inline-block",
-                    lineHeight: 1,
-                  }}
-                >
-                  Anti Fraud
-                </span>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#0D3CFC",
-                  }}
-                >
-                  <SouthEastArrow size={25} />
-                </div>
-              </div>
-            </Link>
-
-            {/* Get in Touch */}
-            <Link href="/contact">
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    display: "inline-block",
-                  }}
-                >
-                  Get in touch
-                </span>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#0D3CFC",
-                    borderRadius: "4px",
-                    padding: "4px",
-                    color: "#ffffff",
-                  }}
-                >
-                  <SouthEastArrow size={24} />
-                </div>
-              </div>
-            </Link>
-
-            {/* Pusat Bantuan */}
-            <Link href="/pusat-bantuan">
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "2px solid #000000",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    display: "inline-block",
-                  }}
-                >
-                  Pusat Bantuan
-                </span>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#000000",
-                    borderRadius: "4px",
-                    padding: "4px",
-                    color: "#ffffff",
-                  }}
-                >
-                  <NorthWestArrow size={24} />
-                </div>
-              </div>
-            </Link>
-
-            {/* Menu */}
+          {/* Get in Touch */}
+          <Link href="/contact">
             <div
+              className="get-in-touch"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Get in touch
+              </span>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#0D3CFC",
+                  borderRadius: "4px",
+                  padding: "4px",
+                  color: "#ffffff",
+                }}
+              >
+                <SouthEastArrow size={24} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Pusat Bantuan */}
+          <Link href="/pusat-bantuan">
+            <div
+              className="pusat-bantuan"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -523,8 +441,18 @@ export default function HomePage(): React.JSX.Element {
                 cursor: "pointer",
                 backgroundColor: "transparent",
               }}
-              onClick={toggleMenu}
             >
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#000000",
+                  fontFamily: FONT_FAMILY,
+                  display: "inline-block",
+                }}
+              >
+                Pusat Bantuan
+              </span>
               <div
                 style={{
                   display: "inline-flex",
@@ -536,38 +464,70 @@ export default function HomePage(): React.JSX.Element {
                   color: "#ffffff",
                 }}
               >
-                <span
-                  ref={plusIconRef}
-                  style={{
-                    fontSize: isMenuOpen ? "24px" : "28px",
-                    fontWeight: isMenuOpen ? 400 : 300,
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1,
-                    display: "inline-block",
-                  }}
-                >
-                  {isMenuOpen ? "✕" : "+"}
-                </span>
+                <NorthWestArrow size={24} />
               </div>
+            </div>
+          </Link>
+
+          {/* Menu - Tombol Close menggunakan tanda X */}
+          <div
+            className="menu-button"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              border: "2px solid #000000",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+            }}
+            onClick={toggleMenu}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#ffffff",
+              }}
+            >
               <span
+                ref={plusIconRef}
                 style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#000000",
+                  fontSize: isMenuOpen ? "24px" : "28px",
+                  fontWeight: isMenuOpen ? 400 : 300,
                   fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.02em",
+                  lineHeight: 1,
                   display: "inline-block",
+                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
                 }}
               >
-                {isMenuOpen ? "Close" : "Menu"}
+                {isMenuOpen ? "✕" : "+"}
               </span>
             </div>
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#000000",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                display: "inline-block",
+              }}
+            >
+              {isMenuOpen ? "Close" : "Menu"}
+            </span>
           </div>
         </div>
 
         {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
+          className="menu-overlay"
           style={{
             position: "fixed",
             top: 0,
@@ -641,17 +601,80 @@ export default function HomePage(): React.JSX.Element {
 
         @media (max-width: 1024px) {
           .subtitle p {
-            font-size: 48px !important;
+            font-size: 56px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
           }
         }
         @media (max-width: 768px) {
           .subtitle p {
-            font-size: 36px !important;
+            font-size: 40px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
           }
         }
         @media (max-width: 480px) {
           .subtitle p {
-            font-size: 24px !important;
+            font-size: 28px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
           }
         }
       `}</style>
