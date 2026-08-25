@@ -84,6 +84,7 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk stacked cards
   const cardsSectionRef = useRef<HTMLDivElement>(null);
   const cardsPinnedRef = useRef<HTMLDivElement>(null);
+  const communityTitleRef = useRef<HTMLDivElement>(null);
   const [card1Ref, setCard1Ref] = useState<HTMLDivElement | null>(null);
   const [card2Ref, setCard2Ref] = useState<HTMLDivElement | null>(null);
   const [card3Ref, setCard3Ref] = useState<HTMLDivElement | null>(null);
@@ -174,33 +175,75 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
-    // Set posisi awal - jarak 120px antar card agar 5 card terlihat
-    gsap.set(card1Ref, { y: 0, zIndex: 5, opacity: 1 });
-    gsap.set(card2Ref, { y: 120, zIndex: 6, opacity: 0.9 });
-    gsap.set(card3Ref, { y: 240, zIndex: 7, opacity: 0.8 });
-    gsap.set(card4Ref, { y: 360, zIndex: 8, opacity: 0.7 });
-    gsap.set(card5Ref, { y: 480, zIndex: 9, opacity: 0.6 });
-
     const section = cardsSectionRef.current;
     const pinWrap = cardsPinnedRef.current;
+    const communityTitle = communityTitleRef.current;
+
+    // Set posisi awal - semua kartu di posisi yang sama (tumpuk)
+    gsap.set(card1Ref, { y: 0, zIndex: 5, opacity: 1 });
+    gsap.set(card2Ref, { y: 0, zIndex: 6, opacity: 0 });
+    gsap.set(card3Ref, { y: 0, zIndex: 7, opacity: 0 });
+    gsap.set(card4Ref, { y: 0, zIndex: 8, opacity: 0 });
+    gsap.set(card5Ref, { y: 0, zIndex: 9, opacity: 0 });
+
+    // Set posisi awal community title
+    gsap.set(communityTitle, { y: 0, opacity: 1 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=1000%",
+        end: "+=1500%",
         pin: pinWrap,
-        scrub: 1,
+        scrub: 1.2,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       }
     });
 
-    // Animasi card bergerak ke atas - kecepatan normal
-    tl.to(card2Ref, { y: 0, duration: 1, ease: "power2.inOut" }, 0)
-      .to(card3Ref, { y: 120, duration: 1, ease: "power2.inOut" }, 0.8)
-      .to(card4Ref, { y: 240, duration: 1, ease: "power2.inOut" }, 1.6)
-      .to(card5Ref, { y: 360, duration: 1, ease: "power2.inOut" }, 2.4);
+    // Fase 1: Kartu muncul satu per satu (numpuk) - community title tetap diam
+    tl.to(card2Ref, { 
+      y: 0, 
+      opacity: 1, 
+      duration: 1.5, 
+      ease: "power2.inOut",
+      onStart: () => {
+        // Community title tetap di posisi
+      }
+    }, 0.2)
+    .to(card3Ref, { 
+      y: 0, 
+      opacity: 1, 
+      duration: 1.5, 
+      ease: "power2.inOut" 
+    }, 1.2)
+    .to(card4Ref, { 
+      y: 0, 
+      opacity: 1, 
+      duration: 1.5, 
+      ease: "power2.inOut" 
+    }, 2.2)
+    .to(card5Ref, { 
+      y: 0, 
+      opacity: 1, 
+      duration: 1.5, 
+      ease: "power2.inOut" 
+    }, 3.2)
+
+    // Fase 2: Setelah semua kartu numpuk, semua bergerak ke atas bersama
+    .to([card1Ref, card2Ref, card3Ref, card4Ref, card5Ref], {
+      y: -400,
+      duration: 2,
+      ease: "power2.inOut",
+      stagger: 0.15,
+    }, 4.5)
+
+    // Fase 3: Community title mulai bergerak ke atas
+    .to(communityTitle, {
+      y: -200,
+      duration: 1.5,
+      ease: "power2.inOut",
+    }, 5.5);
 
     setHasCardsAnimated(true);
 
@@ -454,54 +497,47 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STACKED CARDS SECTION - di bawah tombol */}
+            {/* STACKED CARDS SECTION */}
             <div
               ref={cardsSectionRef}
               style={{
                 width: '100%',
-                minHeight: '500vh', // tinggi cukup untuk animasi pin
+                minHeight: '600vh',
                 position: 'relative',
                 backgroundColor: 'transparent',
                 marginTop: '40px',
                 marginBottom: '0',
               }}
             >
-              {/* JUDUL COMMUNITY - 80px tanpa garis */}
-              <div style={{
-                position: 'sticky',
-                top: '0',
-                zIndex: 20,
-                width: '100%',
-                backgroundColor: 'transparent',
-                padding: '30px 0 0 0',
-                boxSizing: 'border-box',
-              }}>
+              {/* JUDUL COMMUNITY - 80px tanpa garis, rata kiri */}
+              <div
+                ref={communityTitleRef}
+                style={{
+                  position: 'sticky',
+                  top: '0',
+                  zIndex: 20,
+                  width: '100%',
+                  backgroundColor: 'transparent',
+                  padding: '20px 0 0 0',
+                  boxSizing: 'border-box',
+                }}
+              >
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                  paddingBottom: '10px',
+                  fontFamily: FONT_FAMILY,
+                  fontSize: '80px',
+                  fontWeight: '700',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '0.9',
+                  color: '#000000',
+                  textTransform: 'uppercase',
+                  textAlign: 'left',
+                  paddingBottom: '30px',
                 }}>
-                  <div style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '80px',
-                    fontWeight: '700',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '0.9',
-                    color: '#000000',
-                    textTransform: 'uppercase',
-                  }}>
-                    COMMUNITY
-                  </div>
-                  <div style={{
-                    marginBottom: '10px',
-                  }}>
-                    <NorthEastArrow size={40} />
-                  </div>
+                  COMMUNITY
                 </div>
               </div>
 
-              {/* STACKED CARDS CONTAINER - di sisi kiri */}
+              {/* STACKED CARDS CONTAINER - rata kiri */}
               <div
                 ref={cardsPinnedRef}
                 style={{
@@ -513,41 +549,41 @@ export default function HomePage(): React.JSX.Element {
                   justifyContent: 'flex-start',
                   overflow: 'visible',
                   marginTop: '20px',
-                  marginBottom: '50px',
-                  paddingLeft: '40px',
+                  marginBottom: '100px',
                 }}
               >
                 <div style={{
                   position: 'relative',
-                  width: '90%',
+                  width: '100%',
                   maxWidth: '900px',
                   height: '80vh',
                   margin: '0',
                 }}>
                   
-                  {/* CARD 1 - NOTE - ukuran kecil */}
+                  {/* CARD 1 */}
                   <div
                     ref={setCard1Ref}
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) translateY(0px)',
+                      top: '0',
+                      left: '0',
                       width: '100%',
-                      height: '60%',
+                      maxWidth: '800px',
+                      height: '450px',
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '0px',
-                      boxShadow: 'none',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
                       overflow: 'hidden',
                       zIndex: 5,
                       display: 'flex',
                       flexDirection: 'column',
                       color: '#000000',
+                      willChange: 'transform, opacity',
                     }}
                   >
                     <div style={{
-                      padding: '25px 35px 0 35px',
+                      padding: '30px 40px 0 40px',
                       borderBottom: '2px solid #000000',
                     }}>
                       <div style={{
@@ -557,12 +593,12 @@ export default function HomePage(): React.JSX.Element {
                         marginBottom: '20px',
                       }}>
                         <div style={{
-                          fontSize: '60px',
+                          fontSize: '48px',
                           fontFamily: FONT_FAMILY,
                           fontWeight: '700',
                           letterSpacing: '-0.02em',
                           lineHeight: '1',
-                          color: '#000000',
+                          color: '#0D3CFC',
                         }}>
                           NOTE
                         </div>
@@ -595,7 +631,7 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                     
                     <div style={{
-                      padding: '30px 35px 25px 35px',
+                      padding: '30px 40px 25px 40px',
                       flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -605,7 +641,7 @@ export default function HomePage(): React.JSX.Element {
                         <p style={{
                           fontFamily: "'Questrial', sans-serif",
                           fontSize: '16px',
-                          lineHeight: '1.5',
+                          lineHeight: '1.6',
                           color: '#333333',
                           marginBottom: '20px',
                           maxWidth: '80%',
@@ -626,66 +662,67 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                       }}>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>MENURU</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>MENURU CORE</span>
                         <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>01 / 05</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* CARD 2 - BLOG */}
+                  {/* CARD 2 */}
                   <div
                     ref={setCard2Ref}
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) translateY(120px)',
-                      width: '95%',
-                      height: '56%',
+                      top: '0',
+                      left: '0',
+                      width: '100%',
+                      maxWidth: '800px',
+                      height: '450px',
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '0px',
-                      boxShadow: 'none',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
                       overflow: 'hidden',
                       zIndex: 6,
                       display: 'flex',
                       flexDirection: 'column',
                       color: '#000000',
-                      willChange: 'transform',
+                      willChange: 'transform, opacity',
+                      opacity: 0,
                     }}
                   >
                     <div style={{
-                      padding: '22px 32px 0 32px',
+                      padding: '30px 40px 0 40px',
                       borderBottom: '2px solid #000000',
                     }}>
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
-                        marginBottom: '18px',
+                        marginBottom: '20px',
                       }}>
                         <div style={{
-                          fontSize: '55px',
+                          fontSize: '48px',
                           fontFamily: FONT_FAMILY,
                           fontWeight: '700',
                           letterSpacing: '-0.02em',
                           lineHeight: '1',
-                          color: '#000000',
+                          color: '#0D3CFC',
                         }}>
                           BLOG
                         </div>
                         <button style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '9px',
+                          gap: '10px',
                           background: 'transparent',
                           border: '1.5px solid #000000',
                           cursor: 'pointer',
-                          fontSize: '13px',
+                          fontSize: '14px',
                           fontFamily: FONT_FAMILY,
                           color: '#000000',
-                          padding: '9px 18px',
-                          marginBottom: '7px',
+                          padding: '10px 20px',
+                          marginBottom: '8px',
                           transition: 'all 0.2s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -697,13 +734,13 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.color = '#000000';
                         }}>
                           <span>VIEW</span>
-                          <NorthEastArrow size={15} />
+                          <NorthEastArrow size={16} />
                         </button>
                       </div>
                     </div>
                     
                     <div style={{
-                      padding: '28px 32px 22px 32px',
+                      padding: '30px 40px 25px 40px',
                       flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -712,23 +749,23 @@ export default function HomePage(): React.JSX.Element {
                       <div>
                         <p style={{
                           fontFamily: "'Questrial', sans-serif",
-                          fontSize: '15px',
-                          lineHeight: '1.5',
+                          fontSize: '16px',
+                          lineHeight: '1.6',
                           color: '#333333',
-                          marginBottom: '18px',
-                          maxWidth: '78%',
+                          marginBottom: '20px',
+                          maxWidth: '80%',
                         }}>
                           Publikasikan artikel dan tutorial inspiratif.
                         </p>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>SEO</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Analytics</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Comments</span>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>SEO</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Analytics</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Comments</span>
                         </div>
                       </div>
                       <div style={{
-                        marginTop: '18px',
-                        paddingTop: '14px',
+                        marginTop: '20px',
+                        paddingTop: '15px',
                         borderTop: '1px solid #e0e0e0',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -740,60 +777,61 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* CARD 3 - CALENDAR */}
+                  {/* CARD 3 */}
                   <div
                     ref={setCard3Ref}
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) translateY(240px)',
-                      width: '90%',
-                      height: '52%',
+                      top: '0',
+                      left: '0',
+                      width: '100%',
+                      maxWidth: '800px',
+                      height: '450px',
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '0px',
-                      boxShadow: 'none',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
                       overflow: 'hidden',
                       zIndex: 7,
                       display: 'flex',
                       flexDirection: 'column',
                       color: '#000000',
-                      willChange: 'transform',
+                      willChange: 'transform, opacity',
+                      opacity: 0,
                     }}
                   >
                     <div style={{
-                      padding: '20px 30px 0 30px',
+                      padding: '30px 40px 0 40px',
                       borderBottom: '2px solid #000000',
                     }}>
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
-                        marginBottom: '16px',
+                        marginBottom: '20px',
                       }}>
                         <div style={{
-                          fontSize: '50px',
+                          fontSize: '48px',
                           fontFamily: FONT_FAMILY,
                           fontWeight: '700',
                           letterSpacing: '-0.02em',
                           lineHeight: '1',
-                          color: '#000000',
+                          color: '#0D3CFC',
                         }}>
                           CALENDAR
                         </div>
                         <button style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '8px',
+                          gap: '10px',
                           background: 'transparent',
                           border: '1.5px solid #000000',
                           cursor: 'pointer',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           fontFamily: FONT_FAMILY,
                           color: '#000000',
-                          padding: '8px 16px',
-                          marginBottom: '6px',
+                          padding: '10px 20px',
+                          marginBottom: '8px',
                           transition: 'all 0.2s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -805,13 +843,13 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.color = '#000000';
                         }}>
                           <span>VIEW</span>
-                          <NorthEastArrow size={14} />
+                          <NorthEastArrow size={16} />
                         </button>
                       </div>
                     </div>
                     
                     <div style={{
-                      padding: '25px 30px 20px 30px',
+                      padding: '30px 40px 25px 40px',
                       flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -820,23 +858,23 @@ export default function HomePage(): React.JSX.Element {
                       <div>
                         <p style={{
                           fontFamily: "'Questrial', sans-serif",
-                          fontSize: '14px',
-                          lineHeight: '1.5',
+                          fontSize: '16px',
+                          lineHeight: '1.6',
                           color: '#333333',
-                          marginBottom: '16px',
-                          maxWidth: '75%',
+                          marginBottom: '20px',
+                          maxWidth: '80%',
                         }}>
                           Kelola jadwal dan event dengan kalender interaktif.
                         </p>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Sync</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Reminders</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Recurring</span>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Sync</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Reminders</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Share</span>
                         </div>
                       </div>
                       <div style={{
-                        marginTop: '16px',
-                        paddingTop: '12px',
+                        marginTop: '20px',
+                        paddingTop: '15px',
                         borderTop: '1px solid #e0e0e0',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -848,60 +886,61 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* CARD 4 - TASK */}
+                  {/* CARD 4 */}
                   <div
                     ref={setCard4Ref}
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) translateY(360px)',
-                      width: '85%',
-                      height: '48%',
+                      top: '0',
+                      left: '0',
+                      width: '100%',
+                      maxWidth: '800px',
+                      height: '450px',
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '0px',
-                      boxShadow: 'none',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
                       overflow: 'hidden',
                       zIndex: 8,
                       display: 'flex',
                       flexDirection: 'column',
                       color: '#000000',
-                      willChange: 'transform',
+                      willChange: 'transform, opacity',
+                      opacity: 0,
                     }}
                   >
                     <div style={{
-                      padding: '18px 28px 0 28px',
+                      padding: '30px 40px 0 40px',
                       borderBottom: '2px solid #000000',
                     }}>
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
-                        marginBottom: '14px',
+                        marginBottom: '20px',
                       }}>
                         <div style={{
-                          fontSize: '45px',
+                          fontSize: '48px',
                           fontFamily: FONT_FAMILY,
                           fontWeight: '700',
                           letterSpacing: '-0.02em',
                           lineHeight: '1',
-                          color: '#000000',
+                          color: '#0D3CFC',
                         }}>
                           TASK
                         </div>
                         <button style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '7px',
+                          gap: '10px',
                           background: 'transparent',
                           border: '1.5px solid #000000',
                           cursor: 'pointer',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           fontFamily: FONT_FAMILY,
                           color: '#000000',
-                          padding: '7px 14px',
-                          marginBottom: '5px',
+                          padding: '10px 20px',
+                          marginBottom: '8px',
                           transition: 'all 0.2s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -913,13 +952,13 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.color = '#000000';
                         }}>
                           <span>VIEW</span>
-                          <NorthEastArrow size={13} />
+                          <NorthEastArrow size={16} />
                         </button>
                       </div>
                     </div>
                     
                     <div style={{
-                      padding: '22px 28px 18px 28px',
+                      padding: '30px 40px 25px 40px',
                       flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -928,23 +967,23 @@ export default function HomePage(): React.JSX.Element {
                       <div>
                         <p style={{
                           fontFamily: "'Questrial', sans-serif",
-                          fontSize: '14px',
-                          lineHeight: '1.5',
+                          fontSize: '16px',
+                          lineHeight: '1.6',
                           color: '#333333',
-                          marginBottom: '14px',
-                          maxWidth: '75%',
+                          marginBottom: '20px',
+                          maxWidth: '80%',
                         }}>
                           Kelola tugas dengan prioritas dan deadline.
                         </p>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Priority</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Deadline</span>
-                          <span style={{ padding: '4px 14px', background: '#f0f0f0', fontSize: '11px', fontFamily: "'Questrial', sans-serif" }}>Progress</span>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Priority</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Deadline</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Progress</span>
                         </div>
                       </div>
                       <div style={{
-                        marginTop: '14px',
-                        paddingTop: '10px',
+                        marginTop: '20px',
+                        paddingTop: '15px',
                         borderTop: '1px solid #e0e0e0',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -956,60 +995,61 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  {/* CARD 5 - REMINDER */}
+                  {/* CARD 5 */}
                   <div
                     ref={setCard5Ref}
                     style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) translateY(480px)',
-                      width: '80%',
-                      height: '44%',
+                      top: '0',
+                      left: '0',
+                      width: '100%',
+                      maxWidth: '800px',
+                      height: '450px',
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '0px',
-                      boxShadow: 'none',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
                       overflow: 'hidden',
                       zIndex: 9,
                       display: 'flex',
                       flexDirection: 'column',
                       color: '#000000',
-                      willChange: 'transform',
+                      willChange: 'transform, opacity',
+                      opacity: 0,
                     }}
                   >
                     <div style={{
-                      padding: '16px 26px 0 26px',
+                      padding: '30px 40px 0 40px',
                       borderBottom: '2px solid #000000',
                     }}>
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
-                        marginBottom: '12px',
+                        marginBottom: '20px',
                       }}>
                         <div style={{
-                          fontSize: '40px',
+                          fontSize: '48px',
                           fontFamily: FONT_FAMILY,
                           fontWeight: '700',
                           letterSpacing: '-0.02em',
                           lineHeight: '1',
-                          color: '#000000',
+                          color: '#0D3CFC',
                         }}>
-                          REMINDER
+                          ARCHIVE
                         </div>
                         <button style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
+                          gap: '10px',
                           background: 'transparent',
                           border: '1.5px solid #000000',
                           cursor: 'pointer',
-                          fontSize: '11px',
+                          fontSize: '14px',
                           fontFamily: FONT_FAMILY,
                           color: '#000000',
-                          padding: '6px 12px',
-                          marginBottom: '4px',
+                          padding: '10px 20px',
+                          marginBottom: '8px',
                           transition: 'all 0.2s ease',
                         }}
                         onMouseEnter={(e) => {
@@ -1021,13 +1061,13 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.color = '#000000';
                         }}>
                           <span>VIEW</span>
-                          <NorthEastArrow size={12} />
+                          <NorthEastArrow size={16} />
                         </button>
                       </div>
                     </div>
                     
                     <div style={{
-                      padding: '20px 26px 16px 26px',
+                      padding: '30px 40px 25px 40px',
                       flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -1036,53 +1076,34 @@ export default function HomePage(): React.JSX.Element {
                       <div>
                         <p style={{
                           fontFamily: "'Questrial', sans-serif",
-                          fontSize: '13px',
-                          lineHeight: '1.5',
+                          fontSize: '16px',
+                          lineHeight: '1.6',
                           color: '#333333',
-                          marginBottom: '12px',
-                          maxWidth: '75%',
+                          marginBottom: '20px',
+                          maxWidth: '80%',
                         }}>
-                          Notifikasi cerdas untuk jadwal dan deadline.
+                          Arsipkan data dengan sistem pencarian canggih.
                         </p>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                          <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Push Notif</span>
-                          <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Email</span>
-                          <span style={{ padding: '3px 12px', background: '#f0f0f0', fontSize: '10px', fontFamily: "'Questrial', sans-serif" }}>Custom</span>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Search</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Filter</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Backup</span>
                         </div>
                       </div>
                       <div style={{
-                        marginTop: '12px',
-                        paddingTop: '8px',
+                        marginTop: '20px',
+                        paddingTop: '15px',
                         borderTop: '1px solid #e0e0e0',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                       }}>
-                        <span style={{ fontSize: '11px', fontFamily: FONT_FAMILY, color: '#999999' }}>NOTIFICATION</span>
-                        <span style={{ fontSize: '11px', fontFamily: FONT_FAMILY, color: '#999999' }}>05 / 05</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>DATA MANAGEMENT</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>05 / 05</span>
                       </div>
                     </div>
                   </div>
 
-                </div>
-              </div>
-
-              {/* Indikator scroll */}
-              <div
-                style={{
-                  position: 'relative',
-                  textAlign: 'center',
-                  marginTop: '20px',
-                  color: '#999999',
-                  fontSize: '14px',
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <span>Scroll untuk melihat semua fitur</span>
-                <div style={{ marginTop: '8px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
               </div>
             </div>
