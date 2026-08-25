@@ -60,19 +60,11 @@ const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-const ArrowDown = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const arrowRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -271,7 +263,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* HERO SECTION */}
+        {/* HERO SECTION - konten di tengah */}
         <div
           ref={heroRef}
           style={{
@@ -279,16 +271,19 @@ export default function HomePage(): React.JSX.Element {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
             padding: "40px",
             backgroundColor: "#ffffff",
             position: "relative",
-            paddingTop: "120px",
           }}
         >
           {/* Content Wrapper */}
           <div style={{ 
             position: "relative", 
             zIndex: 1,
+            maxWidth: "900px",
+            width: "100%",
+            textAlign: "left",
           }}>
             {/* Subtitle */}
             <div
@@ -317,7 +312,6 @@ export default function HomePage(): React.JSX.Element {
             {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
-                ref={buttonRef}
                 style={{
                   display: "inline-block",
                   border: "2px solid #0D3CFC",
@@ -341,7 +335,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               <div
-                ref={arrowRef}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -383,10 +376,10 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Judul Menuru di kiri navbar */}
+          {/* Judul Menuru di kiri navbar - 40px */}
           <h1
             style={{
-              fontSize: "28px",
+              fontSize: "40px",
               fontWeight: 700,
               color: "#000000",
               fontFamily: FONT_FAMILY,
@@ -401,16 +394,14 @@ export default function HomePage(): React.JSX.Element {
 
           {/* Menu items di kanan */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Anti Fraud */}
+            {/* Anti Fraud - tanpa linebox/border */}
             <Link href="/anti-fraud">
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
+                  padding: "8px 12px",
                   cursor: "pointer",
                   backgroundColor: "transparent",
                 }}
@@ -431,10 +422,7 @@ export default function HomePage(): React.JSX.Element {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "#0D3CFC",
-                    borderRadius: "4px",
-                    padding: "4px",
-                    color: "#ffffff",
+                    color: "#0D3CFC",
                   }}
                 >
                   <SouthEastArrow size={24} />
