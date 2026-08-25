@@ -151,7 +151,6 @@ export default function HomePage(): React.JSX.Element {
           { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       }
-      // Animasi plus icon berputar
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 45,
@@ -173,7 +172,6 @@ export default function HomePage(): React.JSX.Element {
       } else {
         setIsMenuOpen(false);
       }
-      // Animasi plus icon kembali
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -275,11 +273,11 @@ export default function HomePage(): React.JSX.Element {
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: "flex-start",
             padding: "40px",
             backgroundColor: "#ffffff",
             position: "relative",
+            paddingTop: "120px",
           }}
         >
           {/* Judul - FIXED di posisi */}
@@ -305,57 +303,31 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Content Wrapper - hanya subtitle */}
+          {/* Content Wrapper - hanya subtitle di bawah judul */}
           <div style={{ 
             position: "relative", 
             zIndex: 1,
-            maxWidth: "900px",
-            width: "100%",
-            textAlign: "center",
+            marginTop: "100px",
           }}>
-            {/* Anti Fraud Badge */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                backgroundColor: "rgba(13, 60, 252, 0.08)",
-                marginBottom: "30px",
-              }}
-            >
-              <ShieldCheck size={20} />
-              <span
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Anti-Fraud Protection
-              </span>
-            </div>
-
-            {/* Subtitle */}
+            {/* Subtitle - gaya asli (rata kiri, font 60px, biru) */}
             <div
               ref={subtitleRef}
               className="subtitle"
               style={{
-                textAlign: "center",
+                textAlign: "left",
                 position: "relative",
               }}
             >
               <p
                 style={{
-                  fontSize: "72px",
+                  fontSize: "60px",
                   fontWeight: 400,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1.2,
                   margin: 0,
                   padding: 0,
+                  paddingBottom: "30px",
                   whiteSpace: "pre-line",
                 }}
               >
@@ -365,7 +337,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas */}
+        {/* NAVBAR - FIXED di atas dengan anti-fraud badge */}
         <div
           ref={navbarRef}
           style={{
@@ -385,6 +357,32 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
+          {/* Anti-Fraud Badge - di samping Get in touch */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              borderRadius: "20px",
+              backgroundColor: "rgba(13, 60, 252, 0.08)",
+              border: "1px solid rgba(13, 60, 252, 0.2)",
+            }}
+          >
+            <ShieldCheck size={18} />
+            <span
+              style={{
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Anti-Fraud
+            </span>
+          </div>
+
           {/* Get in Touch */}
           <Link href="/contact">
             <div
@@ -469,7 +467,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Menu - Tombol Close menggunakan tanda X */}
+          {/* Menu */}
           <div
             className="menu-button"
             style={{
@@ -601,7 +599,7 @@ export default function HomePage(): React.JSX.Element {
 
         @media (max-width: 1024px) {
           .subtitle p {
-            font-size: 56px !important;
+            font-size: 48px !important;
           }
           .title {
             font-size: 36px !important;
@@ -627,7 +625,7 @@ export default function HomePage(): React.JSX.Element {
         }
         @media (max-width: 768px) {
           .subtitle p {
-            font-size: 40px !important;
+            font-size: 36px !important;
           }
           .title {
             font-size: 28px !important;
@@ -653,7 +651,7 @@ export default function HomePage(): React.JSX.Element {
         }
         @media (max-width: 480px) {
           .subtitle p {
-            font-size: 28px !important;
+            font-size: 24px !important;
           }
           .title {
             font-size: 22px !important;
