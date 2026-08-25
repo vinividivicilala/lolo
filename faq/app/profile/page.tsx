@@ -446,7 +446,7 @@ export default function ProfilePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Baris atas: Shop, About (dengan bg stabilo), Sign Up */}
+          {/* Baris atas: Shop, Profile (bg biru, teks putih), Sign Up */}
           <div
             style={{
               display: "flex",
@@ -462,25 +462,26 @@ export default function ProfilePage(): React.JSX.Element {
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
               </div>
             </Link>
-            <Link href="/about">
-              <div style={{ 
-                display: "inline-flex", 
-                alignItems: "center", 
-                cursor: "pointer",
-                backgroundColor: "#FFEB3B", // Warna stabilo/kuning
-                padding: "4px 12px",
-                borderRadius: "4px",
+            
+            {/* Profile - bg biru, teks putih, tanpa link */}
+            <div style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              backgroundColor: "#0D3CFC",
+              padding: "6px 16px",
+              borderRadius: "8px",
+              cursor: "default",
+            }}>
+              <span style={{ 
+                fontSize: "16px", 
+                fontWeight: 500, 
+                color: "#ffffff", 
+                fontFamily: FONT_FAMILY 
               }}>
-                <span style={{ 
-                  fontSize: "16px", 
-                  fontWeight: 500, 
-                  color: "#000000", 
-                  fontFamily: FONT_FAMILY 
-                }}>
-                  About
-                </span>
-              </div>
-            </Link>
+                Profile
+              </span>
+            </div>
+            
             <Link href="/signup">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
