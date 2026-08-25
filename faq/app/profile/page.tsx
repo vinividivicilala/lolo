@@ -42,6 +42,12 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // SVG Icons
+const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -74,6 +80,9 @@ export default function ProfilePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLHeadingElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
@@ -314,7 +323,7 @@ export default function ProfilePage(): React.JSX.Element {
             zIndex: 1,
             marginTop: "60px",
           }}>
-            {/* Profiles - font 400px, warna biru, di bawah judul */}
+            {/* Profiles - font 400px, warna biru */}
             <div
               ref={profileRef}
               className="profile-title"
@@ -332,11 +341,86 @@ export default function ProfilePage(): React.JSX.Element {
                   lineHeight: 1,
                   margin: 0,
                   padding: 0,
+                  paddingBottom: "30px",
                   letterSpacing: "-0.03em",
                 }}
               >
                 Profiles
               </h2>
+            </div>
+
+            {/* Subtitle */}
+            <div
+              ref={subtitleRef}
+              className="subtitle"
+              style={{
+                textAlign: "left",
+                position: "relative",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "60px",
+                  fontWeight: 400,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "30px",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {`You can take notes, find ideas,\nand donate money to those in need`}
+              </p>
+            </div>
+
+            {/* Tombol dan Arrow */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                className="cta-button"
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Let's build now
+                </span>
+              </div>
+
+              <div
+                ref={arrowRef}
+                className="arrow-box"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <NorthEastArrow size={24} />
+              </div>
             </div>
           </div>
         </div>
@@ -362,7 +446,7 @@ export default function ProfilePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Baris atas: Shop, About, Sign Up, Profiles */}
+          {/* Baris atas: Shop, About (dengan bg stabilo), Sign Up */}
           <div
             style={{
               display: "flex",
@@ -379,18 +463,27 @@ export default function ProfilePage(): React.JSX.Element {
               </div>
             </Link>
             <Link href="/about">
-              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              <div style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                cursor: "pointer",
+                backgroundColor: "#FFEB3B", // Warna stabilo/kuning
+                padding: "4px 12px",
+                borderRadius: "4px",
+              }}>
+                <span style={{ 
+                  fontSize: "16px", 
+                  fontWeight: 500, 
+                  color: "#000000", 
+                  fontFamily: FONT_FAMILY 
+                }}>
+                  About
+                </span>
               </div>
             </Link>
             <Link href="/signup">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
-              </div>
-            </Link>
-            <Link href="/profile">
-              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Profiles</span>
               </div>
             </Link>
           </div>
@@ -526,8 +619,22 @@ export default function ProfilePage(): React.JSX.Element {
           .profile-title h2 {
             font-size: 200px !important;
           }
+          .subtitle p {
+            font-size: 48px !important;
+          }
           .title {
             font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
           }
           .get-in-touch {
             padding: 6px 12px !important;
@@ -552,8 +659,26 @@ export default function ProfilePage(): React.JSX.Element {
           .profile-title h2 {
             font-size: 120px !important;
           }
+          .subtitle p {
+            font-size: 36px !important;
+          }
           .title {
             font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
           }
           .get-in-touch {
             padding: 4px 10px !important;
@@ -578,8 +703,26 @@ export default function ProfilePage(): React.JSX.Element {
           .profile-title h2 {
             font-size: 80px !important;
           }
+          .subtitle p {
+            font-size: 24px !important;
+          }
           .title {
             font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
           }
           .get-in-touch {
             padding: 4px 8px !important;
