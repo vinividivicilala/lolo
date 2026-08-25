@@ -283,7 +283,7 @@ export default function HomePage(): React.JSX.Element {
             maxWidth: "900px",
             width: "100%",
           }}>
-            {/* Subtitle - tetap 2 baris */}
+            {/* Subtitle - 2 baris rata kiri */}
             <div
               style={{
                 textAlign: "left",
@@ -300,10 +300,10 @@ export default function HomePage(): React.JSX.Element {
                   margin: 0,
                   padding: 0,
                   paddingBottom: "30px",
-                  whiteSpace: "pre-line",
                 }}
               >
-                {`You can take notes, find ideas,\nand donate money to those in need`}
+                You can take notes, find ideas,<br />
+                and donate money to those in need
               </p>
             </div>
 
