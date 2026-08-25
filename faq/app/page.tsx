@@ -9,12 +9,10 @@ import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -31,10 +29,7 @@ let auth = null;
 let db = null;
 
 if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
   db = getFirestore(app);
 }
@@ -84,15 +79,14 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk stacked cards
   const cardsSectionRef = useRef<HTMLDivElement>(null);
   const cardsPinnedRef = useRef<HTMLDivElement>(null);
-  const communityTitleRef = useRef<HTMLDivElement>(null);
   const [card1Ref, setCard1Ref] = useState<HTMLDivElement | null>(null);
   const [card2Ref, setCard2Ref] = useState<HTMLDivElement | null>(null);
   const [card3Ref, setCard3Ref] = useState<HTMLDivElement | null>(null);
   const [card4Ref, setCard4Ref] = useState<HTMLDivElement | null>(null);
   const [card5Ref, setCard5Ref] = useState<HTMLDivElement | null>(null);
-  const [hasCardsAnimated, setHasCardsAnimated] = useState(false);
+  const [card6Ref, setCard6Ref] = useState<HTMLDivElement | null>(null);
 
-  // Auth listener - mulai animasi preloader
+  // Auth listener
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -121,7 +115,6 @@ export default function HomePage(): React.JSX.Element {
     });
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -164,8 +157,7 @@ export default function HomePage(): React.JSX.Element {
   // Animasi stacked cards
   useEffect(() => {
     if (!showMain) return;
-
-    if (!card1Ref || !card2Ref || !card3Ref || !card4Ref || !card5Ref) return;
+    if (!card1Ref || !card2Ref || !card3Ref || !card4Ref || !card5Ref || !card6Ref) return;
     if (!cardsSectionRef.current || !cardsPinnedRef.current) return;
 
     // Bersihkan ScrollTrigger sebelumnya
@@ -175,77 +167,39 @@ export default function HomePage(): React.JSX.Element {
       }
     });
 
+    // Atur posisi awal card: card1 di posisi akhir (y:0), card2 di bawah, dst.
+    gsap.set(card1Ref, { y: 0, zIndex: 6 });
+    gsap.set(card2Ref, { y: 350, zIndex: 5 });
+    gsap.set(card3Ref, { y: 700, zIndex: 4 });
+    gsap.set(card4Ref, { y: 1050, zIndex: 3 });
+    gsap.set(card5Ref, { y: 1400, zIndex: 2 });
+    gsap.set(card6Ref, { y: 1750, zIndex: 1 });
+
     const section = cardsSectionRef.current;
     const pinWrap = cardsPinnedRef.current;
-    const communityTitle = communityTitleRef.current;
 
-    // Set posisi awal - semua kartu di posisi yang sama (tumpuk)
-    gsap.set(card1Ref, { y: 0, zIndex: 5, opacity: 1 });
-    gsap.set(card2Ref, { y: 0, zIndex: 6, opacity: 0 });
-    gsap.set(card3Ref, { y: 0, zIndex: 7, opacity: 0 });
-    gsap.set(card4Ref, { y: 0, zIndex: 8, opacity: 0 });
-    gsap.set(card5Ref, { y: 0, zIndex: 9, opacity: 0 });
-
-    // Set posisi awal community title
-    gsap.set(communityTitle, { y: 0, opacity: 1 });
-
+    // Timeline untuk menggerakkan card ke atas (menumpuk)
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=1500%",
+        end: "+=2000%", // panjang agar semua card bergerak
         pin: pinWrap,
-        scrub: 1.2,
+        scrub: 1.5,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       }
     });
 
-    // Fase 1: Kartu muncul satu per satu (numpuk) - community title tetap diam
-    tl.to(card2Ref, { 
-      y: 0, 
-      opacity: 1, 
-      duration: 1.5, 
-      ease: "power2.inOut",
-      onStart: () => {
-        // Community title tetap di posisi
-      }
-    }, 0.2)
-    .to(card3Ref, { 
-      y: 0, 
-      opacity: 1, 
-      duration: 1.5, 
-      ease: "power2.inOut" 
-    }, 1.2)
-    .to(card4Ref, { 
-      y: 0, 
-      opacity: 1, 
-      duration: 1.5, 
-      ease: "power2.inOut" 
-    }, 2.2)
-    .to(card5Ref, { 
-      y: 0, 
-      opacity: 1, 
-      duration: 1.5, 
-      ease: "power2.inOut" 
-    }, 3.2)
+    // Gerakkan card2 ke y:0, card3 ke y:0, dst secara bertahap
+    tl.to(card2Ref, { y: 0, duration: 2, ease: "power2.inOut" }, 0)
+      .to(card3Ref, { y: 0, duration: 2, ease: "power2.inOut" }, 1.5)
+      .to(card4Ref, { y: 0, duration: 2, ease: "power2.inOut" }, 3)
+      .to(card5Ref, { y: 0, duration: 2, ease: "power2.inOut" }, 4.5)
+      .to(card6Ref, { y: 0, duration: 2, ease: "power2.inOut" }, 6);
 
-    // Fase 2: Setelah semua kartu numpuk, semua bergerak ke atas bersama
-    .to([card1Ref, card2Ref, card3Ref, card4Ref, card5Ref], {
-      y: -400,
-      duration: 2,
-      ease: "power2.inOut",
-      stagger: 0.15,
-    }, 4.5)
-
-    // Fase 3: Community title mulai bergerak ke atas
-    .to(communityTitle, {
-      y: -200,
-      duration: 1.5,
-      ease: "power2.inOut",
-    }, 5.5);
-
-    setHasCardsAnimated(true);
+    // Setelah semua card selesai menumpuk (sekitar 7.5 detik timeline), kita biarkan pin berakhir
+    // dan teks COMMUNITY yang sticky akan ikut scroll ke atas.
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => {
@@ -254,7 +208,7 @@ export default function HomePage(): React.JSX.Element {
         }
       });
     };
-  }, [showMain, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref]);
+  }, [showMain, card1Ref, card2Ref, card3Ref, card4Ref, card5Ref, card6Ref]);
 
   const toggleMenu = () => {
     if (!isMenuOpen) {
@@ -266,11 +220,7 @@ export default function HomePage(): React.JSX.Element {
         );
       }
       if (plusIconRef.current) {
-        gsap.to(plusIconRef.current, {
-          rotation: 45,
-          duration: 0.4,
-          ease: "power2.out"
-        });
+        gsap.to(plusIconRef.current, { rotation: 45, duration: 0.4, ease: "power2.out" });
       }
     } else {
       if (menuOverlayRef.current) {
@@ -279,67 +229,23 @@ export default function HomePage(): React.JSX.Element {
           opacity: 0,
           duration: 0.5,
           ease: "power2.in",
-          onComplete: () => {
-            setIsMenuOpen(false);
-          }
+          onComplete: () => setIsMenuOpen(false)
         });
       } else {
         setIsMenuOpen(false);
       }
       if (plusIconRef.current) {
-        gsap.to(plusIconRef.current, {
-          rotation: 0,
-          duration: 0.4,
-          ease: "power2.in"
-        });
+        gsap.to(plusIconRef.current, { rotation: 0, duration: 0.4, ease: "power2.in" });
       }
     }
   };
 
   if (!showMain) {
     return (
-      <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
+      <div ref={preloaderRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            Menuru
-          </span>
-          <span
-            ref={textRef}
-            style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-            }}
-          >
-            Shop
-          </span>
+          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
+          <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block", willChange: "transform, opacity" }}>Shop</span>
         </div>
       </div>
     );
@@ -369,1122 +275,418 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <div
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#ffffff",
-          margin: 0,
-          padding: 0,
-          position: "relative",
-          fontFamily: FONT_FAMILY,
-          overflow: "visible",
-        }}
-      >
+      <div style={{ minHeight: "100vh", backgroundColor: "#ffffff", margin: 0, padding: 0, position: "relative", fontFamily: FONT_FAMILY, overflow: "visible" }}>
         {/* HERO SECTION */}
-        <div
-          ref={heroRef}
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            padding: "40px",
-            backgroundColor: "#ffffff",
-            position: "relative",
-            paddingTop: "120px",
-          }}
-        >
-          {/* Judul - FIXED di posisi */}
-          <h1
-            ref={titleRef}
-            className="title"
-            style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              padding: 0,
-              lineHeight: 1,
-              position: "fixed",
-              top: "40px",
-              left: "40px",
-              zIndex: 15,
-              pointerEvents: "none",
-            }}
-          >
-            Menuru
-          </h1>
+        <div ref={heroRef} style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "flex-start", padding: "40px", backgroundColor: "#ffffff", position: "relative", paddingTop: "120px" }}>
+          <h1 ref={titleRef} className="title" style={{ fontSize: "48px", fontWeight: 700, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, padding: 0, lineHeight: 1, position: "fixed", top: "40px", left: "40px", zIndex: 15, pointerEvents: "none" }}>Menuru</h1>
 
-          {/* Content Wrapper */}
-          <div style={{ 
-            position: "relative", 
-            zIndex: 1,
-            marginTop: "60px",
-          }}>
-            {/* Subtitle */}
-            <div
-              ref={subtitleRef}
-              className="subtitle"
-              style={{
-                textAlign: "left",
-                position: "relative",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "60px",
-                  fontWeight: 400,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1.2,
-                  margin: 0,
-                  padding: 0,
-                  paddingBottom: "30px",
-                  whiteSpace: "pre-line",
-                }}
-              >
+          <div style={{ position: "relative", zIndex: 1, marginTop: "60px" }}>
+            <div ref={subtitleRef} className="subtitle" style={{ textAlign: "left", position: "relative" }}>
+              <p style={{ fontSize: "60px", fontWeight: 400, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1.2, margin: 0, padding: 0, paddingBottom: "30px", whiteSpace: "pre-line" }}>
                 {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
             </div>
 
-            {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
-              <div
-                ref={buttonRef}
-                className="cta-button"
-                style={{
-                  display: "inline-block",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "12px 28px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  Let's build now
-                </span>
+              <div ref={buttonRef} className="cta-button" style={{ display: "inline-block", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "12px 28px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "18px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>Let's build now</span>
               </div>
-
-              <div
-                ref={arrowRef}
-                className="arrow-box"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  width: "50px",
-                  height: "50px",
-                }}
-              >
+              <div ref={arrowRef} className="arrow-box" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "10px", cursor: "pointer", backgroundColor: "#0D3CFC", color: "#ffffff", width: "50px", height: "50px" }}>
                 <NorthEastArrow size={24} />
               </div>
             </div>
 
             {/* STACKED CARDS SECTION */}
-            <div
-              ref={cardsSectionRef}
-              style={{
-                width: '100%',
-                minHeight: '600vh',
-                position: 'relative',
-                backgroundColor: 'transparent',
-                marginTop: '40px',
-                marginBottom: '0',
-              }}
-            >
-              {/* JUDUL COMMUNITY - 80px tanpa garis, rata kiri */}
-              <div
-                ref={communityTitleRef}
-                style={{
-                  position: 'sticky',
-                  top: '0',
-                  zIndex: 20,
-                  width: '100%',
-                  backgroundColor: 'transparent',
-                  padding: '20px 0 0 0',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <div style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '80px',
-                  fontWeight: '700',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '0.9',
-                  color: '#000000',
-                  textTransform: 'uppercase',
-                  textAlign: 'left',
-                  paddingBottom: '30px',
-                }}>
-                  COMMUNITY
+            <div ref={cardsSectionRef} style={{ width: '100%', minHeight: '300vh', position: 'relative', backgroundColor: 'transparent', marginTop: '40px', marginBottom: '0' }}>
+              {/* Container yang akan dipin */}
+              <div ref={cardsPinnedRef} style={{ width: '100%', height: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', overflow: 'visible' }}>
+                {/* Teks COMMUNITY - sticky di atas selama pin */}
+                <div style={{ position: 'sticky', top: 0, zIndex: 20, width: '100%', backgroundColor: 'transparent', padding: '20px 0', boxSizing: 'border-box' }}>
+                  <div style={{ fontFamily: FONT_FAMILY, fontSize: '80px', fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '0.9', color: '#000000', textTransform: 'uppercase' }}>
+                    COMMUNITY
+                  </div>
                 </div>
-              </div>
 
-              {/* STACKED CARDS CONTAINER - rata kiri */}
-              <div
-                ref={cardsPinnedRef}
-                style={{
-                  width: '100%',
-                  height: '80vh',
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-start',
-                  overflow: 'visible',
-                  marginTop: '20px',
-                  marginBottom: '100px',
-                }}
-              >
-                <div style={{
-                  position: 'relative',
-                  width: '100%',
-                  maxWidth: '900px',
-                  height: '80vh',
-                  margin: '0',
-                }}>
-                  
-                  {/* CARD 1 */}
-                  <div
-                    ref={setCard1Ref}
-                    style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '100%',
-                      maxWidth: '800px',
-                      height: '450px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      borderRadius: '0px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 5,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      color: '#000000',
-                      willChange: 'transform, opacity',
-                    }}
-                  >
-                    <div style={{
-                      padding: '30px 40px 0 40px',
-                      borderBottom: '2px solid #000000',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '20px',
-                      }}>
-                        <div style={{
-                          fontSize: '48px',
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: '700',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1',
-                          color: '#0D3CFC',
-                        }}>
-                          NOTE
-                        </div>
-                        <button style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          background: 'transparent',
-                          border: '1.5px solid #000000',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontFamily: FONT_FAMILY,
-                          color: '#000000',
-                          padding: '10px 20px',
-                          marginBottom: '8px',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#000000';
-                        }}>
-                          <span>VIEW</span>
-                          <NorthEastArrow size={16} />
+                {/* Container card - semua card absolute dengan left: 0, top: 50% */}
+                <div style={{ position: 'relative', width: '100%', height: '100%', marginTop: '20px' }}>
+                  {/* CARD 1 - NOTE (paling atas setelah menumpuk) */}
+                  <div ref={setCard1Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 6,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>NOTE</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
                         </button>
                       </div>
                     </div>
-                    
-                    <div style={{
-                      padding: '30px 40px 25px 40px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <p style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#333333',
-                          marginBottom: '20px',
-                          maxWidth: '80%',
-                        }}>
-                          Catat ide-ide brilian dan inspirasi harian dengan mudah.
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Catat ide-ide brilian dan inspirasi harian Anda dengan mudah. Dilengkapi dengan rich text editor dan tag organizer.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Rich Text</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Tagging</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Search</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Export</span>
                         </div>
                       </div>
-                      <div style={{
-                        marginTop: '20px',
-                        paddingTop: '15px',
-                        borderTop: '1px solid #e0e0e0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>MENURU CORE</span>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>01 / 05</span>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>MENURU CORE FEATURE</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>01 / 06</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* CARD 2 */}
-                  <div
-                    ref={setCard2Ref}
-                    style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '100%',
-                      maxWidth: '800px',
-                      height: '450px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      borderRadius: '0px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 6,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      color: '#000000',
-                      willChange: 'transform, opacity',
-                      opacity: 0,
-                    }}
-                  >
-                    <div style={{
-                      padding: '30px 40px 0 40px',
-                      borderBottom: '2px solid #000000',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '20px',
-                      }}>
-                        <div style={{
-                          fontSize: '48px',
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: '700',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1',
-                          color: '#0D3CFC',
-                        }}>
-                          BLOG
-                        </div>
-                        <button style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          background: 'transparent',
-                          border: '1.5px solid #000000',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontFamily: FONT_FAMILY,
-                          color: '#000000',
-                          padding: '10px 20px',
-                          marginBottom: '8px',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#000000';
-                        }}>
-                          <span>VIEW</span>
-                          <NorthEastArrow size={16} />
+                  {/* CARD 2 - BLOG */}
+                  <div ref={setCard2Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>BLOG</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
                         </button>
                       </div>
                     </div>
-                    
-                    <div style={{
-                      padding: '30px 40px 25px 40px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <p style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#333333',
-                          marginBottom: '20px',
-                          maxWidth: '80%',
-                        }}>
-                          Publikasikan artikel dan tutorial inspiratif.
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Publikasikan artikel, tutorial, dan kisah inspiratif. Platform blogging modern dengan SEO built-in dan analitik.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>SEO</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Analytics</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Comments</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Categories</span>
                         </div>
                       </div>
-                      <div style={{
-                        marginTop: '20px',
-                        paddingTop: '15px',
-                        borderTop: '1px solid #e0e0e0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>PUBLISHING</span>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>02 / 05</span>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>PUBLISHING PLATFORM</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>02 / 06</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* CARD 3 */}
-                  <div
-                    ref={setCard3Ref}
-                    style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '100%',
-                      maxWidth: '800px',
-                      height: '450px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      borderRadius: '0px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 7,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      color: '#000000',
-                      willChange: 'transform, opacity',
-                      opacity: 0,
-                    }}
-                  >
-                    <div style={{
-                      padding: '30px 40px 0 40px',
-                      borderBottom: '2px solid #000000',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '20px',
-                      }}>
-                        <div style={{
-                          fontSize: '48px',
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: '700',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1',
-                          color: '#0D3CFC',
-                        }}>
-                          CALENDAR
-                        </div>
-                        <button style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          background: 'transparent',
-                          border: '1.5px solid #000000',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontFamily: FONT_FAMILY,
-                          color: '#000000',
-                          padding: '10px 20px',
-                          marginBottom: '8px',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#000000';
-                        }}>
-                          <span>VIEW</span>
-                          <NorthEastArrow size={16} />
+                  {/* CARD 3 - CALENDAR */}
+                  <div ref={setCard3Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>CALENDAR</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
                         </button>
                       </div>
                     </div>
-                    
-                    <div style={{
-                      padding: '30px 40px 25px 40px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <p style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#333333',
-                          marginBottom: '20px',
-                          maxWidth: '80%',
-                        }}>
-                          Kelola jadwal dan event dengan kalender interaktif.
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Kelola jadwal, event, dan deadline dengan kalender interaktif. Sinkronisasi dengan Google Calendar dan notifikasi real-time.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Sync</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Reminders</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Recurring</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Share</span>
                         </div>
                       </div>
-                      <div style={{
-                        marginTop: '20px',
-                        paddingTop: '15px',
-                        borderTop: '1px solid #e0e0e0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>SCHEDULE</span>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>03 / 05</span>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>SCHEDULE MANAGER</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>03 / 06</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* CARD 4 */}
-                  <div
-                    ref={setCard4Ref}
-                    style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '100%',
-                      maxWidth: '800px',
-                      height: '450px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      borderRadius: '0px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 8,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      color: '#000000',
-                      willChange: 'transform, opacity',
-                      opacity: 0,
-                    }}
-                  >
-                    <div style={{
-                      padding: '30px 40px 0 40px',
-                      borderBottom: '2px solid #000000',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '20px',
-                      }}>
-                        <div style={{
-                          fontSize: '48px',
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: '700',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1',
-                          color: '#0D3CFC',
-                        }}>
-                          TASK
-                        </div>
-                        <button style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          background: 'transparent',
-                          border: '1.5px solid #000000',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontFamily: FONT_FAMILY,
-                          color: '#000000',
-                          padding: '10px 20px',
-                          marginBottom: '8px',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#000000';
-                        }}>
-                          <span>VIEW</span>
-                          <NorthEastArrow size={16} />
+                  {/* CARD 4 - TASK */}
+                  <div ref={setCard4Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 3,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>TASK</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
                         </button>
                       </div>
                     </div>
-                    
-                    <div style={{
-                      padding: '30px 40px 25px 40px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <p style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#333333',
-                          marginBottom: '20px',
-                          maxWidth: '80%',
-                        }}>
-                          Kelola tugas dengan prioritas dan deadline.
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Kelola tugas harian dengan prioritas, deadline, dan progress tracking. Kolaborasi tim dan assign task dengan mudah.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Priority</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Deadline</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Progress</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Team</span>
                         </div>
                       </div>
-                      <div style={{
-                        marginTop: '20px',
-                        paddingTop: '15px',
-                        borderTop: '1px solid #e0e0e0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>PRODUCTIVITY</span>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>04 / 05</span>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>PRODUCTIVITY TOOL</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>04 / 06</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* CARD 5 */}
-                  <div
-                    ref={setCard5Ref}
-                    style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '100%',
-                      maxWidth: '800px',
-                      height: '450px',
-                      backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
-                      borderRadius: '0px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 9,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      color: '#000000',
-                      willChange: 'transform, opacity',
-                      opacity: 0,
-                    }}
-                  >
-                    <div style={{
-                      padding: '30px 40px 0 40px',
-                      borderBottom: '2px solid #000000',
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '20px',
-                      }}>
-                        <div style={{
-                          fontSize: '48px',
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: '700',
-                          letterSpacing: '-0.02em',
-                          lineHeight: '1',
-                          color: '#0D3CFC',
-                        }}>
-                          ARCHIVE
-                        </div>
-                        <button style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          background: 'transparent',
-                          border: '1.5px solid #000000',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontFamily: FONT_FAMILY,
-                          color: '#000000',
-                          padding: '10px 20px',
-                          marginBottom: '8px',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#000000';
-                          e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#000000';
-                        }}>
-                          <span>VIEW</span>
-                          <NorthEastArrow size={16} />
+                  {/* CARD 5 - REMINDER */}
+                  <div ref={setCard5Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>REMINDER</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
                         </button>
                       </div>
                     </div>
-                    
-                    <div style={{
-                      padding: '30px 40px 25px 40px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                    }}>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <p style={{
-                          fontFamily: "'Questrial', sans-serif",
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#333333',
-                          marginBottom: '20px',
-                          maxWidth: '80%',
-                        }}>
-                          Arsipkan data dengan sistem pencarian canggih.
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Notifikasi cerdas untuk mengingatkan Anda tentang jadwal, deadline, dan event penting. Dapat dikustomisasi sesuai preferensi.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Push Notif</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Email</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Custom</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Recurring</span>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>SMART NOTIFICATION</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>05 / 06</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CARD 6 - ARCHIVE */}
+                  <div ref={setCard6Ref} style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(0px)',
+                    width: '80%',
+                    maxWidth: '800px',
+                    height: '70%',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: '0px',
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    zIndex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: '#000000',
+                    willChange: 'transform',
+                  }}>
+                    <div style={{ padding: '30px 40px 0 40px', borderBottom: '2px solid #000000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '25px' }}>
+                        <div style={{ fontSize: '65px', fontFamily: FONT_FAMILY, fontWeight: '700', letterSpacing: '-0.02em', lineHeight: '1', color: '#000000' }}>ARCHIVE</div>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: '1.5px solid #000000', cursor: 'pointer', fontSize: '14px', fontFamily: FONT_FAMILY, color: '#000000', padding: '10px 20px', marginBottom: '8px', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000000'; }}>
+                          <span>VIEW</span><NorthEastArrow size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{ padding: '35px 40px 25px 40px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <p style={{ fontFamily: "'Questrial', sans-serif", fontSize: '16px', lineHeight: '1.6', color: '#333333', marginBottom: '25px', maxWidth: '80%' }}>
+                          Arsipkan catatan, blog, dan data penting dengan sistem pencarian dan filter canggih untuk akses cepat dan aman.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Search</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Filter</span>
+                          <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Versioning</span>
                           <span style={{ padding: '4px 16px', background: '#f0f0f0', fontSize: '12px', fontFamily: "'Questrial', sans-serif" }}>Backup</span>
                         </div>
                       </div>
-                      <div style={{
-                        marginTop: '20px',
-                        paddingTop: '15px',
-                        borderTop: '1px solid #e0e0e0',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
+                      <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>DATA MANAGEMENT</span>
-                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>05 / 05</span>
+                        <span style={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: '#999999' }}>06 / 06</span>
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* NAVBAR - FIXED di atas */}
-        <div
-          ref={navbarRef}
-          style={{
-            position: "fixed",
-            top: "40px",
-            right: "40px",
-            zIndex: 100,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "8px 16px",
-            borderRadius: "12px",
-            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
-            backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
-            transition: "all 0.3s ease",
-            pointerEvents: "auto",
-            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
-          }}
-        >
-          {/* Anti-Fraud Badge */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-            }}
-          >
+        {/* NAVBAR */}
+        <div ref={navbarRef} style={{ position: "fixed", top: "40px", right: "40px", zIndex: 100, display: "flex", alignItems: "center", gap: "12px", padding: "8px 16px", borderRadius: "12px", backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)", backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)", transition: "all 0.3s ease", pointerEvents: "auto", boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
             <ShieldCheck size={28} />
-            <span
-              style={{
-                fontSize: "30px",
-                fontWeight: 500,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1,
-              }}
-            >
-              Anti-Fraud
-            </span>
+            <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Fraud</span>
           </div>
-
-          {/* Get in Touch */}
           <Link href="/contact">
-            <div
-              className="get-in-touch"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Get in touch
-              </span>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#0D3CFC",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
-                }}
-              >
-                <SouthEastArrow size={24} />
-              </div>
+            <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "inline-block" }}>Get in touch</span>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}><SouthEastArrow size={24} /></div>
             </div>
           </Link>
-
-          {/* Pusat Bantuan */}
           <Link href="/pusat-bantuan">
-            <div
-              className="pusat-bantuan"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "2px solid #000000",
-                borderRadius: "8px",
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: "transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  color: "#000000",
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                }}
-              >
-                Pusat Bantuan
-              </span>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#000000",
-                  borderRadius: "4px",
-                  padding: "4px",
-                  color: "#ffffff",
-                }}
-              >
-                <NorthWestArrow size={24} />
-              </div>
+            <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, display: "inline-block" }}>Pusat Bantuan</span>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}><NorthWestArrow size={24} /></div>
             </div>
           </Link>
-
-          {/* Menu */}
-          <div
-            className="menu-button"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              border: "2px solid #000000",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-            }}
-            onClick={toggleMenu}
-          >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#000000",
-                borderRadius: "4px",
-                padding: "4px",
-                color: "#ffffff",
-              }}
-            >
-              <span
-                ref={plusIconRef}
-                style={{
-                  fontSize: isMenuOpen ? "24px" : "28px",
-                  fontWeight: isMenuOpen ? 400 : 300,
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                  display: "inline-block",
-                  transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)",
-                }}
-              >
-                {isMenuOpen ? "✕" : "+"}
-              </span>
+          <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+              <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block", transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)" }}>{isMenuOpen ? "✕" : "+"}</span>
             </div>
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#000000",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                display: "inline-block",
-              }}
-            >
-              {isMenuOpen ? "Close" : "Menu"}
-            </span>
+            <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", display: "inline-block" }}>{isMenuOpen ? "Close" : "Menu"}</span>
           </div>
         </div>
 
         {/* Menu Overlay */}
-        <div
-          ref={menuOverlayRef}
-          className="menu-overlay"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "#0D3CFC",
-            zIndex: 99,
-            display: isMenuOpen ? "flex" : "none",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            transform: "translateY(-100%)",
-            opacity: 0,
-            pointerEvents: isMenuOpen ? "auto" : "none",
-            padding: "40px",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#ffffff",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              padding: 0,
-              lineHeight: 1,
-              opacity: 0.9,
-              position: "absolute",
-              top: "40px",
-              left: "40px",
-            }}
-          >
-            Menuru
-          </h1>
+        <div ref={menuOverlayRef} className="menu-overlay" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "#0D3CFC", zIndex: 99, display: isMenuOpen ? "flex" : "none", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", transform: "translateY(-100%)", opacity: 0, pointerEvents: isMenuOpen ? "auto" : "none", padding: "40px" }}>
+          <h1 style={{ fontSize: "48px", fontWeight: 700, color: "#ffffff", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, padding: 0, lineHeight: 1, opacity: 0.9, position: "absolute", top: "40px", left: "40px" }}>Menuru</h1>
         </div>
       </div>
 
       <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-
-        * {
-          background-color: transparent;
-        }
+        html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
+        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
+        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { background-color: transparent; }
 
         @media (max-width: 1024px) {
-          .subtitle p {
-            font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
-          }
+          .subtitle p { font-size: 48px !important; }
+          .title { font-size: 36px !important; }
+          .cta-button { padding: 10px 22px !important; }
+          .cta-button span { font-size: 16px !important; }
+          .arrow-box { width: 44px !important; height: 44px !important; padding: 8px !important; }
+          .get-in-touch { padding: 6px 12px !important; }
+          .get-in-touch span { font-size: 14px !important; }
+          .pusat-bantuan { padding: 6px 12px !important; }
+          .pusat-bantuan span { font-size: 14px !important; }
+          .menu-button { padding: 6px 12px !important; }
+          .menu-button span { font-size: 14px !important; }
         }
         @media (max-width: 768px) {
-          .subtitle p {
-            font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
+          .subtitle p { font-size: 36px !important; }
+          .title { font-size: 28px !important; }
+          .cta-button { padding: 8px 18px !important; }
+          .cta-button span { font-size: 14px !important; }
+          .arrow-box { width: 38px !important; height: 38px !important; padding: 6px !important; }
+          .arrow-box svg { width: 18px !important; height: 18px !important; }
+          .get-in-touch { padding: 4px 10px !important; }
+          .get-in-touch span { font-size: 12px !important; }
+          .pusat-bantuan { padding: 4px 10px !important; }
+          .pusat-bantuan span { font-size: 12px !important; }
+          .menu-button { padding: 4px 10px !important; }
+          .menu-button span { font-size: 12px !important; }
         }
         @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
-          }
+          .subtitle p { font-size: 24px !important; }
+          .title { font-size: 22px !important; }
+          .cta-button { padding: 6px 14px !important; }
+          .cta-button span { font-size: 12px !important; }
+          .arrow-box { width: 32px !important; height: 32px !important; padding: 4px !important; }
+          .arrow-box svg { width: 14px !important; height: 14px !important; }
+          .get-in-touch { padding: 4px 8px !important; }
+          .get-in-touch span { font-size: 10px !important; }
+          .pusat-bantuan { padding: 4px 8px !important; }
+          .pusat-bantuan span { font-size: 10px !important; }
+          .menu-button { padding: 4px 8px !important; }
+          .menu-button span { font-size: 10px !important; }
         }
       `}</style>
     </>
