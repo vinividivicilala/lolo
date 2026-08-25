@@ -283,7 +283,7 @@ export default function HomePage(): React.JSX.Element {
             maxWidth: "900px",
             width: "100%",
           }}>
-            {/* Subtitle */}
+            {/* Subtitle - tetap 2 baris */}
             <div
               style={{
                 textAlign: "left",
@@ -307,7 +307,7 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Tombol dan Arrow */}
+            {/* Tombol dan Arrow - panah 30px */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 style={{
@@ -343,11 +343,11 @@ export default function HomePage(): React.JSX.Element {
                   cursor: "pointer",
                   backgroundColor: "#0D3CFC",
                   color: "#ffffff",
-                  width: "50px",
-                  height: "50px",
+                  width: "56px",
+                  height: "56px",
                 }}
               >
-                <NorthEastArrow size={24} />
+                <NorthEastArrow size={30} />
               </div>
             </div>
           </div>
