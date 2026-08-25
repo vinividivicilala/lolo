@@ -74,7 +74,7 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-export default function HomePage(): React.JSX.Element {
+export default function ProfilePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -83,6 +83,7 @@ export default function HomePage(): React.JSX.Element {
   const subtitleRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLHeadingElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -248,7 +249,7 @@ export default function HomePage(): React.JSX.Element {
   return (
     <>
       <Head>
-        <title>Menuru Official | Home</title>
+        <title>Menuru Official | Profiles</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
@@ -258,13 +259,13 @@ export default function HomePage(): React.JSX.Element {
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
-        <meta property="og:title" content="Menuru Official | Home" />
+        <meta property="og:title" content="Menuru Official | Profiles" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Menuru Official | Home" />
+        <meta name="twitter:title" content="Menuru Official | Profiles" />
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
@@ -294,6 +295,7 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
+          {/* Judul - FIXED di posisi */}
           <h1
             ref={titleRef}
             className="title"
@@ -321,6 +323,33 @@ export default function HomePage(): React.JSX.Element {
             zIndex: 1,
             marginTop: "60px",
           }}>
+            {/* Profiles - font 400px, warna biru */}
+            <div
+              ref={profileRef}
+              className="profile-title"
+              style={{
+                textAlign: "left",
+                position: "relative",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "400px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "30px",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Profiles
+              </h2>
+            </div>
+
+            {/* Subtitle */}
             <div
               ref={subtitleRef}
               className="subtitle"
@@ -346,6 +375,7 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
+            {/* Tombol dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 ref={buttonRef}
@@ -416,7 +446,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
           }}
         >
-          {/* Baris atas: Shop, About, Sign Up, Profiles */}
+          {/* Baris atas: Shop, About (dengan bg stabilo), Sign Up */}
           <div
             style={{
               display: "flex",
@@ -433,18 +463,27 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </Link>
             <Link href="/about">
-              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              <div style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                cursor: "pointer",
+                backgroundColor: "#FFEB3B", // Warna stabilo/kuning
+                padding: "4px 12px",
+                borderRadius: "4px",
+              }}>
+                <span style={{ 
+                  fontSize: "16px", 
+                  fontWeight: 500, 
+                  color: "#000000", 
+                  fontFamily: FONT_FAMILY 
+                }}>
+                  About
+                </span>
               </div>
             </Link>
             <Link href="/signup">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
-              </div>
-            </Link>
-            <Link href="/profile">
-              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Profiles</span>
               </div>
             </Link>
           </div>
@@ -571,7 +610,15 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
+        @media (max-width: 1400px) {
+          .profile-title h2 {
+            font-size: 300px !important;
+          }
+        }
         @media (max-width: 1024px) {
+          .profile-title h2 {
+            font-size: 200px !important;
+          }
           .subtitle p {
             font-size: 48px !important;
           }
@@ -609,6 +656,9 @@ export default function HomePage(): React.JSX.Element {
           }
         }
         @media (max-width: 768px) {
+          .profile-title h2 {
+            font-size: 120px !important;
+          }
           .subtitle p {
             font-size: 36px !important;
           }
@@ -650,6 +700,9 @@ export default function HomePage(): React.JSX.Element {
           }
         }
         @media (max-width: 480px) {
+          .profile-title h2 {
+            font-size: 80px !important;
+          }
           .subtitle p {
             font-size: 24px !important;
           }
