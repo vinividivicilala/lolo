@@ -432,7 +432,7 @@ export default function HomePage(): React.JSX.Element {
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
               </div>
             </Link>
-            <Link href="/about">
+            <Link href="/profile">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
                 <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
               </div>
