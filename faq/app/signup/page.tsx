@@ -47,61 +47,6 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== ICONS =====
-const SearchIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ShopIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const StoreIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 7H20M4 7L3 12H21L20 7M4 7L5 20H19L20 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 12V16H15V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
-    <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    {hasBadge && (
-      <circle cx="19" cy="5" r="5" fill="#ef4444" stroke="white" strokeWidth="2"/>
-    )}
-  </svg>
-);
-
 const EyeIcon = ({ open }: { open: boolean }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     {open ? (
@@ -118,9 +63,12 @@ const EyeIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
-const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -150,15 +98,6 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// ===== SEARCH ROLLING TEXT =====
-const searchRollingTexts = [
-  "Tentang Note", 
-  "Tentang Donasi", 
-  "Tentang Blog", 
-  "Tentang Shop", 
-  "Tentang Pusat bantuan"
-];
-
 export default function SignUpPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -183,16 +122,6 @@ export default function SignUpPage() {
   const [pinError, setPinError] = useState("");
   const [tempUser, setTempUser] = useState<any>(null);
   
-  // State untuk search
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [rollingText, setRollingText] = useState<string>(searchRollingTexts[0]);
-  const rollingRef = useRef<HTMLSpanElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchExpandedRef = useRef<HTMLDivElement>(null);
-  
   // State untuk navbar
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
@@ -207,7 +136,6 @@ export default function SignUpPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Mulai preloader animation
     setTimeout(() => startPreloaderAnimation(), 500);
   }, []);
 
@@ -277,65 +205,6 @@ export default function SignUpPage() {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isMounted]);
-
-  // Rolling text
-  useEffect(() => {
-    if (!isMounted) return;
-    let isForward = true;
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (isForward) {
-        currentIndex++;
-        if (currentIndex >= searchRollingTexts.length) {
-          currentIndex = searchRollingTexts.length - 2;
-          isForward = false;
-        }
-      } else {
-        currentIndex--;
-        if (currentIndex < 0) {
-          currentIndex = 1;
-          isForward = true;
-        }
-      }
-      if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
-        setRollingText(searchRollingTexts[currentIndex]);
-        if (rollingRef.current) {
-          gsap.fromTo(rollingRef.current,
-            { y: 10, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-          );
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [isMounted]);
-
-  // Search expand
-  useEffect(() => {
-    if (isSearchOpen && searchExpandedRef.current) {
-      gsap.fromTo(searchExpandedRef.current,
-        { height: 0, opacity: 0, y: -10 },
-        { height: "auto", opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
-      );
-      setTimeout(() => searchInputRef.current?.focus(), 300);
-    }
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
-        setSearchQuery("");
-        setSearchResults([]);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setSearchResults([]);
-  }, [searchQuery]);
 
   // Toggle agreement with GSAP
   const toggleAgreement = () => {
@@ -430,7 +299,6 @@ export default function SignUpPage() {
 
       console.log("User created successfully:", userCredential.user);
       
-      // Simpan user sementara untuk PIN
       setTempUser(userCredential.user);
       setShowPinScreen(true);
       setIsLoading(false);
@@ -469,10 +337,7 @@ export default function SignUpPage() {
     }
     setPinError("");
     
-    // Simpan PIN ke Firestore
     await savePin(tempUser.uid, pin);
-    
-    // Redirect ke halaman utama
     router.push('/');
   };
 
@@ -480,11 +345,6 @@ export default function SignUpPage() {
     setPin("");
     setPinConfirm("");
     setPinError("");
-  };
-
-  const handleSignInClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    router.push('/signin');
   };
 
   if (!isMounted || !showMain) {
@@ -577,19 +437,21 @@ export default function SignUpPage() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* ===== HEADER ===== */}
+        {/* ===== HEADER / NAVBAR ===== */}
+        {/* z-index: 101 agar berada di atas menu overlay (z-index: 100) */}
         <div style={{
           position: "fixed",
           top: "40px",
           left: "40px",
           right: "40px",
-          zIndex: 15,
+          zIndex: 101,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          pointerEvents: "none",
         }}>
           {/* KIRI: Menuru */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", pointerEvents: "auto" }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <h1
                 style={{
@@ -610,7 +472,7 @@ export default function SignUpPage() {
             </Link>
           </div>
 
-          {/* KANAN: NAVBAR SAMA SEPERTI HALAMAN UTAMA */}
+          {/* KANAN: NAVBAR */}
           <div
             style={{
               display: "flex",
@@ -624,6 +486,8 @@ export default function SignUpPage() {
               transition: "all 0.3s ease",
               pointerEvents: "auto",
               boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
+              position: "relative",
+              zIndex: 102,
             }}
           >
             {/* Baris atas: Shop, About, Sign In */}
@@ -673,7 +537,7 @@ export default function SignUpPage() {
                 <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Bot</span>
               </div>
               <Link href="/contact">
-                <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
                   <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Get in touch</span>
                   <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
                     <SouthEastArrow size={24} />
@@ -681,14 +545,14 @@ export default function SignUpPage() {
                 </div>
               </Link>
               <Link href="/pusat-bantuan">
-                <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
                   <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Pusat Bantuan</span>
                   <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
                     <NorthWestArrow size={24} />
                   </div>
                 </div>
               </Link>
-              <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
                 <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
                   <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block" }}>
                     {isMenuOpen ? "✕" : "+"}
@@ -702,7 +566,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Menu Overlay */}
+        {/* Menu Overlay - z-index: 100 (di bawah navbar) */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -713,7 +577,7 @@ export default function SignUpPage() {
             width: "100%",
             height: "100%",
             backgroundColor: "#0D3CFC",
-            zIndex: 99,
+            zIndex: 100,
             display: isMenuOpen ? "flex" : "none",
             flexDirection: "column",
             alignItems: "flex-start",
@@ -758,6 +622,8 @@ export default function SignUpPage() {
           alignItems: isMobile ? "center" : "flex-start",
           minHeight: "calc(100vh - 260px)",
           justifyContent: "center",
+          position: "relative",
+          zIndex: 1,
         }}>
           {/* SISI KIRI */}
           <motion.div
@@ -773,7 +639,6 @@ export default function SignUpPage() {
             }}
           >
             {!showPinScreen ? (
-              // === FORM SIGN UP ===
               <>
                 <h1 style={{
                   fontSize: isMobile ? "80px" : "200px",
@@ -799,7 +664,6 @@ export default function SignUpPage() {
                   Create your account to join the Menuru community
                 </p>
 
-                {/* Error Message */}
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -872,7 +736,6 @@ export default function SignUpPage() {
                     onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                   />
 
-                  {/* Password dengan icon mata */}
                   <div style={{
                     position: "relative",
                     marginBottom: "20px",
@@ -921,7 +784,6 @@ export default function SignUpPage() {
                     </button>
                   </div>
 
-                  {/* ===== CEKLIST PERNYATAAN PERSETUJUAN ===== */}
                   <div style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -956,7 +818,6 @@ export default function SignUpPage() {
                     </label>
                   </div>
 
-                  {/* ===== ISI PERNYATAAN PERSETUJUAN ===== */}
                   <div
                     ref={agreementRef}
                     style={{
@@ -1001,7 +862,6 @@ export default function SignUpPage() {
                     </div>
                   </div>
 
-                  {/* ===== LINK KEBIJAKAN & KETENTUAN ===== */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1103,7 +963,6 @@ export default function SignUpPage() {
                 </div>
               </>
             ) : (
-              // === POLA PIN 6 ANGKA ===
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1266,7 +1125,6 @@ export default function SignUpPage() {
             )}
           </motion.div>
 
-          {/* SISI KANAN kosong */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
