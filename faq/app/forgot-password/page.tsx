@@ -432,7 +432,7 @@ const LiveChatAgentGuest = ({
               borderTop: "1px solid #e8e8e8",
               marginTop: "8px",
             }}>
-              ✅ Chat ini sudah selesai. Terima kasih telah menggunakan layanan kami.
+              Chat ini sudah selesai. Terima kasih telah menggunakan layanan kami.
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -624,7 +624,9 @@ function ForgotPasswordContent() {
           const data = doc.data();
           if (data.email) {
             emails.push(data.email);
-            const userName = data.displayName || data.name || data.userName || "Pengguna";
+            // Ambil nama dari email (bagian sebelum @)
+            const emailName = data.email.split('@')[0];
+            const userName = data.displayName || data.name || data.userName || emailName || "Pengguna";
             users.push({
               email: data.email,
               name: userName
@@ -634,9 +636,10 @@ function ForgotPasswordContent() {
         
         if (ADMIN_EMAIL) {
           emails.push(ADMIN_EMAIL);
+          const adminName = ADMIN_EMAIL.split('@')[0];
           users.push({
             email: ADMIN_EMAIL,
-            name: AGENT_NAME
+            name: AGENT_NAME || adminName
           });
         }
         
@@ -1548,10 +1551,6 @@ function ForgotPasswordContent() {
                             color: '#22c55e', 
                             marginTop: '8px', 
                             fontFamily: FONT_FAMILY,
-                            backgroundColor: '#dcfce7',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            border: '1px solid #86efac'
                           }}>
                             Nama ditemukan! Email: {nameSearchResult.email}
                           </div>
@@ -1562,10 +1561,6 @@ function ForgotPasswordContent() {
                             color: '#0D3CFC', 
                             marginTop: '8px', 
                             fontFamily: FONT_FAMILY,
-                            backgroundColor: '#fee2e2',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            border: '1px solid #fca5a5'
                           }}>
                             Maaf tidak ada nama yang terdaftar
                           </div>
