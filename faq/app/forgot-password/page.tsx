@@ -9,6 +9,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   fetchSignInMethodsForEmail,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -717,11 +718,41 @@ function ForgotPasswordContent() {
   // ===== VALIDASI EMAIL TERDAFTAR DI FIREBASE AUTH =====
   const checkEmailExists = async (email: string): Promise<boolean> => {
     try {
+      // Pastikan auth tidak null
+      if (!auth) {
+        console.error("Auth not initialized");
+        return false;
+      }
+      
+      // Coba cek dengan fetchSignInMethodsForEmail
       const methods = await fetchSignInMethodsForEmail(auth, email);
-      return methods.length > 0;
-    } catch (error) {
-      console.error("Error checking email:", error);
-      return false;
+      console.log("Sign in methods for email:", methods);
+      
+      // Jika ada metode sign in, berarti email terdaftar
+      return methods && methods.length > 0;
+    } catch (error: any) {
+      console.error("Error checking email with fetchSignInMethodsForEmail:", error);
+      
+      // Jika error karena auth belum siap, coba dengan metode alternatif
+      // Coba sign in dengan email dan password kosong untuk cek
+      try {
+        // Ini hanya untuk mengecek apakah email terdaftar
+        // Password tidak akan divalidasi karena kita hanya ingin tahu apakah user exists
+        await signInWithEmailAndPassword(auth, email, "dummy_password_for_check");
+        return true;
+      } catch (signInError: any) {
+        // Jika error code adalah 'auth/user-not-found', berarti email tidak terdaftar
+        if (signInError.code === 'auth/user-not-found') {
+          return false;
+        }
+        // Jika error code adalah 'auth/wrong-password', berarti email terdaftar
+        if (signInError.code === 'auth/wrong-password') {
+          return true;
+        }
+        // Error lain mungkin berarti ada masalah koneksi atau konfigurasi
+        console.error("Sign in check error:", signInError.code);
+        return false;
+      }
     }
   };
 
