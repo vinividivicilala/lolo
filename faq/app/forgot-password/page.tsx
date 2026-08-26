@@ -9,6 +9,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   fetchSignInMethodsForEmail,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -540,10 +541,10 @@ function ForgotPasswordContent() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
-  // State untuk daftar email terdaftar dari database livechat_tickets
-  const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
+  // State untuk daftar user dari livechat_tickets
   const [registeredUsers, setRegisteredUsers] = useState<{email: string, name: string}[]>([]);
-  const [isLoadingEmails, setIsLoadingEmails] = useState(true);
+  const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
 
   // ===== PRELOADER ANIMATION =====
   const startPreloaderAnimation = () => {
@@ -609,11 +610,11 @@ function ForgotPasswordContent() {
     
     const loadRegisteredUsers = async () => {
       try {
-        setIsLoadingEmails(true);
+        setIsLoadingUsers(true);
         const ticketsRef = collection(db, "livechat_tickets");
         const querySnapshot = await getDocs(ticketsRef);
-        const emails: string[] = [];
         const users: {email: string, name: string}[] = [];
+        const emails: string[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -643,12 +644,12 @@ function ForgotPasswordContent() {
         
         setRegisteredEmails(uniqueEmails);
         setRegisteredUsers(uniqueUsers);
-        console.log("Registered emails from livechat:", uniqueEmails);
         console.log("Registered users from livechat:", uniqueUsers);
-        setIsLoadingEmails(false);
+        console.log("Registered emails:", uniqueEmails);
+        setIsLoadingUsers(false);
       } catch (error) {
         console.error("Error loading registered users:", error);
-        setIsLoadingEmails(false);
+        setIsLoadingUsers(false);
       }
     };
     
@@ -771,15 +772,13 @@ function ForgotPasswordContent() {
     }
   };
 
-  // ===== VALIDASI EMAIL TERDAFTAR DARI DATABASE LIVECHAT TICKETS =====
+  // ===== VALIDASI EMAIL TERDAFTAR =====
   const checkEmailExists = async (email: string): Promise<boolean> => {
-    // Cek dari daftar email yang sudah dimuat
     if (registeredEmails.includes(email)) {
-      console.log(`Email ${email} ditemukan di database livechat tickets`);
+      console.log(`Email ${email} ditemukan di database`);
       return true;
     }
     
-    // Jika tidak ditemukan di database, coba cek langsung ke Firestore
     try {
       // Cek di koleksi livechat_tickets
       const ticketsRef = collection(db, "livechat_tickets");
@@ -788,12 +787,11 @@ function ForgotPasswordContent() {
       
       if (!querySnapshot.empty) {
         console.log(`Email ${email} ditemukan di Firestore livechat tickets`);
-        // Tambahkan ke daftar untuk cache
         setRegisteredEmails(prev => [...prev, email]);
         return true;
       }
       
-      // Cek juga di koleksi users
+      // Cek di koleksi users
       const usersRef = collection(db, "users");
       const usersQuery = query(usersRef, where("email", "==", email));
       const usersSnapshot = await getDocs(usersQuery);
@@ -804,7 +802,7 @@ function ForgotPasswordContent() {
         return true;
       }
       
-      // Cek di Firebase Auth menggunakan fetchSignInMethodsForEmail
+      // Cek di Firebase Auth
       try {
         const methods = await fetchSignInMethodsForEmail(auth, email);
         if (methods && methods.length > 0) {
@@ -816,12 +814,25 @@ function ForgotPasswordContent() {
         console.log("Auth check error:", authError);
       }
       
-      console.log(`Email ${email} tidak ditemukan di manapun`);
+      console.log(`Email ${email} tidak ditemukan`);
       return false;
     } catch (error) {
-      console.error("Error checking email in Firestore:", error);
+      console.error("Error checking email:", error);
       return false;
     }
+  };
+
+  // ===== CEK NAMA USER DI DATABASE =====
+  const findEmailByName = (name: string): string | null => {
+    const foundUser = registeredUsers.find(user => 
+      user.name.toLowerCase() === name.toLowerCase()
+    );
+    if (foundUser) {
+      console.log(`Nama ${name} ditemukan, email: ${foundUser.email}`);
+      return foundUser.email;
+    }
+    console.log(`Nama ${name} tidak ditemukan`);
+    return null;
   };
 
   // ===== SUBMIT TICKET =====
@@ -835,79 +846,49 @@ function ForgotPasswordContent() {
     setError("");
 
     try {
-      // Validasi
-      if (selectedOption === 'password' && !formData.email) {
-        setError("Email harus diisi.");
-        setLoading(false);
-        return;
-      }
-      if (selectedOption === 'email' && !formData.name) {
-        setError("Nama harus diisi.");
-        setLoading(false);
-        return;
-      }
-      if (selectedOption === 'pin' && (!formData.email || !formData.name)) {
-        setError("Email dan Nama harus diisi.");
-        setLoading(false);
-        return;
+      let userEmail = formData.email;
+
+      // Untuk Lupa Email: cari email berdasarkan nama
+      if (selectedOption === 'email') {
+        if (!formData.name) {
+          setError("Nama harus diisi.");
+          setLoading(false);
+          return;
+        }
+        
+        const foundEmail = findEmailByName(formData.name);
+        if (!foundEmail) {
+          setError("Nama tidak ditemukan. Silakan gunakan nama yang sudah terdaftar.");
+          setLoading(false);
+          return;
+        }
+        userEmail = foundEmail;
+        // Set email yang ditemukan ke formData
+        formData.email = foundEmail;
       }
 
-      // CEK EMAIL HARUS TERDAFTAR DI DATABASE (untuk semua opsi)
-      let emailExists = false;
-      let userData = null;
-      
+      // Untuk Lupa Password dan Lupa Pola Sandi: validasi email
       if (selectedOption === 'password' || selectedOption === 'pin') {
-        // Cek email di database
-        emailExists = await checkEmailExists(formData.email);
+        if (!formData.email) {
+          setError("Email harus diisi.");
+          setLoading(false);
+          return;
+        }
+        
+        const emailExists = await checkEmailExists(formData.email);
         if (!emailExists) {
           setError("Email tidak terdaftar. Silakan gunakan email yang sudah terdaftar atau buat akun baru.");
           setLoading(false);
           return;
         }
-      } else if (selectedOption === 'email') {
-        // Untuk Lupa Email, cek nama dan email yang terdaftar
-        // Cari user dengan nama yang cocok di database
-        const foundUser = registeredUsers.find(user => 
-          user.name.toLowerCase() === formData.name.toLowerCase()
-        );
-        
-        if (foundUser) {
-          emailExists = true;
-          userData = foundUser;
-          // Set email dari data yang ditemukan
-          formData.email = foundUser.email;
-        } else {
-          // Coba cari di Firestore langsung
-          try {
-            const ticketsRef = collection(db, "livechat_tickets");
-            const q = query(ticketsRef, where("userName", "==", formData.name));
-            const querySnapshot = await getDocs(q);
-            
-            if (!querySnapshot.empty) {
-              const data = querySnapshot.docs[0].data();
-              if (data.userEmail && data.userEmail !== "tidakada@email.com") {
-                emailExists = true;
-                formData.email = data.userEmail;
-                userData = { email: data.userEmail, name: data.userName };
-              }
-            }
-          } catch (error) {
-            console.error("Error searching user by name:", error);
-          }
-        }
-        
-        if (!emailExists) {
-          setError("Nama tidak ditemukan. Silakan gunakan nama yang sudah terdaftar atau buat akun baru.");
-          setLoading(false);
-          return;
-        }
+        userEmail = formData.email;
       }
 
       // Buat ticket di Firestore
       const ticketData = {
         userId: null,
-        userName: selectedOption === 'email' && userData ? userData.name : (formData.name || "Pengguna"),
-        userEmail: formData.email || "tidakada@email.com",
+        userName: selectedOption === 'email' ? formData.name : (formData.name || "Pengguna"),
+        userEmail: userEmail,
         topic: selectedOption === 'password' ? 'Lupa Password' :
                selectedOption === 'email' ? 'Lupa Email' : 'Lupa Pola Sandi',
         status: 'waiting',
@@ -916,15 +897,14 @@ function ForgotPasswordContent() {
         typing: false,
         typingUserId: null,
         typingUserName: null,
-        detail: selectedOption === 'password' ? `Email: ${formData.email}` :
-                selectedOption === 'email' ? `Nama: ${formData.name}, Email ditemukan: ${formData.email}` :
-                `Email: ${formData.email}, Nama: ${formData.name}`,
+        detail: selectedOption === 'password' ? `Email: ${userEmail}` :
+                selectedOption === 'email' ? `Nama: ${formData.name}, Email ditemukan: ${userEmail}` :
+                `Email: ${userEmail}, Nama: ${formData.name}`,
       };
 
       const docRef = await addDoc(collection(db, "livechat_tickets"), ticketData);
       const newTicketId = docRef.id;
       
-      // Redirect ke URL dengan ticketId
       router.push(`/forgot-password?ticket=${newTicketId}`);
       setTicketId(newTicketId);
       setShowLiveChat(true);
@@ -950,10 +930,6 @@ function ForgotPasswordContent() {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
     router.push('/forgot-password');
-  };
-
-  const handleResolved = () => {
-    setIsResolved(true);
   };
 
   // ===== RENDER PRELOADER =====
@@ -1047,7 +1023,7 @@ function ForgotPasswordContent() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* ===== HEADER / NAVBAR SAMA SEPERTI HALAMAN UTAMA ===== */}
+        {/* ===== HEADER / NAVBAR ===== */}
         <div style={{
           position: "fixed",
           top: "40px",
@@ -1059,7 +1035,6 @@ function ForgotPasswordContent() {
           justifyContent: "space-between",
           pointerEvents: "none",
         }}>
-          {/* KIRI: Menuru */}
           <div style={{ 
             display: "flex", 
             alignItems: "center", 
@@ -1088,7 +1063,6 @@ function ForgotPasswordContent() {
             </Link>
           </div>
 
-          {/* KANAN: NAVBAR */}
           <div
             style={{
               display: "flex",
@@ -1106,7 +1080,6 @@ function ForgotPasswordContent() {
               zIndex: 102,
             }}
           >
-            {/* Baris atas: Shop, About, Sign In */}
             <div
               style={{
                 display: "flex",
@@ -1134,7 +1107,6 @@ function ForgotPasswordContent() {
               </Link>
             </div>
 
-            {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
             <div
               style={{
                 display: "flex",
@@ -1251,7 +1223,6 @@ function ForgotPasswordContent() {
               }}
             >
               {!selectedOption ? (
-                // ===== TAMPILAN AWAL: 3 OPSI =====
                 <>
                   <h1 style={{
                     fontSize: isMobile ? "60px" : "120px",
@@ -1348,7 +1319,6 @@ function ForgotPasswordContent() {
                   </div>
                 </>
               ) : (
-                // ===== FORM TIKET =====
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1394,7 +1364,7 @@ function ForgotPasswordContent() {
                   }}>
                     {selectedOption === 'password' && 'Masukkan email terdaftar Anda. Agent akan membantu reset password.'}
                     {selectedOption === 'email' && 'Masukkan nama lengkap Anda yang terdaftar untuk menemukan email Anda.'}
-                    {selectedOption === 'pin' && 'Masukkan nama dan email Anda untuk reset pola sandi.'}
+                    {selectedOption === 'pin' && 'Masukkan email dan nama Anda untuk reset pola sandi.'}
                   </p>
 
                   <form onSubmit={handleSubmitTicket} style={{ width: '100%', maxWidth: '500px' }}>
@@ -1648,7 +1618,6 @@ function ForgotPasswordContent() {
               )}
             </motion.div>
           ) : (
-            // ===== TAMPILAN LIVE CHAT AGENT =====
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1771,5 +1740,4 @@ export default function ForgotPasswordPage() {
   );
 }
 
-// ===== KUNCI UNTUK MENCEGAH PRERENDER ERROR =====
 export const dynamic = 'force-dynamic';
