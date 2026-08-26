@@ -9,7 +9,6 @@ import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   fetchSignInMethodsForEmail,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -541,10 +540,12 @@ function ForgotPasswordContent() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
-  // State untuk daftar user dari livechat_tickets
+  // State untuk daftar user dari loginHistory
   const [registeredUsers, setRegisteredUsers] = useState<{email: string, name: string}[]>([]);
   const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isSearchingName, setIsSearchingName] = useState(false);
+  const [nameSearchResult, setNameSearchResult] = useState<{email: string, name: string} | null>(null);
 
   // ===== PRELOADER ANIMATION =====
   const startPreloaderAnimation = () => {
@@ -604,25 +605,30 @@ function ForgotPasswordContent() {
     }, "-=0.3");
   };
 
-  // ===== LOAD ALL REGISTERED USERS FROM LIVECHAT TICKETS =====
+  // ===== LOAD ALL REGISTERED USERS FROM LOGIN HISTORY =====
   useEffect(() => {
     if (!db) return;
     
     const loadRegisteredUsers = async () => {
       try {
         setIsLoadingUsers(true);
-        const ticketsRef = collection(db, "livechat_tickets");
-        const querySnapshot = await getDocs(ticketsRef);
+        
+        // Ambil data dari koleksi loginHistory
+        const loginHistoryRef = collection(db, "loginHistory");
+        const querySnapshot = await getDocs(loginHistoryRef);
+        
         const users: {email: string, name: string}[] = [];
         const emails: string[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          if (data.userEmail && data.userEmail !== "tidakada@email.com") {
-            emails.push(data.userEmail);
+          // Ambil email dan displayName dari loginHistory
+          if (data.email) {
+            emails.push(data.email);
+            const userName = data.displayName || data.name || data.userName || "Pengguna";
             users.push({
-              email: data.userEmail,
-              name: data.userName || "Pengguna"
+              email: data.email,
+              name: userName
             });
           }
         });
@@ -644,11 +650,11 @@ function ForgotPasswordContent() {
         
         setRegisteredEmails(uniqueEmails);
         setRegisteredUsers(uniqueUsers);
-        console.log("Registered users from livechat:", uniqueUsers);
-        console.log("Registered emails:", uniqueEmails);
+        console.log("Registered users from loginHistory:", uniqueUsers);
+        console.log("Registered emails from loginHistory:", uniqueEmails);
         setIsLoadingUsers(false);
       } catch (error) {
-        console.error("Error loading registered users:", error);
+        console.error("Error loading registered users from loginHistory:", error);
         setIsLoadingUsers(false);
       }
     };
@@ -775,18 +781,18 @@ function ForgotPasswordContent() {
   // ===== VALIDASI EMAIL TERDAFTAR =====
   const checkEmailExists = async (email: string): Promise<boolean> => {
     if (registeredEmails.includes(email)) {
-      console.log(`Email ${email} ditemukan di database`);
+      console.log(`Email ${email} ditemukan di database loginHistory`);
       return true;
     }
     
     try {
-      // Cek di koleksi livechat_tickets
-      const ticketsRef = collection(db, "livechat_tickets");
-      const q = query(ticketsRef, where("userEmail", "==", email));
+      // Cek di koleksi loginHistory
+      const loginHistoryRef = collection(db, "loginHistory");
+      const q = query(loginHistoryRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
-        console.log(`Email ${email} ditemukan di Firestore livechat tickets`);
+        console.log(`Email ${email} ditemukan di Firestore loginHistory`);
         setRegisteredEmails(prev => [...prev, email]);
         return true;
       }
@@ -822,17 +828,90 @@ function ForgotPasswordContent() {
     }
   };
 
-  // ===== CEK NAMA USER DI DATABASE =====
-  const findEmailByName = (name: string): string | null => {
-    const foundUser = registeredUsers.find(user => 
-      user.name.toLowerCase() === name.toLowerCase()
-    );
-    if (foundUser) {
-      console.log(`Nama ${name} ditemukan, email: ${foundUser.email}`);
-      return foundUser.email;
+  // ===== CEK NAMA USER DI LOGIN HISTORY =====
+  const findEmailByName = async (name: string): Promise<{email: string, name: string} | null> => {
+    setIsSearchingName(true);
+    setNameSearchResult(null);
+    setError("");
+    
+    try {
+      // Cek di data yang sudah dimuat
+      const foundUser = registeredUsers.find(user => 
+        user.name.toLowerCase() === name.toLowerCase()
+      );
+      
+      if (foundUser) {
+        console.log(`Nama ${name} ditemukan di data yang sudah dimuat, email: ${foundUser.email}`);
+        setIsSearchingName(false);
+        setNameSearchResult(foundUser);
+        return foundUser;
+      }
+      
+      // Jika tidak ditemukan, cari langsung di Firestore loginHistory
+      const loginHistoryRef = collection(db, "loginHistory");
+      // Cari berdasarkan name (displayName)
+      const q1 = query(loginHistoryRef, where("displayName", "==", name));
+      const snapshot1 = await getDocs(q1);
+      
+      if (!snapshot1.empty) {
+        const data = snapshot1.docs[0].data();
+        if (data.email) {
+          const result = {
+            email: data.email,
+            name: data.displayName || data.name || name
+          };
+          console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
+          setNameSearchResult(result);
+          setIsSearchingName(false);
+          return result;
+        }
+      }
+      
+      // Coba cari dengan field "name"
+      const q2 = query(loginHistoryRef, where("name", "==", name));
+      const snapshot2 = await getDocs(q2);
+      
+      if (!snapshot2.empty) {
+        const data = snapshot2.docs[0].data();
+        if (data.email) {
+          const result = {
+            email: data.email,
+            name: data.displayName || data.name || name
+          };
+          console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
+          setNameSearchResult(result);
+          setIsSearchingName(false);
+          return result;
+        }
+      }
+      
+      // Cari di koleksi users
+      const usersRef = collection(db, "users");
+      const usersQuery = query(usersRef, where("displayName", "==", name));
+      const usersSnapshot = await getDocs(usersQuery);
+      
+      if (!usersSnapshot.empty) {
+        const data = usersSnapshot.docs[0].data();
+        if (data.email) {
+          const result = {
+            email: data.email,
+            name: data.displayName || data.name || name
+          };
+          console.log(`Nama ${name} ditemukan di koleksi users dengan email: ${result.email}`);
+          setNameSearchResult(result);
+          setIsSearchingName(false);
+          return result;
+        }
+      }
+      
+      console.log(`Nama ${name} tidak ditemukan`);
+      setIsSearchingName(false);
+      return null;
+    } catch (error) {
+      console.error("Error searching name:", error);
+      setIsSearchingName(false);
+      return null;
     }
-    console.log(`Nama ${name} tidak ditemukan`);
-    return null;
   };
 
   // ===== SUBMIT TICKET =====
@@ -847,6 +926,7 @@ function ForgotPasswordContent() {
 
     try {
       let userEmail = formData.email;
+      let userName = formData.name;
 
       // Untuk Lupa Email: cari email berdasarkan nama
       if (selectedOption === 'email') {
@@ -856,15 +936,18 @@ function ForgotPasswordContent() {
           return;
         }
         
-        const foundEmail = findEmailByName(formData.name);
-        if (!foundEmail) {
+        const result = await findEmailByName(formData.name);
+        if (!result) {
           setError("Nama tidak ditemukan. Silakan gunakan nama yang sudah terdaftar.");
           setLoading(false);
           return;
         }
-        userEmail = foundEmail;
+        
+        userEmail = result.email;
+        userName = result.name;
         // Set email yang ditemukan ke formData
-        formData.email = foundEmail;
+        formData.email = result.email;
+        formData.name = result.name;
       }
 
       // Untuk Lupa Password dan Lupa Pola Sandi: validasi email
@@ -882,12 +965,13 @@ function ForgotPasswordContent() {
           return;
         }
         userEmail = formData.email;
+        userName = formData.name || "Pengguna";
       }
 
       // Buat ticket di Firestore
       const ticketData = {
         userId: null,
-        userName: selectedOption === 'email' ? formData.name : (formData.name || "Pengguna"),
+        userName: userName,
         userEmail: userEmail,
         topic: selectedOption === 'password' ? 'Lupa Password' :
                selectedOption === 'email' ? 'Lupa Email' : 'Lupa Pola Sandi',
@@ -898,8 +982,8 @@ function ForgotPasswordContent() {
         typingUserId: null,
         typingUserName: null,
         detail: selectedOption === 'password' ? `Email: ${userEmail}` :
-                selectedOption === 'email' ? `Nama: ${formData.name}, Email ditemukan: ${userEmail}` :
-                `Email: ${userEmail}, Nama: ${formData.name}`,
+                selectedOption === 'email' ? `Nama: ${userName}, Email ditemukan: ${userEmail}` :
+                `Email: ${userEmail}, Nama: ${userName}`,
       };
 
       const docRef = await addDoc(collection(db, "livechat_tickets"), ticketData);
@@ -926,10 +1010,42 @@ function ForgotPasswordContent() {
     setTicketId(null);
     setIsResolved(false);
     setShowAgreement(false);
+    setNameSearchResult(null);
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
     router.push('/forgot-password');
+  };
+
+  // ===== HANDLE NAME INPUT CHANGE =====
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, name: value });
+    // Reset result saat user mengetik
+    setNameSearchResult(null);
+    setError("");
+  };
+
+  // ===== HANDLE ENTER KEY PRESS =====
+  const handleNameKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && formData.name.trim()) {
+      e.preventDefault();
+      const result = await findEmailByName(formData.name);
+      if (result) {
+        setFormData({ ...formData, email: result.email, name: result.name });
+        setNameSearchResult(result);
+        setError("");
+        // Auto submit jika sudah agreed
+        if (agreed) {
+          // Submit form
+          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+          e.currentTarget.form?.dispatchEvent(submitEvent);
+        }
+      } else {
+        setError("Nama tidak ditemukan. Silakan coba lagi.");
+        setNameSearchResult(null);
+      }
+    }
   };
 
   // ===== RENDER PRELOADER =====
@@ -1269,7 +1385,12 @@ function ForgotPasswordContent() {
                           cursor: 'pointer',
                           borderBottom: '1px solid #f0f0f0',
                         }}
-                        onClick={() => setSelectedOption(item.id as any)}
+                        onClick={() => {
+                          setSelectedOption(item.id as any);
+                          setNameSearchResult(null);
+                          setError("");
+                          setFormData({ email: "", name: "" });
+                        }}
                       >
                         <span style={{
                           fontSize: '24px',
@@ -1327,7 +1448,12 @@ function ForgotPasswordContent() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
                     <button
-                      onClick={() => setSelectedOption(null)}
+                      onClick={() => {
+                        setSelectedOption(null);
+                        setNameSearchResult(null);
+                        setError("");
+                        setFormData({ email: "", name: "" });
+                      }}
                       style={{
                         background: 'none',
                         border: 'none',
@@ -1363,7 +1489,7 @@ function ForgotPasswordContent() {
                     marginBottom: '32px',
                   }}>
                     {selectedOption === 'password' && 'Masukkan email terdaftar Anda. Agent akan membantu reset password.'}
-                    {selectedOption === 'email' && 'Masukkan nama lengkap Anda yang terdaftar untuk menemukan email Anda.'}
+                    {selectedOption === 'email' && 'Masukkan nama lengkap Anda yang terdaftar di login history untuk menemukan email Anda. Tekan Enter untuk mencari.'}
                     {selectedOption === 'pin' && 'Masukkan email dan nama Anda untuk reset pola sandi.'}
                   </p>
 
@@ -1398,13 +1524,14 @@ function ForgotPasswordContent() {
                     {selectedOption === 'email' && (
                       <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                          Nama Lengkap (sesuai saat mendaftar)
+                          Nama Lengkap (sesuai saat login)
                         </label>
                         <input
                           type="text"
-                          placeholder="Masukkan nama lengkap Anda"
+                          placeholder="Masukkan nama lengkap Anda, lalu tekan Enter"
                           value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onChange={handleNameChange}
+                          onKeyPress={handleNameKeyPress}
                           required
                           style={{
                             width: '100%',
@@ -1419,13 +1546,32 @@ function ForgotPasswordContent() {
                           onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
                           onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
                         />
+                        {isSearchingName && (
+                          <div style={{ fontSize: '14px', color: '#0D3CFC', marginTop: '8px', fontFamily: FONT_FAMILY }}>
+                            🔍 Mencari nama...
+                          </div>
+                        )}
+                        {nameSearchResult && (
+                          <div style={{ 
+                            fontSize: '14px', 
+                            color: '#22c55e', 
+                            marginTop: '8px', 
+                            fontFamily: FONT_FAMILY,
+                            backgroundColor: '#dcfce7',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #86efac'
+                          }}>
+                            ✅ Nama ditemukan! Email: <strong>{nameSearchResult.email}</strong>
+                          </div>
+                        )}
                         <div style={{
                           fontSize: '12px',
                           color: '#999',
                           marginTop: '4px',
                           fontFamily: FONT_FAMILY,
                         }}>
-                          Masukkan nama lengkap yang Anda gunakan saat mendaftar
+                          Masukkan nama lengkap yang Anda gunakan saat login, lalu tekan Enter untuk mencari email
                         </div>
                       </div>
                     )}
@@ -1563,22 +1709,22 @@ function ForgotPasswordContent() {
 
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={loading || isSearchingName}
                       style={{
                         width: '100%',
                         padding: '16px',
-                        backgroundColor: loading ? '#ccc' : '#0D3CFC',
+                        backgroundColor: (loading || isSearchingName) ? '#ccc' : '#0D3CFC',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '12px',
                         fontSize: '18px',
                         fontWeight: 600,
                         fontFamily: FONT_FAMILY,
-                        cursor: loading ? 'not-allowed' : 'pointer',
+                        cursor: (loading || isSearchingName) ? 'not-allowed' : 'pointer',
                         transition: 'all 0.3s ease',
                       }}
                     >
-                      {loading ? 'Mengirim...' : 'Kirim Tiket'}
+                      {loading ? 'Mengirim...' : isSearchingName ? 'Mencari...' : 'Kirim Tiket'}
                     </button>
                   </form>
 
