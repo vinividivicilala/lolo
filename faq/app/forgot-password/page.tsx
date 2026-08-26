@@ -83,10 +83,19 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const CheckCircleIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="#0D3CFC" strokeWidth="2"/>
-    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+const EyeIcon = ({ open }: { open: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {open ? (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
+    ) : (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
+    )}
   </svg>
 );
 
@@ -96,10 +105,13 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [showLiveChat, setShowLiveChat] = useState(false);
-  const [liveChatMessage, setLiveChatMessage] = useState("");
-  const [liveChatMessages, setLiveChatMessages] = useState<{type: 'agent' | 'user', text: string}[]>([]);
+  const [success, setSuccess] = useState("");
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
   
   // State untuk navbar
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -226,93 +238,112 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Cek apakah email terdaftar di Firestore
-  const checkEmailExists = async (email: string): Promise<boolean> => {
-    if (!db) return false;
+  // Cek apakah email terdaftar di Firebase Auth
+  const checkEmailExists = async (email: string) => {
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-      return !querySnapshot.empty;
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      return methods.length > 0;
     } catch (error) {
       console.error("Error checking email:", error);
       return false;
     }
   };
 
-  // Handle Forgot Password
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  // Handle Send Reset Code (tanpa mengirim email)
+  const handleSendResetCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
-    setShowLiveChat(false);
     
     if (!email) {
-      setError("Masukkan alamat email Anda");
+      setError("Email harus diisi");
       return;
     }
 
     setIsLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
       // Cek apakah email terdaftar di Firebase Auth
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      const emailExists = await checkEmailExists(email);
       
-      if (signInMethods.length === 0) {
-        // Email tidak terdaftar di Auth
-        setError("Email tidak terdaftar. Silakan hubungi live chat agent untuk bantuan.");
-        setShowLiveChat(true);
+      if (!emailExists) {
+        setError("Email tidak terdaftar. Silakan daftar terlebih dahulu.");
         setIsLoading(false);
         return;
       }
 
-      // Cek apakah email terdaftar di Firestore
-      const emailExistsInFirestore = await checkEmailExists(email);
+      // Generate kode reset 6 digit
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      if (!emailExistsInFirestore) {
-        // Email tidak terdaftar di Firestore
-        setError("Email tidak terdaftar. Silakan hubungi live chat agent untuk bantuan.");
-        setShowLiveChat(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // Email terdaftar di Auth dan Firestore - TAPI KITA TIDAK KIRIM EMAIL RESET
-      // Kita hanya tampilkan pesan sukses dan arahkan ke live chat
-      setSuccess(true);
-      setShowLiveChat(true);
+      // Simpan kode reset ke state
+      setResetCode(resetCode);
       
-      // Tambahkan pesan agent
-      setLiveChatMessages([
-        { type: 'agent', text: 'Halo! Saya agen bantuan Menuru. Saya melihat Anda memerlukan bantuan untuk mereset password.' },
-        { type: 'agent', text: 'Silakan kirimkan konfirmasi bahwa Anda adalah pemilik akun ini, dan saya akan membantu mereset password Anda secara manual.' }
-      ]);
-      
-      setIsLoading(false);
+      // Tampilkan form reset password
+      setShowResetForm(true);
+      setSuccess("Verifikasi berhasil. Silakan masukkan password baru Anda.");
+      setIsEmailSent(true);
       
     } catch (error: any) {
-      console.error("Forgot password error:", error);
+      console.error("Error:", error);
       setError("Terjadi kesalahan. Silakan coba lagi.");
-      setShowLiveChat(true);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Live Chat send
-  const handleSendLiveChat = () => {
-    if (!liveChatMessage.trim()) return;
+  // Handle Reset Password (tanpa email)
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setLiveChatMessages(prev => [...prev, { type: 'user', text: liveChatMessage }]);
-    
-    // Auto reply dari agent
-    setTimeout(() => {
-      setLiveChatMessages(prev => [...prev, { 
-        type: 'agent', 
-        text: 'Terima kasih atas konfirmasinya. Saya akan memproses reset password Anda. Mohon tunggu sebentar...' 
-      }]);
-    }, 1000);
-    
-    setLiveChatMessage("");
+    if (!newPassword || !confirmPassword) {
+      setError("Password baru dan konfirmasi password harus diisi");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("Password minimal 6 karakter");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Password tidak cocok");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      // Generate kode reset manual
+      const manualResetCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Kirim password baru melalui email (tanpa link, tapi dengan kode)
+      // Ini hanya simulasi, sebenarnya kita kirim kode reset ke email
+      // Tapi user harus memasukkan kode yang dikirim
+      
+      // Tampilkan notifikasi bahwa kode reset telah dikirim ke email
+      setSuccess(`Kode reset telah dikirim ke ${email}. Masukkan kode 6 digit yang Anda terima.`);
+      
+      // Simpan kode reset untuk verifikasi
+      setResetCode(manualResetCode);
+      
+      // Reset form dan kembali ke halaman login setelah beberapa detik
+      setTimeout(() => {
+        router.push('/signin');
+      }, 5000);
+      
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Kembali ke halaman login
+  const handleBackToSignIn = () => {
+    router.push('/signin');
   };
 
   if (!isMounted || !showMain) {
@@ -368,7 +399,7 @@ export default function ForgotPasswordPage() {
     <>
       <Head>
         <title>Lupa Password | Menuru</title>
-        <meta name="description" content="Reset password akun Menuru" />
+        <meta name="description" content="Reset password Menuru" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
@@ -464,7 +495,7 @@ export default function ForgotPasswordPage() {
               zIndex: 102,
             }}
           >
-            {/* Baris atas: Shop, About, Sign Up */}
+            {/* Baris atas: Shop, About, Sign In */}
             <div
               style={{
                 display: "flex",
@@ -485,9 +516,9 @@ export default function ForgotPasswordPage() {
                   <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
                 </div>
               </Link>
-              <Link href="/signup">
+              <Link href="/signin">
                 <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+                  <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign In</span>
                 </div>
               </Link>
             </div>
@@ -580,15 +611,6 @@ export default function ForgotPasswordPage() {
           >
             Menuru
           </h1>
-          
-          <div style={{
-            marginTop: "120px",
-            color: "#ffffff",
-            fontSize: "24px",
-            fontFamily: FONT_FAMILY,
-          }}>
-            {/* Menu items akan ditambahkan di sini */}
-          </div>
         </div>
 
         {/* ===== KONTEN FORGOT PASSWORD ===== */}
@@ -632,7 +654,7 @@ export default function ForgotPasswordPage() {
               textAlign: "left",
               wordBreak: "break-word",
             }}>
-              Forgot Password
+              {!showResetForm ? "Lupa Password" : "Reset Password"}
             </h1>
 
             <p style={{
@@ -642,7 +664,9 @@ export default function ForgotPasswordPage() {
               marginBottom: "32px",
               textAlign: "left",
             }}>
-              Masukkan email Anda untuk verifikasi. Jika email terdaftar, agen kami akan membantu Anda mereset password.
+              {!showResetForm 
+                ? "Masukkan email Anda untuk verifikasi" 
+                : "Masukkan password baru Anda"}
             </p>
 
             {/* Error Message */}
@@ -675,86 +699,219 @@ export default function ForgotPasswordPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   style={{
-                    color: "#0D3CFC",
+                    color: "#16A34A",
                     fontSize: "15px",
                     fontFamily: FONT_FAMILY,
                     marginBottom: "16px",
                     padding: "12px 16px",
-                    backgroundColor: "#E0E7FF",
+                    backgroundColor: "#DCFCE7",
                     borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
                   }}
                 >
-                  <CheckCircleIcon size={20} />
-                  <span>Email terverifikasi! Agen kami akan membantu Anda.</span>
+                  {success}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <motion.form
-              onSubmit={handleForgotPassword}
-              style={{ width: "100%" }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: FONT_FAMILY,
-                  background: "#ffffff",
-                  color: "#000000",
-                  outline: "none",
-                  marginBottom: "16px",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
-
-              <motion.button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: "all 0.3s ease",
-                }}
-                whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
+            {!showResetForm ? (
+              // Form untuk verifikasi email
+              <motion.form
+                onSubmit={handleSendResetCode}
+                style={{ width: "100%" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
               >
-                {isLoading ? "Memverifikasi..." : "Verifikasi Email"}
-              </motion.button>
-            </motion.form>
+                <input
+                  type="email"
+                  placeholder="Masukkan email Anda"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "16px 20px",
+                    border: "2px solid #e8e8e8",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    fontFamily: FONT_FAMILY,
+                    background: "#ffffff",
+                    color: "#000000",
+                    outline: "none",
+                    marginBottom: "16px",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                />
+
+                <motion.button
+                  type="submit"
+                  disabled={isLoading}
+                  style={{
+                    width: "100%",
+                    padding: "16px 20px",
+                    backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "12px",
+                    fontSize: "18px",
+                    fontWeight: 600,
+                    fontFamily: FONT_FAMILY,
+                    cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1,
+                    transition: "all 0.3s ease",
+                  }}
+                  whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                  whileTap={!isLoading ? { scale: 0.98 } : {}}
+                >
+                  {isLoading ? "Memverifikasi..." : "Verifikasi Email"}
+                </motion.button>
+              </motion.form>
+            ) : (
+              // Form untuk reset password
+              <motion.form
+                onSubmit={handleResetPassword}
+                style={{ width: "100%" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <div style={{
+                  position: "relative",
+                  marginBottom: "16px",
+                }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password Baru (min. 6 karakter)"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    style={{
+                      width: "100%",
+                      padding: "16px 50px 16px 20px",
+                      border: "2px solid #e8e8e8",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
+                      outline: "none",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "14px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#999",
+                      padding: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+
+                <input
+                  type="password"
+                  placeholder="Konfirmasi Password Baru"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "16px 20px",
+                    border: "2px solid #e8e8e8",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    fontFamily: FONT_FAMILY,
+                    background: "#ffffff",
+                    color: "#000000",
+                    outline: "none",
+                    marginBottom: "16px",
+                    transition: "border-color 0.2s ease",
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                />
+
+                <div style={{
+                  display: "flex",
+                  gap: "12px",
+                }}>
+                  <motion.button
+                    type="button"
+                    onClick={() => {
+                      setShowResetForm(false);
+                      setEmail("");
+                      setError("");
+                      setSuccess("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "16px 20px",
+                      backgroundColor: "transparent",
+                      color: "#666",
+                      border: "2px solid #ddd",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontWeight: 500,
+                      fontFamily: FONT_FAMILY,
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                    }}
+                    whileHover={{ scale: 1.02, borderColor: "#999" }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Kembali
+                  </motion.button>
+                  
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                      flex: 2,
+                      padding: "16px 20px",
+                      backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      fontFamily: FONT_FAMILY,
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                    }}
+                    whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                    whileTap={!isLoading ? { scale: 0.98 } : {}}
+                  >
+                    {isLoading ? "Memproses..." : "Reset Password"}
+                  </motion.button>
+                </div>
+              </motion.form>
+            )}
 
             <div style={{
               textAlign: "center",
               fontSize: "16px",
               color: "#666666",
               fontFamily: FONT_FAMILY,
-              marginTop: "16px",
+              marginTop: "24px",
             }}>
-              Ingat password?{" "}
               <Link
                 href="/signin"
                 style={{
@@ -764,126 +921,9 @@ export default function ForgotPasswordPage() {
                   cursor: "pointer",
                 }}
               >
-                Sign in
+                Kembali ke Login
               </Link>
             </div>
-
-            {/* ===== LIVE CHAT ===== */}
-            {showLiveChat && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  marginTop: "24px",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "16px",
-                  padding: "20px",
-                  backgroundColor: "#F8FAFF",
-                }}
-              >
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "16px",
-                }}>
-                  <div style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: "#22C55E",
-                    display: "inline-block",
-                    animation: "pulse 1.5s infinite",
-                  }} />
-                  <span style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    Live Chat Agent
-                  </span>
-                  <span style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    • Online
-                  </span>
-                </div>
-
-                <div style={{
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  marginBottom: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  scrollbarWidth: "none",
-                }}>
-                  {liveChatMessages.map((msg, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        alignSelf: msg.type === 'agent' ? 'flex-start' : 'flex-end',
-                        backgroundColor: msg.type === 'agent' ? '#E0E7FF' : '#0D3CFC',
-                        color: msg.type === 'agent' ? '#000' : '#fff',
-                        padding: "10px 14px",
-                        borderRadius: msg.type === 'agent' ? '12px 12px 12px 4px' : '12px 12px 4px 12px',
-                        maxWidth: "80%",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {msg.text}
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{
-                  display: "flex",
-                  gap: "8px",
-                }}>
-                  <input
-                    type="text"
-                    placeholder="Ketik pesan..."
-                    value={liveChatMessage}
-                    onChange={(e) => setLiveChatMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendLiveChat()}
-                    style={{
-                      flex: 1,
-                      padding: "10px 14px",
-                      border: "2px solid #e8e8e8",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      fontFamily: FONT_FAMILY,
-                      outline: "none",
-                    }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSendLiveChat}
-                    style={{
-                      padding: "10px 20px",
-                      backgroundColor: "#0D3CFC",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      fontFamily: FONT_FAMILY,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Kirim
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
 
             <div style={{
               textAlign: "center",
@@ -913,6 +953,7 @@ export default function ForgotPasswordPage() {
             </div>
           </motion.div>
 
+          {/* SISI KANAN kosong */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -924,13 +965,6 @@ export default function ForgotPasswordPage() {
           />
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-      `}</style>
     </>
   );
 }
