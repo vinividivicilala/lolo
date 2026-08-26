@@ -9,7 +9,6 @@ import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   fetchSignInMethodsForEmail,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -541,6 +540,10 @@ function ForgotPasswordContent() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
+  // State untuk daftar email terdaftar
+  const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState(true);
+
   // ===== PRELOADER ANIMATION =====
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -598,6 +601,43 @@ function ForgotPasswordContent() {
       ease: "power2.inOut"
     }, "-=0.3");
   };
+
+  // ===== LOAD ALL REGISTERED EMAILS FROM LIVECHAT TICKETS =====
+  useEffect(() => {
+    if (!db) return;
+    
+    const loadRegisteredEmails = async () => {
+      try {
+        setIsLoadingEmails(true);
+        const ticketsRef = collection(db, "livechat_tickets");
+        const querySnapshot = await getDocs(ticketsRef);
+        const emails: string[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.userEmail && data.userEmail !== "tidakada@email.com") {
+            emails.push(data.userEmail);
+          }
+        });
+        
+        // Tambahkan email admin
+        if (ADMIN_EMAIL) {
+          emails.push(ADMIN_EMAIL);
+        }
+        
+        // Hapus duplikat
+        const uniqueEmails = [...new Set(emails)];
+        setRegisteredEmails(uniqueEmails);
+        console.log("Registered emails from livechat:", uniqueEmails);
+        setIsLoadingEmails(false);
+      } catch (error) {
+        console.error("Error loading registered emails:", error);
+        setIsLoadingEmails(false);
+      }
+    };
+    
+    loadRegisteredEmails();
+  }, []);
 
   // ===== Mounting =====
   useEffect(() => {
@@ -715,44 +755,51 @@ function ForgotPasswordContent() {
     }
   };
 
-  // ===== VALIDASI EMAIL TERDAFTAR DI FIREBASE AUTH =====
+  // ===== VALIDASI EMAIL TERDAFTAR DARI DATABASE LIVECHAT TICKETS =====
   const checkEmailExists = async (email: string): Promise<boolean> => {
+    // Cek dari daftar email yang sudah dimuat
+    if (registeredEmails.includes(email)) {
+      console.log(`Email ${email} ditemukan di database livechat tickets`);
+      return true;
+    }
+    
+    // Jika tidak ditemukan di database, coba cek langsung ke Firestore
     try {
-      // Pastikan auth tidak null
-      if (!auth) {
-        console.error("Auth not initialized");
-        return false;
+      const ticketsRef = collection(db, "livechat_tickets");
+      const q = query(ticketsRef, where("userEmail", "==", email));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        console.log(`Email ${email} ditemukan di Firestore livechat tickets`);
+        return true;
       }
       
-      // Coba cek dengan fetchSignInMethodsForEmail
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      console.log("Sign in methods for email:", methods);
+      // Cek juga di koleksi users
+      const usersRef = collection(db, "users");
+      const usersQuery = query(usersRef, where("email", "==", email));
+      const usersSnapshot = await getDocs(usersQuery);
       
-      // Jika ada metode sign in, berarti email terdaftar
-      return methods && methods.length > 0;
-    } catch (error: any) {
-      console.error("Error checking email with fetchSignInMethodsForEmail:", error);
-      
-      // Jika error karena auth belum siap, coba dengan metode alternatif
-      // Coba sign in dengan email dan password kosong untuk cek
-      try {
-        // Ini hanya untuk mengecek apakah email terdaftar
-        // Password tidak akan divalidasi karena kita hanya ingin tahu apakah user exists
-        await signInWithEmailAndPassword(auth, email, "dummy_password_for_check");
+      if (!usersSnapshot.empty) {
+        console.log(`Email ${email} ditemukan di koleksi users`);
         return true;
-      } catch (signInError: any) {
-        // Jika error code adalah 'auth/user-not-found', berarti email tidak terdaftar
-        if (signInError.code === 'auth/user-not-found') {
-          return false;
-        }
-        // Jika error code adalah 'auth/wrong-password', berarti email terdaftar
-        if (signInError.code === 'auth/wrong-password') {
+      }
+      
+      // Cek di Firebase Auth menggunakan fetchSignInMethodsForEmail
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        if (methods && methods.length > 0) {
+          console.log(`Email ${email} ditemukan di Firebase Auth`);
           return true;
         }
-        // Error lain mungkin berarti ada masalah koneksi atau konfigurasi
-        console.error("Sign in check error:", signInError.code);
-        return false;
+      } catch (authError) {
+        console.log("Auth check error:", authError);
       }
+      
+      console.log(`Email ${email} tidak ditemukan di manapun`);
+      return false;
+    } catch (error) {
+      console.error("Error checking email in Firestore:", error);
+      return false;
     }
   };
 
@@ -784,7 +831,7 @@ function ForgotPasswordContent() {
         return;
       }
 
-      // CEK EMAIL HARUS TERDAFTAR DI FIREBASE AUTH (untuk password dan pin)
+      // CEK EMAIL HARUS TERDAFTAR DI DATABASE (untuk password dan pin)
       if (selectedOption === 'password' || selectedOption === 'pin') {
         const emailExists = await checkEmailExists(formData.email);
         if (!emailExists) {
