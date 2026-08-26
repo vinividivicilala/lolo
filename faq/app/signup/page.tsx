@@ -8,15 +8,14 @@ import { useRouter } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
-  sendPasswordResetEmail,
-  fetchSignInMethodsForEmail
+  createUserWithEmailAndPassword,
+  updateProfile 
 } from "firebase/auth";
 import { 
   getFirestore, 
-  collection, 
-  query, 
-  where, 
-  getDocs 
+  doc, 
+  setDoc,
+  serverTimestamp 
 } from "firebase/firestore";
 import gsap from 'gsap';
 
@@ -48,6 +47,22 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== ICONS =====
+const EyeIcon = ({ open }: { open: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {open ? (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
+    ) : (
+      <>
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
+    )}
+  </svg>
+);
+
 const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -83,23 +98,29 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const CheckCircleIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="#0D3CFC" strokeWidth="2"/>
-    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-export default function ForgotPasswordPage() {
+export default function SignUpPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [showLiveChat, setShowLiveChat] = useState(false);
-  const [liveChatMessage, setLiveChatMessage] = useState("");
-  const [liveChatMessages, setLiveChatMessages] = useState<{type: 'agent' | 'user', text: string}[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // State untuk Persetujuan
+  const [agreed, setAgreed] = useState(false);
+  const [showAgreement, setShowAgreement] = useState(false);
+  const agreementRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk PIN
+  const [showPinScreen, setShowPinScreen] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinConfirm, setPinConfirm] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [tempUser, setTempUser] = useState<any>(null);
   
   // State untuk navbar
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -185,6 +206,24 @@ export default function ForgotPasswordPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [isMounted]);
 
+  // Toggle agreement with GSAP
+  const toggleAgreement = () => {
+    setShowAgreement(!showAgreement);
+    if (!showAgreement && agreementRef.current) {
+      gsap.fromTo(agreementRef.current,
+        { height: 0, opacity: 0 },
+        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    } else if (agreementRef.current) {
+      gsap.to(agreementRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.in'
+      });
+    }
+  };
+
   // Toggle Menu
   const toggleMenu = () => {
     if (!isMenuOpen) {
@@ -226,93 +265,86 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Cek apakah email terdaftar di Firestore
-  const checkEmailExists = async (email: string): Promise<boolean> => {
-    if (!db) return false;
-    try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-      return !querySnapshot.empty;
-    } catch (error) {
-      console.error("Error checking email:", error);
-      return false;
-    }
+  // Fungsi untuk menyimpan PIN ke Firestore
+  const savePin = async (uid: string, pinValue: string) => {
+    if (!db) return;
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { 
+      pin: pinValue,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
   };
 
-  // Handle Forgot Password
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  // Handle Sign Up
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
-    setShowLiveChat(false);
-    
-    if (!email) {
-      setError("Masukkan alamat email Anda");
+    if (!agreed) {
+      setError("Anda harus menyetujui Pernyataan Persetujuan");
       return;
     }
-
     setIsLoading(true);
+    setError("");
 
     try {
-      // Cek apakah email terdaftar di Firebase Auth
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      
-      if (signInMethods.length === 0) {
-        // Email tidak terdaftar di Auth
-        setError("Email tidak terdaftar. Silakan hubungi live chat agent untuk bantuan.");
-        setShowLiveChat(true);
-        setIsLoading(false);
-        return;
-      }
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
 
-      // Cek apakah email terdaftar di Firestore
-      const emailExistsInFirestore = await checkEmailExists(email);
-      
-      if (!emailExistsInFirestore) {
-        // Email tidak terdaftar di Firestore
-        setError("Email tidak terdaftar. Silakan hubungi live chat agent untuk bantuan.");
-        setShowLiveChat(true);
-        setIsLoading(false);
-        return;
-      }
+      await updateProfile(userCredential.user, {
+        displayName: formData.name
+      });
 
-      // Email terdaftar di Auth dan Firestore - TAPI KITA TIDAK KIRIM EMAIL RESET
-      // Kita hanya tampilkan pesan sukses dan arahkan ke live chat
-      setSuccess(true);
-      setShowLiveChat(true);
+      console.log("User created successfully:", userCredential.user);
       
-      // Tambahkan pesan agent
-      setLiveChatMessages([
-        { type: 'agent', text: 'Halo! Saya agen bantuan Menuru. Saya melihat Anda memerlukan bantuan untuk mereset password.' },
-        { type: 'agent', text: 'Silakan kirimkan konfirmasi bahwa Anda adalah pemilik akun ini, dan saya akan membantu mereset password Anda secara manual.' }
-      ]);
-      
+      setTempUser(userCredential.user);
+      setShowPinScreen(true);
       setIsLoading(false);
       
     } catch (error: any) {
-      console.error("Forgot password error:", error);
-      setError("Terjadi kesalahan. Silakan coba lagi.");
-      setShowLiveChat(true);
+      console.error("Sign up error:", error);
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError("Email sudah digunakan. Coba email lain atau login.");
+          break;
+        case 'auth/invalid-email':
+          setError("Email tidak valid.");
+          break;
+        case 'auth/weak-password':
+          setError("Password terlalu lemah. Minimal 6 karakter.");
+          break;
+        case 'auth/operation-not-allowed':
+          setError("Registrasi email/password tidak diaktifkan.");
+          break;
+        default:
+          setError("Terjadi kesalahan. Silakan coba lagi.");
+      }
       setIsLoading(false);
     }
   };
 
-  // Handle Live Chat send
-  const handleSendLiveChat = () => {
-    if (!liveChatMessage.trim()) return;
+  // Handle PIN submit
+  const handlePinSubmit = async () => {
+    if (pin.length !== 6) {
+      setPinError("PIN harus 6 digit");
+      return;
+    }
+    if (pin !== pinConfirm) {
+      setPinError("PIN tidak cocok");
+      return;
+    }
+    setPinError("");
     
-    setLiveChatMessages(prev => [...prev, { type: 'user', text: liveChatMessage }]);
-    
-    // Auto reply dari agent
-    setTimeout(() => {
-      setLiveChatMessages(prev => [...prev, { 
-        type: 'agent', 
-        text: 'Terima kasih atas konfirmasinya. Saya akan memproses reset password Anda. Mohon tunggu sebentar...' 
-      }]);
-    }, 1000);
-    
-    setLiveChatMessage("");
+    await savePin(tempUser.uid, pin);
+    router.push('/');
+  };
+
+  const resetPin = () => {
+    setPin("");
+    setPinConfirm("");
+    setPinError("");
   };
 
   if (!isMounted || !showMain) {
@@ -367,8 +399,8 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <Head>
-        <title>Lupa Password | Menuru</title>
-        <meta name="description" content="Reset password akun Menuru" />
+        <title>Sign Up | Menuru</title>
+        <meta name="description" content="Buat akun Menuru" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
@@ -464,7 +496,7 @@ export default function ForgotPasswordPage() {
               zIndex: 102,
             }}
           >
-            {/* Baris atas: Shop, About, Sign Up */}
+            {/* Baris atas: Shop, About, Sign In */}
             <div
               style={{
                 display: "flex",
@@ -485,9 +517,9 @@ export default function ForgotPasswordPage() {
                   <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
                 </div>
               </Link>
-              <Link href="/signup">
+              <Link href="/signin">
                 <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+                  <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign In</span>
                 </div>
               </Link>
             </div>
@@ -562,6 +594,7 @@ export default function ForgotPasswordPage() {
             padding: "40px",
           }}
         >
+          {/* Hanya judul putih di menu overlay */}
           <h1
             style={{
               fontSize: "48px",
@@ -581,6 +614,7 @@ export default function ForgotPasswordPage() {
             Menuru
           </h1>
           
+          {/* Konten menu overlay lainnya bisa ditambahkan di sini */}
           <div style={{
             marginTop: "120px",
             color: "#ffffff",
@@ -591,7 +625,7 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {/* ===== KONTEN FORGOT PASSWORD ===== */}
+        {/* ===== KONTEN SIGN UP ===== */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 80px",
@@ -621,296 +655,491 @@ export default function ForgotPasswordPage() {
               justifyContent: "center",
             }}
           >
-            <h1 style={{
-              fontSize: isMobile ? "80px" : "180px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-              margin: "0 0 10px 0",
-              textAlign: "left",
-              wordBreak: "break-word",
-            }}>
-              Forgot Password
-            </h1>
-
-            <p style={{
-              fontSize: "18px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "32px",
-              textAlign: "left",
-            }}>
-              Masukkan email Anda untuk verifikasi. Jika email terdaftar, agen kami akan membantu Anda mereset password.
-            </p>
-
-            {/* Error Message */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    color: "#EB2227",
-                    fontSize: "15px",
-                    fontFamily: FONT_FAMILY,
-                    marginBottom: "16px",
-                    padding: "12px 16px",
-                    backgroundColor: "#FEE2E2",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Success Message */}
-            <AnimatePresence>
-              {success && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    color: "#0D3CFC",
-                    fontSize: "15px",
-                    fontFamily: FONT_FAMILY,
-                    marginBottom: "16px",
-                    padding: "12px 16px",
-                    backgroundColor: "#E0E7FF",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <CheckCircleIcon size={20} />
-                  <span>Email terverifikasi! Agen kami akan membantu Anda.</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <motion.form
-              onSubmit={handleForgotPassword}
-              style={{ width: "100%" }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontFamily: FONT_FAMILY,
-                  background: "#ffffff",
-                  color: "#000000",
-                  outline: "none",
-                  marginBottom: "16px",
-                  transition: "border-color 0.2s ease",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
-
-              <motion.button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: "100%",
-                  padding: "16px 20px",
-                  backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: "all 0.3s ease",
-                }}
-                whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
-              >
-                {isLoading ? "Memverifikasi..." : "Verifikasi Email"}
-              </motion.button>
-            </motion.form>
-
-            <div style={{
-              textAlign: "center",
-              fontSize: "16px",
-              color: "#666666",
-              fontFamily: FONT_FAMILY,
-              marginTop: "16px",
-            }}>
-              Ingat password?{" "}
-              <Link
-                href="/signin"
-                style={{
+            {!showPinScreen ? (
+              <>
+                <h1 style={{
+                  fontSize: isMobile ? "80px" : "200px",
+                  fontWeight: 700,
                   color: "#0D3CFC",
-                  textDecoration: "underline",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                Sign in
-              </Link>
-            </div>
-
-            {/* ===== LIVE CHAT ===== */}
-            {showLiveChat && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  marginTop: "24px",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "16px",
-                  padding: "20px",
-                  backgroundColor: "#F8FAFF",
-                }}
-              >
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "16px",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.05em",
+                  lineHeight: 1,
+                  margin: "0 0 10px 0",
+                  textAlign: "left",
+                  wordBreak: "break-word",
                 }}>
-                  <div style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: "#22C55E",
-                    display: "inline-block",
-                    animation: "pulse 1.5s infinite",
-                  }} />
-                  <span style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    Live Chat Agent
-                  </span>
-                  <span style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    • Online
-                  </span>
-                </div>
+                  Sign Up
+                </h1>
 
-                <div style={{
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  marginBottom: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  scrollbarWidth: "none",
+                <p style={{
+                  fontSize: "18px",
+                  color: "#666666",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "32px",
+                  textAlign: "left",
                 }}>
-                  {liveChatMessages.map((msg, index) => (
-                    <div
-                      key={index}
+                  Create your account to join the Menuru community
+                </p>
+
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
                       style={{
-                        alignSelf: msg.type === 'agent' ? 'flex-start' : 'flex-end',
-                        backgroundColor: msg.type === 'agent' ? '#E0E7FF' : '#0D3CFC',
-                        color: msg.type === 'agent' ? '#000' : '#fff',
-                        padding: "10px 14px",
-                        borderRadius: msg.type === 'agent' ? '12px 12px 12px 4px' : '12px 12px 4px 12px',
-                        maxWidth: "80%",
-                        fontSize: "14px",
+                        color: "#0D3CFC",
+                        fontSize: "15px",
                         fontFamily: FONT_FAMILY,
+                        marginBottom: "16px",
+                        padding: "0",
                       }}
                     >
-                      {msg.text}
-                    </div>
-                  ))}
-                </div>
+                      {error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                <div style={{
-                  display: "flex",
-                  gap: "8px",
-                }}>
+                <motion.form
+                  onSubmit={handleSignUp}
+                  style={{ width: "100%" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
                   <input
                     type="text"
-                    placeholder="Ketik pesan..."
-                    value={liveChatMessage}
-                    onChange={(e) => setLiveChatMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendLiveChat()}
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
                     style={{
-                      flex: 1,
-                      padding: "10px 14px",
+                      width: "100%",
+                      padding: "16px 20px",
                       border: "2px solid #e8e8e8",
-                      borderRadius: "8px",
-                      fontSize: "14px",
+                      borderRadius: "12px",
+                      fontSize: "16px",
                       fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
                       outline: "none",
+                      marginBottom: "16px",
+                      transition: "border-color 0.2s ease",
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                   />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSendLiveChat}
+                  
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
                     style={{
-                      padding: "10px 20px",
-                      backgroundColor: "#0D3CFC",
+                      width: "100%",
+                      padding: "16px 20px",
+                      border: "2px solid #e8e8e8",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      fontFamily: FONT_FAMILY,
+                      background: "#ffffff",
+                      color: "#000000",
+                      outline: "none",
+                      marginBottom: "16px",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+
+                  <div style={{
+                    position: "relative",
+                    marginBottom: "20px",
+                  }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password (min. 6 characters)"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      minLength={6}
+                      style={{
+                        width: "100%",
+                        padding: "16px 50px 16px 20px",
+                        border: "2px solid #e8e8e8",
+                        borderRadius: "12px",
+                        fontSize: "16px",
+                        fontFamily: FONT_FAMILY,
+                        background: "#ffffff",
+                        color: "#000000",
+                        outline: "none",
+                        transition: "border-color 0.2s ease",
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#999",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <EyeIcon open={showPassword} />
+                    </button>
+                  </div>
+
+                  <div style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                    marginBottom: "8px",
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="agree"
+                      checked={agreed}
+                      onChange={() => setAgreed(!agreed)}
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        marginTop: "2px",
+                        accentColor: "#0D3CFC",
+                        cursor: "pointer",
+                      }}
+                    />
+                    <label
+                      htmlFor="agree"
+                      style={{
+                        fontSize: "16px",
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                        cursor: "pointer",
+                        lineHeight: 1.5,
+                      }}
+                      onClick={toggleAgreement}
+                    >
+                      Saya menyetujui <strong>Pernyataan Persetujuan</strong>
+                    </label>
+                  </div>
+
+                  <div
+                    ref={agreementRef}
+                    style={{
+                      overflow: 'hidden',
+                      height: 0,
+                      opacity: 0,
+                      marginBottom: '0',
+                    }}
+                  >
+                    <div style={{
+                      padding: '20px 0',
+                      fontSize: '18px',
+                      color: '#1a1a1a',
+                      lineHeight: 1.8,
+                      fontFamily: FONT_FAMILY,
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                    }}>
+                      <h3 style={{ fontSize: '24px', fontWeight: 600, color: '#0D3CFC', marginBottom: '16px' }}>
+                        Pernyataan Persetujuan
+                      </h3>
+                      <p><strong>1. Pengumpulan Data</strong></p>
+                      <p style={{ marginLeft: '20px' }}>1.1 Kami mengumpulkan data nama, email, dan informasi profil yang Anda berikan.</p>
+                      <p style={{ marginLeft: '20px' }}>1.2 Data digunakan untuk mengelola akun dan memberikan layanan terbaik.</p>
+                      <p style={{ marginLeft: '20px' }}>1.3 Data tidak akan dibagikan kepada pihak ketiga tanpa izin Anda.</p>
+                      <br />
+                      <p><strong>2. Penggunaan Layanan</strong></p>
+                      <p style={{ marginLeft: '20px' }}>2.1 Anda setuju untuk menggunakan layanan sesuai dengan ketentuan yang berlaku.</p>
+                      <p style={{ marginLeft: '20px' }}>2.2 Anda bertanggung jawab atas semua aktivitas yang terjadi di akun Anda.</p>
+                      <p style={{ marginLeft: '20px' }}>2.3 Kami berhak menghentikan akun yang melanggar ketentuan.</p>
+                      <br />
+                      <p><strong>3. Keamanan</strong></p>
+                      <p style={{ marginLeft: '20px' }}>3.1 Kami melindungi data Anda dengan enkripsi dan protokol keamanan.</p>
+                      <p style={{ marginLeft: '20px' }}>3.2 Anda wajib menjaga kerahasiaan kata sandi dan PIN Anda.</p>
+                      <p style={{ marginLeft: '20px' }}>3.3 Laporkan segera jika ada aktivitas mencurigakan.</p>
+                      <br />
+                      <p><strong>4. Perubahan Ketentuan</strong></p>
+                      <p style={{ marginLeft: '20px' }}>4.1 Ketentuan dapat berubah sewaktu-waktu dan akan diberitahukan.</p>
+                      <p style={{ marginLeft: '20px' }}>4.2 Dengan terus menggunakan layanan, Anda menyetujui perubahan tersebut.</p>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                    marginBottom: '24px',
+                    fontSize: '14px',
+                    color: '#666',
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    <span>Dengan mendaftar, Anda menyetujui</span>
+                    <Link href="/kebijakan" style={{
+                      color: '#0D3CFC',
+                      textDecoration: 'underline',
+                      fontWeight: 500,
+                    }}>
+                      Kebijakan Privasi
+                    </Link>
+                    <span style={{ color: '#ccc' }}>•</span>
+                    <Link href="/ketentuan" style={{
+                      color: '#0D3CFC',
+                      textDecoration: 'underline',
+                      fontWeight: 500,
+                    }}>
+                      Ketentuan Layanan
+                    </Link>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                      width: "100%",
+                      padding: "16px 20px",
+                      backgroundColor: isLoading ? "#ccc" : "#0D3CFC",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "8px",
-                      fontSize: "14px",
+                      borderRadius: "12px",
+                      fontSize: "18px",
                       fontWeight: 600,
                       fontFamily: FONT_FAMILY,
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1,
+                      transition: "all 0.3s ease",
+                    }}
+                    whileHover={!isLoading ? { scale: 1.02, backgroundColor: "#0a2fc9" } : {}}
+                    whileTap={!isLoading ? { scale: 0.98 } : {}}
+                  >
+                    {isLoading ? "Creating Account..." : "Get Started"}
+                  </motion.button>
+                </motion.form>
+
+                <div style={{
+                  textAlign: "center",
+                  fontSize: "16px",
+                  color: "#666666",
+                  fontFamily: FONT_FAMILY,
+                  marginTop: "16px",
+                }}>
+                  Already have an account?{" "}
+                  <Link
+                    href="/signin"
+                    style={{
+                      color: "#0D3CFC",
+                      textDecoration: "underline",
+                      fontWeight: 500,
                       cursor: "pointer",
                     }}
                   >
-                    Kirim
+                    Sign in
+                  </Link>
+                </div>
+
+                <div style={{
+                  textAlign: "center",
+                  marginTop: "20px",
+                  paddingTop: "20px",
+                  borderTop: "1px solid #f0f0f0",
+                }}>
+                  <Link
+                    href="/pusat-bantuan"
+                    style={{
+                      color: "#0D3CFC",
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      fontFamily: FONT_FAMILY,
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                  >
+                    <HelpDeskIcon size={18} />
+                    <span>Pusat Bantuan</span>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "100%",
+                }}
+              >
+                <h2 style={{
+                  fontSize: "36px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "8px",
+                }}>
+                  Buat PIN 6 Digit
+                </h2>
+                <p style={{
+                  fontSize: "18px",
+                  color: "#666",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "32px",
+                  textAlign: "center",
+                }}>
+                  Buat PIN 6 digit untuk keamanan tambahan
+                </p>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '24px',
+                  width: '100%',
+                  maxWidth: '400px',
+                  marginBottom: '16px',
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      fontFamily: FONT_FAMILY,
+                      display: 'block',
+                      marginBottom: '4px',
+                    }}>
+                      PIN
+                    </label>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      value={pin}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 6) setPin(val);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '20px',
+                        fontSize: '32px',
+                        textAlign: 'center',
+                        border: '2px solid #e8e8e8',
+                        borderRadius: '12px',
+                        fontFamily: FONT_FAMILY,
+                        outline: 'none',
+                        letterSpacing: '8px',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      fontFamily: FONT_FAMILY,
+                      display: 'block',
+                      marginBottom: '4px',
+                    }}>
+                      Konfirmasi PIN
+                    </label>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      value={pinConfirm}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 6) setPinConfirm(val);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '20px',
+                        fontSize: '32px',
+                        textAlign: 'center',
+                        border: '2px solid #e8e8e8',
+                        borderRadius: '12px',
+                        fontFamily: FONT_FAMILY,
+                        outline: 'none',
+                        letterSpacing: '8px',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
+                    />
+                  </div>
+                </div>
+
+                {pinError && (
+                  <div style={{
+                    color: '#0D3CFC',
+                    fontSize: '16px',
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: '16px',
+                  }}>
+                    {pinError}
+                  </div>
+                )}
+
+                <div style={{
+                  display: 'flex',
+                  gap: '16px',
+                  marginTop: '8px',
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={resetPin}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: 'transparent',
+                      color: '#666',
+                      border: '2px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Reset
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handlePinSubmit}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: '#0D3CFC',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Simpan PIN
                   </motion.button>
                 </div>
               </motion.div>
             )}
-
-            <div style={{
-              textAlign: "center",
-              marginTop: "20px",
-              paddingTop: "20px",
-              borderTop: "1px solid #f0f0f0",
-            }}>
-              <Link
-                href="/pusat-bantuan"
-                style={{
-                  color: "#0D3CFC",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  fontFamily: FONT_FAMILY,
-                  textDecoration: "none",
-                  transition: "color 0.2s ease",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-              >
-                <HelpDeskIcon size={18} />
-                <span>Pusat Bantuan</span>
-              </Link>
-            </div>
           </motion.div>
 
           <motion.div
@@ -924,13 +1153,6 @@ export default function ForgotPasswordPage() {
           />
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-      `}</style>
     </>
   );
 }
