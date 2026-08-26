@@ -424,31 +424,50 @@ export default function SignInPage() {
   const saveLoginHistory = async (user: any, provider: string) => {
     if (!db) return;
     try {
+      // Ambil nama dari berbagai sumber
+      let displayName = user.displayName || "";
+      let name = "";
+      
+      // Jika displayName kosong, ambil dari email
+      if (!displayName && user.email) {
+        displayName = user.email.split('@')[0];
+      }
+      
+      // Set name sama dengan displayName
+      name = displayName;
+      
       // Cek apakah user sudah ada di loginHistory
       const loginHistoryRef = collection(db, "loginHistory");
       const q = query(loginHistoryRef, where("email", "==", user.email));
       const querySnapshot = await getDocs(q);
       
+      const loginData = {
+        email: user.email || "",
+        displayName: displayName,
+        name: name,
+        provider: provider,
+        lastLogin: serverTimestamp(),
+        uid: user.uid,
+        photoURL: user.photoURL || null,
+      };
+      
       if (querySnapshot.empty) {
         // Buat baru jika belum ada
         await addDoc(collection(db, "loginHistory"), {
-          email: user.email,
-          displayName: user.displayName || user.email?.split('@')[0] || "Pengguna",
-          name: user.displayName || user.email?.split('@')[0] || "Pengguna",
-          provider: provider,
+          ...loginData,
           createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp(),
-          uid: user.uid,
-          photoURL: user.photoURL || null,
         });
+        console.log("Login history created for:", user.email);
       } else {
         // Update lastLogin
         const docRef = querySnapshot.docs[0].ref;
         await updateDoc(docRef, {
           lastLogin: serverTimestamp(),
-          displayName: user.displayName || user.email?.split('@')[0] || "Pengguna",
+          displayName: displayName,
+          name: name,
           photoURL: user.photoURL || null,
         });
+        console.log("Login history updated for:", user.email);
       }
     } catch (error) {
       console.error("Error saving login history:", error);
@@ -543,15 +562,15 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Simpan ke login history dengan provider Google
-      await saveLoginHistory(user, "google");
-      
-      // Update displayName jika kosong
-      if (!user.displayName) {
+      // Pastikan displayName ada
+      if (!user.displayName && user.email) {
         await updateProfile(user, {
-          displayName: user.email?.split('@')[0] || "Pengguna"
+          displayName: user.email.split('@')[0]
         });
       }
+      
+      // Simpan ke login history dengan provider Google
+      await saveLoginHistory(user, "google");
     } catch (error: any) {
       setError(error.message || "Login dengan Google gagal");
     } finally {
@@ -568,15 +587,15 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Simpan ke login history dengan provider GitHub
-      await saveLoginHistory(user, "github");
-      
-      // Update displayName jika kosong
-      if (!user.displayName) {
+      // Pastikan displayName ada
+      if (!user.displayName && user.email) {
         await updateProfile(user, {
-          displayName: user.email?.split('@')[0] || "Pengguna"
+          displayName: user.email.split('@')[0]
         });
       }
+      
+      // Simpan ke login history dengan provider GitHub
+      await saveLoginHistory(user, "github");
     } catch (error: any) {
       setError(error.message || "Login dengan GitHub gagal");
     } finally {
@@ -620,18 +639,6 @@ export default function SignInPage() {
 
   const handleForgotPassword = () => {
     router.push('/forgot-password');
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      await signOut(auth);
-      setUser(null);
-      setShowPinScreen(false);
-      setTempUser(null);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
   };
 
   // ===== RENDER =====
