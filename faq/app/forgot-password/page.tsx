@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
-  sendPasswordResetEmail,
   fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { 
@@ -502,6 +501,11 @@ function ForgotPasswordContent() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // State untuk preloader
+  const [showMain, setShowMain] = useState(false);
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
   // State untuk navbar
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
@@ -511,8 +515,6 @@ function ForgotPasswordContent() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [rollingText, setRollingText] = useState<string>("");
-  const rollingRef = useRef<HTMLSpanElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchExpandedRef = useRef<HTMLDivElement>(null);
@@ -538,9 +540,68 @@ function ForgotPasswordContent() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
+  // ===== PRELOADER ANIMATION =====
+  const startPreloaderAnimation = () => {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMain(true);
+            }
+          });
+        }
+      }
+    });
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
+
   // ===== Mounting =====
   useEffect(() => {
     setIsMounted(true);
+    setTimeout(() => startPreloaderAnimation(), 500);
   }, []);
 
   useEffect(() => {
@@ -555,13 +616,13 @@ function ForgotPasswordContent() {
 
   // ===== BACA TICKET ID DARI URL =====
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !showMain) return;
     const ticketParam = searchParams?.get('ticket');
     if (ticketParam) {
       setTicketId(ticketParam);
       setShowLiveChat(true);
     }
-  }, [searchParams, isMounted]);
+  }, [searchParams, isMounted, showMain]);
 
   // ===== SEARCH EXPAND =====
   useEffect(() => {
@@ -692,7 +753,7 @@ function ForgotPasswordContent() {
         return;
       }
 
-      // CEK EMAIL HARUS TERDAFTAR DI FIREBASE AUTH
+      // CEK EMAIL HARUS TERDAFTAR DI FIREBASE AUTH (untuk password dan pin)
       if (selectedOption === 'password' || selectedOption === 'pin') {
         const emailExists = await checkEmailExists(formData.email);
         if (!emailExists) {
@@ -701,8 +762,6 @@ function ForgotPasswordContent() {
           return;
         }
       }
-
-      // HAPUS KIRIM EMAIL RESET PASSWORD - TIDAK MENGIRIM LINK KE EMAIL
 
       // Buat ticket di Firestore
       const ticketData = {
@@ -757,18 +816,52 @@ function ForgotPasswordContent() {
     setIsResolved(true);
   };
 
-  // ===== RENDER =====
-  if (!isMounted) {
+  // ===== RENDER PRELOADER =====
+  if (!isMounted || !showMain) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#ffffff',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: FONT_FAMILY,
-      }}>
-        <div style={{ color: '#000', fontSize: '1.5rem' }}>Loading...</div>
+      <div
+        ref={preloaderRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
+        </div>
       </div>
     );
   }
