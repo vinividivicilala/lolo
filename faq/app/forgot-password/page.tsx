@@ -162,7 +162,6 @@ const LiveChatAgentGuest = ({
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load ticket data
   useEffect(() => {
     if (!db || !ticketId) return;
     const ticketRef = doc(db, "livechat_tickets", ticketId);
@@ -178,7 +177,6 @@ const LiveChatAgentGuest = ({
     return () => unsubscribe();
   }, [ticketId]);
 
-  // Subscribe agent online status
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -193,7 +191,6 @@ const LiveChatAgentGuest = ({
     return () => unsubscribe();
   }, []);
 
-  // Subscribe messages
   useEffect(() => {
     if (!db || !ticketId) return;
     const q = query(
@@ -494,7 +491,7 @@ const LiveChatAgentGuest = ({
   );
 };
 
-// ===== KOMPONEN UTAMA YANG MENGGUNAKAN useSearchParams =====
+// ===== KOMPONEN UTAMA =====
 function ForgotPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -624,9 +621,18 @@ function ForgotPasswordContent() {
           const data = doc.data();
           if (data.email) {
             emails.push(data.email);
-            // Ambil nama dari email (bagian sebelum @)
-            const emailName = data.email.split('@')[0];
-            const userName = data.displayName || data.name || data.userName || emailName || "Pengguna";
+            // Ambil nama dari berbagai field yang mungkin ada
+            let userName = "";
+            if (data.displayName) {
+              userName = data.displayName;
+            } else if (data.name) {
+              userName = data.name;
+            } else if (data.userName) {
+              userName = data.userName;
+            } else {
+              // Jika tidak ada nama, ambil dari email (bagian sebelum @)
+              userName = data.email.split('@')[0];
+            }
             users.push({
               email: data.email,
               name: userName
@@ -634,6 +640,7 @@ function ForgotPasswordContent() {
           }
         });
         
+        // Tambahkan email admin
         if (ADMIN_EMAIL) {
           emails.push(ADMIN_EMAIL);
           const adminName = ADMIN_EMAIL.split('@')[0];
@@ -833,6 +840,7 @@ function ForgotPasswordContent() {
     setError("");
     
     try {
+      // Cek di data yang sudah dimuat
       const foundUser = registeredUsers.find(user => 
         user.name.toLowerCase() === name.toLowerCase()
       );
@@ -845,7 +853,10 @@ function ForgotPasswordContent() {
         return foundUser;
       }
       
+      // Cari di Firestore loginHistory dengan berbagai field
       const loginHistoryRef = collection(db, "loginHistory");
+      
+      // Cari dengan field displayName
       const q1 = query(loginHistoryRef, where("displayName", "==", name));
       const snapshot1 = await getDocs(q1);
       
@@ -854,7 +865,7 @@ function ForgotPasswordContent() {
         if (data.email) {
           const result = {
             email: data.email,
-            name: data.displayName || data.name || name
+            name: data.displayName || data.name || data.userName || name
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -864,6 +875,7 @@ function ForgotPasswordContent() {
         }
       }
       
+      // Cari dengan field name
       const q2 = query(loginHistoryRef, where("name", "==", name));
       const snapshot2 = await getDocs(q2);
       
@@ -872,7 +884,7 @@ function ForgotPasswordContent() {
         if (data.email) {
           const result = {
             email: data.email,
-            name: data.displayName || data.name || name
+            name: data.displayName || data.name || data.userName || name
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -882,6 +894,26 @@ function ForgotPasswordContent() {
         }
       }
       
+      // Cari dengan field userName
+      const q3 = query(loginHistoryRef, where("userName", "==", name));
+      const snapshot3 = await getDocs(q3);
+      
+      if (!snapshot3.empty) {
+        const data = snapshot3.docs[0].data();
+        if (data.email) {
+          const result = {
+            email: data.email,
+            name: data.displayName || data.name || data.userName || name
+          };
+          console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
+          setNameSearchResult(result);
+          setNameNotFound(false);
+          setIsSearchingName(false);
+          return result;
+        }
+      }
+      
+      // Cari di koleksi users
       const usersRef = collection(db, "users");
       const usersQuery = query(usersRef, where("displayName", "==", name));
       const usersSnapshot = await getDocs(usersQuery);
@@ -891,7 +923,7 @@ function ForgotPasswordContent() {
         if (data.email) {
           const result = {
             email: data.email,
-            name: data.displayName || data.name || name
+            name: data.displayName || data.name || data.userName || name
           };
           console.log(`Nama ${name} ditemukan di koleksi users dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -899,6 +931,21 @@ function ForgotPasswordContent() {
           setIsSearchingName(false);
           return result;
         }
+      }
+      
+      // Jika tidak ditemukan di database, coba ambil dari email (bagian sebelum @)
+      // Cek apakah ada email yang memiliki nama (bagian sebelum @) sama dengan input
+      const foundByEmailName = registeredUsers.find(user => {
+        const emailName = user.email.split('@')[0];
+        return emailName.toLowerCase() === name.toLowerCase();
+      });
+      
+      if (foundByEmailName) {
+        console.log(`Nama ${name} ditemukan dari email (bagian sebelum @): ${foundByEmailName.email}`);
+        setIsSearchingName(false);
+        setNameSearchResult(foundByEmailName);
+        setNameNotFound(false);
+        return foundByEmailName;
       }
       
       console.log(`Nama ${name} tidak ditemukan`);
