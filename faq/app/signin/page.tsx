@@ -424,25 +424,77 @@ export default function SignInPage() {
   const saveLoginHistory = async (user: any, provider: string) => {
     if (!db) return;
     try {
+      // Ambil email dari berbagai sumber
+      let userEmail = user.email || "";
+      
+      // Jika email kosong, coba dari providerData
+      if (!userEmail && user.providerData && user.providerData.length > 0) {
+        for (const data of user.providerData) {
+          if (data.email) {
+            userEmail = data.email;
+            break;
+          }
+        }
+      }
+      
+      // Jika masih kosong, coba dari user.reloadUserInfo
+      if (!userEmail && user.reloadUserInfo) {
+        userEmail = user.reloadUserInfo.email || "";
+      }
+      
+      // Jika masih kosong, coba dari email dari result
+      if (!userEmail) {
+        // Untuk Google, email biasanya ada di providerData
+        if (user.providerData) {
+          for (const data of user.providerData) {
+            if (data.email) {
+              userEmail = data.email;
+              break;
+            }
+          }
+        }
+      }
+      
+      // Jika masih kosong, gunakan UID sebagai fallback
+      if (!userEmail) {
+        userEmail = `${user.uid}@user.com`;
+      }
+      
       // Ambil nama dari berbagai sumber
       let displayName = user.displayName || "";
-      let name = "";
       
-      // Jika displayName kosong, ambil dari email
-      if (!displayName && user.email) {
-        displayName = user.email.split('@')[0];
+      // Jika displayName kosong, ambil dari providerData
+      if (!displayName && user.providerData && user.providerData.length > 0) {
+        for (const data of user.providerData) {
+          if (data.displayName) {
+            displayName = data.displayName;
+            break;
+          }
+        }
+      }
+      
+      // Jika displayName masih kosong, ambil dari email
+      if (!displayName && userEmail && userEmail !== `${user.uid}@user.com`) {
+        displayName = userEmail.split('@')[0];
+      }
+      
+      // Jika masih kosong, gunakan nama dari user
+      if (!displayName) {
+        displayName = userEmail.split('@')[0] || "Pengguna";
       }
       
       // Set name sama dengan displayName
-      name = displayName;
+      const name = displayName;
+      
+      console.log("Saving login history:", { email: userEmail, displayName, name, provider });
       
       // Cek apakah user sudah ada di loginHistory
       const loginHistoryRef = collection(db, "loginHistory");
-      const q = query(loginHistoryRef, where("email", "==", user.email));
+      const q = query(loginHistoryRef, where("uid", "==", user.uid));
       const querySnapshot = await getDocs(q);
       
       const loginData = {
-        email: user.email || "",
+        email: userEmail,
         displayName: displayName,
         name: name,
         provider: provider,
@@ -457,7 +509,7 @@ export default function SignInPage() {
           ...loginData,
           createdAt: serverTimestamp(),
         });
-        console.log("Login history created for:", user.email);
+        console.log("Login history created for:", userEmail);
       } else {
         // Update lastLogin
         const docRef = querySnapshot.docs[0].ref;
@@ -466,8 +518,9 @@ export default function SignInPage() {
           displayName: displayName,
           name: name,
           photoURL: user.photoURL || null,
+          email: userEmail,
         });
-        console.log("Login history updated for:", user.email);
+        console.log("Login history updated for:", userEmail);
       }
     } catch (error) {
       console.error("Error saving login history:", error);
@@ -562,16 +615,35 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
+      console.log("Google user:", user);
+      console.log("Google user email:", user.email);
+      console.log("Google providerData:", user.providerData);
+      
       // Pastikan displayName ada
-      if (!user.displayName && user.email) {
-        await updateProfile(user, {
-          displayName: user.email.split('@')[0]
-        });
+      let displayName = user.displayName || "";
+      if (!displayName && user.providerData && user.providerData.length > 0) {
+        for (const data of user.providerData) {
+          if (data.displayName) {
+            displayName = data.displayName;
+            break;
+          }
+        }
       }
+      if (!displayName && user.email) {
+        displayName = user.email.split('@')[0];
+      }
+      if (!displayName) {
+        displayName = "Pengguna";
+      }
+      
+      await updateProfile(user, {
+        displayName: displayName
+      });
       
       // Simpan ke login history dengan provider Google
       await saveLoginHistory(user, "google");
     } catch (error: any) {
+      console.error("Google login error:", error);
       setError(error.message || "Login dengan Google gagal");
     } finally {
       setLoading(false);
@@ -587,16 +659,35 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
+      console.log("GitHub user:", user);
+      console.log("GitHub user email:", user.email);
+      console.log("GitHub providerData:", user.providerData);
+      
       // Pastikan displayName ada
-      if (!user.displayName && user.email) {
-        await updateProfile(user, {
-          displayName: user.email.split('@')[0]
-        });
+      let displayName = user.displayName || "";
+      if (!displayName && user.providerData && user.providerData.length > 0) {
+        for (const data of user.providerData) {
+          if (data.displayName) {
+            displayName = data.displayName;
+            break;
+          }
+        }
       }
+      if (!displayName && user.email) {
+        displayName = user.email.split('@')[0];
+      }
+      if (!displayName) {
+        displayName = "Pengguna";
+      }
+      
+      await updateProfile(user, {
+        displayName: displayName
+      });
       
       // Simpan ke login history dengan provider GitHub
       await saveLoginHistory(user, "github");
     } catch (error: any) {
+      console.error("GitHub login error:", error);
       setError(error.message || "Login dengan GitHub gagal");
     } finally {
       setLoading(false);
