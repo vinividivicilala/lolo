@@ -546,6 +546,7 @@ function ForgotPasswordContent() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isSearchingName, setIsSearchingName] = useState(false);
   const [nameSearchResult, setNameSearchResult] = useState<{email: string, name: string} | null>(null);
+  const [nameNotFound, setNameNotFound] = useState(false);
 
   // ===== PRELOADER ANIMATION =====
   const startPreloaderAnimation = () => {
@@ -613,7 +614,6 @@ function ForgotPasswordContent() {
       try {
         setIsLoadingUsers(true);
         
-        // Ambil data dari koleksi loginHistory
         const loginHistoryRef = collection(db, "loginHistory");
         const querySnapshot = await getDocs(loginHistoryRef);
         
@@ -622,7 +622,6 @@ function ForgotPasswordContent() {
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          // Ambil email dan displayName dari loginHistory
           if (data.email) {
             emails.push(data.email);
             const userName = data.displayName || data.name || data.userName || "Pengguna";
@@ -633,7 +632,6 @@ function ForgotPasswordContent() {
           }
         });
         
-        // Tambahkan email admin
         if (ADMIN_EMAIL) {
           emails.push(ADMIN_EMAIL);
           users.push({
@@ -642,7 +640,6 @@ function ForgotPasswordContent() {
           });
         }
         
-        // Hapus duplikat berdasarkan email
         const uniqueEmails = [...new Set(emails)];
         const uniqueUsers = users.filter((user, index, self) => 
           index === self.findIndex((u) => u.email === user.email)
@@ -786,7 +783,6 @@ function ForgotPasswordContent() {
     }
     
     try {
-      // Cek di koleksi loginHistory
       const loginHistoryRef = collection(db, "loginHistory");
       const q = query(loginHistoryRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
@@ -797,7 +793,6 @@ function ForgotPasswordContent() {
         return true;
       }
       
-      // Cek di koleksi users
       const usersRef = collection(db, "users");
       const usersQuery = query(usersRef, where("email", "==", email));
       const usersSnapshot = await getDocs(usersQuery);
@@ -808,7 +803,6 @@ function ForgotPasswordContent() {
         return true;
       }
       
-      // Cek di Firebase Auth
       try {
         const methods = await fetchSignInMethodsForEmail(auth, email);
         if (methods && methods.length > 0) {
@@ -832,10 +826,10 @@ function ForgotPasswordContent() {
   const findEmailByName = async (name: string): Promise<{email: string, name: string} | null> => {
     setIsSearchingName(true);
     setNameSearchResult(null);
+    setNameNotFound(false);
     setError("");
     
     try {
-      // Cek di data yang sudah dimuat
       const foundUser = registeredUsers.find(user => 
         user.name.toLowerCase() === name.toLowerCase()
       );
@@ -844,12 +838,11 @@ function ForgotPasswordContent() {
         console.log(`Nama ${name} ditemukan di data yang sudah dimuat, email: ${foundUser.email}`);
         setIsSearchingName(false);
         setNameSearchResult(foundUser);
+        setNameNotFound(false);
         return foundUser;
       }
       
-      // Jika tidak ditemukan, cari langsung di Firestore loginHistory
       const loginHistoryRef = collection(db, "loginHistory");
-      // Cari berdasarkan name (displayName)
       const q1 = query(loginHistoryRef, where("displayName", "==", name));
       const snapshot1 = await getDocs(q1);
       
@@ -862,12 +855,12 @@ function ForgotPasswordContent() {
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
+          setNameNotFound(false);
           setIsSearchingName(false);
           return result;
         }
       }
       
-      // Coba cari dengan field "name"
       const q2 = query(loginHistoryRef, where("name", "==", name));
       const snapshot2 = await getDocs(q2);
       
@@ -880,12 +873,12 @@ function ForgotPasswordContent() {
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
+          setNameNotFound(false);
           setIsSearchingName(false);
           return result;
         }
       }
       
-      // Cari di koleksi users
       const usersRef = collection(db, "users");
       const usersQuery = query(usersRef, where("displayName", "==", name));
       const usersSnapshot = await getDocs(usersQuery);
@@ -899,16 +892,19 @@ function ForgotPasswordContent() {
           };
           console.log(`Nama ${name} ditemukan di koleksi users dengan email: ${result.email}`);
           setNameSearchResult(result);
+          setNameNotFound(false);
           setIsSearchingName(false);
           return result;
         }
       }
       
       console.log(`Nama ${name} tidak ditemukan`);
+      setNameNotFound(true);
       setIsSearchingName(false);
       return null;
     } catch (error) {
       console.error("Error searching name:", error);
+      setNameNotFound(true);
       setIsSearchingName(false);
       return null;
     }
@@ -928,7 +924,6 @@ function ForgotPasswordContent() {
       let userEmail = formData.email;
       let userName = formData.name;
 
-      // Untuk Lupa Email: cari email berdasarkan nama
       if (selectedOption === 'email') {
         if (!formData.name) {
           setError("Nama harus diisi.");
@@ -938,19 +933,17 @@ function ForgotPasswordContent() {
         
         const result = await findEmailByName(formData.name);
         if (!result) {
-          setError("Nama tidak ditemukan. Silakan gunakan nama yang sudah terdaftar.");
+          setError("Maaf tidak ada nama yang terdaftar");
           setLoading(false);
           return;
         }
         
         userEmail = result.email;
         userName = result.name;
-        // Set email yang ditemukan ke formData
         formData.email = result.email;
         formData.name = result.name;
       }
 
-      // Untuk Lupa Password dan Lupa Pola Sandi: validasi email
       if (selectedOption === 'password' || selectedOption === 'pin') {
         if (!formData.email) {
           setError("Email harus diisi.");
@@ -968,7 +961,6 @@ function ForgotPasswordContent() {
         userName = formData.name || "Pengguna";
       }
 
-      // Buat ticket di Firestore
       const ticketData = {
         userId: null,
         userName: userName,
@@ -1011,6 +1003,7 @@ function ForgotPasswordContent() {
     setIsResolved(false);
     setShowAgreement(false);
     setNameSearchResult(null);
+    setNameNotFound(false);
     if (agreementRef.current) {
       gsap.set(agreementRef.current, { height: 0, opacity: 0 });
     }
@@ -1021,8 +1014,8 @@ function ForgotPasswordContent() {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFormData({ ...formData, name: value });
-    // Reset result saat user mengetik
     setNameSearchResult(null);
+    setNameNotFound(false);
     setError("");
   };
 
@@ -1034,16 +1027,12 @@ function ForgotPasswordContent() {
       if (result) {
         setFormData({ ...formData, email: result.email, name: result.name });
         setNameSearchResult(result);
+        setNameNotFound(false);
         setError("");
-        // Auto submit jika sudah agreed
-        if (agreed) {
-          // Submit form
-          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-          e.currentTarget.form?.dispatchEvent(submitEvent);
-        }
       } else {
-        setError("Nama tidak ditemukan. Silakan coba lagi.");
         setNameSearchResult(null);
+        setNameNotFound(true);
+        setError("Maaf tidak ada nama yang terdaftar");
       }
     }
   };
@@ -1388,6 +1377,7 @@ function ForgotPasswordContent() {
                         onClick={() => {
                           setSelectedOption(item.id as any);
                           setNameSearchResult(null);
+                          setNameNotFound(false);
                           setError("");
                           setFormData({ email: "", name: "" });
                         }}
@@ -1451,6 +1441,7 @@ function ForgotPasswordContent() {
                       onClick={() => {
                         setSelectedOption(null);
                         setNameSearchResult(null);
+                        setNameNotFound(false);
                         setError("");
                         setFormData({ email: "", name: "" });
                       }}
@@ -1548,7 +1539,7 @@ function ForgotPasswordContent() {
                         />
                         {isSearchingName && (
                           <div style={{ fontSize: '14px', color: '#0D3CFC', marginTop: '8px', fontFamily: FONT_FAMILY }}>
-                            🔍 Mencari nama...
+                            Mencari nama...
                           </div>
                         )}
                         {nameSearchResult && (
@@ -1562,7 +1553,21 @@ function ForgotPasswordContent() {
                             borderRadius: '8px',
                             border: '1px solid #86efac'
                           }}>
-                            ✅ Nama ditemukan! Email: <strong>{nameSearchResult.email}</strong>
+                            Nama ditemukan! Email: {nameSearchResult.email}
+                          </div>
+                        )}
+                        {nameNotFound && (
+                          <div style={{ 
+                            fontSize: '14px', 
+                            color: '#0D3CFC', 
+                            marginTop: '8px', 
+                            fontFamily: FONT_FAMILY,
+                            backgroundColor: '#fee2e2',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #fca5a5'
+                          }}>
+                            Maaf tidak ada nama yang terdaftar
                           </div>
                         )}
                         <div style={{
@@ -1805,7 +1810,7 @@ function ForgotPasswordContent() {
                     fontFamily: FONT_FAMILY,
                     marginTop: '4px',
                   }}>
-                    ✅ Chat ini sudah selesai. Terima kasih.
+                    Chat ini sudah selesai. Terima kasih.
                   </p>
                 )}
               </div>
