@@ -540,8 +540,9 @@ function ForgotPasswordContent() {
   const [showAgreement, setShowAgreement] = useState(false);
   const agreementRef = useRef<HTMLDivElement>(null);
 
-  // State untuk daftar email terdaftar
+  // State untuk daftar email terdaftar dari database livechat_tickets
   const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<{email: string, name: string}[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(true);
 
   // ===== PRELOADER ANIMATION =====
@@ -602,41 +603,56 @@ function ForgotPasswordContent() {
     }, "-=0.3");
   };
 
-  // ===== LOAD ALL REGISTERED EMAILS FROM LIVECHAT TICKETS =====
+  // ===== LOAD ALL REGISTERED USERS FROM LIVECHAT TICKETS =====
   useEffect(() => {
     if (!db) return;
     
-    const loadRegisteredEmails = async () => {
+    const loadRegisteredUsers = async () => {
       try {
         setIsLoadingEmails(true);
         const ticketsRef = collection(db, "livechat_tickets");
         const querySnapshot = await getDocs(ticketsRef);
         const emails: string[] = [];
+        const users: {email: string, name: string}[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.userEmail && data.userEmail !== "tidakada@email.com") {
             emails.push(data.userEmail);
+            users.push({
+              email: data.userEmail,
+              name: data.userName || "Pengguna"
+            });
           }
         });
         
         // Tambahkan email admin
         if (ADMIN_EMAIL) {
           emails.push(ADMIN_EMAIL);
+          users.push({
+            email: ADMIN_EMAIL,
+            name: AGENT_NAME
+          });
         }
         
-        // Hapus duplikat
+        // Hapus duplikat berdasarkan email
         const uniqueEmails = [...new Set(emails)];
+        const uniqueUsers = users.filter((user, index, self) => 
+          index === self.findIndex((u) => u.email === user.email)
+        );
+        
         setRegisteredEmails(uniqueEmails);
+        setRegisteredUsers(uniqueUsers);
         console.log("Registered emails from livechat:", uniqueEmails);
+        console.log("Registered users from livechat:", uniqueUsers);
         setIsLoadingEmails(false);
       } catch (error) {
-        console.error("Error loading registered emails:", error);
+        console.error("Error loading registered users:", error);
         setIsLoadingEmails(false);
       }
     };
     
-    loadRegisteredEmails();
+    loadRegisteredUsers();
   }, []);
 
   // ===== Mounting =====
@@ -765,12 +781,15 @@ function ForgotPasswordContent() {
     
     // Jika tidak ditemukan di database, coba cek langsung ke Firestore
     try {
+      // Cek di koleksi livechat_tickets
       const ticketsRef = collection(db, "livechat_tickets");
       const q = query(ticketsRef, where("userEmail", "==", email));
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
         console.log(`Email ${email} ditemukan di Firestore livechat tickets`);
+        // Tambahkan ke daftar untuk cache
+        setRegisteredEmails(prev => [...prev, email]);
         return true;
       }
       
@@ -781,6 +800,7 @@ function ForgotPasswordContent() {
       
       if (!usersSnapshot.empty) {
         console.log(`Email ${email} ditemukan di koleksi users`);
+        setRegisteredEmails(prev => [...prev, email]);
         return true;
       }
       
@@ -789,6 +809,7 @@ function ForgotPasswordContent() {
         const methods = await fetchSignInMethodsForEmail(auth, email);
         if (methods && methods.length > 0) {
           console.log(`Email ${email} ditemukan di Firebase Auth`);
+          setRegisteredEmails(prev => [...prev, email]);
           return true;
         }
       } catch (authError) {
@@ -831,11 +852,52 @@ function ForgotPasswordContent() {
         return;
       }
 
-      // CEK EMAIL HARUS TERDAFTAR DI DATABASE (untuk password dan pin)
+      // CEK EMAIL HARUS TERDAFTAR DI DATABASE (untuk semua opsi)
+      let emailExists = false;
+      let userData = null;
+      
       if (selectedOption === 'password' || selectedOption === 'pin') {
-        const emailExists = await checkEmailExists(formData.email);
+        // Cek email di database
+        emailExists = await checkEmailExists(formData.email);
         if (!emailExists) {
           setError("Email tidak terdaftar. Silakan gunakan email yang sudah terdaftar atau buat akun baru.");
+          setLoading(false);
+          return;
+        }
+      } else if (selectedOption === 'email') {
+        // Untuk Lupa Email, cek nama dan email yang terdaftar
+        // Cari user dengan nama yang cocok di database
+        const foundUser = registeredUsers.find(user => 
+          user.name.toLowerCase() === formData.name.toLowerCase()
+        );
+        
+        if (foundUser) {
+          emailExists = true;
+          userData = foundUser;
+          // Set email dari data yang ditemukan
+          formData.email = foundUser.email;
+        } else {
+          // Coba cari di Firestore langsung
+          try {
+            const ticketsRef = collection(db, "livechat_tickets");
+            const q = query(ticketsRef, where("userName", "==", formData.name));
+            const querySnapshot = await getDocs(q);
+            
+            if (!querySnapshot.empty) {
+              const data = querySnapshot.docs[0].data();
+              if (data.userEmail && data.userEmail !== "tidakada@email.com") {
+                emailExists = true;
+                formData.email = data.userEmail;
+                userData = { email: data.userEmail, name: data.userName };
+              }
+            }
+          } catch (error) {
+            console.error("Error searching user by name:", error);
+          }
+        }
+        
+        if (!emailExists) {
+          setError("Nama tidak ditemukan. Silakan gunakan nama yang sudah terdaftar atau buat akun baru.");
           setLoading(false);
           return;
         }
@@ -844,7 +906,7 @@ function ForgotPasswordContent() {
       // Buat ticket di Firestore
       const ticketData = {
         userId: null,
-        userName: formData.name || "Pengguna",
+        userName: selectedOption === 'email' && userData ? userData.name : (formData.name || "Pengguna"),
         userEmail: formData.email || "tidakada@email.com",
         topic: selectedOption === 'password' ? 'Lupa Password' :
                selectedOption === 'email' ? 'Lupa Email' : 'Lupa Pola Sandi',
@@ -855,7 +917,7 @@ function ForgotPasswordContent() {
         typingUserId: null,
         typingUserName: null,
         detail: selectedOption === 'password' ? `Email: ${formData.email}` :
-                selectedOption === 'email' ? `Nama: ${formData.name}` :
+                selectedOption === 'email' ? `Nama: ${formData.name}, Email ditemukan: ${formData.email}` :
                 `Email: ${formData.email}, Nama: ${formData.name}`,
       };
 
@@ -1331,7 +1393,7 @@ function ForgotPasswordContent() {
                     marginBottom: '32px',
                   }}>
                     {selectedOption === 'password' && 'Masukkan email terdaftar Anda. Agent akan membantu reset password.'}
-                    {selectedOption === 'email' && 'Masukkan nama lengkap Anda untuk mencari email terdaftar.'}
+                    {selectedOption === 'email' && 'Masukkan nama lengkap Anda yang terdaftar untuk menemukan email Anda.'}
                     {selectedOption === 'pin' && 'Masukkan nama dan email Anda untuk reset pola sandi.'}
                   </p>
 
@@ -1366,11 +1428,11 @@ function ForgotPasswordContent() {
                     {selectedOption === 'email' && (
                       <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', fontSize: '14px', color: '#666', marginBottom: '4px', fontFamily: FONT_FAMILY }}>
-                          Nama Lengkap
+                          Nama Lengkap (sesuai saat mendaftar)
                         </label>
                         <input
                           type="text"
-                          placeholder="Masukkan nama Anda"
+                          placeholder="Masukkan nama lengkap Anda"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
@@ -1387,6 +1449,14 @@ function ForgotPasswordContent() {
                           onFocus={(e) => e.currentTarget.style.borderColor = '#0D3CFC'}
                           onBlur={(e) => e.currentTarget.style.borderColor = '#e8e8e8'}
                         />
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#999',
+                          marginTop: '4px',
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          Masukkan nama lengkap yang Anda gunakan saat mendaftar
+                        </div>
                       </div>
                     )}
 
