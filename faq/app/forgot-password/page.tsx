@@ -538,7 +538,7 @@ function ForgotPasswordContent() {
   const agreementRef = useRef<HTMLDivElement>(null);
 
   // State untuk daftar user dari loginHistory
-  const [registeredUsers, setRegisteredUsers] = useState<{email: string, name: string}[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<{email: string, name: string, uid: string, provider: string}[]>([]);
   const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isSearchingName, setIsSearchingName] = useState(false);
@@ -614,28 +614,23 @@ function ForgotPasswordContent() {
         const loginHistoryRef = collection(db, "loginHistory");
         const querySnapshot = await getDocs(loginHistoryRef);
         
-        const users: {email: string, name: string}[] = [];
+        const users: {email: string, name: string, uid: string, provider: string}[] = [];
         const emails: string[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          if (data.email) {
-            emails.push(data.email);
-            // Ambil nama dari berbagai field yang mungkin ada
-            let userName = "";
-            if (data.displayName) {
-              userName = data.displayName;
-            } else if (data.name) {
-              userName = data.name;
-            } else if (data.userName) {
-              userName = data.userName;
-            } else {
-              // Jika tidak ada nama, ambil dari email (bagian sebelum @)
-              userName = data.email.split('@')[0];
-            }
+          // Cek apakah email valid (bukan random UID@user.com)
+          const email = data.email || "";
+          const isValidEmail = email && !email.includes('@user.com') && email.includes('@');
+          
+          if (isValidEmail) {
+            emails.push(email);
+            const userName = data.displayName || data.name || email.split('@')[0] || "Pengguna";
             users.push({
-              email: data.email,
-              name: userName
+              email: email,
+              name: userName,
+              uid: data.uid || "",
+              provider: data.provider || "",
             });
           }
         });
@@ -643,10 +638,11 @@ function ForgotPasswordContent() {
         // Tambahkan email admin
         if (ADMIN_EMAIL) {
           emails.push(ADMIN_EMAIL);
-          const adminName = ADMIN_EMAIL.split('@')[0];
           users.push({
             email: ADMIN_EMAIL,
-            name: AGENT_NAME || adminName
+            name: AGENT_NAME,
+            uid: "admin",
+            provider: "email",
           });
         }
         
@@ -848,9 +844,9 @@ function ForgotPasswordContent() {
       if (foundUser) {
         console.log(`Nama ${name} ditemukan di data yang sudah dimuat, email: ${foundUser.email}`);
         setIsSearchingName(false);
-        setNameSearchResult(foundUser);
+        setNameSearchResult({ email: foundUser.email, name: foundUser.name });
         setNameNotFound(false);
-        return foundUser;
+        return { email: foundUser.email, name: foundUser.name };
       }
       
       // Cari di Firestore loginHistory dengan berbagai field
@@ -860,12 +856,14 @@ function ForgotPasswordContent() {
       const q1 = query(loginHistoryRef, where("displayName", "==", name));
       const snapshot1 = await getDocs(q1);
       
-      if (!snapshot1.empty) {
-        const data = snapshot1.docs[0].data();
-        if (data.email) {
+      for (const doc of snapshot1.docs) {
+        const data = doc.data();
+        const email = data.email || "";
+        // Validasi email bukan random UID@user.com
+        if (email && !email.includes('@user.com') && email.includes('@')) {
           const result = {
-            email: data.email,
-            name: data.displayName || data.name || data.userName || name
+            email: email,
+            name: data.displayName || data.name || name
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -879,12 +877,13 @@ function ForgotPasswordContent() {
       const q2 = query(loginHistoryRef, where("name", "==", name));
       const snapshot2 = await getDocs(q2);
       
-      if (!snapshot2.empty) {
-        const data = snapshot2.docs[0].data();
-        if (data.email) {
+      for (const doc of snapshot2.docs) {
+        const data = doc.data();
+        const email = data.email || "";
+        if (email && !email.includes('@user.com') && email.includes('@')) {
           const result = {
-            email: data.email,
-            name: data.displayName || data.name || data.userName || name
+            email: email,
+            name: data.displayName || data.name || name
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -898,12 +897,13 @@ function ForgotPasswordContent() {
       const q3 = query(loginHistoryRef, where("userName", "==", name));
       const snapshot3 = await getDocs(q3);
       
-      if (!snapshot3.empty) {
-        const data = snapshot3.docs[0].data();
-        if (data.email) {
+      for (const doc of snapshot3.docs) {
+        const data = doc.data();
+        const email = data.email || "";
+        if (email && !email.includes('@user.com') && email.includes('@')) {
           const result = {
-            email: data.email,
-            name: data.displayName || data.name || data.userName || name
+            email: email,
+            name: data.displayName || data.name || name
           };
           console.log(`Nama ${name} ditemukan di Firestore loginHistory dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -918,12 +918,13 @@ function ForgotPasswordContent() {
       const usersQuery = query(usersRef, where("displayName", "==", name));
       const usersSnapshot = await getDocs(usersQuery);
       
-      if (!usersSnapshot.empty) {
-        const data = usersSnapshot.docs[0].data();
-        if (data.email) {
+      for (const doc of usersSnapshot.docs) {
+        const data = doc.data();
+        const email = data.email || "";
+        if (email && !email.includes('@user.com') && email.includes('@')) {
           const result = {
-            email: data.email,
-            name: data.displayName || data.name || data.userName || name
+            email: email,
+            name: data.displayName || data.name || name
           };
           console.log(`Nama ${name} ditemukan di koleksi users dengan email: ${result.email}`);
           setNameSearchResult(result);
@@ -934,7 +935,6 @@ function ForgotPasswordContent() {
       }
       
       // Jika tidak ditemukan di database, coba ambil dari email (bagian sebelum @)
-      // Cek apakah ada email yang memiliki nama (bagian sebelum @) sama dengan input
       const foundByEmailName = registeredUsers.find(user => {
         const emailName = user.email.split('@')[0];
         return emailName.toLowerCase() === name.toLowerCase();
@@ -943,9 +943,9 @@ function ForgotPasswordContent() {
       if (foundByEmailName) {
         console.log(`Nama ${name} ditemukan dari email (bagian sebelum @): ${foundByEmailName.email}`);
         setIsSearchingName(false);
-        setNameSearchResult(foundByEmailName);
+        setNameSearchResult({ email: foundByEmailName.email, name: foundByEmailName.name });
         setNameNotFound(false);
-        return foundByEmailName;
+        return { email: foundByEmailName.email, name: foundByEmailName.name };
       }
       
       console.log(`Nama ${name} tidak ditemukan`);
