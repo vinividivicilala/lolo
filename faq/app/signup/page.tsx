@@ -47,6 +47,61 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== ICONS =====
+const SearchIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ShopIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 7L4 20H20L21 7H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M7 7L8 4H16L17 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M15 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const StoreIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 7H20M4 7L3 12H21L20 7M4 7L5 20H19L20 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12V16H15V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
+    <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    {hasBadge && (
+      <circle cx="19" cy="5" r="5" fill="#ef4444" stroke="white" strokeWidth="2"/>
+    )}
+  </svg>
+);
+
 const EyeIcon = ({ open }: { open: boolean }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     {open ? (
@@ -63,15 +118,7 @@ const EyeIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
-const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
+// ===== NAVBAR ICONS SAMA SEPERTI HALAMAN UTAMA =====
 const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -98,48 +145,21 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-export default function SignUpPage() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: ""
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  
-  // State untuk Persetujuan
-  const [agreed, setAgreed] = useState(false);
-  const [showAgreement, setShowAgreement] = useState(false);
-  const agreementRef = useRef<HTMLDivElement>(null);
-  
-  // State untuk PIN
-  const [showPinScreen, setShowPinScreen] = useState(false);
-  const [pin, setPin] = useState("");
-  const [pinConfirm, setPinConfirm] = useState("");
-  const [pinError, setPinError] = useState("");
-  const [tempUser, setTempUser] = useState<any>(null);
-  
-  // State untuk navbar
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuOverlayRef = useRef<HTMLDivElement>(null);
-  const plusIconRef = useRef<HTMLSpanElement>(null);
-  
-  // State untuk preloader
-  const [showMain, setShowMain] = useState(false);
+// ===== SEARCH ROLLING TEXT =====
+const searchRollingTexts = [
+  "Tentang Note", 
+  "Tentang Donasi", 
+  "Tentang Blog", 
+  "Tentang Shop", 
+  "Tentang Pusat bantuan"
+];
+
+// ===== PRELOADER =====
+const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  
-  const router = useRouter();
 
   useEffect(() => {
-    setIsMounted(true);
-    setTimeout(() => startPreloaderAnimation(), 500);
-  }, []);
-
-  const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
         if (preloaderRef.current) {
@@ -147,9 +167,7 @@ export default function SignUpPage() {
             opacity: 0,
             duration: 0.6,
             ease: "power2.inOut",
-            onComplete: () => {
-              setShowMain(true);
-            }
+            onComplete: onComplete
           });
         }
       }
@@ -194,37 +212,180 @@ export default function SignUpPage() {
       duration: 0.3,
       ease: "power2.inOut"
     }, "-=0.3");
+  }, [onComplete]);
+
+  return (
+    <div
+      ref={preloaderRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+        <span
+          style={{
+            fontSize: "100px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Menuru
+        </span>
+        <span
+          ref={textRef}
+          style={{
+            fontSize: "50px",
+            fontWeight: 600,
+            color: "#000000",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.02em",
+            display: "inline-block",
+            willChange: "transform, opacity",
+          }}
+        >
+          Shop
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default function SignUpPage() {
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // State untuk Persetujuan
+  const [agreed, setAgreed] = useState(false);
+  const [showAgreement, setShowAgreement] = useState(false);
+  const agreementRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk PIN
+  const [showPinScreen, setShowPinScreen] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinConfirm, setPinConfirm] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [tempUser, setTempUser] = useState<any>(null);
+  
+  // State untuk navbar
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
+  
+  // State untuk search
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [rollingText, setRollingText] = useState<string>(searchRollingTexts[0]);
+  const rollingRef = useRef<HTMLSpanElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchExpandedRef = useRef<HTMLDivElement>(null);
+  
+  // State untuk preloader
+  const [showMain, setShowMain] = useState(false);
+  
+  const router = useRouter();
+
+  // ===== PRELOADER =====
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handlePreloaderComplete = () => {
+    setShowMain(true);
   };
 
+  // ===== MOBILE CHECK =====
   useEffect(() => {
-    if (!isMounted) return;
+    if (!showMain) return;
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, [isMounted]);
+  }, [showMain]);
 
-  // Toggle agreement with GSAP
-  const toggleAgreement = () => {
-    setShowAgreement(!showAgreement);
-    if (!showAgreement && agreementRef.current) {
-      gsap.fromTo(agreementRef.current,
-        { height: 0, opacity: 0 },
-        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
+  // ===== ROLLING TEXT =====
+  useEffect(() => {
+    if (!showMain) return;
+    let isForward = true;
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      if (isForward) {
+        currentIndex++;
+        if (currentIndex >= searchRollingTexts.length) {
+          currentIndex = searchRollingTexts.length - 2;
+          isForward = false;
+        }
+      } else {
+        currentIndex--;
+        if (currentIndex < 0) {
+          currentIndex = 1;
+          isForward = true;
+        }
+      }
+      if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
+        setRollingText(searchRollingTexts[currentIndex]);
+        if (rollingRef.current) {
+          gsap.fromTo(rollingRef.current,
+            { y: 10, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+          );
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [showMain]);
+
+  // ===== SEARCH EXPAND =====
+  useEffect(() => {
+    if (isSearchOpen && searchExpandedRef.current) {
+      gsap.fromTo(searchExpandedRef.current,
+        { height: 0, opacity: 0, y: -10 },
+        { height: "auto", opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
       );
-    } else if (agreementRef.current) {
-      gsap.to(agreementRef.current, {
-        height: 0,
-        opacity: 0,
-        duration: 0.4,
-        ease: 'power2.in'
-      });
+      setTimeout(() => searchInputRef.current?.focus(), 300);
     }
-  };
+  }, [isSearchOpen]);
 
-  // Toggle Menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setSearchResults([]);
+  }, [searchQuery]);
+
+  // ===== TOGGLE MENU =====
   const toggleMenu = () => {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
@@ -265,18 +426,39 @@ export default function SignUpPage() {
     }
   };
 
-  // Fungsi untuk menyimpan PIN ke Firestore
-  const savePin = async (uid: string, pinValue: string) => {
+  // ===== TOGGLE AGREEMENT =====
+  const toggleAgreement = () => {
+    setShowAgreement(!showAgreement);
+    if (!showAgreement && agreementRef.current) {
+      gsap.fromTo(agreementRef.current,
+        { height: 0, opacity: 0 },
+        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    } else if (agreementRef.current) {
+      gsap.to(agreementRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.in'
+      });
+    }
+  };
+
+  // ===== SAVE USER TO FIRESTORE =====
+  const saveUserToFirestore = async (uid: string, email: string, name: string, pinValue: string) => {
     if (!db) return;
     const userRef = doc(db, "users", uid);
-    await setDoc(userRef, { 
+    await setDoc(userRef, {
+      email: email,
+      displayName: name,
+      name: name,
       pin: pinValue,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     }, { merge: true });
   };
 
-  // Handle Sign Up
+  // ===== HANDLE SIGN UP =====
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) {
@@ -299,6 +481,7 @@ export default function SignUpPage() {
 
       console.log("User created successfully:", userCredential.user);
       
+      // Simpan user sementara untuk PIN
       setTempUser(userCredential.user);
       setShowPinScreen(true);
       setIsLoading(false);
@@ -325,7 +508,7 @@ export default function SignUpPage() {
     }
   };
 
-  // Handle PIN submit
+  // ===== HANDLE PIN SUBMIT =====
   const handlePinSubmit = async () => {
     if (pin.length !== 6) {
       setPinError("PIN harus 6 digit");
@@ -337,7 +520,10 @@ export default function SignUpPage() {
     }
     setPinError("");
     
-    await savePin(tempUser.uid, pin);
+    // Simpan user ke koleksi "users" dengan PIN
+    await saveUserToFirestore(tempUser.uid, tempUser.email, formData.name, pin);
+    
+    // Redirect ke halaman utama
     router.push('/');
   };
 
@@ -347,53 +533,9 @@ export default function SignUpPage() {
     setPinError("");
   };
 
+  // ===== RENDER =====
   if (!isMounted || !showMain) {
-    return (
-      <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            Menuru
-          </span>
-          <span
-            ref={textRef}
-            style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-            }}
-          >
-            Shop
-          </span>
-        </div>
-      </div>
-    );
+    return <Preloader onComplete={handlePreloaderComplete} />;
   }
 
   return (
@@ -437,7 +579,7 @@ export default function SignUpPage() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* ===== HEADER / NAVBAR ===== */}
+        {/* ===== HEADER / NAVBAR SAMA SEPERTI HALAMAN UTAMA ===== */}
         <div style={{
           position: "fixed",
           top: "40px",
@@ -449,7 +591,7 @@ export default function SignUpPage() {
           justifyContent: "space-between",
           pointerEvents: "none",
         }}>
-          {/* KIRI: Menuru - Sembunyikan saat menu terbuka */}
+          {/* KIRI: Menuru */}
           <div style={{ 
             display: "flex", 
             alignItems: "center", 
@@ -572,7 +714,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Menu Overlay - z-index: 100 (di bawah navbar) */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -594,7 +736,6 @@ export default function SignUpPage() {
             padding: "40px",
           }}
         >
-          {/* Hanya judul putih di menu overlay */}
           <h1
             style={{
               fontSize: "48px",
@@ -613,16 +754,6 @@ export default function SignUpPage() {
           >
             Menuru
           </h1>
-          
-          {/* Konten menu overlay lainnya bisa ditambahkan di sini */}
-          <div style={{
-            marginTop: "120px",
-            color: "#ffffff",
-            fontSize: "24px",
-            fontFamily: FONT_FAMILY,
-          }}>
-            {/* Menu items akan ditambahkan di sini */}
-          </div>
         </div>
 
         {/* ===== KONTEN SIGN UP ===== */}
@@ -656,6 +787,7 @@ export default function SignUpPage() {
             }}
           >
             {!showPinScreen ? (
+              // === FORM SIGN UP ===
               <>
                 <h1 style={{
                   fontSize: isMobile ? "80px" : "200px",
@@ -681,6 +813,7 @@ export default function SignUpPage() {
                   Create your account to join the Menuru community
                 </p>
 
+                {/* Error Message */}
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -753,6 +886,7 @@ export default function SignUpPage() {
                     onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
                   />
 
+                  {/* Password dengan icon mata */}
                   <div style={{
                     position: "relative",
                     marginBottom: "20px",
@@ -801,6 +935,7 @@ export default function SignUpPage() {
                     </button>
                   </div>
 
+                  {/* ===== CEKLIST PERNYATAAN PERSETUJUAN ===== */}
                   <div style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -835,6 +970,7 @@ export default function SignUpPage() {
                     </label>
                   </div>
 
+                  {/* ===== ISI PERNYATAAN PERSETUJUAN ===== */}
                   <div
                     ref={agreementRef}
                     style={{
@@ -879,6 +1015,7 @@ export default function SignUpPage() {
                     </div>
                   </div>
 
+                  {/* ===== LINK KEBIJAKAN & KETENTUAN ===== */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -980,6 +1117,7 @@ export default function SignUpPage() {
                 </div>
               </>
             ) : (
+              // === POLA PIN 6 ANGKA ===
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1142,6 +1280,7 @@ export default function SignUpPage() {
             )}
           </motion.div>
 
+          {/* SISI KANAN kosong */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
