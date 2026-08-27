@@ -344,38 +344,38 @@ const getGreeting = (): string => {
   return "Selamat malam";
 };
 
-// ===== DEFAULT FAQ DATA =====
+// ===== DEFAULT FAQ DATA - URUTAN: Blog, Note, Donation, Shop, Calendar, News =====
 const defaultFaqData = {
   Blog: [
     { q: "Apa itu Blog Menuru?", a: "Blog Menuru adalah platform untuk berbagi artikel, tips, dan informasi seputar gaya hidup, pengembangan diri, dan teknologi." },
     { q: "Bagaimana cara menulis artikel di Blog Menuru?", a: "Untuk menulis artikel, Anda harus login sebagai kontributor. Hubungi tim admin untuk mendapatkan akses." },
     { q: "Apakah ada biaya untuk membaca blog?", a: "Tidak, semua artikel di Blog Menuru dapat dibaca secara gratis." },
   ],
-  Shop: [
-    { q: "Produk apa saja yang dijual di Shop Menuru?", a: "Shop Menuru menjual merchandise eksklusif seperti kaos, tas, dan aksesoris dengan desain khas Menuru." },
-    { q: "Bagaimana cara melakukan pembelian?", a: "Pilih produk, tambahkan ke keranjang, lalu ikuti proses checkout. Pembayaran melalui transfer bank atau e-wallet." },
-    { q: "Apakah tersedia pengiriman internasional?", a: "Saat ini pengiriman hanya untuk wilayah Indonesia. Kami akan segera membuka pengiriman internasional." },
+  Note: [
+    { q: "Apa itu Note?", a: "Note adalah fitur untuk mencatat ide, catatan pribadi, atau hal penting lainnya." },
+    { q: "Apakah Note bisa dibagikan?", a: "Saat ini Note bersifat pribadi. Fitur berbagi akan segera hadir." },
+    { q: "Bagaimana cara menyimpan Note?", a: "Cukup tulis catatan Anda dan klik simpan. Note akan tersimpan di akun Anda." },
   ],
   Donation: [
     { q: "Bagaimana cara berdonasi?", a: "Anda dapat berdonasi melalui tombol Donasi di halaman utama, atau transfer ke rekening resmi Menuru yang tertera." },
     { q: "Kemana donasi disalurkan?", a: "Donasi disalurkan untuk kegiatan sosial, pendidikan, dan pengembangan komunitas." },
     { q: "Apakah donasi bisa mendapatkan laporan?", a: "Ya, setiap donasi akan dilaporkan secara transparan di halaman Laporan Donasi." },
   ],
-  News: [
-    { q: "Berita apa saja yang dimuat di News?", a: "News berisi berita terbaru seputar kegiatan Menuru, pencapaian, dan acara mendatang." },
-    { q: "Apakah bisa berlangganan newsletter?", a: "Ya, Anda bisa berlangganan newsletter melalui form di halaman News." },
-    { q: "Bagaimana cara mengirimkan berita?", a: "Kirimkan berita ke email redaksi@menuru.com untuk dipertimbangkan." },
+  Shop: [
+    { q: "Produk apa saja yang dijual di Shop Menuru?", a: "Shop Menuru menjual merchandise eksklusif seperti kaos, tas, dan aksesoris dengan desain khas Menuru." },
+    { q: "Bagaimana cara melakukan pembelian?", a: "Pilih produk, tambahkan ke keranjang, lalu ikuti proses checkout. Pembayaran melalui transfer bank atau e-wallet." },
+    { q: "Apakah tersedia pengiriman internasional?", a: "Saat ini pengiriman hanya untuk wilayah Indonesia. Kami akan segera membuka pengiriman internasional." },
   ],
   Calendar: [
     { q: "Apa fungsi Calendar?", a: "Calendar menampilkan jadwal acara, webinar, dan kegiatan komunitas Menuru." },
     { q: "Bagaimana cara menambahkan acara ke Calendar?", a: "Acara ditambahkan oleh tim admin. Jika Anda ingin mengusulkan acara, hubungi kami." },
     { q: "Apakah Calendar bisa di-sync ke Google Calendar?", a: "Ya, ada tombol sinkronisasi untuk menambahkan acara ke Google Calendar Anda." },
   ],
-  Note: [
-    { q: "Apa itu Note?", a: "Note adalah fitur untuk mencatat ide, catatan pribadi, atau hal penting lainnya." },
-    { q: "Apakah Note bisa dibagikan?", a: "Saat ini Note bersifat pribadi. Fitur berbagi akan segera hadir." },
-    { q: "Bagaimana cara menyimpan Note?", a: "Cukup tulis catatan Anda dan klik simpan. Note akan tersimpan di akun Anda." },
-  ]
+  News: [
+    { q: "Berita apa saja yang dimuat di News?", a: "News berisi berita terbaru seputar kegiatan Menuru, pencapaian, dan acara mendatang." },
+    { q: "Apakah bisa berlangganan newsletter?", a: "Ya, Anda bisa berlangganan newsletter melalui form di halaman News." },
+    { q: "Bagaimana cara mengirimkan berita?", a: "Kirimkan berita ke email redaksi@menuru.com untuk dipertimbangkan." },
+  ],
 };
 
 // ============================================================
@@ -605,6 +605,9 @@ const FaqItem = ({
 // ===== SIDEBAR NAVIGATION =====
 // ============================================================
 const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categories: string[] }) => {
+  // Urutan sidebar yang benar: 01 Blog, 02 Note, 03 Donation, 04 Shop, 05 Calendar, 06 News
+  const sidebarOrder = ["Blog", "Note", "Donation", "Shop", "Calendar", "News"];
+  
   return (
     <div style={{
       position: "fixed",
@@ -617,7 +620,7 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
       alignItems: "flex-start",
       gap: "8px",
     }}>
-      {categories.map((category, idx) => {
+      {sidebarOrder.map((category, idx) => {
         const number = String(idx + 1).padStart(2, '0');
         const isActive = idx === activeIndex;
         return (
@@ -1991,6 +1994,7 @@ export default function PusatBantuanPage() {
   // State untuk sidebar navigation
   const [activeFaqIndex, setActiveFaqIndex] = useState(0);
   const categories = Object.keys(defaultFaqData);
+  const sidebarOrder = ["Blog", "Note", "Donation", "Shop", "Calendar", "News"];
 
   // ===== PRELOADER =====
   useEffect(() => {
@@ -2007,7 +2011,7 @@ export default function PusatBantuanPage() {
     
     const handleScroll = () => {
       // Cek setiap FAQ section dari bawah ke atas
-      for (let i = categories.length - 1; i >= 0; i--) {
+      for (let i = sidebarOrder.length - 1; i >= 0; i--) {
         const number = String(i + 1).padStart(2, '0');
         const element = document.getElementById(`faq-${number}`);
         if (element) {
@@ -2026,7 +2030,7 @@ export default function PusatBantuanPage() {
     setTimeout(handleScroll, 500);
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [showMain, categories]);
+  }, [showMain]);
 
   // ===== MOUNTING =====
   useEffect(() => {
@@ -2530,7 +2534,7 @@ export default function PusatBantuanPage() {
         </div>
 
         {/* ===== SIDEBAR NAVIGATION ===== */}
-        <SidebarNav activeIndex={activeFaqIndex} categories={categories} />
+        <SidebarNav activeIndex={activeFaqIndex} categories={sidebarOrder} />
 
         {/* ===== KONTEN PUSAT BANTUAN ===== */}
         <div style={{
@@ -2606,8 +2610,9 @@ export default function PusatBantuanPage() {
             </span>
           </motion.div>
 
-          {Object.keys(faqData).map((category, catIndex) => {
+          {sidebarOrder.map((category, catIndex) => {
             const number = String(catIndex + 1).padStart(2, '0');
+            const faqCategory = category as keyof typeof faqData;
             return (
               <motion.div
                 key={category}
@@ -2632,7 +2637,7 @@ export default function PusatBantuanPage() {
                 </h2>
 
                 <div style={{ maxWidth: "100%", margin: "0" }}>
-                  {faqData[category as keyof typeof faqData].map((item, idx) => (
+                  {faqData[faqCategory]?.map((item, idx) => (
                     <FaqItem 
                       key={idx} 
                       question={item.q} 
