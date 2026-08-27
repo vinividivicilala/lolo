@@ -87,7 +87,7 @@ const EditIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// ===== NAVBAR ICONS SAMA SEPERTI HALAMAN UTAMA =====
+// ===== NAVBAR ICONS =====
 const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -388,6 +388,7 @@ const FaqItem = ({
   index,
   isAdmin,
   onEdit,
+  number,
 }: { 
   question: string; 
   answer: string; 
@@ -395,6 +396,7 @@ const FaqItem = ({
   index: number;
   isAdmin: boolean;
   onEdit: (category: string, index: number, newQ: string, newA: string) => void;
+  number: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -440,7 +442,7 @@ const FaqItem = ({
   };
 
   return (
-    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }}>
+    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }} id={`faq-${number}`}>
       <div 
         onClick={!isEditing ? toggleFaq : undefined}
         style={{
@@ -451,36 +453,47 @@ const FaqItem = ({
           padding: '4px 0',
         }}
       >
-        {isEditing ? (
-          <input
-            type="text"
-            value={editQ}
-            onChange={(e) => setEditQ(e.target.value)}
-            style={{
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{
+            fontSize: '24px',
+            fontWeight: 600,
+            color: '#0D3CFC',
+            fontFamily: FONT_FAMILY,
+            minWidth: '60px',
+          }}>
+            {number}
+          </span>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editQ}
+              onChange={(e) => setEditQ(e.target.value)}
+              style={{
+                fontSize: '30px',
+                fontWeight: 500,
+                color: '#0D3CFC',
+                fontFamily: FONT_FAMILY,
+                border: '2px solid #0D3CFC',
+                borderRadius: '8px',
+                padding: '4px 12px',
+                width: '80%',
+                backgroundColor: '#f5f9ff',
+                outline: 'none',
+              }}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          ) : (
+            <span style={{
               fontSize: '30px',
               fontWeight: 500,
               color: '#0D3CFC',
               fontFamily: FONT_FAMILY,
-              border: '2px solid #0D3CFC',
-              borderRadius: '8px',
-              padding: '4px 12px',
-              width: '80%',
-              backgroundColor: '#f5f9ff',
-              outline: 'none',
-            }}
-            onClick={(e) => e.stopPropagation()}
-            autoFocus
-          />
-        ) : (
-          <span style={{
-            fontSize: '30px',
-            fontWeight: 500,
-            color: '#0D3CFC',
-            fontFamily: FONT_FAMILY,
-          }}>
-            {question}
-          </span>
-        )}
+            }}>
+              {question}
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {isAdmin && !isEditing && (
             <button
@@ -563,7 +576,7 @@ const FaqItem = ({
         </div>
       </div>
       {isEditing ? (
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ marginTop: '12px', paddingLeft: '76px' }}>
           <textarea
             value={editA}
             onChange={(e) => setEditA(e.target.value)}
@@ -585,7 +598,7 @@ const FaqItem = ({
           />
         </div>
       ) : (
-        <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0 }}>
+        <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0, paddingLeft: '76px' }}>
           <div style={{
             padding: '12px 0 8px 0',
             fontSize: '30px',
@@ -597,6 +610,99 @@ const FaqItem = ({
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// ============================================================
+// ===== SIDEBAR NAVIGATION =====
+// ============================================================
+const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categories: string[] }) => {
+  const [visibleItems, setVisibleItems] = useState<number[]>([]);
+  const prevActiveIndexRef = useRef(0);
+
+  useEffect(() => {
+    // Ketika scroll ke bawah (activeIndex bertambah), tambahkan item baru
+    if (activeIndex > prevActiveIndexRef.current) {
+      setVisibleItems(prev => {
+        const newItems = [...prev];
+        for (let i = prevActiveIndexRef.current + 1; i <= activeIndex; i++) {
+          if (!newItems.includes(i)) {
+            newItems.push(i);
+          }
+        }
+        return newItems;
+      });
+    } 
+    // Ketika scroll ke atas (activeIndex berkurang), hapus item terakhir
+    else if (activeIndex < prevActiveIndexRef.current) {
+      setVisibleItems(prev => {
+        const newItems = [...prev];
+        while (newItems.length > 0 && newItems[newItems.length - 1] > activeIndex) {
+          newItems.pop();
+        }
+        return newItems;
+      });
+    }
+    
+    prevActiveIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  return (
+    <div style={{
+      position: "fixed",
+      left: "40px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 50,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "0",
+    }}>
+      {visibleItems.map((idx) => {
+        const number = String(idx + 1).padStart(2, '0');
+        const isActive = idx === activeIndex;
+        return (
+          <div
+            key={idx}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "6px 0",
+              opacity: isActive ? 1 : 0.6,
+              transition: "opacity 0.3s ease",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              const element = document.getElementById(`faq-${number}`);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }}
+          >
+            {/* Garis putus-putus */}
+            <div style={{
+              width: "20px",
+              height: "1px",
+              borderTop: "1.5px dashed #0D3CFC",
+              opacity: isActive ? 1 : 0.5,
+              transition: "opacity 0.3s ease",
+            }} />
+            <span style={{
+              fontSize: "14px",
+              fontWeight: isActive ? 600 : 400,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.05em",
+              transition: "all 0.3s ease",
+            }}>
+              {number}. {categories[idx]}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -1021,10 +1127,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-    const isWaiting = activeTicket?.status === 'waiting';
-    const isResolved = activeTicket?.status === 'resolved' || activeTicket?.status === 'closed';
-    const isAgentOnlineNow = agentOnline && activeTicket?.status === 'active';
-
     if (tickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "40px" }}>
@@ -1934,6 +2036,11 @@ export default function PusatBantuanPage() {
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
   const [greetingText, setGreetingText] = useState(getGreeting());
   const greetingRef = useRef<HTMLSpanElement>(null);
+  
+  // State untuk sidebar navigation
+  const [activeFaqIndex, setActiveFaqIndex] = useState(0);
+  const categories = Object.keys(defaultFaqData);
+  const faqRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
   // ===== PRELOADER =====
   useEffect(() => {
@@ -1944,11 +2051,38 @@ export default function PusatBantuanPage() {
     setShowMain(true);
   };
 
+  // ===== SCROLL DETECTION FOR SIDEBAR =====
+  useEffect(() => {
+    if (!showMain) return;
+    
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 200; // offset untuk deteksi lebih awal
+      
+      // Cek setiap FAQ section
+      for (let i = categories.length - 1; i >= 0; i--) {
+        const category = categories[i];
+        const element = document.getElementById(`faq-${String(i + 1).padStart(2, '0')}`);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 250) {
+            setActiveFaqIndex(i);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Initial check
+    setTimeout(handleScroll, 500);
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showMain, categories]);
+
   // ===== MOUNTING =====
   useEffect(() => {
     if (!showMain) return;
     
-    // Auth listener
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -2273,7 +2407,7 @@ export default function PusatBantuanPage() {
         overflowX: "hidden",
         overflowY: "auto",
       }}>
-        {/* ===== HEADER / NAVBAR SAMA SEPERTI HALAMAN UTAMA ===== */}
+        {/* ===== HEADER / NAVBAR ===== */}
         <div style={{
           position: "fixed",
           top: "40px",
@@ -2285,7 +2419,6 @@ export default function PusatBantuanPage() {
           justifyContent: "space-between",
           pointerEvents: "none",
         }}>
-          {/* KIRI: Menuru */}
           <div style={{ 
             display: "flex", 
             alignItems: "center", 
@@ -2314,7 +2447,6 @@ export default function PusatBantuanPage() {
             </Link>
           </div>
 
-          {/* KANAN: NAVBAR */}
           <div
             style={{
               display: "flex",
@@ -2332,7 +2464,6 @@ export default function PusatBantuanPage() {
               zIndex: 102,
             }}
           >
-            {/* Baris atas: Shop, About, Sign In */}
             <div
               style={{
                 display: "flex",
@@ -2360,7 +2491,6 @@ export default function PusatBantuanPage() {
               </Link>
             </div>
 
-            {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
             <div
               style={{
                 display: "flex",
@@ -2450,10 +2580,14 @@ export default function PusatBantuanPage() {
           </h1>
         </div>
 
+        {/* ===== SIDEBAR NAVIGATION ===== */}
+        <SidebarNav activeIndex={activeFaqIndex} categories={categories} />
+
         {/* ===== KONTEN PUSAT BANTUAN ===== */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 40px",
+          paddingLeft: "140px",
           width: "100%",
           maxWidth: "1400px",
           marginLeft: "auto",
@@ -2523,43 +2657,48 @@ export default function PusatBantuanPage() {
             </span>
           </motion.div>
 
-          {Object.keys(faqData).map((category, catIndex) => (
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
-              style={{ marginBottom: "60px" }}
-            >
-              <h2 style={{
-                fontSize: "70px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.2,
-                margin: "0 0 20px 0",
-                textAlign: "left",
-                wordBreak: "break-word",
-              }}>
-                {category}
-              </h2>
+          {Object.keys(faqData).map((category, catIndex) => {
+            const number = String(catIndex + 1).padStart(2, '0');
+            return (
+              <motion.div
+                key={category}
+                id={`faq-${number}`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
+                style={{ marginBottom: "60px" }}
+              >
+                <h2 style={{
+                  fontSize: "70px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.2,
+                  margin: "0 0 20px 0",
+                  textAlign: "left",
+                  wordBreak: "break-word",
+                }}>
+                  {number}. {category}
+                </h2>
 
-              <div style={{ maxWidth: "100%", margin: "0" }}>
-                {faqData[category as keyof typeof faqData].map((item, idx) => (
-                  <FaqItem 
-                    key={idx} 
-                    question={item.q} 
-                    answer={item.a} 
-                    category={category}
-                    index={idx}
-                    isAdmin={isAdmin}
-                    onEdit={handleEditFaq}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ))}
+                <div style={{ maxWidth: "100%", margin: "0" }}>
+                  {faqData[category as keyof typeof faqData].map((item, idx) => (
+                    <FaqItem 
+                      key={idx} 
+                      question={item.q} 
+                      answer={item.a} 
+                      category={category}
+                      index={idx}
+                      isAdmin={isAdmin}
+                      onEdit={handleEditFaq}
+                      number={number}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })}
 
           {/* ===== LIVE CHAT AGENT ===== */}
           <LiveChatAgent 
