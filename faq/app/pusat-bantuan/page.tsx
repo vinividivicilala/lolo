@@ -388,7 +388,6 @@ const FaqItem = ({
   index,
   isAdmin,
   onEdit,
-  number,
 }: { 
   question: string; 
   answer: string; 
@@ -396,7 +395,6 @@ const FaqItem = ({
   index: number;
   isAdmin: boolean;
   onEdit: (category: string, index: number, newQ: string, newA: string) => void;
-  number: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -442,7 +440,7 @@ const FaqItem = ({
   };
 
   return (
-    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }} id={`faq-${number}`}>
+    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }}>
       <div 
         onClick={!isEditing ? toggleFaq : undefined}
         style={{
@@ -453,47 +451,36 @@ const FaqItem = ({
           padding: '4px 0',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{
-            fontSize: '24px',
-            fontWeight: 600,
-            color: '#0D3CFC',
-            fontFamily: FONT_FAMILY,
-            minWidth: '60px',
-          }}>
-            {number}
-          </span>
-          {isEditing ? (
-            <input
-              type="text"
-              value={editQ}
-              onChange={(e) => setEditQ(e.target.value)}
-              style={{
-                fontSize: '30px',
-                fontWeight: 500,
-                color: '#0D3CFC',
-                fontFamily: FONT_FAMILY,
-                border: '2px solid #0D3CFC',
-                borderRadius: '8px',
-                padding: '4px 12px',
-                width: '80%',
-                backgroundColor: '#f5f9ff',
-                outline: 'none',
-              }}
-              onClick={(e) => e.stopPropagation()}
-              autoFocus
-            />
-          ) : (
-            <span style={{
+        {isEditing ? (
+          <input
+            type="text"
+            value={editQ}
+            onChange={(e) => setEditQ(e.target.value)}
+            style={{
               fontSize: '30px',
               fontWeight: 500,
               color: '#0D3CFC',
               fontFamily: FONT_FAMILY,
-            }}>
-              {question}
-            </span>
-          )}
-        </div>
+              border: '2px solid #0D3CFC',
+              borderRadius: '8px',
+              padding: '4px 12px',
+              width: '80%',
+              backgroundColor: '#f5f9ff',
+              outline: 'none',
+            }}
+            onClick={(e) => e.stopPropagation()}
+            autoFocus
+          />
+        ) : (
+          <span style={{
+            fontSize: '30px',
+            fontWeight: 500,
+            color: '#0D3CFC',
+            fontFamily: FONT_FAMILY,
+          }}>
+            {question}
+          </span>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {isAdmin && !isEditing && (
             <button
@@ -576,7 +563,7 @@ const FaqItem = ({
         </div>
       </div>
       {isEditing ? (
-        <div style={{ marginTop: '12px', paddingLeft: '76px' }}>
+        <div style={{ marginTop: '12px' }}>
           <textarea
             value={editA}
             onChange={(e) => setEditA(e.target.value)}
@@ -598,7 +585,7 @@ const FaqItem = ({
           />
         </div>
       ) : (
-        <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0, paddingLeft: '76px' }}>
+        <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0 }}>
           <div style={{
             padding: '12px 0 8px 0',
             fontSize: '30px',
@@ -618,36 +605,6 @@ const FaqItem = ({
 // ===== SIDEBAR NAVIGATION =====
 // ============================================================
 const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categories: string[] }) => {
-  const [visibleItems, setVisibleItems] = useState<number[]>([]);
-  const prevActiveIndexRef = useRef(0);
-
-  useEffect(() => {
-    // Ketika scroll ke bawah (activeIndex bertambah), tambahkan item baru
-    if (activeIndex > prevActiveIndexRef.current) {
-      setVisibleItems(prev => {
-        const newItems = [...prev];
-        for (let i = prevActiveIndexRef.current + 1; i <= activeIndex; i++) {
-          if (!newItems.includes(i)) {
-            newItems.push(i);
-          }
-        }
-        return newItems;
-      });
-    } 
-    // Ketika scroll ke atas (activeIndex berkurang), hapus item terakhir
-    else if (activeIndex < prevActiveIndexRef.current) {
-      setVisibleItems(prev => {
-        const newItems = [...prev];
-        while (newItems.length > 0 && newItems[newItems.length - 1] > activeIndex) {
-          newItems.pop();
-        }
-        return newItems;
-      });
-    }
-    
-    prevActiveIndexRef.current = activeIndex;
-  }, [activeIndex]);
-
   return (
     <div style={{
       position: "fixed",
@@ -658,9 +615,9 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
       display: "flex",
       flexDirection: "column",
       alignItems: "flex-start",
-      gap: "0",
+      gap: "8px",
     }}>
-      {visibleItems.map((idx) => {
+      {categories.map((category, idx) => {
         const number = String(idx + 1).padStart(2, '0');
         const isActive = idx === activeIndex;
         return (
@@ -669,11 +626,12 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              padding: "6px 0",
-              opacity: isActive ? 1 : 0.6,
-              transition: "opacity 0.3s ease",
+              gap: "0",
+              padding: "4px 0",
+              opacity: isActive ? 1 : 0.5,
+              transition: "opacity 0.3s ease, transform 0.3s ease",
               cursor: "pointer",
+              transform: isActive ? "scale(1.05)" : "scale(1)",
             }}
             onClick={() => {
               const element = document.getElementById(`faq-${number}`);
@@ -682,23 +640,16 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
               }
             }}
           >
-            {/* Garis putus-putus */}
-            <div style={{
-              width: "20px",
-              height: "1px",
-              borderTop: "1.5px dashed #0D3CFC",
-              opacity: isActive ? 1 : 0.5,
-              transition: "opacity 0.3s ease",
-            }} />
             <span style={{
-              fontSize: "14px",
-              fontWeight: isActive ? 600 : 400,
-              color: "#0D3CFC",
+              fontSize: isActive ? "28px" : "20px",
+              fontWeight: isActive ? 700 : 400,
+              color: isActive ? "#0D3CFC" : "#999",
               fontFamily: FONT_FAMILY,
-              letterSpacing: "0.05em",
+              letterSpacing: "0.02em",
               transition: "all 0.3s ease",
+              lineHeight: 1.2,
             }}>
-              {number}. {categories[idx]}
+              {number}. {category}
             </span>
           </div>
         );
@@ -2040,7 +1991,6 @@ export default function PusatBantuanPage() {
   // State untuk sidebar navigation
   const [activeFaqIndex, setActiveFaqIndex] = useState(0);
   const categories = Object.keys(defaultFaqData);
-  const faqRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
   // ===== PRELOADER =====
   useEffect(() => {
@@ -2056,14 +2006,13 @@ export default function PusatBantuanPage() {
     if (!showMain) return;
     
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200; // offset untuk deteksi lebih awal
-      
-      // Cek setiap FAQ section
+      // Cek setiap FAQ section dari bawah ke atas
       for (let i = categories.length - 1; i >= 0; i--) {
-        const category = categories[i];
-        const element = document.getElementById(`faq-${String(i + 1).padStart(2, '0')}`);
+        const number = String(i + 1).padStart(2, '0');
+        const element = document.getElementById(`faq-${number}`);
         if (element) {
           const rect = element.getBoundingClientRect();
+          // Jika judul FAQ terlihat di viewport (top <= 250)
           if (rect.top <= 250) {
             setActiveFaqIndex(i);
             break;
@@ -2587,7 +2536,7 @@ export default function PusatBantuanPage() {
         <div style={{
           marginTop: "180px",
           padding: "0 40px 40px",
-          paddingLeft: "140px",
+          paddingLeft: "160px",
           width: "100%",
           maxWidth: "1400px",
           marginLeft: "auto",
@@ -2692,7 +2641,6 @@ export default function PusatBantuanPage() {
                       index={idx}
                       isAdmin={isAdmin}
                       onEdit={handleEditFaq}
-                      number={number}
                     />
                   ))}
                 </div>
