@@ -8,10 +8,11 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
 // Firebase Config
@@ -74,6 +75,22 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+// Arrow Right SVG
+const ArrowRight = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Instagram SVG
+const InstagramIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2"/>
+    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
+    <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
 export default function ProfilePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -89,6 +106,9 @@ export default function ProfilePage(): React.JSX.Element {
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
   const goalRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const teamRef = useRef<HTMLDivElement>(null);
+  const sinceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -97,6 +117,90 @@ export default function ProfilePage(): React.JSX.Element {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (showMain) {
+      setTimeout(() => {
+        initAnimations();
+      }, 300);
+    }
+  }, [showMain]);
+
+  const initAnimations = () => {
+    // Split text animations
+    const aboutSplit = new SplitText(aboutRef.current?.querySelectorAll('.about-text, .about-title-text'), {
+      type: 'lines',
+      linesClass: 'split-line'
+    });
+
+    const goalSplit = new SplitText(goalRef.current?.querySelectorAll('.goal-text, .goal-title-text'), {
+      type: 'lines',
+      linesClass: 'split-line'
+    });
+
+    const teamSplit = new SplitText(teamRef.current?.querySelectorAll('.team-text, .team-title-text'), {
+      type: 'lines',
+      linesClass: 'split-line'
+    });
+
+    // About section animation
+    gsap.from(aboutRef.current?.querySelectorAll('.split-line'), {
+      y: 60,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: aboutRef.current,
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+
+    // Goal section animation
+    gsap.from(goalRef.current?.querySelectorAll('.split-line'), {
+      y: 60,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: goalRef.current,
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+
+    // Team section animation
+    gsap.from(teamRef.current?.querySelectorAll('.split-line'), {
+      y: 60,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: teamRef.current,
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+
+    // Since section animation
+    gsap.from(sinceRef.current, {
+      scale: 0.8,
+      opacity: 0,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: sinceRef.current,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+
+    // Refresh ScrollTrigger
+    ScrollTrigger.refresh();
+  };
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -424,10 +528,10 @@ export default function ProfilePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* OUR GOAL SECTION - Added below the buttons */}
+            {/* ABOUT MENURU SECTION */}
             <div
-              ref={goalRef}
-              className="goal-section"
+              ref={aboutRef}
+              className="about-section"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 2fr",
@@ -438,7 +542,7 @@ export default function ProfilePage(): React.JSX.Element {
                 alignItems: "flex-start",
               }}
             >
-              {/* Left side - "Our goal" text */}
+              {/* Left side - "About Menuru" */}
               <div
                 style={{
                   display: "flex",
@@ -447,6 +551,73 @@ export default function ProfilePage(): React.JSX.Element {
                 }}
               >
                 <h3
+                  className="about-title-text"
+                  style={{
+                    fontSize: "72px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1,
+                    margin: 0,
+                    padding: 0,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  About Menuru
+                </h3>
+              </div>
+
+              {/* Right side - Description */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <p
+                  className="about-text"
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 400,
+                    color: "#000000",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.8,
+                    margin: 0,
+                    padding: 0,
+                    maxWidth: "100%",
+                  }}
+                >
+                  Menuru Studio is a non-profit brand born from the founder's vision to assist the public at no cost. Established in 2024, the brand originated from the founder's own experiences—specifically, the challenges they faced with note-taking and scheduling after graduating from university. At its core, Menuru Studio embodies the founder's commitment to helping the community.
+                </p>
+              </div>
+            </div>
+
+            {/* OUR GOAL SECTION */}
+            <div
+              ref={goalRef}
+              className="goal-section"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                marginTop: "60px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+                alignItems: "flex-start",
+              }}
+            >
+              {/* Left side - "Our goal" */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h3
+                  className="goal-title-text"
                   style={{
                     fontSize: "72px",
                     fontWeight: 700,
@@ -462,7 +633,7 @@ export default function ProfilePage(): React.JSX.Element {
                 </h3>
               </div>
 
-              {/* Right side - Description text with 5 lines */}
+              {/* Right side - Description */}
               <div
                 style={{
                   display: "flex",
@@ -472,10 +643,11 @@ export default function ProfilePage(): React.JSX.Element {
                 }}
               >
                 <p
+                  className="goal-text"
                   style={{
                     fontSize: "20px",
                     fontWeight: 400,
-                    color: "#333333",
+                    color: "#000000",
                     fontFamily: FONT_FAMILY,
                     lineHeight: 1.8,
                     margin: 0,
@@ -483,9 +655,171 @@ export default function ProfilePage(): React.JSX.Element {
                     maxWidth: "100%",
                   }}
                 >
-                  From the moment our company was founded, we have helped our clients find exceptional solutions for their businesses, creating memorable brands and digital products. Our expertise grows with each year, and our accumulated experience empowers us to develop products exactly as they should be.
+                  Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features. Our expertise has continued to grow over the years, and this accumulated experience enables us to develop features that truly meet the highest standards.
                 </p>
               </div>
+            </div>
+
+            {/* MEET OUR TEAM SECTION */}
+            <div
+              ref={teamRef}
+              className="team-section"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                marginTop: "60px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+                alignItems: "flex-start",
+              }}
+            >
+              {/* Left side - "Meet our team" with arrow + Instagram */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "16px",
+                }}
+              >
+                <div
+                  className="team-title-text"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "72px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1,
+                      margin: 0,
+                      padding: 0,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    Meet our team
+                  </h3>
+                  <ArrowRight size={32} style={{ color: "#0D3CFC" }} />
+                </div>
+                <Link 
+                  href="https://www.instagram.com/faridardiansyahh/"
+                  target="_blank"
+                  style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: "8px",
+                    textDecoration: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <InstagramIcon size={24} style={{ color: "#0D3CFC" }} />
+                  <span style={{ 
+                    fontSize: "16px", 
+                    fontWeight: 500, 
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                  }}>
+                    @faridardiansyahh
+                  </span>
+                </Link>
+              </div>
+
+              {/* Right side - Team members */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "20px",
+                }}
+              >
+                {/* Founder */}
+                <div className="team-text" style={{ width: "100%" }}>
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "1fr 2fr",
+                    gap: "40px",
+                    width: "100%",
+                  }}>
+                    <span style={{ 
+                      fontSize: "18px", 
+                      fontWeight: 600, 
+                      color: "#000000",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      Founder
+                    </span>
+                    <span style={{ 
+                      fontSize: "18px", 
+                      fontWeight: 400, 
+                      color: "#000000",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      Farid Ardiansyah
+                    </span>
+                  </div>
+                </div>
+
+                {/* Developer */}
+                <div className="team-text" style={{ width: "100%" }}>
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "1fr 2fr",
+                    gap: "40px",
+                    width: "100%",
+                  }}>
+                    <span style={{ 
+                      fontSize: "18px", 
+                      fontWeight: 600, 
+                      color: "#000000",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      Developer
+                    </span>
+                    <span style={{ 
+                      fontSize: "18px", 
+                      fontWeight: 400, 
+                      color: "#000000",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      Farid Ardiansyah
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SINCE 2024 SECTION */}
+            <div
+              ref={sinceRef}
+              className="since-section"
+              style={{
+                marginTop: "60px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+                textAlign: "center",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "180px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1,
+                  margin: 0,
+                  padding: "20px 0",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Since 2024
+              </h2>
             </div>
           </div>
         </div>
@@ -676,18 +1010,31 @@ export default function ProfilePage(): React.JSX.Element {
           background-color: transparent;
         }
 
+        .split-line {
+          overflow: hidden;
+          display: block;
+        }
+
         @media (max-width: 1400px) {
           .profile-title h2 {
             font-size: 300px !important;
           }
-          .goal-section {
+          .about-section,
+          .goal-section,
+          .team-section {
             gap: 40px !important;
           }
-          .goal-section h3 {
+          .about-title-text,
+          .goal-title-text,
+          .team-title-text h3 {
             font-size: 56px !important;
           }
-          .goal-section p {
+          .about-text,
+          .goal-text {
             font-size: 18px !important;
+          }
+          .since-section h2 {
+            font-size: 140px !important;
           }
         }
         @media (max-width: 1024px) {
@@ -729,18 +1076,33 @@ export default function ProfilePage(): React.JSX.Element {
           .menu-button span {
             font-size: 14px !important;
           }
-          .goal-section {
+          .about-section,
+          .goal-section,
+          .team-section {
             grid-template-columns: 1fr !important;
             gap: 20px !important;
             margin-top: 50px !important;
             padding-top: 30px !important;
           }
-          .goal-section h3 {
+          .about-title-text,
+          .goal-title-text,
+          .team-title-text h3 {
             font-size: 48px !important;
           }
-          .goal-section p {
+          .about-text,
+          .goal-text {
             font-size: 16px !important;
             line-height: 1.6 !important;
+          }
+          .team-text {
+            font-size: 16px !important;
+          }
+          .team-text div {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 20px !important;
+          }
+          .since-section h2 {
+            font-size: 100px !important;
           }
         }
         @media (max-width: 768px) {
@@ -786,17 +1148,32 @@ export default function ProfilePage(): React.JSX.Element {
           .menu-button span {
             font-size: 12px !important;
           }
-          .goal-section {
+          .about-section,
+          .goal-section,
+          .team-section {
             gap: 16px !important;
             margin-top: 40px !important;
             padding-top: 24px !important;
           }
-          .goal-section h3 {
+          .about-title-text,
+          .goal-title-text,
+          .team-title-text h3 {
             font-size: 36px !important;
           }
-          .goal-section p {
+          .about-text,
+          .goal-text {
             font-size: 14px !important;
             line-height: 1.6 !important;
+          }
+          .team-text {
+            font-size: 14px !important;
+          }
+          .team-text div {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+          }
+          .since-section h2 {
+            font-size: 72px !important;
           }
         }
         @media (max-width: 480px) {
@@ -842,17 +1219,36 @@ export default function ProfilePage(): React.JSX.Element {
           .menu-button span {
             font-size: 10px !important;
           }
-          .goal-section {
+          .about-section,
+          .goal-section,
+          .team-section {
             gap: 12px !important;
             margin-top: 30px !important;
             padding-top: 20px !important;
           }
-          .goal-section h3 {
+          .about-title-text,
+          .goal-title-text,
+          .team-title-text h3 {
             font-size: 28px !important;
           }
-          .goal-section p {
+          .about-text,
+          .goal-text {
             font-size: 12px !important;
             line-height: 1.5 !important;
+          }
+          .team-text {
+            font-size: 12px !important;
+          }
+          .team-text div {
+            grid-template-columns: 1fr !important;
+            gap: 4px !important;
+          }
+          .since-section h2 {
+            font-size: 48px !important;
+          }
+          .team-title-text {
+            flex-direction: column !important;
+            align-items: flex-start !important;
           }
         }
       `}</style>
