@@ -88,6 +88,7 @@ export default function ProfilePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
+  const goalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -422,6 +423,70 @@ export default function ProfilePage(): React.JSX.Element {
                 <NorthEastArrow size={24} />
               </div>
             </div>
+
+            {/* OUR GOAL SECTION - Added below the buttons */}
+            <div
+              ref={goalRef}
+              className="goal-section"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                marginTop: "80px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+                alignItems: "flex-start",
+              }}
+            >
+              {/* Left side - "Our goal" text */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "72px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1,
+                    margin: 0,
+                    padding: 0,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  Our goal
+                </h3>
+              </div>
+
+              {/* Right side - Description text with 5 lines */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 400,
+                    color: "#333333",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.8,
+                    margin: 0,
+                    padding: 0,
+                    maxWidth: "100%",
+                  }}
+                >
+                  From the moment our company was founded, we have helped our clients find exceptional solutions for their businesses, creating memorable brands and digital products. Our expertise grows with each year, and our accumulated experience empowers us to develop products exactly as they should be.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -615,6 +680,15 @@ export default function ProfilePage(): React.JSX.Element {
           .profile-title h2 {
             font-size: 300px !important;
           }
+          .goal-section {
+            gap: 40px !important;
+          }
+          .goal-section h3 {
+            font-size: 56px !important;
+          }
+          .goal-section p {
+            font-size: 18px !important;
+          }
         }
         @media (max-width: 1024px) {
           .profile-title h2 {
@@ -654,6 +728,19 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 14px !important;
+          }
+          .goal-section {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+            margin-top: 50px !important;
+            padding-top: 30px !important;
+          }
+          .goal-section h3 {
+            font-size: 48px !important;
+          }
+          .goal-section p {
+            font-size: 16px !important;
+            line-height: 1.6 !important;
           }
         }
         @media (max-width: 768px) {
@@ -699,6 +786,18 @@ export default function ProfilePage(): React.JSX.Element {
           .menu-button span {
             font-size: 12px !important;
           }
+          .goal-section {
+            gap: 16px !important;
+            margin-top: 40px !important;
+            padding-top: 24px !important;
+          }
+          .goal-section h3 {
+            font-size: 36px !important;
+          }
+          .goal-section p {
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+          }
         }
         @media (max-width: 480px) {
           .profile-title h2 {
@@ -742,6 +841,18 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 10px !important;
+          }
+          .goal-section {
+            gap: 12px !important;
+            margin-top: 30px !important;
+            padding-top: 20px !important;
+          }
+          .goal-section h3 {
+            font-size: 28px !important;
+          }
+          .goal-section p {
+            font-size: 12px !important;
+            line-height: 1.5 !important;
           }
         }
       `}</style>
