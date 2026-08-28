@@ -75,9 +75,25 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+// Plus Icon
+const PlusIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+// Minus Icon
+const MinusIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 export default function ProfilePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+  
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -92,6 +108,30 @@ export default function ProfilePage(): React.JSX.Element {
   const aboutRef = useRef<HTMLDivElement>(null);
   const goalRef = useRef<HTMLDivElement>(null);
   const teamRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const featureContentRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const features = [
+    { id: 'community', label: 'Community' },
+    { id: 'blog', label: 'Blog' },
+    { id: 'livechat', label: 'Live Chat' },
+    { id: 'livechatagent', label: 'Live Chat Agent' },
+    { id: 'donation', label: 'Donation' },
+    { id: 'contact', label: 'Contact' },
+    { id: 'note', label: 'Note' },
+    { id: 'calendar', label: 'Calendar' },
+  ];
+
+  const featureDetails: { [key: string]: string } = {
+    community: 'Connect with a vibrant community of like-minded individuals. Share ideas, collaborate on projects, and grow together in a supportive environment.',
+    blog: 'Express your thoughts and ideas through our blogging platform. Write, publish, and share your stories with the world.',
+    livechat: 'Real-time chat support to help you with any questions or issues you might have. Our team is always ready to assist.',
+    livechatagent: 'Dedicated live chat agents available 24/7 to provide personalized support and guidance for all your needs.',
+    donation: 'Support our mission by making donations. Every contribution helps us continue providing free services to the community.',
+    contact: 'Get in touch with us through multiple channels. We\'re always open to feedback, suggestions, and collaborations.',
+    note: 'Take notes, organize your thoughts, and keep track of important information. Your personal notes are always secure.',
+    calendar: 'Manage your schedule, set reminders, and never miss important events with our integrated calendar feature.',
+  };
 
   useEffect(() => {
     if (!auth) return;
@@ -114,7 +154,8 @@ export default function ProfilePage(): React.JSX.Element {
     const elements = [
       ...(aboutRef.current?.querySelectorAll('.about-title, .about-text, .about-since') || []),
       ...(goalRef.current?.querySelectorAll('.goal-title, .goal-text') || []),
-      ...(teamRef.current?.querySelectorAll('.team-title, .team-text') || [])
+      ...(teamRef.current?.querySelectorAll('.team-title, .team-text') || []),
+      ...(featuresRef.current?.querySelectorAll('.features-title') || [])
     ];
 
     elements.forEach(el => {
@@ -140,6 +181,55 @@ export default function ProfilePage(): React.JSX.Element {
     });
 
     ScrollTrigger.refresh();
+  };
+
+  const toggleFeature = (featureId: string) => {
+    const content = featureContentRef.current[featureId];
+    if (!content) return;
+
+    if (expandedFeature === featureId) {
+      // Close
+      gsap.to(content, {
+        height: 0,
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setExpandedFeature(null);
+        }
+      });
+    } else {
+      // Close any open feature
+      if (expandedFeature) {
+        const prevContent = featureContentRef.current[expandedFeature];
+        if (prevContent) {
+          gsap.to(prevContent, {
+            height: 0,
+            opacity: 0,
+            duration: 0.3,
+            ease: "power2.inOut"
+          });
+        }
+      }
+
+      // Open new feature
+      setExpandedFeature(featureId);
+      // Set height auto first to measure
+      content.style.height = 'auto';
+      const fullHeight = content.scrollHeight;
+      content.style.height = '0';
+      content.style.opacity = '0';
+      
+      gsap.to(content, {
+        height: fullHeight,
+        opacity: 1,
+        duration: 0.6,
+        ease: "power2.out",
+        onComplete: () => {
+          content.style.height = 'auto';
+        }
+      });
+    }
   };
 
   const startPreloaderAnimation = () => {
@@ -600,7 +690,6 @@ export default function ProfilePage(): React.JSX.Element {
               style={{
                 marginTop: "60px",
                 paddingTop: "40px",
-                paddingBottom: "60px",
               }}
             >
               <div style={{
@@ -690,6 +779,126 @@ export default function ProfilePage(): React.JSX.Element {
                       </span>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* OUR FEATURES SECTION */}
+            <div
+              ref={featuresRef}
+              className="section-wrapper"
+              style={{
+                marginTop: "60px",
+                paddingTop: "40px",
+                paddingBottom: "60px",
+              }}
+            >
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                alignItems: "flex-start",
+              }}>
+                {/* Left side - "Our features" */}
+                <div>
+                  <h3
+                    className="features-title"
+                    style={{
+                      fontSize: "72px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1,
+                      margin: 0,
+                      padding: 0,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    Our features
+                  </h3>
+                </div>
+
+                {/* Right side - Features list with expandable content */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "16px",
+                  }}
+                >
+                  {features.map((feature) => (
+                    <div key={feature.id}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "16px 20px",
+                          borderBottom: "1px solid rgba(13, 60, 252, 0.2)",
+                          cursor: "pointer",
+                          transition: "background-color 0.2s ease",
+                        }}
+                        onClick={() => toggleFeature(feature.id)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(13, 60, 252, 0.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "28px",
+                            fontWeight: 500,
+                            color: "#0D3CFC",
+                            fontFamily: FONT_FAMILY,
+                          }}
+                        >
+                          {feature.label}
+                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#0D3CFC",
+                          }}
+                        >
+                          {expandedFeature === feature.id ? (
+                            <MinusIcon size={28} />
+                          ) : (
+                            <PlusIcon size={28} />
+                          )}
+                        </div>
+                      </div>
+                      <div
+                        ref={(el) => {
+                          featureContentRef.current[feature.id] = el;
+                        }}
+                        style={{
+                          height: 0,
+                          opacity: 0,
+                          overflow: "hidden",
+                          paddingLeft: "20px",
+                          paddingRight: "20px",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: 400,
+                            color: "#0D3CFC",
+                            fontFamily: FONT_FAMILY,
+                            lineHeight: 1.8,
+                            margin: "16px 0",
+                            padding: 0,
+                          }}
+                        >
+                          {featureDetails[feature.id]}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -896,7 +1105,8 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .about-title,
           .goal-title,
-          .team-title {
+          .team-title,
+          .features-title {
             font-size: 56px !important;
           }
           .about-text,
@@ -908,6 +1118,9 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .team-text span {
             font-size: 20px !important;
+          }
+          .features-title {
+            font-size: 56px !important;
           }
         }
         @media (max-width: 1024px) {
@@ -951,13 +1164,15 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .about-section,
           .goal-section,
-          .team-section {
+          .team-section,
+          .features-section {
             grid-template-columns: 1fr !important;
             gap: 20px !important;
           }
           .about-title,
           .goal-title,
-          .team-title {
+          .team-title,
+          .features-title {
             font-size: 48px !important;
           }
           .about-text,
@@ -1021,13 +1236,15 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .about-section,
           .goal-section,
-          .team-section {
+          .team-section,
+          .features-section {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
           }
           .about-title,
           .goal-title,
-          .team-title {
+          .team-title,
+          .features-title {
             font-size: 36px !important;
           }
           .about-text,
@@ -1044,6 +1261,9 @@ export default function ProfilePage(): React.JSX.Element {
           .team-text div {
             grid-template-columns: 1fr 1fr !important;
             gap: 12px !important;
+          }
+          .features-title {
+            font-size: 36px !important;
           }
         }
         @media (max-width: 480px) {
@@ -1091,13 +1311,15 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .about-section,
           .goal-section,
-          .team-section {
+          .team-section,
+          .features-section {
             grid-template-columns: 1fr !important;
             gap: 12px !important;
           }
           .about-title,
           .goal-title,
-          .team-title {
+          .team-title,
+          .features-title {
             font-size: 28px !important;
           }
           .about-text,
@@ -1114,6 +1336,9 @@ export default function ProfilePage(): React.JSX.Element {
           .team-text div {
             grid-template-columns: 1fr !important;
             gap: 4px !important;
+          }
+          .features-title {
+            font-size: 28px !important;
           }
         }
       `}</style>
