@@ -338,6 +338,7 @@ export default function ProfilePage(): React.JSX.Element {
             backgroundColor: "#ffffff",
             position: "relative",
             paddingTop: "120px",
+            paddingBottom: "120px",
           }}
         >
           {/* Judul - FIXED di posisi */}
@@ -599,6 +600,7 @@ export default function ProfilePage(): React.JSX.Element {
               style={{
                 marginTop: "60px",
                 paddingTop: "40px",
+                paddingBottom: "60px",
               }}
             >
               <div style={{
@@ -691,6 +693,9 @@ export default function ProfilePage(): React.JSX.Element {
                 </div>
               </div>
             </div>
+
+            {/* Spacer tambahan untuk memastikan konten terlihat */}
+            <div style={{ height: "60px" }} />
           </div>
         </div>
 
