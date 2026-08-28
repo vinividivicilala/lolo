@@ -110,6 +110,7 @@ export default function ProfilePage(): React.JSX.Element {
   const teamRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureContentRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const featureItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const features = [
     { id: 'community', label: 'Community' },
@@ -145,6 +146,7 @@ export default function ProfilePage(): React.JSX.Element {
     if (showMain) {
       setTimeout(() => {
         initAnimations();
+        initFeatureHoverAnimations();
       }, 300);
     }
   }, [showMain]);
@@ -181,6 +183,53 @@ export default function ProfilePage(): React.JSX.Element {
     });
 
     ScrollTrigger.refresh();
+  };
+
+  const initFeatureHoverAnimations = () => {
+    features.forEach((feature) => {
+      const item = featureItemRefs.current[feature.id];
+      if (!item) return;
+
+      // Create hover timeline
+      const hoverTimeline = gsap.timeline({ paused: true });
+      
+      // Find elements within the feature item
+      const label = item.querySelector('.feature-label');
+      const icon = item.querySelector('.feature-icon');
+      const border = item.querySelector('.feature-border');
+
+      hoverTimeline
+        .to(item, {
+          backgroundColor: '#000000',
+          duration: 0.3,
+          ease: 'power2.out'
+        })
+        .to(label, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: 'power2.out'
+        }, 0)
+        .to(icon, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: 'power2.out'
+        }, 0)
+        .to(border, {
+          borderColor: 'rgba(255, 255, 255, 0.3)',
+          duration: 0.3,
+          ease: 'power2.out'
+        }, 0);
+
+      // Mouse enter
+      item.addEventListener('mouseenter', () => {
+        hoverTimeline.play();
+      });
+
+      // Mouse leave
+      item.addEventListener('mouseleave', () => {
+        hoverTimeline.reverse();
+      });
+    });
   };
 
   const toggleFeature = (featureId: string) => {
@@ -823,12 +872,15 @@ export default function ProfilePage(): React.JSX.Element {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "16px",
+                    gap: "4px",
                   }}
                 >
                   {features.map((feature) => (
                     <div key={feature.id}>
                       <div
+                        ref={(el) => {
+                          featureItemRefs.current[feature.id] = el;
+                        }}
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -836,32 +888,32 @@ export default function ProfilePage(): React.JSX.Element {
                           padding: "16px 20px",
                           borderBottom: "1px solid rgba(13, 60, 252, 0.2)",
                           cursor: "pointer",
-                          transition: "background-color 0.2s ease",
+                          borderRadius: "4px",
+                          transition: "all 0.3s ease",
+                          backgroundColor: "transparent",
                         }}
                         onClick={() => toggleFeature(feature.id)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "rgba(13, 60, 252, 0.05)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent";
-                        }}
                       >
                         <span
+                          className="feature-label"
                           style={{
                             fontSize: "28px",
                             fontWeight: 500,
                             color: "#0D3CFC",
                             fontFamily: FONT_FAMILY,
+                            transition: "color 0.3s ease",
                           }}
                         >
                           {feature.label}
                         </span>
                         <div
+                          className="feature-icon"
                           style={{
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             color: "#0D3CFC",
+                            transition: "color 0.3s ease",
                           }}
                         >
                           {expandedFeature === feature.id ? (
@@ -870,6 +922,18 @@ export default function ProfilePage(): React.JSX.Element {
                             <PlusIcon size={28} />
                           )}
                         </div>
+                        <div
+                          className="feature-border"
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: "1px",
+                            backgroundColor: "rgba(13, 60, 252, 0.2)",
+                            transition: "background-color 0.3s ease",
+                          }}
+                        />
                       </div>
                       <div
                         ref={(el) => {
@@ -1119,9 +1183,6 @@ export default function ProfilePage(): React.JSX.Element {
           .team-text span {
             font-size: 20px !important;
           }
-          .features-title {
-            font-size: 56px !important;
-          }
         }
         @media (max-width: 1024px) {
           .profile-title h2 {
@@ -1262,9 +1323,6 @@ export default function ProfilePage(): React.JSX.Element {
             grid-template-columns: 1fr 1fr !important;
             gap: 12px !important;
           }
-          .features-title {
-            font-size: 36px !important;
-          }
         }
         @media (max-width: 480px) {
           .profile-title h2 {
@@ -1336,9 +1394,6 @@ export default function ProfilePage(): React.JSX.Element {
           .team-text div {
             grid-template-columns: 1fr !important;
             gap: 4px !important;
-          }
-          .features-title {
-            font-size: 28px !important;
           }
         }
       `}</style>
