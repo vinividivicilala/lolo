@@ -75,22 +75,6 @@ const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// Arrow Right SVG
-const ArrowRight = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Instagram SVG
-const InstagramIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2"/>
-    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
-    <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
-  </svg>
-);
-
 export default function ProfilePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -105,8 +89,8 @@ export default function ProfilePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
-  const goalRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const goalRef = useRef<HTMLDivElement>(null);
   const teamRef = useRef<HTMLDivElement>(null);
   const sinceRef = useRef<HTMLDivElement>(null);
 
@@ -127,65 +111,36 @@ export default function ProfilePage(): React.JSX.Element {
   }, [showMain]);
 
   const initAnimations = () => {
-    // Split text animations
-    const aboutSplit = new SplitText(aboutRef.current?.querySelectorAll('.about-text, .about-title-text'), {
-      type: 'lines',
-      linesClass: 'split-line'
-    });
+    // Split text animations for all sections
+    const elements = [
+      ...(aboutRef.current?.querySelectorAll('.about-title, .about-text') || []),
+      ...(goalRef.current?.querySelectorAll('.goal-title, .goal-text') || []),
+      ...(teamRef.current?.querySelectorAll('.team-title, .team-text') || [])
+    ];
 
-    const goalSplit = new SplitText(goalRef.current?.querySelectorAll('.goal-text, .goal-title-text'), {
-      type: 'lines',
-      linesClass: 'split-line'
-    });
-
-    const teamSplit = new SplitText(teamRef.current?.querySelectorAll('.team-text, .team-title-text'), {
-      type: 'lines',
-      linesClass: 'split-line'
-    });
-
-    // About section animation
-    gsap.from(aboutRef.current?.querySelectorAll('.split-line'), {
-      y: 60,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: aboutRef.current,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
+    elements.forEach(el => {
+      if (el.textContent) {
+        const split = new SplitText(el, {
+          type: 'lines',
+          linesClass: 'split-line'
+        });
+        
+        gsap.from(split.lines, {
+          y: 60,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el.closest('.section-wrapper'),
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
+        });
       }
     });
 
-    // Goal section animation
-    gsap.from(goalRef.current?.querySelectorAll('.split-line'), {
-      y: 60,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: goalRef.current,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-
-    // Team section animation
-    gsap.from(teamRef.current?.querySelectorAll('.split-line'), {
-      y: 60,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: teamRef.current,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-
-    // Since section animation
+    // Since 2024 animation
     gsap.from(sinceRef.current, {
       scale: 0.8,
       opacity: 0,
@@ -198,7 +153,6 @@ export default function ProfilePage(): React.JSX.Element {
       }
     });
 
-    // Refresh ScrollTrigger
     ScrollTrigger.refresh();
   };
 
@@ -531,167 +485,23 @@ export default function ProfilePage(): React.JSX.Element {
             {/* ABOUT MENURU SECTION */}
             <div
               ref={aboutRef}
-              className="about-section"
+              className="section-wrapper"
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 2fr",
-                gap: "60px",
                 marginTop: "80px",
                 paddingTop: "40px",
                 borderTop: "1px solid rgba(13, 60, 252, 0.15)",
-                alignItems: "flex-start",
               }}
             >
-              {/* Left side - "About Menuru" */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                }}
-              >
-                <h3
-                  className="about-title-text"
-                  style={{
-                    fontSize: "72px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1,
-                    margin: 0,
-                    padding: 0,
-                    letterSpacing: "-0.03em",
-                  }}
-                >
-                  About Menuru
-                </h3>
-              </div>
-
-              {/* Right side - Description */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                }}
-              >
-                <p
-                  className="about-text"
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 400,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.8,
-                    margin: 0,
-                    padding: 0,
-                    maxWidth: "100%",
-                  }}
-                >
-                  Menuru Studio is a non-profit brand born from the founder's vision to assist the public at no cost. Established in 2024, the brand originated from the founder's own experiences—specifically, the challenges they faced with note-taking and scheduling after graduating from university. At its core, Menuru Studio embodies the founder's commitment to helping the community.
-                </p>
-              </div>
-            </div>
-
-            {/* OUR GOAL SECTION */}
-            <div
-              ref={goalRef}
-              className="goal-section"
-              style={{
+              <div style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 2fr",
                 gap: "60px",
-                marginTop: "60px",
-                paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
                 alignItems: "flex-start",
-              }}
-            >
-              {/* Left side - "Our goal" */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                }}
-              >
-                <h3
-                  className="goal-title-text"
-                  style={{
-                    fontSize: "72px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1,
-                    margin: 0,
-                    padding: 0,
-                    letterSpacing: "-0.03em",
-                  }}
-                >
-                  Our goal
-                </h3>
-              </div>
-
-              {/* Right side - Description */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                }}
-              >
-                <p
-                  className="goal-text"
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 400,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.8,
-                    margin: 0,
-                    padding: 0,
-                    maxWidth: "100%",
-                  }}
-                >
-                  Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features. Our expertise has continued to grow over the years, and this accumulated experience enables us to develop features that truly meet the highest standards.
-                </p>
-              </div>
-            </div>
-
-            {/* MEET OUR TEAM SECTION */}
-            <div
-              ref={teamRef}
-              className="team-section"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 2fr",
-                gap: "60px",
-                marginTop: "60px",
-                paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
-                alignItems: "flex-start",
-              }}
-            >
-              {/* Left side - "Meet our team" with arrow + Instagram */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "16px",
-                }}
-              >
-                <div
-                  className="team-title-text"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
+              }}>
+                {/* Left side - "About Menuru" */}
+                <div>
                   <h3
+                    className="about-title"
                     style={{
                       fontSize: "72px",
                       fontWeight: 700,
@@ -703,94 +513,27 @@ export default function ProfilePage(): React.JSX.Element {
                       letterSpacing: "-0.03em",
                     }}
                   >
-                    Meet our team
+                    About Menuru
                   </h3>
-                  <ArrowRight size={32} style={{ color: "#0D3CFC" }} />
-                </div>
-                <Link 
-                  href="https://www.instagram.com/faridardiansyahh/"
-                  target="_blank"
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: "8px",
-                    textDecoration: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  <InstagramIcon size={24} style={{ color: "#0D3CFC" }} />
-                  <span style={{ 
-                    fontSize: "16px", 
-                    fontWeight: 500, 
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    @faridardiansyahh
-                  </span>
-                </Link>
-              </div>
-
-              {/* Right side - Team members */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "20px",
-                }}
-              >
-                {/* Founder */}
-                <div className="team-text" style={{ width: "100%" }}>
-                  <div style={{ 
-                    display: "grid", 
-                    gridTemplateColumns: "1fr 2fr",
-                    gap: "40px",
-                    width: "100%",
-                  }}>
-                    <span style={{ 
-                      fontSize: "18px", 
-                      fontWeight: 600, 
-                      color: "#000000",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      Founder
-                    </span>
-                    <span style={{ 
-                      fontSize: "18px", 
-                      fontWeight: 400, 
-                      color: "#000000",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      Farid Ardiansyah
-                    </span>
-                  </div>
                 </div>
 
-                {/* Developer */}
-                <div className="team-text" style={{ width: "100%" }}>
-                  <div style={{ 
-                    display: "grid", 
-                    gridTemplateColumns: "1fr 2fr",
-                    gap: "40px",
-                    width: "100%",
-                  }}>
-                    <span style={{ 
-                      fontSize: "18px", 
-                      fontWeight: 600, 
-                      color: "#000000",
+                {/* Right side - Description */}
+                <div>
+                  <p
+                    className="about-text"
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
-                    }}>
-                      Developer
-                    </span>
-                    <span style={{ 
-                      fontSize: "18px", 
-                      fontWeight: 400, 
-                      color: "#000000",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      Farid Ardiansyah
-                    </span>
-                  </div>
+                      lineHeight: 1.8,
+                      margin: 0,
+                      padding: 0,
+                      maxWidth: "100%",
+                    }}
+                  >
+                    Menuru Studio is a non-profit brand born from the founder's vision to assist the public at no cost. Established in 2024, the brand originated from the founder's own experiences—specifically, the challenges they faced with note-taking and scheduling after graduating from university. At its core, Menuru Studio embodies the founder's commitment to helping the community.
+                  </p>
                 </div>
               </div>
             </div>
@@ -798,11 +541,9 @@ export default function ProfilePage(): React.JSX.Element {
             {/* SINCE 2024 SECTION */}
             <div
               ref={sinceRef}
-              className="since-section"
               style={{
-                marginTop: "60px",
-                paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+                marginTop: "40px",
+                paddingTop: "20px",
                 textAlign: "center",
               }}
             >
@@ -820,6 +561,163 @@ export default function ProfilePage(): React.JSX.Element {
               >
                 Since 2024
               </h2>
+            </div>
+
+            {/* OUR GOAL SECTION */}
+            <div
+              ref={goalRef}
+              className="section-wrapper"
+              style={{
+                marginTop: "60px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+              }}
+            >
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                alignItems: "flex-start",
+              }}>
+                {/* Left side - "Our goal" */}
+                <div>
+                  <h3
+                    className="goal-title"
+                    style={{
+                      fontSize: "72px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1,
+                      margin: 0,
+                      padding: 0,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    Our goal
+                  </h3>
+                </div>
+
+                {/* Right side - Description */}
+                <div>
+                  <p
+                    className="goal-text"
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.8,
+                      margin: 0,
+                      padding: 0,
+                      maxWidth: "100%",
+                    }}
+                  >
+                    Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features. Our expertise has continued to grow over the years, and this accumulated experience enables us to develop features that truly meet the highest standards.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* MEET OUR TEAM SECTION */}
+            <div
+              ref={teamRef}
+              className="section-wrapper"
+              style={{
+                marginTop: "60px",
+                paddingTop: "40px",
+                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
+              }}
+            >
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr",
+                gap: "60px",
+                alignItems: "flex-start",
+              }}>
+                {/* Left side - "Meet our team" */}
+                <div>
+                  <h3
+                    className="team-title"
+                    style={{
+                      fontSize: "72px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1,
+                      margin: 0,
+                      padding: 0,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    Meet our team
+                  </h3>
+                </div>
+
+                {/* Right side - Team members */}
+                <div
+                  className="team-text"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "30px",
+                  }}
+                >
+                  {/* Founder */}
+                  <div style={{ width: "100%" }}>
+                    <div style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "40px",
+                      width: "100%",
+                    }}>
+                      <span style={{ 
+                        fontSize: "24px", 
+                        fontWeight: 600, 
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        Founder
+                      </span>
+                      <span style={{ 
+                        fontSize: "24px", 
+                        fontWeight: 400, 
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        Farid Ardiansyah
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Developer */}
+                  <div style={{ width: "100%" }}>
+                    <div style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "40px",
+                      width: "100%",
+                    }}>
+                      <span style={{ 
+                        fontSize: "24px", 
+                        fontWeight: 600, 
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        Developer
+                      </span>
+                      <span style={{ 
+                        fontSize: "24px", 
+                        fontWeight: 400, 
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        Farid Ardiansyah
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1019,14 +917,9 @@ export default function ProfilePage(): React.JSX.Element {
           .profile-title h2 {
             font-size: 300px !important;
           }
-          .about-section,
-          .goal-section,
-          .team-section {
-            gap: 40px !important;
-          }
-          .about-title-text,
-          .goal-title-text,
-          .team-title-text h3 {
+          .about-title,
+          .goal-title,
+          .team-title {
             font-size: 56px !important;
           }
           .about-text,
@@ -1035,6 +928,9 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .since-section h2 {
             font-size: 140px !important;
+          }
+          .team-text span {
+            font-size: 20px !important;
           }
         }
         @media (max-width: 1024px) {
@@ -1081,12 +977,10 @@ export default function ProfilePage(): React.JSX.Element {
           .team-section {
             grid-template-columns: 1fr !important;
             gap: 20px !important;
-            margin-top: 50px !important;
-            padding-top: 30px !important;
           }
-          .about-title-text,
-          .goal-title-text,
-          .team-title-text h3 {
+          .about-title,
+          .goal-title,
+          .team-title {
             font-size: 48px !important;
           }
           .about-text,
@@ -1094,8 +988,8 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 16px !important;
             line-height: 1.6 !important;
           }
-          .team-text {
-            font-size: 16px !important;
+          .team-text span {
+            font-size: 18px !important;
           }
           .team-text div {
             grid-template-columns: 1fr 1fr !important;
@@ -1151,13 +1045,12 @@ export default function ProfilePage(): React.JSX.Element {
           .about-section,
           .goal-section,
           .team-section {
+            grid-template-columns: 1fr !important;
             gap: 16px !important;
-            margin-top: 40px !important;
-            padding-top: 24px !important;
           }
-          .about-title-text,
-          .goal-title-text,
-          .team-title-text h3 {
+          .about-title,
+          .goal-title,
+          .team-title {
             font-size: 36px !important;
           }
           .about-text,
@@ -1165,8 +1058,8 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 14px !important;
             line-height: 1.6 !important;
           }
-          .team-text {
-            font-size: 14px !important;
+          .team-text span {
+            font-size: 16px !important;
           }
           .team-text div {
             grid-template-columns: 1fr 1fr !important;
@@ -1222,13 +1115,12 @@ export default function ProfilePage(): React.JSX.Element {
           .about-section,
           .goal-section,
           .team-section {
+            grid-template-columns: 1fr !important;
             gap: 12px !important;
-            margin-top: 30px !important;
-            padding-top: 20px !important;
           }
-          .about-title-text,
-          .goal-title-text,
-          .team-title-text h3 {
+          .about-title,
+          .goal-title,
+          .team-title {
             font-size: 28px !important;
           }
           .about-text,
@@ -1236,8 +1128,8 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 12px !important;
             line-height: 1.5 !important;
           }
-          .team-text {
-            font-size: 12px !important;
+          .team-text span {
+            font-size: 14px !important;
           }
           .team-text div {
             grid-template-columns: 1fr !important;
@@ -1245,10 +1137,6 @@ export default function ProfilePage(): React.JSX.Element {
           }
           .since-section h2 {
             font-size: 48px !important;
-          }
-          .team-title-text {
-            flex-direction: column !important;
-            align-items: flex-start !important;
           }
         }
       `}</style>
