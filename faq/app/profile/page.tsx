@@ -92,7 +92,6 @@ export default function ProfilePage(): React.JSX.Element {
   const aboutRef = useRef<HTMLDivElement>(null);
   const goalRef = useRef<HTMLDivElement>(null);
   const teamRef = useRef<HTMLDivElement>(null);
-  const sinceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -113,7 +112,7 @@ export default function ProfilePage(): React.JSX.Element {
   const initAnimations = () => {
     // Split text animations for all sections
     const elements = [
-      ...(aboutRef.current?.querySelectorAll('.about-title, .about-text') || []),
+      ...(aboutRef.current?.querySelectorAll('.about-title, .about-text, .about-since') || []),
       ...(goalRef.current?.querySelectorAll('.goal-title, .goal-text') || []),
       ...(teamRef.current?.querySelectorAll('.team-title, .team-text') || [])
     ];
@@ -137,19 +136,6 @@ export default function ProfilePage(): React.JSX.Element {
             toggleActions: 'play none none reverse'
           }
         });
-      }
-    });
-
-    // Since 2024 animation
-    gsap.from(sinceRef.current, {
-      scale: 0.8,
-      opacity: 0,
-      duration: 1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: sinceRef.current,
-        start: 'top 85%',
-        toggleActions: 'play none none reverse'
       }
     });
 
@@ -482,14 +468,13 @@ export default function ProfilePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ABOUT MENURU SECTION */}
+            {/* ABOUT MENURU SECTION - with Since 2024 on the left */}
             <div
               ref={aboutRef}
               className="section-wrapper"
               style={{
                 marginTop: "80px",
                 paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
               }}
             >
               <div style={{
@@ -498,7 +483,7 @@ export default function ProfilePage(): React.JSX.Element {
                 gap: "60px",
                 alignItems: "flex-start",
               }}>
-                {/* Left side - "About Menuru" */}
+                {/* Left side - "About Menuru" and "Since 2024" */}
                 <div>
                   <h3
                     className="about-title"
@@ -515,6 +500,20 @@ export default function ProfilePage(): React.JSX.Element {
                   >
                     About Menuru
                   </h3>
+                  <p
+                    className="about-since"
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      margin: "16px 0 0 0",
+                      padding: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Since 2024
+                  </p>
                 </div>
 
                 {/* Right side - Description */}
@@ -538,31 +537,6 @@ export default function ProfilePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* SINCE 2024 SECTION */}
-            <div
-              ref={sinceRef}
-              style={{
-                marginTop: "40px",
-                paddingTop: "20px",
-                textAlign: "center",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "180px",
-                  fontWeight: 700,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                  margin: 0,
-                  padding: "20px 0",
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                Since 2024
-              </h2>
-            </div>
-
             {/* OUR GOAL SECTION */}
             <div
               ref={goalRef}
@@ -570,7 +544,6 @@ export default function ProfilePage(): React.JSX.Element {
               style={{
                 marginTop: "60px",
                 paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
               }}
             >
               <div style={{
@@ -626,7 +599,6 @@ export default function ProfilePage(): React.JSX.Element {
               style={{
                 marginTop: "60px",
                 paddingTop: "40px",
-                borderTop: "1px solid rgba(13, 60, 252, 0.15)",
               }}
             >
               <div style={{
@@ -926,8 +898,8 @@ export default function ProfilePage(): React.JSX.Element {
           .goal-text {
             font-size: 18px !important;
           }
-          .since-section h2 {
-            font-size: 140px !important;
+          .about-since {
+            font-size: 20px !important;
           }
           .team-text span {
             font-size: 20px !important;
@@ -988,15 +960,15 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 16px !important;
             line-height: 1.6 !important;
           }
+          .about-since {
+            font-size: 18px !important;
+          }
           .team-text span {
             font-size: 18px !important;
           }
           .team-text div {
             grid-template-columns: 1fr 1fr !important;
             gap: 20px !important;
-          }
-          .since-section h2 {
-            font-size: 100px !important;
           }
         }
         @media (max-width: 768px) {
@@ -1058,15 +1030,15 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 14px !important;
             line-height: 1.6 !important;
           }
+          .about-since {
+            font-size: 16px !important;
+          }
           .team-text span {
             font-size: 16px !important;
           }
           .team-text div {
             grid-template-columns: 1fr 1fr !important;
             gap: 12px !important;
-          }
-          .since-section h2 {
-            font-size: 72px !important;
           }
         }
         @media (max-width: 480px) {
@@ -1128,15 +1100,15 @@ export default function ProfilePage(): React.JSX.Element {
             font-size: 12px !important;
             line-height: 1.5 !important;
           }
+          .about-since {
+            font-size: 14px !important;
+          }
           .team-text span {
             font-size: 14px !important;
           }
           .team-text div {
             grid-template-columns: 1fr !important;
             gap: 4px !important;
-          }
-          .since-section h2 {
-            font-size: 48px !important;
           }
         }
       `}</style>
