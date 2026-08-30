@@ -304,6 +304,7 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
+          {/* Title with blur background */}
           <h1
             ref={titleRef}
             className="title"
@@ -314,13 +315,16 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
-              padding: 0,
+              padding: "10px 20px",
               lineHeight: 1,
               position: "fixed",
               top: "40px",
               left: "40px",
               zIndex: 15,
               pointerEvents: "none",
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255,255,255,0.7)",
+              borderRadius: "12px",
             }}
           >
             Menuru
@@ -330,18 +334,13 @@ export default function HomePage(): React.JSX.Element {
             position: "relative", 
             zIndex: 1,
             marginTop: "60px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
           }}>
             <div
               ref={subtitleRef}
               className="subtitle"
               style={{
-                textAlign: "center",
+                textAlign: "left",
                 position: "relative",
-                width: "100%",
               }}
             >
               <p
@@ -355,14 +354,13 @@ export default function HomePage(): React.JSX.Element {
                   padding: 0,
                   paddingBottom: "30px",
                   whiteSpace: "pre-line",
-                  textAlign: "center",
                 }}
               >
                 {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
               <div
                 ref={buttonRef}
                 className="cta-button"
@@ -409,15 +407,38 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
+            {/* "Showreel 2026" Text */}
+            <div
+              style={{
+                marginTop: "60px",
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "48px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Showreel 2026
+              </span>
+            </div>
+
             {/* VIDEO SECTION - 1500px width, centered, no bg/border/shadow */}
             <div
               style={{
-                marginTop: "50px",
+                marginTop: "20px",
                 width: "1500px",
                 maxWidth: "100%",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
+                marginLeft: 0,
               }}
             >
               <video
@@ -441,7 +462,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* NAVBAR */}
+        {/* NAVBAR with blur background */}
         <div
           ref={navbarRef}
           style={{
@@ -453,13 +474,13 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: "column",
             alignItems: "flex-end",
             gap: "8px",
-            padding: "0 16px",
-            borderRadius: "12px",
-            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0)",
-            backdropFilter: isMenuOpen ? "blur(20px)" : "blur(0px)",
+            padding: "16px 20px",
+            borderRadius: "16px",
+            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(20px)",
             transition: "all 0.3s ease",
             pointerEvents: "auto",
-            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
+            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.05)",
           }}
         >
           {/* Baris atas: Shop, About (teks biru), Sign Up */}
