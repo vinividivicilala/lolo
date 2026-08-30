@@ -99,7 +99,7 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     // Play video when component mounts
-    if (videoRef.current) {
+    if (videoRef.current && showMain) {
       videoRef.current.play().catch(error => {
         console.log("Video autoplay failed:", error);
       });
@@ -330,13 +330,18 @@ export default function HomePage(): React.JSX.Element {
             position: "relative", 
             zIndex: 1,
             marginTop: "60px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
           }}>
             <div
               ref={subtitleRef}
               className="subtitle"
               style={{
-                textAlign: "left",
+                textAlign: "center",
                 position: "relative",
+                width: "100%",
               }}
             >
               <p
@@ -350,13 +355,14 @@ export default function HomePage(): React.JSX.Element {
                   padding: 0,
                   paddingBottom: "30px",
                   whiteSpace: "pre-line",
+                  textAlign: "center",
                 }}
               >
                 {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", justifyContent: "center" }}>
               <div
                 ref={buttonRef}
                 className="cta-button"
@@ -403,17 +409,15 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* VIDEO SECTION - Added below the buttons */}
+            {/* VIDEO SECTION - 1500px width, centered, no bg/border/shadow */}
             <div
               style={{
-                marginTop: "40px",
-                width: "100%",
-                maxWidth: "800px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 8px 32px rgba(13, 60, 252, 0.15)",
-                backgroundColor: "#f5f5f5",
-                position: "relative",
+                marginTop: "50px",
+                width: "1500px",
+                maxWidth: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <video
@@ -427,7 +431,7 @@ export default function HomePage(): React.JSX.Element {
                   width: "100%",
                   height: "auto",
                   display: "block",
-                  borderRadius: "12px",
+                  backgroundColor: "transparent",
                 }}
                 onError={(e) => {
                   console.error("Video failed to load:", e);
