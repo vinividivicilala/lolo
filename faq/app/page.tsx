@@ -87,6 +87,7 @@ export default function HomePage(): React.JSX.Element {
   const navbarRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -95,6 +96,15 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    // Play video when component mounts
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.log("Video autoplay failed:", error);
+      });
+    }
+  }, [showMain]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -391,6 +401,38 @@ export default function HomePage(): React.JSX.Element {
               >
                 <NorthEastArrow size={24} />
               </div>
+            </div>
+
+            {/* VIDEO SECTION - Added below the buttons */}
+            <div
+              style={{
+                marginTop: "40px",
+                width: "100%",
+                maxWidth: "800px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                boxShadow: "0 8px 32px rgba(13, 60, 252, 0.15)",
+                backgroundColor: "#f5f5f5",
+                position: "relative",
+              }}
+            >
+              <video
+                ref={videoRef}
+                src="/videos/1.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "12px",
+                }}
+                onError={(e) => {
+                  console.error("Video failed to load:", e);
+                }}
+              />
             </div>
           </div>
         </div>
