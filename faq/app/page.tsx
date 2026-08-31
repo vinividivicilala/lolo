@@ -858,7 +858,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "12px", height: "400px", maxHeight: "400px" }}>
+        <div style={{ display: "flex", gap: "12px", height: "400px" }}>
           {/* Left sidebar - chat list */}
           <div style={{
             width: "200px",
@@ -869,7 +869,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            maxHeight: "400px",
+            height: "400px",
           }}>
             <div style={{
               padding: "0 10px 8px 10px",
@@ -895,7 +895,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "8px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "340px" }}>
+            <div style={{ overflowY: "auto", height: "340px" }}>
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
@@ -987,7 +987,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "400px",
+            height: "400px",
           }}>
             {selectedTicket ? (
               <>
@@ -1048,7 +1048,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    minHeight: "200px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1248,7 +1247,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "12px", height: "400px", maxHeight: "400px" }}>
+      <div style={{ display: "flex", gap: "12px", height: "400px" }}>
         <div style={{
           width: "220px",
           backgroundColor: "#f9f9f9",
@@ -1256,7 +1255,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          maxHeight: "400px",
+          height: "400px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1398,7 +1397,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "400px",
+          height: "400px",
         }}>
           {selectedTicket ? (
             <>
@@ -1459,7 +1458,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
-                  minHeight: "200px",
                 }}
               >
                 {messages.length === 0 ? (
