@@ -9,6 +9,7 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { motion, AnimatePresence } from "framer-motion";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -102,7 +103,7 @@ const featuresData = [
   { name: "Note" }
 ];
 
-// Footer links
+// Footer links - with Community and Live Chat Agent added to Product
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
@@ -188,13 +189,40 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   );
 };
 
-// ============================================================
-// ===== LIVE CHAT AGENT COMPONENT (Full version like Contact) =
-// ============================================================
+// ===== LIVE CHAT AGENT INTERFACES =====
+interface Ticket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  agentId?: string;
+  agentName?: string;
+  status: 'waiting' | 'active' | 'resolved' | 'closed';
+  topic: string;
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+  typing: boolean;
+  typingUserId?: string | null;
+  typingUserName?: string | null;
+}
+
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+}
+
+// ===== LIVE CHAT AGENT COMPONENT (Like contact page) =====
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
@@ -229,17 +257,26 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
   };
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  };
+  const WaitingIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
 
-  const getTypingText = (ticket: any) => {
-    if (!ticket || !ticket.typing) return null;
-    const name = ticket.typingUserName || "Seseorang";
-    return `${name} sedang mengetik...`;
-  };
+  const ActiveIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  );
+
+  const ResolvedIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  );
 
   const ChatIconSmall = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -319,13 +356,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ticketList: any[] = [];
+      const ticketList: Ticket[] = [];
       snapshot.forEach((doc) => {
-        ticketList.push({ id: doc.id, ...doc.data() });
+        ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
       });
       setTickets(ticketList);
       if (selectedTicket) {
-        const stillExists = ticketList.some((t: any) => t.id === selectedTicket.id);
+        const stillExists = ticketList.some(t => t.id === selectedTicket.id);
         if (!stillExists) {
           setSelectedTicket(null);
           setMessages([]);
@@ -342,9 +379,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       orderBy("timestamp", "asc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgList: any[] = [];
+      const msgList: ChatMessage[] = [];
       snapshot.forEach((doc) => {
-        msgList.push({ id: doc.id, ...doc.data() });
+        msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
       setTimeout(() => {
@@ -356,8 +393,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
-    const unread = messages.filter((m: any) => m.senderId !== user.uid && !m.read);
-    unread.forEach(async (msg: any) => {
+    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
@@ -365,7 +402,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
-    const activeTicket = tickets.find((t: any) => t.status === 'waiting' || t.status === 'active');
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
       setSelectedTicket(activeTicket);
     } else if (tickets.length > 0 && !selectedTicket) {
@@ -403,7 +440,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   const startChat = async () => {
     if (!db || !user || !selectedTopic || !isMounted) return;
-    const hasActiveTicket = tickets.some((t: any) => t.status === 'waiting' || t.status === 'active');
+    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
     if (hasActiveTicket) {
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
@@ -499,6 +536,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getTypingText = (ticket: Ticket | null) => {
+    if (!ticket || !ticket.typing) return null;
+    const name = ticket.typingUserName || "Seseorang";
+    return `${name} sedang mengetik...`;
+  };
+
   const handleLogout = async () => {
     if (!auth) return;
     try {
@@ -514,23 +563,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
+  if (!isMounted) {
+    return <div style={{ minHeight: "200px" }} />;
+  }
+
   // ============================================================
   // ===== RENDER COMPONENT =====
   // ============================================================
   
-  if (!isMounted) {
-    return <div style={{ marginTop: "40px", minHeight: "100px" }} />;
-  }
-
   if (!user) {
     return (
       <div style={{
         marginTop: "40px",
-        borderTop: "1px solid #e8e8e8",
         paddingTop: "30px",
-        maxWidth: "1400px",
-        marginLeft: "auto",
-        marginRight: "auto",
       }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "22px",
@@ -594,18 +639,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // USER VIEW
   if (!isAdmin) {
-    const activeTicket = tickets.find((t: any) => t.status === 'waiting' || t.status === 'active');
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
 
     if (tickets.length === 0 && !showStartChat) {
       return (
-        <div style={{ 
-          marginTop: "40px", 
-          borderTop: "1px solid #e8e8e8", 
-          paddingTop: "30px",
-          maxWidth: "1400px",
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}>
+        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -679,14 +717,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (showStartChat) {
       return (
-        <div style={{ 
-          marginTop: "40px", 
-          borderTop: "1px solid #e8e8e8", 
-          paddingTop: "30px",
-          maxWidth: "1400px",
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}>
+        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -785,16 +816,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - With chat list
+    // USER VIEW - Full chat interface
     return (
-      <div style={{ 
-        marginTop: "40px", 
-        borderTop: "1px solid #e8e8e8", 
-        paddingTop: "30px",
-        maxWidth: "1400px",
-        marginLeft: "auto",
-        marginRight: "auto",
-      }}>
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
           <h3 ref={liveChatTitleRef} style={{
             fontSize: "20px",
@@ -875,7 +899,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               }}>{tickets.length}</span>
             </div>
             <div style={{ overflowY: "auto", maxHeight: "360px" }}>
-              {tickets.map((ticket: any) => {
+              {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
                 const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
@@ -999,6 +1023,23 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       </span>
                     </div>
                   </div>
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "3px 8px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        fontSize: "9px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Selesaikan
+                    </button>
+                  )}
                 </div>
                 <div 
                   ref={messagesContainerRef}
@@ -1018,7 +1059,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       Belum ada pesan
                     </div>
                   ) : (
-                    messages.map((msg: any, idx: number) => {
+                    messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
                       const isAgent = !isMine && msg.senderName === AGENT_NAME;
                       return (
@@ -1144,20 +1185,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   // ADMIN VIEW
-  const waitingTickets = tickets.filter((t: any) => t.status === 'waiting');
-  const activeTickets = tickets.filter((t: any) => t.status === 'active');
-  const resolvedTickets = tickets.filter((t: any) => t.status === 'resolved' || t.status === 'closed');
+  const waitingTickets = tickets.filter(t => t.status === 'waiting');
+  const activeTickets = tickets.filter(t => t.status === 'active');
+  const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
-    <div style={{ 
-      marginTop: "40px", 
-      borderTop: "1px solid #e8e8e8", 
-      paddingTop: "30px",
-      maxWidth: "1400px",
-      marginLeft: "auto",
-      marginRight: "auto",
-    }}>
+    <div style={{ marginTop: "40px", paddingTop: "30px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "20px",
@@ -1243,10 +1277,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 top: 0,
                 zIndex: 1,
               }}>
-                <span>⏳</span>
+                <WaitingIcon />
                 <span>Menunggu ({waitingTickets.length})</span>
               </div>
-              {waitingTickets.map((ticket: any) => (
+              {waitingTickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => {
@@ -1285,10 +1319,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 top: 0,
                 zIndex: 1,
               }}>
-                <span>✓</span>
+                <ActiveIcon />
                 <span>Aktif ({activeTickets.length})</span>
               </div>
-              {activeTickets.map((ticket: any) => (
+              {activeTickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
@@ -1325,10 +1359,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 top: 0,
                 zIndex: 1,
               }}>
-                <span>✔</span>
+                <ResolvedIcon />
                 <span>Selesai ({resolvedTickets.length})</span>
               </div>
-              {resolvedTickets.map((ticket: any) => {
+              {resolvedTickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 return (
                   <div
@@ -1437,7 +1471,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     Belum ada pesan
                   </div>
                 ) : (
-                  messages.map((msg: any, idx: number) => {
+                  messages.map((msg, idx) => {
                     const isMine = msg.senderId === user.uid;
                     return (
                       <div
@@ -2262,7 +2296,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER - With Community and Live Chat Agent added to Product */}
         <div
           style={{
             width: "100%",
@@ -2333,7 +2367,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* LIVE CHAT AGENT - Full version like Contact page */}
+          {/* ===== LIVE CHAT AGENT (Like contact page) ===== */}
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
