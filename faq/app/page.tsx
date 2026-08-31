@@ -383,7 +383,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessages(msgList);
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
       }, 100);
     });
     return () => unsubscribe();
@@ -811,7 +813,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - Chat interface
+    // USER VIEW - Chat interface dengan scroll normal
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -856,7 +858,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "12px", height: "420px", maxHeight: "420px" }}>
+        <div style={{ display: "flex", gap: "12px", height: "400px", maxHeight: "400px" }}>
+          {/* Left sidebar - chat list */}
           <div style={{
             width: "200px",
             backgroundColor: "#0D3CFC",
@@ -866,8 +869,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            boxShadow: "0 2px 10px rgba(13,60,252,0.1)",
-            maxHeight: "420px",
+            maxHeight: "400px",
           }}>
             <div style={{
               padding: "0 10px 8px 10px",
@@ -893,7 +895,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "8px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "360px" }}>
+            <div style={{ overflowY: "auto", maxHeight: "340px" }}>
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
@@ -976,6 +978,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           </div>
 
+          {/* Right side - chat messages */}
           <div style={{
             flex: 1,
             backgroundColor: "#ffffff",
@@ -984,7 +987,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "420px",
+            maxHeight: "400px",
           }}>
             {selectedTicket ? (
               <>
@@ -1045,8 +1048,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    minHeight: "180px",
-                    maxHeight: "330px",
+                    minHeight: "200px",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1246,7 +1248,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "12px", height: "420px", maxHeight: "420px" }}>
+      <div style={{ display: "flex", gap: "12px", height: "400px", maxHeight: "400px" }}>
         <div style={{
           width: "220px",
           backgroundColor: "#f9f9f9",
@@ -1254,7 +1256,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          maxHeight: "420px",
+          maxHeight: "400px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1396,7 +1398,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "420px",
+          maxHeight: "400px",
         }}>
           {selectedTicket ? (
             <>
@@ -1457,8 +1459,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
-                  minHeight: "180px",
-                  maxHeight: "330px",
+                  minHeight: "200px",
                 }}
               >
                 {messages.length === 0 ? (
