@@ -42,41 +42,42 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // SVG Icons
-const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 17L17 7M17 17V7H7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 17L7 7M7 17V7H17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const ShieldCheck = ({ size = 24 }: { size?: number }) => (
+const ShieldCheck = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const ShoppingBag = ({ size = 20 }: { size?: number }) => (
+const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 6H18L19 18H5L6 6Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 6H18L19 18H5L6 6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBlueBackground, setIsBlueBackground] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -88,6 +89,9 @@ export default function HomePage(): React.JSX.Element {
   const heroRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const featuresTextRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -103,6 +107,50 @@ export default function HomePage(): React.JSX.Element {
       videoRef.current.play().catch(error => {
         console.log("Video autoplay failed:", error);
       });
+    }
+  }, [showMain]);
+
+  useEffect(() => {
+    if (!showMain) return;
+
+    // Setup ScrollTrigger for background color change
+    const featuresElement = featuresRef.current;
+    const mainContainer = mainContainerRef.current;
+
+    if (featuresElement && mainContainer) {
+      // Create the scroll trigger
+      const trigger = ScrollTrigger.create({
+        trigger: featuresElement,
+        start: "top bottom",
+        end: "top top",
+        onEnter: () => {
+          setIsBlueBackground(true);
+          // Update navbar background
+          if (navbarRef.current) {
+            gsap.to(navbarRef.current, {
+              backgroundColor: "rgba(13, 60, 252, 0.9)",
+              backdropFilter: "blur(20px)",
+              duration: 0.5,
+              ease: "power2.out"
+            });
+          }
+        },
+        onLeaveBack: () => {
+          setIsBlueBackground(false);
+          if (navbarRef.current) {
+            gsap.to(navbarRef.current, {
+              backgroundColor: "rgba(255,255,255,0.7)",
+              backdropFilter: "blur(20px)",
+              duration: 0.5,
+              ease: "power2.out"
+            });
+          }
+        }
+      });
+
+      return () => {
+        trigger.kill();
+      };
     }
   }, [showMain]);
 
@@ -255,6 +303,13 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
+  // Determine text colors based on background
+  const textColor = isBlueBackground ? "#ffffff" : "#000000";
+  const blueColor = isBlueBackground ? "#ffffff" : "#0D3CFC";
+  const borderColor = isBlueBackground ? "#ffffff" : "#0D3CFC";
+  const arrowBgColor = isBlueBackground ? "#ffffff" : "#0D3CFC";
+  const arrowColor = isBlueBackground ? "#0D3CFC" : "#ffffff";
+
   return (
     <>
       <Head>
@@ -280,14 +335,16 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <div
+        ref={mainContainerRef}
         style={{
           minHeight: "100vh",
-          backgroundColor: "#ffffff",
+          backgroundColor: isBlueBackground ? "#0D3CFC" : "#ffffff",
           margin: 0,
           padding: 0,
           position: "relative",
           fontFamily: FONT_FAMILY,
           overflow: "visible",
+          transition: "background-color 0.8s ease",
         }}
       >
         {/* HERO SECTION */}
@@ -299,7 +356,7 @@ export default function HomePage(): React.JSX.Element {
             flexDirection: "column",
             justifyContent: "flex-start",
             padding: "40px",
-            backgroundColor: "#ffffff",
+            backgroundColor: "transparent",
             position: "relative",
             paddingTop: "120px",
           }}
@@ -311,7 +368,7 @@ export default function HomePage(): React.JSX.Element {
             style={{
               fontSize: "48px",
               fontWeight: 700,
-              color: "#000000",
+              color: textColor,
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
@@ -323,8 +380,9 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 15,
               pointerEvents: "none",
               backdropFilter: "blur(10px)",
-              backgroundColor: "rgba(255,255,255,0.7)",
+              backgroundColor: isBlueBackground ? "rgba(13, 60, 252, 0.7)" : "rgba(255,255,255,0.7)",
               borderRadius: "12px",
+              transition: "color 0.5s ease, background-color 0.5s ease",
             }}
           >
             Menuru
@@ -347,13 +405,14 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "60px",
                   fontWeight: 400,
-                  color: "#0D3CFC",
+                  color: blueColor,
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1.2,
                   margin: 0,
                   padding: 0,
                   paddingBottom: "30px",
                   whiteSpace: "pre-line",
+                  transition: "color 0.5s ease",
                 }}
               >
                 {`You can take notes, find ideas,\nand donate money to those in need`}
@@ -366,20 +425,22 @@ export default function HomePage(): React.JSX.Element {
                 className="cta-button"
                 style={{
                   display: "inline-block",
-                  border: "2px solid #0D3CFC",
+                  border: `2px solid ${borderColor}`,
                   borderRadius: "8px",
                   padding: "12px 28px",
                   cursor: "pointer",
                   backgroundColor: "transparent",
+                  transition: "border-color 0.5s ease",
                 }}
               >
                 <span
                   style={{
                     fontSize: "18px",
                     fontWeight: 500,
-                    color: "#0D3CFC",
+                    color: blueColor,
                     fontFamily: FONT_FAMILY,
                     letterSpacing: "0.02em",
+                    transition: "color 0.5s ease",
                   }}
                 >
                   Let's build now
@@ -393,17 +454,18 @@ export default function HomePage(): React.JSX.Element {
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "2px solid #0D3CFC",
+                  border: `2px solid ${borderColor}`,
                   borderRadius: "8px",
                   padding: "10px",
                   cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
+                  backgroundColor: arrowBgColor,
+                  color: arrowColor,
                   width: "50px",
                   height: "50px",
+                  transition: "border-color 0.5s ease, background-color 0.5s ease, color 0.5s ease",
                 }}
               >
-                <NorthEastArrow size={24} />
+                <NorthEastArrow size={24} color={arrowColor} />
               </div>
             </div>
 
@@ -420,16 +482,17 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "48px",
                   fontWeight: 600,
-                  color: "#0D3CFC",
+                  color: blueColor,
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "-0.02em",
+                  transition: "color 0.5s ease",
                 }}
               >
                 Showreel 2026
               </span>
             </div>
 
-            {/* VIDEO SECTION - 1500px width, centered, no bg/border/shadow */}
+            {/* VIDEO SECTION */}
             <div
               style={{
                 marginTop: "20px",
@@ -462,6 +525,67 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
+        {/* FEATURES SECTION */}
+        <div
+          ref={featuresRef}
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: "transparent",
+            position: "relative",
+          }}
+        >
+          <h2
+            ref={featuresTextRef}
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: isBlueBackground ? "#ffffff" : "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              textAlign: "center",
+              transition: "color 0.5s ease",
+            }}
+          >
+            Our Features
+          </h2>
+          
+          {/* You can add feature cards here if needed */}
+          <div
+            style={{
+              marginTop: "60px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "40px",
+              width: "100%",
+              maxWidth: "1200px",
+            }}
+          >
+            {/* Example feature cards */}
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <div style={{ fontSize: "48px", color: isBlueBackground ? "#ffffff" : "#0D3CFC", transition: "color 0.5s ease" }}>📝</div>
+              <h3 style={{ fontSize: "24px", color: isBlueBackground ? "#ffffff" : "#000000", transition: "color 0.5s ease" }}>Note Taking</h3>
+              <p style={{ color: isBlueBackground ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.5s ease" }}>Capture your ideas anytime, anywhere</p>
+            </div>
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <div style={{ fontSize: "48px", color: isBlueBackground ? "#ffffff" : "#0D3CFC", transition: "color 0.5s ease" }}>💡</div>
+              <h3 style={{ fontSize: "24px", color: isBlueBackground ? "#ffffff" : "#000000", transition: "color 0.5s ease" }}>Find Ideas</h3>
+              <p style={{ color: isBlueBackground ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.5s ease" }}>Discover inspiration from the community</p>
+            </div>
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <div style={{ fontSize: "48px", color: isBlueBackground ? "#ffffff" : "#0D3CFC", transition: "color 0.5s ease" }}>❤️</div>
+              <h3 style={{ fontSize: "24px", color: isBlueBackground ? "#ffffff" : "#000000", transition: "color 0.5s ease" }}>Donate</h3>
+              <p style={{ color: isBlueBackground ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.5s ease" }}>Support those in need with ease</p>
+            </div>
+          </div>
+        </div>
+
         {/* NAVBAR with blur background */}
         <div
           ref={navbarRef}
@@ -476,14 +600,14 @@ export default function HomePage(): React.JSX.Element {
             gap: "8px",
             padding: "16px 20px",
             borderRadius: "16px",
-            backgroundColor: isMenuOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)",
+            backgroundColor: isBlueBackground ? "rgba(13, 60, 252, 0.9)" : "rgba(255,255,255,0.7)",
             backdropFilter: "blur(20px)",
-            transition: "all 0.3s ease",
+            transition: "all 0.5s ease",
             pointerEvents: "auto",
-            boxShadow: isMenuOpen ? "0 4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.05)",
+            boxShadow: isBlueBackground ? "0 4px 20px rgba(0,0,0,0.2)" : "0 4px 20px rgba(0,0,0,0.05)",
           }}
         >
-          {/* Baris atas: Shop, About (teks biru), Sign Up */}
+          {/* Baris atas: Shop, About, Sign Up */}
           <div
             style={{
               display: "flex",
@@ -495,18 +619,18 @@ export default function HomePage(): React.JSX.Element {
           >
             <Link href="/shop">
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-                <ShoppingBag size={20} />
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
+                <ShoppingBag size={20} color={isBlueBackground ? "#ffffff" : "#0D3CFC"} />
+                <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, transition: "color 0.5s ease" }}>Shop</span>
               </div>
             </Link>
             <Link href="/profile">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, transition: "color 0.5s ease" }}>About</span>
               </div>
             </Link>
             <Link href="/signup">
               <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, transition: "color 0.5s ease" }}>Sign Up</span>
               </div>
             </Link>
           </div>
@@ -522,36 +646,36 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
-              <ShieldCheck size={28} />
-              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Fraud</span>
+              <ShieldCheck size={28} color={isBlueBackground ? "#ffffff" : "#0D3CFC"} />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1, transition: "color 0.5s ease" }}>Anti-Fraud</span>
             </div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
-              <ShieldCheck size={28} />
-              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Bot</span>
+              <ShieldCheck size={28} color={isBlueBackground ? "#ffffff" : "#0D3CFC"} />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1, transition: "color 0.5s ease" }}>Anti-Bot</span>
             </div>
             <Link href="/contact">
-              <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Get in touch</span>
-                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
-                  <SouthEastArrow size={24} />
+              <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: `2px solid ${isBlueBackground ? "#ffffff" : "#0D3CFC"}`, borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent", transition: "border-color 0.5s ease" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#0D3CFC", fontFamily: FONT_FAMILY, transition: "color 0.5s ease" }}>Get in touch</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: isBlueBackground ? "#ffffff" : "#0D3CFC", borderRadius: "4px", padding: "4px", color: isBlueBackground ? "#0D3CFC" : "#ffffff", transition: "background-color 0.5s ease, color 0.5s ease" }}>
+                  <SouthEastArrow size={24} color={isBlueBackground ? "#0D3CFC" : "#ffffff"} />
                 </div>
               </div>
             </Link>
             <Link href="/pusat-bantuan">
-              <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
-                <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Pusat Bantuan</span>
-                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
-                  <NorthWestArrow size={24} />
+              <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: `2px solid ${isBlueBackground ? "#ffffff" : "#000000"}`, borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent", transition: "border-color 0.5s ease" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#000000", fontFamily: FONT_FAMILY, transition: "color 0.5s ease" }}>Pusat Bantuan</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: isBlueBackground ? "#ffffff" : "#000000", borderRadius: "4px", padding: "4px", color: isBlueBackground ? "#0D3CFC" : "#ffffff", transition: "background-color 0.5s ease, color 0.5s ease" }}>
+                  <NorthWestArrow size={24} color={isBlueBackground ? "#0D3CFC" : "#ffffff"} />
                 </div>
               </div>
             </Link>
-            <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+            <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: `2px solid ${isBlueBackground ? "#ffffff" : "#000000"}`, borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent", transition: "border-color 0.5s ease" }} onClick={toggleMenu}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: isBlueBackground ? "#ffffff" : "#000000", borderRadius: "4px", padding: "4px", color: isBlueBackground ? "#0D3CFC" : "#ffffff", transition: "background-color 0.5s ease, color 0.5s ease" }}>
                 <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block", transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)" }}>
                   {isMenuOpen ? "✕" : "+"}
                 </span>
               </div>
-              <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: isBlueBackground ? "#ffffff" : "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em", transition: "color 0.5s ease" }}>
                 {isMenuOpen ? "Close" : "Menu"}
               </span>
             </div>
