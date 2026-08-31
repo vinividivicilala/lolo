@@ -105,7 +105,6 @@ const featuresData = [
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -119,6 +118,7 @@ export default function HomePage(): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featuresTextRef = useRef<HTMLHeadingElement>(null);
+  const featuresContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -139,29 +139,140 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!showMain) return;
 
+    // GSAP ScrollTrigger for features section
     const featuresElement = featuresRef.current;
+    const featuresContainer = featuresContainerRef.current;
+    const featuresTitle = featuresTextRef.current;
 
-    if (featuresElement) {
-      const trigger = ScrollTrigger.create({
-        trigger: featuresElement,
-        start: "top bottom",
-        end: "bottom top",
-        onEnter: () => {
-          setIsFeaturesVisible(true);
-        },
-        onLeave: () => {
-          setIsFeaturesVisible(false);
-        },
-        onEnterBack: () => {
-          setIsFeaturesVisible(true);
-        },
-        onLeaveBack: () => {
-          setIsFeaturesVisible(false);
+    if (featuresElement && featuresContainer) {
+      // Create a timeline for the features section
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: featuresElement,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5,
+          toggleActions: "play none none reverse",
+          onEnter: () => {
+            // Background turns blue
+            gsap.to(featuresElement, {
+              backgroundColor: "#0D3CFC",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            // Title turns white
+            gsap.to(featuresTitle, {
+              color: "#ffffff",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            // All feature titles turn white
+            gsap.utils.toArray('.feature-title').forEach((el: any) => {
+              gsap.to(el, {
+                color: "#ffffff",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+            // All feature items turn white
+            gsap.utils.toArray('.feature-item').forEach((el: any) => {
+              gsap.to(el, {
+                color: "rgba(255,255,255,0.8)",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+          },
+          onLeave: () => {
+            // Background turns white when leaving
+            gsap.to(featuresElement, {
+              backgroundColor: "#ffffff",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            // Title turns blue
+            gsap.to(featuresTitle, {
+              color: "#0D3CFC",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            // All feature titles turn blue
+            gsap.utils.toArray('.feature-title').forEach((el: any) => {
+              gsap.to(el, {
+                color: "#0D3CFC",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+            // All feature items turn dark
+            gsap.utils.toArray('.feature-item').forEach((el: any) => {
+              gsap.to(el, {
+                color: "rgba(0,0,0,0.65)",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+          },
+          onEnterBack: () => {
+            // Background turns blue when scrolling back up
+            gsap.to(featuresElement, {
+              backgroundColor: "#0D3CFC",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            gsap.to(featuresTitle, {
+              color: "#ffffff",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            gsap.utils.toArray('.feature-title').forEach((el: any) => {
+              gsap.to(el, {
+                color: "#ffffff",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+            gsap.utils.toArray('.feature-item').forEach((el: any) => {
+              gsap.to(el, {
+                color: "rgba(255,255,255,0.8)",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+          },
+          onLeaveBack: () => {
+            // Background turns white when scrolling back up past section
+            gsap.to(featuresElement, {
+              backgroundColor: "#ffffff",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            gsap.to(featuresTitle, {
+              color: "#0D3CFC",
+              duration: 0.8,
+              ease: "power2.out"
+            });
+            gsap.utils.toArray('.feature-title').forEach((el: any) => {
+              gsap.to(el, {
+                color: "#0D3CFC",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+            gsap.utils.toArray('.feature-item').forEach((el: any) => {
+              gsap.to(el, {
+                color: "rgba(0,0,0,0.65)",
+                duration: 0.8,
+                ease: "power2.out"
+              });
+            });
+          }
         }
       });
 
       return () => {
-        trigger.kill();
+        tl.kill();
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       };
     }
   }, [showMain]);
@@ -519,7 +630,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Only this section turns blue */}
+        {/* FEATURES SECTION - Using GSAP ScrollTrigger */}
         <div
           ref={featuresRef}
           style={{
@@ -529,9 +640,8 @@ export default function HomePage(): React.JSX.Element {
             alignItems: "flex-start",
             justifyContent: "flex-start",
             padding: "60px 40px",
-            backgroundColor: isFeaturesVisible ? "#0D3CFC" : "#ffffff",
+            backgroundColor: "#ffffff",
             position: "relative",
-            transition: "background-color 0.8s ease",
             paddingTop: "100px",
             paddingBottom: "100px",
           }}
@@ -542,21 +652,21 @@ export default function HomePage(): React.JSX.Element {
             style={{
               fontSize: "80px",
               fontWeight: 700,
-              color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
+              color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
               padding: 0,
               paddingBottom: "50px",
               textAlign: "left",
-              transition: "color 0.8s ease",
             }}
           >
             Our Features
           </h2>
 
-          {/* Features List - Vertical, Left Aligned, No Cards */}
+          {/* Features List - Vertical, Left Aligned */}
           <div
+            ref={featuresContainerRef}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -578,14 +688,14 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <h3
+                  className="feature-title"
                   style={{
                     fontSize: "28px",
                     fontWeight: 600,
-                    color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
+                    color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     margin: 0,
                     padding: 0,
-                    transition: "color 0.8s ease",
                   }}
                 >
                   {feature.name}
@@ -601,13 +711,13 @@ export default function HomePage(): React.JSX.Element {
                   {feature.items.map((item, itemIndex) => (
                     <span
                       key={itemIndex}
+                      className="feature-item"
                       style={{
                         fontSize: "14px",
                         fontWeight: 400,
-                        color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.65)",
+                        color: "rgba(0,0,0,0.65)",
                         fontFamily: FONT_FAMILY,
                         padding: "2px 0",
-                        transition: "color 0.8s ease",
                         position: "relative",
                       }}
                     >
@@ -630,20 +740,18 @@ export default function HomePage(): React.JSX.Element {
             textAlign: "center",
             padding: "30px 0",
             backgroundColor: "#ffffff",
-            transition: "color 0.8s ease",
           }}
         >
           <span
             style={{
               fontSize: "16px",
               fontWeight: 400,
-              color: isFeaturesVisible ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.3)",
+              color: "rgba(0,0,0,0.3)",
               fontFamily: FONT_FAMILY,
               letterSpacing: "0.05em",
-              transition: "color 0.8s ease",
             }}
           >
-            {isFeaturesVisible ? "▼ Scroll to explore more" : "▲ Scroll back up"}
+            ▼ Scroll to explore more
           </span>
         </div>
 
