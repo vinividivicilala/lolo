@@ -181,7 +181,7 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   );
 };
 
-// ===== LIVE CHAT AGENT COMPONENT =====
+// ===== LIVE CHAT AGENT COMPONENT - NEW =====
 interface Ticket {
   id: string;
   userId: string;
@@ -246,6 +246,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const WaitingIcon = () => (
@@ -536,12 +542,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  };
-
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Seseorang";
@@ -813,7 +813,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - Chat interface dengan scroll normal
+    // USER VIEW - Chat interface
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -858,10 +858,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "12px", height: "400px" }}>
+        <div style={{ 
+          display: "flex", 
+          gap: "12px", 
+          height: "450px",
+          width: "100%",
+        }}>
           {/* Left sidebar - chat list */}
           <div style={{
-            width: "200px",
+            width: "220px",
             backgroundColor: "#0D3CFC",
             borderRadius: "8px",
             padding: "10px 0",
@@ -869,7 +874,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            height: "400px",
+            height: "450px",
           }}>
             <div style={{
               padding: "0 10px 8px 10px",
@@ -987,7 +992,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "400px",
+            height: "450px",
           }}>
             {selectedTicket ? (
               <>
@@ -1247,7 +1252,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "12px", height: "400px" }}>
+      <div style={{ display: "flex", gap: "12px", height: "450px" }}>
         <div style={{
           width: "220px",
           backgroundColor: "#f9f9f9",
@@ -1255,7 +1260,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          height: "400px",
+          height: "450px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1397,7 +1402,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          height: "400px",
+          height: "450px",
         }}>
           {selectedTicket ? (
             <>
