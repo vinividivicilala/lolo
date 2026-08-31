@@ -74,6 +74,34 @@ const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: 
   </svg>
 );
 
+// Feature data from the file
+const featuresData = [
+  { name: "Notes", items: ["My Notes", "Create Note", "Pinned Notes", "Recent Notes", "Categories", "Tags", "Archived Notes", "Trash"] },
+  { name: "Donation", items: ["Campaigns", "Donate", "My Donations", "Donation History", "Fundraising", "Supported Causes", "Updates"] },
+  { name: "Calendar", items: ["Calendar", "Events", "Schedule", "Reminders", "Upcoming Events", "Past Events", "Recurring Events"] },
+  { name: "Community", items: ["Communities", "Members", "Posts", "Topics", "Groups", "Activities", "Events", "Discussions"] },
+  { name: "Forum", items: ["Discussions", "Questions", "Categories", "Topics", "Replies", "Popular Discussions", "Unanswered"] },
+  { name: "Blog", items: ["Articles", "Categories", "Tags", "Featured Posts", "Recent Posts", "Saved Articles", "Authors"] },
+  { name: "Learning", items: ["Courses", "Lessons", "Tutorials", "Materials", "Progress", "Completed Lessons", "Certificates"] },
+  { name: "Projects", items: ["Projects", "Active Projects", "Completed Projects", "Project Details", "Technologies", "Gallery", "Updates"] },
+  { name: "Feedback", items: ["Submit Feedback", "Suggestions", "Bug Reports", "Feature Requests", "My Feedback", "Feedback Status"] },
+  { name: "Announcements", items: ["Latest Updates", "News", "Feature Updates", "Events", "Maintenance", "Important Notices"] },
+  { name: "Profile", items: ["About", "Activity", "Posts", "Projects", "Communities", "Interests", "Achievements", "Settings"] },
+  { name: "Notifications", items: ["All", "Mentions", "Comments", "Replies", "Likes", "Followers", "Events", "System"] },
+  { name: "Goals", items: ["My Goals", "Create Goal", "Progress", "Milestones", "Completed Goals", "Deadlines", "Categories"] },
+  { name: "Bookmarks", items: ["Saved Posts", "Saved Articles", "Saved Projects", "Collections", "Recent Saves"] },
+  { name: "Events", items: ["Upcoming Events", "Discover Events", "My Events", "Registered Events", "Past Events", "Event Calendar"] },
+  { name: "Resources", items: ["Tools", "Websites", "Documents", "Tutorials", "Books", "Templates", "References"] },
+  { name: "Archive", items: ["Archived Notes", "Archived Posts", "Archived Projects", "Archived Events", "Recently Deleted"] },
+  { name: "Activity", items: ["Recent Activity", "Posts", "Comments", "Likes", "Projects", "Contributions", "Achievements"] },
+  { name: "Dashboard", items: ["Overview", "Statistics", "Recent Activity", "Upcoming Events", "Notifications", "Progress"] },
+  { name: "Messages", items: ["Inbox", "Direct Messages", "Group Chats", "Requests", "Archived Chats"] },
+  { name: "Connections", items: ["Friends", "Followers", "Following", "Requests", "Suggested Connections"] },
+  { name: "Search", items: ["People", "Posts", "Notes", "Projects", "Communities", "Events", "Articles"] },
+  { name: "Achievements", items: ["Badges", "Milestones", "Completed Goals", "Contributions", "Certificates"] },
+  { name: "Settings", items: ["Account", "Profile", "Privacy", "Notifications", "Security", "Preferences"] }
+];
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -91,15 +119,6 @@ export default function HomePage(): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featuresTextRef = useRef<HTMLHeadingElement>(null);
-
-  const featuresList = [
-    "Note Taking",
-    "Donation",
-    "Calendar",
-    "Community",
-    "Task Management",
-    "Reminder"
-  ];
 
   useEffect(() => {
     if (!auth) return;
@@ -125,7 +144,6 @@ export default function HomePage(): React.JSX.Element {
     const featuresElement = featuresRef.current;
 
     if (featuresElement) {
-      // Create the scroll trigger
       const trigger = ScrollTrigger.create({
         trigger: featuresElement,
         start: "top bottom",
@@ -348,7 +366,6 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
-          {/* Title with blur background */}
           <h1
             ref={titleRef}
             className="title"
@@ -451,7 +468,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* "Showreel 2026" Text */}
             <div
               style={{
                 marginTop: "60px",
@@ -473,7 +489,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* VIDEO SECTION */}
             <div
               style={{
                 marginTop: "20px",
@@ -506,22 +521,24 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Only this section turns blue when visible */}
+        {/* FEATURES SECTION */}
         <div
           ref={featuresRef}
           style={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
-            justifyContent: "center",
-            padding: "40px",
+            justifyContent: "flex-start",
+            padding: "60px 40px",
             backgroundColor: isFeaturesVisible ? "#0D3CFC" : "#ffffff",
             position: "relative",
             transition: "background-color 0.8s ease",
+            paddingTop: "100px",
+            paddingBottom: "100px",
           }}
         >
-          {/* Title at top left */}
+          {/* "Our Features" Title - Top Left */}
           <h2
             ref={featuresTextRef}
             style={{
@@ -532,7 +549,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: "-0.03em",
               margin: 0,
               padding: 0,
-              paddingBottom: "60px",
+              paddingBottom: "50px",
               textAlign: "left",
               transition: "color 0.8s ease",
             }}
@@ -540,39 +557,102 @@ export default function HomePage(): React.JSX.Element {
             Our Features
           </h2>
 
-          {/* Features list - Things / Activities Inside */}
+          {/* Features Grid */}
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "30px",
               width: "100%",
-              maxWidth: "800px",
+              maxWidth: "1400px",
             }}
           >
-            {featuresList.map((feature, index) => (
+            {featuresData.map((feature, index) => (
               <div
                 key={index}
                 style={{
-                  fontSize: "36px",
-                  fontWeight: 400,
-                  color: isFeaturesVisible ? "#ffffff" : "#000000",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.02em",
-                  padding: "8px 0",
-                  transition: "color 0.8s ease",
-                  borderBottom: isFeaturesVisible 
-                    ? "1px solid rgba(255,255,255,0.2)" 
-                    : "1px solid rgba(0,0,0,0.1)",
+                  backgroundColor: isFeaturesVisible ? "rgba(255,255,255,0.15)" : "rgba(13, 60, 252, 0.08)",
+                  borderRadius: "16px",
+                  padding: "24px",
+                  transition: "background-color 0.8s ease, transform 0.3s ease",
+                  cursor: "pointer",
+                  border: isFeaturesVisible ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(13, 60, 252, 0.1)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0px)";
                 }}
               >
-                {feature}
+                <h3
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: 600,
+                    color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    margin: 0,
+                    padding: 0,
+                    paddingBottom: "12px",
+                    transition: "color 0.8s ease",
+                  }}
+                >
+                  {feature.name}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "8px",
+                  }}
+                >
+                  {feature.items.map((item, itemIndex) => (
+                    <span
+                      key={itemIndex}
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 400,
+                        color: isFeaturesVisible ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.7)",
+                        fontFamily: FONT_FAMILY,
+                        backgroundColor: isFeaturesVisible ? "rgba(255,255,255,0.1)" : "rgba(13, 60, 252, 0.06)",
+                        padding: "4px 12px",
+                        borderRadius: "20px",
+                        transition: "color 0.8s ease, background-color 0.8s ease",
+                      }}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
+
+          {/* Bottom text to indicate section end */}
+          <div
+            style={{
+              marginTop: "60px",
+              width: "100%",
+              textAlign: "center",
+              padding: "20px 0",
+              transition: "color 0.8s ease",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 400,
+                color: isFeaturesVisible ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)",
+                fontFamily: FONT_FAMILY,
+                transition: "color 0.8s ease",
+              }}
+            >
+              {isFeaturesVisible ? "▼ Scroll to explore more" : "▲ Scroll back up"}
+            </span>
+          </div>
         </div>
 
-        {/* NAVBAR - Stays unchanged */}
+        {/* NAVBAR */}
         <div
           ref={navbarRef}
           style={{
@@ -593,7 +673,6 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           }}
         >
-          {/* Baris atas: Shop, About, Sign Up */}
           <div
             style={{
               display: "flex",
@@ -621,7 +700,6 @@ export default function HomePage(): React.JSX.Element {
             </Link>
           </div>
 
-          {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
           <div
             style={{
               display: "flex",
