@@ -528,6 +528,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         marginTop: "40px",
         borderTop: "1px solid #e8e8e8",
         paddingTop: "30px",
+        maxWidth: "1400px",
+        marginLeft: "auto",
+        marginRight: "auto",
       }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "22px",
@@ -595,7 +598,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (tickets.length === 0 && !showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <div style={{ 
+          marginTop: "40px", 
+          borderTop: "1px solid #e8e8e8", 
+          paddingTop: "30px",
+          maxWidth: "1400px",
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -669,7 +679,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <div style={{ 
+          marginTop: "40px", 
+          borderTop: "1px solid #e8e8e8", 
+          paddingTop: "30px",
+          maxWidth: "1400px",
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -770,7 +787,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     // USER VIEW - With chat list
     return (
-      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+      <div style={{ 
+        marginTop: "40px", 
+        borderTop: "1px solid #e8e8e8", 
+        paddingTop: "30px",
+        maxWidth: "1400px",
+        marginLeft: "auto",
+        marginRight: "auto",
+      }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
           <h3 ref={liveChatTitleRef} style={{
             fontSize: "20px",
@@ -1126,7 +1150,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
-    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+    <div style={{ 
+      marginTop: "40px", 
+      borderTop: "1px solid #e8e8e8", 
+      paddingTop: "30px",
+      maxWidth: "1400px",
+      marginLeft: "auto",
+      marginRight: "auto",
+    }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "20px",
