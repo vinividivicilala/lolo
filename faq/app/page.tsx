@@ -27,7 +27,6 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase only on client side
 let app = null;
 let auth = null;
 let db = null;
@@ -82,12 +81,6 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const SendIcon = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -188,7 +181,7 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   );
 };
 
-// ===== LIVE CHAT AGENT INTERFACES =====
+// ===== LIVE CHAT AGENT COMPONENT (Full version from contact page) =====
 interface Ticket {
   id: string;
   userId: string;
@@ -217,7 +210,6 @@ interface ChatMessage {
   read: boolean;
 }
 
-// ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -226,7 +218,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -240,10 +231,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Kerjasama",
     "Lainnya"
   ];
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -289,6 +276,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
+  const SendIcon = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   const LiveChatIllustration = () => (
     <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -300,7 +293,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // GSAP SplitText untuk judul Live Chat Agent
   useEffect(() => {
-    if (liveChatTitleRef.current && isMounted) {
+    if (liveChatTitleRef.current) {
       const splitTitle = new SplitText(liveChatTitleRef.current, {
         type: "chars",
         charsClass: "split-char-livechat"
@@ -326,11 +319,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMounted]);
+  }, []);
 
   // ===== ALL useEffect HOOKS =====
   useEffect(() => {
-    if (!db || !isMounted) return;
+    if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
@@ -340,10 +333,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, isMounted]);
+  }, [db]);
 
   useEffect(() => {
-    if (!db || !user || !isMounted) return;
+    if (!db || !user) return;
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -369,10 +362,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted]);
+  }, [db, user, isAdmin, selectedTicket]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !isMounted) return;
+    if (!db || !selectedTicket) return;
     const q = query(
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
@@ -388,19 +381,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }, 100);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket, isMounted]);
+  }, [db, selectedTicket]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
+    if (!db || !selectedTicket || !user || !isAdmin) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
+  }, [messages, selectedTicket, db, user, isAdmin]);
 
   useEffect(() => {
-    if (!user || isAdmin || !isMounted) return;
+    if (!user || isAdmin) return;
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
       setSelectedTicket(activeTicket);
@@ -410,13 +403,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
+  }, [tickets, user, isAdmin, selectedTicket]);
 
   // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
-    if (!selectedTicket || !user || !db || !isMounted) return;
+    if (!selectedTicket || !user || !db) return;
     const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
     if (value.length > 0) {
       await updateDoc(ticketRef, {
@@ -438,7 +431,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const startChat = async () => {
-    if (!db || !user || !selectedTopic || !isMounted) return;
+    if (!db || !user || !selectedTopic) return;
     const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
     if (hasActiveTicket) {
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
@@ -473,7 +466,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const sendMessage = async () => {
-    if (!db || !selectedTicket || !messageText.trim() || !user || !isMounted) return;
+    if (!db || !selectedTicket || !messageText.trim() || !user) return;
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
@@ -508,7 +501,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const takeTicket = async (ticketId: string) => {
-    if (!db || !isAdmin || !user || !isMounted) return;
+    if (!db || !isAdmin || !user) return;
     try {
       await updateDoc(doc(db, "livechat_tickets", ticketId), {
         agentId: user.uid,
@@ -521,7 +514,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const resolveTicket = async (ticketId: string) => {
-    if (!db || !isAdmin || !isMounted) return;
+    if (!db || !isAdmin) return;
     try {
       await updateDoc(doc(db, "livechat_tickets", ticketId), {
         status: "resolved",
@@ -562,13 +555,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  if (!isMounted) {
-    return <div style={{ minHeight: "200px" }} />;
-  }
-
-  // ============================================================
   // ===== RENDER COMPONENT =====
-  // ============================================================
   
   if (!user) {
     return (
@@ -1592,13 +1579,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 };
 
 export default function HomePage(): React.JSX.Element {
-  const [isMounted, setIsMounted] = useState(false);
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -2219,7 +2206,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Background turns blue on scroll */}
+        {/* FEATURES SECTION - Only 7 features */}
         <div
           ref={featuresRef}
           style={{
@@ -2233,10 +2220,8 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
             paddingTop: "100px",
             paddingBottom: "100px",
-            transition: "background-color 0.8s ease",
           }}
         >
-          {/* "Our Features" Title - Top Left */}
           <h2
             ref={featuresTextRef}
             style={{
@@ -2249,13 +2234,11 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               paddingBottom: "50px",
               textAlign: "left",
-              transition: "color 0.8s ease",
             }}
           >
             Our Features
           </h2>
 
-          {/* Features List - Vertical, Left Aligned */}
           <div
             ref={featuresContainerRef}
             style={{
@@ -2282,13 +2265,12 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     fontSize: "64px",
                     fontWeight: 600,
-                    color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
+                    color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     margin: 0,
                     padding: 0,
                     lineHeight: 1.2,
                     letterSpacing: "-0.02em",
-                    transition: "color 0.8s ease",
                   }}
                 >
                   {feature.name}
@@ -2296,6 +2278,11 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ===== LIVE CHAT AGENT (Full version from contact page) ===== */}
+        <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
         {/* FOOTER */}
@@ -2368,12 +2355,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ))}
           </div>
-
-          {/* ===== LIVE CHAT AGENT ===== */}
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* MENURU Text - 450px, left aligned, with GSAP SplitText + ScrollTrigger */}
+        {/* MENURU Text - 450px, left aligned */}
         <div
           ref={menuruFooterRef}
           style={{
