@@ -27,6 +27,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
+// Initialize Firebase only on client side
 let app = null;
 let auth = null;
 let db = null;
@@ -35,7 +36,6 @@ if (typeof window !== "undefined") {
   app = getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0];
-
   auth = getAuth(app);
   db = getFirestore(app);
 }
@@ -186,10 +186,14 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
 const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [agentOnline, setAgentOnline] = useState(false);
   const [tickets, setTickets] = useState<any[]>([]);
-  const [showChat, setShowChat] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!db) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
@@ -199,10 +203,10 @@ const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: 
       }
     });
     return () => unsubscribe();
-  }, [db]);
+  }, [db, isMounted]);
 
   useEffect(() => {
-    if (!db || !user) return;
+    if (!db || !user || !isMounted) return;
     const q = query(
       collection(db, "livechat_tickets"),
       where("userId", "==", user.uid),
@@ -216,7 +220,7 @@ const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: 
       setTickets(ticketList);
     });
     return () => unsubscribe();
-  }, [db, user]);
+  }, [db, user, isMounted]);
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -233,6 +237,10 @@ const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: 
       console.error("Logout error:", error);
     }
   };
+
+  if (!isMounted) {
+    return <div style={{ marginTop: "20px", borderTop: "1px solid #e8e8e8", paddingTop: "20px", minHeight: "60px" }} />;
+  }
 
   if (!user) {
     return (
@@ -357,6 +365,7 @@ const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: 
 };
 
 export default function HomePage(): React.JSX.Element {
+  const [isMounted, setIsMounted] = useState(false);
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
@@ -381,15 +390,19 @@ export default function HomePage(): React.JSX.Element {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
 
+  // Set mounted state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Auth
   useEffect(() => {
-    if (!auth) return;
+    if (!auth || !isMounted) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
         setIsAdmin(currentUser.email === ADMIN_EMAIL);
-        // Update online status
         try {
           const userRef = doc(db, "users", currentUser.uid);
           await updateDoc(userRef, {
@@ -402,50 +415,46 @@ export default function HomePage(): React.JSX.Element {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [isMounted]);
 
+  // Start preloader after auth check
   useEffect(() => {
-    if (!showMain) return;
-    // Start preloader animation after auth check
+    if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
-  }, []);
+  }, [isMounted, loading]);
 
   useEffect(() => {
-    if (videoRef.current && showMain) {
+    if (videoRef.current && showMain && isMounted) {
       videoRef.current.play().catch(error => {
         console.log("Video autoplay failed:", error);
       });
     }
-  }, [showMain]);
+  }, [showMain, isMounted]);
 
   useEffect(() => {
-    if (!showMain) return;
+    if (!showMain || !isMounted) return;
 
     // GSAP ScrollTrigger for features section
     const featuresElement = featuresRef.current;
     const featuresTitle = featuresTextRef.current;
 
     if (featuresElement) {
-      // Create scroll trigger
       const trigger = ScrollTrigger.create({
         trigger: featuresElement,
         start: "top bottom",
         end: "bottom top",
         onEnter: () => {
           setIsFeaturesVisible(true);
-          // Background turns blue
           gsap.to(featuresElement, {
             backgroundColor: "#0D3CFC",
             duration: 0.8,
             ease: "power2.out"
           });
-          // Title turns white
           gsap.to(featuresTitle, {
             color: "#ffffff",
             duration: 0.8,
             ease: "power2.out"
           });
-          // All feature names turn white
           gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#ffffff",
@@ -456,19 +465,16 @@ export default function HomePage(): React.JSX.Element {
         },
         onLeave: () => {
           setIsFeaturesVisible(false);
-          // Background turns white when leaving
           gsap.to(featuresElement, {
             backgroundColor: "#ffffff",
             duration: 0.8,
             ease: "power2.out"
           });
-          // Title turns blue
           gsap.to(featuresTitle, {
             color: "#0D3CFC",
             duration: 0.8,
             ease: "power2.out"
           });
-          // All feature names turn blue
           gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#0D3CFC",
@@ -479,7 +485,6 @@ export default function HomePage(): React.JSX.Element {
         },
         onEnterBack: () => {
           setIsFeaturesVisible(true);
-          // Background turns blue when scrolling back up
           gsap.to(featuresElement, {
             backgroundColor: "#0D3CFC",
             duration: 0.8,
@@ -500,7 +505,6 @@ export default function HomePage(): React.JSX.Element {
         },
         onLeaveBack: () => {
           setIsFeaturesVisible(false);
-          // Background turns white when scrolling back up past section
           gsap.to(featuresElement, {
             backgroundColor: "#ffffff",
             duration: 0.8,
@@ -527,13 +531,11 @@ export default function HomePage(): React.JSX.Element {
     const menuruText = menuruTextRef.current;
     
     if (menuruElement && menuruText) {
-      // Create SplitText
       const split = new SplitText(menuruText, {
         type: "chars",
         charsClass: "menuru-char"
       });
 
-      // Set initial state - hidden
       gsap.set(split.chars, {
         opacity: 0,
         y: 100,
@@ -541,12 +543,10 @@ export default function HomePage(): React.JSX.Element {
         rotationX: 90
       });
 
-      // Create scroll trigger animation
       ScrollTrigger.create({
         trigger: menuruElement,
         start: "top 85%",
         onEnter: () => {
-          // Animate each character with stagger
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
@@ -559,7 +559,6 @@ export default function HomePage(): React.JSX.Element {
           });
         },
         onLeave: () => {
-          // Reset when scrolling away
           gsap.to(split.chars, {
             opacity: 0,
             y: 100,
@@ -572,7 +571,6 @@ export default function HomePage(): React.JSX.Element {
           });
         },
         onEnterBack: () => {
-          // Re-animate when scrolling back up
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
@@ -590,7 +588,7 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showMain]);
+  }, [showMain, isMounted]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -692,7 +690,56 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  if (loading || !showMain) {
+  // Loading state
+  if (!isMounted || loading) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!showMain) {
     return (
       <div
         ref={preloaderRef}
