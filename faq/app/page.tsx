@@ -84,7 +84,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Feature data - only these 7 features
+// Feature data
 const featuresData = [
   { name: "Community" },
   { name: "Blog" },
@@ -181,7 +181,7 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   );
 };
 
-// ===== LIVE CHAT AGENT COMPONENT - NEW =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 interface Ticket {
   id: string;
   userId: string;
@@ -388,9 +388,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
+      // Auto scroll to bottom - hanya scroll di container chat
       setTimeout(() => {
         if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
       }, 100);
     });
@@ -570,10 +571,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   
   if (!user) {
     return (
-      <div style={{
-        marginTop: "40px",
-        paddingTop: "30px",
-      }}>
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "22px",
           fontWeight: 600,
@@ -863,6 +861,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           gap: "12px", 
           height: "450px",
           width: "100%",
+          overflow: "hidden",
+          borderRadius: "8px",
         }}>
           {/* Left sidebar - chat list */}
           <div style={{
@@ -1053,6 +1053,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
+                    minHeight: 0,
                   }}
                 >
                   {messages.length === 0 ? (
@@ -1463,6 +1464,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
+                  minHeight: 0,
                 }}
               >
                 {messages.length === 0 ? (
