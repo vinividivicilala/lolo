@@ -2219,7 +2219,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Only 7 features */}
+        {/* FEATURES SECTION - Background turns blue on scroll */}
         <div
           ref={featuresRef}
           style={{
@@ -2233,6 +2233,7 @@ export default function HomePage(): React.JSX.Element {
             position: "relative",
             paddingTop: "100px",
             paddingBottom: "100px",
+            transition: "background-color 0.8s ease",
           }}
         >
           {/* "Our Features" Title - Top Left */}
@@ -2248,6 +2249,7 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               paddingBottom: "50px",
               textAlign: "left",
+              transition: "color 0.8s ease",
             }}
           >
             Our Features
@@ -2280,12 +2282,13 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     fontSize: "64px",
                     fontWeight: 600,
-                    color: "#0D3CFC",
+                    color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     margin: 0,
                     padding: 0,
                     lineHeight: 1.2,
                     letterSpacing: "-0.02em",
+                    transition: "color 0.8s ease",
                   }}
                 >
                   {feature.name}
