@@ -75,7 +75,7 @@ const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: 
   </svg>
 );
 
-// Feature data with all details
+// Feature data from the file
 const featuresData = [
   { name: "Notes", items: ["My Notes", "Create Note", "Pinned Notes", "Recent Notes", "Categories", "Tags", "Archived Notes", "Trash"] },
   { name: "Donation", items: ["Campaigns", "Donate", "My Donations", "Donation History", "Fundraising", "Supported Causes", "Updates"] },
@@ -693,13 +693,13 @@ export default function HomePage(): React.JSX.Element {
             Our Features
           </h2>
 
-          {/* Features List - Vertical, Left Aligned */}
+          {/* Features List - Vertical, Left Aligned, Large Text, White Color */}
           <div
             ref={featuresContainerRef}
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "40px",
+              gap: "50px",
               width: "100%",
               maxWidth: "1400px",
             }}
@@ -711,7 +711,7 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
-                  gap: "8px",
+                  gap: "12px",
                   padding: "0",
                   transition: "all 0.3s ease",
                 }}
@@ -719,12 +719,14 @@ export default function HomePage(): React.JSX.Element {
                 <h3
                   className="feature-title"
                   style={{
-                    fontSize: "28px",
+                    fontSize: "48px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     margin: 0,
                     padding: 0,
+                    lineHeight: 1.2,
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   {feature.name}
@@ -733,7 +735,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: "8px",
+                    gap: "12px",
                     paddingLeft: "4px",
                   }}
                 >
@@ -742,7 +744,7 @@ export default function HomePage(): React.JSX.Element {
                       key={itemIndex}
                       className="feature-item"
                       style={{
-                        fontSize: "14px",
+                        fontSize: "24px",
                         fontWeight: 400,
                         color: "rgba(0,0,0,0.65)",
                         fontFamily: FONT_FAMILY,
@@ -752,7 +754,7 @@ export default function HomePage(): React.JSX.Element {
                     >
                       {item}
                       {itemIndex < feature.items.length - 1 && (
-                        <span style={{ margin: "0 6px", opacity: 0.3 }}>•</span>
+                        <span style={{ margin: "0 10px", opacity: 0.3 }}>•</span>
                       )}
                     </span>
                   ))}
