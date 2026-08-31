@@ -92,6 +92,15 @@ export default function HomePage(): React.JSX.Element {
   const featuresRef = useRef<HTMLDivElement>(null);
   const featuresTextRef = useRef<HTMLHeadingElement>(null);
 
+  const featuresList = [
+    "Note Taking",
+    "Donation",
+    "Calendar",
+    "Community",
+    "Task Management",
+    "Reminder"
+  ];
+
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, () => {
@@ -116,6 +125,7 @@ export default function HomePage(): React.JSX.Element {
     const featuresElement = featuresRef.current;
 
     if (featuresElement) {
+      // Create the scroll trigger
       const trigger = ScrollTrigger.create({
         trigger: featuresElement,
         start: "top bottom",
@@ -289,9 +299,6 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  const textColor = isFeaturesVisible ? "#ffffff" : "#0D3CFC";
-  const bgColor = isFeaturesVisible ? "#0D3CFC" : "#ffffff";
-
   return (
     <>
       <Head>
@@ -341,6 +348,7 @@ export default function HomePage(): React.JSX.Element {
             paddingTop: "120px",
           }}
         >
+          {/* Title with blur background */}
           <h1
             ref={titleRef}
             className="title"
@@ -443,6 +451,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
+            {/* "Showreel 2026" Text */}
             <div
               style={{
                 marginTop: "60px",
@@ -464,6 +473,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
+            {/* VIDEO SECTION */}
             <div
               style={{
                 marginTop: "20px",
@@ -496,31 +506,33 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION */}
+        {/* FEATURES SECTION - Only this section turns blue when visible */}
         <div
           ref={featuresRef}
           style={{
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
-            padding: "60px 40px",
-            backgroundColor: bgColor,
+            alignItems: "flex-start",
+            justifyContent: "center",
+            padding: "40px",
+            backgroundColor: isFeaturesVisible ? "#0D3CFC" : "#ffffff",
             position: "relative",
             transition: "background-color 0.8s ease",
-            gap: "80px",
           }}
         >
-          {/* Our Features - Top Left */}
+          {/* Title at top left */}
           <h2
             ref={featuresTextRef}
             style={{
               fontSize: "80px",
               fontWeight: 700,
-              color: textColor,
+              color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
               padding: 0,
+              paddingBottom: "60px",
               textAlign: "left",
               transition: "color 0.8s ease",
             }}
@@ -528,184 +540,39 @@ export default function HomePage(): React.JSX.Element {
             Our Features
           </h2>
 
-          {/* Feature Overview */}
-          <div style={{ width: "100%" }}>
-            <h3 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: textColor,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              transition: "color 0.8s ease",
-            }}>
-              Feature Overview
-            </h3>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "30px",
-            }}>
-              <div>
-                <span style={{ fontSize: "40px", display: "block", marginBottom: "10px" }}>📝</span>
-                <h4 style={{ fontSize: "22px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Note</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Capture your thoughts</p>
+          {/* Features list - Things / Activities Inside */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+              width: "100%",
+              maxWidth: "800px",
+            }}
+          >
+            {featuresList.map((feature, index) => (
+              <div
+                key={index}
+                style={{
+                  fontSize: "36px",
+                  fontWeight: 400,
+                  color: isFeaturesVisible ? "#ffffff" : "#000000",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                  padding: "8px 0",
+                  transition: "color 0.8s ease",
+                  borderBottom: isFeaturesVisible 
+                    ? "1px solid rgba(255,255,255,0.2)" 
+                    : "1px solid rgba(0,0,0,0.1)",
+                }}
+              >
+                {feature}
               </div>
-              <div>
-                <span style={{ fontSize: "40px", display: "block", marginBottom: "10px" }}>💡</span>
-                <h4 style={{ fontSize: "22px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Donation</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Support those in need</p>
-              </div>
-              <div>
-                <span style={{ fontSize: "40px", display: "block", marginBottom: "10px" }}>📅</span>
-                <h4 style={{ fontSize: "22px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Calendar</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Plan your schedule</p>
-              </div>
-              <div>
-                <span style={{ fontSize: "40px", display: "block", marginBottom: "10px" }}>👥</span>
-                <h4 style={{ fontSize: "22px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Community</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Connect with others</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Details */}
-          <div style={{ width: "100%" }}>
-            <h3 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: textColor,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              transition: "color 0.8s ease",
-            }}>
-              Feature Details
-            </h3>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "40px",
-            }}>
-              <div>
-                <h4 style={{ fontSize: "24px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Note Taking</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Create, edit, and organize your notes</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "24px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Donation System</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Easy and secure donation process</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "24px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Calendar Integration</h4>
-                <p style={{ fontSize: "16px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Manage events and reminders</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Showcase */}
-          <div style={{ width: "100%" }}>
-            <h3 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: textColor,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              transition: "color 0.8s ease",
-            }}>
-              Feature Showcase
-            </h3>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "30px",
-            }}>
-              <div>
-                <span style={{ fontSize: "48px", display: "block", marginBottom: "10px" }}>🎯</span>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0", transition: "color 0.8s ease" }}>Smart Notes</h4>
-              </div>
-              <div>
-                <span style={{ fontSize: "48px", display: "block", marginBottom: "10px" }}>🤝</span>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0", transition: "color 0.8s ease" }}>Donation Hub</h4>
-              </div>
-              <div>
-                <span style={{ fontSize: "48px", display: "block", marginBottom: "10px" }}>🗓️</span>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0", transition: "color 0.8s ease" }}>Event Calendar</h4>
-              </div>
-              <div>
-                <span style={{ fontSize: "48px", display: "block", marginBottom: "10px" }}>🌐</span>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0", transition: "color 0.8s ease" }}>Community Feed</h4>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Overview & Activities */}
-          <div style={{ width: "100%" }}>
-            <h3 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: textColor,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              transition: "color 0.8s ease",
-            }}>
-              Feature Overview & Activities
-            </h3>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "30px",
-            }}>
-              <div>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Daily Tasks</h4>
-                <p style={{ fontSize: "15px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Track your daily activities</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Donation Campaigns</h4>
-                <p style={{ fontSize: "15px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Join and support campaigns</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "20px", fontWeight: 600, color: textColor, margin: "0 0 8px 0", transition: "color 0.8s ease" }}>Community Events</h4>
-                <p style={{ fontSize: "15px", color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)", transition: "color 0.8s ease" }}>Participate in events</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Introduction */}
-          <div style={{ width: "100%" }}>
-            <h3 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: textColor,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              transition: "color 0.8s ease",
-            }}>
-              Feature Introduction
-            </h3>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "30px",
-            }}>
-              <div>
-                <h4 style={{ fontSize: "18px", fontWeight: 600, color: textColor, margin: "0 0 5px 0", transition: "color 0.8s ease" }}>📋 Quick Notes</h4>
-                <p style={{ fontSize: "14px", color: isFeaturesVisible ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", transition: "color 0.8s ease" }}>Instant note creation</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "18px", fontWeight: 600, color: textColor, margin: "0 0 5px 0", transition: "color 0.8s ease" }}>💰 Easy Donation</h4>
-                <p style={{ fontSize: "14px", color: isFeaturesVisible ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", transition: "color 0.8s ease" }}>One-click donations</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "18px", fontWeight: 600, color: textColor, margin: "0 0 5px 0", transition: "color 0.8s ease" }}>📆 Smart Calendar</h4>
-                <p style={{ fontSize: "14px", color: isFeaturesVisible ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", transition: "color 0.8s ease" }}>Intelligent scheduling</p>
-              </div>
-              <div>
-                <h4 style={{ fontSize: "18px", fontWeight: 600, color: textColor, margin: "0 0 5px 0", transition: "color 0.8s ease" }}>👥 Community Hub</h4>
-                <p style={{ fontSize: "14px", color: isFeaturesVisible ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", transition: "color 0.8s ease" }}>Connect and share</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* NAVBAR */}
+        {/* NAVBAR - Stays unchanged */}
         <div
           ref={navbarRef}
           style={{
@@ -726,6 +593,7 @@ export default function HomePage(): React.JSX.Element {
             boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           }}
         >
+          {/* Baris atas: Shop, About, Sign Up */}
           <div
             style={{
               display: "flex",
@@ -753,6 +621,7 @@ export default function HomePage(): React.JSX.Element {
             </Link>
           </div>
 
+          {/* Baris bawah: Anti-Fraud, Anti-Bot, Get in touch, Pusat Bantuan, Menu */}
           <div
             style={{
               display: "flex",
