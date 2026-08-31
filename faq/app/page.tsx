@@ -218,6 +218,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -231,6 +232,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Kerjasama",
     "Lainnya"
   ];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -293,6 +298,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // GSAP SplitText untuk judul Live Chat Agent
   useEffect(() => {
+    if (!isMounted) return;
     if (liveChatTitleRef.current) {
       const splitTitle = new SplitText(liveChatTitleRef.current, {
         type: "chars",
@@ -319,11 +325,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMounted]);
 
   // ===== ALL useEffect HOOKS =====
   useEffect(() => {
-    if (!db) return;
+    if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
@@ -333,10 +339,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db]);
+  }, [db, isMounted]);
 
   useEffect(() => {
-    if (!db || !user) return;
+    if (!db || !user || !isMounted) return;
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -362,10 +368,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket]);
+  }, [db, user, isAdmin, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket) return;
+    if (!db || !selectedTicket || !isMounted) return;
     const q = query(
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
@@ -381,19 +387,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }, 100);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket]);
+  }, [db, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin) return;
+    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedTicket, db, user, isAdmin]);
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   useEffect(() => {
-    if (!user || isAdmin) return;
+    if (!user || isAdmin || !isMounted) return;
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
       setSelectedTicket(activeTicket);
@@ -403,7 +409,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
   // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -556,6 +562,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   // ===== RENDER COMPONENT =====
+  if (!isMounted) {
+    return <div style={{ minHeight: "100px" }} />;
+  }
   
   if (!user) {
     return (
@@ -802,7 +811,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - Chat interface dengan tinggi yang tidak memaksa scroll
+    // USER VIEW - Chat interface
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
