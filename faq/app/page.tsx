@@ -120,8 +120,14 @@ export default function HomePage(): React.JSX.Element {
       const trigger = ScrollTrigger.create({
         trigger: featuresElement,
         start: "top bottom",
-        end: "top top",
+        end: "bottom top",
         onEnter: () => {
+          setIsFeaturesVisible(true);
+        },
+        onLeave: () => {
+          setIsFeaturesVisible(false);
+        },
+        onEnterBack: () => {
           setIsFeaturesVisible(true);
         },
         onLeaveBack: () => {
@@ -283,13 +289,6 @@ export default function HomePage(): React.JSX.Element {
       </div>
     );
   }
-
-  // Determine text colors based on features visibility
-  const textColor = isFeaturesVisible ? "#ffffff" : "#000000";
-  const blueColor = isFeaturesVisible ? "#ffffff" : "#0D3CFC";
-  const borderColor = isFeaturesVisible ? "#ffffff" : "#0D3CFC";
-  const arrowBgColor = isFeaturesVisible ? "#ffffff" : "#0D3CFC";
-  const arrowColor = isFeaturesVisible ? "#0D3CFC" : "#ffffff";
 
   return (
     <>
@@ -498,7 +497,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Only this section turns blue */}
+        {/* FEATURES SECTION - Only this section turns blue when visible */}
         <div
           ref={featuresRef}
           style={{
