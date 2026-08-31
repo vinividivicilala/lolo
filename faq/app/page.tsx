@@ -112,6 +112,7 @@ export default function HomePage(): React.JSX.Element {
   const featuresTextRef = useRef<HTMLHeadingElement>(null);
   const featuresContainerRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -235,22 +236,65 @@ export default function HomePage(): React.JSX.Element {
 
     // GSAP SplitText + ScrollTrigger for "Menuru" at bottom left
     const menuruElement = menuruFooterRef.current;
-    if (menuruElement) {
-      const split = new SplitText(menuruElement, {
-        type: "lines",
-        linesClass: "menuru-line"
+    const menuruText = menuruTextRef.current;
+    
+    if (menuruElement && menuruText) {
+      // Create SplitText
+      const split = new SplitText(menuruText, {
+        type: "chars",
+        charsClass: "menuru-char"
       });
 
-      gsap.from(split.lines, {
-        y: 100,
+      // Set initial state - hidden
+      gsap.set(split.chars, {
         opacity: 0,
-        duration: 1.5,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: menuruElement,
-          start: "top 85%",
-          toggleActions: "play none none none"
+        y: 100,
+        scale: 0.5,
+        rotationX: 90
+      });
+
+      // Create scroll trigger animation
+      ScrollTrigger.create({
+        trigger: menuruElement,
+        start: "top 85%",
+        onEnter: () => {
+          // Animate each character with stagger
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        },
+        onLeave: () => {
+          // Reset when scrolling away
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            scale: 0.5,
+            rotationX: 90,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.in",
+            overwrite: true
+          });
+        },
+        onEnterBack: () => {
+          // Re-animate when scrolling back up
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
         }
       });
     }
@@ -693,7 +737,7 @@ export default function HomePage(): React.JSX.Element {
         <div
           style={{
             width: "100%",
-            padding: "60px 40px",
+            padding: "60px 40px 40px 40px",
             backgroundColor: "#ffffff",
             borderTop: "1px solid rgba(0,0,0,0.05)",
             marginTop: "20px",
@@ -766,14 +810,16 @@ export default function HomePage(): React.JSX.Element {
           ref={menuruFooterRef}
           style={{
             width: "100%",
-            padding: "40px 40px 80px 40px",
+            padding: "20px 40px 80px 40px",
             backgroundColor: "#ffffff",
             overflow: "hidden",
             display: "flex",
             justifyContent: "flex-start",
+            minHeight: "300px",
           }}
         >
           <span
+            ref={menuruTextRef}
             style={{
               fontFamily: FONT_FAMILY,
               fontSize: "450px",
@@ -961,9 +1007,9 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
-        .menuru-line {
-          overflow: hidden;
-          display: block;
+        .menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
         }
 
         @media (max-width: 1024px) {
