@@ -9,7 +9,6 @@ import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import { motion } from "framer-motion";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -76,35 +75,18 @@ const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: 
   </svg>
 );
 
-// Feature data with all details
+// Feature data - only these 7 features
 const featuresData = [
-  { name: "Notes", items: ["My Notes", "Create Note", "Pinned Notes", "Recent Notes", "Categories", "Tags", "Archived Notes", "Trash"] },
-  { name: "Donation", items: ["Campaigns", "Donate", "My Donations", "Donation History", "Fundraising", "Supported Causes", "Updates"] },
-  { name: "Calendar", items: ["Calendar", "Events", "Schedule", "Reminders", "Upcoming Events", "Past Events", "Recurring Events"] },
-  { name: "Community", items: ["Communities", "Members", "Posts", "Topics", "Groups", "Activities", "Events", "Discussions"] },
-  { name: "Forum", items: ["Discussions", "Questions", "Categories", "Topics", "Replies", "Popular Discussions", "Unanswered"] },
-  { name: "Blog", items: ["Articles", "Categories", "Tags", "Featured Posts", "Recent Posts", "Saved Articles", "Authors"] },
-  { name: "Learning", items: ["Courses", "Lessons", "Tutorials", "Materials", "Progress", "Completed Lessons", "Certificates"] },
-  { name: "Projects", items: ["Projects", "Active Projects", "Completed Projects", "Project Details", "Technologies", "Gallery", "Updates"] },
-  { name: "Feedback", items: ["Submit Feedback", "Suggestions", "Bug Reports", "Feature Requests", "My Feedback", "Feedback Status"] },
-  { name: "Announcements", items: ["Latest Updates", "News", "Feature Updates", "Events", "Maintenance", "Important Notices"] },
-  { name: "Profile", items: ["About", "Activity", "Posts", "Projects", "Communities", "Interests", "Achievements", "Settings"] },
-  { name: "Notifications", items: ["All", "Mentions", "Comments", "Replies", "Likes", "Followers", "Events", "System"] },
-  { name: "Goals", items: ["My Goals", "Create Goal", "Progress", "Milestones", "Completed Goals", "Deadlines", "Categories"] },
-  { name: "Bookmarks", items: ["Saved Posts", "Saved Articles", "Saved Projects", "Collections", "Recent Saves"] },
-  { name: "Events", items: ["Upcoming Events", "Discover Events", "My Events", "Registered Events", "Past Events", "Event Calendar"] },
-  { name: "Resources", items: ["Tools", "Websites", "Documents", "Tutorials", "Books", "Templates", "References"] },
-  { name: "Archive", items: ["Archived Notes", "Archived Posts", "Archived Projects", "Archived Events", "Recently Deleted"] },
-  { name: "Activity", items: ["Recent Activity", "Posts", "Comments", "Likes", "Projects", "Contributions", "Achievements"] },
-  { name: "Dashboard", items: ["Overview", "Statistics", "Recent Activity", "Upcoming Events", "Notifications", "Progress"] },
-  { name: "Messages", items: ["Inbox", "Direct Messages", "Group Chats", "Requests", "Archived Chats"] },
-  { name: "Connections", items: ["Friends", "Followers", "Following", "Requests", "Suggested Connections"] },
-  { name: "Search", items: ["People", "Posts", "Notes", "Projects", "Communities", "Events", "Articles"] },
-  { name: "Achievements", items: ["Badges", "Milestones", "Completed Goals", "Contributions", "Certificates"] },
-  { name: "Settings", items: ["Account", "Profile", "Privacy", "Notifications", "Security", "Preferences"] }
+  { name: "Community" },
+  { name: "Blog" },
+  { name: "Live Chat" },
+  { name: "Live Chat Agent" },
+  { name: "Donation" },
+  { name: "Contact" },
+  { name: "Note" }
 ];
 
-// Footer links from contact page
+// Footer links - normal case (not all caps)
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation"] },
@@ -174,18 +156,10 @@ export default function HomePage(): React.JSX.Element {
             duration: 0.8,
             ease: "power2.out"
           });
-          // All feature titles turn white
-          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+          // All feature names turn white
+          gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#ffffff",
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          });
-          // All feature items turn white
-          gsap.utils.toArray('.feature-item').forEach((el: any) => {
-            gsap.to(el, {
-              color: "rgba(255,255,255,0.85)",
               duration: 0.8,
               ease: "power2.out"
             });
@@ -205,18 +179,10 @@ export default function HomePage(): React.JSX.Element {
             duration: 0.8,
             ease: "power2.out"
           });
-          // All feature titles turn blue
-          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+          // All feature names turn blue
+          gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#0D3CFC",
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          });
-          // All feature items turn dark
-          gsap.utils.toArray('.feature-item').forEach((el: any) => {
-            gsap.to(el, {
-              color: "rgba(0,0,0,0.65)",
               duration: 0.8,
               ease: "power2.out"
             });
@@ -235,16 +201,9 @@ export default function HomePage(): React.JSX.Element {
             duration: 0.8,
             ease: "power2.out"
           });
-          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+          gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#ffffff",
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          });
-          gsap.utils.toArray('.feature-item').forEach((el: any) => {
-            gsap.to(el, {
-              color: "rgba(255,255,255,0.85)",
               duration: 0.8,
               ease: "power2.out"
             });
@@ -263,20 +222,35 @@ export default function HomePage(): React.JSX.Element {
             duration: 0.8,
             ease: "power2.out"
           });
-          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+          gsap.utils.toArray('.feature-name').forEach((el: any) => {
             gsap.to(el, {
               color: "#0D3CFC",
               duration: 0.8,
               ease: "power2.out"
             });
           });
-          gsap.utils.toArray('.feature-item').forEach((el: any) => {
-            gsap.to(el, {
-              color: "rgba(0,0,0,0.65)",
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          });
+        }
+      });
+    }
+
+    // GSAP SplitText + ScrollTrigger for "Menuru" at bottom left
+    const menuruElement = menuruFooterRef.current;
+    if (menuruElement) {
+      const split = new SplitText(menuruElement, {
+        type: "lines",
+        linesClass: "menuru-line"
+      });
+
+      gsap.from(split.lines, {
+        y: 100,
+        opacity: 0,
+        duration: 1.5,
+        stagger: 0.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: menuruElement,
+          start: "top 85%",
+          toggleActions: "play none none none"
         }
       });
     }
@@ -639,7 +613,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION - Using GSAP ScrollTrigger */}
+        {/* FEATURES SECTION - Only 7 features */}
         <div
           ref={featuresRef}
           style={{
@@ -679,7 +653,7 @@ export default function HomePage(): React.JSX.Element {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "40px",
+              gap: "30px",
               width: "100%",
               maxWidth: "1400px",
             }}
@@ -691,15 +665,14 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
-                  gap: "8px",
                   padding: "0",
                   transition: "all 0.3s ease",
                 }}
               >
                 <h3
-                  className="feature-title"
+                  className="feature-name"
                   style={{
-                    fontSize: "48px",
+                    fontSize: "64px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -711,40 +684,12 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {feature.name}
                 </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "8px",
-                    paddingLeft: "4px",
-                  }}
-                >
-                  {feature.items.map((item, itemIndex) => (
-                    <span
-                      key={itemIndex}
-                      className="feature-item"
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: 400,
-                        color: "rgba(0,0,0,0.65)",
-                        fontFamily: FONT_FAMILY,
-                        padding: "2px 0",
-                        position: "relative",
-                      }}
-                    >
-                      {item}
-                      {itemIndex < feature.items.length - 1 && (
-                        <span style={{ margin: "0 10px", opacity: 0.3 }}>•</span>
-                      )}
-                    </span>
-                  ))}
-                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* FOOTER - Like contact page */}
+        {/* FOOTER - Like contact page, normal case */}
         <div
           style={{
             width: "100%",
@@ -782,6 +727,7 @@ export default function HomePage(): React.JSX.Element {
                     margin: 0,
                     marginBottom: "16px",
                     letterSpacing: "-0.01em",
+                    textTransform: "none",
                   }}
                 >
                   {section.title}
@@ -803,6 +749,7 @@ export default function HomePage(): React.JSX.Element {
                         color: "#0D3CFC",
                         letterSpacing: "-0.01em",
                         cursor: "pointer",
+                        textTransform: "none",
                       }}
                     >
                       {link}
@@ -814,7 +761,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text - Large blue text at bottom */}
+        {/* MENURU Text - 450px, left aligned, with GSAP SplitText + ScrollTrigger */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -823,50 +770,25 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#ffffff",
             overflow: "hidden",
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: "flex-start",
           }}
         >
           <span
             style={{
               fontFamily: FONT_FAMILY,
-              fontSize: "300px",
+              fontSize: "450px",
               fontWeight: 700,
               color: "#0D3CFC",
               letterSpacing: "-0.02em",
               textTransform: "none",
               lineHeight: "0.8",
               display: "block",
-              textAlign: "right",
+              textAlign: "left",
               WebkitFontSmoothing: "antialiased",
               MozOsxFontSmoothing: "grayscale",
             }}
           >
-            {'MENURU'.split('').map((char, index) => (
-              <motion.span
-                key={index}
-                className="menuru-footer-char"
-                style={{
-                  display: 'inline-block',
-                  opacity: 0,
-                  y: 200,
-                  scale: 0.3,
-                }}
-                initial={{ opacity: 0, y: 200, scale: 0.3 }}
-                whileInView={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  scale: 1,
-                  transition: {
-                    duration: 1.2,
-                    delay: index * 0.04,
-                    ease: [0.16, 1, 0.3, 1],
-                  }
-                }}
-                viewport={{ once: true, amount: 0.3 }}
-              >
-                {char}
-              </motion.span>
-            ))}
+            Menuru
           </span>
         </div>
 
@@ -1039,8 +961,9 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
-        .menuru-footer-char {
-          display: inline-block;
+        .menuru-line {
+          overflow: hidden;
+          display: block;
         }
 
         @media (max-width: 1024px) {
