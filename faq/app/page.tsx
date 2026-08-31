@@ -9,7 +9,6 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import { motion, AnimatePresence } from "framer-motion";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -103,7 +102,7 @@ const featuresData = [
   { name: "Note" }
 ];
 
-// Footer links - with Community and Live Chat Agent added to Product
+// Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
@@ -218,7 +217,7 @@ interface ChatMessage {
   read: boolean;
 }
 
-// ===== LIVE CHAT AGENT COMPONENT (Like contact page) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2296,7 +2295,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FOOTER - With Community and Live Chat Agent added to Product */}
+        {/* FOOTER */}
         <div
           style={{
             width: "100%",
@@ -2367,7 +2366,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* ===== LIVE CHAT AGENT (Like contact page) ===== */}
+          {/* ===== LIVE CHAT AGENT ===== */}
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
