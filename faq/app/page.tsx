@@ -129,7 +129,6 @@ export default function HomePage(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    // Play video when component mounts
     if (videoRef.current && showMain) {
       videoRef.current.play().catch(error => {
         console.log("Video autoplay failed:", error);
@@ -140,7 +139,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!showMain) return;
 
-    // Setup ScrollTrigger for features section visibility
     const featuresElement = featuresRef.current;
 
     if (featuresElement) {
@@ -521,7 +519,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FEATURES SECTION */}
+        {/* FEATURES SECTION - Only this section turns blue */}
         <div
           ref={featuresRef}
           style={{
@@ -557,12 +555,12 @@ export default function HomePage(): React.JSX.Element {
             Our Features
           </h2>
 
-          {/* Features Grid */}
+          {/* Features List - Vertical, Left Aligned, No Cards */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "30px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "40px",
               width: "100%",
               maxWidth: "1400px",
             }}
@@ -571,29 +569,22 @@ export default function HomePage(): React.JSX.Element {
               <div
                 key={index}
                 style={{
-                  backgroundColor: isFeaturesVisible ? "rgba(255,255,255,0.15)" : "rgba(13, 60, 252, 0.08)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  transition: "background-color 0.8s ease, transform 0.3s ease",
-                  cursor: "pointer",
-                  border: isFeaturesVisible ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(13, 60, 252, 0.1)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0px)";
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  padding: "0",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <h3
                   style={{
-                    fontSize: "24px",
+                    fontSize: "28px",
                     fontWeight: 600,
                     color: isFeaturesVisible ? "#ffffff" : "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     margin: 0,
                     padding: 0,
-                    paddingBottom: "12px",
                     transition: "color 0.8s ease",
                   }}
                 >
@@ -604,52 +595,56 @@ export default function HomePage(): React.JSX.Element {
                     display: "flex",
                     flexWrap: "wrap",
                     gap: "8px",
+                    paddingLeft: "4px",
                   }}
                 >
                   {feature.items.map((item, itemIndex) => (
                     <span
                       key={itemIndex}
                       style={{
-                        fontSize: "13px",
+                        fontSize: "14px",
                         fontWeight: 400,
-                        color: isFeaturesVisible ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.7)",
+                        color: isFeaturesVisible ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.65)",
                         fontFamily: FONT_FAMILY,
-                        backgroundColor: isFeaturesVisible ? "rgba(255,255,255,0.1)" : "rgba(13, 60, 252, 0.06)",
-                        padding: "4px 12px",
-                        borderRadius: "20px",
-                        transition: "color 0.8s ease, background-color 0.8s ease",
+                        padding: "2px 0",
+                        transition: "color 0.8s ease",
+                        position: "relative",
                       }}
                     >
                       {item}
+                      {itemIndex < feature.items.length - 1 && (
+                        <span style={{ margin: "0 6px", opacity: 0.3 }}>•</span>
+                      )}
                     </span>
                   ))}
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Bottom text to indicate section end */}
-          <div
+        {/* Scroll to explore more - Outside the blue section */}
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            padding: "30px 0",
+            backgroundColor: "#ffffff",
+            transition: "color 0.8s ease",
+          }}
+        >
+          <span
             style={{
-              marginTop: "60px",
-              width: "100%",
-              textAlign: "center",
-              padding: "20px 0",
+              fontSize: "16px",
+              fontWeight: 400,
+              color: isFeaturesVisible ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.3)",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.05em",
               transition: "color 0.8s ease",
             }}
           >
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: 400,
-                color: isFeaturesVisible ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)",
-                fontFamily: FONT_FAMILY,
-                transition: "color 0.8s ease",
-              }}
-            >
-              {isFeaturesVisible ? "▼ Scroll to explore more" : "▲ Scroll back up"}
-            </span>
-          </div>
+            {isFeaturesVisible ? "▼ Scroll to explore more" : "▲ Scroll back up"}
+          </span>
         </div>
 
         {/* NAVBAR */}
