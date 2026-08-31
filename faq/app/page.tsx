@@ -9,6 +9,7 @@ import { getFirestore } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { motion } from "framer-motion";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -75,7 +76,7 @@ const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: 
   </svg>
 );
 
-// Feature data from the file
+// Feature data with all details
 const featuresData = [
   { name: "Notes", items: ["My Notes", "Create Note", "Pinned Notes", "Recent Notes", "Categories", "Tags", "Archived Notes", "Trash"] },
   { name: "Donation", items: ["Campaigns", "Donate", "My Donations", "Donation History", "Fundraising", "Supported Causes", "Updates"] },
@@ -103,16 +104,17 @@ const featuresData = [
   { name: "Settings", items: ["Account", "Profile", "Privacy", "Notifications", "Security", "Preferences"] }
 ];
 
-// Footer links data
+// Footer links from contact page
 const footerLinks = [
-  "Get in Touch", "Contact Us", "→", "Instagram", "Live Chat", "Product", "Shop",
-  "Note", "Calendar", "Blog", "Donation", "Attention", "Kebijakan Privasi",
-  "Ketentuan Kami", "Pusat Bantuan"
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation"] },
+  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
 ];
 
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -127,7 +129,7 @@ export default function HomePage(): React.JSX.Element {
   const featuresRef = useRef<HTMLDivElement>(null);
   const featuresTextRef = useRef<HTMLHeadingElement>(null);
   const featuresContainerRef = useRef<HTMLDivElement>(null);
-  const menuruTextRef = useRef<HTMLDivElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!auth) return;
@@ -151,152 +153,130 @@ export default function HomePage(): React.JSX.Element {
     // GSAP ScrollTrigger for features section
     const featuresElement = featuresRef.current;
     const featuresTitle = featuresTextRef.current;
-    const menuruElement = menuruTextRef.current;
 
     if (featuresElement) {
-      // Create a timeline for the features section
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: featuresElement,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.5,
-          toggleActions: "play none none reverse",
-          onEnter: () => {
-            // Background turns blue
-            gsap.to(featuresElement, {
-              backgroundColor: "#0D3CFC",
-              duration: 0.8,
-              ease: "power2.out"
-            });
-            // Title turns white
-            gsap.to(featuresTitle, {
+      // Create scroll trigger
+      const trigger = ScrollTrigger.create({
+        trigger: featuresElement,
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => {
+          setIsFeaturesVisible(true);
+          // Background turns blue
+          gsap.to(featuresElement, {
+            backgroundColor: "#0D3CFC",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          // Title turns white
+          gsap.to(featuresTitle, {
+            color: "#ffffff",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          // All feature titles turn white
+          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+            gsap.to(el, {
               color: "#ffffff",
               duration: 0.8,
               ease: "power2.out"
             });
-            // All feature titles turn white
-            gsap.utils.toArray('.feature-title').forEach((el: any) => {
-              gsap.to(el, {
-                color: "#ffffff",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-            // All feature items turn white
-            gsap.utils.toArray('.feature-item').forEach((el: any) => {
-              gsap.to(el, {
-                color: "rgba(255,255,255,0.85)",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-          },
-          onLeave: () => {
-            // Background turns white when leaving
-            gsap.to(featuresElement, {
-              backgroundColor: "#ffffff",
+          });
+          // All feature items turn white
+          gsap.utils.toArray('.feature-item').forEach((el: any) => {
+            gsap.to(el, {
+              color: "rgba(255,255,255,0.85)",
               duration: 0.8,
               ease: "power2.out"
             });
-            // Title turns blue
-            gsap.to(featuresTitle, {
+          });
+        },
+        onLeave: () => {
+          setIsFeaturesVisible(false);
+          // Background turns white when leaving
+          gsap.to(featuresElement, {
+            backgroundColor: "#ffffff",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          // Title turns blue
+          gsap.to(featuresTitle, {
+            color: "#0D3CFC",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          // All feature titles turn blue
+          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+            gsap.to(el, {
               color: "#0D3CFC",
               duration: 0.8,
               ease: "power2.out"
             });
-            // All feature titles turn blue
-            gsap.utils.toArray('.feature-title').forEach((el: any) => {
-              gsap.to(el, {
-                color: "#0D3CFC",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-            // All feature items turn dark
-            gsap.utils.toArray('.feature-item').forEach((el: any) => {
-              gsap.to(el, {
-                color: "rgba(0,0,0,0.65)",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-          },
-          onEnterBack: () => {
-            // Background turns blue when scrolling back up
-            gsap.to(featuresElement, {
-              backgroundColor: "#0D3CFC",
+          });
+          // All feature items turn dark
+          gsap.utils.toArray('.feature-item').forEach((el: any) => {
+            gsap.to(el, {
+              color: "rgba(0,0,0,0.65)",
               duration: 0.8,
               ease: "power2.out"
             });
-            gsap.to(featuresTitle, {
+          });
+        },
+        onEnterBack: () => {
+          setIsFeaturesVisible(true);
+          // Background turns blue when scrolling back up
+          gsap.to(featuresElement, {
+            backgroundColor: "#0D3CFC",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          gsap.to(featuresTitle, {
+            color: "#ffffff",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+            gsap.to(el, {
               color: "#ffffff",
               duration: 0.8,
               ease: "power2.out"
             });
-            gsap.utils.toArray('.feature-title').forEach((el: any) => {
-              gsap.to(el, {
-                color: "#ffffff",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-            gsap.utils.toArray('.feature-item').forEach((el: any) => {
-              gsap.to(el, {
-                color: "rgba(255,255,255,0.85)",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-          },
-          onLeaveBack: () => {
-            // Background turns white when scrolling back up past section
-            gsap.to(featuresElement, {
-              backgroundColor: "#ffffff",
+          });
+          gsap.utils.toArray('.feature-item').forEach((el: any) => {
+            gsap.to(el, {
+              color: "rgba(255,255,255,0.85)",
               duration: 0.8,
               ease: "power2.out"
             });
-            gsap.to(featuresTitle, {
+          });
+        },
+        onLeaveBack: () => {
+          setIsFeaturesVisible(false);
+          // Background turns white when scrolling back up past section
+          gsap.to(featuresElement, {
+            backgroundColor: "#ffffff",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          gsap.to(featuresTitle, {
+            color: "#0D3CFC",
+            duration: 0.8,
+            ease: "power2.out"
+          });
+          gsap.utils.toArray('.feature-title').forEach((el: any) => {
+            gsap.to(el, {
               color: "#0D3CFC",
               duration: 0.8,
               ease: "power2.out"
             });
-            gsap.utils.toArray('.feature-title').forEach((el: any) => {
-              gsap.to(el, {
-                color: "#0D3CFC",
-                duration: 0.8,
-                ease: "power2.out"
-              });
+          });
+          gsap.utils.toArray('.feature-item').forEach((el: any) => {
+            gsap.to(el, {
+              color: "rgba(0,0,0,0.65)",
+              duration: 0.8,
+              ease: "power2.out"
             });
-            gsap.utils.toArray('.feature-item').forEach((el: any) => {
-              gsap.to(el, {
-                color: "rgba(0,0,0,0.65)",
-                duration: 0.8,
-                ease: "power2.out"
-              });
-            });
-          }
-        }
-      });
-    }
-
-    // GSAP SplitText animation for "Menuru" text
-    if (menuruElement) {
-      const split = new SplitText(menuruElement, {
-        type: "lines",
-        linesClass: "menuru-line"
-      });
-
-      gsap.from(split.lines, {
-        y: 100,
-        opacity: 0,
-        duration: 1.5,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: menuruElement,
-          start: "top 80%",
-          toggleActions: "play none none none"
+          });
         }
       });
     }
@@ -693,13 +673,13 @@ export default function HomePage(): React.JSX.Element {
             Our Features
           </h2>
 
-          {/* Features List - Vertical, Left Aligned, Large Text, White Color */}
+          {/* Features List - Vertical, Left Aligned */}
           <div
             ref={featuresContainerRef}
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "50px",
+              gap: "40px",
               width: "100%",
               maxWidth: "1400px",
             }}
@@ -711,7 +691,7 @@ export default function HomePage(): React.JSX.Element {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
-                  gap: "12px",
+                  gap: "8px",
                   padding: "0",
                   transition: "all 0.3s ease",
                 }}
@@ -735,7 +715,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: "12px",
+                    gap: "8px",
                     paddingLeft: "4px",
                   }}
                 >
@@ -764,104 +744,130 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FOOTER SECTION - Outside the blue section */}
+        {/* FOOTER - Like contact page */}
         <div
           style={{
             width: "100%",
             padding: "60px 40px",
             backgroundColor: "#ffffff",
             borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
           }}
         >
           <div
             style={{
               display: "flex",
-              flexWrap: "wrap",
-              gap: "20px 40px",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
               maxWidth: "1400px",
               margin: "0 auto",
-              justifyContent: "flex-start",
-              alignItems: "center",
+              gap: "40px",
+              flexWrap: "wrap",
             }}
           >
-            {footerLinks.map((link, index) => (
-              <span
-                key={index}
+            {footerLinks.map((section, idx) => (
+              <div
+                key={idx}
                 style={{
-                  fontSize: "16px",
-                  fontWeight: 400,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "color 0.3s ease",
-                  letterSpacing: "0.02em",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#000000";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#0D3CFC";
+                  flex: "1",
+                  minWidth: "200px",
                 }}
               >
-                {link}
-              </span>
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {section.links.map((link, linkIdx) => (
+                    <span
+                      key={linkIdx}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "20px",
+                        fontWeight: 400,
+                        color: "#0D3CFC",
+                        letterSpacing: "-0.01em",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {link}
+                    </span>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* GSAP SplitText "Menuru" Section */}
+        {/* MENURU Text - Large blue text at bottom */}
         <div
-          ref={menuruTextRef}
+          ref={menuruFooterRef}
           style={{
             width: "100%",
-            padding: "80px 40px",
+            padding: "40px 40px 80px 40px",
             backgroundColor: "#ffffff",
+            overflow: "hidden",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
+            justifyContent: "flex-end",
           }}
         >
-          <div
+          <span
             style={{
-              fontSize: "80px",
+              fontFamily: FONT_FAMILY,
+              fontSize: "300px",
               fontWeight: 700,
               color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              textAlign: "center",
-              lineHeight: 1.2,
+              letterSpacing: "-0.02em",
+              textTransform: "none",
+              lineHeight: "0.8",
+              display: "block",
+              textAlign: "right",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
             }}
           >
-            Menuru
-          </div>
-          <div
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              textAlign: "center",
-              lineHeight: 1.2,
-            }}
-          >
-            Menuru
-          </div>
-          <div
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              textAlign: "center",
-              lineHeight: 1.2,
-            }}
-          >
-            Menuru
-          </div>
+            {'MENURU'.split('').map((char, index) => (
+              <motion.span
+                key={index}
+                className="menuru-footer-char"
+                style={{
+                  display: 'inline-block',
+                  opacity: 0,
+                  y: 200,
+                  scale: 0.3,
+                }}
+                initial={{ opacity: 0, y: 200, scale: 0.3 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: {
+                    duration: 1.2,
+                    delay: index * 0.04,
+                    ease: [0.16, 1, 0.3, 1],
+                  }
+                }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </span>
         </div>
 
         {/* NAVBAR */}
@@ -1033,9 +1039,8 @@ export default function HomePage(): React.JSX.Element {
           background-color: transparent;
         }
 
-        .menuru-line {
-          overflow: hidden;
-          display: block;
+        .menuru-footer-char {
+          display: inline-block;
         }
 
         @media (max-width: 1024px) {
