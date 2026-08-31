@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -41,6 +41,8 @@ if (typeof window !== "undefined") {
 }
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const AGENT_NAME = "Farid Ardiansyah";
 
 // SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
@@ -75,6 +77,14 @@ const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: 
   </svg>
 );
 
+const LogoutIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // Feature data - only these 7 features
 const featuresData = [
   { name: "Community" },
@@ -86,17 +96,274 @@ const featuresData = [
   { name: "Note" }
 ];
 
-// Footer links - normal case (not all caps)
+// Footer links - with Community and Live Chat Agent added to Product
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
   { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
 ];
+
+// ===== PULSING DOTS =====
+const PulsingDots = ({ active }: { active: boolean }) => {
+  if (!active) return <span style={{ color: '#999', fontSize: '11px' }}>● Offline</span>;
+  return (
+    <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+      <span className="dot" style={{ animationDelay: '0s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.2s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.4s' }}>●</span>
+      <style>{`
+        .dot {
+          animation: blink 1.4s infinite both;
+          font-size: 9px;
+          color: #22c55e;
+        }
+        @keyframes blink {
+          0% { opacity: 0.2; }
+          20% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+      `}</style>
+    </span>
+  );
+};
+
+// ===== INSTAGRAM VERIFIED BADGE =====
+const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "3px",
+          display: "inline-block",
+          verticalAlign: "middle",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
+        />
+        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 6px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "3px 8px",
+          borderRadius: "5px",
+          fontSize: "10px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          fontFamily: FONT_FAMILY,
+        }}>
+          Official Account
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "5px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ===== LIVE CHAT AGENT COMPONENT (Mini version for footer) =====
+const LiveChatAgentFooter = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
+  const [agentOnline, setAgentOnline] = useState(false);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [showChat, setShowChat] = useState(false);
+
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        setAgentOnline(data.online || false);
+      }
+    });
+    return () => unsubscribe();
+  }, [db]);
+
+  useEffect(() => {
+    if (!db || !user) return;
+    const q = query(
+      collection(db, "livechat_tickets"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ticketList: any[] = [];
+      snapshot.forEach((doc) => {
+        ticketList.push({ id: doc.id, ...doc.data() });
+      });
+      setTickets(ticketList);
+    });
+    return () => unsubscribe();
+  }, [db, user]);
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          online: false,
+          lastSeen: serverTimestamp(),
+        });
+      }
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div style={{ marginTop: "20px", borderTop: "1px solid #e8e8e8", paddingTop: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <PulsingDots active={agentOnline} />
+            <span style={{ fontSize: "12px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
+              {agentOnline ? "Agent Online" : "Agent Offline"}
+            </span>
+          </div>
+          <Link href="/" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                padding: "4px 14px",
+                backgroundColor: "#0D3CFC",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Login
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+
+  return (
+    <div style={{ marginTop: "20px", borderTop: "1px solid #e8e8e8", paddingTop: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <PulsingDots active={agentOnline} />
+            <span style={{ fontSize: "12px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
+              {agentOnline ? "Agent Online" : "Agent Offline"}
+            </span>
+          </div>
+          {isAdmin && (
+            <>
+              <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>•</span>
+              <span style={{ fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY, fontWeight: 500 }}>
+                {AGENT_NAME}
+              </span>
+              <InstagramVerifiedBadge size={11} />
+            </>
+          )}
+          {activeTicket && (
+            <span style={{
+              backgroundColor: "#d1fae5",
+              color: "#065f46",
+              fontSize: "9px",
+              fontWeight: 600,
+              padding: "2px 8px",
+              borderRadius: "8px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              Chat Aktif
+            </span>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {isAdmin && (
+            <span style={{
+              backgroundColor: "#dbeafe",
+              color: "#0D3CFC",
+              fontSize: "9px",
+              fontWeight: 600,
+              padding: "2px 8px",
+              borderRadius: "8px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              Agent
+            </span>
+          )}
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "3px 10px",
+              backgroundColor: "transparent",
+              color: "#ef4444",
+              border: "1px solid #ef4444",
+              borderRadius: "4px",
+              fontSize: "10px",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+          >
+            <LogoutIcon size={12} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+      {activeTicket && (
+        <div style={{
+          marginTop: "8px",
+          padding: "8px 12px",
+          backgroundColor: "#f9f9f9",
+          borderRadius: "6px",
+          fontSize: "12px",
+          fontFamily: FONT_FAMILY,
+          color: "#333",
+        }}>
+          <span style={{ fontWeight: 500 }}>Chat aktif:</span> {activeTicket.topic} — {activeTicket.userName}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -114,12 +381,33 @@ export default function HomePage(): React.JSX.Element {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
 
+  // Auth
   useEffect(() => {
     if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, () => {
-      setTimeout(() => startPreloaderAnimation(), 500);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        setIsAdmin(currentUser.email === ADMIN_EMAIL);
+        // Update online status
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          await updateDoc(userRef, {
+            online: true,
+            lastSeen: serverTimestamp(),
+          });
+        } catch (error) {
+          console.error("Error updating online status:", error);
+        }
+      }
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!showMain) return;
+    // Start preloader animation after auth check
+    setTimeout(() => startPreloaderAnimation(), 500);
   }, []);
 
   useEffect(() => {
@@ -404,7 +692,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  if (!showMain) {
+  if (loading || !showMain) {
     return (
       <div
         ref={preloaderRef}
@@ -733,7 +1021,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* FOOTER - Like contact page, normal case */}
+        {/* FOOTER - With Community and Live Chat Agent added to Product */}
         <div
           style={{
             width: "100%",
@@ -803,6 +1091,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
             ))}
           </div>
+
+          {/* LIVE CHAT AGENT - Footer section like contact page */}
+          <LiveChatAgentFooter user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
         {/* MENURU Text - 450px, left aligned, with GSAP SplitText + ScrollTrigger */}
