@@ -2606,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - Without Hover, With White Box and Video */}
+        {/* Menu Overlay - With border box like "Get in Touch" */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2619,16 +2619,15 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#0D3CFC",
             zIndex: 99,
             display: isMenuOpen ? "flex" : "none",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
             transform: "translateY(-100%)",
             opacity: 0,
             pointerEvents: isMenuOpen ? "auto" : "none",
             padding: "60px 80px",
             boxSizing: "border-box",
             overflow: "hidden",
-            gap: "40px",
           }}
         >
           <h1
@@ -2657,9 +2656,8 @@ export default function HomePage(): React.JSX.Element {
               display: "flex",
               flexDirection: "column",
               gap: "15px",
-              width: "45%",
-              maxWidth: "500px",
-              marginTop: "40px",
+              width: "60%",
+              maxWidth: "600px",
             }}
           >
             {menuItems.map((item, index) => (
@@ -2709,32 +2707,48 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* White Box - Right Side with Video (Longer to the right) */}
+          {/* Border Box - Bottom Right with Video */}
           <div
             ref={menuBoxRef}
             style={{
-              width: "55%",
-              maxWidth: "700px",
-              height: "70%",
-              maxHeight: "550px",
-              backgroundColor: "#ffffff",
-              borderRadius: "20px",
-              overflow: "hidden",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              position: "absolute",
+              right: "80px",
+              bottom: "80px",
               display: "flex",
-              flexDirection: "column",
+              alignItems: "center",
+              gap: "16px",
+              border: "2px solid #0D3CFC",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              backgroundColor: "transparent",
+              cursor: "pointer",
               opacity: 0,
-              transform: "scale(0.95) translateX(20px)",
-              flexShrink: 0,
+              transform: "scale(0.95)",
             }}
           >
-            {/* Video - Full width */}
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+              }}
+            >
+              Bagaimana website ini bisa berkembang?
+            </span>
             <div
               style={{
-                width: "100%",
-                height: "100%",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#0D3CFC",
+                borderRadius: "4px",
+                padding: "4px",
+                color: "#ffffff",
+                width: "40px",
+                height: "40px",
                 overflow: "hidden",
-                backgroundColor: "#000000",
               }}
             >
               <video
@@ -2752,34 +2766,6 @@ export default function HomePage(): React.JSX.Element {
                   console.error("Menu video failed to load:", e);
                 }}
               />
-            </div>
-
-            {/* Title - Only 40px font, no description */}
-            <div
-              style={{
-                padding: "20px 24px 24px 24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#ffffff",
-                flexShrink: 0,
-                minHeight: "80px",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "40px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  margin: 0,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                  textAlign: "center",
-                }}
-              >
-                Bagaimana website ini bisa berkembang?
-              </h2>
             </div>
           </div>
         </div>
@@ -2877,20 +2863,13 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 40px 40px !important;
-            flex-direction: column !important;
-          }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
           }
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
           .menu-overlay .menu-box {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 50% !important;
-            max-height: 400px !important;
+            right: 40px !important;
+            bottom: 40px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2939,8 +2918,15 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
-          .menu-overlay .menu-box h2 {
-            font-size: 28px !important;
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
           }
         }
         @media (max-width: 480px) {
@@ -2987,9 +2973,6 @@ export default function HomePage(): React.JSX.Element {
             padding: 20px 15px !important;
           }
           .menu-overlay .menu-text {
-            font-size: 22px !important;
-          }
-          .menu-overlay .menu-box h2 {
             font-size: 22px !important;
           }
         }
