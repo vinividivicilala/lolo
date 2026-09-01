@@ -1759,7 +1759,7 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate red box with video
+            // Animate D9FF81 box with video
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -2606,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With Red Box, Text Left, Video Right */}
+        {/* Menu Overlay - With #D9FF81 Box, Text 3 Lines Left, Video Right */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2707,7 +2707,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Red Box - Bottom Right with Text Left and Video Right */}
+          {/* #D9FF81 Box - Bottom Right with Text Left (3 lines) and Video Right */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2716,39 +2716,76 @@ export default function HomePage(): React.JSX.Element {
               bottom: "80px",
               display: "flex",
               alignItems: "center",
-              gap: "16px",
-              border: "2px solid #ff0000",
+              justifyContent: "space-between",
+              gap: "20px",
+              border: "2px solid #D9FF81",
               borderRadius: "8px",
-              padding: "12px 20px",
-              backgroundColor: "#ff0000",
+              padding: "16px 24px",
+              backgroundColor: "#D9FF81",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
-              boxShadow: "0 4px 20px rgba(255,0,0,0.3)",
+              boxShadow: "0 4px 20px rgba(217, 255, 129, 0.3)",
+              maxWidth: "500px",
+              width: "auto",
+              minHeight: "70px",
             }}
           >
-            <span
+            <div
               style={{
-                fontSize: "30px",
-                fontWeight: 500,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                whiteSpace: "nowrap",
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                flex: 1,
               }}
             >
-              Bagaimana website ini bisa berkembang?
-            </span>
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana website ini
+              </span>
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                bisa berkembang?
+              </span>
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "rgba(13, 60, 252, 0.7)",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Dengan dukungan komunitas
+              </span>
+            </div>
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "rgba(255,255,255,0.2)",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "4px",
                 padding: "2px",
-                width: "30px",
-                height: "30px",
+                width: "50px",
+                height: "50px",
                 overflow: "hidden",
                 flexShrink: 0,
               }}
@@ -2873,9 +2910,15 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box {
             right: 40px !important;
             bottom: 40px !important;
+            max-width: 400px !important;
+            padding: 12px 16px !important;
           }
           .menu-overlay .menu-box span {
-            font-size: 24px !important;
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box video {
+            width: 40px !important;
+            height: 40px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2929,11 +2972,17 @@ export default function HomePage(): React.JSX.Element {
             right: auto !important;
             bottom: auto !important;
             margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
             flex-wrap: wrap !important;
+            padding: 12px 16px !important;
           }
           .menu-overlay .menu-box span {
-            font-size: 20px !important;
-            white-space: normal !important;
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box video {
+            width: 40px !important;
+            height: 40px !important;
           }
         }
         @media (max-width: 480px) {
@@ -2983,10 +3032,11 @@ export default function HomePage(): React.JSX.Element {
             font-size: 22px !important;
           }
           .menu-overlay .menu-box span {
-            font-size: 16px !important;
+            font-size: 14px !important;
           }
-          .menu-overlay .menu-box {
-            padding: 8px 12px !important;
+          .menu-overlay .menu-box video {
+            width: 30px !important;
+            height: 30px !important;
           }
         }
       `}</style>
