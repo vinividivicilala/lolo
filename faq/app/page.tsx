@@ -223,6 +223,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -301,6 +302,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       <circle cx="16" cy="10" r="1" fill="#0D3CFC"/>
     </svg>
   );
+
+  // Fungsi scroll ke bawah chat - HANYA SCROLL DI DALAM CHAT
+  const scrollToBottom = () => {
+    if (chatMessagesContainerRef.current) {
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+    }
+  };
 
   // GSAP SplitText untuk judul Live Chat Agent
   useEffect(() => {
@@ -388,12 +396,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
-      // Auto scroll to bottom - hanya scroll di container chat
+      // Scroll ke bawah chat - hanya di dalam container chat
       setTimeout(() => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      }, 100);
+        scrollToBottom();
+      }, 50);
     });
     return () => unsubscribe();
   }, [db, selectedTicket, isMounted]);
@@ -1045,7 +1051,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   )}
                 </div>
                 <div 
-                  ref={messagesContainerRef}
+                  ref={chatMessagesContainerRef}
                   style={{
                     flex: 1,
                     overflowY: "auto",
@@ -1456,7 +1462,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 )}
               </div>
               <div 
-                ref={messagesContainerRef}
+                ref={chatMessagesContainerRef}
                 style={{
                   flex: 1,
                   overflowY: "auto",
