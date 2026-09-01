@@ -220,10 +220,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
-  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -1060,61 +1059,82 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     flexDirection: "column",
                     gap: "4px",
                     minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
                   }}
                 >
-                  {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                      Belum ada pesan
-                    </div>
-                  ) : (
-                    messages.map((msg, idx) => {
-                      const isMine = msg.senderId === user.uid;
-                      const isAgent = !isMine && msg.senderName === AGENT_NAME;
-                      return (
-                        <div
-                          key={idx}
-                          style={{
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            maxWidth: "75%",
-                            padding: "5px 8px",
-                            borderRadius: "6px",
-                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                            color: isMine ? "#fff" : "#000",
-                            fontSize: "11px",
-                            fontFamily: FONT_FAMILY,
-                          }}
-                        >
-                          {!isMine && (
-                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", display: "flex", alignItems: "center", gap: "3px" }}>
-                              {msg.senderName}
-                              {isAgent && <InstagramVerifiedBadge size={9} />}
+                  <style>{`
+                    .chat-messages-container::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+                  <div className="chat-messages-container" style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}>
+                    {messages.length === 0 ? (
+                      <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                        Belum ada pesan
+                      </div>
+                    ) : (
+                      messages.map((msg, idx) => {
+                        const isMine = msg.senderId === user.uid;
+                        const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              alignSelf: isMine ? "flex-end" : "flex-start",
+                              maxWidth: "75%",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                              color: isMine ? "#fff" : "#000",
+                              fontSize: "11px",
+                              fontFamily: FONT_FAMILY,
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {!isMine && (
+                              <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", display: "flex", alignItems: "center", gap: "3px" }}>
+                                {msg.senderName}
+                                {isAgent && <InstagramVerifiedBadge size={9} />}
+                              </div>
+                            )}
+                            <div>{msg.text}</div>
+                            <div style={{ 
+                              fontSize: "6px", 
+                              color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                              marginTop: "2px",
+                              textAlign: "right",
+                            }}>
+                              {formatTime(msg.timestamp)}
                             </div>
-                          )}
-                          <div>{msg.text}</div>
-                          <div style={{ 
-                            fontSize: "6px", 
-                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                            marginTop: "2px",
-                          }}>
-                            {formatTime(msg.timestamp)}
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                  {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
-                    <div style={{
-                      alignSelf: "flex-start",
-                      fontSize: "10px",
-                      color: "#666",
-                      fontStyle: "italic",
-                      padding: "2px 5px",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      {getTypingText(selectedTicket)}
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                        );
+                      })
+                    )}
+                    {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
+                      <div style={{
+                        alignSelf: "flex-start",
+                        fontSize: "10px",
+                        color: "#666",
+                        fontStyle: "italic",
+                        padding: "2px 5px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        {getTypingText(selectedTicket)}
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
                 </div>
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
@@ -1471,59 +1491,80 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   flexDirection: "column",
                   gap: "4px",
                   minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
                 }}
               >
-                {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                    Belum ada pesan
-                  </div>
-                ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user.uid;
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "75%",
-                          padding: "5px 8px",
-                          borderRadius: "6px",
-                          backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                          color: isMine ? "#fff" : "#000",
-                          fontSize: "11px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {!isMine && (
-                          <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
-                            {msg.senderName}
+                <style>{`
+                  .chat-messages-container-admin::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+                <div className="chat-messages-container-admin" style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}>
+                  {messages.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                      Belum ada pesan
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "5px 8px",
+                            borderRadius: "6px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "11px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {!isMine && (
+                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "6px", 
+                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                            marginTop: "2px",
+                            textAlign: "right",
+                          }}>
+                            {formatTime(msg.timestamp)}
                           </div>
-                        )}
-                        <div>{msg.text}</div>
-                        <div style={{ 
-                          fontSize: "6px", 
-                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                          marginTop: "2px",
-                        }}>
-                          {formatTime(msg.timestamp)}
                         </div>
-                      </div>
-                    );
-                  })
-                )}
-                {typingText && selectedTicket.status !== 'resolved' && (
-                  <div style={{
-                    alignSelf: "flex-start",
-                    fontSize: "10px",
-                    color: "#666",
-                    fontStyle: "italic",
-                    padding: "2px 5px",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    {typingText}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+                      );
+                    })
+                  )}
+                  {typingText && selectedTicket.status !== 'resolved' && (
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "10px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "2px 5px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {typingText}
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
               {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
@@ -2588,6 +2629,19 @@ export default function HomePage(): React.JSX.Element {
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+
+        /* Hide scrollbar for chat messages */
+        .chat-messages-container::-webkit-scrollbar,
+        .chat-messages-container-admin::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .chat-messages-container,
+        .chat-messages-container-admin {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
         }
 
         @media (max-width: 1024px) {
