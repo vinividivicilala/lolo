@@ -1732,49 +1732,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isMenuOpen]);
 
-  // GSAP animation for menu items hover
-  useEffect(() => {
-    if (!showMain || !isMounted || !menuItemsRef.current) return;
-
-    const items = menuItemsRef.current.querySelectorAll('.menu-item');
-    
-    items.forEach((item: any) => {
-      item.addEventListener('mouseenter', () => {
-        gsap.to(item, {
-          backgroundColor: 'rgba(0, 255, 100, 0.2)',
-          duration: 0.4,
-          ease: 'power2.out'
-        });
-        gsap.to(item, {
-          scale: 1.02,
-          duration: 0.4,
-          ease: 'back.out(1.7)'
-        });
-      });
-      
-      item.addEventListener('mouseleave', () => {
-        gsap.to(item, {
-          backgroundColor: 'transparent',
-          duration: 0.4,
-          ease: 'power2.in'
-        });
-        gsap.to(item, {
-          scale: 1,
-          duration: 0.4,
-          ease: 'power2.in'
-        });
-      });
-    });
-
-    return () => {
-      items.forEach((item: any) => {
-        item.removeEventListener('mouseenter', () => {});
-        item.removeEventListener('mouseleave', () => {});
-      });
-    };
-  }, [showMain, isMounted]);
-
-  // GSAP animation for menu drawer opening with box and video
+  // GSAP animation for menu drawer opening
   useEffect(() => {
     if (!menuOverlayRef.current || !isMounted) return;
     
@@ -2648,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With White Box, Video, and Text */}
+        {/* Menu Overlay - Without Hover, With White Box and Video */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2661,15 +2619,16 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#0D3CFC",
             zIndex: 99,
             display: isMenuOpen ? "flex" : "none",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
             transform: "translateY(-100%)",
             opacity: 0,
             pointerEvents: isMenuOpen ? "auto" : "none",
             padding: "60px 80px",
             boxSizing: "border-box",
             overflow: "hidden",
+            gap: "40px",
           }}
         >
           <h1
@@ -2698,8 +2657,9 @@ export default function HomePage(): React.JSX.Element {
               display: "flex",
               flexDirection: "column",
               gap: "15px",
-              width: "50%",
-              maxWidth: "600px",
+              width: "45%",
+              maxWidth: "500px",
+              marginTop: "40px",
             }}
           >
             {menuItems.map((item, index) => (
@@ -2749,30 +2709,30 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* White Box - Right Side with Video and Text */}
+          {/* White Box - Right Side with Video (Longer to the right) */}
           <div
             ref={menuBoxRef}
             style={{
-              position: "absolute",
-              right: "80px",
-              bottom: "80px",
-              width: "400px",
-              height: "500px",
+              width: "55%",
+              maxWidth: "700px",
+              height: "70%",
+              maxHeight: "550px",
               backgroundColor: "#ffffff",
-              borderRadius: "16px",
+              borderRadius: "20px",
               overflow: "hidden",
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
               display: "flex",
               flexDirection: "column",
               opacity: 0,
               transform: "scale(0.95) translateX(20px)",
+              flexShrink: 0,
             }}
           >
-            {/* Video */}
+            {/* Video - Full width */}
             <div
               style={{
                 width: "100%",
-                height: "55%",
+                height: "100%",
                 overflow: "hidden",
                 backgroundColor: "#000000",
               }}
@@ -2794,42 +2754,32 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Text Content */}
+            {/* Title - Only 40px font, no description */}
             <div
               style={{
-                padding: "20px 24px",
+                padding: "20px 24px 24px 24px",
                 display: "flex",
-                flexDirection: "column",
+                alignItems: "center",
                 justifyContent: "center",
-                flex: 1,
                 backgroundColor: "#ffffff",
+                flexShrink: 0,
+                minHeight: "80px",
               }}
             >
               <h2
                 style={{
-                  fontSize: "22px",
+                  fontSize: "40px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   margin: 0,
-                  marginBottom: "8px",
-                  letterSpacing: "-0.01em",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                  textAlign: "center",
                 }}
               >
                 Bagaimana website ini bisa berkembang?
               </h2>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 400,
-                  color: "#666666",
-                  fontFamily: FONT_FAMILY,
-                  margin: 0,
-                  lineHeight: 1.6,
-                }}
-              >
-                Dengan dukungan dari komunitas, fitur-fitur inovatif, dan pengalaman pengguna yang terus ditingkatkan.
-              </p>
             </div>
           </div>
         </div>
@@ -2927,15 +2877,20 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 40px 40px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
           }
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
           .menu-overlay .menu-box {
-            width: 300px !important;
-            height: 400px !important;
-            right: 40px !important;
-            bottom: 40px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 50% !important;
+            max-height: 400px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2980,22 +2935,12 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 30px 20px !important;
-            flex-direction: column !important;
           }
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .menu-overlay .menu-box {
-            width: 100% !important;
-            height: 300px !important;
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
+          .menu-overlay .menu-box h2 {
+            font-size: 28px !important;
           }
         }
         @media (max-width: 480px) {
@@ -3044,8 +2989,8 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 22px !important;
           }
-          .menu-overlay .menu-box {
-            height: 250px !important;
+          .menu-overlay .menu-box h2 {
+            font-size: 22px !important;
           }
         }
       `}</style>
