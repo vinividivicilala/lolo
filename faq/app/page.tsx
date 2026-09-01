@@ -2606,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With #D9FF81 Box, Text 3 Lines Left, Video Right - LARGER SIZE */}
+        {/* Menu Overlay - Video 400px with #D9FF81 Box */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2707,7 +2707,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* #D9FF81 Box - Bottom Right with Text Left (3 lines) and Video Right - LARGER */}
+          {/* #D9FF81 Box - Bottom Right with Video 400px */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2716,97 +2716,35 @@ export default function HomePage(): React.JSX.Element {
               bottom: "80px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "24px",
+              justifyContent: "center",
               border: "2px solid #D9FF81",
               borderRadius: "12px",
-              padding: "20px 32px",
+              padding: "0",
               backgroundColor: "#D9FF81",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
               boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-              maxWidth: "600px",
-              width: "auto",
-              minHeight: "90px",
+              width: "400px",
+              height: "225px",
+              overflow: "hidden",
             }}
           >
-            <div
+            <video
+              ref={menuVideoRef}
+              src="/videos/1.mp4"
+              loop
+              muted
+              playsInline
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "2px",
-                flex: 1,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
               }}
-            >
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Bagaimana website ini
-              </span>
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                bisa berkembang?
-              </span>
-              <span
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 400,
-                  color: "rgba(13, 60, 252, 0.7)",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Dengan dukungan komunitas
-              </span>
-            </div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "rgba(13, 60, 252, 0.1)",
-                borderRadius: "6px",
-                padding: "4px",
-                width: "70px",
-                height: "70px",
-                overflow: "hidden",
-                flexShrink: 0,
+              onError={(e) => {
+                console.error("Menu video failed to load:", e);
               }}
-            >
-              <video
-                ref={menuVideoRef}
-                src="/videos/1.mp4"
-                loop
-                muted
-                playsInline
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "6px",
-                }}
-                onError={(e) => {
-                  console.error("Menu video failed to load:", e);
-                }}
-              />
-            </div>
+            />
           </div>
         </div>
       </div>
@@ -2910,16 +2848,8 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box {
             right: 40px !important;
             bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box video {
-            width: 55px !important;
-            height: 55px !important;
+            width: 300px !important;
+            height: 169px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2973,18 +2903,9 @@ export default function HomePage(): React.JSX.Element {
             right: auto !important;
             bottom: auto !important;
             margin-top: 20px !important;
-            max-width: 100% !important;
             width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box video {
-            width: 50px !important;
-            height: 50px !important;
+            height: auto !important;
+            aspect-ratio: 16/9 !important;
           }
         }
         @media (max-width: 480px) {
@@ -3032,17 +2953,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay .menu-text {
             font-size: 22px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box video {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
           }
         }
       `}</style>
