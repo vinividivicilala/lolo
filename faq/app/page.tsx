@@ -1676,6 +1676,8 @@ export default function HomePage(): React.JSX.Element {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
+  const menuVideoRef = useRef<HTMLVideoElement>(null);
+  const menuBoxRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1718,7 +1720,19 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMain, isMounted]);
 
-  // GSAP animation for menu items hover - ONLY GREEN HIGHLIGHT
+  // Play video in menu when menu opens
+  useEffect(() => {
+    if (menuVideoRef.current && isMenuOpen) {
+      menuVideoRef.current.play().catch(error => {
+        console.log("Menu video autoplay failed:", error);
+      });
+    }
+    if (menuVideoRef.current && !isMenuOpen) {
+      menuVideoRef.current.pause();
+    }
+  }, [isMenuOpen]);
+
+  // GSAP animation for menu items hover
   useEffect(() => {
     if (!showMain || !isMounted || !menuItemsRef.current) return;
 
@@ -1726,13 +1740,11 @@ export default function HomePage(): React.JSX.Element {
     
     items.forEach((item: any) => {
       item.addEventListener('mouseenter', () => {
-        // Only background highlight with green color - no border, no text color change
         gsap.to(item, {
           backgroundColor: 'rgba(0, 255, 100, 0.2)',
           duration: 0.4,
           ease: 'power2.out'
         });
-        // Scale effect
         gsap.to(item, {
           scale: 1.02,
           duration: 0.4,
@@ -1741,13 +1753,11 @@ export default function HomePage(): React.JSX.Element {
       });
       
       item.addEventListener('mouseleave', () => {
-        // Reset background
         gsap.to(item, {
           backgroundColor: 'transparent',
           duration: 0.4,
           ease: 'power2.in'
         });
-        // Reset scale
         gsap.to(item, {
           scale: 1,
           duration: 0.4,
@@ -1764,7 +1774,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showMain, isMounted]);
 
-  // GSAP animation for menu drawer opening
+  // GSAP animation for menu drawer opening with box and video
   useEffect(() => {
     if (!menuOverlayRef.current || !isMounted) return;
     
@@ -1787,6 +1797,19 @@ export default function HomePage(): React.JSX.Element {
                   y: 0,
                   duration: 0.6,
                   stagger: 0.08,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            // Animate white box with video
+            if (menuBoxRef.current) {
+              gsap.fromTo(menuBoxRef.current,
+                { opacity: 0, scale: 0.95, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
                   ease: 'power3.out'
                 }
               );
@@ -2625,7 +2648,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With GSAP animations */}
+        {/* Menu Overlay - With White Box, Video, and Text */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2668,14 +2691,15 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
+          {/* Menu Items - Left Side */}
           <div
             ref={menuItemsRef}
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "15px",
-              width: "100%",
-              maxWidth: "800px",
+              width: "50%",
+              maxWidth: "600px",
             }}
           >
             {menuItems.map((item, index) => (
@@ -2723,6 +2747,90 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* White Box - Right Side with Video and Text */}
+          <div
+            ref={menuBoxRef}
+            style={{
+              position: "absolute",
+              right: "80px",
+              bottom: "80px",
+              width: "400px",
+              height: "500px",
+              backgroundColor: "#ffffff",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              display: "flex",
+              flexDirection: "column",
+              opacity: 0,
+              transform: "scale(0.95) translateX(20px)",
+            }}
+          >
+            {/* Video */}
+            <div
+              style={{
+                width: "100%",
+                height: "55%",
+                overflow: "hidden",
+                backgroundColor: "#000000",
+              }}
+            >
+              <video
+                ref={menuVideoRef}
+                src="/videos/1.mp4"
+                loop
+                muted
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+                onError={(e) => {
+                  console.error("Menu video failed to load:", e);
+                }}
+              />
+            </div>
+
+            {/* Text Content */}
+            <div
+              style={{
+                padding: "20px 24px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                flex: 1,
+                backgroundColor: "#ffffff",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  margin: 0,
+                  marginBottom: "8px",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Bagaimana website ini bisa berkembang?
+              </h2>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "#666666",
+                  fontFamily: FONT_FAMILY,
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              >
+                Dengan dukungan dari komunitas, fitur-fitur inovatif, dan pengalaman pengguna yang terus ditingkatkan.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -2820,8 +2928,14 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 40px 40px !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 36px !important;
+          }
+          .menu-overlay .menu-box {
+            width: 300px !important;
+            height: 400px !important;
+            right: 40px !important;
+            bottom: 40px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2866,9 +2980,22 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 30px 20px !important;
+            flex-direction: column !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .menu-box {
+            width: 100% !important;
+            height: 300px !important;
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
           }
         }
         @media (max-width: 480px) {
@@ -2914,8 +3041,11 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 20px 15px !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 22px !important;
+          }
+          .menu-overlay .menu-box {
+            height: 250px !important;
           }
         }
       `}</style>
