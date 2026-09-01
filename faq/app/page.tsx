@@ -95,6 +95,17 @@ const featuresData = [
   { name: "Note" }
 ];
 
+// Menu items for drawer
+const menuItems = [
+  { name: "Community", number: "01" },
+  { name: "Blog", number: "02" },
+  { name: "Live Chat", number: "03" },
+  { name: "Live Chat Agent", number: "04" },
+  { name: "Donation", number: "05" },
+  { name: "Contact", number: "06" },
+  { name: "Note", number: "07" }
+];
+
 // Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
@@ -395,7 +406,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgList);
-      // Scroll ke bawah chat - hanya di dalam container chat
       setTimeout(() => {
         scrollToBottom();
       }, 50);
@@ -1644,6 +1654,7 @@ export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -2546,7 +2557,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay */}
+        {/* Menu Overlay - With hover effects */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2561,15 +2572,20 @@ export default function HomePage(): React.JSX.Element {
             display: isMenuOpen ? "flex" : "none",
             flexDirection: "column",
             alignItems: "flex-start",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             transform: "translateY(-100%)",
             opacity: 0,
             pointerEvents: isMenuOpen ? "auto" : "none",
-            padding: "40px",
+            padding: "60px 80px",
+            boxSizing: "border-box",
+            overflow: "hidden",
           }}
         >
           <h1
             style={{
+              position: "absolute",
+              top: "40px",
+              left: "40px",
               fontSize: "48px",
               fontWeight: 700,
               color: "#ffffff",
@@ -2579,13 +2595,68 @@ export default function HomePage(): React.JSX.Element {
               padding: 0,
               lineHeight: 1,
               opacity: 0.9,
-              position: "absolute",
-              top: "40px",
-              left: "40px",
             }}
           >
             Menuru
           </h1>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              width: "100%",
+              maxWidth: "800px",
+            }}
+          >
+            {menuItems.map((item, index) => (
+              <Link
+                key={index}
+                href="/"
+                style={{ textDecoration: "none" }}
+                onMouseEnter={() => setHoveredMenu(item.number)}
+                onMouseLeave={() => setHoveredMenu(null)}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 20px",
+                    borderRadius: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    backgroundColor: hoveredMenu === item.number ? "rgba(0, 255, 100, 0.2)" : "transparent",
+                    borderLeft: hoveredMenu === item.number ? "6px solid #00ff64" : "6px solid transparent",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 600,
+                      color: hoveredMenu === item.number ? "#00ff64" : "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.02em",
+                      transition: "color 0.3s ease",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 300,
+                      color: hoveredMenu === item.number ? "#00ff64" : "rgba(255,255,255,0.4)",
+                      fontFamily: FONT_FAMILY,
+                      transition: "color 0.3s ease",
+                    }}
+                  >
+                    {item.number}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -2631,7 +2702,6 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform, opacity, filter;
         }
 
-        /* Hide scrollbar for chat messages */
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
           display: none !important;
@@ -2680,6 +2750,12 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 14px !important;
           }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay span {
+            font-size: 36px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -2721,6 +2797,12 @@ export default function HomePage(): React.JSX.Element {
           .menu-button span {
             font-size: 12px !important;
           }
+          .menu-overlay {
+            padding: 30px 20px !important;
+          }
+          .menu-overlay span {
+            font-size: 28px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -2761,6 +2843,12 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-button span {
             font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay span {
+            font-size: 22px !important;
           }
         }
       `}</style>
