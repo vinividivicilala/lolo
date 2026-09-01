@@ -1654,7 +1654,6 @@ export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
-  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1719,34 +1718,18 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMain, isMounted]);
 
-  // GSAP animation for menu items hover
+  // GSAP animation for menu items hover - ONLY GREEN HIGHLIGHT
   useEffect(() => {
     if (!showMain || !isMounted || !menuItemsRef.current) return;
 
     const items = menuItemsRef.current.querySelectorAll('.menu-item');
     
     items.forEach((item: any) => {
-      const numberEl = item.querySelector('.menu-number');
-      const textEl = item.querySelector('.menu-text');
-      
       item.addEventListener('mouseenter', () => {
-        // Animate background highlight
+        // Only background highlight with green color - no border, no text color change
         gsap.to(item, {
-          backgroundColor: 'rgba(0, 255, 100, 0.15)',
-          borderLeft: '4px solid #00ff64',
+          backgroundColor: 'rgba(0, 255, 100, 0.2)',
           duration: 0.4,
-          ease: 'power2.out'
-        });
-        // Animate text color
-        gsap.to(textEl, {
-          color: '#00ff64',
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-        // Animate number
-        gsap.to(numberEl, {
-          color: '#00ff64',
-          duration: 0.3,
           ease: 'power2.out'
         });
         // Scale effect
@@ -1761,20 +1744,7 @@ export default function HomePage(): React.JSX.Element {
         // Reset background
         gsap.to(item, {
           backgroundColor: 'transparent',
-          borderLeft: '4px solid transparent',
           duration: 0.4,
-          ease: 'power2.in'
-        });
-        // Reset text color
-        gsap.to(textEl, {
-          color: '#ffffff',
-          duration: 0.3,
-          ease: 'power2.in'
-        });
-        // Reset number color
-        gsap.to(numberEl, {
-          color: 'rgba(255,255,255,0.4)',
-          duration: 0.3,
           ease: 'power2.in'
         });
         // Reset scale
@@ -2721,36 +2691,31 @@ export default function HomePage(): React.JSX.Element {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "10px 20px",
-                    borderRadius: "12px",
+                    borderRadius: "8px",
                     cursor: "pointer",
-                    transition: "all 0.3s ease",
                     backgroundColor: "transparent",
-                    borderLeft: "4px solid transparent",
                     opacity: 0,
                     transform: "translateY(30px)",
+                    transition: "none",
                   }}
                 >
                   <span
-                    className="menu-text"
                     style={{
                       fontSize: "48px",
                       fontWeight: 600,
                       color: "#ffffff",
                       fontFamily: FONT_FAMILY,
                       letterSpacing: "-0.02em",
-                      transition: "color 0.3s ease",
                     }}
                   >
                     {item.name}
                   </span>
                   <span
-                    className="menu-number"
                     style={{
                       fontSize: "24px",
                       fontWeight: 300,
-                      color: "rgba(255,255,255,0.4)",
+                      color: "#ffffff",
                       fontFamily: FONT_FAMILY,
-                      transition: "color 0.3s ease",
                     }}
                   >
                     {item.number}
@@ -2855,7 +2820,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 40px 40px !important;
           }
-          .menu-overlay .menu-text {
+          .menu-overlay span {
             font-size: 36px !important;
           }
         }
@@ -2902,7 +2867,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 30px 20px !important;
           }
-          .menu-overlay .menu-text {
+          .menu-overlay span {
             font-size: 28px !important;
           }
         }
@@ -2949,7 +2914,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 20px 15px !important;
           }
-          .menu-overlay .menu-text {
+          .menu-overlay span {
             font-size: 22px !important;
           }
         }
