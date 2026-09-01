@@ -2725,8 +2725,8 @@ export default function HomePage(): React.JSX.Element {
               opacity: 0,
               transform: "scale(0.95)",
               boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-              width: "400px",
-              height: "225px",
+              width: "150px",
+              height: "150px",
               overflow: "hidden",
             }}
           >
