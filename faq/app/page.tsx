@@ -1676,6 +1676,7 @@ export default function HomePage(): React.JSX.Element {
   const featuresContainerRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1717,6 +1718,121 @@ export default function HomePage(): React.JSX.Element {
       });
     }
   }, [showMain, isMounted]);
+
+  // GSAP animation for menu items hover
+  useEffect(() => {
+    if (!showMain || !isMounted || !menuItemsRef.current) return;
+
+    const items = menuItemsRef.current.querySelectorAll('.menu-item');
+    
+    items.forEach((item: any) => {
+      const numberEl = item.querySelector('.menu-number');
+      const textEl = item.querySelector('.menu-text');
+      
+      item.addEventListener('mouseenter', () => {
+        // Animate background highlight
+        gsap.to(item, {
+          backgroundColor: 'rgba(0, 255, 100, 0.15)',
+          borderLeft: '4px solid #00ff64',
+          duration: 0.4,
+          ease: 'power2.out'
+        });
+        // Animate text color
+        gsap.to(textEl, {
+          color: '#00ff64',
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+        // Animate number
+        gsap.to(numberEl, {
+          color: '#00ff64',
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+        // Scale effect
+        gsap.to(item, {
+          scale: 1.02,
+          duration: 0.4,
+          ease: 'back.out(1.7)'
+        });
+      });
+      
+      item.addEventListener('mouseleave', () => {
+        // Reset background
+        gsap.to(item, {
+          backgroundColor: 'transparent',
+          borderLeft: '4px solid transparent',
+          duration: 0.4,
+          ease: 'power2.in'
+        });
+        // Reset text color
+        gsap.to(textEl, {
+          color: '#ffffff',
+          duration: 0.3,
+          ease: 'power2.in'
+        });
+        // Reset number color
+        gsap.to(numberEl, {
+          color: 'rgba(255,255,255,0.4)',
+          duration: 0.3,
+          ease: 'power2.in'
+        });
+        // Reset scale
+        gsap.to(item, {
+          scale: 1,
+          duration: 0.4,
+          ease: 'power2.in'
+        });
+      });
+    });
+
+    return () => {
+      items.forEach((item: any) => {
+        item.removeEventListener('mouseenter', () => {});
+        item.removeEventListener('mouseleave', () => {});
+      });
+    };
+  }, [showMain, isMounted]);
+
+  // GSAP animation for menu drawer opening
+  useEffect(() => {
+    if (!menuOverlayRef.current || !isMounted) return;
+    
+    if (isMenuOpen) {
+      gsap.fromTo(menuOverlayRef.current,
+        { y: '-100%', opacity: 0 },
+        {
+          y: '0%',
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out',
+          onComplete: () => {
+            // Animate menu items with stagger
+            const items = menuOverlayRef.current?.querySelectorAll('.menu-item');
+            if (items) {
+              gsap.fromTo(items,
+                { opacity: 0, y: 30 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  stagger: 0.08,
+                  ease: 'power3.out'
+                }
+              );
+            }
+          }
+        }
+      );
+    } else {
+      gsap.to(menuOverlayRef.current, {
+        y: '-100%',
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power3.in'
+      });
+    }
+  }, [isMenuOpen, isMounted]);
 
   useEffect(() => {
     if (!showMain || !isMounted) return;
@@ -1940,12 +2056,6 @@ export default function HomePage(): React.JSX.Element {
   const toggleMenu = () => {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
-      if (menuOverlayRef.current) {
-        gsap.fromTo(menuOverlayRef.current,
-          { y: "-100%", opacity: 0 },
-          { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
-        );
-      }
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 45,
@@ -1954,19 +2064,6 @@ export default function HomePage(): React.JSX.Element {
         });
       }
     } else {
-      if (menuOverlayRef.current) {
-        gsap.to(menuOverlayRef.current, {
-          y: "-100%",
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-          onComplete: () => {
-            setIsMenuOpen(false);
-          }
-        });
-      } else {
-        setIsMenuOpen(false);
-      }
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -1974,6 +2071,7 @@ export default function HomePage(): React.JSX.Element {
           ease: "power2.in"
         });
       }
+      setIsMenuOpen(false);
     }
   };
 
@@ -2557,7 +2655,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With hover effects */}
+        {/* Menu Overlay - With GSAP animations */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2601,6 +2699,7 @@ export default function HomePage(): React.JSX.Element {
           </h1>
 
           <div
+            ref={menuItemsRef}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -2614,10 +2713,9 @@ export default function HomePage(): React.JSX.Element {
                 key={index}
                 href="/"
                 style={{ textDecoration: "none" }}
-                onMouseEnter={() => setHoveredMenu(item.number)}
-                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <div
+                  className="menu-item"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -2626,15 +2724,18 @@ export default function HomePage(): React.JSX.Element {
                     borderRadius: "12px",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
-                    backgroundColor: hoveredMenu === item.number ? "rgba(0, 255, 100, 0.2)" : "transparent",
-                    borderLeft: hoveredMenu === item.number ? "6px solid #00ff64" : "6px solid transparent",
+                    backgroundColor: "transparent",
+                    borderLeft: "4px solid transparent",
+                    opacity: 0,
+                    transform: "translateY(30px)",
                   }}
                 >
                   <span
+                    className="menu-text"
                     style={{
                       fontSize: "48px",
                       fontWeight: 600,
-                      color: hoveredMenu === item.number ? "#00ff64" : "#ffffff",
+                      color: "#ffffff",
                       fontFamily: FONT_FAMILY,
                       letterSpacing: "-0.02em",
                       transition: "color 0.3s ease",
@@ -2643,10 +2744,11 @@ export default function HomePage(): React.JSX.Element {
                     {item.name}
                   </span>
                   <span
+                    className="menu-number"
                     style={{
                       fontSize: "24px",
                       fontWeight: 300,
-                      color: hoveredMenu === item.number ? "#00ff64" : "rgba(255,255,255,0.4)",
+                      color: "rgba(255,255,255,0.4)",
                       fontFamily: FONT_FAMILY,
                       transition: "color 0.3s ease",
                     }}
@@ -2753,7 +2855,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 40px 40px !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 36px !important;
           }
         }
@@ -2800,7 +2902,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 30px 20px !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 28px !important;
           }
         }
@@ -2847,7 +2949,7 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 20px 15px !important;
           }
-          .menu-overlay span {
+          .menu-overlay .menu-text {
             font-size: 22px !important;
           }
         }
