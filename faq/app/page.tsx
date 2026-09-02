@@ -2728,7 +2728,7 @@ export default function HomePage(): React.JSX.Element {
             ref={storiesRef}
             style={{
               position: "absolute",
-              left: "550px",
+              left: "850px",
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2851,7 +2851,7 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              left: "550px",
+              left: "850px",
               top: "250px",
               display: "flex",
               alignItems: "center",
