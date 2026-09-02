@@ -2743,7 +2743,7 @@ export default function HomePage(): React.JSX.Element {
             ref={storiesRef}
             style={{
               position: "absolute",
-                left: "420px",  
+                left: "620px",  
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2866,7 +2866,7 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox2Ref}
   style={{
     position: "absolute",
-    left: "420px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES
+    left: "620px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES
     top: "260px",               // <-- JARAK DARI STORIES (180px + 80px)
     display: "flex",
     alignItems: "center",
@@ -2962,8 +2962,8 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox3Ref}
   style={{
     position: "absolute",
-    left: "420px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
-    top: "400px",               // <-- JARAK DARI BOX 2 (260px + 140px)
+    left: "620px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
+    top: "500px",               // <-- JARAK DARI BOX 2 (260px + 140px)
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
