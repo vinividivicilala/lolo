@@ -96,15 +96,15 @@ const featuresData = [
   { name: "Note" }
 ];
 
-// Menu items for drawer
+// Menu items for drawer dengan foto
 const menuItems = [
-  { name: "Community", number: "01" },
-  { name: "Blog", number: "02" },
-  { name: "Live Chat", number: "03" },
-  { name: "Live Chat Agent", number: "04" },
-  { name: "Donation", number: "05" },
-  { name: "Contact", number: "06" },
-  { name: "Note", number: "07" }
+  { name: "Community", number: "01", image: "/images/11.jpg" },
+  { name: "Blog", number: "02", image: "/images/12.jpg" },
+  { name: "Live Chat", number: "03", image: "/images/13.jpg" },
+  { name: "Live Chat Agent", number: "04", image: "/images/14.jpg" },
+  { name: "Donation", number: "05", image: "/images/15.jpg" },
+  { name: "Contact", number: "06", image: "/images/16.jpg" },
+  { name: "Note", number: "07", image: "/images/17.jpg" }
 ];
 
 // Footer links
@@ -1655,6 +1655,7 @@ export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesVisible, setIsFeaturesVisible] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1678,6 +1679,7 @@ export default function HomePage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
   const menuBoxRef = useRef<HTMLDivElement>(null);
+  const menuImageRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1720,6 +1722,90 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMain, isMounted]);
 
+  // GSAP animation for menu items hover - show image with GSAP
+  useEffect(() => {
+    if (!showMain || !isMounted || !menuItemsRef.current) return;
+
+    const items = menuItemsRef.current.querySelectorAll('.menu-item');
+    
+    items.forEach((item: any, index: number) => {
+      const imageUrl = menuItems[index]?.image || '';
+      
+      item.addEventListener('mouseenter', (e: any) => {
+        const rect = item.getBoundingClientRect();
+        const menuOverlay = menuOverlayRef.current;
+        
+        if (!menuOverlay) return;
+        
+        // Create or update image element
+        let imgElement = menuOverlay.querySelector('.hover-menu-image') as HTMLImageElement;
+        if (!imgElement) {
+          imgElement = document.createElement('img');
+          imgElement.className = 'hover-menu-image';
+          imgElement.style.position = 'fixed';
+          imgElement.style.width = '180px';
+          imgElement.style.height = '180px';
+          imgElement.style.objectFit = 'cover';
+          imgElement.style.borderRadius = '12px';
+          imgElement.style.border = '2px solid #D9FF81';
+          imgElement.style.boxShadow = '0 8px 40px rgba(0,0,0,0.3)';
+          imgElement.style.zIndex = '1000';
+          imgElement.style.pointerEvents = 'none';
+          imgElement.style.opacity = '0';
+          imgElement.style.transform = 'scale(0.8)';
+          document.body.appendChild(imgElement);
+        }
+        
+        imgElement.src = imageUrl;
+        
+        // Position image near the menu item
+        const x = rect.right + 20;
+        const y = rect.top - 20;
+        
+        gsap.to(imgElement, {
+          left: x + 'px',
+          top: y + 'px',
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: 'back.out(1.7)',
+          overwrite: true
+        });
+      });
+      
+      item.addEventListener('mouseleave', () => {
+        const menuOverlay = menuOverlayRef.current;
+        if (!menuOverlay) return;
+        
+        const imgElement = document.body.querySelector('.hover-menu-image') as HTMLImageElement;
+        if (imgElement) {
+          gsap.to(imgElement, {
+            opacity: 0,
+            scale: 0.8,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (imgElement.parentNode) {
+                imgElement.remove();
+              }
+            }
+          });
+        }
+      });
+    });
+
+    return () => {
+      const imgElement = document.body.querySelector('.hover-menu-image') as HTMLImageElement;
+      if (imgElement && imgElement.parentNode) {
+        imgElement.remove();
+      }
+      items.forEach((item: any) => {
+        item.removeEventListener('mouseenter', () => {});
+        item.removeEventListener('mouseleave', () => {});
+      });
+    };
+  }, [showMain, isMounted]);
+
   // GSAP animation for menu drawer opening
   useEffect(() => {
     if (!menuOverlayRef.current || !isMounted) return;
@@ -1747,6 +1833,20 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
+            // Animate Stories text
+            const storiesText = menuOverlayRef.current?.querySelector('.stories-text');
+            if (storiesText) {
+              gsap.fromTo(storiesText,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  delay: 0.4,
+                  ease: 'power3.out'
+                }
+              );
+            }
             // Animate D9FF81 box with image
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
@@ -1770,6 +1870,11 @@ export default function HomePage(): React.JSX.Element {
         duration: 0.6,
         ease: 'power3.in'
       });
+      // Remove hover image when menu closes
+      const imgElement = document.body.querySelector('.hover-menu-image') as HTMLImageElement;
+      if (imgElement && imgElement.parentNode) {
+        imgElement.remove();
+      }
     }
   }, [isMenuOpen, isMounted]);
 
@@ -2594,7 +2699,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With #D9FF81 Box, Text 3 Lines Left, Image Right */}
+        {/* Menu Overlay - With GSAP Image on Hover, Stories Text, and D9FF81 Box */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2636,6 +2741,24 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </h1>
+
+          {/* Stories Text - Below Navbar */}
+          <div
+            className="stories-text"
+            style={{
+              position: "absolute",
+              top: "120px",
+              right: "80px",
+              fontSize: "64px",
+              fontWeight: 600,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              opacity: 0,
+            }}
+          >
+            Stories
+          </div>
 
           {/* Menu Items - Left Side */}
           <div
@@ -2695,7 +2818,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* #D9FF81 Box - Bottom Right with Text Left (3 lines) and Image Right - LARGER */}
+          {/* #D9FF81 Box - Bottom Right with Text 3 Lines and Image */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2737,7 +2860,7 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Bagaimana website ini
+                Bagaimana Rasa nya Masuk
               </span>
               <span
                 style={{
@@ -2749,11 +2872,11 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                bisa berkembang?
+                Kuliah Di Universitas
               </span>
               <span
                 style={{
-                  fontSize: "15px",
+                  fontSize: "18px",
                   fontWeight: 400,
                   color: "rgba(13, 60, 252, 0.7)",
                   fontFamily: FONT_FAMILY,
@@ -2761,7 +2884,7 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Dengan dukungan komunitas
+                Gunadarma
               </span>
             </div>
             <div
@@ -2772,14 +2895,14 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "6px",
                 padding: "4px",
-                width: "100px",
-                height: "100px",
+                width: "70px",
+                height: "70px",
                 overflow: "hidden",
                 flexShrink: 0,
               }}
             >
               <img
-                src="/images/mnbv.JPG"
+                src="/images/10.jpg"
                 alt="Menuru"
                 style={{
                   width: "100%",
@@ -2847,6 +2970,17 @@ export default function HomePage(): React.JSX.Element {
           -ms-overflow-style: none !important;
         }
 
+        /* Hover menu image */
+        .hover-menu-image {
+          position: fixed;
+          pointer-events: none;
+          z-index: 1000;
+          border-radius: 12px;
+          border: 2px solid #D9FF81;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+          object-fit: cover;
+        }
+
         @media (max-width: 1024px) {
           .subtitle p {
             font-size: 48px !important;
@@ -2902,6 +3036,11 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box img {
             width: 55px !important;
             height: 55px !important;
+          }
+          .stories-text {
+            font-size: 48px !important;
+            right: 40px !important;
+            top: 100px !important;
           }
         }
         @media (max-width: 768px) {
@@ -2968,6 +3107,11 @@ export default function HomePage(): React.JSX.Element {
             width: 50px !important;
             height: 50px !important;
           }
+          .stories-text {
+            font-size: 36px !important;
+            right: 20px !important;
+            top: 80px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -3025,6 +3169,11 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box {
             padding: 10px 14px !important;
             min-height: 50px !important;
+          }
+          .stories-text {
+            font-size: 28px !important;
+            right: 15px !important;
+            top: 70px !important;
           }
         }
       `}</style>
