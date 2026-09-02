@@ -1777,7 +1777,7 @@ export default function HomePage(): React.JSX.Element {
             // Animate box 2
             if (menuBox2Ref.current) {
               gsap.fromTo(menuBox2Ref.current,
-                { opacity: 0, scale: 0.9, x: 20 },
+                { opacity: 0, scale: 0.9, x: -20 },
                 {
                   opacity: 1,
                   scale: 1,
@@ -2723,12 +2723,12 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Left side near item 02 (Blog) */}
+          {/* Stories Section - Left side in empty space near item 02 (Blog) */}
           <div
             ref={storiesRef}
             style={{
               position: "absolute",
-              left: "80px",
+              left: "400px",
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2846,12 +2846,12 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* #D9FF81 Box 2 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" - Below stories */}
+          {/* #D9FF81 Box 2 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" - In empty space near 02 */}
           <div
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              left: "80px",
+              left: "400px",
               top: "250px",
               display: "flex",
               alignItems: "center",
@@ -3055,14 +3055,14 @@ export default function HomePage(): React.JSX.Element {
             height: 55px !important;
           }
           .menu-overlay .stories {
-            left: 40px !important;
+            left: 300px !important;
             top: 140px !important;
           }
           .menu-overlay .stories span {
             font-size: 30px !important;
           }
           .menu-overlay .menu-box2 {
-            left: 40px !important;
+            left: 300px !important;
             top: 200px !important;
             max-width: 450px !important;
             padding: 14px 20px !important;
