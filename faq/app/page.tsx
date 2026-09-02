@@ -9,7 +9,6 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import Image from 'next/image';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -1678,8 +1677,8 @@ export default function HomePage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
   const menuBoxRef = useRef<HTMLDivElement>(null);
-  const storiesBoxRef = useRef<HTMLDivElement>(null);
   const storiesTitleRef = useRef<HTMLDivElement>(null);
+  const storiesBoxRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1749,26 +1748,13 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate D9FF81 box with image
-            if (menuBoxRef.current) {
-              gsap.fromTo(menuBoxRef.current,
-                { opacity: 0, scale: 0.9, x: 20 },
-                {
-                  opacity: 1,
-                  scale: 1,
-                  x: 0,
-                  duration: 0.8,
-                  ease: 'power3.out'
-                }
-              );
-            }
             // Animate stories title
             if (storiesTitleRef.current) {
               gsap.fromTo(storiesTitleRef.current,
-                { opacity: 0, y: 20 },
+                { opacity: 0, x: -30 },
                 {
                   opacity: 1,
-                  y: 0,
+                  x: 0,
                   duration: 0.6,
                   ease: 'power3.out',
                   delay: 0.4
@@ -1778,14 +1764,28 @@ export default function HomePage(): React.JSX.Element {
             // Animate stories box
             if (storiesBoxRef.current) {
               gsap.fromTo(storiesBoxRef.current,
-                { opacity: 0, scale: 0.9, x: 20 },
+                { opacity: 0, scale: 0.9, x: -20 },
                 {
                   opacity: 1,
                   scale: 1,
                   x: 0,
                   duration: 0.8,
                   ease: 'power3.out',
-                  delay: 0.2
+                  delay: 0.3
+                }
+              );
+            }
+            // Animate original box
+            if (menuBoxRef.current) {
+              gsap.fromTo(menuBoxRef.current,
+                { opacity: 0, scale: 0.9, x: -20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  delay: 0.5
                 }
               );
             }
@@ -2623,7 +2623,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With #D9FF81 Box, Stories Section, and More */}
+        {/* Menu Overlay - With Stories and Boxes */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2724,16 +2724,15 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Bottom Right Section - Stories and Boxes */}
+          {/* Stories Section - Left Side Below Menu Items */}
           <div
             style={{
-              position: "absolute",
-              right: "80px",
-              bottom: "80px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "16px",
+              alignItems: "flex-start",
+              marginTop: "40px",
+              width: "100%",
+              maxWidth: "800px",
             }}
           >
             {/* Stories Title */}
@@ -2745,8 +2744,9 @@ export default function HomePage(): React.JSX.Element {
                 color: "#ffffff",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "-0.02em",
+                marginBottom: "16px",
                 opacity: 0,
-                transform: "translateY(20px)",
+                transform: "translateX(-30px)",
               }}
             >
               stories
@@ -2766,11 +2766,12 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
                 opacity: 0,
-                transform: "scale(0.95)",
+                transform: "scale(0.95) translateX(-20px)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
                 maxWidth: "700px",
-                width: "auto",
+                width: "100%",
                 minHeight: "80px",
+                marginBottom: "16px",
               }}
             >
               <div
@@ -2821,7 +2822,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <img
-                  src="/images/10.jpg"
+                  src="/images/mnbv.JPG"
                   alt="Stories"
                   style={{
                     width: "100%",
@@ -2847,10 +2848,10 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
                 opacity: 0,
-                transform: "scale(0.95)",
+                transform: "scale(0.95) translateX(-20px)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
                 maxWidth: "600px",
-                width: "auto",
+                width: "100%",
                 minHeight: "70px",
               }}
             >
@@ -2914,7 +2915,7 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 <img
-                  src="/images/10.jpg"
+                  src="/images/mnbv.JPG"
                   alt="Menuru"
                   style={{
                     width: "100%",
@@ -3130,13 +3131,8 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .stories-title {
             font-size: 20px !important;
           }
-          .menu-overlay .bottom-right {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
+          .menu-overlay .stories-section {
             margin-top: 20px !important;
-            width: 100% !important;
-            align-items: flex-start !important;
           }
         }
         @media (max-width: 480px) {
