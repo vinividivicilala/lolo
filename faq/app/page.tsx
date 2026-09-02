@@ -2606,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With "stories" and two boxes */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2707,7 +2707,7 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* "stories" text - below navbar button, near number 02 */}
+          {/* Bottom section with stories and boxes */}
           <div
             style={{
               position: "absolute",
@@ -2732,7 +2732,7 @@ export default function HomePage(): React.JSX.Element {
               stories
             </span>
 
-            {/* Box 2 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" */}
+            {/* Box 2 */}
             <div
               ref={menuBox2Ref}
               style={{
@@ -2826,7 +2826,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 1 - "Bagaimana website ini bisa berkembang?" - Bottom Right */}
+          {/* Box 1 - Bottom Right */}
           <div
             ref={menuBoxRef}
             style={{
