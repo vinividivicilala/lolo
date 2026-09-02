@@ -1679,6 +1679,7 @@ export default function HomePage(): React.JSX.Element {
   const menuBoxRef = useRef<HTMLDivElement>(null);
   const storiesTitleRef = useRef<HTMLDivElement>(null);
   const storiesBoxRef = useRef<HTMLDivElement>(null);
+  const bottomRightRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1748,44 +1749,16 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate stories title
-            if (storiesTitleRef.current) {
-              gsap.fromTo(storiesTitleRef.current,
-                { opacity: 0, x: -30 },
+            // Animate bottom right section (stories + boxes)
+            if (bottomRightRef.current) {
+              gsap.fromTo(bottomRightRef.current,
+                { opacity: 0, x: 30 },
                 {
                   opacity: 1,
-                  x: 0,
-                  duration: 0.6,
-                  ease: 'power3.out',
-                  delay: 0.4
-                }
-              );
-            }
-            // Animate stories box
-            if (storiesBoxRef.current) {
-              gsap.fromTo(storiesBoxRef.current,
-                { opacity: 0, scale: 0.9, x: -20 },
-                {
-                  opacity: 1,
-                  scale: 1,
                   x: 0,
                   duration: 0.8,
                   ease: 'power3.out',
-                  delay: 0.3
-                }
-              );
-            }
-            // Animate original box
-            if (menuBoxRef.current) {
-              gsap.fromTo(menuBoxRef.current,
-                { opacity: 0, scale: 0.9, x: -20 },
-                {
-                  opacity: 1,
-                  scale: 1,
-                  x: 0,
-                  duration: 0.8,
-                  ease: 'power3.out',
-                  delay: 0.5
+                  delay: 0.2
                 }
               );
             }
@@ -2623,7 +2596,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With Stories and Boxes */}
+        {/* Menu Overlay - With Stories at Bottom Right */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2724,15 +2697,18 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Left Side Below Menu Items */}
+          {/* Bottom Right Section - Stories and Boxes */}
           <div
+            ref={bottomRightRef}
             style={{
+              position: "absolute",
+              right: "80px",
+              bottom: "80px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
-              marginTop: "40px",
-              width: "100%",
-              maxWidth: "800px",
+              alignItems: "flex-end",
+              gap: "16px",
+              opacity: 0,
             }}
           >
             {/* Stories Title */}
@@ -2744,9 +2720,6 @@ export default function HomePage(): React.JSX.Element {
                 color: "#ffffff",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "-0.02em",
-                marginBottom: "16px",
-                opacity: 0,
-                transform: "translateX(-30px)",
               }}
             >
               stories
@@ -2765,13 +2738,10 @@ export default function HomePage(): React.JSX.Element {
                 padding: "16px 24px",
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
-                opacity: 0,
-                transform: "scale(0.95) translateX(-20px)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
                 maxWidth: "700px",
                 width: "100%",
                 minHeight: "80px",
-                marginBottom: "16px",
               }}
             >
               <div
@@ -2847,8 +2817,6 @@ export default function HomePage(): React.JSX.Element {
                 padding: "16px 24px",
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
-                opacity: 0,
-                transform: "scale(0.95) translateX(-20px)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
                 maxWidth: "600px",
                 width: "100%",
@@ -3026,6 +2994,10 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
+          .menu-overlay .bottom-right {
+            right: 40px !important;
+            bottom: 40px !important;
+          }
           .menu-overlay .menu-box {
             max-width: 450px !important;
             padding: 12px 16px !important;
@@ -3100,6 +3072,14 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
+          .menu-overlay .bottom-right {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 30px !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+          }
           .menu-overlay .menu-box {
             max-width: 100% !important;
             width: 100% !important;
@@ -3130,9 +3110,6 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay .stories-title {
             font-size: 20px !important;
-          }
-          .menu-overlay .stories-section {
-            margin-top: 20px !important;
           }
         }
         @media (max-width: 480px) {
