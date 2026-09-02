@@ -2606,7 +2606,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay */}
+        {/* Menu Overlay - With "stories" moved to the right side */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2707,16 +2707,17 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Bottom section with stories and boxes */}
+          {/* Right Side - Stories section moved here */}
           <div
             style={{
               position: "absolute",
-              bottom: "240px",
-              left: "80px",
+              right: "80px",
+              top: "50%",
+              transform: "translateY(-50%)",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
-              gap: "16px",
+              alignItems: "flex-end",
+              gap: "20px",
             }}
           >
             <span
@@ -2732,7 +2733,7 @@ export default function HomePage(): React.JSX.Element {
               stories
             </span>
 
-            {/* Box 2 */}
+            {/* Box 2 - Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma */}
             <div
               ref={menuBox2Ref}
               style={{
@@ -2826,7 +2827,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 1 - Bottom Right */}
+          {/* Box 1 - Bottom Right (untouched) */}
           <div
             ref={menuBoxRef}
             style={{
@@ -3035,8 +3036,7 @@ export default function HomePage(): React.JSX.Element {
             height: 55px !important;
           }
           .menu-overlay .stories-box {
-            bottom: 200px !important;
-            left: 40px !important;
+            right: 40px !important;
             max-width: 400px !important;
             padding: 14px 20px !important;
             min-height: 65px !important;
@@ -3118,14 +3118,16 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay .stories-box {
             position: relative !important;
-            bottom: auto !important;
-            left: auto !important;
-            margin-top: 10px !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
+            margin-top: 20px !important;
             max-width: 100% !important;
             width: 100% !important;
             flex-wrap: wrap !important;
             padding: 12px 16px !important;
             min-height: 55px !important;
+            align-items: flex-start !important;
           }
           .menu-overlay .stories-box span {
             font-size: 14px !important;
@@ -3136,6 +3138,7 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay .stories-label {
             font-size: 20px !important;
+            align-self: flex-start !important;
           }
         }
         @media (max-width: 480px) {
