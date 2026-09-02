@@ -2859,7 +2859,7 @@ export default function HomePage(): React.JSX.Element {
               gap: "24px",
               border: "2px solid #D9FF81",
               borderRadius: "12px",
-              padding: "16px 28px",
+              padding: "20px 36px",
               backgroundColor: "#D9FF81",
               cursor: "pointer",
               opacity: 0,
@@ -2880,7 +2880,7 @@ export default function HomePage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "18px",
+                  fontSize: "25px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2892,7 +2892,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
               <span
                 style={{
-                  fontSize: "18px",
+                  fontSize: "25px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2904,7 +2904,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
               <span
                 style={{
-                  fontSize: "18px",
+                  fontSize: "25px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2923,8 +2923,8 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "6px",
                 padding: "4px",
-                width: "90px",
-                height: "90px",
+                width: "100px",
+                height: "100px",
                 overflow: "hidden",
                 flexShrink: 0,
               }}
