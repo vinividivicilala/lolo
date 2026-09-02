@@ -2743,11 +2743,11 @@ export default function HomePage(): React.JSX.Element {
             ref={storiesRef}
             style={{
               position: "absolute",
-              right: "80px",
-              top: "100px",
+                left: "420px",  
+              top: "180px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-end",
+              alignItems: "flex-start",
               gap: "8px",
               opacity: 0,
             }}
@@ -2864,25 +2864,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 2 - #C8EEFF, di bawah stories */}
           <div
             ref={menuBox2Ref}
-            style={{
-              position: "absolute",
-              right: "80px",
-              top: "180px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
-              borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
-              width: "auto",
-              minHeight: "100px",
+  style={{
+    position: "absolute",
+    left: "420px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES
+    top: "260px",               // <-- JARAK DARI STORIES (180px + 80px)
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "30px",
+    border: "2px solid #C8EEFF",
+    borderRadius: "12px",
+    padding: "20px 36px",
+    backgroundColor: "#C8EEFF",
+    cursor: "pointer",
+    opacity: 0,
+    transform: "scale(0.95)",
+    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+    maxWidth: "750px",
+    width: "auto",
+    minHeight: "100px",
             }}
           >
             <div
@@ -2960,25 +2960,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 3 - #C8EEFF, di bawah Box 2 dengan jarak */}
           <div
             ref={menuBox3Ref}
-            style={{
-              position: "absolute",
-              right: "80px",
-              top: "320px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
-              borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
-              width: "auto",
-              minHeight: "100px",
+  style={{
+    position: "absolute",
+    left: "420px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
+    top: "400px",               // <-- JARAK DARI BOX 2 (260px + 140px)
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "30px",
+    border: "2px solid #C8EEFF",
+    borderRadius: "12px",
+    padding: "20px 36px",
+    backgroundColor: "#C8EEFF",
+    cursor: "pointer",
+    opacity: 0,
+    transform: "scale(0.95)",
+    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+    maxWidth: "750px",
+    width: "auto",
+    minHeight: "100px",
             }}
           >
             <div
