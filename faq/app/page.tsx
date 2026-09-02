@@ -2963,7 +2963,7 @@ export default function HomePage(): React.JSX.Element {
   style={{
     position: "absolute",
     left: "720px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
-    top: "410px",               // <-- JARAK DARI BOX 2 (260px + 140px)
+    top: "470px",               // <-- JARAK DARI BOX 2 (260px + 140px)
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
