@@ -2866,7 +2866,7 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              left: "550px",
+              right: "100px",              
               top: "250px",
               display: "flex",
               alignItems: "center",
@@ -2875,7 +2875,7 @@ export default function HomePage(): React.JSX.Element {
               border: "2px solid #0D3CFC",
               borderRadius: "12px",
               padding: "20px 36px",
-              backgroundColor: "transparent",
+              backgroundColor: "#000000",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
@@ -2897,7 +2897,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "22px",
                   fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.01em",
                   lineHeight: 1.3,
@@ -2909,7 +2909,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "22px",
                   fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.01em",
                   lineHeight: 1.3,
@@ -2921,13 +2921,13 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "22px",
                   fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.01em",
                   lineHeight: 1.3,
                 }}
               >
-                Gunadarma
+                Gunadarma?
               </span>
             </div>
             <div
@@ -2962,7 +2962,7 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox3Ref}
             style={{
               position: "absolute",
-              left: "550px",
+              right: "100px",              
               top: "390px",
               display: "flex",
               alignItems: "center",
@@ -2971,7 +2971,7 @@ export default function HomePage(): React.JSX.Element {
               border: "2px solid #0D3CFC",
               borderRadius: "12px",
               padding: "20px 36px",
-              backgroundColor: "transparent",
+              backgroundColor: "#000000",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
@@ -2993,7 +2993,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "22px",
                   fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.01em",
                   lineHeight: 1.3,
@@ -3005,7 +3005,7 @@ export default function HomePage(): React.JSX.Element {
                 style={{
                   fontSize: "22px",
                   fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.01em",
                   lineHeight: 1.3,
