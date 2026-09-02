@@ -1679,7 +1679,7 @@ export default function HomePage(): React.JSX.Element {
   const menuBoxRef = useRef<HTMLDivElement>(null);
   const storiesTitleRef = useRef<HTMLDivElement>(null);
   const storiesBoxRef = useRef<HTMLDivElement>(null);
-  const bottomRightRef = useRef<HTMLDivElement>(null);
+  const sideContentRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1749,16 +1749,16 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate bottom right section (stories + boxes)
-            if (bottomRightRef.current) {
-              gsap.fromTo(bottomRightRef.current,
+            // Animate side content (stories + box) next to item 02
+            if (sideContentRef.current) {
+              gsap.fromTo(sideContentRef.current,
                 { opacity: 0, x: 30 },
                 {
                   opacity: 1,
                   x: 0,
                   duration: 0.8,
                   ease: 'power3.out',
-                  delay: 0.2
+                  delay: 0.3
                 }
               );
             }
@@ -2596,7 +2596,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With Stories at Bottom Right */}
+        {/* Menu Overlay - With Stories next to item 02 */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2618,6 +2618,7 @@ export default function HomePage(): React.JSX.Element {
             padding: "60px 80px",
             boxSizing: "border-box",
             overflow: "hidden",
+            position: "relative",
           }}
         >
           <h1
@@ -2639,259 +2640,266 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Menu Items - Left Side */}
           <div
-            ref={menuItemsRef}
             style={{
               display: "flex",
-              flexDirection: "column",
-              gap: "15px",
               width: "100%",
-              maxWidth: "600px",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
             }}
           >
-            {menuItems.map((item, index) => (
-              <Link
-                key={index}
-                href="/"
-                style={{ textDecoration: "none" }}
+            {/* Menu Items - Left Side */}
+            <div
+              ref={menuItemsRef}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
+                width: "45%",
+                maxWidth: "600px",
+              }}
+            >
+              {menuItems.map((item, index) => (
+                <Link
+                  key={index}
+                  href="/"
+                  style={{ textDecoration: "none" }}
+                >
+                  <div
+                    className="menu-item"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      backgroundColor: "transparent",
+                      opacity: 0,
+                      transform: "translateY(30px)",
+                      transition: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "48px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      {item.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "24px",
+                        fontWeight: 300,
+                        color: "#ffffff",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {item.number}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Side Content - Stories next to item 02 */}
+            <div
+              ref={sideContentRef}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "12px",
+                width: "45%",
+                maxWidth: "500px",
+                paddingTop: "10px",
+                opacity: 0,
+              }}
+            >
+              {/* Stories Title */}
+              <div
+                ref={storiesTitleRef}
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                stories
+              </div>
+
+              {/* Stories Box - Smaller */}
+              <div
+                ref={storiesBoxRef}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "16px",
+                  border: "2px solid #D9FF81",
+                  borderRadius: "10px",
+                  padding: "12px 16px",
+                  backgroundColor: "#D9FF81",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(217, 255, 129, 0.2)",
+                  width: "100%",
+                  minHeight: "60px",
+                }}
               >
                 <div
-                  className="menu-item"
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    backgroundColor: "transparent",
-                    opacity: 0,
-                    transform: "translateY(30px)",
-                    transition: "none",
+                    flexDirection: "column",
+                    gap: "1px",
+                    flex: 1,
                   }}
                 >
                   <span
                     style={{
-                      fontSize: "48px",
+                      fontSize: "14px",
                       fontWeight: 600,
-                      color: "#ffffff",
+                      color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
-                      letterSpacing: "-0.02em",
+                      letterSpacing: "0.01em",
+                      lineHeight: 1.2,
                     }}
                   >
-                    {item.name}
+                    Bagaimana Rasa nya Masuk Kuliah
                   </span>
                   <span
                     style={{
-                      fontSize: "24px",
-                      fontWeight: 300,
-                      color: "#ffffff",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.01em",
+                      lineHeight: 1.2,
                     }}
                   >
-                    {item.number}
+                    Di Universitas Gunadarma
                   </span>
                 </div>
-              </Link>
-            ))}
-          </div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(13, 60, 252, 0.1)",
+                    borderRadius: "6px",
+                    padding: "3px",
+                    width: "60px",
+                    height: "60px",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src="/images/mnbv.JPG"
+                    alt="Stories"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                    }}
+                  />
+                </div>
+              </div>
 
-          {/* Bottom Right Section - Stories and Boxes */}
-          <div
-            ref={bottomRightRef}
-            style={{
-              position: "absolute",
-              right: "80px",
-              bottom: "80px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "16px",
-              opacity: 0,
-            }}
-          >
-            {/* Stories Title */}
-            <div
-              ref={storiesTitleRef}
-              style={{
-                fontSize: "28px",
-                fontWeight: 600,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              stories
-            </div>
-
-            {/* Stories Box - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" */}
-            <div
-              ref={storiesBoxRef}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "24px",
-                border: "2px solid #D9FF81",
-                borderRadius: "12px",
-                padding: "16px 24px",
-                backgroundColor: "#D9FF81",
-                cursor: "pointer",
-                boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-                maxWidth: "700px",
-                width: "100%",
-                minHeight: "80px",
-              }}
-            >
+              {/* Original Box - Smaller */}
               <div
+                ref={menuBoxRef}
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                  flex: 1,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Bagaimana Rasa nya Masuk Kuliah
-                </span>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Di Universitas Gunadarma
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "inline-flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(13, 60, 252, 0.1)",
-                  borderRadius: "6px",
-                  padding: "4px",
-                  width: "100px",
-                  height: "100px",
-                  overflow: "hidden",
-                  flexShrink: 0,
+                  justifyContent: "space-between",
+                  gap: "16px",
+                  border: "2px solid #D9FF81",
+                  borderRadius: "10px",
+                  padding: "10px 16px",
+                  backgroundColor: "#D9FF81",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(217, 255, 129, 0.2)",
+                  width: "100%",
+                  minHeight: "55px",
                 }}
               >
-                <img
-                  src="/images/mnbv.JPG"
-                  alt="Stories"
+                <div
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1px",
+                    flex: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.01em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Bagaimana website ini
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.01em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    bisa berkembang?
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 400,
+                      color: "rgba(13, 60, 252, 0.7)",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.01em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Dengan dukungan komunitas
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(13, 60, 252, 0.1)",
                     borderRadius: "6px",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Original Box - "Bagaimana website ini bisa berkembang?" */}
-            <div
-              ref={menuBoxRef}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "24px",
-                border: "2px solid #D9FF81",
-                borderRadius: "12px",
-                padding: "16px 24px",
-                backgroundColor: "#D9FF81",
-                cursor: "pointer",
-                boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-                maxWidth: "600px",
-                width: "100%",
-                minHeight: "70px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                  flex: 1,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
+                    padding: "3px",
+                    width: "45px",
+                    height: "45px",
+                    overflow: "hidden",
+                    flexShrink: 0,
                   }}
                 >
-                  Bagaimana website ini
-                </span>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  bisa berkembang?
-                </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 400,
-                    color: "rgba(13, 60, 252, 0.7)",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Dengan dukungan komunitas
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(13, 60, 252, 0.1)",
-                  borderRadius: "6px",
-                  padding: "4px",
-                  width: "60px",
-                  height: "60px",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src="/images/mnbv.JPG"
-                  alt="Menuru"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "6px",
-                  }}
-                />
+                  <img
+                    src="/images/mnbv.JPG"
+                    alt="Menuru"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -2994,36 +3002,36 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
-          .menu-overlay .bottom-right {
-            right: 40px !important;
-            bottom: 40px !important;
+          .menu-overlay .menu-items {
+            width: 50% !important;
           }
-          .menu-overlay .menu-box {
-            max-width: 450px !important;
-            padding: 12px 16px !important;
-            min-height: 60px !important;
+          .menu-overlay .side-content {
+            width: 40% !important;
           }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
+          .menu-overlay .stories-box {
+            padding: 10px 12px !important;
+            min-height: 50px !important;
           }
-          .menu-overlay .menu-box img {
+          .menu-overlay .stories-box span {
+            font-size: 12px !important;
+          }
+          .menu-overlay .stories-box img {
             width: 50px !important;
             height: 50px !important;
           }
-          .menu-overlay .stories-box {
-            max-width: 550px !important;
-            padding: 12px 16px !important;
-            min-height: 60px !important;
+          .menu-overlay .menu-box {
+            padding: 8px 12px !important;
+            min-height: 45px !important;
           }
-          .menu-overlay .stories-box span {
-            font-size: 16px !important;
+          .menu-overlay .menu-box span {
+            font-size: 12px !important;
           }
-          .menu-overlay .stories-box img {
-            width: 70px !important;
-            height: 70px !important;
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
           }
           .menu-overlay .stories-title {
-            font-size: 22px !important;
+            font-size: 20px !important;
           }
         }
         @media (max-width: 768px) {
@@ -3068,45 +3076,41 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 30px 20px !important;
+            flex-direction: column !important;
           }
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
-          .menu-overlay .bottom-right {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 30px !important;
-            align-items: flex-start !important;
+          .menu-overlay .menu-items {
             width: 100% !important;
-          }
-          .menu-overlay .menu-box {
             max-width: 100% !important;
+          }
+          .menu-overlay .side-content {
             width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
+            max-width: 100% !important;
+            margin-top: 20px !important;
+          }
+          .menu-overlay .stories-box {
+            padding: 10px 12px !important;
             min-height: 50px !important;
           }
+          .menu-overlay .stories-box span {
+            font-size: 12px !important;
+          }
+          .menu-overlay .stories-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 8px 12px !important;
+            min-height: 45px !important;
+          }
           .menu-overlay .menu-box span {
-            font-size: 15px !important;
+            font-size: 12px !important;
           }
           .menu-overlay .menu-box img {
             width: 40px !important;
             height: 40px !important;
-          }
-          .menu-overlay .stories-box {
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .stories-box span {
-            font-size: 15px !important;
-          }
-          .menu-overlay .stories-box img {
-            width: 60px !important;
-            height: 60px !important;
           }
           .menu-overlay .stories-title {
             font-size: 20px !important;
@@ -3158,30 +3162,22 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 22px !important;
           }
+          .menu-overlay .stories-box span {
+            font-size: 11px !important;
+          }
+          .menu-overlay .stories-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
           .menu-overlay .menu-box span {
-            font-size: 13px !important;
+            font-size: 11px !important;
           }
           .menu-overlay .menu-box img {
             width: 30px !important;
             height: 30px !important;
           }
-          .menu-overlay .stories-box span {
-            font-size: 13px !important;
-          }
-          .menu-overlay .stories-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
           .menu-overlay .stories-title {
             font-size: 18px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .stories-box {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
           }
         }
       `}</style>
