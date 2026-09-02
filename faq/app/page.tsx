@@ -9,6 +9,7 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import Image from 'next/image';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -1678,6 +1679,7 @@ export default function HomePage(): React.JSX.Element {
   const menuItemsRef = useRef<HTMLDivElement>(null);
   const menuBoxRef = useRef<HTMLDivElement>(null);
   const menuBox2Ref = useRef<HTMLDivElement>(null);
+  const storiesRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1747,7 +1749,7 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate both boxes
+            // Animate D9FF81 box with image
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1760,6 +1762,19 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
+            // Animate stories section
+            if (storiesRef.current) {
+              gsap.fromTo(storiesRef.current,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            // Animate second box
             if (menuBox2Ref.current) {
               gsap.fromTo(menuBox2Ref.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1768,7 +1783,8 @@ export default function HomePage(): React.JSX.Element {
                   scale: 1,
                   x: 0,
                   duration: 0.8,
-                  ease: 'power3.out'
+                  ease: 'power3.out',
+                  delay: 0.2
                 }
               );
             }
@@ -2606,7 +2622,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With stories and boxes to the right of menu items */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2619,16 +2635,15 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: "#0D3CFC",
             zIndex: 99,
             display: isMenuOpen ? "flex" : "none",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
             transform: "translateY(-100%)",
             opacity: 0,
             pointerEvents: isMenuOpen ? "auto" : "none",
             padding: "60px 80px",
             boxSizing: "border-box",
             overflow: "hidden",
-            gap: "60px",
           }}
         >
           <h1
@@ -2657,9 +2672,8 @@ export default function HomePage(): React.JSX.Element {
               display: "flex",
               flexDirection: "column",
               gap: "15px",
-              width: "auto",
+              width: "100%",
               maxWidth: "600px",
-              flexShrink: 0,
             }}
           >
             {menuItems.map((item, index) => (
@@ -2681,7 +2695,6 @@ export default function HomePage(): React.JSX.Element {
                     opacity: 0,
                     transform: "translateY(30px)",
                     transition: "none",
-                    minWidth: "300px",
                   }}
                 >
                   <span
@@ -2710,125 +2723,34 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Right Side - Stories section next to menu items */}
+          {/* Stories Section - Below navbar near number 02 */}
           <div
+            ref={storiesRef}
             style={{
+              position: "absolute",
+              right: "80px",
+              top: "100px",
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
-              gap: "20px",
-              flex: 1,
-              marginTop: "40px",
+              gap: "8px",
+              opacity: 0,
             }}
           >
             <span
               style={{
-                fontSize: "28px",
-                fontWeight: 600,
+                fontSize: "40px",
+                fontWeight: 300,
                 color: "#ffffff",
                 fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                opacity: 0.9,
+                letterSpacing: "0.05em",
               }}
             >
               stories
             </span>
-
-            {/* Box 2 - Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma */}
-            <div
-              ref={menuBox2Ref}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "24px",
-                border: "2px solid #D9FF81",
-                borderRadius: "12px",
-                padding: "16px 28px",
-                backgroundColor: "#D9FF81",
-                cursor: "pointer",
-                opacity: 0,
-                transform: "scale(0.95)",
-                boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-                maxWidth: "550px",
-                width: "100%",
-                minHeight: "80px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                  flex: 1,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Bagaimana Rasa nya
-                </span>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Masuk Kuliah Di
-                </span>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.01em",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Universitas Gunadarma
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(13, 60, 252, 0.1)",
-                  borderRadius: "6px",
-                  padding: "4px",
-                  width: "90px",
-                  height: "90px",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src="/images/10.jpg"
-                  alt="Stories"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "6px",
-                  }}
-                />
-              </div>
-            </div>
           </div>
 
-          {/* Box 1 - Bottom Right (untouched) */}
+          {/* #D9FF81 Box 1 - "Bagaimana website ini bisa berkembang?" - Bottom Right */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2914,6 +2836,102 @@ export default function HomePage(): React.JSX.Element {
               <img
                 src="/images/10.jpg"
                 alt="Menuru"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* #D9FF81 Box 2 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" - Below stories */}
+          <div
+            ref={menuBox2Ref}
+            style={{
+              position: "absolute",
+              right: "80px",
+              top: "160px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "24px",
+              border: "2px solid #D9FF81",
+              borderRadius: "12px",
+              padding: "16px 28px",
+              backgroundColor: "#D9FF81",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
+              maxWidth: "650px",
+              width: "auto",
+              minHeight: "80px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana Rasa nya Masuk
+              </span>
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Kuliah Di Universitas
+              </span>
+              <span
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Gunadarma
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "90px",
+                height: "90px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/10.jpg"
+                alt="Universitas Gunadarma"
                 style={{
                   width: "100%",
                   height: "100%",
@@ -3018,13 +3036,9 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay {
             padding: 40px 40px !important;
-            gap: 30px !important;
           }
           .menu-overlay .menu-text {
             font-size: 36px !important;
-          }
-          .menu-overlay .menu-item {
-            min-width: 200px !important;
           }
           .menu-overlay .menu-box {
             right: 40px !important;
@@ -3040,20 +3054,26 @@ export default function HomePage(): React.JSX.Element {
             width: 55px !important;
             height: 55px !important;
           }
-          .menu-overlay .stories-box {
-            max-width: 400px !important;
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 130px !important;
+            max-width: 450px !important;
             padding: 14px 20px !important;
-            min-height: 65px !important;
+            min-height: 60px !important;
           }
-          .menu-overlay .stories-box span {
-            font-size: 16px !important;
+          .menu-overlay .menu-box2 span {
+            font-size: 15px !important;
           }
-          .menu-overlay .stories-box img {
+          .menu-overlay .menu-box2 img {
             width: 65px !important;
             height: 65px !important;
           }
-          .menu-overlay .stories-label {
-            font-size: 24px !important;
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
           }
         }
         @media (max-width: 768px) {
@@ -3099,13 +3119,13 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay {
             padding: 30px 20px !important;
             flex-direction: column !important;
-            gap: 20px !important;
           }
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
-          .menu-overlay .menu-item {
-            min-width: auto !important;
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
           }
           .menu-overlay .menu-box {
             position: relative !important;
@@ -3125,33 +3145,33 @@ export default function HomePage(): React.JSX.Element {
             width: 50px !important;
             height: 50px !important;
           }
-          .menu-overlay .stories-box {
+          .menu-overlay .menu-box2 {
             position: relative !important;
             right: auto !important;
             top: auto !important;
-            transform: none !important;
-            margin-top: 10px !important;
+            margin-top: 15px !important;
             max-width: 100% !important;
             width: 100% !important;
             flex-wrap: wrap !important;
             padding: 12px 16px !important;
-            min-height: 55px !important;
-            align-items: flex-start !important;
+            min-height: 50px !important;
           }
-          .menu-overlay .stories-box span {
+          .menu-overlay .menu-box2 span {
             font-size: 14px !important;
           }
-          .menu-overlay .stories-box img {
-            width: 50px !important;
-            height: 50px !important;
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
           }
-          .menu-overlay .stories-label {
-            font-size: 20px !important;
-            align-self: flex-start !important;
-          }
-          .menu-overlay .right-side {
-            width: 100% !important;
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
             align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
           }
         }
         @media (max-width: 480px) {
@@ -3211,19 +3231,19 @@ export default function HomePage(): React.JSX.Element {
             padding: 10px 14px !important;
             min-height: 50px !important;
           }
-          .menu-overlay .stories-box span {
+          .menu-overlay .menu-box2 span {
             font-size: 12px !important;
           }
-          .menu-overlay .stories-box img {
-            width: 40px !important;
-            height: 40px !important;
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
           }
-          .menu-overlay .stories-box {
+          .menu-overlay .menu-box2 {
             padding: 8px 12px !important;
-            min-height: 45px !important;
+            min-height: 40px !important;
           }
-          .menu-overlay .stories-label {
-            font-size: 18px !important;
+          .menu-overlay .stories span {
+            font-size: 20px !important;
           }
         }
       `}</style>
