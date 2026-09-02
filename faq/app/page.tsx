@@ -1778,7 +1778,7 @@ export default function HomePage(): React.JSX.Element {
             // Animate box 2
             if (menuBox2Ref.current) {
               gsap.fromTo(menuBox2Ref.current,
-                { opacity: 0, scale: 0.9, x: -20 },
+                { opacity: 0, scale: 0.9, x: 20 },
                 {
                   opacity: 1,
                   scale: 1,
@@ -1792,7 +1792,7 @@ export default function HomePage(): React.JSX.Element {
             // Animate box 3
             if (menuBox3Ref.current) {
               gsap.fromTo(menuBox3Ref.current,
-                { opacity: 0, scale: 0.9, x: -20 },
+                { opacity: 0, scale: 0.9, x: 20 },
                 {
                   opacity: 1,
                   scale: 1,
@@ -2738,16 +2738,16 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Digeser ke kanan (left: 550px) tidak kena item menu */}
+          {/* Stories Section - Digeser ke kanan (right: 80px) */}
           <div
             ref={storiesRef}
             style={{
               position: "absolute",
-              left: "550px",
-              top: "180px",
+              right: "80px",
+              top: "100px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
+              alignItems: "flex-end",
               gap: "8px",
               opacity: 0,
             }}
@@ -2765,7 +2765,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* #D9FF81 Box 1 - Tetap di kanan bawah dengan warna kuning */}
+          {/* Box 1 - D9FF81, tetap di kanan bawah */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2861,25 +2861,25 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 2 - Tanpa warna kuning, border biru, teks putih */}
+          {/* Box 2 - #C8EEFF, di bawah stories */}
           <div
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              right: "100px",              
-              top: "250px",
+              right: "80px",
+              top: "180px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               gap: "30px",
-              border: "2px solid #0D3CFC",
+              border: "2px solid #C8EEFF",
               borderRadius: "12px",
               padding: "20px 36px",
-              backgroundColor: "#000000",
+              backgroundColor: "#C8EEFF",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(13, 60, 252, 0.1)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
               maxWidth: "750px",
               width: "auto",
               minHeight: "100px",
@@ -2927,7 +2927,7 @@ export default function HomePage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Gunadarma?
+                Gunadarma
               </span>
             </div>
             <div
@@ -2935,7 +2935,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "rgba(255,255,255,0.1)",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "6px",
                 padding: "4px",
                 width: "100px",
@@ -2957,25 +2957,25 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 3 - Tanpa warna kuning, border biru, teks putih, gambar 15.jpg */}
+          {/* Box 3 - #C8EEFF, di bawah Box 2 dengan jarak */}
           <div
             ref={menuBox3Ref}
             style={{
               position: "absolute",
-              right: "100px",              
-              top: "390px",
+              right: "80px",
+              top: "320px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               gap: "30px",
-              border: "2px solid #0D3CFC",
+              border: "2px solid #C8EEFF",
               borderRadius: "12px",
               padding: "20px 36px",
-              backgroundColor: "#000000",
+              backgroundColor: "#C8EEFF",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(13, 60, 252, 0.1)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
               maxWidth: "750px",
               width: "auto",
               minHeight: "100px",
@@ -3019,7 +3019,7 @@ export default function HomePage(): React.JSX.Element {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "rgba(255,255,255,0.1)",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "6px",
                 padding: "4px",
                 width: "100px",
@@ -3139,6 +3139,13 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
           .menu-overlay .menu-box {
             right: 40px !important;
             bottom: 40px !important;
@@ -3153,16 +3160,9 @@ export default function HomePage(): React.JSX.Element {
             width: 55px !important;
             height: 55px !important;
           }
-          .menu-overlay .stories {
-            left: 400px !important;
-            top: 140px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
           .menu-overlay .menu-box2 {
-            left: 400px !important;
-            top: 200px !important;
+            right: 40px !important;
+            top: 140px !important;
             max-width: 550px !important;
             padding: 14px 20px !important;
             min-height: 80px !important;
@@ -3175,8 +3175,8 @@ export default function HomePage(): React.JSX.Element {
             height: 75px !important;
           }
           .menu-overlay .menu-box3 {
-            left: 400px !important;
-            top: 320px !important;
+            right: 40px !important;
+            top: 260px !important;
             max-width: 550px !important;
             padding: 14px 20px !important;
             min-height: 80px !important;
@@ -3240,6 +3240,16 @@ export default function HomePage(): React.JSX.Element {
             width: 100% !important;
             max-width: 100% !important;
           }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
           .menu-overlay .menu-box {
             position: relative !important;
             right: auto !important;
@@ -3258,19 +3268,9 @@ export default function HomePage(): React.JSX.Element {
             width: 50px !important;
             height: 50px !important;
           }
-          .menu-overlay .stories {
-            position: relative !important;
-            left: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
           .menu-overlay .menu-box2 {
             position: relative !important;
-            left: auto !important;
+            right: auto !important;
             top: auto !important;
             margin-top: 15px !important;
             max-width: 100% !important;
@@ -3288,7 +3288,7 @@ export default function HomePage(): React.JSX.Element {
           }
           .menu-overlay .menu-box3 {
             position: relative !important;
-            left: auto !important;
+            right: auto !important;
             top: auto !important;
             margin-top: 15px !important;
             max-width: 100% !important;
@@ -3351,6 +3351,9 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 22px !important;
           }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
           .menu-overlay .menu-box span {
             font-size: 14px !important;
           }
@@ -3361,9 +3364,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box {
             padding: 10px 14px !important;
             min-height: 50px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
           }
           .menu-overlay .menu-box2 span {
             font-size: 14px !important;
