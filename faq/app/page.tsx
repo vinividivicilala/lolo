@@ -2860,7 +2860,7 @@ export default function HomePage(): React.JSX.Element {
               border: "2px solid #D9FF81",
               borderRadius: "12px",
               padding: "20px 36px",
-              backgroundColor: "#D9FF81",
+              backgroundColor: "#C8EEFF",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
