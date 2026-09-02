@@ -2723,12 +2723,12 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Left side in empty space near item 02 (Blog) */}
+          {/* Stories Section - Digeser ke kanan (left: 550px) tidak kena item menu */}
           <div
             ref={storiesRef}
             style={{
               position: "absolute",
-              left: "400px",
+              left: "550px",
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2750,7 +2750,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* #D9FF81 Box 1 - "Bagaimana website ini bisa berkembang?" - Bottom Right */}
+          {/* #D9FF81 Box 1 - Tetap di kanan bawah */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2846,12 +2846,12 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* #D9FF81 Box 2 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" - In empty space near 02 */}
+          {/* #D9FF81 Box 2 - Digeser ke kanan (left: 550px) tidak kena item menu */}
           <div
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              left: "400px",
+              left: "550px",
               top: "250px",
               display: "flex",
               alignItems: "center",
@@ -3055,14 +3055,14 @@ export default function HomePage(): React.JSX.Element {
             height: 55px !important;
           }
           .menu-overlay .stories {
-            left: 300px !important;
+            left: 400px !important;
             top: 140px !important;
           }
           .menu-overlay .stories span {
             font-size: 30px !important;
           }
           .menu-overlay .menu-box2 {
-            left: 300px !important;
+            left: 400px !important;
             top: 200px !important;
             max-width: 450px !important;
             padding: 14px 20px !important;
