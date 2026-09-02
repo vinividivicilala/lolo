@@ -1749,7 +1749,7 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate D9FF81 box with image
+            // Animate D9FF81 box 1 with image
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1774,7 +1774,7 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate second box
+            // Animate box 2
             if (menuBox2Ref.current) {
               gsap.fromTo(menuBox2Ref.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -2723,16 +2723,16 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Below navbar near number 02 */}
+          {/* Stories Section - Left side near item 02 (Blog) */}
           <div
             ref={storiesRef}
             style={{
               position: "absolute",
-              right: "80px",
-              top: "100px",
+              left: "80px",
+              top: "180px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-end",
+              alignItems: "flex-start",
               gap: "8px",
               opacity: 0,
             }}
@@ -2851,8 +2851,8 @@ export default function HomePage(): React.JSX.Element {
             ref={menuBox2Ref}
             style={{
               position: "absolute",
-              right: "80px",
-              top: "160px",
+              left: "80px",
+              top: "250px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -3054,9 +3054,16 @@ export default function HomePage(): React.JSX.Element {
             width: 55px !important;
             height: 55px !important;
           }
+          .menu-overlay .stories {
+            left: 40px !important;
+            top: 140px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
           .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 130px !important;
+            left: 40px !important;
+            top: 200px !important;
             max-width: 450px !important;
             padding: 14px 20px !important;
             min-height: 60px !important;
@@ -3067,13 +3074,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box2 img {
             width: 65px !important;
             height: 65px !important;
-          }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
           }
         }
         @media (max-width: 768px) {
@@ -3145,9 +3145,19 @@ export default function HomePage(): React.JSX.Element {
             width: 50px !important;
             height: 50px !important;
           }
+          .menu-overlay .stories {
+            position: relative !important;
+            left: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
           .menu-overlay .menu-box2 {
             position: relative !important;
-            right: auto !important;
+            left: auto !important;
             top: auto !important;
             margin-top: 15px !important;
             max-width: 100% !important;
@@ -3162,16 +3172,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box2 img {
             width: 55px !important;
             height: 55px !important;
-          }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
           }
         }
         @media (max-width: 480px) {
@@ -3231,6 +3231,9 @@ export default function HomePage(): React.JSX.Element {
             padding: 10px 14px !important;
             min-height: 50px !important;
           }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
           .menu-overlay .menu-box2 span {
             font-size: 12px !important;
           }
@@ -3241,9 +3244,6 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-box2 {
             padding: 8px 12px !important;
             min-height: 40px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
           }
         }
       `}</style>
