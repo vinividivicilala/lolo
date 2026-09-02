@@ -9,6 +9,7 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import Image from 'next/image';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -1677,7 +1678,8 @@ export default function HomePage(): React.JSX.Element {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
   const menuBoxRef = useRef<HTMLDivElement>(null);
-  const menuBox2Ref = useRef<HTMLDivElement>(null);
+  const storiesBoxRef = useRef<HTMLDivElement>(null);
+  const storiesTitleRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -1747,7 +1749,7 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate D9FF81 boxes with image
+            // Animate D9FF81 box with image
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1760,8 +1762,22 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            if (menuBox2Ref.current) {
-              gsap.fromTo(menuBox2Ref.current,
+            // Animate stories title
+            if (storiesTitleRef.current) {
+              gsap.fromTo(storiesTitleRef.current,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  ease: 'power3.out',
+                  delay: 0.4
+                }
+              );
+            }
+            // Animate stories box
+            if (storiesBoxRef.current) {
+              gsap.fromTo(storiesBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
                 {
                   opacity: 1,
@@ -2607,7 +2623,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - With Stories Section */}
+        {/* Menu Overlay - With #D9FF81 Box, Stories Section, and More */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2708,49 +2724,53 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Below navbar, left side */}
+          {/* Bottom Right Section - Stories and Boxes */}
           <div
             style={{
               position: "absolute",
+              right: "80px",
               bottom: "80px",
-              left: "80px",
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
-              maxWidth: "500px",
+              alignItems: "flex-end",
+              gap: "16px",
             }}
           >
-            <span
+            {/* Stories Title */}
+            <div
+              ref={storiesTitleRef}
               style={{
                 fontSize: "28px",
                 fontWeight: 600,
                 color: "#ffffff",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "-0.02em",
-                opacity: 0.9,
+                opacity: 0,
+                transform: "translateY(20px)",
               }}
             >
               stories
-            </span>
+            </div>
 
-            {/* Story Box 1 - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" */}
+            {/* Stories Box - "Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma" */}
             <div
-              ref={menuBoxRef}
+              ref={storiesBoxRef}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: "16px",
+                gap: "24px",
                 border: "2px solid #D9FF81",
                 borderRadius: "12px",
-                padding: "14px 20px",
+                padding: "16px 24px",
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
                 opacity: 0,
                 transform: "scale(0.95)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-                width: "100%",
-                minHeight: "70px",
+                maxWidth: "700px",
+                width: "auto",
+                minHeight: "80px",
               }}
             >
               <div
@@ -2763,7 +2783,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2775,7 +2795,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2794,15 +2814,15 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: "rgba(13, 60, 252, 0.1)",
                   borderRadius: "6px",
                   padding: "4px",
-                  width: "55px",
-                  height: "55px",
+                  width: "100px",
+                  height: "100px",
                   overflow: "hidden",
                   flexShrink: 0,
                 }}
               >
                 <img
                   src="/images/10.jpg"
-                  alt="Story"
+                  alt="Stories"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -2813,23 +2833,24 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Story Box 2 - "Bagaimana website ini bisa berkembang?" (existing) */}
+            {/* Original Box - "Bagaimana website ini bisa berkembang?" */}
             <div
-              ref={menuBox2Ref}
+              ref={menuBoxRef}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: "16px",
+                gap: "24px",
                 border: "2px solid #D9FF81",
                 borderRadius: "12px",
-                padding: "14px 20px",
+                padding: "16px 24px",
                 backgroundColor: "#D9FF81",
                 cursor: "pointer",
                 opacity: 0,
                 transform: "scale(0.95)",
                 boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-                width: "100%",
+                maxWidth: "600px",
+                width: "auto",
                 minHeight: "70px",
               }}
             >
@@ -2843,7 +2864,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2855,7 +2876,7 @@ export default function HomePage(): React.JSX.Element {
                 </span>
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2864,6 +2885,18 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   bisa berkembang?
+                </span>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 400,
+                    color: "rgba(13, 60, 252, 0.7)",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.01em",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  Dengan dukungan komunitas
                 </span>
               </div>
               <div
@@ -2874,15 +2907,15 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: "rgba(13, 60, 252, 0.1)",
                   borderRadius: "6px",
                   padding: "4px",
-                  width: "55px",
-                  height: "55px",
+                  width: "60px",
+                  height: "60px",
                   overflow: "hidden",
                   flexShrink: 0,
                 }}
               >
                 <img
                   src="/images/10.jpg"
-                  alt="Story"
+                  alt="Menuru"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -2992,21 +3025,32 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
-          .menu-overlay .stories-section {
-            left: 40px !important;
-            bottom: 40px !important;
-            max-width: 400px !important;
-          }
-          .menu-overlay .stories-section .story-box {
+          .menu-overlay .menu-box {
+            max-width: 450px !important;
             padding: 12px 16px !important;
             min-height: 60px !important;
           }
-          .menu-overlay .stories-section .story-box span {
-            font-size: 14px !important;
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
           }
-          .menu-overlay .stories-section .story-box img {
-            width: 45px !important;
-            height: 45px !important;
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .stories-box {
+            max-width: 550px !important;
+            padding: 12px 16px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .stories-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .stories-box img {
+            width: 70px !important;
+            height: 70px !important;
+          }
+          .menu-overlay .stories-title {
+            font-size: 22px !important;
           }
         }
         @media (max-width: 768px) {
@@ -3055,27 +3099,44 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 28px !important;
           }
-          .menu-overlay .stories-section {
-            position: relative !important;
-            left: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
+          .menu-overlay .menu-box {
             max-width: 100% !important;
             width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
           }
-          .menu-overlay .stories-section .story-box {
-            padding: 10px 14px !important;
-            min-height: 55px !important;
+          .menu-overlay .menu-box span {
+            font-size: 15px !important;
           }
-          .menu-overlay .stories-section .story-box span {
-            font-size: 13px !important;
-          }
-          .menu-overlay .stories-section .story-box img {
+          .menu-overlay .menu-box img {
             width: 40px !important;
             height: 40px !important;
           }
-          .menu-overlay .stories-section .stories-title {
-            font-size: 22px !important;
+          .menu-overlay .stories-box {
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .stories-box span {
+            font-size: 15px !important;
+          }
+          .menu-overlay .stories-box img {
+            width: 60px !important;
+            height: 60px !important;
+          }
+          .menu-overlay .stories-title {
+            font-size: 20px !important;
+          }
+          .menu-overlay .bottom-right {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            width: 100% !important;
+            align-items: flex-start !important;
           }
         }
         @media (max-width: 480px) {
@@ -3124,15 +3185,30 @@ export default function HomePage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 22px !important;
           }
-          .menu-overlay .stories-section .story-box span {
-            font-size: 12px !important;
+          .menu-overlay .menu-box span {
+            font-size: 13px !important;
           }
-          .menu-overlay .stories-section .story-box img {
-            width: 35px !important;
-            height: 35px !important;
+          .menu-overlay .menu-box img {
+            width: 30px !important;
+            height: 30px !important;
           }
-          .menu-overlay .stories-section .stories-title {
+          .menu-overlay .stories-box span {
+            font-size: 13px !important;
+          }
+          .menu-overlay .stories-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .stories-title {
             font-size: 18px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .stories-box {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
           }
         }
       `}</style>
