@@ -1654,7 +1654,7 @@ export default function PrivacyPolicyPage() {
       title: "Pendahuluan",
       subs: [
         { sub: "1.1 Latar Belakang", content: "Kebijakan Privasi ini dibuat untuk melindungi data pribadi pengguna yang menggunakan layanan Menuru. Kami berkomitmen untuk menjaga kerahasiaan dan keamanan informasi pribadi Anda sesuai dengan peraturan perlindungan data yang berlaku." },
-        { sub: "1.2 Ruang Lingkup", content: "Kebijakan ini berlaku untuk semua layanan yang disediakan oleh Menuru, termasuk website, aplikasi mobile, dan fitur-fitur yang tersedia di dalamnya. Kebijakan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
+        { sub: "1.2 Ruang Lingkup", content: "Kebijakan ini berlaku untuk semua layanan yang disediakan oleh Menuru, termasuk website dan fitur-fitur yang tersedia di dalamnya. Kebijakan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
         { sub: "1.3 Persetujuan", content: "Dengan menggunakan layanan Menuru, Anda menyetujui pengumpulan dan penggunaan informasi pribadi Anda sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju, Anda tidak diperkenankan menggunakan layanan kami." }
       ]
     },
@@ -1996,7 +1996,7 @@ export default function PrivacyPolicyPage() {
       );
     }
 
-    // Animasi privacy title 250px - DINAIIKAN KE ATAS
+    // Animasi privacy title - DINAIIKAN KE ATAS
     const privacyTitle = privacyTitleRef.current;
     if (privacyTitle) {
       gsap.fromTo(privacyTitle,
@@ -2008,6 +2008,36 @@ export default function PrivacyPolicyPage() {
           duration: 1,
           ease: "back.out(1.7)",
           delay: 0.5
+        }
+      );
+    }
+
+    // Animasi tombol
+    const button = buttonRef.current;
+    if (button) {
+      gsap.fromTo(button,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          delay: 0.6
+        }
+      );
+    }
+
+    // Animasi arrow
+    const arrow = arrowRef.current;
+    if (arrow) {
+      gsap.fromTo(arrow,
+        { opacity: 0, scale: 0.8 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+          delay: 0.7
         }
       );
     }
@@ -2330,12 +2360,60 @@ export default function PrivacyPolicyPage() {
               </p>
             </div>
 
-            {/* PRIVACY POLICY TITLE 250px - DINAIIKAN KE ATAS */}
+            {/* Tombol Let's build now dan Arrow seperti halaman utama */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                  opacity: 0,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Let's build now
+                </span>
+              </div>
+
+              <div
+                ref={arrowRef}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                  opacity: 0,
+                }}
+              >
+                <NorthEastArrow size={24} color="#ffffff" />
+              </div>
+            </div>
+
+            {/* PRIVACY POLICY TITLE 250px - DI BAWAH TOMBOL */}
             <div
               ref={privacyTitleRef}
               style={{
                 width: "100%",
-                padding: "10px 0 30px 0",
+                padding: "30px 0 0 0",
                 backgroundColor: "#ffffff",
                 overflow: "hidden",
                 display: "flex",
@@ -2361,58 +2439,10 @@ export default function PrivacyPolicyPage() {
                 Privacy Policy
               </span>
             </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
-              <Link href="/">
-                <div
-                  ref={buttonRef}
-                  style={{
-                    display: "inline-block",
-                    border: "2px solid #0D3CFC",
-                    borderRadius: "8px",
-                    padding: "12px 28px",
-                    cursor: "pointer",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 500,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    Kembali ke Beranda
-                  </span>
-                </div>
-              </Link>
-
-              <div
-                ref={arrowRef}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  width: "50px",
-                  height: "50px",
-                }}
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              >
-                <NorthEastArrow size={24} color="#ffffff" />
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* CONTENT SECTIONS */}
+        {/* CONTENT SECTIONS - DINAIKAN KE ATAS */}
         <div
           ref={contentRef}
           style={{
@@ -2420,8 +2450,21 @@ export default function PrivacyPolicyPage() {
             maxWidth: "1200px",
             margin: "0 auto",
             width: "100%",
+            marginTop: "-40px",
           }}
         >
+          {/* Last Update */}
+          <div style={{
+            textAlign: "right",
+            marginBottom: "40px",
+            fontFamily: FONT_FAMILY,
+            color: "#666",
+            fontSize: "14px",
+            fontStyle: "italic",
+          }}>
+            Terakhir diperbarui: 1 September 2026
+          </div>
+
           {privacyContent.map((section, index) => (
             <div key={index} className="content-section" style={{ marginBottom: "50px" }}>
               <h2 style={{
