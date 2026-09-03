@@ -1681,7 +1681,6 @@ export default function HomePage(): React.JSX.Element {
   const menuBox2Ref = useRef<HTMLDivElement>(null);
   const menuBox3Ref = useRef<HTMLDivElement>(null);
   const storiesRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -2439,9 +2438,8 @@ export default function HomePage(): React.JSX.Element {
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER WITH BIG IMAGES - 2 FOTO DI SAMPING KONTEN FOOTER */}
+        {/* FOOTER */}
         <div
-          ref={footerRef}
           style={{
             width: "100%",
             padding: "60px 40px 40px 40px",
@@ -2452,59 +2450,56 @@ export default function HomePage(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
-          {/* LEFT IMAGE - p0l.jpg */}
+          {/* Foto Kiri */}
           <div
             style={{
               position: "absolute",
-              left: "0",
-              top: "0",
-              width: "50%",
-              height: "100%",
-              zIndex: 0,
-              overflow: "hidden",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
             }}
           >
             <img
               src="/images/p0l.jpg"
-              alt="Left footer image"
+              alt=""
               style={{
                 width: "100%",
-                height: "100%",
-                objectFit: "cover",
+                height: "auto",
                 display: "block",
+                objectFit: "cover",
               }}
             />
           </div>
 
-          {/* RIGHT IMAGE - xxz.jpg */}
+          {/* Foto Kanan */}
           <div
             style={{
               position: "absolute",
-              right: "0",
-              top: "0",
-              width: "50%",
-              height: "100%",
-              zIndex: 0,
-              overflow: "hidden",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
             }}
           >
             <img
               src="/images/xxz.jpg"
-              alt="Right footer image"
+              alt=""
               style={{
                 width: "100%",
-                height: "100%",
-                objectFit: "cover",
+                height: "auto",
                 display: "block",
+                objectFit: "cover",
               }}
             />
           </div>
 
-          {/* Footer Content - tetap di tengah dengan background transparan */}
           <div
             style={{
-              position: "relative",
-              zIndex: 1,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
@@ -2512,10 +2507,8 @@ export default function HomePage(): React.JSX.Element {
               margin: "0 auto",
               gap: "40px",
               flexWrap: "wrap",
-              backgroundColor: "rgba(255,255,255,0.75)",
-              padding: "40px 50px",
-              borderRadius: "16px",
-              backdropFilter: "blur(8px)",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             {footerLinks.map((section, idx) => (
@@ -2802,7 +2795,7 @@ export default function HomePage(): React.JSX.Element {
             ref={storiesRef}
             style={{
               position: "absolute",
-                left: "720px",  
+              left: "720px",  
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2923,25 +2916,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 2 - #C8EEFF, di bawah stories */}
           <div
             ref={menuBox2Ref}
-  style={{
-    position: "absolute",
-    left: "720px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES
-    top: "260px",               // <-- JARAK DARI STORIES (180px + 80px)
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "30px",
-    border: "2px solid #C8EEFF",
-    borderRadius: "12px",
-    padding: "20px 36px",
-    backgroundColor: "#C8EEFF",
-    cursor: "pointer",
-    opacity: 0,
-    transform: "scale(0.95)",
-    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-    maxWidth: "750px",
-    width: "auto",
-    minHeight: "100px",
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "260px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
             }}
           >
             <div
@@ -3019,25 +3012,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 3 - #C8EEFF, di bawah Box 2 dengan jarak */}
           <div
             ref={menuBox3Ref}
-  style={{
-    position: "absolute",
-    left: "720px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
-    top: "470px",               // <-- JARAK DARI BOX 2 (260px + 140px)
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "30px",
-    border: "2px solid #C8EEFF",
-    borderRadius: "12px",
-    padding: "20px 36px",
-    backgroundColor: "#C8EEFF",
-    cursor: "pointer",
-    opacity: 0,
-    transform: "scale(0.95)",
-    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-    maxWidth: "750px",
-    width: "auto",
-    minHeight: "100px",
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "470px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
             }}
           >
             <div
