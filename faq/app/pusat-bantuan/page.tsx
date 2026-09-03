@@ -4,32 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
-import { motion, AnimatePresence } from 'framer-motion';
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, getDocs } from "firebase/firestore";
 import gsap from 'gsap';
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signOut,
-  updateProfile,
-} from "firebase/auth";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  where,
-  getDocs,
-  deleteDoc,
-  arrayUnion,
-  arrayRemove,
-} from "firebase/firestore";
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
 
 // Firebase Config
 const firebaseConfig = {
@@ -51,7 +36,6 @@ if (typeof window !== "undefined") {
   app = getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0];
-
   auth = getAuth(app);
   db = getFirestore(app);
 }
@@ -60,23 +44,44 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// ===== ICONS =====
-const SearchIcon = ({ size = 20 }: { size?: number }) => (
+// SVG Icons
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 17V7H7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const SendIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ShieldCheck = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 6H18L19 18H5L6 6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const LogoutIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -87,71 +92,87 @@ const EditIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-// ===== NAVBAR ICONS =====
-const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+const SaveIcon = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 21V13H7V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 3V8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// Footer links
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
+  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+];
 
-const ShieldCheck = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 12L11 14L15 10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// Menu items for drawer
+const menuItems = [
+  { name: "Community", number: "01" },
+  { name: "Blog", number: "02" },
+  { name: "Live Chat", number: "03" },
+  { name: "Live Chat Agent", number: "04" },
+  { name: "Donation", number: "05" },
+  { name: "Contact", number: "06" },
+  { name: "Note", number: "07" }
+];
 
-const ShoppingBag = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 6H18L19 18H5L6 6Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const UserAvatarIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M5 20V19C5 15.6863 7.68629 13 11 13H13C16.3137 13 19 15.6863 19 19V20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const StoreIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 7H20M4 7L3 12H21L20 7M4 7L5 20H19L20 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 12V16H15V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const NotificationsIcon = ({ size = 24, hasBadge = false }: { size?: number; hasBadge?: boolean }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "relative" }}>
-    <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    {hasBadge && (
-      <circle cx="19" cy="5" r="5" fill="#ef4444" stroke="white" strokeWidth="2"/>
-    )}
-  </svg>
-);
-
-const ChatIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// ===== INSTAGRAM VERIFIED BADGE =====
+const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          marginLeft: "4px",
+          display: "inline-block",
+          verticalAlign: "middle",
+          cursor: "pointer",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <path
+          fill="#0095F6"
+          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
+        />
+        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {showTooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "4px 10px",
+          borderRadius: "6px",
+          fontSize: "11px",
+          whiteSpace: "nowrap",
+          zIndex: 100,
+          border: "1px solid rgba(255,255,255,0.05)",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Verified Author
+          <div style={{
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "6px solid transparent",
+            borderTopColor: "#1a1a1a",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ===== PRELOADER =====
 const Preloader = ({ onComplete }: { onComplete: () => void }) => {
@@ -254,360 +275,15 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
             willChange: "transform, opacity",
           }}
         >
-          Shop
+          Policy
         </span>
       </div>
     </div>
   );
 };
 
-// ===== LIVE CHAT AGENT ICON =====
-const LiveChatIllustration = () => (
-  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="8" cy="10" r="1" fill="#0D3CFC"/>
-    <circle cx="12" cy="10" r="1" fill="#0D3CFC"/>
-    <circle cx="16" cy="10" r="1" fill="#0D3CFC"/>
-  </svg>
-);
-
-// ===== INSTAGRAM VERIFIED BADGE =====
-const InstagramVerifiedBadge = ({ size = 16 }: { size?: number }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          marginLeft: "4px",
-          display: "inline-block",
-          verticalAlign: "middle",
-          cursor: "pointer",
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <path
-          fill="#0095F6"
-          d="M12 2.2 C13.6 3.8 16.2 3.8 17.8 2.2 C18.6 3.8 20.2 5.4 21.8 6.2 C20.2 7.8 20.2 10.4 21.8 12 C20.2 13.6 20.2 16.2 21.8 17.8 C20.2 18.6 18.6 20.2 17.8 21.8 C16.2 20.2 13.6 20.2 12 21.8 C10.4 20.2 7.8 20.2 6.2 21.8 C5.4 20.2 3.8 18.6 2.2 17.8 C3.8 16.2 3.8 13.6 2.2 12 C3.8 10.4 3.8 7.8 2.2 6.2 C3.8 5.4 5.4 3.8 6.2 2.2 C7.8 3.8 10.4 3.8 12 2.2 Z"
-        />
-        <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      {showTooltip && (
-        <div style={{
-          position: "absolute",
-          bottom: "calc(100% + 8px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "4px 10px",
-          borderRadius: "6px",
-          fontSize: "11px",
-          whiteSpace: "nowrap",
-          zIndex: 100,
-          border: "1px solid rgba(255,255,255,0.05)",
-          fontFamily: FONT_FAMILY,
-        }}>
-          Official Account
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            border: "6px solid transparent",
-            borderTopColor: "#1a1a1a",
-          }} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ===== SEARCH ROLLING TEXT =====
-const searchRollingTexts = [
-  "Tentang Note", 
-  "Tentang Donasi", 
-  "Tentang Blog", 
-  "Tentang Shop", 
-  "Tentang Pusat bantuan"
-];
-
-const getGreeting = (): string => {
-  const hour = new Date().getHours();
-  if (hour >= 4 && hour < 10) return "Selamat pagi";
-  if (hour >= 10 && hour < 15) return "Selamat siang";
-  if (hour >= 15 && hour < 18) return "Selamat sore";
-  return "Selamat malam";
-};
-
-// ===== DEFAULT FAQ DATA - URUTAN: Blog, Note, Donation, Shop, Calendar, News =====
-const defaultFaqData = {
-  Blog: [
-    { q: "Apa itu Blog Menuru?", a: "Blog Menuru adalah platform untuk berbagi artikel, tips, dan informasi seputar gaya hidup, pengembangan diri, dan teknologi." },
-    { q: "Bagaimana cara menulis artikel di Blog Menuru?", a: "Untuk menulis artikel, Anda harus login sebagai kontributor. Hubungi tim admin untuk mendapatkan akses." },
-    { q: "Apakah ada biaya untuk membaca blog?", a: "Tidak, semua artikel di Blog Menuru dapat dibaca secara gratis." },
-  ],
-  Note: [
-    { q: "Apa itu Note?", a: "Note adalah fitur untuk mencatat ide, catatan pribadi, atau hal penting lainnya." },
-    { q: "Apakah Note bisa dibagikan?", a: "Saat ini Note bersifat pribadi. Fitur berbagi akan segera hadir." },
-    { q: "Bagaimana cara menyimpan Note?", a: "Cukup tulis catatan Anda dan klik simpan. Note akan tersimpan di akun Anda." },
-  ],
-  Donation: [
-    { q: "Bagaimana cara berdonasi?", a: "Anda dapat berdonasi melalui tombol Donasi di halaman utama, atau transfer ke rekening resmi Menuru yang tertera." },
-    { q: "Kemana donasi disalurkan?", a: "Donasi disalurkan untuk kegiatan sosial, pendidikan, dan pengembangan komunitas." },
-    { q: "Apakah donasi bisa mendapatkan laporan?", a: "Ya, setiap donasi akan dilaporkan secara transparan di halaman Laporan Donasi." },
-  ],
-  Shop: [
-    { q: "Produk apa saja yang dijual di Shop Menuru?", a: "Shop Menuru menjual merchandise eksklusif seperti kaos, tas, dan aksesoris dengan desain khas Menuru." },
-    { q: "Bagaimana cara melakukan pembelian?", a: "Pilih produk, tambahkan ke keranjang, lalu ikuti proses checkout. Pembayaran melalui transfer bank atau e-wallet." },
-    { q: "Apakah tersedia pengiriman internasional?", a: "Saat ini pengiriman hanya untuk wilayah Indonesia. Kami akan segera membuka pengiriman internasional." },
-  ],
-  Calendar: [
-    { q: "Apa fungsi Calendar?", a: "Calendar menampilkan jadwal acara, webinar, dan kegiatan komunitas Menuru." },
-    { q: "Bagaimana cara menambahkan acara ke Calendar?", a: "Acara ditambahkan oleh tim admin. Jika Anda ingin mengusulkan acara, hubungi kami." },
-    { q: "Apakah Calendar bisa di-sync ke Google Calendar?", a: "Ya, ada tombol sinkronisasi untuk menambahkan acara ke Google Calendar Anda." },
-  ],
-  News: [
-    { q: "Berita apa saja yang dimuat di News?", a: "News berisi berita terbaru seputar kegiatan Menuru, pencapaian, dan acara mendatang." },
-    { q: "Apakah bisa berlangganan newsletter?", a: "Ya, Anda bisa berlangganan newsletter melalui form di halaman News." },
-    { q: "Bagaimana cara mengirimkan berita?", a: "Kirimkan berita ke email redaksi@menuru.com untuk dipertimbangkan." },
-  ],
-};
-
-// ============================================================
-// ===== KOMPONEN FAQ ITEM =====
-// ============================================================
-const FaqItem = ({ 
-  question, 
-  answer, 
-  category,
-  index,
-  isAdmin,
-  onEdit,
-}: { 
-  question: string; 
-  answer: string; 
-  category: string;
-  index: number;
-  isAdmin: boolean;
-  onEdit: (category: string, index: number, newQ: string, newA: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editQ, setEditQ] = useState(question);
-  const [editA, setEditA] = useState(answer);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<HTMLSpanElement>(null);
-
-  const toggleFaq = () => {
-    setIsOpen(!isOpen);
-    if (contentRef.current) {
-      if (!isOpen) {
-        gsap.fromTo(contentRef.current,
-          { height: 0, opacity: 0 },
-          { height: 'auto', opacity: 1, duration: 0.4, ease: 'power2.out' }
-        );
-        gsap.to(iconRef.current, {
-          rotate: 45,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      } else {
-        gsap.to(contentRef.current, {
-          height: 0,
-          opacity: 0,
-          duration: 0.3,
-          ease: 'power2.in'
-        });
-        gsap.to(iconRef.current, {
-          rotate: 0,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      }
-    }
-  };
-
-  const handleSaveEdit = () => {
-    if (editQ.trim() && editA.trim()) {
-      onEdit(category, index, editQ.trim(), editA.trim());
-      setIsEditing(false);
-    }
-  };
-
-  return (
-    <div style={{ borderBottom: '1px solid #e8e8e8', padding: '12px 0' }}>
-      <div 
-        onClick={!isEditing ? toggleFaq : undefined}
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: isEditing ? 'default' : 'pointer',
-          padding: '4px 0',
-        }}
-      >
-        {isEditing ? (
-          <input
-            type="text"
-            value={editQ}
-            onChange={(e) => setEditQ(e.target.value)}
-            style={{
-              fontSize: '30px',
-              fontWeight: 500,
-              color: '#0D3CFC',
-              fontFamily: FONT_FAMILY,
-              border: '2px solid #0D3CFC',
-              borderRadius: '8px',
-              padding: '4px 12px',
-              width: '80%',
-              backgroundColor: '#f5f9ff',
-              outline: 'none',
-            }}
-            onClick={(e) => e.stopPropagation()}
-            autoFocus
-          />
-        ) : (
-          <span style={{
-            fontSize: '30px',
-            fontWeight: 500,
-            color: '#0D3CFC',
-            fontFamily: FONT_FAMILY,
-          }}>
-            {question}
-          </span>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {isAdmin && !isEditing && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-                setEditQ(question);
-                setEditA(answer);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                transition: 'background 0.2s ease',
-                color: '#0D3CFC',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(13,60,252,0.08)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              <EditIcon size={20} />
-            </button>
-          )}
-          {isEditing ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSaveEdit();
-                }}
-                style={{
-                  background: '#0D3CFC',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '4px 16px',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 500,
-                }}
-              >
-                Simpan
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(false);
-                  setEditQ(question);
-                  setEditA(answer);
-                }}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #ccc',
-                  color: '#666',
-                  padding: '4px 16px',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Batal
-              </button>
-            </div>
-          ) : (
-            <span ref={iconRef} style={{
-              fontSize: '32px',
-              fontWeight: 300,
-              color: '#0D3CFC',
-              transition: 'transform 0.3s ease',
-              display: 'inline-block',
-            }}>
-              +
-            </span>
-          )}
-        </div>
-      </div>
-      {isEditing ? (
-        <div style={{ marginTop: '12px' }}>
-          <textarea
-            value={editA}
-            onChange={(e) => setEditA(e.target.value)}
-            style={{
-              fontSize: '30px',
-              fontWeight: 400,
-              color: '#000000',
-              fontFamily: FONT_FAMILY,
-              border: '2px solid #0D3CFC',
-              borderRadius: '8px',
-              padding: '8px 12px',
-              width: '100%',
-              minHeight: '80px',
-              backgroundColor: '#f5f9ff',
-              outline: 'none',
-              resize: 'vertical',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      ) : (
-        <div ref={contentRef} style={{ height: 0, overflow: 'hidden', opacity: 0 }}>
-          <div style={{
-            padding: '12px 0 8px 0',
-            fontSize: '30px',
-            color: '#000000',
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.6,
-          }}>
-            {answer}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ============================================================
 // ===== SIDEBAR NAVIGATION =====
-// ============================================================
-const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categories: string[] }) => {
-  // Urutan sidebar yang benar: 01 Blog, 02 Note, 03 Donation, 04 Shop, 05 Calendar, 06 News
-  const sidebarOrder = ["Blog", "Note", "Donation", "Shop", "Calendar", "News"];
-  
+const SidebarNav = ({ activeIndex, sections }: { activeIndex: number; sections: any[] }) => {
   return (
     <div style={{
       position: "fixed",
@@ -618,9 +294,9 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
       display: "flex",
       flexDirection: "column",
       alignItems: "flex-start",
-      gap: "8px",
+      gap: "6px",
     }}>
-      {sidebarOrder.map((category, idx) => {
+      {sections.map((section, idx) => {
         const number = String(idx + 1).padStart(2, '0');
         const isActive = idx === activeIndex;
         return (
@@ -630,21 +306,21 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
               display: "flex",
               alignItems: "center",
               gap: "0",
-              padding: "4px 0",
+              padding: "3px 0",
               opacity: isActive ? 1 : 0.5,
               transition: "opacity 0.3s ease, transform 0.3s ease",
               cursor: "pointer",
               transform: isActive ? "scale(1.05)" : "scale(1)",
             }}
             onClick={() => {
-              const element = document.getElementById(`faq-${number}`);
+              const element = document.getElementById(`section-${number}`);
               if (element) {
                 element.scrollIntoView({ behavior: "smooth", block: "start" });
               }
             }}
           >
             <span style={{
-              fontSize: isActive ? "28px" : "20px",
+              fontSize: isActive ? "24px" : "18px",
               fontWeight: isActive ? 700 : 400,
               color: isActive ? "#0D3CFC" : "#999",
               fontFamily: FONT_FAMILY,
@@ -652,7 +328,7 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
               transition: "all 0.3s ease",
               lineHeight: 1.2,
             }}>
-              {number}. {category}
+              {number}. {section.title}
             </span>
           </div>
         );
@@ -661,9 +337,7 @@ const SidebarNav = ({ activeIndex, categories }: { activeIndex: number; categori
   );
 };
 
-// ============================================================
-// ===== LIVE CHAT AGENT COMPONENT =====
-// ============================================================
+// ===== LIVE CHAT AGENT =====
 interface Ticket {
   id: string;
   userId: string;
@@ -758,6 +432,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   };
 
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
   const WaitingIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10"/>
@@ -782,6 +462,27 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const ChatIconSmall = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+
+  const ChatIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const SendIcon = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const LiveChatIllustration = () => (
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="8" cy="10" r="1" fill="#0D3CFC"/>
+      <circle cx="12" cy="10" r="1" fill="#0D3CFC"/>
+      <circle cx="16" cy="10" r="1" fill="#0D3CFC"/>
     </svg>
   );
 
@@ -988,12 +689,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     } catch (error) {
       console.error("Error resolving ticket:", error);
     }
-  };
-
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const getTypingText = (ticket: Ticket | null) => {
@@ -1954,71 +1649,358 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 };
 
 // ============================================================
-// ===== KOMPONEN UTAMA =====
+// ===== MAIN PAGE COMPONENT =====
 // ============================================================
-export default function PusatBantuanPage() {
+export default function PrivacyPolicyPage() {
   const [isMounted, setIsMounted] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  
-  // State untuk preloader
   const [showMain, setShowMain] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorEmail, setAuthorEmail] = useState("");
+  const [isAuthorVerified, setIsAuthorVerified] = useState(false);
+  const [activeSection, setActiveSection] = useState(0);
   
-  // State untuk navbar
+  // Navbar state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
   
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchExpandedRef = useRef<HTMLDivElement>(null);
-  const [rollingText, setRollingText] = useState(searchRollingTexts[0]);
-  const rollingRef = useRef<HTMLSpanElement>(null);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const profileDropdownRef = useRef<HTMLDivElement>(null);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationsRef = useRef<HTMLDivElement>(null);
-  const [totalUnread, setTotalUnread] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [faqData, setFaqData] = useState(defaultFaqData);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
-  const [authorName, setAuthorName] = useState<string>("");
-  const [authorEmail, setAuthorEmail] = useState<string>("");
-  const [isAuthorVerified, setIsAuthorVerified] = useState(false);
-  const [greetingText, setGreetingText] = useState(getGreeting());
-  const greetingRef = useRef<HTMLSpanElement>(null);
-  
-  // State untuk sidebar navigation
-  const [activeFaqIndex, setActiveFaqIndex] = useState(0);
-  const categories = Object.keys(defaultFaqData);
-  const sidebarOrder = ["Blog", "Note", "Donation", "Shop", "Calendar", "News"];
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
+  const menuBoxRef = useRef<HTMLDivElement>(null);
+  const menuBox2Ref = useRef<HTMLDivElement>(null);
+  const menuBox3Ref = useRef<HTMLDivElement>(null);
+  const storiesRef = useRef<HTMLDivElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const privacyTitleRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const editButtonRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // ===== PRELOADER =====
+  // Default Privacy Policy Content
+  const defaultPrivacyContent = [
+    {
+      title: "Pendahuluan",
+      subs: [
+        { sub: "1.1 Latar Belakang", content: "Kebijakan Privasi ini dibuat untuk melindungi data pribadi pengguna yang menggunakan layanan Menuru. Kami berkomitmen untuk menjaga kerahasiaan dan keamanan informasi pribadi Anda sesuai dengan peraturan perlindungan data yang berlaku." },
+        { sub: "1.2 Ruang Lingkup", content: "Kebijakan ini berlaku untuk semua layanan yang disediakan oleh Menuru, termasuk website dan fitur-fitur yang tersedia di dalamnya. Kebijakan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
+        { sub: "1.3 Persetujuan", content: "Dengan menggunakan layanan Menuru, Anda menyetujui pengumpulan dan penggunaan informasi pribadi Anda sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju, Anda tidak diperkenankan menggunakan layanan kami." }
+      ]
+    },
+    {
+      title: "Informasi yang Kami Kumpulkan",
+      subs: [
+        { sub: "2.1 Informasi Akun", content: "Kami mengumpulkan informasi yang Anda berikan saat mendaftar, termasuk nama lengkap, alamat email, kata sandi, dan nomor telepon. Informasi ini diperlukan untuk membuat dan mengelola akun Anda." },
+        { sub: "2.2 Informasi Profil", content: "Kami mengumpulkan data profil seperti foto profil, biografi, dan preferensi pengguna. Informasi ini digunakan untuk personalisasi pengalaman Anda di platform." },
+        { sub: "2.3 Informasi Transaksi", content: "Untuk fitur Shop dan Donation, kami mengumpulkan data transaksi seperti riwayat pembelian, metode pembayaran, dan alamat pengiriman. Semua data transaksi dilindungi dengan enkripsi." },
+        { sub: "2.4 Informasi Interaksi", content: "Kami mengumpulkan data interaksi Anda dengan fitur-fitur seperti Note, Calendar, Blog, Community, dan Live Chat. Ini termasuk catatan yang Anda buat, jadwal, komentar, dan percakapan chat." },
+        { sub: "2.5 Informasi Teknis", content: "Kami secara otomatis mengumpulkan informasi teknis seperti alamat IP, jenis perangkat, sistem operasi, browser, dan data penggunaan. Informasi ini digunakan untuk analisis dan peningkatan layanan." }
+      ]
+    },
+    {
+      title: "Penggunaan Informasi",
+      subs: [
+        { sub: "3.1 Penyediaan Layanan", content: "Informasi pribadi Anda digunakan untuk menyediakan, memelihara, dan meningkatkan layanan Menuru. Ini termasuk mengelola akun, memproses transaksi, dan memberikan dukungan pelanggan." },
+        { sub: "3.2 Personalisasi", content: "Kami menggunakan data untuk mempersonalisasi pengalaman Anda, seperti merekomendasikan konten yang relevan di Blog, menyesuaikan antarmuka, dan memberikan notifikasi yang dipersonalisasi." },
+        { sub: "3.3 Komunikasi", content: "Kami menggunakan informasi kontak Anda untuk mengirimkan notifikasi penting, pembaruan layanan, dan komunikasi terkait akun. Anda dapat mengatur preferensi notifikasi di pengaturan akun." },
+        { sub: "3.4 Analisis dan Peningkatan", content: "Data penggunaan dianalisis untuk memahami perilaku pengguna, mengidentifikasi tren, dan meningkatkan fungsionalitas layanan. Kami menggunakan analitik untuk mengoptimalkan pengalaman pengguna." },
+        { sub: "3.5 Keamanan", content: "Informasi digunakan untuk mendeteksi, mencegah, dan mengatasi aktivitas mencurigakan atau pelanggaran keamanan. Kami memantau aktivitas untuk melindungi akun dan data pengguna." }
+      ]
+    },
+    {
+      title: "Penyimpanan dan Keamanan Data",
+      subs: [
+        { sub: "4.1 Metode Penyimpanan", content: "Data Anda disimpan di server Firebase yang aman dengan enkripsi standar industri. Kami menggunakan protokol keamanan untuk melindungi data dari akses tidak sah." },
+        { sub: "4.2 Enkripsi", content: "Semua data sensitif, termasuk kata sandi dan informasi transaksi, dienkripsi menggunakan teknologi enkripsi terkini. Ini memastikan bahwa data Anda tetap aman selama transmisi dan penyimpanan." },
+        { sub: "4.3 Periode Penyimpanan", content: "Kami menyimpan data Anda selama akun Anda aktif atau selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan ini. Data akan dihapus setelah permintaan penghapusan akun." },
+        { sub: "4.4 Cadangan Data", content: "Kami melakukan pencadangan data secara rutin untuk mencegah kehilangan data. Cadangan disimpan dengan aman dan hanya dapat diakses oleh personel yang berwenang." }
+      ]
+    },
+    {
+      title: "Berbagi Informasi",
+      subs: [
+        { sub: "5.1 Penyedia Layanan", content: "Kami dapat berbagi data dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan layanan, seperti hosting, pembayaran, dan analitik. Semua pihak ketiga terikat dengan perjanjian kerahasiaan." },
+        { sub: "5.2 Kewajiban Hukum", content: "Kami dapat mengungkapkan informasi jika diwajibkan oleh hukum atau untuk merespons proses hukum yang sah, seperti surat perintah pengadilan atau panggilan pengadilan." },
+        { sub: "5.3 Perlindungan Hak", content: "Kami dapat berbagi informasi untuk melindungi hak, properti, atau keselamatan Menuru, pengguna kami, atau orang lain. Ini termasuk penegakan syarat dan ketentuan kami." },
+        { sub: "5.4 Persetujuan Pengguna", content: "Kami tidak akan membagikan informasi pribadi Anda kepada pihak ketiga untuk tujuan pemasaran tanpa persetujuan eksplisit Anda." }
+      ]
+    },
+    {
+      title: "Hak Privasi Anda",
+      subs: [
+        { sub: "6.1 Hak Akses", content: "Anda berhak mengakses informasi pribadi yang kami miliki tentang Anda. Anda dapat melihat dan mengunduh data Anda melalui pengaturan akun." },
+        { sub: "6.2 Hak Perbaikan", content: "Anda berhak memperbaiki informasi pribadi yang tidak akurat atau tidak lengkap. Anda dapat memperbarui profil Anda kapan saja di pengaturan akun." },
+        { sub: "6.3 Hak Penghapusan", content: "Anda berhak meminta penghapusan informasi pribadi Anda. Kami akan menghapus data Anda sesuai dengan permintaan, kecuali jika diperlukan untuk kepatuhan hukum." },
+        { sub: "6.4 Hak Pembatasan", content: "Anda berhak membatasi pemrosesan informasi pribadi Anda dalam keadaan tertentu, seperti jika Anda mempertanyakan keakuratan data." },
+        { sub: "6.5 Hak Portabilitas", content: "Anda berhak menerima data Anda dalam format terstruktur dan dapat dibaca mesin. Anda dapat meminta ekspor data Anda melalui pengaturan akun." }
+      ]
+    },
+    {
+      title: "Cookie dan Teknologi Pelacakan",
+      subs: [
+        { sub: "7.1 Penggunaan Cookie", content: "Kami menggunakan cookie untuk meningkatkan pengalaman pengguna, menyimpan preferensi, dan melacak aktivitas di situs. Cookie membantu kami memahami bagaimana Anda berinteraksi dengan layanan." },
+        { sub: "7.2 Jenis Cookie", content: "Kami menggunakan cookie sesi (sementara) dan cookie persisten (tetap) untuk berbagai tujuan, termasuk autentikasi, analitik, dan personalisasi konten." },
+        { sub: "7.3 Kontrol Cookie", content: "Anda dapat mengatur preferensi cookie melalui pengaturan browser. Anda dapat menolak semua cookie, tetapi ini dapat mempengaruhi fungsionalitas beberapa fitur." },
+        { sub: "7.4 Pihak Ketiga", content: "Kami menggunakan layanan analitik pihak ketiga yang juga menggunakan cookie untuk mengumpulkan data penggunaan. Data ini digunakan secara agregat untuk meningkatkan layanan." }
+      ]
+    },
+    {
+      title: "Shop",
+      subs: [
+        { sub: "8.1 Data Transaksi", content: "Fitur Shop mengumpulkan data transaksi termasuk produk yang dibeli, jumlah, harga, metode pembayaran, dan alamat pengiriman. Semua data transaksi dilindungi dengan enkripsi." },
+        { sub: "8.2 Riwayat Pembelian", content: "Kami menyimpan riwayat pembelian Anda untuk memudahkan pelacakan pesanan, pengembalian barang, dan memberikan rekomendasi produk yang relevan." },
+        { sub: "8.3 Keamanan Pembayaran", content: "Kami menggunakan gateway pembayaran yang aman dan terverifikasi. Informasi kartu kredit tidak disimpan di server kami dan diproses langsung oleh penyedia pembayaran." }
+      ]
+    },
+    {
+      title: "Note",
+      subs: [
+        { sub: "9.1 Penyimpanan Catatan", content: "Fitur Note menyimpan catatan pribadi Anda di server yang aman. Semua catatan dienkripsi dan hanya dapat diakses oleh Anda menggunakan akun terdaftar." },
+        { sub: "9.2 Privasi Catatan", content: "Kami tidak memiliki akses ke konten catatan Anda. Catatan Anda bersifat pribadi dan tidak dibagikan dengan pengguna lain atau pihak ketiga." },
+        { sub: "9.3 Sinkronisasi", content: "Catatan Anda disinkronkan secara real-time di semua perangkat yang terhubung dengan akun Anda, memastikan akses yang konsisten di mana saja." }
+      ]
+    },
+    {
+      title: "Calendar",
+      subs: [
+        { sub: "10.1 Manajemen Jadwal", content: "Fitur Calendar mengelola jadwal dan pengingat Anda. Data kalender disimpan dengan aman dan hanya digunakan untuk memberikan notifikasi yang Anda minta." },
+        { sub: "10.2 Pengingat", content: "Kami menggunakan data kalender untuk mengirimkan pengingat dan notifikasi tentang acara yang akan datang. Anda dapat mengatur preferensi notifikasi di pengaturan." },
+        { sub: "10.3 Integrasi", content: "Calendar dapat diintegrasikan dengan kalender eksternal (Google Calendar, Outlook) dengan izin Anda. Kami tidak menyimpan kredensial kalender eksternal Anda." }
+      ]
+    },
+    {
+      title: "Blog",
+      subs: [
+        { sub: "11.1 Interaksi Konten", content: "Fitur Blog mengumpulkan data interaksi seperti komentar, like, dan waktu baca. Data ini digunakan untuk meningkatkan pengalaman membaca dan merekomendasikan konten yang relevan." },
+        { sub: "11.2 Konten Publik", content: "Komentar dan interaksi di Blog bersifat publik. Mohon pertimbangkan informasi yang Anda bagikan di ruang publik ini." },
+        { sub: "11.3 Rekomendasi", content: "Kami menggunakan data pembacaan untuk merekomendasikan artikel yang relevan dengan minat Anda. Ini membantu Anda menemukan konten yang lebih personal." }
+      ]
+    },
+    {
+      title: "Donation",
+      subs: [
+        { sub: "12.1 Data Donor", content: "Fitur Donation melindungi data donor termasuk nama, email, dan jumlah donasi. Informasi ini digunakan untuk mengirimkan konfirmasi dan laporan donasi." },
+        { sub: "12.2 Transaksi Aman", content: "Semua transaksi donasi diproses melalui gateway pembayaran yang aman dan terverifikasi. Kami tidak menyimpan informasi kartu kredit di server kami." },
+        { sub: "12.3 Transparansi", content: "Kami menyediakan laporan donasi yang transparan dan dapat diakses oleh donor. Penggunaan dana donasi dilaporkan secara berkala." }
+      ]
+    },
+    {
+      title: "Community",
+      subs: [
+        { sub: "13.1 Aktivitas Sosial", content: "Fitur Community mengumpulkan data aktivitas seperti posting, komentar, dan interaksi sosial. Data ini digunakan untuk membangun pengalaman komunitas yang positif." },
+        { sub: "13.2 Konten Publik", content: "Posting dan komentar di Community bersifat publik dan dapat dilihat oleh pengguna lain. Kami mendorong pengguna untuk berbagi dengan bijak." },
+        { sub: "13.3 Keamanan Komunitas", content: "Kami memoderasi konten untuk menjaga lingkungan yang aman dan positif. Pelanggaran dapat mengakibatkan penghapusan konten atau sanksi akun." }
+      ]
+    },
+    {
+      title: "Live Chat Agent",
+      subs: [
+        { sub: "14.1 Percakapan Terenkripsi", content: "Fitur Live Chat Agent melindungi percakapan Anda dengan enkripsi end-to-end. Hanya Anda dan agen yang dapat membaca pesan." },
+        { sub: "14.2 Riwayat Chat", content: "Riwayat chat disimpan untuk keperluan pelacakan dan peningkatan layanan. Anda dapat meminta penghapusan riwayat chat kapan saja." },
+        { sub: "14.3 Kualitas Layanan", content: "Chat dianalisis secara agregat untuk meningkatkan kualitas layanan dukungan. Data pribadi tidak digunakan dalam analisis ini." }
+      ]
+    },
+    {
+      title: "Live Chat",
+      subs: [
+        { sub: "15.1 Komunikasi Real-time", content: "Fitur Live Chat memungkinkan komunikasi real-time antara pengguna. Semua pesan dilindungi dengan enkripsi untuk menjaga kerahasiaan." },
+        { sub: "15.2 Penyimpanan Pesan", content: "Pesan disimpan sementara untuk fungsionalitas chat. Pesan dapat dihapus secara permanen atas permintaan pengguna." },
+        { sub: "15.3 Moderasi", content: "Kami memantau chat untuk mencegah penyalahgunaan dan menjaga lingkungan yang aman bagi semua pengguna." }
+      ]
+    },
+    {
+      title: "Perubahan Kebijakan",
+      subs: [
+        { sub: "16.1 Pembaruan Kebijakan", content: "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan diberitahukan melalui email atau notifikasi di platform." },
+        { sub: "16.2 Tanggal Efektif", content: "Tanggal efektif pembaruan akan dicantumkan di bagian atas Kebijakan. Perubahan berlaku segera setelah dipublikasikan." },
+        { sub: "16.3 Pemberitahuan", content: "Kami akan memberikan pemberitahuan tentang perubahan penting setidaknya 30 hari sebelum berlaku. Anda dapat meninjau perubahan sebelum menyetujui." }
+      ]
+    },
+    {
+      title: "Hubungi Kami",
+      subs: [
+        { sub: "17.1 Kontak Dukungan", content: "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi tim dukungan kami melalui email atau form kontak." },
+        { sub: "17.2 Email", content: "Anda dapat menghubungi kami di privacy@wawa44.com untuk pertanyaan terkait privasi dan perlindungan data." },
+        { sub: "17.3 Alamat", content: "Jl. Contoh No. 123, Jakarta, Indonesia. Kami siap membantu Anda dengan segala pertanyaan terkait privasi." }
+      ]
+    }
+  ];
+
+  const [privacyContent, setPrivacyContent] = useState(defaultPrivacyContent);
+
+  // Load saved content from Firestore
+  const loadContentFromFirestore = async () => {
+    if (!db) return;
+    try {
+      const docRef = doc(db, "settings", "privacyPolicy");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.content) {
+          setPrivacyContent(data.content);
+        }
+        if (data.lastUpdate) {
+          setLastUpdate(data.lastUpdate);
+        }
+        if (data.authorName) {
+          setAuthorName(data.authorName);
+        }
+        if (data.authorEmail) {
+          setAuthorEmail(data.authorEmail);
+          setIsAuthorVerified(data.authorEmail === ADMIN_EMAIL);
+        }
+      } else {
+        // Set default date
+        const now = new Date();
+        setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+        setAuthorName("Admin");
+        setAuthorEmail("admin@menuru.com");
+      }
+    } catch (error) {
+      console.error("Error loading privacy content:", error);
+      const now = new Date();
+      setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    }
+  };
+
+  // Save content to Firestore
+  const saveContentToFirestore = async (newContent: any) => {
+    if (!db || !isAdmin) return;
+    try {
+      const docRef = doc(db, "settings", "privacyPolicy");
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      const userEmail = user?.email || "admin@menuru.com";
+      const userName = user?.displayName || user?.email || "Admin";
+      
+      await setDoc(docRef, {
+        content: newContent,
+        lastUpdate: dateStr,
+        authorName: userName,
+        authorEmail: userEmail,
+        updatedAt: serverTimestamp()
+      });
+      
+      setLastUpdate(dateStr);
+      setAuthorName(userName);
+      setAuthorEmail(userEmail);
+      setIsAuthorVerified(userEmail === ADMIN_EMAIL);
+      setIsEditing(false);
+      alert("Konten Privacy Policy berhasil disimpan!");
+    } catch (error) {
+      console.error("Error saving privacy content:", error);
+      alert("Gagal menyimpan konten. Silakan coba lagi.");
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const handlePreloaderComplete = () => {
-    setShowMain(true);
-  };
-
-  // ===== SCROLL DETECTION FOR SIDEBAR =====
+  // Auth
   useEffect(() => {
-    if (!showMain) return;
+    if (!auth || !isMounted) return;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        const isAdminUser = currentUser.email === ADMIN_EMAIL;
+        setIsAdmin(isAdminUser);
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          await updateDoc(userRef, {
+            online: true,
+            lastSeen: serverTimestamp(),
+          });
+        } catch (error) {
+          console.error("Error updating online status:", error);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [isMounted]);
+
+  // Load content after auth and mount
+  useEffect(() => {
+    if (!isMounted || loading) return;
+    loadContentFromFirestore();
+  }, [isMounted, loading]);
+
+  // Preloader
+  useEffect(() => {
+    if (!isMounted || loading) return;
+    setTimeout(() => {
+      // Preloader akan selesai setelah animasi
+    }, 500);
+  }, [isMounted, loading]);
+
+  // GSAP animation for menu drawer opening
+  useEffect(() => {
+    if (!menuOverlayRef.current || !isMounted || loading || !showMain) return;
+    
+    if (isMenuOpen) {
+      gsap.fromTo(menuOverlayRef.current,
+        { y: '-100%', opacity: 0 },
+        {
+          y: '0%',
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out',
+          onComplete: () => {
+            const items = menuOverlayRef.current?.querySelectorAll('.menu-item');
+            if (items) {
+              gsap.fromTo(items,
+                { opacity: 0, y: 30 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  stagger: 0.08,
+                  ease: 'power3.out'
+                }
+              );
+            }
+          }
+        }
+      );
+    } else {
+      gsap.to(menuOverlayRef.current, {
+        y: '-100%',
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power3.in'
+      });
+    }
+  }, [isMenuOpen, isMounted, loading, showMain]);
+
+  // Scroll detection for sidebar
+  useEffect(() => {
+    if (!showMain || !isMounted || loading) return;
     
     const handleScroll = () => {
-      // Cek setiap FAQ section dari bawah ke atas
-      for (let i = sidebarOrder.length - 1; i >= 0; i--) {
+      for (let i = privacyContent.length - 1; i >= 0; i--) {
         const number = String(i + 1).padStart(2, '0');
-        const element = document.getElementById(`faq-${number}`);
+        const element = document.getElementById(`section-${number}`);
         if (element) {
           const rect = element.getBoundingClientRect();
-          // Jika judul FAQ terlihat di viewport (top <= 250)
           if (rect.top <= 250) {
-            setActiveFaqIndex(i);
+            setActiveSection(i);
             break;
           }
         }
@@ -2026,239 +2008,21 @@ export default function PusatBantuanPage() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Initial check
     setTimeout(handleScroll, 500);
-    
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [showMain]);
+  }, [showMain, isMounted, loading, privacyContent]);
 
-  // ===== MOUNTING =====
-  useEffect(() => {
-    if (!showMain) return;
-    
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-      if (currentUser) {
-        try {
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          const googlePhotoURL = currentUser.photoURL || "";
-          const googleName = currentUser.displayName || currentUser.email || "";
-          const isAdminUser = currentUser.email === ADMIN_EMAIL;
-          setIsAdmin(isAdminUser);
-          
-          if (!userSnap.exists()) {
-            await setDoc(userRef, {
-              id: currentUser.uid,
-              name: googleName,
-              email: currentUser.email || "",
-              photoURL: googlePhotoURL,
-              createdAt: serverTimestamp(),
-              isPinned: false,
-              isAdmin: isAdminUser,
-              online: true,
-              lastSeen: serverTimestamp(),
-              typing: false,
-              blocked: [],
-              blockedBy: []
-            });
-            if (googlePhotoURL && currentUser.photoURL !== googlePhotoURL) {
-              await updateProfile(currentUser, {
-                photoURL: googlePhotoURL,
-                displayName: googleName
-              });
-            }
-          } else {
-            const userData = userSnap.data();
-            await updateDoc(userRef, {
-              online: true,
-              lastSeen: serverTimestamp()
-            });
-          }
-        } catch (error) {
-          console.error("Error saving user:", error);
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, [showMain]);
-
-  // ===== LOAD FAQ =====
-  const loadFaqFromFirestore = async () => {
-    if (!db) return;
-    try {
-      const faqRef = collection(db, "faq");
-      const q = query(faqRef);
-      const querySnap = await getDocs(q);
-      
-      if (!querySnap.empty) {
-        const data = querySnap.docs[0]?.data();
-        if (data) {
-          setFaqData(data.faq || defaultFaqData);
-          setLastUpdate(data.lastUpdate || new Date().toLocaleString('id-ID', { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }));
-          setAuthorName(data.authorName || "");
-          setAuthorEmail(data.authorEmail || "");
-          setIsAuthorVerified(data.authorEmail === ADMIN_EMAIL);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading FAQ:", error);
-    }
+  // Handle preloader complete
+  const handlePreloaderComplete = () => {
+    setShowMain(true);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
   };
 
-  const saveFaqToFirestore = async (newFaqData: any) => {
-    if (!db || !isAdmin) return;
-    try {
-      const faqRef = collection(db, "faq");
-      const q = query(faqRef);
-      const querySnap = await getDocs(q);
-      
-      const updateData = {
-        faq: newFaqData,
-        lastUpdate: new Date().toLocaleString('id-ID', { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        authorName: user?.displayName || user?.email || "Admin",
-        authorEmail: user?.email || "",
-        updatedBy: user?.uid || "",
-      };
-      
-      if (querySnap.empty) {
-        await setDoc(doc(db, "faq", "main"), updateData);
-      } else {
-        await updateDoc(doc(db, "faq", "main"), updateData);
-      }
-      
-      setFaqData(newFaqData);
-      setLastUpdate(updateData.lastUpdate);
-      setAuthorName(updateData.authorName);
-      setAuthorEmail(updateData.authorEmail);
-      setIsAuthorVerified(updateData.authorEmail === ADMIN_EMAIL);
-    } catch (error) {
-      console.error("Error saving FAQ:", error);
-    }
-  };
-
-  const handleEditFaq = (category: string, index: number, newQ: string, newA: string) => {
-    const newData = { ...faqData };
-    newData[category as keyof typeof faqData][index] = { q: newQ, a: newA };
-    saveFaqToFirestore(newData);
-  };
-
-  useEffect(() => {
-    if (!showMain) return;
-    loadFaqFromFirestore();
-  }, [showMain]);
-
-  // ===== UNREAD NOTIFICATIONS =====
-  useEffect(() => {
-    if (!db || !user || !showMain) return;
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef);
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      let unread = 0;
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        if (data.participants && data.participants.includes(user.uid)) {
-          const messagesRef = collection(db, "chats", docSnap.id, "messages");
-          const unreadQuery = query(
-            messagesRef,
-            where("read", "==", false),
-            where("senderId", "!=", user.uid)
-          );
-          const unreadSnap = await getDocs(unreadQuery);
-          unread += unreadSnap.size;
-        }
-      }
-      setTotalUnread(unread);
-    });
-    return () => unsubscribe();
-  }, [user, showMain]);
-
-  // ===== ROLLING TEXT =====
-  useEffect(() => {
-    if (!showMain) return;
-    let isForward = true;
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (isForward) {
-        currentIndex++;
-        if (currentIndex >= searchRollingTexts.length) {
-          currentIndex = searchRollingTexts.length - 2;
-          isForward = false;
-        }
-      } else {
-        currentIndex--;
-        if (currentIndex < 0) {
-          currentIndex = 1;
-          isForward = true;
-        }
-      }
-      if (currentIndex >= 0 && currentIndex < searchRollingTexts.length) {
-        setRollingText(searchRollingTexts[currentIndex]);
-        if (rollingRef.current) {
-          gsap.fromTo(rollingRef.current,
-            { y: 10, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-          );
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [showMain]);
-
-  // ===== SEARCH EXPAND =====
-  useEffect(() => {
-    if (isSearchOpen && searchExpandedRef.current) {
-      gsap.fromTo(searchExpandedRef.current,
-        { height: 0, opacity: 0, y: -10 },
-        { height: "auto", opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
-      );
-      setTimeout(() => searchInputRef.current?.focus(), 300);
-    }
-  }, [isSearchOpen]);
-
-  // ===== CLICK OUTSIDE =====
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
-        setSearchQuery("");
-        setSearchResults([]);
-      }
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
-        setShowProfileDropdown(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // ===== TOGGLE MENU =====
   const toggleMenu = () => {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
-      if (menuOverlayRef.current) {
-        gsap.fromTo(menuOverlayRef.current,
-          { y: "-100%", opacity: 0 },
-          { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" }
-        );
-      }
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 45,
@@ -2267,19 +2031,6 @@ export default function PusatBantuanPage() {
         });
       }
     } else {
-      if (menuOverlayRef.current) {
-        gsap.to(menuOverlayRef.current, {
-          y: "-100%",
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-          onComplete: () => {
-            setIsMenuOpen(false);
-          }
-        });
-      } else {
-        setIsMenuOpen(false);
-      }
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -2287,46 +2038,52 @@ export default function PusatBantuanPage() {
           ease: "power2.in"
         });
       }
+      setIsMenuOpen(false);
     }
   };
 
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        online: false,
-        lastSeen: serverTimestamp(),
-        typing: false
-      });
-      await signOut(auth);
-      setShowProfileDropdown(false);
-    } catch (error) {
-      console.error("Logout error:", error);
+  // Handle content edit
+  const handleContentChange = (sectionIndex: number, subIndex: number, field: 'sub' | 'content', value: string) => {
+    const newContent = [...privacyContent];
+    newContent[sectionIndex].subs[subIndex][field] = value;
+    setPrivacyContent(newContent);
+  };
+
+  const handleTitleChange = (sectionIndex: number, value: string) => {
+    const newContent = [...privacyContent];
+    newContent[sectionIndex].title = value;
+    setPrivacyContent(newContent);
+  };
+
+  const handleSaveContent = () => {
+    saveContentToFirestore(privacyContent);
+  };
+
+  // Scroll to section
+  const scrollToSection = (index: number) => {
+    const number = String(index + 1).padStart(2, '0');
+    const element = document.getElementById(`section-${number}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
-  // ===== RENDER =====
-  if (!isMounted || !showMain) {
+  // Loading state
+  if (!isMounted || loading) {
     return <Preloader onComplete={handlePreloaderComplete} />;
   }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-        <div style={{ fontSize: "18px", color: "#000", fontFamily: FONT_FAMILY }}>Loading...</div>
-      </div>
-    );
+  if (!showMain) {
+    return <Preloader onComplete={handlePreloaderComplete} />;
   }
 
   return (
     <>
       <Head>
-        <title>Pusat Bantuan | Menuru</title>
-        <meta name="description" content="Pusat Bantuan Menuru - Bantuan dan dukungan" />
+        <title>Kebijakan Privasi | Menuru</title>
+        <meta name="description" content="Kebijakan Privasi Menuru - Perlindungan data pribadi Anda" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/images/ai.jpg" />
       </Head>
 
       <style jsx global>{`
@@ -2350,16 +2107,19 @@ export default function PusatBantuanPage() {
         }
       `}</style>
 
-      <div style={{
-        minHeight: "100vh",
-        backgroundColor: "#ffffff",
-        margin: 0,
-        padding: 0,
-        position: "relative",
-        fontFamily: FONT_FAMILY,
-        overflowX: "hidden",
-        overflowY: "auto",
-      }}>
+      <div
+        ref={containerRef}
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#ffffff",
+          margin: 0,
+          padding: 0,
+          position: "relative",
+          fontFamily: FONT_FAMILY,
+          overflowX: "hidden",
+          overflowY: "auto",
+        }}
+      >
         {/* ===== HEADER / NAVBAR ===== */}
         <div style={{
           position: "fixed",
@@ -2534,13 +2294,13 @@ export default function PusatBantuanPage() {
         </div>
 
         {/* ===== SIDEBAR NAVIGATION ===== */}
-        <SidebarNav activeIndex={activeFaqIndex} categories={sidebarOrder} />
+        <SidebarNav activeIndex={activeSection} sections={privacyContent} />
 
-        {/* ===== KONTEN PUSAT BANTUAN ===== */}
+        {/* ===== KONTEN PRIVACY POLICY ===== */}
         <div style={{
           marginTop: "180px",
           padding: "0 40px 40px",
-          paddingLeft: "160px",
+          paddingLeft: "180px",
           width: "100%",
           maxWidth: "1400px",
           marginLeft: "auto",
@@ -2565,7 +2325,7 @@ export default function PusatBantuanPage() {
               wordBreak: "break-word",
             }}
           >
-            Pusat Bantuan
+            Privacy Policy
           </motion.h1>
 
           <motion.div
@@ -2608,47 +2368,178 @@ export default function PusatBantuanPage() {
             <span style={{ fontSize: "14px", color: "#666" }}>
               ({authorEmail || "admin@menuru.com"})
             </span>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  if (isEditing) {
+                    handleSaveContent();
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+                style={{
+                  marginLeft: "16px",
+                  padding: "6px 16px",
+                  backgroundColor: isEditing ? "#22c55e" : "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.8";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+              >
+                {isEditing ? (
+                  <>
+                    <SaveIcon size={16} />
+                    <span>Simpan</span>
+                  </>
+                ) : (
+                  <>
+                    <EditIcon size={16} />
+                    <span>Edit</span>
+                  </>
+                )}
+              </button>
+            )}
+            {isAdmin && isEditing && (
+              <span style={{
+                fontSize: "14px",
+                color: "#ef4444",
+                fontWeight: 500,
+                marginLeft: "8px",
+              }}>
+                * Mode Edit Aktif
+              </span>
+            )}
           </motion.div>
 
-          {sidebarOrder.map((category, catIndex) => {
-            const number = String(catIndex + 1).padStart(2, '0');
-            const faqCategory = category as keyof typeof faqData;
+          {privacyContent.map((section, index) => {
+            const number = String(index + 1).padStart(2, '0');
             return (
               <motion.div
-                key={category}
-                id={`faq-${number}`}
+                key={index}
+                id={`section-${number}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 + catIndex * 0.1 }}
-                style={{ marginBottom: "60px" }}
+                transition={{ duration: 0.6, delay: 0.2 + index * 0.05 }}
+                style={{ marginBottom: "50px" }}
               >
-                <h2 style={{
-                  fontSize: "70px",
-                  fontWeight: 700,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.2,
-                  margin: "0 0 20px 0",
-                  textAlign: "left",
-                  wordBreak: "break-word",
-                }}>
-                  {number}. {category}
-                </h2>
-
-                <div style={{ maxWidth: "100%", margin: "0" }}>
-                  {faqData[faqCategory]?.map((item, idx) => (
-                    <FaqItem 
-                      key={idx} 
-                      question={item.q} 
-                      answer={item.a} 
-                      category={category}
-                      index={idx}
-                      isAdmin={isAdmin}
-                      onEdit={handleEditFaq}
-                    />
-                  ))}
-                </div>
+                {isEditing && isAdmin ? (
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) => handleTitleChange(index, e.target.value)}
+                    style={{
+                      fontSize: "70px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.03em",
+                      lineHeight: 1.2,
+                      marginBottom: "24px",
+                      border: "2px solid #0D3CFC",
+                      borderRadius: "8px",
+                      padding: "8px 16px",
+                      width: "100%",
+                      backgroundColor: "rgba(13,60,252,0.05)",
+                      outline: "none",
+                    }}
+                  />
+                ) : (
+                  <h2 style={{
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1.2,
+                    margin: "0 0 20px 0",
+                    textAlign: "left",
+                    wordBreak: "break-word",
+                  }}>
+                    {number}. {section.title}
+                  </h2>
+                )}
+                {section.subs.map((sub, subIndex) => (
+                  <div key={subIndex} style={{ marginBottom: "20px" }}>
+                    {isEditing && isAdmin ? (
+                      <>
+                        <input
+                          type="text"
+                          value={sub.sub}
+                          onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
+                          style={{
+                            fontSize: "24px",
+                            fontWeight: 600,
+                            color: "#0D3CFC",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: "8px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            padding: "6px 12px",
+                            width: "100%",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                          }}
+                        />
+                        <textarea
+                          value={sub.content}
+                          onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
+                          style={{
+                            fontSize: "18px",
+                            lineHeight: "1.8",
+                            color: "#333",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: 0,
+                            padding: "12px 16px",
+                            paddingLeft: "20px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            width: "100%",
+                            minHeight: "80px",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                            resize: "vertical",
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <h3 style={{
+                          fontSize: "24px",
+                          fontWeight: 600,
+                          color: "#0D3CFC",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: "8px",
+                        }}>
+                          {sub.sub}
+                        </h3>
+                        <p style={{
+                          fontSize: "18px",
+                          lineHeight: "1.8",
+                          color: "#333",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: 0,
+                          paddingLeft: "20px",
+                        }}>
+                          {sub.content}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ))}
               </motion.div>
             );
           })}
@@ -2660,6 +2551,165 @@ export default function PusatBantuanPage() {
             db={db} 
             auth={auth} 
           />
+
+          {/* ===== FOOTER with Images ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "60px 0 40px 0",
+              backgroundColor: "#ffffff",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              marginTop: "40px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Foto Kiri */}
+            <div
+              style={{
+                position: "absolute",
+                left: "0px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
+                opacity: 0.8,
+              }}
+            >
+              <img
+                src="/images/p0l.jpg"
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Foto Kanan */}
+            <div
+              style={{
+                position: "absolute",
+                right: "0px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
+                opacity: 0.8,
+              }}
+            >
+              <img
+                src="/images/xxz.jpg"
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                maxWidth: "1400px",
+                margin: "0 auto",
+                gap: "40px",
+                flexWrap: "wrap",
+                position: "relative",
+                zIndex: 1,
+                paddingLeft: "40px",
+                paddingRight: "40px",
+              }}
+            >
+              {footerLinks.map((section, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    flex: "1",
+                    minWidth: "200px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: "#000000",
+                      margin: 0,
+                      marginBottom: "16px",
+                      letterSpacing: "-0.01em",
+                      textTransform: "none",
+                    }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                    }}
+                  >
+                    {section.links.map((link, linkIdx) => (
+                      <span
+                        key={linkIdx}
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "20px",
+                          fontWeight: 400,
+                          color: "#0D3CFC",
+                          letterSpacing: "-0.01em",
+                          cursor: "pointer",
+                          textTransform: "none",
+                        }}
+                      >
+                        {link}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* MENURU Text - 450px, left aligned */}
+          <div
+            ref={menuruFooterRef}
+            style={{
+              width: "100%",
+              padding: "20px 40px 80px 40px",
+              backgroundColor: "#ffffff",
+              overflow: "hidden",
+              display: "flex",
+              justifyContent: "flex-start",
+              minHeight: "300px",
+            }}
+          >
+            <span
+              ref={menuruTextRef}
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "450px",
+                fontWeight: 700,
+                color: "#0D3CFC",
+                letterSpacing: "-0.02em",
+                textTransform: "none",
+                lineHeight: "0.8",
+                display: "block",
+                textAlign: "left",
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+              }}
+            >
+              Menuru
+            </span>
+          </div>
         </div>
       </div>
     </>
