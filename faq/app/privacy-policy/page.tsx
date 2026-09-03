@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 
 export default function PrivacyPolicyPage() {
@@ -9,6 +10,7 @@ export default function PrivacyPolicyPage() {
   const homeButtonRef = useRef<HTMLDivElement>(null);
   const privacyWrapperRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const privacyTextRef = useRef<HTMLDivElement>(null);
   
   const [showCookiePopup, setShowCookiePopup] = useState(false);
 
@@ -53,6 +55,25 @@ export default function PrivacyPolicyPage() {
       setShowCookiePopup(false);
     }
   };
+
+  // Animate Privacy Policy text on load
+  useEffect(() => {
+    if (privacyTextRef.current) {
+      gsap.fromTo(privacyTextRef.current,
+        {
+          opacity: 0,
+          y: 50,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.3,
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -218,6 +239,9 @@ export default function PrivacyPolicyPage() {
     </svg>
   );
 
+  // Navbar items
+  const navItems = ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Live Chat"];
+
   return (
     <div
       style={{
@@ -330,6 +354,77 @@ export default function PrivacyPolicyPage() {
         </div>
       )}
 
+      {/* NAVBAR - Like main page */}
+      <div
+        style={{
+          position: "fixed",
+          top: "40px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          gap: "24px",
+          padding: "12px 24px",
+          borderRadius: "16px",
+          backgroundColor: "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          transition: "all 0.3s ease",
+          pointerEvents: "auto",
+        }}
+      >
+        <Link href="/shop">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Shop</span>
+        </Link>
+        <Link href="/note">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Note</span>
+        </Link>
+        <Link href="/calendar">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Calendar</span>
+        </Link>
+        <Link href="/blog">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Blog</span>
+        </Link>
+        <Link href="/donation">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Donation</span>
+        </Link>
+        <Link href="/community">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Community</span>
+        </Link>
+        <Link href="/live-chat-agent">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Live Chat Agent</span>
+        </Link>
+        <Link href="/live-chat">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#ffffff", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", opacity: 0.7, transition: "opacity 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+          >Live Chat</span>
+        </Link>
+      </div>
+
+      {/* MAIN CONTENT - Horizontal scroll */}
       <div
         ref={containerRef}
         style={{
@@ -337,6 +432,7 @@ export default function PrivacyPolicyPage() {
           display: "flex",
           alignItems: "center",
           willChange: "transform",
+          paddingTop: "80px",
         }}
       >
         <div
@@ -394,12 +490,13 @@ export default function PrivacyPolicyPage() {
               <span>Halaman Utama</span>
             </div>
 
-            {/* Teks PRIVACY POLICY yang besar */}
+            {/* Teks PRIVACY POLICY yang besar - 450px */}
             <div
+              ref={privacyTextRef}
               style={{
                 fontWeight: "700",
-                fontSize: "700px",
-                lineHeight: "1",
+                fontSize: "450px",
+                lineHeight: "0.9",
                 color: "#ffffff",
                 whiteSpace: "nowrap",
               }}
@@ -408,370 +505,566 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
 
-          {/* Section 1 - Pendahuluan */}
+          {/* KONTEN PRIVACY POLICY dengan format makalah */}
           <div
             style={{
-              width: "650px",
+              width: "800px",
               flexShrink: 0,
+              padding: "40px 0",
             }}
           >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              1. Pendahuluan
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1.5rem",
-            }}>
-              Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
-            </p>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              Dengan mengakses atau menggunakan Layanan kami, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju dengan bagian mana pun, Anda tidak boleh mengakses layanan.
-            </p>
-          </div>
+            {/* 1. Pendahuluan */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                1. Pendahuluan
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                1.1. Latar Belakang
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+              }}>
+                Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami. Privasi Anda adalah prioritas utama kami.
+              </p>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                1.2. Ruang Lingkup
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Kebijakan ini berlaku untuk semua pengguna yang mengakses atau menggunakan Layanan kami, termasuk situs web, aplikasi mobile, dan fitur-fitur lainnya yang terkait dengan platform kami.
+              </p>
+            </div>
 
-          {/* Section 2 - Informasi yang Dikumpulkan */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              2. Informasi yang Kami Kumpulkan
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              <strong style={{ color: "#ffffff" }}>Informasi yang Anda Berikan:</strong>
-            </p>
-            <ul style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1.5rem",
-              paddingLeft: "2rem",
-            }}>
-              <li>Informasi akun (nama, email, kata sandi)</li>
-              <li>Profil dan foto profil</li>
-              <li>Komentar dan interaksi dalam notifikasi</li>
-              <li>Reaksi dan like pada konten</li>
-              <li>Komunikasi dengan tim dukungan</li>
-            </ul>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              <strong style={{ color: "#ffffff" }}>Informasi yang Dikumpulkan Secara Otomatis:</strong>
-            </p>
-            <ul style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-              paddingLeft: "2rem",
-            }}>
-              <li>Data penggunaan (waktu akses, fitur yang digunakan)</li>
-              <li>Informasi perangkat (tipe perangkat, sistem operasi)</li>
-              <li>Alamat IP dan data lokasi umum</li>
-              <li>Cookie dan teknologi pelacakan serupa</li>
-            </ul>
-          </div>
+            {/* 2. Informasi yang Dikumpulkan */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                2. Informasi yang Dikumpulkan
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                2.1. Informasi Pribadi
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Kami mengumpulkan informasi yang Anda berikan secara langsung, termasuk:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>2.1.1.</strong> Nama lengkap dan alamat email</li>
+                <li><strong style={{ color: "#ffffff" }}>2.1.2.</strong> Kata sandi yang dienkripsi</li>
+                <li><strong style={{ color: "#ffffff" }}>2.1.3.</strong> Foto profil dan informasi biografi</li>
+                <li><strong style={{ color: "#ffffff" }}>2.1.4.</strong> Komentar, interaksi, dan reaksi pada konten</li>
+                <li><strong style={{ color: "#ffffff" }}>2.1.5.</strong> Komunikasi dengan tim dukungan kami</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                2.2. Informasi Otomatis
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Kami juga mengumpulkan informasi secara otomatis saat Anda menggunakan Layanan:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>2.2.1.</strong> Data penggunaan (waktu akses, fitur yang digunakan)</li>
+                <li><strong style={{ color: "#ffffff" }}>2.2.2.</strong> Informasi perangkat (tipe perangkat, sistem operasi, versi browser)</li>
+                <li><strong style={{ color: "#ffffff" }}>2.2.3.</strong> Alamat IP dan data lokasi umum</li>
+                <li><strong style={{ color: "#ffffff" }}>2.2.4.</strong> Cookie dan teknologi pelacakan serupa</li>
+              </ul>
+            </div>
 
-          {/* Section 3 - Penggunaan Informasi */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              3. Penggunaan Informasi
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              Kami menggunakan informasi yang dikumpulkan untuk:
-            </p>
-            <ul style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-              paddingLeft: "2rem",
-            }}>
-              <li>Menyediakan, memelihara, dan meningkatkan Layanan</li>
-              <li>Mengirimkan notifikasi dan pembaruan penting</li>
-              <li>Menanggapi komentar, pertanyaan, dan permintaan Anda</li>
-              <li>Memantau dan menganalisis tren, penggunaan, dan aktivitas</li>
-              <li>Mendeteksi, mencegah, dan mengatasi masalah teknis atau keamanan</li>
-              <li>Mematuhi kewajiban hukum</li>
-            </ul>
-          </div>
+            {/* 3. Penggunaan Informasi */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                3. Penggunaan Informasi
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                3.1. Tujuan Penggunaan
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Informasi yang kami kumpulkan digunakan untuk:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>3.1.1.</strong> Menyediakan, memelihara, dan meningkatkan Layanan</li>
+                <li><strong style={{ color: "#ffffff" }}>3.1.2.</strong> Mengirimkan notifikasi dan pembaruan penting</li>
+                <li><strong style={{ color: "#ffffff" }}>3.1.3.</strong> Menanggapi komentar, pertanyaan, dan permintaan Anda</li>
+                <li><strong style={{ color: "#ffffff" }}>3.1.4.</strong> Memonitor dan menganalisis tren, penggunaan, dan aktivitas</li>
+                <li><strong style={{ color: "#ffffff" }}>3.1.5.</strong> Mendeteksi, mencegah, dan mengatasi masalah teknis atau keamanan</li>
+                <li><strong style={{ color: "#ffffff" }}>3.1.6.</strong> Mematuhi kewajiban hukum yang berlaku</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                3.2. Dasar Hukum
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Kami memproses informasi pribadi Anda berdasarkan persetujuan Anda, pelaksanaan kontrak, kepatuhan terhadap kewajiban hukum, dan kepentingan sah kami dalam menyediakan Layanan yang aman dan efektif.
+              </p>
+            </div>
 
-          {/* Section 4 - Penyimpanan dan Keamanan */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              4. Penyimpanan dan Keamanan Data
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1.5rem",
-            }}>
-              Kami menggunakan layanan Firebase dari Google untuk menyimpan data Anda. Data disimpan di server yang aman dengan enkripsi dan protokol keamanan industri standar. Namun, tidak ada metode transmisi melalui internet atau metode penyimpanan elektronik yang 100% aman.
-            </p>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              Kami akan menyimpan informasi pribadi Anda selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan Privasi ini, kecuali periode penyimpanan yang lebih lama diperlukan atau diizinkan oleh hukum.
-            </p>
-          </div>
+            {/* 4. Penyimpanan dan Keamanan */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                4. Penyimpanan dan Keamanan Data
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                4.1. Metode Penyimpanan
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+              }}>
+                Kami menggunakan layanan Firebase dari Google untuk menyimpan data Anda. Data disimpan di server yang aman dengan enkripsi dan protokol keamanan industri standar. Kami menerapkan langkah-langkah keamanan yang tepat untuk melindungi terhadap akses, perubahan, pengungkapan, atau penghancuran data yang tidak sah.
+              </p>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                4.2. Retensi Data
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Kami akan menyimpan informasi pribadi Anda selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan Privasi ini, kecuali periode penyimpanan yang lebih lama diperlukan atau diizinkan oleh hukum. Setelah tujuan penggunaan selesai, kami akan menghapus atau menganonimkan data Anda.
+              </p>
+            </div>
 
-          {/* Section 5 - Berbagi Informasi */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              5. Berbagi Informasi
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              Kami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga. Kami dapat berbagi informasi dalam situasi berikut:
-            </p>
-            <ul style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-              paddingLeft: "2rem",
-            }}>
-              <li>Dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan Layanan</li>
-              <li>Jika diwajibkan oleh hukum atau untuk merespons proses hukum</li>
-              <li>Untuk melindungi hak, properti, atau keselamatan kami atau orang lain</li>
-              <li>Dengan persetujuan Anda</li>
-            </ul>
-          </div>
+            {/* 5. Berbagi Informasi */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                5. Berbagi Informasi
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                5.1. Pihak Ketiga
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Kami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga. Namun, kami dapat berbagi informasi dalam situasi berikut:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>5.1.1.</strong> Dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan Layanan</li>
+                <li><strong style={{ color: "#ffffff" }}>5.1.2.</strong> Jika diwajibkan oleh hukum atau untuk merespons proses hukum</li>
+                <li><strong style={{ color: "#ffffff" }}>5.1.3.</strong> Untuk melindungi hak, properti, atau keselamatan kami atau orang lain</li>
+                <li><strong style={{ color: "#ffffff" }}>5.1.4.</strong> Dengan persetujuan eksplisit Anda</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                5.2. Transfer Internasional
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Informasi Anda dapat ditransfer ke dan disimpan di server yang berlokasi di luar negara Anda. Kami memastikan bahwa transfer tersebut dilindungi oleh perjanjian yang sesuai dan mematuhi standar perlindungan data yang berlaku.
+              </p>
+            </div>
 
-          {/* Section 6 - Hak Privasi */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              6. Hak Privasi Anda
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              Tergantung pada lokasi Anda, Anda mungkin memiliki hak tertentu terkait informasi pribadi Anda, termasuk:
-            </p>
-            <ul style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1.5rem",
-              paddingLeft: "2rem",
-            }}>
-              <li>Hak untuk mengakses informasi pribadi Anda</li>
-              <li>Hak untuk memperbaiki informasi yang tidak akurat</li>
-              <li>Hak untuk menghapus informasi pribadi Anda</li>
-              <li>Hak untuk membatasi atau menolak pemrosesan</li>
-              <li>Hak untuk portabilitas data</li>
-            </ul>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              Untuk menggunakan hak-hak ini, silakan hubungi kami di privacy@wawa44.com
-            </p>
-          </div>
+            {/* 6. Hak Privasi */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                6. Hak Privasi Anda
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                6.1. Hak Pengguna
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Tergantung pada lokasi Anda, Anda mungkin memiliki hak tertentu terkait informasi pribadi Anda, termasuk:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>6.1.1.</strong> Hak untuk mengakses informasi pribadi Anda</li>
+                <li><strong style={{ color: "#ffffff" }}>6.1.2.</strong> Hak untuk memperbaiki informasi yang tidak akurat</li>
+                <li><strong style={{ color: "#ffffff" }}>6.1.3.</strong> Hak untuk menghapus informasi pribadi Anda</li>
+                <li><strong style={{ color: "#ffffff" }}>6.1.4.</strong> Hak untuk membatasi atau menolak pemrosesan</li>
+                <li><strong style={{ color: "#ffffff" }}>6.1.5.</strong> Hak untuk portabilitas data</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                6.2. Cara Menggunakan Hak
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Untuk menggunakan hak-hak ini, silakan hubungi kami melalui informasi kontak yang tercantum di bagian 9. Kami akan merespons permintaan Anda dalam waktu 30 hari sesuai dengan peraturan yang berlaku.
+              </p>
+            </div>
 
-          {/* Section 7 - Cookie */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              7. Cookie dan Teknologi Pelacakan
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              Kami menggunakan cookie dan teknologi serupa untuk melacak aktivitas di Layanan kami dan menyimpan informasi tertentu. Anda dapat menginstruksikan browser Anda untuk menolak semua cookie atau untuk menunjukkan kapan cookie dikirim. Namun, jika Anda tidak menerima cookie, beberapa bagian dari Layanan kami mungkin tidak berfungsi dengan baik.
-            </p>
-          </div>
+            {/* 7. Cookie dan Teknologi Pelacakan */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                7. Cookie dan Teknologi Pelacakan
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                7.1. Jenis Cookie
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Kami menggunakan berbagai jenis cookie untuk meningkatkan pengalaman Anda:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>7.1.1.</strong> <strong>Cookie Esensial:</strong> Diperlukan untuk fungsi dasar Layanan</li>
+                <li><strong style={{ color: "#ffffff" }}>7.1.2.</strong> <strong>Cookie Preferensi:</strong> Mengingat pengaturan dan preferensi Anda</li>
+                <li><strong style={{ color: "#ffffff" }}>7.1.3.</strong> <strong>Cookie Analitik:</strong> Membantu kami memahami bagaimana Anda menggunakan Layanan</li>
+                <li><strong style={{ color: "#ffffff" }}>7.1.4.</strong> <strong>Cookie Pemasaran:</strong> Digunakan untuk menampilkan konten yang relevan</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                7.2. Kontrol Cookie
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Anda dapat menginstruksikan browser Anda untuk menolak semua cookie atau untuk menunjukkan kapan cookie dikirim. Namun, jika Anda tidak menerima cookie, beberapa bagian dari Layanan kami mungkin tidak berfungsi dengan baik. Anda juga dapat mengelola preferensi cookie melalui pengaturan browser Anda.
+              </p>
+            </div>
 
-          {/* Section 8 - Perubahan Kebijakan */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              8. Perubahan Kebijakan
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang perubahan dengan memposting Kebijakan Privasi baru di halaman ini dan memperbarui tanggal "Terakhir diperbarui". Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan.
-            </p>
-          </div>
+            {/* 8. Perubahan Kebijakan */}
+            <div style={{ marginBottom: "50px" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                8. Perubahan Kebijakan
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                8.1. Pembaruan Kebijakan
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+              }}>
+                Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang perubahan dengan memposting Kebijakan Privasi baru di halaman ini dan memperbarui tanggal "Terakhir diperbarui".
+              </p>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                8.2. Pemberitahuan
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan. Perubahan akan berlaku efektif segera setelah diposting di halaman ini. Penggunaan Layanan Anda yang berkelanjutan setelah perubahan tersebut merupakan penerimaan Anda terhadap Kebijakan Privasi yang diperbarui.
+              </p>
+            </div>
 
-          {/* Section 9 - Kontak */}
-          <div
-            style={{
-              width: "650px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ 
-              fontWeight: "600", 
-              fontSize: "64px", 
-              margin: "0 0 2rem 0",
-              color: "#ffffff",
-            }}>
-              9. Hubungi Kami
-            </h2>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "1rem",
-            }}>
-              Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami:
-            </p>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "0.5rem",
-            }}>
-              <strong>Email:</strong> privacy@wawa44.com
-            </p>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: "0.5rem",
-            }}>
-              <strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta, Indonesia
-            </p>
-            <p style={{ 
-              fontWeight: "400",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "rgba(255, 255, 255, 0.85)",
-              marginBottom: 0,
-            }}>
-              <strong>Telepon:</strong> +62 21 1234 5678
-            </p>
+            {/* 9. Hubungi Kami */}
+            <div style={{ marginBottom: "0" }}>
+              <h2 style={{ 
+                fontWeight: "600", 
+                fontSize: "42px", 
+                margin: "0 0 24px 0",
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+              }}>
+                9. Hubungi Kami
+              </h2>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                9.1. Informasi Kontak
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "12px",
+              }}>
+                Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami melalui:
+              </p>
+              <ul style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "20px",
+                paddingLeft: "2rem",
+              }}>
+                <li><strong style={{ color: "#ffffff" }}>9.1.1.</strong> <strong>Email:</strong> privacy@wawa44.com</li>
+                <li><strong style={{ color: "#ffffff" }}>9.1.2.</strong> <strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta, Indonesia</li>
+                <li><strong style={{ color: "#ffffff" }}>9.1.3.</strong> <strong>Telepon:</strong> +62 21 1234 5678</li>
+              </ul>
+              
+              <h3 style={{
+                fontWeight: "500",
+                fontSize: "22px",
+                color: "#ffffff",
+                margin: "0 0 12px 0",
+                opacity: 0.9,
+              }}>
+                9.2. Jam Operasional
+              </h3>
+              <p style={{ 
+                fontWeight: "400",
+                fontSize: "16px",
+                lineHeight: "1.8",
+                color: "rgba(255, 255, 255, 0.8)",
+                marginBottom: "0",
+              }}>
+                Tim dukungan kami tersedia Senin-Jumat, 09.00-17.00 WIB. Kami akan merespons pertanyaan Anda dalam waktu 2x24 jam kerja.
+              </p>
+            </div>
           </div>
 
           {/* Arrow dan Teks Policy Lainnya */}
@@ -829,6 +1122,74 @@ export default function PrivacyPolicyPage() {
           >
             MENURU
           </div>
+        </div>
+      </div>
+
+      {/* FOOTER - Like main page */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "20px 40px",
+          backgroundColor: "rgba(0,0,0,0.8)",
+          backdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+          zIndex: 50,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: "32px",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", fontFamily: "Helvetica, Arial, sans-serif" }}>
+            © 2026 Menuru
+          </span>
+          <Link href="/privacy-policy">
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            >Privacy Policy</span>
+          </Link>
+          <Link href="/terms">
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            >Terms of Service</span>
+          </Link>
+          <Link href="/cookies">
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            >Cookies Policy</span>
+          </Link>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+          }}
+        >
+          <Link href="/contact">
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            >Contact</span>
+          </Link>
+          <Link href="/about">
+            <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "Helvetica, Arial, sans-serif", transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+            >About</span>
+          </Link>
         </div>
       </div>
     </div>
