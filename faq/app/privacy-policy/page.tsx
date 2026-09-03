@@ -1910,7 +1910,7 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - Menuru, Shop, Note
+  // Preloader - SINGLE: Shop lalu Note (tidak double)
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
@@ -2352,7 +2352,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Shop
+            Note
           </span>
         </div>
       </div>
@@ -2401,7 +2401,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Shop
+            Note
           </span>
         </div>
       </div>
@@ -2628,49 +2628,35 @@ export default function PrivacyPolicyPage() {
           gap: "40px",
           marginTop: "-40px",
         }}>
-          {/* SIDEBAR - KIRI BAWAH - TIDAK IKUT SCROLL KE ATAS - HANYA TEKS */}
+          {/* SIDEBAR - KIRI - HANYA TEKS, TANPA DESIGN */}
           <div
             ref={sidebarRef}
             style={{
-              width: "250px",
+              width: "280px",
               flexShrink: 0,
               position: "sticky",
               top: "120px",
               alignSelf: "flex-start",
               maxHeight: "calc(100vh - 160px)",
               overflowY: "auto",
-              paddingRight: "15px",
-              borderRight: "1px solid rgba(13,60,252,0.15)",
+              paddingRight: "20px",
               opacity: 0,
             }}
             className="sidebar-scroll"
           >
-            <div style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "12px",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              paddingBottom: "6px",
-              borderBottom: "2px solid #0D3CFC",
-            }}>
-              Daftar Isi
-            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {privacyContent.map((section, index) => (
                 <React.Fragment key={index}>
-                  {/* Judul Utama - Hanya Teks */}
+                  {/* Judul Utama - Hanya Teks, Besar */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
-                      padding: "4px 8px",
+                      padding: "6px 0",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
-                      fontSize: "13px",
+                      fontSize: "15px",
                       fontWeight: activeSection === index ? 600 : 400,
-                      color: activeSection === index ? "#0D3CFC" : "#555",
+                      color: activeSection === index ? "#0D3CFC" : "#444",
                       transition: "color 0.2s ease",
                     }}
                   >
@@ -2682,10 +2668,10 @@ export default function PrivacyPolicyPage() {
                       key={`${index}-${subIdx}`}
                       onClick={() => scrollToSection(index)}
                       style={{
-                        padding: "3px 8px 3px 20px",
+                        padding: "3px 0 3px 16px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
-                        fontSize: "12px",
+                        fontSize: "13px",
                         fontWeight: activeSection === index ? 500 : 300,
                         color: activeSection === index ? "#0D3CFC" : "#888",
                         transition: "color 0.2s ease",
@@ -2707,7 +2693,7 @@ export default function PrivacyPolicyPage() {
               paddingBottom: "60px",
             }}
           >
-            {/* Last Update - Otomatis menampilkan tanggal dan admin */}
+            {/* Last Update - Otomatis menampilkan tanggal */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
