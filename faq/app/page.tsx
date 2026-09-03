@@ -1681,6 +1681,7 @@ export default function HomePage(): React.JSX.Element {
   const menuBox2Ref = useRef<HTMLDivElement>(null);
   const menuBox3Ref = useRef<HTMLDivElement>(null);
   const storiesRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   // Set mounted state
   useEffect(() => {
@@ -2438,8 +2439,9 @@ export default function HomePage(): React.JSX.Element {
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER WITH BIG IMAGES */}
         <div
+          ref={footerRef}
           style={{
             width: "100%",
             padding: "60px 40px 40px 40px",
@@ -2447,10 +2449,66 @@ export default function HomePage(): React.JSX.Element {
             borderTop: "1px solid rgba(0,0,0,0.05)",
             marginTop: "20px",
             position: "relative",
+            overflow: "hidden",
           }}
         >
+          {/* Left Image - p0l.jpg */}
           <div
             style={{
+              position: "absolute",
+              left: "-20px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "45%",
+              height: "80%",
+              zIndex: 0,
+              opacity: 1,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt="Left footer image"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                borderRadius: "0",
+              }}
+            />
+          </div>
+
+          {/* Right Image - xxz.jpg */}
+          <div
+            style={{
+              position: "absolute",
+              right: "-20px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "45%",
+              height: "80%",
+              zIndex: 0,
+              opacity: 1,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt="Right footer image"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                borderRadius: "0",
+              }}
+            />
+          </div>
+
+          {/* Footer Content - on top of images */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
@@ -2458,6 +2516,10 @@ export default function HomePage(): React.JSX.Element {
               margin: "0 auto",
               gap: "40px",
               flexWrap: "wrap",
+              backgroundColor: "rgba(255,255,255,0.85)",
+              padding: "40px 50px",
+              borderRadius: "16px",
+              backdropFilter: "blur(10px)",
             }}
           >
             {footerLinks.map((section, idx) => (
@@ -2508,92 +2570,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             ))}
-
-            {/* SISI KIRI - foto p0l.jpg */}
-            <div
-              style={{
-                position: "absolute",
-                left: "40px",
-                bottom: "120px",
-                width: "180px",
-                height: "180px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-              }}
-            >
-              <img
-                src="/images/p0l.jpg"
-                alt="Menuru left"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* SISI KANAN - foto xxz.jpg */}
-            <div
-              style={{
-                position: "absolute",
-                right: "40px",
-                bottom: "120px",
-                width: "180px",
-                height: "180px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-              }}
-            >
-              <img
-                src="/images/xxz.jpg"
-                alt="Menuru right"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* SISI KIRI ATAS - Menuru besar */}
-            <div
-              style={{
-                position: "absolute",
-                left: "40px",
-                top: "-20px",
-                fontSize: "120px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                opacity: 0.08,
-                lineHeight: 1,
-                pointerEvents: "none",
-              }}
-            >
-              Menuru
-            </div>
-
-            {/* SISI KANAN ATAS - Menuru besar */}
-            <div
-              style={{
-                position: "absolute",
-                right: "40px",
-                top: "-20px",
-                fontSize: "120px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                opacity: 0.08,
-                lineHeight: 1,
-                pointerEvents: "none",
-              }}
-            >
-              Menuru
-            </div>
           </div>
         </div>
 
@@ -2830,7 +2806,7 @@ export default function HomePage(): React.JSX.Element {
             ref={storiesRef}
             style={{
               position: "absolute",
-              left: "720px",  
+                left: "720px",  
               top: "180px",
               display: "flex",
               flexDirection: "column",
@@ -2951,25 +2927,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 2 - #C8EEFF, di bawah stories */}
           <div
             ref={menuBox2Ref}
-            style={{
-              position: "absolute",
-              left: "720px",
-              top: "260px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
-              borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
-              width: "auto",
-              minHeight: "100px",
+  style={{
+    position: "absolute",
+    left: "720px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES
+    top: "260px",               // <-- JARAK DARI STORIES (180px + 80px)
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "30px",
+    border: "2px solid #C8EEFF",
+    borderRadius: "12px",
+    padding: "20px 36px",
+    backgroundColor: "#C8EEFF",
+    cursor: "pointer",
+    opacity: 0,
+    transform: "scale(0.95)",
+    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+    maxWidth: "750px",
+    width: "auto",
+    minHeight: "100px",
             }}
           >
             <div
@@ -3047,25 +3023,25 @@ export default function HomePage(): React.JSX.Element {
           {/* Box 3 - #C8EEFF, di bawah Box 2 dengan jarak */}
           <div
             ref={menuBox3Ref}
-            style={{
-              position: "absolute",
-              left: "720px",
-              top: "470px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
-              borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
-              width: "auto",
-              minHeight: "100px",
+  style={{
+    position: "absolute",
+    left: "720px",              // <-- SISI KIRI, SEJAJAR DENGAN STORIES & BOX 2
+    top: "470px",               // <-- JARAK DARI BOX 2 (260px + 140px)
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "30px",
+    border: "2px solid #C8EEFF",
+    borderRadius: "12px",
+    padding: "20px 36px",
+    backgroundColor: "#C8EEFF",
+    cursor: "pointer",
+    opacity: 0,
+    transform: "scale(0.95)",
+    boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+    maxWidth: "750px",
+    width: "auto",
+    minHeight: "100px",
             }}
           >
             <div
