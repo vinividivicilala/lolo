@@ -2439,140 +2439,141 @@ export default function HomePage(): React.JSX.Element {
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER WITH BIG IMAGES */}
-        <div
-          ref={footerRef}
+        {/* FOOTER WITH BIG IMAGES - 2 FOTO DI SAMPING KONTEN FOOTER */}
+<div
+  ref={footerRef}
+  style={{
+    width: "100%",
+    padding: "60px 40px 40px 40px",
+    backgroundColor: "#ffffff",
+    borderTop: "1px solid rgba(0,0,0,0.05)",
+    marginTop: "20px",
+    position: "relative",
+    overflow: "hidden",
+  }}
+>
+  {/* LEFT IMAGE - p0l.jpg */}
+  <div
+    style={{
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "100%",
+      height: "100%",
+      zIndex: 0,
+      display: "flex",
+    }}
+  >
+    {/* Kiri - p0l.jpg */}
+    <div
+      style={{
+        width: "50%",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src="/images/p0l.jpg"
+        alt="Left footer image"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
+    </div>
+    {/* Kanan - xxz.jpg */}
+    <div
+      style={{
+        width: "50%",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src="/images/xxz.jpg"
+        alt="Right footer image"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
+    </div>
+  </div>
+
+  {/* Footer Content - tetap di tengah dengan background transparan */}
+  <div
+    style={{
+      position: "relative",
+      zIndex: 1,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      maxWidth: "1400px",
+      margin: "0 auto",
+      gap: "40px",
+      flexWrap: "wrap",
+      backgroundColor: "rgba(255,255,255,0.75)",
+      padding: "40px 50px",
+      borderRadius: "16px",
+      backdropFilter: "blur(8px)",
+    }}
+  >
+    {footerLinks.map((section, idx) => (
+      <div
+        key={idx}
+        style={{
+          flex: "1",
+          minWidth: "200px",
+        }}
+      >
+        <h3
           style={{
-            width: "100%",
-            padding: "60px 40px 40px 40px",
-            backgroundColor: "#ffffff",
-            borderTop: "1px solid rgba(0,0,0,0.05)",
-            marginTop: "20px",
-            position: "relative",
-            overflow: "hidden",
+            fontFamily: FONT_FAMILY,
+            fontSize: "28px",
+            fontWeight: 600,
+            color: "#000000",
+            margin: 0,
+            marginBottom: "16px",
+            letterSpacing: "-0.01em",
+            textTransform: "none",
           }}
         >
-          {/* Left Image - p0l.jpg */}
-          <div
-            style={{
-              position: "absolute",
-              left: "-20px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "45%",
-              height: "80%",
-              zIndex: 0,
-              opacity: 1,
-            }}
-          >
-            <img
-              src="/images/p0l.jpg"
-              alt="Left footer image"
+          {section.title}
+        </h3>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          {section.links.map((link, linkIdx) => (
+            <span
+              key={linkIdx}
               style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-                borderRadius: "0",
+                fontFamily: FONT_FAMILY,
+                fontSize: "20px",
+                fontWeight: 400,
+                color: "#0D3CFC",
+                letterSpacing: "-0.01em",
+                cursor: "pointer",
+                textTransform: "none",
               }}
-            />
-          </div>
-
-          {/* Right Image - xxz.jpg */}
-          <div
-            style={{
-              position: "absolute",
-              right: "-20px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "45%",
-              height: "80%",
-              zIndex: 0,
-              opacity: 1,
-            }}
-          >
-            <img
-              src="/images/xxz.jpg"
-              alt="Right footer image"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-                borderRadius: "0",
-              }}
-            />
-          </div>
-
-          {/* Footer Content - on top of images */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              maxWidth: "1400px",
-              margin: "0 auto",
-              gap: "40px",
-              flexWrap: "wrap",
-              backgroundColor: "rgba(255,255,255,0.85)",
-              padding: "40px 50px",
-              borderRadius: "16px",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            {footerLinks.map((section, idx) => (
-              <div
-                key={idx}
-                style={{
-                  flex: "1",
-                  minWidth: "200px",
-                }}
-              >
-                <h3
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "28px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    margin: 0,
-                    marginBottom: "16px",
-                    letterSpacing: "-0.01em",
-                    textTransform: "none",
-                  }}
-                >
-                  {section.title}
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  {section.links.map((link, linkIdx) => (
-                    <span
-                      key={linkIdx}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "20px",
-                        fontWeight: 400,
-                        color: "#0D3CFC",
-                        letterSpacing: "-0.01em",
-                        cursor: "pointer",
-                        textTransform: "none",
-                      }}
-                    >
-                      {link}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+            >
+              {link}
+            </span>
+          ))}
         </div>
+      </div>
+    ))}
+  </div>
+</div>
 
+       
         {/* MENURU Text - 450px, left aligned */}
         <div
           ref={menuruFooterRef}
