@@ -1644,6 +1644,7 @@ export default function PrivacyPolicyPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<any[]>([]);
   const [lastUpdate, setLastUpdate] = useState("1 September 2026");
+  const [activeSection, setActiveSection] = useState(0);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1665,6 +1666,8 @@ export default function PrivacyPolicyPage() {
   const privacyTitleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const editButtonRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Default Privacy Policy Content
   const defaultPrivacyContent = [
@@ -1932,7 +1935,7 @@ export default function PrivacyPolicyPage() {
       duration: 0.4,
       ease: "power2.out",
       onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Note";
+        if (textRef.current) textRef.current.textContent = "Shop";
       }
     })
     .to(textRef.current, {
@@ -2045,6 +2048,30 @@ export default function PrivacyPolicyPage() {
     }
   }, [isMenuOpen, isMounted, loading, showMain]);
 
+  // Scroll spy untuk sidebar
+  useEffect(() => {
+    if (!isMounted || loading || !showMain) return;
+
+    const handleScroll = () => {
+      const sectionElements = sectionRefs.current;
+      const scrollPosition = window.scrollY + 100;
+
+      for (let i = sectionElements.length - 1; i >= 0; i--) {
+        const section = sectionElements[i];
+        if (section) {
+          const offsetTop = section.offsetTop;
+          if (scrollPosition >= offsetTop) {
+            setActiveSection(i);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMounted, loading, showMain, privacyContent]);
+
   // GSAP animation for content
   useEffect(() => {
     if (!isMounted || loading || !showMain) return;
@@ -2110,6 +2137,21 @@ export default function PrivacyPolicyPage() {
       );
     }
 
+    // Animasi sidebar
+    const sidebar = sidebarRef.current;
+    if (sidebar) {
+      gsap.fromTo(sidebar,
+        { opacity: 0, x: -30 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.8
+        }
+      );
+    }
+
     // Animasi edit button
     const editButton = editButtonRef.current;
     if (editButton && isAdmin) {
@@ -2120,51 +2162,7 @@ export default function PrivacyPolicyPage() {
           x: 0,
           duration: 0.6,
           ease: "power2.out",
-          delay: 0.8
-        }
-      );
-    }
-
-    // Animasi content sections
-    const sections = contentRef.current?.querySelectorAll('.content-section');
-    if (sections) {
-      gsap.fromTo(sections,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: "power2.out",
-          delay: 0.8,
-          scrollTrigger: {
-            trigger: contentRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
-    // Animasi sub sections
-    const subSections = contentRef.current?.querySelectorAll('.sub-section');
-    if (subSections) {
-      gsap.fromTo(subSections,
-        { opacity: 0, x: -20 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "power2.out",
-          delay: 1,
-          scrollTrigger: {
-            trigger: contentRef.current,
-            start: "top 70%",
-            end: "bottom 30%",
-            toggleActions: "play none none reverse",
-          }
+          delay: 0.9
         }
       );
     }
@@ -2268,6 +2266,14 @@ export default function PrivacyPolicyPage() {
     setPrivacyContent(newContent);
   };
 
+  // Scroll ke section
+  const scrollToSection = (index: number) => {
+    const section = sectionRefs.current[index];
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (!isMounted || loading) {
     return (
       <div
@@ -2310,7 +2316,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2359,7 +2365,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2577,147 +2583,225 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT SECTIONS - DINAIKAN KE ATAS */}
-        <div
-          ref={contentRef}
-          style={{
-            padding: "0 40px 60px 40px",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            width: "100%",
-            marginTop: "-40px",
-          }}
-        >
-          {/* Last Update */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "40px",
-            fontFamily: FONT_FAMILY,
-          }}>
+        {/* CONTENT WITH SIDEBAR */}
+        <div style={{
+          display: "flex",
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "0 40px",
+          gap: "40px",
+          marginTop: "-40px",
+        }}>
+          {/* SIDEBAR - KIRI */}
+          <div
+            ref={sidebarRef}
+            style={{
+              width: "250px",
+              flexShrink: 0,
+              position: "sticky",
+              top: "120px",
+              alignSelf: "flex-start",
+              maxHeight: "calc(100vh - 140px)",
+              overflowY: "auto",
+              paddingRight: "20px",
+              borderRight: "2px solid rgba(13,60,252,0.1)",
+              opacity: 0,
+            }}
+          >
             <div style={{
-              color: "#666",
               fontSize: "14px",
-              fontStyle: "italic",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "16px",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
             }}>
-              Terakhir diperbarui: {lastUpdate}
+              Daftar Isi
             </div>
-            {isAdmin && isEditing && (
-              <div style={{
-                color: "#0D3CFC",
-                fontSize: "14px",
-                fontWeight: 500,
-              }}>
-                Mode Edit Aktif
+            {privacyContent.map((section, index) => (
+              <div
+                key={index}
+                onClick={() => scrollToSection(index)}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  borderRadius: "6px",
+                  marginBottom: "4px",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  fontWeight: activeSection === index ? 600 : 400,
+                  color: activeSection === index ? "#0D3CFC" : "#666",
+                  backgroundColor: activeSection === index ? "rgba(13,60,252,0.08)" : "transparent",
+                  transition: "all 0.3s ease",
+                  borderLeft: activeSection === index ? "3px solid #0D3CFC" : "3px solid transparent",
+                  paddingLeft: activeSection === index ? "9px" : "12px",
+                }}
+                onMouseEnter={(e) => {
+                  if (activeSection !== index) {
+                    e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeSection !== index) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }
+                }}
+              >
+                {index + 1}. {section.title}
               </div>
-            )}
+            ))}
           </div>
 
-          {privacyContent.map((section, index) => (
-            <div key={index} className="content-section" style={{ marginBottom: "50px" }}>
-              {isEditing && isAdmin ? (
-                <input
-                  type="text"
-                  value={section.title}
-                  onChange={(e) => handleTitleChange(index, e.target.value)}
-                  style={{
+          {/* CONTENT - KANAN */}
+          <div
+            ref={contentRef}
+            style={{
+              flex: 1,
+              paddingBottom: "60px",
+            }}
+          >
+            {/* Last Update */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "40px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              <div style={{
+                color: "#666",
+                fontSize: "14px",
+                fontStyle: "italic",
+              }}>
+                Terakhir diperbarui: {lastUpdate}
+              </div>
+              {isAdmin && isEditing && (
+                <div style={{
+                  color: "#0D3CFC",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}>
+                  Mode Edit Aktif
+                </div>
+              )}
+            </div>
+
+            {privacyContent.map((section, index) => (
+              <div
+                key={index}
+                ref={(el) => {
+                  sectionRefs.current[index] = el;
+                }}
+                className="content-section"
+                style={{
+                  marginBottom: "50px",
+                  scrollMarginTop: "100px",
+                }}
+              >
+                {isEditing && isAdmin ? (
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) => handleTitleChange(index, e.target.value)}
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "24px",
+                      letterSpacing: "-0.02em",
+                      border: "2px solid #0D3CFC",
+                      borderRadius: "8px",
+                      padding: "8px 16px",
+                      width: "100%",
+                      backgroundColor: "rgba(13,60,252,0.05)",
+                      outline: "none",
+                    }}
+                  />
+                ) : (
+                  <h2 style={{
                     fontSize: "36px",
                     fontWeight: 700,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
                     marginBottom: "24px",
                     letterSpacing: "-0.02em",
-                    border: "2px solid #0D3CFC",
-                    borderRadius: "8px",
-                    padding: "8px 16px",
-                    width: "100%",
-                    backgroundColor: "rgba(13,60,252,0.05)",
-                    outline: "none",
-                  }}
-                />
-              ) : (
-                <h2 style={{
-                  fontSize: "36px",
-                  fontWeight: 700,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: "24px",
-                  letterSpacing: "-0.02em",
-                }}>
-                  {index + 1}. {section.title}
-                </h2>
-              )}
-              {section.subs.map((sub, subIndex) => (
-                <div key={subIndex} className="sub-section" style={{ marginBottom: "20px", opacity: 0 }}>
-                  {isEditing && isAdmin ? (
-                    <>
-                      <input
-                        type="text"
-                        value={sub.sub}
-                        onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
-                        style={{
+                  }}>
+                    {index + 1}. {section.title}
+                  </h2>
+                )}
+                {section.subs.map((sub, subIndex) => (
+                  <div key={subIndex} className="sub-section" style={{ marginBottom: "20px" }}>
+                    {isEditing && isAdmin ? (
+                      <>
+                        <input
+                          type="text"
+                          value={sub.sub}
+                          onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
+                          style={{
+                            fontSize: "22px",
+                            fontWeight: 600,
+                            color: "#0D3CFC",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: "8px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            padding: "6px 12px",
+                            width: "100%",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                          }}
+                        />
+                        <textarea
+                          value={sub.content}
+                          onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
+                          style={{
+                            fontSize: "18px",
+                            lineHeight: "1.8",
+                            color: "#333",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: 0,
+                            padding: "12px 16px",
+                            paddingLeft: "20px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            width: "100%",
+                            minHeight: "80px",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                            resize: "vertical",
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <h3 style={{
                           fontSize: "22px",
                           fontWeight: 600,
                           color: "#0D3CFC",
                           fontFamily: FONT_FAMILY,
                           marginBottom: "8px",
-                          border: "2px solid #0D3CFC",
-                          borderRadius: "8px",
-                          padding: "6px 12px",
-                          width: "100%",
-                          backgroundColor: "rgba(13,60,252,0.05)",
-                          outline: "none",
-                        }}
-                      />
-                      <textarea
-                        value={sub.content}
-                        onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
-                        style={{
+                        }}>
+                          {sub.sub}
+                        </h3>
+                        <p style={{
                           fontSize: "18px",
                           lineHeight: "1.8",
                           color: "#333",
                           fontFamily: FONT_FAMILY,
                           marginBottom: 0,
-                          padding: "12px 16px",
                           paddingLeft: "20px",
-                          border: "2px solid #0D3CFC",
-                          borderRadius: "8px",
-                          width: "100%",
-                          minHeight: "80px",
-                          backgroundColor: "rgba(13,60,252,0.05)",
-                          outline: "none",
-                          resize: "vertical",
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <h3 style={{
-                        fontSize: "22px",
-                        fontWeight: 600,
-                        color: "#0D3CFC",
-                        fontFamily: FONT_FAMILY,
-                        marginBottom: "8px",
-                      }}>
-                        {sub.sub}
-                      </h3>
-                      <p style={{
-                        fontSize: "18px",
-                        lineHeight: "1.8",
-                        color: "#333",
-                        fontFamily: FONT_FAMILY,
-                        marginBottom: 0,
-                        paddingLeft: "20px",
-                      }}>
-                        {sub.content}
-                      </p>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+                        }}>
+                          {sub.content}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* LIVE CHAT AGENT */}
@@ -3420,11 +3504,11 @@ export default function PrivacyPolicyPage() {
         }
 
         .content-section {
-          opacity: 0;
+          opacity: 1;
         }
 
         .sub-section {
-          opacity: 0;
+          opacity: 1;
         }
 
         .chat-messages-container::-webkit-scrollbar,
@@ -3437,6 +3521,18 @@ export default function PrivacyPolicyPage() {
         .chat-messages-container-admin {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
+        }
+
+        /* Scrollbar untuk sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+          width: 3px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: #0D3CFC;
+          border-radius: 10px;
         }
 
         @media (max-width: 1024px) {
@@ -3529,6 +3625,10 @@ export default function PrivacyPolicyPage() {
           .menu-overlay .menu-box3 img {
             width: 75px !important;
             height: 75px !important;
+          }
+          /* Sidebar hidden on tablet */
+          .sidebar-hidden {
+            display: none !important;
           }
         }
         @media (max-width: 768px) {
@@ -3646,6 +3746,10 @@ export default function PrivacyPolicyPage() {
             width: 55px !important;
             height: 55px !important;
           }
+          /* Sidebar hidden on mobile */
+          .sidebar-hidden {
+            display: none !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -3728,6 +3832,10 @@ export default function PrivacyPolicyPage() {
           .menu-overlay .menu-box3 {
             padding: 8px 12px !important;
             min-height: 40px !important;
+          }
+          /* Sidebar hidden on mobile */
+          .sidebar-hidden {
+            display: none !important;
           }
         }
       `}</style>
