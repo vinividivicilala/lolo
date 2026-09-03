@@ -5,10 +5,11 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, getDocs } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { motion } from 'framer-motion';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -58,7 +59,7 @@ const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, 
 
 const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokelinejoin="round"/>
   </svg>
 );
 
@@ -99,49 +100,7 @@ const SaveIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Footer links
-const footerLinks = [
-  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
-  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
-];
-
-// Menu items for drawer
-const menuItems = [
-  { name: "Community", number: "01" },
-  { name: "Blog", number: "02" },
-  { name: "Live Chat", number: "03" },
-  { name: "Live Chat Agent", number: "04" },
-  { name: "Donation", number: "05" },
-  { name: "Contact", number: "06" },
-  { name: "Note", number: "07" }
-];
-
-// ===== PULSING DOTS =====
-const PulsingDots = ({ active }: { active: boolean }) => {
-  if (!active) return <span style={{ color: '#999', fontSize: '11px' }}>● Offline</span>;
-  return (
-    <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
-      <span className="dot" style={{ animationDelay: '0s' }}>●</span>
-      <span className="dot" style={{ animationDelay: '0.2s' }}>●</span>
-      <span className="dot" style={{ animationDelay: '0.4s' }}>●</span>
-      <style>{`
-        .dot {
-          animation: blink 1.4s infinite both;
-          font-size: 9px;
-          color: #22c55e;
-        }
-        @keyframes blink {
-          0% { opacity: 0.2; }
-          20% { opacity: 1; }
-          100% { opacity: 0.2; }
-        }
-      `}</style>
-    </span>
-  );
-};
-
-// ===== INSTAGRAM VERIFIED BADGE =====
+// Instagram Verified Badge
 const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   return (
@@ -193,6 +152,232 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
         </div>
       )}
     </div>
+  );
+};
+
+// ===== PRELOADER =====
+const Preloader = ({ onComplete }: { onComplete: () => void }) => {
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: onComplete
+          });
+        }
+      }
+    });
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Shop";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  }, [onComplete]);
+
+  return (
+    <div
+      ref={preloaderRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+        <span
+          style={{
+            fontSize: "100px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Menuru
+        </span>
+        <span
+          ref={textRef}
+          style={{
+            fontSize: "50px",
+            fontWeight: 600,
+            color: "#000000",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.02em",
+            display: "inline-block",
+            willChange: "transform, opacity",
+          }}
+        >
+          Shop
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ===== SIDEBAR NAVIGATION =====
+const SidebarNav = ({ activeSection, sections }: { activeSection: number; sections: any[] }) => {
+  return (
+    <div style={{
+      position: "fixed",
+      left: "40px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 50,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "6px",
+      maxHeight: "70vh",
+      overflowY: "auto",
+      paddingRight: "20px",
+    }}
+    className="sidebar-scroll"
+    >
+      {sections.map((section, idx) => {
+        const isActive = idx === activeSection;
+        return (
+          <div
+            key={idx}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "2px",
+              opacity: isActive ? 1 : 0.5,
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+              cursor: "pointer",
+              transform: isActive ? "scale(1.02)" : "scale(1)",
+              padding: "2px 0",
+            }}
+            onClick={() => {
+              const element = document.getElementById(`section-${idx}`);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }}
+          >
+            <span style={{
+              fontSize: isActive ? "20px" : "16px",
+              fontWeight: isActive ? 700 : 400,
+              color: isActive ? "#0D3CFC" : "#999",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+              transition: "all 0.3s ease",
+              lineHeight: 1.2,
+            }}>
+              {idx + 1}. {section.title}
+            </span>
+            {section.subs?.slice(0, 2).map((sub: any, subIdx: number) => (
+              <span
+                key={subIdx}
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 300,
+                  color: isActive ? "#0D3CFC" : "#aaa",
+                  fontFamily: FONT_FAMILY,
+                  paddingLeft: "20px",
+                  transition: "color 0.3s ease",
+                  opacity: isActive ? 1 : 0.6,
+                }}
+              >
+                {sub.sub}
+              </span>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ===== PULSING DOTS =====
+const PulsingDots = ({ active }: { active: boolean }) => {
+  if (!active) return <span style={{ color: '#999', fontSize: '11px' }}>● Offline</span>;
+  return (
+    <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+      <span className="dot" style={{ animationDelay: '0s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.2s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.4s' }}>●</span>
+      <style>{`
+        .dot {
+          animation: blink 1.4s infinite both;
+          font-size: 9px;
+          color: #22c55e;
+        }
+        @keyframes blink {
+          0% { opacity: 0.2; }
+          20% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+      `}</style>
+    </span>
   );
 };
 
@@ -1644,6 +1829,8 @@ export default function PrivacyPolicyPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState("");
   const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [isAuthorVerified, setIsAuthorVerified] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -1838,8 +2025,13 @@ export default function PrivacyPolicyPage() {
           if (data.adminName) {
             setAdminName(data.adminName);
           }
+          if (data.adminEmail) {
+            setAdminEmail(data.adminEmail);
+          }
+          if (data.adminEmail === ADMIN_EMAIL) {
+            setIsAuthorVerified(true);
+          }
         }
-        // Set default date if no data
         if (!lastUpdate) {
           const now = new Date();
           setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
@@ -1847,11 +2039,15 @@ export default function PrivacyPolicyPage() {
         if (!adminName) {
           setAdminName(ADMIN_EMAIL);
         }
+        if (!adminEmail) {
+          setAdminEmail(ADMIN_EMAIL);
+        }
       } catch (error) {
         console.error("Error loading privacy content:", error);
         const now = new Date();
         setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
         setAdminName(ADMIN_EMAIL);
+        setAdminEmail(ADMIN_EMAIL);
       }
     };
     loadContent();
@@ -1866,16 +2062,21 @@ export default function PrivacyPolicyPage() {
       const dateStr = now.toLocaleDateString('id-ID', { 
         day: 'numeric', 
         month: 'long', 
-        year: 'numeric' 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
       await setDoc(docRef, {
         content: privacyContent,
         lastUpdate: dateStr,
-        adminName: ADMIN_EMAIL,
+        adminName: user?.displayName || user?.email || ADMIN_EMAIL,
+        adminEmail: user?.email || ADMIN_EMAIL,
         updatedAt: serverTimestamp()
       });
       setLastUpdate(dateStr);
-      setAdminName(ADMIN_EMAIL);
+      setAdminName(user?.displayName || user?.email || ADMIN_EMAIL);
+      setAdminEmail(user?.email || ADMIN_EMAIL);
+      setIsAuthorVerified(user?.email === ADMIN_EMAIL);
       setIsEditing(false);
       alert("Konten Privacy Policy berhasil disimpan!");
     } catch (error) {
@@ -1895,22 +2096,40 @@ export default function PrivacyPolicyPage() {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
-        setIsAdmin(currentUser.email === ADMIN_EMAIL);
+        const isAdminUser = currentUser.email === ADMIN_EMAIL;
+        setIsAdmin(isAdminUser);
         try {
           const userRef = doc(db, "users", currentUser.uid);
-          await updateDoc(userRef, {
-            online: true,
-            lastSeen: serverTimestamp(),
-          });
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              id: currentUser.uid,
+              name: currentUser.displayName || currentUser.email || "",
+              email: currentUser.email || "",
+              photoURL: currentUser.photoURL || "",
+              createdAt: serverTimestamp(),
+              isAdmin: isAdminUser,
+              online: true,
+              lastSeen: serverTimestamp(),
+              typing: false,
+              blocked: [],
+              blockedBy: []
+            });
+          } else {
+            await updateDoc(userRef, {
+              online: true,
+              lastSeen: serverTimestamp(),
+            });
+          }
         } catch (error) {
-          console.error("Error updating online status:", error);
+          console.error("Error updating user:", error);
         }
       }
     });
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - SINGLE: Menuru, Shop, Note (1x masing-masing)
+  // Preloader
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
@@ -2082,7 +2301,7 @@ export default function PrivacyPolicyPage() {
     }
   }, [isMenuOpen, isMounted, loading, showMain]);
 
-  // Scroll spy untuk sidebar - mendeteksi judul dan sub judul
+  // Scroll spy untuk sidebar
   useEffect(() => {
     if (!isMounted || loading || !showMain) return;
 
@@ -2103,7 +2322,6 @@ export default function PrivacyPolicyPage() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Initial check
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMounted, loading, showMain, privacyContent]);
@@ -2310,102 +2528,26 @@ export default function PrivacyPolicyPage() {
     }
   };
 
-  if (!isMounted || loading) {
-    return (
-      <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            Menuru
-          </span>
-          <span
-            ref={textRef}
-            style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-            }}
-          >
-            Shop
-          </span>
-        </div>
-      </div>
-    );
-  }
+  // Menu items
+  const menuItems = [
+    { name: "Community", number: "01" },
+    { name: "Blog", number: "02" },
+    { name: "Live Chat", number: "03" },
+    { name: "Live Chat Agent", number: "04" },
+    { name: "Donation", number: "05" },
+    { name: "Contact", number: "06" },
+    { name: "Note", number: "07" }
+  ];
 
-  if (!showMain) {
-    return (
-      <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            Menuru
-          </span>
-          <span
-            ref={textRef}
-            style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-            }}
-          >
-            Shop
-          </span>
-        </div>
-      </div>
-    );
+  // Footer links
+  const footerLinks = [
+    { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+    { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
+    { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+  ];
+
+  if (!isMounted || loading || !showMain) {
+    return <Preloader onComplete={() => {}} />;
   }
 
   return (
@@ -2417,6 +2559,384 @@ export default function PrivacyPolicyPage() {
         <meta name="theme-color" content="#0D3CFC" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
       </Head>
+
+      <style jsx global>{`
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
+        * {
+          background-color: transparent;
+        }
+
+        .menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+
+        .split-char-livechat {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .content-section {
+          opacity: 1;
+        }
+
+        .sub-section {
+          opacity: 1;
+        }
+
+        .chat-messages-container::-webkit-scrollbar,
+        .chat-messages-container-admin::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .chat-messages-container,
+        .chat-messages-container-admin {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        /* Scrollbar untuk sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+          width: 3px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: #0D3CFC;
+          border-radius: 10px;
+        }
+
+        @media (max-width: 1024px) {
+          .subtitle p {
+            font-size: 48px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 36px !important;
+          }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 140px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .menu-overlay .menu-box3 {
+            right: 40px !important;
+            top: 260px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .sidebar-scroll {
+            width: 200px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .subtitle p {
+            font-size: 36px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+          .menu-overlay {
+            padding: 30px 20px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box2 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box3 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          /* Sidebar hidden on mobile */
+          .sidebar-scroll {
+            display: none !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .subtitle p {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box2 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box3 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          /* Sidebar hidden on mobile */
+          .sidebar-scroll {
+            display: none !important;
+          }
+        }
+      `}</style>
 
       <div
         ref={containerRef}
@@ -2430,576 +2950,6 @@ export default function PrivacyPolicyPage() {
           overflow: "visible",
         }}
       >
-        {/* HERO SECTION */}
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            padding: "40px",
-            backgroundColor: "#ffffff",
-            position: "relative",
-            paddingTop: "120px",
-          }}
-        >
-          <h1
-            ref={titleRef}
-            className="title"
-            style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              padding: "10px 20px",
-              lineHeight: 1,
-              position: "fixed",
-              top: "40px",
-              left: "40px",
-              zIndex: 15,
-              pointerEvents: "none",
-              backdropFilter: "blur(10px)",
-              backgroundColor: "rgba(255,255,255,0.7)",
-              borderRadius: "12px",
-            }}
-          >
-            Menuru
-          </h1>
-
-          <div style={{ 
-            position: "relative", 
-            zIndex: 1,
-            marginTop: "0px",
-          }}>
-            <div
-              ref={subtitleRef}
-              style={{
-                textAlign: "left",
-                position: "relative",
-                opacity: 0,
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "60px",
-                  fontWeight: 400,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1.2,
-                  margin: 0,
-                  padding: 0,
-                  paddingBottom: "20px",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {`You can take notes, find ideas,\nand donate money to those in need`}
-              </p>
-            </div>
-
-            {/* Tombol Let's build now dan Arrow */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
-              <div
-                ref={buttonRef}
-                style={{
-                  display: "inline-block",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "12px 28px",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  opacity: 0,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  Let's build now
-                </span>
-              </div>
-
-              <div
-                ref={arrowRef}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid #0D3CFC",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  width: "50px",
-                  height: "50px",
-                  opacity: 0,
-                }}
-              >
-                <NorthEastArrow size={24} color="#ffffff" />
-              </div>
-
-              {/* Tombol Edit untuk Admin */}
-              {isAdmin && (
-                <div
-                  ref={editButtonRef}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 16px",
-                    border: "2px solid #0D3CFC",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    backgroundColor: isEditing ? "#0D3CFC" : "transparent",
-                    color: isEditing ? "#ffffff" : "#0D3CFC",
-                    opacity: 0,
-                    marginLeft: "auto",
-                  }}
-                  onClick={() => {
-                    if (isEditing) {
-                      saveContent();
-                    } else {
-                      setIsEditing(true);
-                    }
-                  }}
-                >
-                  {isEditing ? (
-                    <>
-                      <SaveIcon size={18} color="#ffffff" />
-                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Simpan</span>
-                    </>
-                  ) : (
-                    <>
-                      <EditIcon size={18} color="#0D3CFC" />
-                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Edit</span>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* PRIVACY POLICY TITLE 250px - DI BAWAH TOMBOL */}
-            <div
-              ref={privacyTitleRef}
-              style={{
-                width: "100%",
-                padding: "30px 0 0 0",
-                backgroundColor: "#ffffff",
-                overflow: "hidden",
-                display: "flex",
-                justifyContent: "flex-start",
-                opacity: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "250px",
-                  fontWeight: 700,
-                  color: "#0D3CFC",
-                  letterSpacing: "-0.02em",
-                  textTransform: "none",
-                  lineHeight: "0.8",
-                  display: "block",
-                  textAlign: "left",
-                  WebkitFontSmoothing: "antialiased",
-                  MozOsxFontSmoothing: "grayscale",
-                }}
-              >
-                Privacy Policy
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* CONTENT WITH SIDEBAR */}
-        <div style={{
-          display: "flex",
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "0 40px",
-          gap: "40px",
-          marginTop: "-40px",
-        }}>
-          {/* SIDEBAR - KIRI - HANYA TEKS, TANPA DESIGN, OTOMATIS DETEKSI JUDUL */}
-          <div
-            ref={sidebarRef}
-            style={{
-              width: "280px",
-              flexShrink: 0,
-              position: "sticky",
-              top: "120px",
-              alignSelf: "flex-start",
-              maxHeight: "calc(100vh - 160px)",
-              overflowY: "auto",
-              paddingRight: "20px",
-              opacity: 0,
-            }}
-            className="sidebar-scroll"
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              {privacyContent.map((section, index) => (
-                <React.Fragment key={index}>
-                  {/* Judul Utama - Hanya Teks */}
-                  <div
-                    onClick={() => scrollToSection(index)}
-                    style={{
-                      padding: "6px 0",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "15px",
-                      fontWeight: activeSection === index ? 600 : 400,
-                      color: activeSection === index ? "#0D3CFC" : "#444",
-                      transition: "color 0.2s ease",
-                    }}
-                  >
-                    {index + 1}. {section.title}
-                  </div>
-                  {/* Sub Judul - Indent */}
-                  {section.subs.map((sub, subIdx) => (
-                    <div
-                      key={`${index}-${subIdx}`}
-                      onClick={() => scrollToSection(index)}
-                      style={{
-                        padding: "3px 0 3px 16px",
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "13px",
-                        fontWeight: activeSection === index ? 500 : 300,
-                        color: activeSection === index ? "#0D3CFC" : "#888",
-                        transition: "color 0.2s ease",
-                      }}
-                    >
-                      {sub.sub}
-                    </div>
-                  ))}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-
-          {/* CONTENT - KANAN */}
-          <div
-            ref={contentRef}
-            style={{
-              flex: 1,
-              paddingBottom: "60px",
-            }}
-          >
-            {/* Last Update - Otomatis menampilkan tanggal dan admin */}
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "40px",
-              fontFamily: FONT_FAMILY,
-              flexWrap: "wrap",
-              gap: "8px",
-            }}>
-              <div style={{
-                color: "#666",
-                fontSize: "14px",
-                fontStyle: "italic",
-              }}>
-                Terakhir diperbarui: {lastUpdate || "1 September 2026"} oleh {adminName || ADMIN_EMAIL}
-              </div>
-              {isAdmin && isEditing && (
-                <div style={{
-                  color: "#0D3CFC",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                }}>
-                  Mode Edit Aktif
-                </div>
-              )}
-            </div>
-
-            {privacyContent.map((section, index) => (
-              <div
-                key={index}
-                ref={(el) => {
-                  sectionRefs.current[index] = el;
-                }}
-                className="content-section"
-                style={{
-                  marginBottom: "50px",
-                  scrollMarginTop: "100px",
-                }}
-              >
-                {isEditing && isAdmin ? (
-                  <input
-                    type="text"
-                    value={section.title}
-                    onChange={(e) => handleTitleChange(index, e.target.value)}
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: 700,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      marginBottom: "24px",
-                      letterSpacing: "-0.02em",
-                      border: "2px solid #0D3CFC",
-                      borderRadius: "8px",
-                      padding: "8px 16px",
-                      width: "100%",
-                      backgroundColor: "rgba(13,60,252,0.05)",
-                      outline: "none",
-                    }}
-                  />
-                ) : (
-                  <h2 style={{
-                    fontSize: "36px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    marginBottom: "24px",
-                    letterSpacing: "-0.02em",
-                  }}>
-                    {index + 1}. {section.title}
-                  </h2>
-                )}
-                {section.subs.map((sub, subIndex) => (
-                  <div key={subIndex} className="sub-section" style={{ marginBottom: "20px" }}>
-                    {isEditing && isAdmin ? (
-                      <>
-                        <input
-                          type="text"
-                          value={sub.sub}
-                          onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
-                          style={{
-                            fontSize: "22px",
-                            fontWeight: 600,
-                            color: "#0D3CFC",
-                            fontFamily: FONT_FAMILY,
-                            marginBottom: "8px",
-                            border: "2px solid #0D3CFC",
-                            borderRadius: "8px",
-                            padding: "6px 12px",
-                            width: "100%",
-                            backgroundColor: "rgba(13,60,252,0.05)",
-                            outline: "none",
-                          }}
-                        />
-                        <textarea
-                          value={sub.content}
-                          onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
-                          style={{
-                            fontSize: "18px",
-                            lineHeight: "1.8",
-                            color: "#333",
-                            fontFamily: FONT_FAMILY,
-                            marginBottom: 0,
-                            padding: "12px 16px",
-                            paddingLeft: "20px",
-                            border: "2px solid #0D3CFC",
-                            borderRadius: "8px",
-                            width: "100%",
-                            minHeight: "80px",
-                            backgroundColor: "rgba(13,60,252,0.05)",
-                            outline: "none",
-                            resize: "vertical",
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <h3 style={{
-                          fontSize: "22px",
-                          fontWeight: 600,
-                          color: "#0D3CFC",
-                          fontFamily: FONT_FAMILY,
-                          marginBottom: "8px",
-                        }}>
-                          {sub.sub}
-                        </h3>
-                        <p style={{
-                          fontSize: "18px",
-                          lineHeight: "1.8",
-                          color: "#333",
-                          fontFamily: FONT_FAMILY,
-                          marginBottom: 0,
-                          paddingLeft: "20px",
-                        }}>
-                          {sub.content}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* LIVE CHAT AGENT */}
-        <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
-        </div>
-
-        {/* FOOTER with Images */}
-        <div
-          style={{
-            width: "100%",
-            padding: "60px 40px 40px 40px",
-            backgroundColor: "#ffffff",
-            borderTop: "1px solid rgba(0,0,0,0.05)",
-            marginTop: "20px",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Foto Kiri */}
-          <div
-            style={{
-              position: "absolute",
-              left: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/p0l.jpg"
-              alt=""
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-
-          {/* Foto Kanan */}
-          <div
-            style={{
-              position: "absolute",
-              right: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/xxz.jpg"
-              alt=""
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              maxWidth: "1400px",
-              margin: "0 auto",
-              gap: "40px",
-              flexWrap: "wrap",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            {footerLinks.map((section, idx) => (
-              <div
-                key={idx}
-                style={{
-                  flex: "1",
-                  minWidth: "200px",
-                }}
-              >
-                <h3
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "28px",
-                    fontWeight: 600,
-                    color: "#000000",
-                    margin: 0,
-                    marginBottom: "16px",
-                    letterSpacing: "-0.01em",
-                    textTransform: "none",
-                  }}
-                >
-                  {section.title}
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  {section.links.map((link, linkIdx) => (
-                    <span
-                      key={linkIdx}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "20px",
-                        fontWeight: 400,
-                        color: "#0D3CFC",
-                        letterSpacing: "-0.01em",
-                        cursor: "pointer",
-                        textTransform: "none",
-                      }}
-                    >
-                      {link}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* MENURU Text - 450px, left aligned */}
-        <div
-          ref={menuruFooterRef}
-          style={{
-            width: "100%",
-            padding: "20px 40px 80px 40px",
-            backgroundColor: "#ffffff",
-            overflow: "hidden",
-            display: "flex",
-            justifyContent: "flex-start",
-            minHeight: "300px",
-          }}
-        >
-          <span
-            ref={menuruTextRef}
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "450px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              letterSpacing: "-0.02em",
-              textTransform: "none",
-              lineHeight: "0.8",
-              display: "block",
-              textAlign: "left",
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
-            }}
-          >
-            Menuru
-          </span>
-        </div>
-
         {/* NAVBAR */}
         <div
           ref={navbarRef}
@@ -3493,385 +3443,594 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
         </div>
+
+        {/* HERO SECTION - dengan teks "Privacy Policy" besar */}
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            paddingTop: "120px",
+          }}
+        >
+          <h1
+            ref={titleRef}
+            className="title"
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: "10px 20px",
+              lineHeight: 1,
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
+              pointerEvents: "none",
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255,255,255,0.7)",
+              borderRadius: "12px",
+            }}
+          >
+            Menuru
+          </h1>
+
+          <div style={{ 
+            position: "relative", 
+            zIndex: 1,
+            marginTop: "0px",
+          }}>
+            <div
+              ref={subtitleRef}
+              style={{
+                textAlign: "left",
+                position: "relative",
+                opacity: 0,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "60px",
+                  fontWeight: 400,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "20px",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {`You can take notes, find ideas,\nand donate money to those in need`}
+              </p>
+            </div>
+
+            {/* Tombol Let's build now dan Arrow */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                  opacity: 0,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Let's build now
+                </span>
+              </div>
+
+              <div
+                ref={arrowRef}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                  opacity: 0,
+                }}
+              >
+                <NorthEastArrow size={24} color="#ffffff" />
+              </div>
+
+              {/* Tombol Edit untuk Admin */}
+              {isAdmin && (
+                <div
+                  ref={editButtonRef}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 16px",
+                    border: "2px solid #0D3CFC",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    backgroundColor: isEditing ? "#0D3CFC" : "transparent",
+                    color: isEditing ? "#ffffff" : "#0D3CFC",
+                    opacity: 0,
+                    marginLeft: "auto",
+                  }}
+                  onClick={() => {
+                    if (isEditing) {
+                      saveContent();
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                >
+                  {isEditing ? (
+                    <>
+                      <SaveIcon size={18} color="#ffffff" />
+                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Simpan</span>
+                    </>
+                  ) : (
+                    <>
+                      <EditIcon size={18} color="#0D3CFC" />
+                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Edit</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* PRIVACY POLICY TITLE 250px */}
+            <div
+              ref={privacyTitleRef}
+              style={{
+                width: "100%",
+                padding: "30px 0 0 0",
+                backgroundColor: "#ffffff",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "flex-start",
+                opacity: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "250px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  lineHeight: "0.8",
+                  display: "block",
+                  textAlign: "left",
+                  WebkitFontSmoothing: "antialiased",
+                  MozOsxFontSmoothing: "grayscale",
+                }}
+              >
+                Privacy Policy
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* CONTENT WITH SIDEBAR - Langsung di bawah Privacy Policy */}
+        <div style={{
+          display: "flex",
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "0 40px",
+          gap: "40px",
+          marginTop: "20px",
+        }}>
+          {/* SIDEBAR - KIRI - Seperti di Pusat Bantuan */}
+          <div
+            ref={sidebarRef}
+            style={{
+              width: "280px",
+              flexShrink: 0,
+              position: "sticky",
+              top: "120px",
+              alignSelf: "flex-start",
+              maxHeight: "calc(100vh - 160px)",
+              overflowY: "auto",
+              paddingRight: "20px",
+              opacity: 0,
+            }}
+            className="sidebar-scroll"
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {privacyContent.map((section, index) => (
+                <div key={index}>
+                  {/* Judul Utama */}
+                  <div
+                    onClick={() => scrollToSection(index)}
+                    style={{
+                      padding: "6px 0",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: activeSection === index ? "18px" : "15px",
+                      fontWeight: activeSection === index ? 700 : 400,
+                      color: activeSection === index ? "#0D3CFC" : "#444",
+                      transition: "color 0.2s ease, font-size 0.2s ease",
+                    }}
+                  >
+                    {index + 1}. {section.title}
+                  </div>
+                  {/* Sub Judul - Maksimal 2 sub pertama */}
+                  {section.subs?.slice(0, 2).map((sub, subIdx) => (
+                    <div
+                      key={`${index}-${subIdx}`}
+                      onClick={() => scrollToSection(index)}
+                      style={{
+                        padding: "3px 0 3px 16px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: activeSection === index ? "14px" : "12px",
+                        fontWeight: activeSection === index ? 500 : 300,
+                        color: activeSection === index ? "#0D3CFC" : "#888",
+                        transition: "color 0.2s ease, font-size 0.2s ease",
+                      }}
+                    >
+                      {sub.sub}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CONTENT - KANAN - Langsung di bawah Privacy Policy */}
+          <div
+            ref={contentRef}
+            style={{
+              flex: 1,
+              paddingBottom: "60px",
+            }}
+          >
+            {/* Last Update dan Author - Seperti di Pusat Bantuan */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "40px",
+              fontFamily: FONT_FAMILY,
+              flexWrap: "wrap",
+              gap: "8px",
+            }}>
+              <div style={{
+                color: "#666",
+                fontSize: "14px",
+                fontStyle: "italic",
+              }}>
+                Last Update: {lastUpdate || "Belum diperbarui"}
+              </div>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#666",
+                fontSize: "14px",
+              }}>
+                <span>Author by</span>
+                <span style={{ fontWeight: 600, color: "#0D3CFC" }}>
+                  {adminName || ADMIN_EMAIL}
+                </span>
+                {isAuthorVerified && <InstagramVerifiedBadge size={16} />}
+                <span style={{ fontSize: "12px", color: "#999" }}>
+                  ({adminEmail || ADMIN_EMAIL})
+                </span>
+              </div>
+              {isAdmin && isEditing && (
+                <div style={{
+                  color: "#0D3CFC",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}>
+                  Mode Edit Aktif
+                </div>
+              )}
+            </div>
+
+            {privacyContent.map((section, index) => (
+              <div
+                key={index}
+                ref={(el) => {
+                  sectionRefs.current[index] = el;
+                }}
+                id={`section-${index}`}
+                className="content-section"
+                style={{
+                  marginBottom: "50px",
+                  scrollMarginTop: "100px",
+                }}
+              >
+                {isEditing && isAdmin ? (
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) => handleTitleChange(index, e.target.value)}
+                    style={{
+                      fontSize: "36px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "24px",
+                      letterSpacing: "-0.02em",
+                      border: "2px solid #0D3CFC",
+                      borderRadius: "8px",
+                      padding: "8px 16px",
+                      width: "100%",
+                      backgroundColor: "rgba(13,60,252,0.05)",
+                      outline: "none",
+                    }}
+                  />
+                ) : (
+                  <h2 style={{
+                    fontSize: "36px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: "24px",
+                    letterSpacing: "-0.02em",
+                  }}>
+                    {index + 1}. {section.title}
+                  </h2>
+                )}
+                {section.subs.map((sub, subIndex) => (
+                  <div key={subIndex} className="sub-section" style={{ marginBottom: "20px" }}>
+                    {isEditing && isAdmin ? (
+                      <>
+                        <input
+                          type="text"
+                          value={sub.sub}
+                          onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
+                          style={{
+                            fontSize: "22px",
+                            fontWeight: 600,
+                            color: "#0D3CFC",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: "8px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            padding: "6px 12px",
+                            width: "100%",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                          }}
+                        />
+                        <textarea
+                          value={sub.content}
+                          onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
+                          style={{
+                            fontSize: "18px",
+                            lineHeight: "1.8",
+                            color: "#333",
+                            fontFamily: FONT_FAMILY,
+                            marginBottom: 0,
+                            padding: "12px 16px",
+                            paddingLeft: "20px",
+                            border: "2px solid #0D3CFC",
+                            borderRadius: "8px",
+                            width: "100%",
+                            minHeight: "80px",
+                            backgroundColor: "rgba(13,60,252,0.05)",
+                            outline: "none",
+                            resize: "vertical",
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <h3 style={{
+                          fontSize: "22px",
+                          fontWeight: 600,
+                          color: "#0D3CFC",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: "8px",
+                        }}>
+                          {sub.sub}
+                        </h3>
+                        <p style={{
+                          fontSize: "18px",
+                          lineHeight: "1.8",
+                          color: "#333",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: 0,
+                          paddingLeft: "20px",
+                        }}>
+                          {sub.content}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* LIVE CHAT AGENT */}
+        <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+        </div>
+
+        {/* FOOTER with Images */}
+        <div
+          style={{
+            width: "100%",
+            padding: "60px 40px 40px 40px",
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Foto Kiri */}
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          {/* Foto Kanan */}
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {footerLinks.map((section, idx) => (
+              <div
+                key={idx}
+                style={{
+                  flex: "1",
+                  minWidth: "200px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                    textTransform: "none",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {section.links.map((link, linkIdx) => (
+                    <span
+                      key={linkIdx}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "20px",
+                        fontWeight: 400,
+                        color: "#0D3CFC",
+                        letterSpacing: "-0.01em",
+                        cursor: "pointer",
+                        textTransform: "none",
+                      }}
+                    >
+                      {link}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* MENURU Text - 450px, left aligned */}
+        <div
+          ref={menuruFooterRef}
+          style={{
+            width: "100%",
+            padding: "20px 40px 80px 40px",
+            backgroundColor: "#ffffff",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "flex-start",
+            minHeight: "300px",
+          }}
+        >
+          <span
+            ref={menuruTextRef}
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "450px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              letterSpacing: "-0.02em",
+              textTransform: "none",
+              lineHeight: "0.8",
+              display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            Menuru
+          </span>
+        </div>
       </div>
-
-      <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-
-        * {
-          background-color: transparent;
-        }
-
-        .menuru-char {
-          display: inline-block;
-          will-change: transform, opacity;
-        }
-
-        .split-char-livechat {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
-        .content-section {
-          opacity: 1;
-        }
-
-        .sub-section {
-          opacity: 1;
-        }
-
-        .chat-messages-container::-webkit-scrollbar,
-        .chat-messages-container-admin::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        .chat-messages-container,
-        .chat-messages-container-admin {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-
-        /* Scrollbar untuk sidebar */
-        .sidebar-scroll::-webkit-scrollbar {
-          width: 3px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: #0D3CFC;
-          border-radius: 10px;
-        }
-
-        @media (max-width: 1024px) {
-          .subtitle p {
-            font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
-          }
-          .menu-overlay {
-            padding: 40px 40px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 36px !important;
-          }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
-          .menu-overlay .menu-box {
-            right: 40px !important;
-            bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 140px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .menu-overlay .menu-box3 {
-            right: 40px !important;
-            top: 260px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .sidebar-scroll {
-            width: 200px !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .subtitle p {
-            font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
-          .menu-overlay {
-            padding: 30px 20px !important;
-            flex-direction: column !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 28px !important;
-          }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
-          .menu-overlay .menu-box {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
-          .menu-overlay .menu-box2 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box3 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
-          }
-          .menu-overlay {
-            padding: 20px 15px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 22px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box2 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box3 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-      `}</style>
     </>
   );
 }
