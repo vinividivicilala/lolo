@@ -9,7 +9,6 @@ import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, add
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import { motion } from 'framer-motion';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -176,7 +175,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    // Menuru tetap di kiri, Shop muncul 1x
+    // Menuru tetap di kiri, Shop muncul 1x, Note muncul 1x
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -260,82 +259,6 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           Shop
         </span>
       </div>
-    </div>
-  );
-};
-
-// ===== SIDEBAR NAVIGATION =====
-const SidebarNav = ({ activeSection, sections }: { activeSection: number; sections: any[] }) => {
-  return (
-    <div style={{
-      position: "fixed",
-      left: "40px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      zIndex: 50,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-start",
-      gap: "6px",
-      maxHeight: "70vh",
-      overflowY: "auto",
-      paddingRight: "20px",
-    }}
-    className="sidebar-scroll"
-    >
-      {sections.map((section, idx) => {
-        const isActive = idx === activeSection;
-        return (
-          <div
-            key={idx}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              gap: "2px",
-              opacity: isActive ? 1 : 0.5,
-              transition: "opacity 0.3s ease, transform 0.3s ease",
-              cursor: "pointer",
-              transform: isActive ? "scale(1.02)" : "scale(1)",
-              padding: "2px 0",
-            }}
-            onClick={() => {
-              const element = document.getElementById(`section-${idx}`);
-              if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
-            }}
-          >
-            <span style={{
-              fontSize: isActive ? "20px" : "16px",
-              fontWeight: isActive ? 700 : 400,
-              color: isActive ? "#0D3CFC" : "#999",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.02em",
-              transition: "all 0.3s ease",
-              lineHeight: 1.2,
-            }}>
-              {idx + 1}. {section.title}
-            </span>
-            {section.subs?.slice(0, 2).map((sub: any, subIdx: number) => (
-              <span
-                key={subIdx}
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 300,
-                  color: isActive ? "#0D3CFC" : "#aaa",
-                  fontFamily: FONT_FAMILY,
-                  paddingLeft: "20px",
-                  transition: "color 0.3s ease",
-                  opacity: isActive ? 1 : 0.6,
-                }}
-              >
-                {sub.sub}
-              </span>
-            ))}
-          </div>
-        );
-      })}
     </div>
   );
 };
@@ -2112,8 +2035,7 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - menggunakan Preloader component
-  // Fungsi untuk menangani preloader selesai
+  // Handle preloader complete
   const handlePreloaderComplete = () => {
     setShowMain(true);
     setTimeout(() => {
@@ -2209,7 +2131,7 @@ export default function PrivacyPolicyPage() {
     }
   }, [isMenuOpen, isMounted, loading, showMain]);
 
-  // Scroll spy untuk sidebar
+  // Scroll spy untuk sidebar - mendeteksi judul dan sub judul
   useEffect(() => {
     if (!isMounted || loading || !showMain) return;
 
@@ -2468,384 +2390,6 @@ export default function PrivacyPolicyPage() {
         <meta name="theme-color" content="#0D3CFC" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
       </Head>
-
-      <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-
-        * {
-          background-color: transparent;
-        }
-
-        .menuru-char {
-          display: inline-block;
-          will-change: transform, opacity;
-        }
-
-        .split-char-livechat {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
-        .content-section {
-          opacity: 1;
-        }
-
-        .sub-section {
-          opacity: 1;
-        }
-
-        .chat-messages-container::-webkit-scrollbar,
-        .chat-messages-container-admin::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        .chat-messages-container,
-        .chat-messages-container-admin {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-
-        /* Scrollbar untuk sidebar */
-        .sidebar-scroll::-webkit-scrollbar {
-          width: 3px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: #0D3CFC;
-          border-radius: 10px;
-        }
-
-        @media (max-width: 1024px) {
-          .subtitle p {
-            font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
-          }
-          .menu-overlay {
-            padding: 40px 40px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 36px !important;
-          }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
-          .menu-overlay .menu-box {
-            right: 40px !important;
-            bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 140px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .menu-overlay .menu-box3 {
-            right: 40px !important;
-            top: 260px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .sidebar-scroll {
-            width: 200px !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .subtitle p {
-            font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
-          .menu-overlay {
-            padding: 30px 20px !important;
-            flex-direction: column !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 28px !important;
-          }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
-          .menu-overlay .menu-box {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
-          .menu-overlay .menu-box2 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box3 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
-          }
-          .menu-overlay {
-            padding: 20px 15px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 22px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box2 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box3 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-      `}</style>
 
       <div
         ref={containerRef}
@@ -3353,7 +2897,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* HERO SECTION - dengan teks "Privacy Policy" besar */}
+        {/* HERO SECTION */}
         <div
           style={{
             minHeight: "100vh",
@@ -3542,7 +3086,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR - Langsung di bawah Privacy Policy */}
+        {/* CONTENT WITH SIDEBAR */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
@@ -3551,7 +3095,7 @@ export default function PrivacyPolicyPage() {
           gap: "40px",
           marginTop: "20px",
         }}>
-          {/* SIDEBAR - KIRI - Seperti di Pusat Bantuan */}
+          {/* SIDEBAR - KIRI - Tetap seperti sebelumnya, tanpa scrollbar */}
           <div
             ref={sidebarRef}
             style={{
@@ -3560,12 +3104,9 @@ export default function PrivacyPolicyPage() {
               position: "sticky",
               top: "120px",
               alignSelf: "flex-start",
-              maxHeight: "calc(100vh - 160px)",
-              overflowY: "auto",
               paddingRight: "20px",
               opacity: 0,
             }}
-            className="sidebar-scroll"
           >
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               {privacyContent.map((section, index) => (
@@ -3585,8 +3126,8 @@ export default function PrivacyPolicyPage() {
                   >
                     {index + 1}. {section.title}
                   </div>
-                  {/* Sub Judul - Maksimal 2 sub pertama */}
-                  {section.subs?.slice(0, 2).map((sub, subIdx) => (
+                  {/* Sub Judul */}
+                  {section.subs?.map((sub, subIdx) => (
                     <div
                       key={`${index}-${subIdx}`}
                       onClick={() => scrollToSection(index)}
@@ -3608,7 +3149,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
 
-          {/* CONTENT - KANAN - Langsung di bawah Privacy Policy */}
+          {/* CONTENT - KANAN */}
           <div
             ref={contentRef}
             style={{
@@ -3616,7 +3157,7 @@ export default function PrivacyPolicyPage() {
               paddingBottom: "60px",
             }}
           >
-            {/* Last Update dan Author - Seperti di Pusat Bantuan */}
+            {/* Last Update dan Author */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
@@ -3940,6 +3481,369 @@ export default function PrivacyPolicyPage() {
           </span>
         </div>
       </div>
+
+      <style jsx global>{`
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
+        * {
+          background-color: transparent;
+        }
+
+        .menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+
+        .split-char-livechat {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .content-section {
+          opacity: 1;
+        }
+
+        .sub-section {
+          opacity: 1;
+        }
+
+        .chat-messages-container::-webkit-scrollbar,
+        .chat-messages-container-admin::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .chat-messages-container,
+        .chat-messages-container-admin {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        @media (max-width: 1024px) {
+          .subtitle p {
+            font-size: 48px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 36px !important;
+          }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 140px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .menu-overlay .menu-box3 {
+            right: 40px !important;
+            top: 260px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .subtitle p {
+            font-size: 36px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+          .menu-overlay {
+            padding: 30px 20px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box2 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box3 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          /* Sidebar hidden on mobile */
+          .sidebar-scroll {
+            display: none !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .subtitle p {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box2 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box3 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          /* Sidebar hidden on mobile */
+          .sidebar-scroll {
+            display: none !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
