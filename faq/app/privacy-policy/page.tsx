@@ -58,7 +58,7 @@ const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, 
 
 const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 17L7 7M7 7V17H17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -1648,39 +1648,152 @@ export default function PrivacyPolicyPage() {
   const privacyTitleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Privacy Policy Content
+  // Privacy Policy Content - Lengkap dengan 1.1, 1.2, dst
   const privacyContent = [
     {
+      title: "Pendahuluan",
+      subs: [
+        { sub: "1.1 Latar Belakang", content: "Kebijakan Privasi ini dibuat untuk melindungi data pribadi pengguna yang menggunakan layanan Menuru. Kami berkomitmen untuk menjaga kerahasiaan dan keamanan informasi pribadi Anda sesuai dengan peraturan perlindungan data yang berlaku." },
+        { sub: "1.2 Ruang Lingkup", content: "Kebijakan ini berlaku untuk semua layanan yang disediakan oleh Menuru, termasuk website, aplikasi mobile, dan fitur-fitur yang tersedia di dalamnya. Kebijakan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
+        { sub: "1.3 Persetujuan", content: "Dengan menggunakan layanan Menuru, Anda menyetujui pengumpulan dan penggunaan informasi pribadi Anda sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju, Anda tidak diperkenankan menggunakan layanan kami." }
+      ]
+    },
+    {
+      title: "Informasi yang Kami Kumpulkan",
+      subs: [
+        { sub: "2.1 Informasi Akun", content: "Kami mengumpulkan informasi yang Anda berikan saat mendaftar, termasuk nama lengkap, alamat email, kata sandi, dan nomor telepon. Informasi ini diperlukan untuk membuat dan mengelola akun Anda." },
+        { sub: "2.2 Informasi Profil", content: "Kami mengumpulkan data profil seperti foto profil, biografi, dan preferensi pengguna. Informasi ini digunakan untuk personalisasi pengalaman Anda di platform." },
+        { sub: "2.3 Informasi Transaksi", content: "Untuk fitur Shop dan Donation, kami mengumpulkan data transaksi seperti riwayat pembelian, metode pembayaran, dan alamat pengiriman. Semua data transaksi dilindungi dengan enkripsi." },
+        { sub: "2.4 Informasi Interaksi", content: "Kami mengumpulkan data interaksi Anda dengan fitur-fitur seperti Note, Calendar, Blog, Community, dan Live Chat. Ini termasuk catatan yang Anda buat, jadwal, komentar, dan percakapan chat." },
+        { sub: "2.5 Informasi Teknis", content: "Kami secara otomatis mengumpulkan informasi teknis seperti alamat IP, jenis perangkat, sistem operasi, browser, dan data penggunaan. Informasi ini digunakan untuk analisis dan peningkatan layanan." }
+      ]
+    },
+    {
+      title: "Penggunaan Informasi",
+      subs: [
+        { sub: "3.1 Penyediaan Layanan", content: "Informasi pribadi Anda digunakan untuk menyediakan, memelihara, dan meningkatkan layanan Menuru. Ini termasuk mengelola akun, memproses transaksi, dan memberikan dukungan pelanggan." },
+        { sub: "3.2 Personalisasi", content: "Kami menggunakan data untuk mempersonalisasi pengalaman Anda, seperti merekomendasikan konten yang relevan di Blog, menyesuaikan antarmuka, dan memberikan notifikasi yang dipersonalisasi." },
+        { sub: "3.3 Komunikasi", content: "Kami menggunakan informasi kontak Anda untuk mengirimkan notifikasi penting, pembaruan layanan, dan komunikasi terkait akun. Anda dapat mengatur preferensi notifikasi di pengaturan akun." },
+        { sub: "3.4 Analisis dan Peningkatan", content: "Data penggunaan dianalisis untuk memahami perilaku pengguna, mengidentifikasi tren, dan meningkatkan fungsionalitas layanan. Kami menggunakan analitik untuk mengoptimalkan pengalaman pengguna." },
+        { sub: "3.5 Keamanan", content: "Informasi digunakan untuk mendeteksi, mencegah, dan mengatasi aktivitas mencurigakan atau pelanggaran keamanan. Kami memantau aktivitas untuk melindungi akun dan data pengguna." }
+      ]
+    },
+    {
+      title: "Penyimpanan dan Keamanan Data",
+      subs: [
+        { sub: "4.1 Metode Penyimpanan", content: "Data Anda disimpan di server Firebase yang aman dengan enkripsi standar industri. Kami menggunakan protokol keamanan untuk melindungi data dari akses tidak sah." },
+        { sub: "4.2 Enkripsi", content: "Semua data sensitif, termasuk kata sandi dan informasi transaksi, dienkripsi menggunakan teknologi enkripsi terkini. Ini memastikan bahwa data Anda tetap aman selama transmisi dan penyimpanan." },
+        { sub: "4.3 Periode Penyimpanan", content: "Kami menyimpan data Anda selama akun Anda aktif atau selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan ini. Data akan dihapus setelah permintaan penghapusan akun." },
+        { sub: "4.4 Cadangan Data", content: "Kami melakukan pencadangan data secara rutin untuk mencegah kehilangan data. Cadangan disimpan dengan aman dan hanya dapat diakses oleh personel yang berwenang." }
+      ]
+    },
+    {
+      title: "Berbagi Informasi",
+      subs: [
+        { sub: "5.1 Penyedia Layanan", content: "Kami dapat berbagi data dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan layanan, seperti hosting, pembayaran, dan analitik. Semua pihak ketiga terikat dengan perjanjian kerahasiaan." },
+        { sub: "5.2 Kewajiban Hukum", content: "Kami dapat mengungkapkan informasi jika diwajibkan oleh hukum atau untuk merespons proses hukum yang sah, seperti surat perintah pengadilan atau panggilan pengadilan." },
+        { sub: "5.3 Perlindungan Hak", content: "Kami dapat berbagi informasi untuk melindungi hak, properti, atau keselamatan Menuru, pengguna kami, atau orang lain. Ini termasuk penegakan syarat dan ketentuan kami." },
+        { sub: "5.4 Persetujuan Pengguna", content: "Kami tidak akan membagikan informasi pribadi Anda kepada pihak ketiga untuk tujuan pemasaran tanpa persetujuan eksplisit Anda." }
+      ]
+    },
+    {
+      title: "Hak Privasi Anda",
+      subs: [
+        { sub: "6.1 Hak Akses", content: "Anda berhak mengakses informasi pribadi yang kami miliki tentang Anda. Anda dapat melihat dan mengunduh data Anda melalui pengaturan akun." },
+        { sub: "6.2 Hak Perbaikan", content: "Anda berhak memperbaiki informasi pribadi yang tidak akurat atau tidak lengkap. Anda dapat memperbarui profil Anda kapan saja di pengaturan akun." },
+        { sub: "6.3 Hak Penghapusan", content: "Anda berhak meminta penghapusan informasi pribadi Anda. Kami akan menghapus data Anda sesuai dengan permintaan, kecuali jika diperlukan untuk kepatuhan hukum." },
+        { sub: "6.4 Hak Pembatasan", content: "Anda berhak membatasi pemrosesan informasi pribadi Anda dalam keadaan tertentu, seperti jika Anda mempertanyakan keakuratan data." },
+        { sub: "6.5 Hak Portabilitas", content: "Anda berhak menerima data Anda dalam format terstruktur dan dapat dibaca mesin. Anda dapat meminta ekspor data Anda melalui pengaturan akun." }
+      ]
+    },
+    {
+      title: "Cookie dan Teknologi Pelacakan",
+      subs: [
+        { sub: "7.1 Penggunaan Cookie", content: "Kami menggunakan cookie untuk meningkatkan pengalaman pengguna, menyimpan preferensi, dan melacak aktivitas di situs. Cookie membantu kami memahami bagaimana Anda berinteraksi dengan layanan." },
+        { sub: "7.2 Jenis Cookie", content: "Kami menggunakan cookie sesi (sementara) dan cookie persisten (tetap) untuk berbagai tujuan, termasuk autentikasi, analitik, dan personalisasi konten." },
+        { sub: "7.3 Kontrol Cookie", content: "Anda dapat mengatur preferensi cookie melalui pengaturan browser. Anda dapat menolak semua cookie, tetapi ini dapat mempengaruhi fungsionalitas beberapa fitur." },
+        { sub: "7.4 Pihak Ketiga", content: "Kami menggunakan layanan analitik pihak ketiga yang juga menggunakan cookie untuk mengumpulkan data penggunaan. Data ini digunakan secara agregat untuk meningkatkan layanan." }
+      ]
+    },
+    {
       title: "Shop",
-      content: "Kebijakan privasi untuk fitur Shop mencakup perlindungan data transaksi, riwayat pembelian, metode pembayaran, dan informasi alamat pengiriman. Kami menggunakan enkripsi end-to-end untuk melindungi semua data transaksi Anda."
+      subs: [
+        { sub: "8.1 Data Transaksi", content: "Fitur Shop mengumpulkan data transaksi termasuk produk yang dibeli, jumlah, harga, metode pembayaran, dan alamat pengiriman. Semua data transaksi dilindungi dengan enkripsi." },
+        { sub: "8.2 Riwayat Pembelian", content: "Kami menyimpan riwayat pembelian Anda untuk memudahkan pelacakan pesanan, pengembalian barang, dan memberikan rekomendasi produk yang relevan." },
+        { sub: "8.3 Keamanan Pembayaran", content: "Kami menggunakan gateway pembayaran yang aman dan terverifikasi. Informasi kartu kredit tidak disimpan di server kami dan diproses langsung oleh penyedia pembayaran." }
+      ]
     },
     {
       title: "Note",
-      content: "Fitur Note menyimpan catatan pribadi Anda dengan aman. Semua catatan dienkripsi dan hanya dapat diakses oleh Anda. Kami tidak memiliki akses ke konten catatan Anda."
+      subs: [
+        { sub: "9.1 Penyimpanan Catatan", content: "Fitur Note menyimpan catatan pribadi Anda di server yang aman. Semua catatan dienkripsi dan hanya dapat diakses oleh Anda menggunakan akun terdaftar." },
+        { sub: "9.2 Privasi Catatan", content: "Kami tidak memiliki akses ke konten catatan Anda. Catatan Anda bersifat pribadi dan tidak dibagikan dengan pengguna lain atau pihak ketiga." },
+        { sub: "9.3 Sinkronisasi", content: "Catatan Anda disinkronkan secara real-time di semua perangkat yang terhubung dengan akun Anda, memastikan akses yang konsisten di mana saja." }
+      ]
     },
     {
       title: "Calendar",
-      content: "Fitur Calendar mengelola jadwal dan pengingat Anda. Data kalender disimpan dengan aman dan hanya digunakan untuk memberikan notifikasi dan pengingat yang Anda minta."
+      subs: [
+        { sub: "10.1 Manajemen Jadwal", content: "Fitur Calendar mengelola jadwal dan pengingat Anda. Data kalender disimpan dengan aman dan hanya digunakan untuk memberikan notifikasi yang Anda minta." },
+        { sub: "10.2 Pengingat", content: "Kami menggunakan data kalender untuk mengirimkan pengingat dan notifikasi tentang acara yang akan datang. Anda dapat mengatur preferensi notifikasi di pengaturan." },
+        { sub: "10.3 Integrasi", content: "Calendar dapat diintegrasikan dengan kalender eksternal (Google Calendar, Outlook) dengan izin Anda. Kami tidak menyimpan kredensial kalender eksternal Anda." }
+      ]
     },
     {
       title: "Blog",
-      content: "Fitur Blog memungkinkan Anda membaca dan berinteraksi dengan konten. Kami mengumpulkan data seperti komentar, like, dan waktu baca untuk meningkatkan pengalaman pengguna dan merekomendasikan konten yang relevan."
+      subs: [
+        { sub: "11.1 Interaksi Konten", content: "Fitur Blog mengumpulkan data interaksi seperti komentar, like, dan waktu baca. Data ini digunakan untuk meningkatkan pengalaman membaca dan merekomendasikan konten yang relevan." },
+        { sub: "11.2 Konten Publik", content: "Komentar dan interaksi di Blog bersifat publik. Mohon pertimbangkan informasi yang Anda bagikan di ruang publik ini." },
+        { sub: "11.3 Rekomendasi", content: "Kami menggunakan data pembacaan untuk merekomendasikan artikel yang relevan dengan minat Anda. Ini membantu Anda menemukan konten yang lebih personal." }
+      ]
     },
     {
       title: "Donation",
-      content: "Fitur Donation memproses donasi Anda dengan aman. Kami melindungi data donor, termasuk nama, email, dan jumlah donasi. Semua transaksi donasi diproses melalui gateway pembayaran yang aman dan terverifikasi."
+      subs: [
+        { sub: "12.1 Data Donor", content: "Fitur Donation melindungi data donor termasuk nama, email, dan jumlah donasi. Informasi ini digunakan untuk mengirimkan konfirmasi dan laporan donasi." },
+        { sub: "12.2 Transaksi Aman", content: "Semua transaksi donasi diproses melalui gateway pembayaran yang aman dan terverifikasi. Kami tidak menyimpan informasi kartu kredit di server kami." },
+        { sub: "12.3 Transparansi", content: "Kami menyediakan laporan donasi yang transparan dan dapat diakses oleh donor. Penggunaan dana donasi dilaporkan secara berkala." }
+      ]
     },
     {
       title: "Community",
-      content: "Fitur Community memungkinkan Anda berinteraksi dengan pengguna lain. Kami mengumpulkan data aktivitas seperti posting, komentar, dan interaksi sosial. Semua data ini digunakan untuk meningkatkan pengalaman komunitas dan menjaga keamanan platform."
+      subs: [
+        { sub: "13.1 Aktivitas Sosial", content: "Fitur Community mengumpulkan data aktivitas seperti posting, komentar, dan interaksi sosial. Data ini digunakan untuk membangun pengalaman komunitas yang positif." },
+        { sub: "13.2 Konten Publik", content: "Posting dan komentar di Community bersifat publik dan dapat dilihat oleh pengguna lain. Kami mendorong pengguna untuk berbagi dengan bijak." },
+        { sub: "13.3 Keamanan Komunitas", content: "Kami memoderasi konten untuk menjaga lingkungan yang aman dan positif. Pelanggaran dapat mengakibatkan penghapusan konten atau sanksi akun." }
+      ]
     },
     {
       title: "Live Chat Agent",
-      content: "Fitur Live Chat Agent menghubungkan Anda dengan agen kami untuk dukungan langsung. Kami melindungi percakapan chat Anda dengan enkripsi, dan menyimpan riwayat chat untuk keperluan pelacakan dan peningkatan layanan."
+      subs: [
+        { sub: "14.1 Percakapan Terenkripsi", content: "Fitur Live Chat Agent melindungi percakapan Anda dengan enkripsi end-to-end. Hanya Anda dan agen yang dapat membaca pesan." },
+        { sub: "14.2 Riwayat Chat", content: "Riwayat chat disimpan untuk keperluan pelacakan dan peningkatan layanan. Anda dapat meminta penghapusan riwayat chat kapan saja." },
+        { sub: "14.3 Kualitas Layanan", content: "Chat dianalisis secara agregat untuk meningkatkan kualitas layanan dukungan. Data pribadi tidak digunakan dalam analisis ini." }
+      ]
     },
     {
       title: "Live Chat",
-      content: "Fitur Live Chat memungkinkan komunikasi real-time antara pengguna. Kami menggunakan enkripsi untuk melindungi pesan Anda dan hanya menyimpan data yang diperlukan untuk fungsionalitas chat."
+      subs: [
+        { sub: "15.1 Komunikasi Real-time", content: "Fitur Live Chat memungkinkan komunikasi real-time antara pengguna. Semua pesan dilindungi dengan enkripsi untuk menjaga kerahasiaan." },
+        { sub: "15.2 Penyimpanan Pesan", content: "Pesan disimpan sementara untuk fungsionalitas chat. Pesan dapat dihapus secara permanen atas permintaan pengguna." },
+        { sub: "15.3 Moderasi", content: "Kami memantau chat untuk mencegah penyalahgunaan dan menjaga lingkungan yang aman bagi semua pengguna." }
+      ]
+    },
+    {
+      title: "Perubahan Kebijakan",
+      subs: [
+        { sub: "16.1 Pembaruan Kebijakan", content: "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan diberitahukan melalui email atau notifikasi di platform." },
+        { sub: "16.2 Tanggal Efektif", content: "Tanggal efektif pembaruan akan dicantumkan di bagian atas Kebijakan. Perubahan berlaku segera setelah dipublikasikan." },
+        { sub: "16.3 Pemberitahuan", content: "Kami akan memberikan pemberitahuan tentang perubahan penting setidaknya 30 hari sebelum berlaku. Anda dapat meninjau perubahan sebelum menyetujui." }
+      ]
+    },
+    {
+      title: "Hubungi Kami",
+      subs: [
+        { sub: "17.1 Kontak Dukungan", content: "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi tim dukungan kami melalui email atau form kontak." },
+        { sub: "17.2 Email", content: "Anda dapat menghubungi kami di privacy@wawa44.com untuk pertanyaan terkait privasi dan perlindungan data." },
+        { sub: "17.3 Alamat", content: "Jl. Contoh No. 123, Jakarta, Indonesia. Kami siap membantu Anda dengan segala pertanyaan terkait privasi." }
+      ]
     }
   ];
 
@@ -1751,7 +1864,7 @@ export default function PrivacyPolicyPage() {
       duration: 0.4,
       ease: "power2.out",
       onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Policy";
+        if (textRef.current) textRef.current.textContent = "Note";
       }
     })
     .to(textRef.current, {
@@ -1883,14 +1996,15 @@ export default function PrivacyPolicyPage() {
       );
     }
 
-    // Animasi privacy title 250px
+    // Animasi privacy title 250px - DINAIIKAN KE ATAS
     const privacyTitle = privacyTitleRef.current;
     if (privacyTitle) {
       gsap.fromTo(privacyTitle,
-        { opacity: 0, scale: 0.8 },
+        { opacity: 0, scale: 0.8, y: 30 },
         {
           opacity: 1,
           scale: 1,
+          y: 0,
           duration: 1,
           ease: "back.out(1.7)",
           delay: 0.5
@@ -1914,6 +2028,28 @@ export default function PrivacyPolicyPage() {
             trigger: contentRef.current,
             start: "top 80%",
             end: "bottom 20%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+
+    // Animasi sub sections
+    const subSections = contentRef.current?.querySelectorAll('.sub-section');
+    if (subSections) {
+      gsap.fromTo(subSections,
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power2.out",
+          delay: 1,
+          scrollTrigger: {
+            trigger: contentRef.current,
+            start: "top 70%",
+            end: "bottom 30%",
             toggleActions: "play none none reverse",
           }
         }
@@ -2048,7 +2184,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Policy
+            Note
           </span>
         </div>
       </div>
@@ -2097,7 +2233,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Policy
+            Note
           </span>
         </div>
       </div>
@@ -2186,12 +2322,44 @@ export default function PrivacyPolicyPage() {
                   lineHeight: 1.2,
                   margin: 0,
                   padding: 0,
-                  paddingBottom: "30px",
+                  paddingBottom: "20px",
                   whiteSpace: "pre-line",
                 }}
               >
                 {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
+            </div>
+
+            {/* PRIVACY POLICY TITLE 250px - DINAIIKAN KE ATAS */}
+            <div
+              ref={privacyTitleRef}
+              style={{
+                width: "100%",
+                padding: "10px 0 30px 0",
+                backgroundColor: "#ffffff",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "flex-start",
+                opacity: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "250px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  lineHeight: "0.8",
+                  display: "block",
+                  textAlign: "left",
+                  WebkitFontSmoothing: "antialiased",
+                  MozOsxFontSmoothing: "grayscale",
+                }}
+              >
+                Privacy Policy
+              </span>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
@@ -2244,38 +2412,6 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* PRIVACY POLICY TITLE 250px */}
-        <div
-          ref={privacyTitleRef}
-          style={{
-            width: "100%",
-            padding: "20px 40px 60px 40px",
-            backgroundColor: "#ffffff",
-            overflow: "hidden",
-            display: "flex",
-            justifyContent: "flex-start",
-            opacity: 0,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "250px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              letterSpacing: "-0.02em",
-              textTransform: "none",
-              lineHeight: "0.8",
-              display: "block",
-              textAlign: "left",
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
-            }}
-          >
-            Privacy Policy
-          </span>
-        </div>
-
         {/* CONTENT SECTIONS */}
         <div
           ref={contentRef}
@@ -2286,27 +2422,41 @@ export default function PrivacyPolicyPage() {
             width: "100%",
           }}
         >
-          {privacyContent.map((item, index) => (
+          {privacyContent.map((section, index) => (
             <div key={index} className="content-section" style={{ marginBottom: "50px" }}>
               <h2 style={{
-                fontSize: "32px",
+                fontSize: "36px",
                 fontWeight: 700,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                marginBottom: "16px",
+                marginBottom: "24px",
                 letterSpacing: "-0.02em",
               }}>
-                {index + 1}. {item.title}
+                {index + 1}. {section.title}
               </h2>
-              <p style={{
-                fontSize: "18px",
-                lineHeight: "1.8",
-                color: "#333",
-                fontFamily: FONT_FAMILY,
-                marginBottom: 0,
-              }}>
-                {item.content}
-              </p>
+              {section.subs.map((sub, subIndex) => (
+                <div key={subIndex} className="sub-section" style={{ marginBottom: "20px", opacity: 0 }}>
+                  <h3 style={{
+                    fontSize: "22px",
+                    fontWeight: 600,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: "8px",
+                  }}>
+                    {sub.sub}
+                  </h3>
+                  <p style={{
+                    fontSize: "18px",
+                    lineHeight: "1.8",
+                    color: "#333",
+                    fontFamily: FONT_FAMILY,
+                    marginBottom: 0,
+                    paddingLeft: "20px",
+                  }}>
+                    {sub.content}
+                  </p>
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -3011,6 +3161,10 @@ export default function PrivacyPolicyPage() {
         }
 
         .content-section {
+          opacity: 0;
+        }
+
+        .sub-section {
           opacity: 0;
         }
 
