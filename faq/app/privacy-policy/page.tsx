@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -81,6 +81,21 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const EditIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SaveIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 21V13H7V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 3V8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -1610,8 +1625,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
             }}>
-              Pilih chat dari daftar di kiri
-            </div>
+              Pilih chat dari daftar di kiri            </div>
           )}
         </div>
       </div>
@@ -1627,6 +1641,9 @@ export default function PrivacyPolicyPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState<any[]>([]);
+  const [lastUpdate, setLastUpdate] = useState("1 September 2026");
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1647,9 +1664,10 @@ export default function PrivacyPolicyPage() {
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const privacyTitleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const editButtonRef = useRef<HTMLDivElement>(null);
 
-  // Privacy Policy Content - Lengkap dengan 1.1, 1.2, dst
-  const privacyContent = [
+  // Default Privacy Policy Content
+  const defaultPrivacyContent = [
     {
       title: "Pendahuluan",
       subs: [
@@ -1796,6 +1814,56 @@ export default function PrivacyPolicyPage() {
       ]
     }
   ];
+
+  const [privacyContent, setPrivacyContent] = useState(defaultPrivacyContent);
+
+  // Load saved content from Firestore
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const loadContent = async () => {
+      try {
+        const docRef = doc(db, "settings", "privacyPolicy");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.content) {
+            setPrivacyContent(data.content);
+          }
+          if (data.lastUpdate) {
+            setLastUpdate(data.lastUpdate);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading privacy content:", error);
+      }
+    };
+    loadContent();
+  }, [db, isMounted]);
+
+  // Save content to Firestore
+  const saveContent = async () => {
+    if (!db || !isAdmin) return;
+    try {
+      const docRef = doc(db, "settings", "privacyPolicy");
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      await setDoc(docRef, {
+        content: privacyContent,
+        lastUpdate: dateStr,
+        updatedAt: serverTimestamp()
+      });
+      setLastUpdate(dateStr);
+      setIsEditing(false);
+      alert("Konten Privacy Policy berhasil disimpan!");
+    } catch (error) {
+      console.error("Error saving privacy content:", error);
+      alert("Gagal menyimpan konten. Silakan coba lagi.");
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -1996,7 +2064,7 @@ export default function PrivacyPolicyPage() {
       );
     }
 
-    // Animasi privacy title - DINAIIKAN KE ATAS
+    // Animasi privacy title
     const privacyTitle = privacyTitleRef.current;
     if (privacyTitle) {
       gsap.fromTo(privacyTitle,
@@ -2038,6 +2106,21 @@ export default function PrivacyPolicyPage() {
           duration: 0.6,
           ease: "back.out(1.7)",
           delay: 0.7
+        }
+      );
+    }
+
+    // Animasi edit button
+    const editButton = editButtonRef.current;
+    if (editButton && isAdmin) {
+      gsap.fromTo(editButton,
+        { opacity: 0, x: 20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          delay: 0.8
         }
       );
     }
@@ -2148,7 +2231,7 @@ export default function PrivacyPolicyPage() {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMounted, loading, showMain]);
+  }, [isMounted, loading, showMain, isAdmin]);
 
   const toggleMenu = () => {
     if (!isMenuOpen) {
@@ -2170,6 +2253,19 @@ export default function PrivacyPolicyPage() {
       }
       setIsMenuOpen(false);
     }
+  };
+
+  // Handle content edit
+  const handleContentChange = (sectionIndex: number, subIndex: number, field: 'sub' | 'content', value: string) => {
+    const newContent = [...privacyContent];
+    newContent[sectionIndex].subs[subIndex][field] = value;
+    setPrivacyContent(newContent);
+  };
+
+  const handleTitleChange = (sectionIndex: number, value: string) => {
+    const newContent = [...privacyContent];
+    newContent[sectionIndex].title = value;
+    setPrivacyContent(newContent);
   };
 
   if (!isMounted || loading) {
@@ -2360,7 +2456,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </div>
 
-            {/* Tombol Let's build now dan Arrow seperti halaman utama */}
+            {/* Tombol Let's build now dan Arrow */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
               <div
                 ref={buttonRef}
@@ -2406,6 +2502,45 @@ export default function PrivacyPolicyPage() {
               >
                 <NorthEastArrow size={24} color="#ffffff" />
               </div>
+
+              {/* Tombol Edit untuk Admin */}
+              {isAdmin && (
+                <div
+                  ref={editButtonRef}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 16px",
+                    border: "2px solid #0D3CFC",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    backgroundColor: isEditing ? "#0D3CFC" : "transparent",
+                    color: isEditing ? "#ffffff" : "#0D3CFC",
+                    opacity: 0,
+                    marginLeft: "auto",
+                  }}
+                  onClick={() => {
+                    if (isEditing) {
+                      saveContent();
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                >
+                  {isEditing ? (
+                    <>
+                      <SaveIcon size={18} color="#ffffff" />
+                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Simpan</span>
+                    </>
+                  ) : (
+                    <>
+                      <EditIcon size={18} color="#0D3CFC" />
+                      <span style={{ fontSize: "16px", fontWeight: 500 }}>Edit</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* PRIVACY POLICY TITLE 250px - DI BAWAH TOMBOL */}
@@ -2455,49 +2590,130 @@ export default function PrivacyPolicyPage() {
         >
           {/* Last Update */}
           <div style={{
-            textAlign: "right",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: "40px",
             fontFamily: FONT_FAMILY,
-            color: "#666",
-            fontSize: "14px",
-            fontStyle: "italic",
           }}>
-            Terakhir diperbarui: 1 September 2026
+            <div style={{
+              color: "#666",
+              fontSize: "14px",
+              fontStyle: "italic",
+            }}>
+              Terakhir diperbarui: {lastUpdate}
+            </div>
+            {isAdmin && isEditing && (
+              <div style={{
+                color: "#0D3CFC",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}>
+                Mode Edit Aktif
+              </div>
+            )}
           </div>
 
           {privacyContent.map((section, index) => (
             <div key={index} className="content-section" style={{ marginBottom: "50px" }}>
-              <h2 style={{
-                fontSize: "36px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                marginBottom: "24px",
-                letterSpacing: "-0.02em",
-              }}>
-                {index + 1}. {section.title}
-              </h2>
-              {section.subs.map((sub, subIndex) => (
-                <div key={subIndex} className="sub-section" style={{ marginBottom: "20px", opacity: 0 }}>
-                  <h3 style={{
-                    fontSize: "22px",
-                    fontWeight: 600,
+              {isEditing && isAdmin ? (
+                <input
+                  type="text"
+                  value={section.title}
+                  onChange={(e) => handleTitleChange(index, e.target.value)}
+                  style={{
+                    fontSize: "36px",
+                    fontWeight: 700,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    marginBottom: "8px",
-                  }}>
-                    {sub.sub}
-                  </h3>
-                  <p style={{
-                    fontSize: "18px",
-                    lineHeight: "1.8",
-                    color: "#333",
-                    fontFamily: FONT_FAMILY,
-                    marginBottom: 0,
-                    paddingLeft: "20px",
-                  }}>
-                    {sub.content}
-                  </p>
+                    marginBottom: "24px",
+                    letterSpacing: "-0.02em",
+                    border: "2px solid #0D3CFC",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    width: "100%",
+                    backgroundColor: "rgba(13,60,252,0.05)",
+                    outline: "none",
+                  }}
+                />
+              ) : (
+                <h2 style={{
+                  fontSize: "36px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "24px",
+                  letterSpacing: "-0.02em",
+                }}>
+                  {index + 1}. {section.title}
+                </h2>
+              )}
+              {section.subs.map((sub, subIndex) => (
+                <div key={subIndex} className="sub-section" style={{ marginBottom: "20px", opacity: 0 }}>
+                  {isEditing && isAdmin ? (
+                    <>
+                      <input
+                        type="text"
+                        value={sub.sub}
+                        onChange={(e) => handleContentChange(index, subIndex, 'sub', e.target.value)}
+                        style={{
+                          fontSize: "22px",
+                          fontWeight: 600,
+                          color: "#0D3CFC",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: "8px",
+                          border: "2px solid #0D3CFC",
+                          borderRadius: "8px",
+                          padding: "6px 12px",
+                          width: "100%",
+                          backgroundColor: "rgba(13,60,252,0.05)",
+                          outline: "none",
+                        }}
+                      />
+                      <textarea
+                        value={sub.content}
+                        onChange={(e) => handleContentChange(index, subIndex, 'content', e.target.value)}
+                        style={{
+                          fontSize: "18px",
+                          lineHeight: "1.8",
+                          color: "#333",
+                          fontFamily: FONT_FAMILY,
+                          marginBottom: 0,
+                          padding: "12px 16px",
+                          paddingLeft: "20px",
+                          border: "2px solid #0D3CFC",
+                          borderRadius: "8px",
+                          width: "100%",
+                          minHeight: "80px",
+                          backgroundColor: "rgba(13,60,252,0.05)",
+                          outline: "none",
+                          resize: "vertical",
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h3 style={{
+                        fontSize: "22px",
+                        fontWeight: 600,
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: "8px",
+                      }}>
+                        {sub.sub}
+                      </h3>
+                      <p style={{
+                        fontSize: "18px",
+                        lineHeight: "1.8",
+                        color: "#333",
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: 0,
+                        paddingLeft: "20px",
+                      }}>
+                        {sub.content}
+                      </p>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
