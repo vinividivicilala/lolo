@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -59,7 +59,7 @@ const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, 
 
 const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokelinejoin="round"/>
+    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -176,28 +176,11 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
+    // Menuru tetap di kiri, Shop muncul 1x
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
       duration: 0.8,
-      ease: "back.out(1.7)"
-    })
-    .to(textRef.current, { duration: 0.6 })
-    .to(textRef.current, {
-      opacity: 0,
-      y: -20,
-      scale: 0.9,
-      duration: 0.4,
-      ease: "power2.out",
-      onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Shop";
-      }
-    })
-    .to(textRef.current, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
       ease: "back.out(1.7)"
     })
     .to(textRef.current, { duration: 0.6 })
@@ -2129,88 +2112,13 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader
-  useEffect(() => {
-    if (!isMounted || loading) return;
-    setTimeout(() => startPreloaderAnimation(), 500);
-  }, [isMounted, loading]);
-
-  const startPreloaderAnimation = () => {
-    const tl = gsap.timeline({
-      onComplete: () => {
-        if (preloaderRef.current) {
-          gsap.to(preloaderRef.current, {
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.inOut",
-            onComplete: () => {
-              setShowMain(true);
-              setTimeout(() => {
-                ScrollTrigger.refresh();
-              }, 200);
-            }
-          });
-        }
-      }
-    });
-
-    gsap.set(textRef.current, { y: 100, opacity: 0 });
-
-    tl.to(textRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: "back.out(1.7)"
-    })
-    .to(textRef.current, { duration: 0.6 })
-    .to(textRef.current, {
-      opacity: 0,
-      y: -20,
-      scale: 0.9,
-      duration: 0.4,
-      ease: "power2.out",
-      onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Shop";
-      }
-    })
-    .to(textRef.current, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
-      ease: "back.out(1.7)"
-    })
-    .to(textRef.current, { duration: 0.6 })
-    .to(textRef.current, {
-      opacity: 0,
-      y: -20,
-      scale: 0.9,
-      duration: 0.4,
-      ease: "power2.out",
-      onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Note";
-      }
-    })
-    .to(textRef.current, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
-      ease: "back.out(1.7)"
-    })
-    .to(textRef.current, { duration: 0.8 })
-    .to(textRef.current, {
-      scale: 0.3,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power2.in"
-    })
-    .to(preloaderRef.current, {
-      scale: 0.95,
-      opacity: 0.8,
-      duration: 0.3,
-      ease: "power2.inOut"
-    }, "-=0.3");
+  // Preloader - menggunakan Preloader component
+  // Fungsi untuk menangani preloader selesai
+  const handlePreloaderComplete = () => {
+    setShowMain(true);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
   };
 
   // GSAP animation for menu drawer opening
@@ -2546,8 +2454,9 @@ export default function PrivacyPolicyPage() {
     { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
   ];
 
+  // Jika belum siap, tampilkan preloader
   if (!isMounted || loading || !showMain) {
-    return <Preloader onComplete={() => {}} />;
+    return <Preloader onComplete={handlePreloaderComplete} />;
   }
 
   return (
