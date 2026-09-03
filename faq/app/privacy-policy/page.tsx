@@ -1643,6 +1643,7 @@ export default function PrivacyPolicyPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState("");
+  const [adminName, setAdminName] = useState("");
   const [activeSection, setActiveSection] = useState(0);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -1833,20 +1834,24 @@ export default function PrivacyPolicyPage() {
           }
           if (data.lastUpdate) {
             setLastUpdate(data.lastUpdate);
-          } else {
-            // Set default date if no lastUpdate
-            const now = new Date();
-            setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
           }
-        } else {
-          // Set default date
+          if (data.adminName) {
+            setAdminName(data.adminName);
+          }
+        }
+        // Set default date if no data
+        if (!lastUpdate) {
           const now = new Date();
           setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+        }
+        if (!adminName) {
+          setAdminName(ADMIN_EMAIL);
         }
       } catch (error) {
         console.error("Error loading privacy content:", error);
         const now = new Date();
         setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+        setAdminName(ADMIN_EMAIL);
       }
     };
     loadContent();
@@ -1866,9 +1871,11 @@ export default function PrivacyPolicyPage() {
       await setDoc(docRef, {
         content: privacyContent,
         lastUpdate: dateStr,
+        adminName: ADMIN_EMAIL,
         updatedAt: serverTimestamp()
       });
       setLastUpdate(dateStr);
+      setAdminName(ADMIN_EMAIL);
       setIsEditing(false);
       alert("Konten Privacy Policy berhasil disimpan!");
     } catch (error) {
@@ -1903,7 +1910,7 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - SAMA SEPERTI HALAMAN UTAMA (Menuru dan Note)
+  // Preloader - Menuru, Shop, Note
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
@@ -1934,6 +1941,24 @@ export default function PrivacyPolicyPage() {
       y: 0,
       opacity: 1,
       duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Shop";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
       ease: "back.out(1.7)"
     })
     .to(textRef.current, { duration: 0.6 })
@@ -2057,7 +2082,7 @@ export default function PrivacyPolicyPage() {
     }
   }, [isMenuOpen, isMounted, loading, showMain]);
 
-  // Scroll spy untuk sidebar
+  // Scroll spy untuk sidebar - mendeteksi judul dan sub judul
   useEffect(() => {
     if (!isMounted || loading || !showMain) return;
 
@@ -2078,6 +2103,8 @@ export default function PrivacyPolicyPage() {
     };
 
     window.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMounted, loading, showMain, privacyContent]);
 
@@ -2325,7 +2352,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2374,7 +2401,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2601,7 +2628,7 @@ export default function PrivacyPolicyPage() {
           gap: "40px",
           marginTop: "-40px",
         }}>
-          {/* SIDEBAR - KIRI BAWAH - TIDAK IKUT SCROLL KE ATAS */}
+          {/* SIDEBAR - KIRI BAWAH - TIDAK IKUT SCROLL KE ATAS - HANYA TEKS */}
           <div
             ref={sidebarRef}
             style={{
@@ -2634,7 +2661,7 @@ export default function PrivacyPolicyPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {privacyContent.map((section, index) => (
                 <React.Fragment key={index}>
-                  {/* Judul Utama - Tanpa design tambahan */}
+                  {/* Judul Utama - Hanya Teks */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
@@ -2644,12 +2671,12 @@ export default function PrivacyPolicyPage() {
                       fontSize: "13px",
                       fontWeight: activeSection === index ? 600 : 400,
                       color: activeSection === index ? "#0D3CFC" : "#555",
-                      transition: "all 0.2s ease",
+                      transition: "color 0.2s ease",
                     }}
                   >
                     {index + 1}. {section.title}
                   </div>
-                  {/* Sub Judul - Indent */}
+                  {/* Sub Judul - Indent, Hanya Teks */}
                   {section.subs.map((sub, subIdx) => (
                     <div
                       key={`${index}-${subIdx}`}
@@ -2661,7 +2688,7 @@ export default function PrivacyPolicyPage() {
                         fontSize: "12px",
                         fontWeight: activeSection === index ? 500 : 300,
                         color: activeSection === index ? "#0D3CFC" : "#888",
-                        transition: "all 0.2s ease",
+                        transition: "color 0.2s ease",
                       }}
                     >
                       {sub.sub}
@@ -2680,20 +2707,22 @@ export default function PrivacyPolicyPage() {
               paddingBottom: "60px",
             }}
           >
-            {/* Last Update - OTOMATIS MENAMPILKAN TGL */}
+            {/* Last Update - Otomatis menampilkan tanggal dan admin */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "40px",
               fontFamily: FONT_FAMILY,
+              flexWrap: "wrap",
+              gap: "8px",
             }}>
               <div style={{
                 color: "#666",
                 fontSize: "14px",
                 fontStyle: "italic",
               }}>
-                Terakhir diperbarui: {lastUpdate || "1 September 2026"}
+                Terakhir diperbarui: {lastUpdate || "1 September 2026"} oleh {adminName || ADMIN_EMAIL}
               </div>
               {isAdmin && isEditing && (
                 <div style={{
