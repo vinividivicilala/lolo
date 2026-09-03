@@ -65,11 +65,50 @@ const menuItems = [
   { name: "Note", number: "07" }
 ];
 
+// Privacy Policy Content
+const privacyContent = [
+  {
+    title: "Shop",
+    content: "Kebijakan privasi untuk fitur Shop mencakup perlindungan data transaksi, riwayat pembelian, metode pembayaran, dan informasi alamat pengiriman. Kami menggunakan enkripsi end-to-end untuk melindungi semua data transaksi Anda."
+  },
+  {
+    title: "Note",
+    content: "Fitur Note menyimpan catatan pribadi Anda dengan aman. Semua catatan dienkripsi dan hanya dapat diakses oleh Anda. Kami tidak memiliki akses ke konten catatan Anda."
+  },
+  {
+    title: "Calendar",
+    content: "Fitur Calendar mengelola jadwal dan pengingat Anda. Data kalender disimpan dengan aman dan hanya digunakan untuk memberikan notifikasi dan pengingat yang Anda minta."
+  },
+  {
+    title: "Blog",
+    content: "Fitur Blog memungkinkan Anda membaca dan berinteraksi dengan konten. Kami mengumpulkan data seperti komentar, like, dan waktu baca untuk meningkatkan pengalaman pengguna dan merekomendasikan konten yang relevan."
+  },
+  {
+    title: "Donation",
+    content: "Fitur Donation memproses donasi Anda dengan aman. Kami melindungi data donor, termasuk nama, email, dan jumlah donasi. Semua transaksi donasi diproses melalui gateway pembayaran yang aman dan terverifikasi."
+  },
+  {
+    title: "Community",
+    content: "Fitur Community memungkinkan Anda berinteraksi dengan pengguna lain. Kami mengumpulkan data aktivitas seperti posting, komentar, dan interaksi sosial. Semua data ini digunakan untuk meningkatkan pengalaman komunitas dan menjaga keamanan platform."
+  },
+  {
+    title: "Live Chat Agent",
+    content: "Fitur Live Chat Agent menghubungkan Anda dengan agen kami untuk dukungan langsung. Kami melindungi percakapan chat Anda dengan enkripsi, dan menyimpan riwayat chat untuk keperluan pelacakan dan peningkatan layanan."
+  },
+  {
+    title: "Live Chat",
+    content: "Fitur Live Chat memungkinkan komunikasi real-time antara pengguna. Kami menggunakan enkripsi untuk melindungi pesan Anda dan hanya menyimpan data yang diperlukan untuk fungsionalitas chat."
+  }
+];
+
 export default function PrivacyPolicyPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [showMain, setShowMain] = useState(false);
+  const [loading, setLoading] = useState(true);
   
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
@@ -85,17 +124,83 @@ export default function PrivacyPolicyPage() {
   const storiesRef = useRef<HTMLDivElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const privacyTextRef = useRef<HTMLDivElement>(null);
+  const privacyTitleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
-    setIsVisible(true);
   }, []);
+
+  // Preloader
+  useEffect(() => {
+    if (!isMounted) return;
+    setTimeout(() => startPreloaderAnimation(), 500);
+  }, [isMounted]);
+
+  const startPreloaderAnimation = () => {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setShowMain(true);
+              setLoading(false);
+              setTimeout(() => {
+                ScrollTrigger.refresh();
+              }, 200);
+            }
+          });
+        }
+      }
+    });
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Policy";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
 
   // GSAP animation for menu drawer opening
   useEffect(() => {
-    if (!menuOverlayRef.current || !isMounted) return;
+    if (!menuOverlayRef.current || !isMounted || loading) return;
     
     if (isMenuOpen) {
       gsap.fromTo(menuOverlayRef.current,
@@ -179,11 +284,11 @@ export default function PrivacyPolicyPage() {
         ease: 'power3.in'
       });
     }
-  }, [isMenuOpen, isMounted]);
+  }, [isMenuOpen, isMounted, loading]);
 
   // GSAP animation for content
   useEffect(() => {
-    if (!isMounted || !isVisible) return;
+    if (!isMounted || loading || !showMain) return;
 
     // Animasi subtitle
     const subtitle = subtitleRef.current;
@@ -200,10 +305,10 @@ export default function PrivacyPolicyPage() {
       );
     }
 
-    // Animasi privacy text 450px
-    const privacyText = privacyTextRef.current;
-    if (privacyText) {
-      gsap.fromTo(privacyText,
+    // Animasi privacy title 250px
+    const privacyTitle = privacyTitleRef.current;
+    if (privacyTitle) {
+      gsap.fromTo(privacyTitle,
         { opacity: 0, scale: 0.8 },
         {
           opacity: 1,
@@ -299,7 +404,7 @@ export default function PrivacyPolicyPage() {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMounted, isVisible]);
+  }, [isMounted, loading, showMain]);
 
   const toggleMenu = () => {
     if (!isMenuOpen) {
@@ -323,8 +428,101 @@ export default function PrivacyPolicyPage() {
     }
   };
 
-  if (!isMounted) {
-    return <div style={{ minHeight: "100vh", backgroundColor: "#ffffff" }} />;
+  if (!isMounted || loading) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Policy
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!showMain) {
+    return (
+      <div
+        ref={preloaderRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Policy
+          </span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -338,6 +536,7 @@ export default function PrivacyPolicyPage() {
       </Head>
 
       <div
+        ref={containerRef}
         style={{
           minHeight: "100vh",
           backgroundColor: "#ffffff",
@@ -389,7 +588,7 @@ export default function PrivacyPolicyPage() {
           <div style={{ 
             position: "relative", 
             zIndex: 1,
-            marginTop: "60px",
+            marginTop: "0px",
           }}>
             <div
               ref={subtitleRef}
@@ -412,7 +611,7 @@ export default function PrivacyPolicyPage() {
                   whiteSpace: "pre-line",
                 }}
               >
-                {`Kebijakan Privasi\nMenuru`}
+                {`You can take notes, find ideas,\nand donate money to those in need`}
               </p>
             </div>
 
@@ -466,12 +665,12 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* PRIVACY POLICY TEXT 450px */}
+        {/* PRIVACY POLICY TITLE 250px */}
         <div
-          ref={privacyTextRef}
+          ref={privacyTitleRef}
           style={{
             width: "100%",
-            padding: "40px 40px 60px 40px",
+            padding: "20px 40px 60px 40px",
             backgroundColor: "#ffffff",
             overflow: "hidden",
             display: "flex",
@@ -482,7 +681,7 @@ export default function PrivacyPolicyPage() {
           <span
             style={{
               fontFamily: FONT_FAMILY,
-              fontSize: "450px",
+              fontSize: "250px",
               fontWeight: 700,
               color: "#0D3CFC",
               letterSpacing: "-0.02em",
@@ -508,358 +707,32 @@ export default function PrivacyPolicyPage() {
             width: "100%",
           }}
         >
-          {/* Pendahuluan */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              1. Pendahuluan
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi pribadi Anda saat menggunakan layanan, situs web, dan aplikasi kami.
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              Dengan mengakses atau menggunakan Layanan kami, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan Kebijakan Privasi ini. Jika Anda tidak setuju dengan bagian mana pun, Anda tidak boleh mengakses layanan.
-            </p>
-          </div>
-
-          {/* Informasi yang Dikumpulkan */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              2. Informasi yang Kami Kumpulkan
-            </h2>
-            <h3 style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "12px",
-            }}>
-              2.1 Informasi yang Anda Berikan
-            </h3>
-            <ul style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "24px",
-              paddingLeft: "24px",
-            }}>
-              <li>Informasi akun (nama, email, kata sandi)</li>
-              <li>Profil dan foto profil</li>
-              <li>Komentar dan interaksi dalam notifikasi</li>
-              <li>Reaksi dan like pada konten</li>
-              <li>Komunikasi dengan tim dukungan</li>
-            </ul>
-
-            <h3 style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "12px",
-            }}>
-              2.2 Informasi yang Dikumpulkan Secara Otomatis
-            </h3>
-            <ul style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-              paddingLeft: "24px",
-            }}>
-              <li>Data penggunaan (waktu akses, fitur yang digunakan)</li>
-              <li>Informasi perangkat (tipe perangkat, sistem operasi)</li>
-              <li>Alamat IP dan data lokasi umum</li>
-              <li>Cookie dan teknologi pelacakan serupa</li>
-            </ul>
-          </div>
-
-          {/* Penggunaan Informasi */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              3. Penggunaan Informasi
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Kami menggunakan informasi yang dikumpulkan untuk:
-            </p>
-            <ul style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-              paddingLeft: "24px",
-            }}>
-              <li>Menyediakan, memelihara, dan meningkatkan Layanan</li>
-              <li>Mengirimkan notifikasi dan pembaruan penting</li>
-              <li>Menanggapi komentar, pertanyaan, dan permintaan Anda</li>
-              <li>Memantau dan menganalisis tren, penggunaan, dan aktivitas</li>
-              <li>Mendeteksi, mencegah, dan mengatasi masalah teknis atau keamanan</li>
-              <li>Mematuhi kewajiban hukum</li>
-            </ul>
-          </div>
-
-          {/* Penyimpanan dan Keamanan */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              4. Penyimpanan dan Keamanan Data
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Kami menggunakan layanan Firebase dari Google untuk menyimpan data Anda. Data disimpan di server yang aman dengan enkripsi dan protokol keamanan industri standar. Namun, tidak ada metode transmisi melalui internet atau metode penyimpanan elektronik yang 100% aman.
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              Kami akan menyimpan informasi pribadi Anda selama diperlukan untuk memenuhi tujuan yang diuraikan dalam Kebijakan Privasi ini, kecuali periode penyimpanan yang lebih lama diperlukan atau diizinkan oleh hukum.
-            </p>
-          </div>
-
-          {/* Berbagi Informasi */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              5. Berbagi Informasi
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Kami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga. Kami dapat berbagi informasi dalam situasi berikut:
-            </p>
-            <ul style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-              paddingLeft: "24px",
-            }}>
-              <li>Dengan penyedia layanan pihak ketiga yang membantu kami mengoperasikan Layanan</li>
-              <li>Jika diwajibkan oleh hukum atau untuk merespons proses hukum</li>
-              <li>Untuk melindungi hak, properti, atau keselamatan kami atau orang lain</li>
-              <li>Dengan persetujuan Anda</li>
-            </ul>
-          </div>
-
-          {/* Hak Privasi */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              6. Hak Privasi Anda
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Tergantung pada lokasi Anda, Anda mungkin memiliki hak tertentu terkait informasi pribadi Anda, termasuk:
-            </p>
-            <ul style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "24px",
-              paddingLeft: "24px",
-            }}>
-              <li>Hak untuk mengakses informasi pribadi Anda</li>
-              <li>Hak untuk memperbaiki informasi yang tidak akurat</li>
-              <li>Hak untuk menghapus informasi pribadi Anda</li>
-              <li>Hak untuk membatasi atau menolak pemrosesan</li>
-              <li>Hak untuk portabilitas data</li>
-            </ul>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              <strong>Email:</strong> privacy@wawa44.com
-            </p>
-          </div>
-
-          {/* Cookie */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              7. Cookie dan Teknologi Pelacakan
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              Kami menggunakan cookie dan teknologi serupa untuk melacak aktivitas di Layanan kami dan menyimpan informasi tertentu. Anda dapat menginstruksikan browser Anda untuk menolak semua cookie atau untuk menunjukkan kapan cookie dikirim. Namun, jika Anda tidak menerima cookie, beberapa bagian dari Layanan kami mungkin tidak berfungsi dengan baik.
-            </p>
-          </div>
-
-          {/* Perubahan Kebijakan */}
-          <div className="content-section" style={{ marginBottom: "60px" }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              8. Perubahan Kebijakan
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang perubahan dengan memposting Kebijakan Privasi baru di halaman ini dan memperbarui tanggal "Terakhir diperbarui". Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan.
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginTop: "16px",
-              fontStyle: "italic",
-            }}>
-              Terakhir diperbarui: 1 September 2026
-            </p>
-          </div>
-
-          {/* Kontak */}
-          <div className="content-section" style={{ marginBottom: 0 }}>
-            <h2 style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "20px",
-              letterSpacing: "-0.02em",
-            }}>
-              9. Hubungi Kami
-            </h2>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}>
-              Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami:
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
-            }}>
-              <strong>Email:</strong> privacy@wawa44.com
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
-            }}>
-              <strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta, Indonesia
-            </p>
-            <p style={{
-              fontSize: "18px",
-              lineHeight: "1.8",
-              color: "#333",
-              fontFamily: FONT_FAMILY,
-              marginBottom: 0,
-            }}>
-              <strong>Telepon:</strong> +62 21 1234 5678
-            </p>
-          </div>
+          {privacyContent.map((item, index) => (
+            <div key={index} className="content-section" style={{ marginBottom: "50px" }}>
+              <h2 style={{
+                fontSize: "32px",
+                fontWeight: 700,
+                color: "#0D3CFC",
+                fontFamily: FONT_FAMILY,
+                marginBottom: "16px",
+                letterSpacing: "-0.02em",
+              }}>
+                {index + 1}. {item.title}
+              </h2>
+              <p style={{
+                fontSize: "18px",
+                lineHeight: "1.8",
+                color: "#333",
+                fontFamily: FONT_FAMILY,
+                marginBottom: 0,
+              }}>
+                {item.content}
+              </p>
+            </div>
+          ))}
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER with Images */}
         <div
           style={{
             width: "100%",
@@ -867,8 +740,58 @@ export default function PrivacyPolicyPage() {
             backgroundColor: "#ffffff",
             borderTop: "1px solid rgba(0,0,0,0.05)",
             marginTop: "20px",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
+          {/* Foto Kiri */}
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          {/* Foto Kanan */}
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -878,6 +801,8 @@ export default function PrivacyPolicyPage() {
               margin: "0 auto",
               gap: "40px",
               flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             {footerLinks.map((section, idx) => (
