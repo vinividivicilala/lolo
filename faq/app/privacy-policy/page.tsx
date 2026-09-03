@@ -1642,7 +1642,7 @@ export default function PrivacyPolicyPage() {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState("1 September 2026");
+  const [lastUpdate, setLastUpdate] = useState("");
   const [activeSection, setActiveSection] = useState(0);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -1833,10 +1833,20 @@ export default function PrivacyPolicyPage() {
           }
           if (data.lastUpdate) {
             setLastUpdate(data.lastUpdate);
+          } else {
+            // Set default date if no lastUpdate
+            const now = new Date();
+            setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
           }
+        } else {
+          // Set default date
+          const now = new Date();
+          setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
         }
       } catch (error) {
         console.error("Error loading privacy content:", error);
+        const now = new Date();
+        setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
       }
     };
     loadContent();
@@ -1893,7 +1903,7 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - SINGLE PRELOADER
+  // Preloader - SAMA SEPERTI HALAMAN UTAMA (Menuru dan Note)
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
@@ -1934,7 +1944,7 @@ export default function PrivacyPolicyPage() {
       duration: 0.4,
       ease: "power2.out",
       onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Shop";
+        if (textRef.current) textRef.current.textContent = "Note";
       }
     })
     .to(textRef.current, {
@@ -2053,7 +2063,7 @@ export default function PrivacyPolicyPage() {
 
     const handleScroll = () => {
       const sectionElements = sectionRefs.current;
-      const scrollPosition = window.scrollY + 120;
+      const scrollPosition = window.scrollY + 150;
 
       for (let i = sectionElements.length - 1; i >= 0; i--) {
         const section = sectionElements[i];
@@ -2273,18 +2283,6 @@ export default function PrivacyPolicyPage() {
     }
   };
 
-  // Generate sidebar items dengan format 1. 1.1 1.2 dst
-  const getSidebarItems = () => {
-    const items: { label: string; index: number }[] = [];
-    privacyContent.forEach((section, idx) => {
-      items.push({ label: `${idx + 1}. ${section.title}`, index: idx });
-      section.subs.forEach((sub, subIdx) => {
-        items.push({ label: `${sub.sub}`, index: idx, isSub: true });
-      });
-    });
-    return items;
-  };
-
   if (!isMounted || loading) {
     return (
       <div
@@ -2327,7 +2325,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Shop
+            Note
           </span>
         </div>
       </div>
@@ -2376,14 +2374,12 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Shop
+            Note
           </span>
         </div>
       </div>
     );
   }
-
-  const sidebarItems = getSidebarItems();
 
   return (
     <>
@@ -2605,32 +2601,32 @@ export default function PrivacyPolicyPage() {
           gap: "40px",
           marginTop: "-40px",
         }}>
-          {/* SIDEBAR - KIRI - TETAP DI TEMPAT */}
+          {/* SIDEBAR - KIRI BAWAH - TIDAK IKUT SCROLL KE ATAS */}
           <div
             ref={sidebarRef}
             style={{
-              width: "280px",
+              width: "250px",
               flexShrink: 0,
               position: "sticky",
               top: "120px",
               alignSelf: "flex-start",
               maxHeight: "calc(100vh - 160px)",
               overflowY: "auto",
-              paddingRight: "20px",
-              borderRight: "2px solid rgba(13,60,252,0.1)",
+              paddingRight: "15px",
+              borderRight: "1px solid rgba(13,60,252,0.15)",
               opacity: 0,
             }}
             className="sidebar-scroll"
           >
             <div style={{
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: 700,
               color: "#0D3CFC",
               fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
+              marginBottom: "12px",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
-              paddingBottom: "8px",
+              paddingBottom: "6px",
               borderBottom: "2px solid #0D3CFC",
             }}>
               Daftar Isi
@@ -2638,72 +2634,39 @@ export default function PrivacyPolicyPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {privacyContent.map((section, index) => (
                 <React.Fragment key={index}>
-                  {/* Judul Utama */}
+                  {/* Judul Utama - Tanpa design tambahan */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
-                      padding: "6px 12px",
+                      padding: "4px 8px",
                       cursor: "pointer",
-                      borderRadius: "4px",
                       fontFamily: FONT_FAMILY,
-                      fontSize: "14px",
-                      fontWeight: activeSection === index ? 700 : 600,
-                      color: activeSection === index ? "#0D3CFC" : "#444",
-                      backgroundColor: activeSection === index ? "rgba(13,60,252,0.08)" : "transparent",
-                      transition: "all 0.3s ease",
-                      borderLeft: activeSection === index ? "3px solid #0D3CFC" : "3px solid transparent",
-                      paddingLeft: activeSection === index ? "9px" : "12px",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activeSection !== index) {
-                        e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.05)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeSection !== index) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
+                      fontSize: "13px",
+                      fontWeight: activeSection === index ? 600 : 400,
+                      color: activeSection === index ? "#0D3CFC" : "#555",
+                      transition: "all 0.2s ease",
                     }}
                   >
                     {index + 1}. {section.title}
                   </div>
-                  {/* Sub Judul */}
-                  {section.subs.map((sub, subIdx) => {
-                    const isActive = activeSection === index;
-                    return (
-                      <div
-                        key={`${index}-${subIdx}`}
-                        onClick={() => scrollToSection(index)}
-                        style={{
-                          padding: "4px 12px 4px 28px",
-                          cursor: "pointer",
-                          borderRadius: "4px",
-                          fontFamily: FONT_FAMILY,
-                          fontSize: "12px",
-                          fontWeight: isActive ? 500 : 400,
-                          color: isActive ? "#0D3CFC" : "#888",
-                          transition: "all 0.3s ease",
-                          borderLeft: isActive ? "2px solid #0D3CFC" : "2px solid transparent",
-                          paddingLeft: isActive ? "26px" : "28px",
-                          opacity: isActive ? 1 : 0.7,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.color = "#0D3CFC";
-                            e.currentTarget.style.opacity = "1";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.color = "#888";
-                            e.currentTarget.style.opacity = "0.7";
-                          }
-                        }}
-                      >
-                        {sub.sub}
-                      </div>
-                    );
-                  })}
+                  {/* Sub Judul - Indent */}
+                  {section.subs.map((sub, subIdx) => (
+                    <div
+                      key={`${index}-${subIdx}`}
+                      onClick={() => scrollToSection(index)}
+                      style={{
+                        padding: "3px 8px 3px 20px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "12px",
+                        fontWeight: activeSection === index ? 500 : 300,
+                        color: activeSection === index ? "#0D3CFC" : "#888",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      {sub.sub}
+                    </div>
+                  ))}
                 </React.Fragment>
               ))}
             </div>
@@ -2717,7 +2680,7 @@ export default function PrivacyPolicyPage() {
               paddingBottom: "60px",
             }}
           >
-            {/* Last Update */}
+            {/* Last Update - OTOMATIS MENAMPILKAN TGL */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
@@ -2730,7 +2693,7 @@ export default function PrivacyPolicyPage() {
                 fontSize: "14px",
                 fontStyle: "italic",
               }}>
-                Terakhir diperbarui: {lastUpdate}
+                Terakhir diperbarui: {lastUpdate || "1 September 2026"}
               </div>
               {isAdmin && isEditing && (
                 <div style={{
@@ -3683,7 +3646,7 @@ export default function PrivacyPolicyPage() {
             height: 75px !important;
           }
           .sidebar-scroll {
-            width: 220px !important;
+            width: 200px !important;
           }
         }
         @media (max-width: 768px) {
