@@ -1910,7 +1910,7 @@ export default function PrivacyPolicyPage() {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Preloader - SINGLE: Shop lalu Note (tidak double)
+  // Preloader - SINGLE: Menuru, Shop, Note (1x masing-masing)
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
@@ -2352,7 +2352,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2401,7 +2401,7 @@ export default function PrivacyPolicyPage() {
               willChange: "transform, opacity",
             }}
           >
-            Note
+            Shop
           </span>
         </div>
       </div>
@@ -2628,7 +2628,7 @@ export default function PrivacyPolicyPage() {
           gap: "40px",
           marginTop: "-40px",
         }}>
-          {/* SIDEBAR - KIRI - HANYA TEKS, TANPA DESIGN */}
+          {/* SIDEBAR - KIRI - HANYA TEKS, TANPA DESIGN, OTOMATIS DETEKSI JUDUL */}
           <div
             ref={sidebarRef}
             style={{
@@ -2647,7 +2647,7 @@ export default function PrivacyPolicyPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {privacyContent.map((section, index) => (
                 <React.Fragment key={index}>
-                  {/* Judul Utama - Hanya Teks, Besar */}
+                  {/* Judul Utama - Hanya Teks */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
@@ -2662,7 +2662,7 @@ export default function PrivacyPolicyPage() {
                   >
                     {index + 1}. {section.title}
                   </div>
-                  {/* Sub Judul - Indent, Hanya Teks */}
+                  {/* Sub Judul - Indent */}
                   {section.subs.map((sub, subIdx) => (
                     <div
                       key={`${index}-${subIdx}`}
@@ -2693,7 +2693,7 @@ export default function PrivacyPolicyPage() {
               paddingBottom: "60px",
             }}
           >
-            {/* Last Update - Otomatis menampilkan tanggal */}
+            {/* Last Update - Otomatis menampilkan tanggal dan admin */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
