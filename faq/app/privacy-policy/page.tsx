@@ -3475,7 +3475,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri bawah */}
+        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri dengan blur */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
@@ -3485,7 +3485,7 @@ export default function PrivacyPolicyPage() {
           marginTop: "0px",
           position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed position, turun ke bawah */}
+          {/* SIDEBAR - KIRI - Fixed dengan blur effect */}
           <div
             ref={sidebarRef}
             style={{
@@ -3496,12 +3496,19 @@ export default function PrivacyPolicyPage() {
               left: "40px",
               transform: "translateY(-50%)",
               paddingRight: "20px",
+              padding: "20px 16px 20px 20px",
               opacity: 0,
               maxHeight: "65vh",
               overflowY: "auto",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               zIndex: 40,
+              backgroundColor: "rgba(255, 255, 255, 0.75)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255,255,255,0.2)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
             }}
             className="sidebar-scroll"
           >
@@ -3526,6 +3533,9 @@ export default function PrivacyPolicyPage() {
                       fontWeight: activeSection === index ? 700 : 400,
                       color: activeSection === index ? "#0D3CFC" : "#444",
                       transition: "color 0.2s ease, font-size 0.2s ease",
+                      borderRadius: "4px",
+                      paddingLeft: activeSection === index ? "8px" : "0",
+                      backgroundColor: activeSection === index ? "rgba(13,60,252,0.08)" : "transparent",
                     }}
                   >
                     {index + 1}. {section.title}
@@ -3543,6 +3553,9 @@ export default function PrivacyPolicyPage() {
                         fontWeight: activeSection === index ? 500 : 300,
                         color: activeSection === index ? "#0D3CFC" : "#888",
                         transition: "color 0.2s ease, font-size 0.2s ease",
+                        borderRadius: "4px",
+                        paddingLeft: activeSection === index ? "20px" : "16px",
+                        backgroundColor: activeSection === index ? "rgba(13,60,252,0.05)" : "transparent",
                       }}
                     >
                       {sub.sub}
@@ -3560,7 +3573,7 @@ export default function PrivacyPolicyPage() {
             style={{
               flex: 1,
               paddingBottom: "60px",
-              marginLeft: "320px",
+              marginLeft: "340px",
               paddingTop: "0px",
             }}
           >
