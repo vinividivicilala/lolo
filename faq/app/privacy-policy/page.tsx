@@ -3475,7 +3475,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri dengan blur */}
+        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri dengan blur menyatu dengan background */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
@@ -3485,7 +3485,7 @@ export default function PrivacyPolicyPage() {
           marginTop: "0px",
           position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed dengan blur effect */}
+          {/* SIDEBAR - KIRI - Fixed dengan blur transparan menyatu dengan bg */}
           <div
             ref={sidebarRef}
             style={{
@@ -3495,20 +3495,19 @@ export default function PrivacyPolicyPage() {
               top: "55%",
               left: "40px",
               transform: "translateY(-50%)",
-              paddingRight: "20px",
-              padding: "20px 16px 20px 20px",
+              padding: "16px 12px 16px 16px",
               opacity: 0,
               maxHeight: "65vh",
               overflowY: "auto",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               zIndex: 40,
-              backgroundColor: "rgba(255, 255, 255, 0.75)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              backgroundColor: "rgba(255, 255, 255, 0.6)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               borderRadius: "16px",
-              border: "1px solid rgba(255,255,255,0.2)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.06)",
             }}
             className="sidebar-scroll"
           >
@@ -3519,23 +3518,22 @@ export default function PrivacyPolicyPage() {
                 height: 0 !important;
               }
             `}</style>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
               {privacyContent.map((section, index) => (
                 <div key={index}>
                   {/* Judul Utama */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
-                      padding: "6px 0",
+                      padding: "5px 8px",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
-                      fontSize: activeSection === index ? "18px" : "15px",
+                      fontSize: activeSection === index ? "16px" : "13px",
                       fontWeight: activeSection === index ? 700 : 400,
                       color: activeSection === index ? "#0D3CFC" : "#444",
-                      transition: "color 0.2s ease, font-size 0.2s ease",
-                      borderRadius: "4px",
-                      paddingLeft: activeSection === index ? "8px" : "0",
-                      backgroundColor: activeSection === index ? "rgba(13,60,252,0.08)" : "transparent",
+                      transition: "all 0.2s ease",
+                      borderRadius: "6px",
+                      backgroundColor: activeSection === index ? "rgba(13,60,252,0.10)" : "transparent",
                     }}
                   >
                     {index + 1}. {section.title}
@@ -3546,16 +3544,15 @@ export default function PrivacyPolicyPage() {
                       key={`${index}-${subIdx}`}
                       onClick={() => scrollToSection(index)}
                       style={{
-                        padding: "3px 0 3px 16px",
+                        padding: "2px 8px 2px 20px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
-                        fontSize: activeSection === index ? "14px" : "12px",
+                        fontSize: activeSection === index ? "13px" : "11px",
                         fontWeight: activeSection === index ? 500 : 300,
-                        color: activeSection === index ? "#0D3CFC" : "#888",
-                        transition: "color 0.2s ease, font-size 0.2s ease",
+                        color: activeSection === index ? "#0D3CFC" : "#999",
+                        transition: "all 0.2s ease",
                         borderRadius: "4px",
-                        paddingLeft: activeSection === index ? "20px" : "16px",
-                        backgroundColor: activeSection === index ? "rgba(13,60,252,0.05)" : "transparent",
+                        backgroundColor: activeSection === index ? "rgba(13,60,252,0.06)" : "transparent",
                       }}
                     >
                       {sub.sub}
