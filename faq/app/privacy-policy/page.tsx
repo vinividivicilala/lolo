@@ -179,7 +179,6 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    // Shop muncul 1x
     tl.to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -197,7 +196,6 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         if (textRef.current) textRef.current.textContent = "Note";
       }
     })
-    // Note muncul 1x
     .to(textRef.current, {
       y: 0,
       opacity: 1,
@@ -2163,7 +2161,7 @@ export default function PrivacyPolicyPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMounted, loading, showMain, privacyContent]);
 
-  // Hitung posisi sidebar agar berada di bawah teks Privacy Policy
+  // Hitung posisi sidebar agar tetap di bawah Privacy Policy dan bergerak ke atas mencari ruang kosong
   useEffect(() => {
     if (!isMounted || loading || !showMain) return;
     
@@ -2171,8 +2169,24 @@ export default function PrivacyPolicyPage() {
       if (privacyTitleRef.current) {
         const rect = privacyTitleRef.current.getBoundingClientRect();
         const bottom = rect.bottom + window.scrollY;
-        // Tambahkan jarak 20px dari bawah teks Privacy Policy
-        setSidebarTop(bottom + 20);
+        const windowHeight = window.innerHeight;
+        const sidebarHeight = 70; // perkiraan tinggi sidebar dalam vh
+        
+        // Hitung posisi ideal: di bawah Privacy Policy
+        let idealTop = bottom + 30;
+        
+        // Jika sidebar terlalu ke bawah (melebihi viewport), geser ke atas
+        const maxTop = windowHeight * 0.75; // maksimal 75% dari viewport
+        if (idealTop > maxTop) {
+          idealTop = maxTop;
+        }
+        
+        // Minimal 80px dari atas
+        if (idealTop < 80) {
+          idealTop = 80;
+        }
+        
+        setSidebarTop(idealTop);
       }
     };
 
@@ -3501,7 +3515,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR - Sidebar FIXED di bawah Privacy Policy */}
+        {/* CONTENT WITH SIDEBAR - Sidebar FIXED dengan auto adjust */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
@@ -3511,14 +3525,14 @@ export default function PrivacyPolicyPage() {
           marginTop: "0px",
           position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed position di bawah Privacy Policy */}
+          {/* SIDEBAR - KIRI - Fixed dengan posisi dinamis */}
           <div
             ref={sidebarRef}
             style={{
               width: "280px",
               flexShrink: 0,
               position: "fixed",
-              top: sidebarTop || "auto",
+              top: sidebarTop + "px",
               left: "40px",
               paddingRight: "20px",
               paddingTop: "0px",
@@ -3528,6 +3542,7 @@ export default function PrivacyPolicyPage() {
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               zIndex: 40,
+              transition: "top 0.15s ease-out",
             }}
             className="sidebar-scroll"
           >
@@ -3579,7 +3594,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
 
-          {/* CONTENT - KANAN - Dinaikkan ke atas */}
+          {/* CONTENT - KANAN */}
           <div
             ref={contentRef}
             className="content-with-sidebar"
@@ -3590,7 +3605,7 @@ export default function PrivacyPolicyPage() {
               paddingTop: "0px",
             }}
           >
-            {/* Last Update dan Author - Nama Admin bukan email */}
+            {/* Last Update dan Author - Nama Admin */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
