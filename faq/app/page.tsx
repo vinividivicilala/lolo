@@ -2535,115 +2535,62 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {section.links.map((link, linkIdx) => {
                     let linkHref = "#";
+                    let isAttention = false;
                     if (link === "Kebijakan Privasi") {
                       linkHref = "/privacy-policy";
+                      isAttention = true;
                     } else if (link === "Ketentuan Kami") {
                       linkHref = "/terms-of-service";
+                      isAttention = true;
                     }
                     
                     return (
-                      <Link key={linkIdx} href={linkHref} style={{ textDecoration: "none" }}>
-                        <span
-                          style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: "20px",
-                            fontWeight: 400,
-                            color: "#0D3CFC",
-                            letterSpacing: "-0.01em",
-                            cursor: "pointer",
-                            textTransform: "none",
-                          }}
-                        >
-                          {link}
-                        </span>
-                      </Link>
+                      <div
+                        key={linkIdx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: "#0D3CFC",
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
+                              textTransform: "none",
+                            }}
+                          >
+                            {link}
+                          </span>
+                        </Link>
+                        {isAttention && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            Update
+                          </span>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Tombol Update di samping teks Kebijakan Privasi dan Ketentuan Kami */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              marginTop: "40px",
-              flexWrap: "wrap",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            {/* Kebijakan Privasi + Update Button */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Link href="/privacy-policy" style={{ textDecoration: "none" }}>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "20px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    letterSpacing: "-0.01em",
-                    cursor: "pointer",
-                  }}
-                >
-                  Kebijakan Privasi
-                </span>
-              </Link>
-              <div
-                style={{
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  padding: "4px 12px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                  textAlign: "center",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Update
-              </div>
-            </div>
-
-            {/* Ketentuan Kami + Update Button */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Link href="/terms-of-service" style={{ textDecoration: "none" }}>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "20px",
-                    fontWeight: 500,
-                    color: "#0D3CFC",
-                    letterSpacing: "-0.01em",
-                    cursor: "pointer",
-                  }}
-                >
-                  Ketentuan Kami
-                </span>
-              </Link>
-              <div
-                style={{
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  padding: "4px 12px",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                  display: "inline-block",
-                  textAlign: "center",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Update
-              </div>
-            </div>
           </div>
         </div>
 
