@@ -1765,111 +1765,86 @@ export default function TermsOfServicePage() {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Default Terms of Service Content - 13 section
+  // Default Terms of Service Content - Fitur-fitur saja
   const defaultTermsContent = [
     {
-      title: "Pendahuluan dan Penerimaan",
+      title: "Pendahuluan",
       subs: [
-        { sub: "1.1 Latar Belakang", content: "Ketentuan Layanan ini dibuat untuk mengatur penggunaan layanan Menuru. Dengan mengakses atau menggunakan layanan kami, Anda setuju untuk terikat oleh Ketentuan Layanan ini dan semua hukum serta peraturan yang berlaku." },
-        { sub: "1.2 Ruang Lingkup", content: "Ketentuan ini berlaku untuk semua layanan yang disediakan oleh Menuru, termasuk website dan fitur-fitur yang tersedia di dalamnya. Ketentuan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
-        { sub: "1.3 Persetujuan", content: "Dengan menggunakan layanan Menuru, Anda menyetujui seluruh ketentuan yang tercantum dalam dokumen ini. Jika Anda tidak setuju, Anda tidak diperkenankan menggunakan layanan kami." }
+        { sub: "1.1 Latar Belakang", content: "Ketentuan Layanan ini dibuat untuk mengatur penggunaan fitur-fitur yang tersedia di Menuru. Kami berkomitmen untuk memberikan pengalaman terbaik bagi semua pengguna dengan menyediakan berbagai fitur yang bermanfaat." },
+        { sub: "1.2 Ruang Lingkup", content: "Ketentuan ini berlaku untuk semua fitur yang disediakan oleh Menuru, termasuk website dan aplikasi. Ketentuan ini mencakup semua pengguna, baik yang terdaftar maupun pengunjung." },
+        { sub: "1.3 Persetujuan", content: "Dengan menggunakan fitur-fitur Menuru, Anda menyetujui seluruh ketentuan yang tercantum dalam dokumen ini. Jika Anda tidak setuju, Anda tidak diperkenankan menggunakan fitur-fitur kami." }
       ]
     },
     {
-      title: "Penggunaan Layanan",
+      title: "Fitur Shop",
       subs: [
-        { sub: "2.1 Ketentuan Umum", content: "Anda setuju untuk menggunakan layanan kami hanya untuk tujuan yang sah dan sesuai dengan Ketentuan Layanan ini. Anda bertanggung jawab menjaga kerahasiaan kredensial akun Anda." },
-        { sub: "2.2 Larangan Penggunaan", content: "Dilarang menggunakan layanan untuk tujuan ilegal, mengganggu pengguna lain, menyebarkan malware, atau melakukan aktivitas yang merugikan pihak lain." },
-        { sub: "2.3 Akun Pengguna", content: "Anda harus mendaftar untuk menggunakan beberapa fitur. Anda bertanggung jawab atas semua aktivitas yang terjadi di bawah akun Anda." }
+        { sub: "2.1 Belanja Online", content: "Fitur Shop memungkinkan Anda untuk membeli berbagai produk yang tersedia di platform Menuru. Anda dapat menjelajahi katalog produk, menambahkan ke keranjang, dan melakukan pembayaran dengan aman." },
+        { sub: "2.2 Metode Pembayaran", content: "Kami menyediakan berbagai metode pembayaran yang aman dan terpercaya untuk memudahkan transaksi Anda. Semua transaksi dilindungi dengan enkripsi standar industri." },
+        { sub: "2.3 Riwayat Pembelian", content: "Semua riwayat pembelian Anda akan tersimpan dan dapat diakses kapan saja. Ini memudahkan Anda untuk melacak pesanan dan melakukan pengembalian jika diperlukan." }
       ]
     },
     {
-      title: "Hak Kekayaan Intelektual",
+      title: "Fitur Note",
       subs: [
-        { sub: "3.1 Kepemilikan Konten", content: "Semua konten, fitur, dan fungsionalitas layanan kami dimiliki oleh Menuru atau pemberi lisensi kami dan dilindungi oleh hak cipta, merek dagang, dan hukum kekayaan intelektual lainnya." },
-        { sub: "3.2 Penggunaan Konten", content: "Anda tidak boleh mereproduksi, mendistribusikan, memodifikasi, atau membuat karya turunan dari konten tanpa izin tertulis dari kami." },
-        { sub: "3.3 Merek Dagang", content: "Nama dan logo Menuru adalah merek dagang kami. Anda tidak boleh menggunakan merek tersebut tanpa izin tertulis dari kami." }
+        { sub: "3.1 Membuat Catatan", content: "Fitur Note memungkinkan Anda untuk membuat, mengedit, dan menghapus catatan pribadi. Semua catatan disimpan dengan aman dan hanya dapat diakses oleh Anda." },
+        { sub: "3.2 Organisasi Catatan", content: "Anda dapat mengorganisir catatan ke dalam folder atau kategori untuk memudahkan pencarian dan pengelolaan. Setiap catatan dapat diberi label dan warna." },
+        { sub: "3.3 Sinkronisasi", content: "Catatan Anda disinkronkan secara real-time di semua perangkat yang terhubung dengan akun Anda, memastikan akses yang konsisten di mana saja." }
       ]
     },
     {
-      title: "Konten Pengguna",
+      title: "Fitur Calendar",
       subs: [
-        { sub: "4.1 Kepemilikan Konten", content: "Anda mempertahankan kepemilikan atas konten yang Anda unggah ke layanan kami. Namun, dengan mengunggah konten, Anda memberi kami lisensi untuk menggunakan konten tersebut." },
-        { sub: "4.2 Lisensi Pengguna", content: "Dengan mengunggah konten, Anda memberi kami lisensi non-eksklusif, bebas royalti, dan di seluruh dunia untuk menggunakan, mereproduksi, dan mendistribusikan konten Anda." },
-        { sub: "4.3 Moderasi Konten", content: "Kami berhak, tetapi tidak berkewajiban, untuk memantau, mengedit, atau menghapus konten pengguna yang melanggar ketentuan ini." }
+        { sub: "4.1 Manajemen Jadwal", content: "Fitur Calendar membantu Anda mengelola jadwal dan kegiatan sehari-hari. Anda dapat menambahkan acara, mengatur pengingat, dan melihat jadwal dalam berbagai tampilan." },
+        { sub: "4.2 Pengingat", content: "Anda dapat mengatur pengingat untuk acara penting dan menerima notifikasi tepat waktu. Pengingat dapat disesuaikan dengan preferensi Anda." },
+        { sub: "4.3 Integrasi", content: "Calendar dapat diintegrasikan dengan kalender eksternal seperti Google Calendar atau Outlook untuk pengelolaan jadwal yang lebih terpusat." }
       ]
     },
     {
-      title: "Privasi dan Perlindungan Data",
+      title: "Fitur Blog",
       subs: [
-        { sub: "5.1 Kebijakan Privasi", content: "Kebijakan Privasi kami menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda. Kebijakan tersebut menjadi bagian dari Ketentuan Layanan ini." },
-        { sub: "5.2 Keamanan Data", content: "Kami menerapkan langkah-langkah keamanan yang wajar untuk melindungi informasi pribadi Anda dari akses tidak sah." },
-        { sub: "5.3 Tanggung Jawab Pengguna", content: "Anda bertanggung jawab menjaga keamanan kredensial akun Anda dan memberi tahu kami jika terjadi pelanggaran keamanan." }
+        { sub: "5.1 Membaca Artikel", content: "Fitur Blog menyediakan berbagai artikel informatif dari berbagai kategori. Anda dapat membaca, memberi like, dan berbagi artikel yang menarik bagi Anda." },
+        { sub: "5.2 Menulis Artikel", content: "Pengguna terdaftar dapat menulis dan mempublikasikan artikel di Blog. Setiap artikel akan melalui proses moderasi untuk memastikan kualitas konten." },
+        { sub: "5.3 Interaksi", content: "Anda dapat berinteraksi dengan penulis dan pembaca lain melalui komentar. Diskusi yang sehat dan konstruktif sangat kami dukung." }
       ]
     },
     {
-      title: "Tautan Pihak Ketiga",
+      title: "Fitur Donation",
       subs: [
-        { sub: "6.1 Tautan Eksternal", content: "Layanan kami mungkin berisi tautan ke situs web atau layanan pihak ketiga yang tidak kami kelola. Kami tidak bertanggung jawab atas konten atau praktik privasi mereka." },
-        { sub: "6.2 Penggunaan Pihak Ketiga", content: "Dengan menggunakan layanan kami, Anda membebaskan kami dari tanggung jawab atas penggunaan situs web atau layanan pihak ketiga." },
-        { sub: "6.3 Interaksi Pihak Ketiga", content: "Interaksi Anda dengan pihak ketiga yang ditemukan melalui layanan kami adalah semata-mata antara Anda dan pihak ketiga tersebut." }
+        { sub: "6.1 Donasi", content: "Fitur Donation memungkinkan Anda untuk memberikan donasi kepada berbagai program dan inisiatif yang dikelola oleh Menuru. Setiap donasi akan digunakan untuk tujuan yang transparan." },
+        { sub: "6.2 Transaksi Aman", content: "Semua transaksi donasi diproses melalui gateway pembayaran yang aman dan terverifikasi. Data donor dilindungi dengan baik." },
+        { sub: "6.3 Laporan Donasi", content: "Kami menyediakan laporan donasi yang transparan dan dapat diakses oleh donor. Penggunaan dana donasi dilaporkan secara berkala." }
       ]
     },
     {
-      title: "Batas Tanggung Jawab",
+      title: "Fitur Community",
       subs: [
-        { sub: "7.1 Batasan Tanggung Jawab", content: "Sejauh diizinkan oleh hukum, Menuru tidak bertanggung jawab atas kerugian tidak langsung, insidental, khusus, atau konsekuensial yang timbul dari penggunaan layanan kami." },
-        { sub: "7.2 Jumlah Tanggung Jawab", content: "Total tanggung jawab kami kepada Anda tidak akan melebihi jumlah yang Anda bayarkan kepada kami, jika ada, selama dua belas (12) bulan sebelumnya." },
-        { sub: "7.3 Pengecualian", content: "Beberapa yurisdiksi tidak mengizinkan pembatasan tanggung jawab tertentu, sehingga beberapa batasan di atas mungkin tidak berlaku untuk Anda." }
+        { sub: "7.1 Forum Diskusi", content: "Fitur Community menyediakan forum diskusi untuk berbagai topik. Anda dapat bergabung dalam diskusi, berbagi pengetahuan, dan membangun koneksi dengan pengguna lain." },
+        { sub: "7.2 Posting Konten", content: "Anda dapat membuat posting, berbagi pengalaman, dan mengajukan pertanyaan di Community. Konten yang bermanfaat akan diapresiasi oleh komunitas." },
+        { sub: "7.3 Moderasi", content: "Kami memoderasi konten untuk menjaga lingkungan yang aman dan positif. Pelanggaran dapat mengakibatkan penghapusan konten atau sanksi akun." }
       ]
     },
     {
-      title: "Penyangkalan Jaminan",
+      title: "Fitur Live Chat",
       subs: [
-        { sub: "8.1 Layanan 'Sebagaimana Adanya'", content: "Layanan kami disediakan 'sebagaimana adanya' dan 'sesuai ketersediaan' tanpa jaminan apapun, baik tersurat maupun tersirat." },
-        { sub: "8.2 Tidak Ada Jaminan", content: "Kami tidak menjamin bahwa layanan akan bebas dari gangguan, aman, atau bebas dari kesalahan, atau bahwa kekurangan akan diperbaiki." },
-        { sub: "8.3 Penggunaan Berisiko", content: "Penggunaan layanan kami sepenuhnya risiko Anda sendiri. Kami tidak bertanggung jawab atas kerusakan yang timbul dari penggunaan layanan." }
+        { sub: "8.1 Chat Real-time", content: "Fitur Live Chat memungkinkan komunikasi real-time antara pengguna. Anda dapat mengirim pesan, berbagi file, dan melakukan panggilan suara atau video." },
+        { sub: "8.2 Privasi Chat", content: "Semua percakapan dilindungi dengan enkripsi untuk menjaga kerahasiaan. Chat hanya dapat diakses oleh peserta yang terlibat." },
+        { sub: "8.3 Riwayat Chat", content: "Riwayat chat disimpan untuk referensi di masa depan. Anda dapat menghapus riwayat chat kapan saja sesuai keinginan." }
       ]
     },
     {
-      title: "Ganti Rugi",
+      title: "Fitur Live Chat Agent",
       subs: [
-        { sub: "9.1 Kewajiban Ganti Rugi", content: "Anda setuju untuk membela, mengganti rugi, dan membebaskan Menuru dari semua klaim, kerusakan, atau biaya yang timbul dari penggunaan layanan Anda." },
-        { sub: "9.2 Ruang Lingkup Ganti Rugi", content: "Ini termasuk klaim yang timbul dari pelanggaran Ketentuan Layanan ini, pelanggaran hak pihak ketiga, atau konten pengguna Anda." },
-        { sub: "9.3 Kelangsungan", content: "Kewajiban ganti rugi ini akan tetap berlaku setelah Ketentuan Layanan ini berakhir." }
-      ]
-    },
-    {
-      title: "Pengakhiran Layanan",
-      subs: [
-        { sub: "10.1 Hak Pengakhiran", content: "Kami dapat mengakhiri atau menangguhkan akses Anda ke layanan segera, tanpa pemberitahuan, jika Anda melanggar Ketentuan Layanan ini." },
-        { sub: "10.2 Pengakhiran oleh Pengguna", content: "Anda dapat mengakhiri akun Anda kapan saja dengan berhenti menggunakan layanan atau menghubungi kami untuk menghapus akun." },
-        { sub: "10.3 Ketentuan yang Tetap Berlaku", content: "Semua ketentuan yang secara alami harus tetap berlaku setelah pengakhiran akan tetap berlaku." }
-      ]
-    },
-    {
-      title: "Hukum yang Mengatur",
-      subs: [
-        { sub: "11.1 Hukum yang Berlaku", content: "Ketentuan Layanan ini diatur oleh hukum yurisdiksi tempat Menuru didirikan, tanpa memperhatikan ketentuan konflik hukum." },
-        { sub: "11.2 Penyelesaian Sengketa", content: "Setiap sengketa yang timbul akan diselesaikan melalui arbitrase sesuai dengan aturan asosiasi arbitrase yang diakui." },
-        { sub: "11.3 Batas Waktu Klaim", content: "Setiap klaim terhadap kami harus diajukan dalam waktu satu (1) tahun setelah penyebab tindakan timbul." }
-      ]
-    },
-    {
-      title: "Ketentuan Lain-lain",
-      subs: [
-        { sub: "12.1 Keseluruhan Perjanjian", content: "Ketentuan Layanan ini, bersama dengan Kebijakan Privasi kami, merupakan keseluruhan perjanjian antara Anda dan Menuru." },
-        { sub: "12.2 Pelepasan Hak", content: "Kegagalan kami untuk menegakkan hak atau ketentuan apa pun tidak dianggap sebagai pelepasan hak tersebut." },
-        { sub: "12.3 Dapat Dipisahkan", content: "Jika ada ketentuan yang dianggap tidak valid atau tidak dapat diberlakukan, ketentuan lainnya tetap berlaku." },
-        { sub: "12.4 Pengalihan", content: "Anda tidak dapat mengalihkan Ketentuan Layanan ini tanpa izin tertulis dari kami. Kami dapat mengalihkan ketentuan ini tanpa batasan." }
+        { sub: "9.1 Bantuan Langsung", content: "Fitur Live Chat Agent menyediakan bantuan langsung dari agen kami untuk menjawab pertanyaan dan menyelesaikan masalah Anda dengan cepat." },
+        { sub: "9.2 Tiket Dukungan", content: "Setiap percakapan dengan agen akan dibuatkan tiket untuk memudahkan pelacakan dan tindak lanjut. Anda dapat melihat status tiket Anda kapan saja." },
+        { sub: "9.3 Kualitas Layanan", content: "Kami berkomitmen untuk memberikan layanan dukungan terbaik. Umpan balik Anda sangat berharga untuk meningkatkan kualitas layanan kami." }
       ]
     },
     {
       title: "Informasi Kontak",
       subs: [
-        { sub: "13.1 Kontak Dukungan", content: "Jika Anda memiliki pertanyaan tentang Ketentuan Layanan ini, silakan hubungi tim dukungan kami melalui email atau form kontak." },
-        { sub: "13.2 Email", content: "Anda dapat menghubungi kami di legal@wawa44.com untuk pertanyaan terkait ketentuan layanan." },
-        { sub: "13.3 Alamat", content: "Jl. Contoh No. 123, Jakarta, Indonesia. Kami siap membantu Anda dengan segala pertanyaan terkait ketentuan layanan." }
+        { sub: "10.1 Kontak Dukungan", content: "Jika Anda memiliki pertanyaan tentang fitur-fitur Menuru, silakan hubungi tim dukungan kami melalui email atau form kontak yang tersedia." },
+        { sub: "10.2 Email", content: "Anda dapat menghubungi kami di support@wawa44.com untuk pertanyaan terkait penggunaan fitur dan layanan." },
+        { sub: "10.3 Alamat", content: "Jl. Contoh No. 123, Jakarta, Indonesia. Kami siap membantu Anda dengan segala pertanyaan terkait fitur-fitur Menuru." }
       ]
     }
   ];
@@ -2336,7 +2311,7 @@ export default function TermsOfServicePage() {
     <>
       <Head>
         <title>Ketentuan Kami | Menuru</title>
-        <meta name="description" content="Ketentuan Layanan Menuru - Syarat dan ketentuan penggunaan layanan" />
+        <meta name="description" content="Ketentuan Layanan Menuru - Syarat dan ketentuan penggunaan fitur" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -2412,6 +2387,32 @@ export default function TermsOfServicePage() {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
+        }
+
+        /* Blur atas dan bawah sidebar */
+        .sidebar-scroll::before {
+          content: '';
+          position: sticky;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 40px;
+          background: linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0) 100%);
+          pointer-events: none;
+          z-index: 10;
+          display: block;
+        }
+        .sidebar-scroll::after {
+          content: '';
+          position: sticky;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 40px;
+          background: linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0) 100%);
+          pointer-events: none;
+          z-index: 10;
+          display: block;
         }
 
         @media (max-width: 1024px) {
@@ -3383,7 +3384,7 @@ export default function TermsOfServicePage() {
               )}
             </div>
 
-            {/* TERMS OF SERVICE TITLE - 250px */}
+            {/* TERMS OF SERVICE TITLE - 150px */}
             <div
               ref={termsTitleRef}
               style={{
@@ -3399,7 +3400,7 @@ export default function TermsOfServicePage() {
               <span
                 style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: "250px",
+                  fontSize: "150px",
                   fontWeight: 700,
                   color: "#0D3CFC",
                   letterSpacing: "-0.02em",
@@ -3427,9 +3428,10 @@ export default function TermsOfServicePage() {
           marginTop: "0px",
           position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed */}
+          {/* SIDEBAR - KIRI - Fixed dengan blur atas & bawah */}
           <div
             ref={sidebarRef}
+            className="sidebar-scroll"
             style={{
               width: "280px",
               flexShrink: 0,
@@ -3445,16 +3447,14 @@ export default function TermsOfServicePage() {
               msOverflowStyle: "none",
               zIndex: 40,
             }}
-            className="sidebar-scroll"
           >
-            <style>{`
-              .sidebar-scroll::-webkit-scrollbar {
-                display: none !important;
-                width: 0 !important;
-                height: 0 !important;
-              }
-            `}</style>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              gap: "4px",
+              paddingTop: "40px",
+              paddingBottom: "40px",
+            }}>
               {termsContent.map((section, index) => (
                 <div key={index}>
                   <div
