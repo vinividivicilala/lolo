@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, getDocs } from "firebase/firestore";
@@ -1730,6 +1731,40 @@ const footerLinks = [
   { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
 ];
 
+// FAQ Data
+const faqData = [
+  {
+    id: 'shop',
+    question: 'Shop',
+    answer: 'Kamu bisa membeli produk-produk menarik dari komunitas Menuru. Tersedia berbagai merchandise eksklusif dan produk kreatif dari para creator.',
+  },
+  {
+    id: 'blog',
+    question: 'Blog',
+    answer: 'Temukan artikel-artikel inspiratif, tutorial, dan berita terbaru seputar kreativitas, teknologi, dan pengembangan diri di blog Menuru.',
+  },
+  {
+    id: 'donation',
+    question: 'Donation',
+    answer: 'Salurkan donasi Anda untuk membantu mereka yang membutuhkan. Setiap donasi akan disalurkan dengan transparan dan tepat sasaran.',
+  },
+  {
+    id: 'note',
+    question: 'Note',
+    answer: 'Catat ide-ide kreatif Anda dengan mudah. Fitur note memungkinkan Anda menyimpan, mengatur, dan berbagi inspirasi kapan saja.',
+  },
+  {
+    id: 'community',
+    question: 'Community',
+    answer: 'Bergabunglah dengan komunitas kreatif Menuru. Temukan teman baru, kolaborasi, dan dukungan untuk mengembangkan potensi Anda.',
+  },
+  {
+    id: 'calendar',
+    question: 'Calendar',
+    answer: 'Atur jadwal Anda dengan mudah. Fitur calendar membantu Anda merencanakan aktivitas, deadline, dan event penting.',
+  },
+];
+
 export default function ContactPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -1737,6 +1772,8 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [activeFaq, setActiveFaq] = useState<string | null>(null);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1756,6 +1793,71 @@ export default function ContactPage() {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const contactTitleRef = useRef<HTMLDivElement>(null);
+  
+  const item01Ref = useRef<HTMLDivElement>(null);
+  const item02Ref = useRef<HTMLDivElement>(null);
+  const item03Ref = useRef<HTMLDivElement>(null);
+  const item04Ref = useRef<HTMLDivElement>(null);
+  const item05Ref = useRef<HTMLDivElement>(null);
+  const hoverText01Ref = useRef<HTMLDivElement>(null);
+  const hoverText02Ref = useRef<HTMLDivElement>(null);
+  const hoverText03Ref = useRef<HTMLDivElement>(null);
+  const hoverText04Ref = useRef<HTMLDivElement>(null);
+  const hoverText05Ref = useRef<HTMLDivElement>(null);
+
+  const createTicketFromItem = async (itemName: string) => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    if (!db) {
+      alert("Database tidak tersedia");
+      return;
+    }
+    
+    try {
+      const q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        where("status", "in", ["waiting", "active"])
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+        return;
+      }
+
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: `Tentang ${itemName}`,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
+      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
+      
+      const liveChatElement = document.getElementById('live-chat-section');
+      if (liveChatElement) {
+        liveChatElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      alert("Gagal membuat ticket. Silakan coba lagi.");
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -1896,6 +1998,42 @@ export default function ContactPage() {
       });
     }
   }, [isMenuOpen, isMounted, loading, showMain]);
+
+  // Hover effects for items 01-05
+  useEffect(() => {
+    const itemRefs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
+    const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
+    
+    itemRefs.forEach((itemRef, index) => {
+      const id = String(index + 1).padStart(2, '0');
+      const textRef = textRefs[index];
+      
+      if (hoveredItem === id && textRef.current && itemRef.current) {
+        gsap.fromTo(textRef.current,
+          { opacity: 0, x: -20, filter: 'blur(5px)' },
+          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.4, ease: "power2.out" }
+        );
+        gsap.to(itemRef.current, {
+          scale: 1.02,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      } else if (hoveredItem !== id && textRef.current) {
+        gsap.to(textRef.current, {
+          opacity: 0,
+          duration: 0.2,
+          ease: "power2.in"
+        });
+        if (itemRef.current) {
+          gsap.to(itemRef.current, {
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        }
+      }
+    });
+  }, [hoveredItem]);
 
   // GSAP animation for content
   useEffect(() => {
@@ -2040,6 +2178,14 @@ export default function ContactPage() {
         });
       }
       setIsMenuOpen(false);
+    }
+  };
+
+  const toggleFaq = (id: string) => {
+    if (activeFaq === id) {
+      setActiveFaq(null);
+    } else {
+      setActiveFaq(id);
     }
   };
 
@@ -3061,8 +3207,559 @@ export default function ContactPage() {
           </div>
         </div>
 
+        {/* 01-05 Items - Konten Contact yang sudah ada */}
+        <div style={{
+          position: "relative",
+          padding: "0 40px",
+          maxWidth: "1400px",
+          margin: "0 auto",
+          width: "100%",
+          marginTop: "20px",
+        }}>
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "30px",
+            marginBottom: "40px",
+            maxWidth: "1100px",
+          }}>
+            {/* 01 - Note */}
+            <div
+              ref={item01Ref}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                cursor: "pointer",
+                transition: "transform 0.3s ease"
+              }}
+              onMouseEnter={() => setHoveredItem('01')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "60px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1"
+                }}>
+                  01
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "120px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em"
+                }}>
+                  Note
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Note');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    border: "2px solid #0D3CFC",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#000000";
+                    e.currentTarget.style.borderColor = "#000000";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                    e.currentTarget.style.borderColor = "#0D3CFC";
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '01' && (
+                  <div
+                    ref={hoverText01Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: "400",
+                      color: "#000000",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    / kamu bisa mencatat apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 02 - Calendar */}
+            <div
+              ref={item02Ref}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                cursor: "pointer",
+                transition: "transform 0.3s ease"
+              }}
+              onMouseEnter={() => setHoveredItem('02')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "60px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1"
+                }}>
+                  02
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "120px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em"
+                }}>
+                  Calendar
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Calendar');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    border: "2px solid #0D3CFC",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#000000";
+                    e.currentTarget.style.borderColor = "#000000";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                    e.currentTarget.style.borderColor = "#0D3CFC";
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '02' && (
+                  <div
+                    ref={hoverText02Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: "400",
+                      color: "#000000",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    / kamu bisa memikirkan jadwal apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 03 - Donation */}
+            <div
+              ref={item03Ref}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                cursor: "pointer",
+                transition: "transform 0.3s ease"
+              }}
+              onMouseEnter={() => setHoveredItem('03')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "60px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1"
+                }}>
+                  03
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "120px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em"
+                }}>
+                  Donation
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Donation');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    border: "2px solid #0D3CFC",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#000000";
+                    e.currentTarget.style.borderColor = "#000000";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                    e.currentTarget.style.borderColor = "#0D3CFC";
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '03' && (
+                  <div
+                    ref={hoverText03Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: "400",
+                      color: "#000000",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    / kamu bisa membagikan uang apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 04 - Community */}
+            <div
+              ref={item04Ref}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                cursor: "pointer",
+                transition: "transform 0.3s ease"
+              }}
+              onMouseEnter={() => setHoveredItem('04')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "60px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1"
+                }}>
+                  04
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "120px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em"
+                }}>
+                  Community
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Community');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    border: "2px solid #0D3CFC",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#000000";
+                    e.currentTarget.style.borderColor = "#000000";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                    e.currentTarget.style.borderColor = "#0D3CFC";
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '04' && (
+                  <div
+                    ref={hoverText04Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: "400",
+                      color: "#000000",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    / kamu bisa mencari apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 05 - Shop */}
+            <div
+              ref={item05Ref}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                cursor: "pointer",
+                transition: "transform 0.3s ease"
+              }}
+              onMouseEnter={() => setHoveredItem('05')}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "60px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1"
+                }}>
+                  05
+                </span>
+                <span style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "120px",
+                  fontWeight: "300",
+                  color: "#000000",
+                  letterSpacing: "-0.02em"
+                }}>
+                  Shop
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", flexShrink: 0 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createTicketFromItem('Shop');
+                  }}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    border: "2px solid #0D3CFC",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#000000";
+                    e.currentTarget.style.borderColor = "#000000";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#0D3CFC";
+                    e.currentTarget.style.borderColor = "#0D3CFC";
+                  }}
+                >
+                  Ticket
+                </button>
+                {hoveredItem === '05' && (
+                  <div
+                    ref={hoverText05Ref}
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: "400",
+                      color: "#000000",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    / kamu bisa membeli apa yang kamu inginkan
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginTop: "30px",
+            maxWidth: "1100px",
+            gap: "40px",
+          }}>
+            <div style={{
+              flex: "0 0 350px",
+              position: "sticky",
+              top: "200px",
+            }}>
+              <h2 style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "50px",
+                fontWeight: "600",
+                color: "#000000",
+                margin: 0,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
+              }}>
+                FAQ
+              </h2>
+              <p style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "50px",
+                fontWeight: "400",
+                color: "#0D3CFC",
+                margin: 0,
+                marginTop: "20px",
+                letterSpacing: "-0.01em",
+                lineHeight: 1.2,
+              }}>
+                Apakah kamu punya kesulitan?
+              </p>
+            </div>
+
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+            }}>
+              {faqData.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    borderBottom: "1px solid #e8e8e8",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    onClick={() => toggleFaq(item.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                      padding: "15px 0",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.7";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                  >
+                    <span style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "40px",
+                      fontWeight: "500",
+                      color: "#0D3CFC",
+                      letterSpacing: "-0.02em",
+                      lineHeight: "1.2",
+                    }}>
+                      {item.question}
+                    </span>
+                    <motion.div
+                      animate={{
+                        rotate: activeFaq === item.id ? 45 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        fontSize: "30px",
+                        fontWeight: 300,
+                        color: "#0D3CFC",
+                        cursor: "pointer",
+                        flexShrink: 0,
+                      }}
+                    >
+                      +
+                    </motion.div>
+                  </div>
+
+                  <AnimatePresence>
+                    {activeFaq === item.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        style={{
+                          overflow: "hidden",
+                        }}
+                      >
+                        <p style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "24px",
+                          fontWeight: "300",
+                          color: "#000000",
+                          padding: "0 0 20px 0",
+                          margin: 0,
+                          lineHeight: 1.5,
+                          letterSpacing: "-0.01em",
+                        }}>
+                          {item.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ===== LIVE CHAT AGENT ===== */}
-        <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+        <div id="live-chat-section" style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
