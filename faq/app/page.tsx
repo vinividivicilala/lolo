@@ -1736,7 +1736,6 @@ export default function HomePage(): React.JSX.Element {
           duration: 0.8,
           ease: 'power3.out',
           onComplete: () => {
-            // Animate menu items with stagger
             const items = menuOverlayRef.current?.querySelectorAll('.menu-item');
             if (items) {
               gsap.fromTo(items,
@@ -1750,7 +1749,6 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate D9FF81 box 1 with image
             if (menuBoxRef.current) {
               gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1763,7 +1761,6 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate stories section
             if (storiesRef.current) {
               gsap.fromTo(storiesRef.current,
                 { opacity: 0, y: 20 },
@@ -1775,7 +1772,6 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate box 2
             if (menuBox2Ref.current) {
               gsap.fromTo(menuBox2Ref.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1789,7 +1785,6 @@ export default function HomePage(): React.JSX.Element {
                 }
               );
             }
-            // Animate box 3
             if (menuBox3Ref.current) {
               gsap.fromTo(menuBox3Ref.current,
                 { opacity: 0, scale: 0.9, x: 20 },
@@ -1819,7 +1814,6 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!showMain || !isMounted) return;
 
-    // GSAP ScrollTrigger for features section
     const featuresElement = featuresRef.current;
     const featuresTitle = featuresTextRef.current;
 
@@ -1911,7 +1905,6 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // GSAP SplitText + ScrollTrigger for "Menuru" at bottom left
     const menuruElement = menuruFooterRef.current;
     const menuruText = menuruTextRef.current;
     
@@ -2540,25 +2533,106 @@ export default function HomePage(): React.JSX.Element {
                     gap: "8px",
                   }}
                 >
-                  {section.links.map((link, linkIdx) => (
-                    <span
-                      key={linkIdx}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "20px",
-                        fontWeight: 400,
-                        color: "#0D3CFC",
-                        letterSpacing: "-0.01em",
-                        cursor: "pointer",
-                        textTransform: "none",
-                      }}
-                    >
-                      {link}
-                    </span>
-                  ))}
+                  {section.links.map((link, linkIdx) => {
+                    // Tentukan link untuk Kebijakan Privasi dan Ketentuan Kami
+                    let linkHref = "#";
+                    if (link === "Kebijakan Privasi") {
+                      linkHref = "/privacy-policy";
+                    } else if (link === "Ketentuan Kami") {
+                      linkHref = "/terms-of-service";
+                    }
+                    
+                    return (
+                      <Link key={linkIdx} href={linkHref} style={{ textDecoration: "none" }}>
+                        <span
+                          style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: "20px",
+                            fontWeight: 400,
+                            color: "#0D3CFC",
+                            letterSpacing: "-0.01em",
+                            cursor: "pointer",
+                            textTransform: "none",
+                          }}
+                        >
+                          {link}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Tombol Update - Kebijakan Privasi & Ketentuan Kami */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "20px",
+              marginTop: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <Link href="/privacy-policy" style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  padding: "10px 24px",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  fontFamily: FONT_FAMILY,
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  display: "inline-block",
+                  border: "none",
+                  textAlign: "center",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.8";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                Kebijakan Privasi • Update
+              </div>
+            </Link>
+            <Link href="/terms-of-service" style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  padding: "10px 24px",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  fontFamily: FONT_FAMILY,
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  display: "inline-block",
+                  border: "none",
+                  textAlign: "center",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.8";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                Ketentuan Kami • Update
+              </div>
+            </Link>
           </div>
         </div>
 
@@ -2732,7 +2806,6 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </h1>
 
-          {/* Menu Items - Left Side */}
           <div
             ref={menuItemsRef}
             style={{
@@ -2790,7 +2863,6 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Stories Section - Digeser ke kanan (right: 80px) */}
           <div
             ref={storiesRef}
             style={{
@@ -2817,7 +2889,6 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* Box 1 - D9FF81, tetap di kanan bawah */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2913,7 +2984,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 2 - #C8EEFF, di bawah stories */}
           <div
             ref={menuBox2Ref}
             style={{
@@ -3009,7 +3079,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Box 3 - #C8EEFF, di bawah Box 2 dengan jarak */}
           <div
             ref={menuBox3Ref}
             style={{
