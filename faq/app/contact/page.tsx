@@ -1,27 +1,14 @@
-// app/contact/page.tsx (Halaman Contact - FINAL FIXED)
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
+import Head from "next/head";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { initializeApp, getApps } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  updateDoc,
-  where,
-  getDocs,
-} from "firebase/firestore";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, getDocs } from "firebase/firestore";
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -41,39 +28,51 @@ const firebaseConfig = {
 };
 
 let app = null;
-let db = null;
 let auth = null;
+let db = null;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0];
-  db = getFirestore(app);
   auth = getAuth(app);
+  db = getFirestore(app);
 }
 
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const AGENT_NAME = "Farid Ardiansyah";
+
 // SVG Icons
-const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const NorthWestArrow = ({ size = 24 }: { size?: number }) => (
+const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 17L7 7M7 17V7H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 17L17 7M17 17V7H7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const NorthEastArrow = ({ size = 20 }: { size?: number }) => (
+const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 7L17 17M17 7V17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 7L7 17M7 7H17M17 7V17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const SendIcon = ({ size = 16 }: { size?: number }) => (
+const ShieldCheck = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 6H18L19 18H5L6 6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -85,52 +84,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const AGENT_NAME = "Farid Ardiansyah";
-
-// ===== LIVE CHAT AGENT INTERFACES =====
-interface Ticket {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  agentId?: string;
-  agentName?: string;
-  status: 'waiting' | 'active' | 'resolved' | 'closed';
-  topic: string;
-  createdAt: any;
-  lastMessage?: string;
-  lastMessageTime?: any;
-  unreadCount: number;
-  typing: boolean;
-  typingUserId?: string | null;
-  typingUserName?: string | null;
-}
-
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: any;
-  read: boolean;
-}
-
-// ===== FEEDBACK INTERFACE =====
-interface Feedback {
-  id: string;
-  name: string;
-  message: string;
-  createdAt: any;
-  userId?: string;
-  userEmail?: string;
-}
-
-// ============================================================
 // ===== PULSING DOTS =====
-// ============================================================
 const PulsingDots = ({ active }: { active: boolean }) => {
   if (!active) return <span style={{ color: '#999', fontSize: '11px' }}>● Offline</span>;
   return (
@@ -209,9 +163,147 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
   );
 };
 
-// ============================================================
+// ===== PRELOADER =====
+const Preloader = ({ onComplete }: { onComplete: () => void }) => {
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const animationDoneRef = useRef(false);
+
+  useEffect(() => {
+    if (animationDoneRef.current) return;
+    animationDoneRef.current = true;
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: onComplete
+          });
+        }
+      }
+    });
+
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  }, [onComplete]);
+
+  return (
+    <div
+      ref={preloaderRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+        <span
+          style={{
+            fontSize: "100px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Menuru
+        </span>
+        <span
+          ref={textRef}
+          style={{
+            fontSize: "50px",
+            fontWeight: 600,
+            color: "#000000",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.02em",
+            display: "inline-block",
+            willChange: "transform, opacity",
+          }}
+        >
+          Shop
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT AGENT COMPONENT =====
-// ============================================================
+interface Ticket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  agentId?: string;
+  agentName?: string;
+  status: 'waiting' | 'active' | 'resolved' | 'closed';
+  topic: string;
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+  typing: boolean;
+  typingUserId?: string | null;
+  typingUserName?: string | null;
+}
+
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+}
+
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -220,8 +312,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [showStartChat, setShowStartChat] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
 
@@ -234,6 +327,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Lainnya"
   ];
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -245,16 +342,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return `#TICKET-${year}${month}${day}${hours}${minutes}`;
   };
 
-  const formatReceivedDate = (timestamp: any): string => {
+  const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const WaitingIcon = () => (
@@ -290,6 +381,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
+  const SendIcon = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   const LiveChatIllustration = () => (
     <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#0D3CFC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -299,8 +396,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // GSAP SplitText untuk judul Live Chat Agent
+  const scrollToBottom = () => {
+    if (chatMessagesContainerRef.current) {
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+    }
+  };
+
   useEffect(() => {
+    if (!isMounted) return;
     if (liveChatTitleRef.current) {
       const splitTitle = new SplitText(liveChatTitleRef.current, {
         type: "chars",
@@ -327,11 +430,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMounted]);
 
-  // ===== ALL useEffect HOOKS =====
   useEffect(() => {
-    if (!db) return;
+    if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
@@ -341,10 +443,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db]);
+  }, [db, isMounted]);
 
   useEffect(() => {
-    if (!db || !user) return;
+    if (!db || !user || !isMounted) return;
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -370,10 +472,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket]);
+  }, [db, user, isAdmin, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket) return;
+    if (!db || !selectedTicket || !isMounted) return;
     const q = query(
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
@@ -385,23 +487,23 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       setMessages(msgList);
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+        scrollToBottom();
+      }, 50);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket]);
+  }, [db, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin) return;
+    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedTicket, db, user, isAdmin]);
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   useEffect(() => {
-    if (!user || isAdmin) return;
+    if (!user || isAdmin || !isMounted) return;
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
       setSelectedTicket(activeTicket);
@@ -411,9 +513,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
-  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -536,12 +637,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  };
-
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Seseorang";
@@ -563,17 +658,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ============================================================
-  // ===== RENDER COMPONENT =====
-  // ============================================================
+  if (!isMounted) {
+    return <div style={{ minHeight: "100px" }} />;
+  }
   
   if (!user) {
     return (
-      <div style={{
-        marginTop: "40px",
-        borderTop: "1px solid #e8e8e8",
-        paddingTop: "30px",
-      }}>
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "22px",
           fontWeight: 600,
@@ -634,13 +725,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // USER VIEW
   if (!isAdmin) {
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
 
     if (tickets.length === 0 && !showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -714,7 +804,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
     if (showStartChat) {
       return (
-        <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <h3 ref={liveChatTitleRef} style={{
               fontSize: "22px",
@@ -813,9 +903,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       );
     }
 
-    // USER VIEW - DIPERKECIL TIDAK MENTOK LAYAR
     return (
-      <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
           <h3 ref={liveChatTitleRef} style={{
             fontSize: "20px",
@@ -858,9 +947,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "12px", height: "420px", maxHeight: "420px" }}>
+        <div style={{ 
+          display: "flex", 
+          gap: "12px", 
+          height: "450px",
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: "8px",
+        }}>
           <div style={{
-            width: "200px",
+            width: "220px",
             backgroundColor: "#0D3CFC",
             borderRadius: "8px",
             padding: "10px 0",
@@ -868,8 +964,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             flexShrink: 0,
             color: "#fff",
             fontFamily: FONT_FAMILY,
-            boxShadow: "0 2px 10px rgba(13,60,252,0.1)",
-            maxHeight: "420px",
+            height: "450px",
           }}>
             <div style={{
               padding: "0 10px 8px 10px",
@@ -895,7 +990,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 borderRadius: "8px",
               }}>{tickets.length}</span>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "360px" }}>
+            <div style={{ overflowY: "auto", height: "340px" }}>
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
@@ -986,7 +1081,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            maxHeight: "420px",
+            height: "450px",
           }}>
             {selectedTicket ? (
               <>
@@ -1039,7 +1134,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   )}
                 </div>
                 <div 
-                  ref={messagesContainerRef}
+                  ref={chatMessagesContainerRef}
                   style={{
                     flex: 1,
                     overflowY: "auto",
@@ -1047,63 +1142,78 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    minHeight: "180px",
-                    maxHeight: "330px",
+                    minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
                   }}
                 >
-                  {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                      Belum ada pesan
-                    </div>
-                  ) : (
-                    messages.map((msg, idx) => {
-                      const isMine = msg.senderId === user.uid;
-                      const isAgent = !isMine && msg.senderName === AGENT_NAME;
-                      return (
-                        <div
-                          key={idx}
-                          style={{
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            maxWidth: "75%",
-                            padding: "5px 8px",
-                            borderRadius: "6px",
-                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                            color: isMine ? "#fff" : "#000",
-                            fontSize: "11px",
-                            fontFamily: FONT_FAMILY,
-                          }}
-                        >
-                          {!isMine && (
-                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", display: "flex", alignItems: "center", gap: "3px" }}>
-                              {msg.senderName}
-                              {isAgent && <InstagramVerifiedBadge size={9} />}
+                  <div className="chat-messages-container" style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}>
+                    {messages.length === 0 ? (
+                      <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                        Belum ada pesan
+                      </div>
+                    ) : (
+                      messages.map((msg, idx) => {
+                        const isMine = msg.senderId === user.uid;
+                        const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              alignSelf: isMine ? "flex-end" : "flex-start",
+                              maxWidth: "75%",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                              color: isMine ? "#fff" : "#000",
+                              fontSize: "11px",
+                              fontFamily: FONT_FAMILY,
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {!isMine && (
+                              <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", display: "flex", alignItems: "center", gap: "3px" }}>
+                                {msg.senderName}
+                                {isAgent && <InstagramVerifiedBadge size={9} />}
+                              </div>
+                            )}
+                            <div>{msg.text}</div>
+                            <div style={{ 
+                              fontSize: "6px", 
+                              color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                              marginTop: "2px",
+                              textAlign: "right",
+                            }}>
+                              {formatTime(msg.timestamp)}
                             </div>
-                          )}
-                          <div>{msg.text}</div>
-                          <div style={{ 
-                            fontSize: "6px", 
-                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                            marginTop: "2px",
-                          }}>
-                            {formatTime(msg.timestamp)}
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                  {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
-                    <div style={{
-                      alignSelf: "flex-start",
-                      fontSize: "10px",
-                      color: "#666",
-                      fontStyle: "italic",
-                      padding: "2px 5px",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      {getTypingText(selectedTicket)}
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                        );
+                      })
+                    )}
+                    {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
+                      <div style={{
+                        alignSelf: "flex-start",
+                        fontSize: "10px",
+                        color: "#666",
+                        fontStyle: "italic",
+                        padding: "2px 5px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        {getTypingText(selectedTicket)}
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
                 </div>
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
@@ -1181,14 +1291,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ADMIN VIEW - DIPERKECIL TIDAK MENTOK LAYAR
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
-    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
+    <div style={{ marginTop: "40px", paddingTop: "30px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <h3 ref={liveChatTitleRef} style={{
           fontSize: "20px",
@@ -1248,7 +1357,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "12px", height: "420px", maxHeight: "420px" }}>
+      <div style={{ display: "flex", gap: "12px", height: "450px" }}>
         <div style={{
           width: "220px",
           backgroundColor: "#f9f9f9",
@@ -1256,7 +1365,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          maxHeight: "420px",
+          height: "450px",
         }}>
           {waitingTickets.length > 0 && (
             <div>
@@ -1398,7 +1507,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "420px",
+          height: "450px",
         }}>
           {selectedTicket ? (
             <>
@@ -1451,7 +1560,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 )}
               </div>
               <div 
-                ref={messagesContainerRef}
+                ref={chatMessagesContainerRef}
                 style={{
                   flex: 1,
                   overflowY: "auto",
@@ -1459,61 +1568,76 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   display: "flex",
                   flexDirection: "column",
                   gap: "4px",
-                  minHeight: "180px",
-                  maxHeight: "330px",
+                  minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
                 }}
               >
-                {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                    Belum ada pesan
-                  </div>
-                ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user.uid;
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "75%",
-                          padding: "5px 8px",
-                          borderRadius: "6px",
-                          backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
-                          color: isMine ? "#fff" : "#000",
-                          fontSize: "11px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {!isMine && (
-                          <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
-                            {msg.senderName}
+                <div className="chat-messages-container-admin" style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}>
+                  {messages.length === 0 ? (
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                      Belum ada pesan
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "5px 8px",
+                            borderRadius: "6px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "11px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {!isMine && (
+                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "6px", 
+                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                            marginTop: "2px",
+                            textAlign: "right",
+                          }}>
+                            {formatTime(msg.timestamp)}
                           </div>
-                        )}
-                        <div>{msg.text}</div>
-                        <div style={{ 
-                          fontSize: "6px", 
-                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
-                          marginTop: "2px",
-                        }}>
-                          {formatTime(msg.timestamp)}
                         </div>
-                      </div>
-                    );
-                  })
-                )}
-                {typingText && selectedTicket.status !== 'resolved' && (
-                  <div style={{
-                    alignSelf: "flex-start",
-                    fontSize: "10px",
-                    color: "#666",
-                    fontStyle: "italic",
-                    padding: "2px 5px",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    {typingText}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+                      );
+                    })
+                  )}
+                  {typingText && selectedTicket.status !== 'resolved' && (
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "10px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "2px 5px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {typingText}
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
               {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
@@ -1580,8 +1704,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
             }}>
-              Pilih chat dari daftar di kiri
-            </div>
+              Pilih chat dari daftar di kiri            </div>
           )}
         </div>
       </div>
@@ -1589,519 +1712,316 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   );
 };
 
-// ============================================================
-// ===== KRITIK & SARAN COMPONENT =====
-// ============================================================
-const FeedbackSection = ({ db, user }: { db: any; user: any }) => {
-  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  const SendIconFeedback = ({ size = 14 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-
-  useEffect(() => {
-    if (!db) return;
-    const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list: Feedback[] = [];
-      snapshot.forEach((doc) => {
-        list.push({ id: doc.id, ...doc.data() } as Feedback);
-      });
-      setFeedbacks(list);
-    });
-    return () => unsubscribe();
-  }, [db]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !message.trim()) {
-      setSubmitStatus('error');
-      setTimeout(() => setSubmitStatus('idle'), 3000);
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await addDoc(collection(db, "feedbacks"), {
-        name: name.trim(),
-        message: message.trim(),
-        createdAt: serverTimestamp(),
-        userId: user?.uid || null,
-        userEmail: user?.email || null,
-      });
-      setName("");
-      setMessage("");
-      setSubmitStatus('success');
-      setTimeout(() => setSubmitStatus('idle'), 3000);
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      setSubmitStatus('error');
-      setTimeout(() => setSubmitStatus('idle'), 3000);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  return (
-    <div style={{ marginTop: "40px", borderTop: "1px solid #e8e8e8", paddingTop: "30px" }}>
-      <h3 style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
-        Kritik & Saran
-      </h3>
-      <p style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
-        Kirimkan kritik dan saran Anda untuk pengembangan Menuru menjadi lebih baik.
-      </p>
-
-      <form onSubmit={handleSubmit} style={{ maxWidth: "450px", marginBottom: "24px" }}>
-        <div style={{ marginBottom: "10px" }}>
-          <label style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "3px" }}>
-            Nama
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Masukkan nama Anda"
-            style={{
-              width: "100%",
-              padding: "7px 10px",
-              border: "2px solid #e8e8e8",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              transition: "border-color 0.2s ease",
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-          />
-        </div>
-        <div style={{ marginBottom: "10px" }}>
-          <label style={{ fontSize: "12px", fontWeight: 500, color: "#000", fontFamily: FONT_FAMILY, display: "block", marginBottom: "3px" }}>
-            Keterangan / Saran
-          </label>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Tulis kritik atau saran Anda..."
-            rows={3}
-            style={{
-              width: "100%",
-              padding: "7px 10px",
-              border: "2px solid #e8e8e8",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              resize: "vertical",
-              minHeight: "70px",
-              transition: "border-color 0.2s ease",
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={{
-            padding: "6px 22px",
-            backgroundColor: "#0D3CFC",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "13px",
-            fontWeight: 500,
-            cursor: isSubmitting ? "not-allowed" : "pointer",
-            fontFamily: FONT_FAMILY,
-            opacity: isSubmitting ? 0.7 : 1,
-            transition: "background 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-          onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0a2fc9"; }}
-          onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = "#0D3CFC"; }}
-        >
-          <SendIconFeedback />
-          <span>{isSubmitting ? "Mengirim..." : "Kirim Kritik & Saran"}</span>
-        </button>
-        {submitStatus === 'success' && (
-          <p style={{ color: "#22c55e", fontSize: "12px", marginTop: "5px", fontFamily: FONT_FAMILY }}>
-            ✓ Kritik & saran berhasil dikirim! Terima kasih.
-          </p>
-        )}
-        {submitStatus === 'error' && (
-          <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "5px", fontFamily: FONT_FAMILY }}>
-            ⚠️ Gagal mengirim. Silakan coba lagi.
-          </p>
-        )}
-      </form>
-
-      {feedbacks.length > 0 && (
-        <div style={{ 
-          position: "relative", 
-          padding: "14px 14px 14px 32px",
-          backgroundColor: "#0D3CFC",
-          borderRadius: "10px",
-          maxWidth: "650px",
-        }}>
-          <div style={{
-            position: "absolute",
-            left: "14px",
-            top: "14px",
-            bottom: "14px",
-            width: "2px",
-            borderLeft: "2px dashed rgba(255,255,255,0.3)",
-          }} />
-          
-          {feedbacks.length > 0 && (
-            <div style={{
-              position: "absolute",
-              left: "8px",
-              top: "14px",
-              width: "12px",
-              height: "12px",
-              borderRadius: "50%",
-              backgroundColor: "#000000",
-              border: "2px solid #ffffff",
-              zIndex: 2,
-            }} />
-          )}
-
-          {feedbacks.map((item, index) => (
-            <div key={item.id} style={{ 
-              position: "relative", 
-              paddingBottom: index < feedbacks.length - 1 ? "14px" : "0", 
-              paddingLeft: "14px",
-              paddingTop: index === 0 ? "0" : "4px",
-            }}>
-              {index > 0 && (
-                <div style={{
-                  position: "absolute",
-                  left: "-10px",
-                  top: "5px",
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#ffffff",
-                  border: "2px solid #0D3CFC",
-                  boxShadow: "0 0 0 2px #ffffff",
-                  zIndex: 2,
-                }} />
-              )}
-              
-              <div style={{
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderRadius: "6px",
-                padding: "8px 12px",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", flexWrap: "wrap", gap: "3px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                    #{index + 1} {item.name}
-                  </span>
-                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
-                    {formatDate(item.createdAt)}
-                  </span>
-                </div>
-                <p style={{ fontSize: "12px", color: "#ffffff", fontFamily: FONT_FAMILY, margin: 0, lineHeight: 1.4, opacity: 0.9 }}>
-                  {item.message}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          <div style={{
-            position: "absolute",
-            left: "4px",
-            bottom: "10px",
-            width: "16px",
-            height: "16px",
-            borderRadius: "50%",
-            backgroundColor: "#0D3CFC",
-            border: "2px solid #ffffff",
-            boxShadow: "0 0 0 2px #0D3CFC",
-            zIndex: 2,
-            animation: "pulse-blink 1.5s ease-in-out infinite",
-          }} />
-        </div>
-      )}
-      <style>{`
-        @keyframes pulse-blink {
-          0%, 100% { box-shadow: 0 0 0 2px #0D3CFC, 0 0 0 4px rgba(255,255,255,0.3); }
-          50% { box-shadow: 0 0 0 4px #0D3CFC, 0 0 0 8px rgba(255,255,255,0.15); }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// FAQ Data
-const faqData = [
-  {
-    id: 'shop',
-    question: 'Shop',
-    answer: 'Kamu bisa membeli produk-produk menarik dari komunitas Menuru. Tersedia berbagai merchandise eksklusif dan produk kreatif dari para creator.',
-  },
-  {
-    id: 'blog',
-    question: 'Blog',
-    answer: 'Temukan artikel-artikel inspiratif, tutorial, dan berita terbaru seputar kreativitas, teknologi, dan pengembangan diri di blog Menuru.',
-  },
-  {
-    id: 'donation',
-    question: 'Donation',
-    answer: 'Salurkan donasi Anda untuk membantu mereka yang membutuhkan. Setiap donasi akan disalurkan dengan transparan dan tepat sasaran.',
-  },
-  {
-    id: 'note',
-    question: 'Note',
-    answer: 'Catat ide-ide kreatif Anda dengan mudah. Fitur note memungkinkan Anda menyimpan, mengatur, dan berbagi inspirasi kapan saja.',
-  },
-  {
-    id: 'community',
-    question: 'Community',
-    answer: 'Bergabunglah dengan komunitas kreatif Menuru. Temukan teman baru, kolaborasi, dan dukungan untuk mengembangkan potensi Anda.',
-  },
-  {
-    id: 'calendar',
-    question: 'Calendar',
-    answer: 'Atur jadwal Anda dengan mudah. Fitur calendar membantu Anda merencanakan aktivitas, deadline, dan event penting.',
-  },
+// Menu items for drawer
+const menuItems = [
+  { name: "Community", number: "01" },
+  { name: "Blog", number: "02" },
+  { name: "Live Chat", number: "03" },
+  { name: "Live Chat Agent", number: "04" },
+  { name: "Donation", number: "05" },
+  { name: "Contact", number: "06" },
+  { name: "Note", number: "07" }
 ];
 
-export default function ContactPage(): React.JSX.Element {
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [isMenuHovered, setIsMenuHovered] = useState(false);
+// Footer links
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
+  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+];
+
+export default function ContactPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFaq, setActiveFaq] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showMain, setShowMain] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
   
-  const contactTitleRef = useRef<HTMLDivElement>(null);
-  const menuruFooterRef = useRef<HTMLDivElement>(null);
-  
-  const item01Ref = useRef<HTMLDivElement>(null);
-  const item02Ref = useRef<HTMLDivElement>(null);
-  const item03Ref = useRef<HTMLDivElement>(null);
-  const item04Ref = useRef<HTMLDivElement>(null);
-  const item05Ref = useRef<HTMLDivElement>(null);
-  const hoverText01Ref = useRef<HTMLDivElement>(null);
-  const hoverText02Ref = useRef<HTMLDivElement>(null);
-  const hoverText03Ref = useRef<HTMLDivElement>(null);
-  const hoverText04Ref = useRef<HTMLDivElement>(null);
-  const hoverText05Ref = useRef<HTMLDivElement>(null);
-  
-  const menuButtonRef = useRef<HTMLDivElement>(null);
-  const menuDrawerRef = useRef<HTMLDivElement>(null);
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
+  const menuBoxRef = useRef<HTMLDivElement>(null);
+  const menuBox2Ref = useRef<HTMLDivElement>(null);
+  const menuBox3Ref = useRef<HTMLDivElement>(null);
+  const storiesRef = useRef<HTMLDivElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const contactTitleRef = useRef<HTMLDivElement>(null);
 
-  const createTicketFromItem = async (itemName: string) => {
-    if (!user) {
-      alert("Silakan login terlebih dahulu");
-      return;
-    }
-    if (!db) {
-      alert("Database tidak tersedia");
-      return;
-    }
-    
-    try {
-      const q = query(
-        collection(db, "livechat_tickets"),
-        where("userId", "==", user.uid),
-        where("status", "in", ["waiting", "active"])
-      );
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
-        return;
-      }
-
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: `Tentang ${itemName}`,
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: `Halo, saya ingin bertanya tentang: ${itemName}`,
-        timestamp: serverTimestamp(),
-        read: false,
-      });
-      alert(`Ticket untuk "${itemName}" berhasil dibuat!`);
-      
-      const liveChatElement = document.getElementById('live-chat-section');
-      if (liveChatElement) {
-        liveChatElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-      alert("Gagal membuat ticket. Silakan coba lagi.");
-    }
-  };
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Auth
   useEffect(() => {
-    if (!auth) return;
+    if (!auth || !isMounted) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
-        setIsAdmin(currentUser.email === ADMIN_EMAIL);
+        const isAdminUser = currentUser.email === ADMIN_EMAIL;
+        setIsAdmin(isAdminUser);
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              id: currentUser.uid,
+              name: currentUser.displayName || currentUser.email || "",
+              email: currentUser.email || "",
+              photoURL: currentUser.photoURL || "",
+              createdAt: serverTimestamp(),
+              isAdmin: isAdminUser,
+              online: true,
+              lastSeen: serverTimestamp(),
+              typing: false,
+              blocked: [],
+              blockedBy: []
+            });
+          } else {
+            await updateDoc(userRef, {
+              online: true,
+              lastSeen: serverTimestamp(),
+            });
+          }
+        } catch (error) {
+          console.error("Error updating user:", error);
+        }
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [isMounted]);
 
-  // Menu drawer - HANYA JUDUL (tanpa menu items)
+  // Handle preloader complete
+  const handlePreloaderComplete = () => {
+    setShowMain(true);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+  };
+
+  // GSAP animation for menu drawer opening
   useEffect(() => {
-    if (isMenuOpen && menuDrawerRef.current) {
-      gsap.fromTo(menuDrawerRef.current,
-        { y: '100%', opacity: 0 },
+    if (!menuOverlayRef.current || !isMounted || loading || !showMain) return;
+    
+    if (isMenuOpen) {
+      gsap.fromTo(menuOverlayRef.current,
+        { y: '-100%', opacity: 0 },
         {
           y: '0%',
           opacity: 1,
           duration: 0.8,
-          ease: "power3.out",
-          display: 'flex',
+          ease: 'power3.out',
           onComplete: () => {
-            if (menuDrawerRef.current) {
-              menuDrawerRef.current.style.overflow = 'hidden';
+            const items = menuOverlayRef.current?.querySelectorAll('.menu-item');
+            if (items) {
+              gsap.fromTo(items,
+                { opacity: 0, y: 30 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  stagger: 0.08,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (menuBoxRef.current) {
+              gsap.fromTo(menuBoxRef.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (storiesRef.current) {
+              gsap.fromTo(storiesRef.current,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (menuBox2Ref.current) {
+              gsap.fromTo(menuBox2Ref.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  delay: 0.2
+                }
+              );
+            }
+            if (menuBox3Ref.current) {
+              gsap.fromTo(menuBox3Ref.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  delay: 0.3
+                }
+              );
             }
           }
         }
       );
-    } else if (!isMenuOpen && menuDrawerRef.current) {
-      gsap.to(menuDrawerRef.current, {
-        y: '100%',
+    } else {
+      gsap.to(menuOverlayRef.current, {
+        y: '-100%',
         opacity: 0,
         duration: 0.6,
-        ease: "power3.in",
-        onComplete: () => {
-          if (menuDrawerRef.current) {
-            menuDrawerRef.current.style.display = 'none';
-          }
-        }
+        ease: 'power3.in'
       });
     }
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMounted, loading, showMain]);
 
-  // Menu button hover
+  // GSAP animation for content
   useEffect(() => {
-    if (menuButtonRef.current) {
-      if (isMenuHovered) {
-        gsap.to(menuButtonRef.current, {
-          scale: 1.05,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      } else {
-        gsap.to(menuButtonRef.current, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      }
-    }
-  }, [isMenuHovered]);
+    if (!isMounted || loading || !showMain) return;
 
-  // Hover effects for items 01-05
-  useEffect(() => {
-    const itemRefs = [item01Ref, item02Ref, item03Ref, item04Ref, item05Ref];
-    const textRefs = [hoverText01Ref, hoverText02Ref, hoverText03Ref, hoverText04Ref, hoverText05Ref];
-    
-    itemRefs.forEach((itemRef, index) => {
-      const id = String(index + 1).padStart(2, '0');
-      const textRef = textRefs[index];
-      
-      if (hoveredItem === id && textRef.current && itemRef.current) {
-        gsap.fromTo(textRef.current,
-          { opacity: 0, x: -20, filter: 'blur(5px)' },
-          { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.4, ease: "power2.out" }
-        );
-        gsap.to(itemRef.current, {
-          scale: 1.02,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      } else if (hoveredItem !== id && textRef.current) {
-        gsap.to(textRef.current, {
-          opacity: 0,
-          duration: 0.2,
-          ease: "power2.in"
-        });
-        if (itemRef.current) {
-          gsap.to(itemRef.current, {
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        }
-      }
-    });
-  }, [hoveredItem]);
-
-  // SplitText animation untuk judul Contact
-  useEffect(() => {
-    if (contactTitleRef.current) {
-      const splitContact = new SplitText(contactTitleRef.current, {
-        type: "chars",
-        charsClass: "split-char-contact"
-      });
-
-      gsap.fromTo(splitContact.chars,
-        { opacity: 0, x: -50, filter: 'blur(10px)' },
+    const subtitle = subtitleRef.current;
+    if (subtitle) {
+      gsap.fromTo(subtitle,
+        { opacity: 0, y: 50 },
         {
           opacity: 1,
-          x: 0,
-          filter: 'blur(0px)',
-          duration: 1,
-          stagger: 0.04,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: contactTitleRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          }
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.3
         }
       );
+    }
+
+    const contactTitle = contactTitleRef.current;
+    if (contactTitle) {
+      gsap.fromTo(contactTitle,
+        { opacity: 0, scale: 0.8, y: 30 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1,
+          ease: "back.out(1.7)",
+          delay: 0.5
+        }
+      );
+    }
+
+    const button = buttonRef.current;
+    if (button) {
+      gsap.fromTo(button,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          delay: 0.6
+        }
+      );
+    }
+
+    const arrow = arrowRef.current;
+    if (arrow) {
+      gsap.fromTo(arrow,
+        { opacity: 0, scale: 0.8 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+          delay: 0.7
+        }
+      );
+    }
+
+    const menuruElement = menuruFooterRef.current;
+    const menuruText = menuruTextRef.current;
+    
+    if (menuruElement && menuruText) {
+      const split = new SplitText(menuruText, {
+        type: "chars",
+        charsClass: "menuru-char"
+      });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 100,
+        scale: 0.5,
+        rotationX: 90
+      });
+
+      ScrollTrigger.create({
+        trigger: menuruElement,
+        start: "top 85%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        },
+        onLeave: () => {
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            scale: 0.5,
+            rotationX: 90,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.in",
+            overwrite: true
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        }
+      });
     }
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMounted, loading, showMain]);
 
-  const handleMenuClick = () => {
+  const toggleMenu = () => {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
       if (plusIconRef.current) {
@@ -2112,22 +2032,6 @@ export default function ContactPage(): React.JSX.Element {
         });
       }
     } else {
-      if (menuDrawerRef.current) {
-        gsap.to(menuDrawerRef.current, {
-          y: '100%',
-          opacity: 0,
-          duration: 0.6,
-          ease: "power3.in",
-          onComplete: () => {
-            setIsMenuOpen(false);
-            if (menuDrawerRef.current) {
-              menuDrawerRef.current.style.display = 'none';
-            }
-          }
-        });
-      } else {
-        setIsMenuOpen(false);
-      }
       if (plusIconRef.current) {
         gsap.to(plusIconRef.current, {
           rotation: 0,
@@ -2135,1269 +2039,1198 @@ export default function ContactPage(): React.JSX.Element {
           ease: "power2.in"
         });
       }
+      setIsMenuOpen(false);
     }
   };
 
-  const toggleFaq = (id: string) => {
-    if (activeFaq === id) {
-      setActiveFaq(null);
-    } else {
-      setActiveFaq(id);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY }}>
-        <div style={{ fontSize: "18px", color: "#000" }}>Loading...</div>
-      </div>
-    );
+  // Jika belum siap, tampilkan preloader
+  if (!isMounted || loading || !showMain) {
+    return <Preloader onComplete={handlePreloaderComplete} />;
   }
 
   return (
     <>
+      <Head>
+        <title>Contact | Menuru</title>
+        <meta name="description" content="Contact Menuru - Hubungi kami" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content="#0D3CFC" />
+        <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
+      </Head>
+
       <style jsx global>{`
-        * {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
         }
-        *::-webkit-scrollbar {
-          display: none;
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
-        html, body {
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
           margin: 0;
           padding: 0;
-          background-color: white;
-          overflow-x: hidden;
-          overflow-y: auto !important;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
         }
-        .split-char-contact {
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
+        * {
+          background-color: transparent;
+        }
+
+        .menuru-char {
           display: inline-block;
-          will-change: transform, opacity, filter;
+          will-change: transform, opacity;
         }
+
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
         }
-        .menuru-footer-char {
-          display: inline-block;
-          will-change: transform, opacity;
+
+        .chat-messages-container::-webkit-scrollbar,
+        .chat-messages-container-admin::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.2; }
+        .chat-messages-container,
+        .chat-messages-container-admin {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        @media (max-width: 1024px) {
+          .subtitle p {
+            font-size: 48px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 36px !important;
+          }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 140px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .menu-overlay .menu-box3 {
+            right: 40px !important;
+            top: 260px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .subtitle p {
+            font-size: 36px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+          .menu-overlay {
+            padding: 30px 20px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box2 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box3 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .subtitle p {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box2 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box3 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
         }
       `}</style>
-      
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: 'white',
-        margin: 0,
-        padding: 0,
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: FONT_FAMILY,
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        position: 'relative',
-        overflowX: 'hidden',
-      }}>
-        {/* JUDUL WEBSITE - pojok kiri atas */}
-        <div style={{
-          position: 'fixed',
-          top: '40px',
-          left: '40px',
-          zIndex: isMenuOpen ? 98 : 100,
-          pointerEvents: 'none'
-        }}>
-          <span style={{
-            fontFamily: FONT_FAMILY,
-            fontWeight: 700,
-            fontSize: '48px',
-            color: '#000000',
-            letterSpacing: '-0.03em',
-            textTransform: 'none',
-            WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale'
-          }}>
-            Menuru
-          </span>
-        </div>
 
-        {/* NAVBAR - pojok kanan atas */}
-        <div style={{
-          position: 'fixed',
-          top: '40px',
-          right: '40px',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '8px 16px',
-          borderRadius: '12px',
-          backgroundColor: isMenuOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
-          backdropFilter: isMenuOpen ? 'blur(20px)' : 'blur(0px)',
-          transition: 'all 0.3s ease',
-          pointerEvents: 'auto',
-          boxShadow: isMenuOpen ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
-        }}>
-          {/* Get in Touch - (here) */}
-          <Link href="/contact">
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: '2px solid #0D3CFC',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#0D3CFC',
-                  fontFamily: FONT_FAMILY,
-                  display: 'inline-block',
-                }}
-              >
-                (here)
-              </span>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#0D3CFC',
-                  borderRadius: '4px',
-                  padding: '4px',
-                  color: '#ffffff',
-                }}
-              >
-                <SouthEastArrow size={24} />
-              </div>
-            </div>
-          </Link>
-
-          {/* Pusat Bantuan */}
-          <Link href="/pusat-bantuan">
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: '2px solid #000000',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#000000',
-                  fontFamily: FONT_FAMILY,
-                  display: 'inline-block',
-                }}
-              >
-                Pusat Bantuan
-              </span>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#000000',
-                  borderRadius: '4px',
-                  padding: '4px',
-                  color: '#ffffff',
-                }}
-              >
-                <NorthWestArrow size={24} />
-              </div>
-            </div>
-          </Link>
-
-          {/* Menu */}
+      <div
+        ref={containerRef}
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#ffffff",
+          margin: 0,
+          padding: 0,
+          position: "relative",
+          fontFamily: FONT_FAMILY,
+          overflow: "visible",
+        }}
+      >
+        {/* NAVBAR */}
+        <div
+          ref={navbarRef}
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "8px",
+            padding: "16px 20px",
+            borderRadius: "16px",
+            backgroundColor: "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(20px)",
+            transition: "all 0.3s ease",
+            pointerEvents: "auto",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          }}
+        >
           <div
-            ref={menuButtonRef}
-            onClick={handleMenuClick}
-            onMouseEnter={() => setIsMenuHovered(true)}
-            onMouseLeave={() => setIsMenuHovered(false)}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              border: '2px solid #000000',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              backgroundColor: 'transparent',
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
             }}
           >
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#000000',
-                borderRadius: '4px',
-                padding: '4px',
-                color: '#ffffff',
-              }}
-            >
-              <span
-                ref={plusIconRef}
-                style={{
-                  fontSize: '28px',
-                  fontWeight: 300,
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1,
-                  display: 'inline-block',
-                  transform: 'rotate(0deg)',
-                }}
-              >
-                +
+            <Link href="/shop">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <ShoppingBag size={20} color="#0D3CFC" />
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
+              </div>
+            </Link>
+            <Link href="/profile">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              </div>
+            </Link>
+            <Link href="/signup">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+              </div>
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} color="#0D3CFC" />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Fraud</span>
+            </div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} color="#0D3CFC" />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Bot</span>
+            </div>
+            <Link href="/contact">
+              <div className="get-in-touch" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Get in touch</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <SouthEastArrow size={24} color="#ffffff" />
+                </div>
+              </div>
+            </Link>
+            <Link href="/pusat-bantuan">
+              <div className="pusat-bantuan" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Pusat Bantuan</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <NorthWestArrow size={24} color="#ffffff" />
+                </div>
+              </div>
+            </Link>
+            <div className="menu-button" style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block", transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)" }}>
+                  {isMenuOpen ? "✕" : "+"}
+                </span>
+              </div>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>
+                {isMenuOpen ? "Close" : "Menu"}
               </span>
             </div>
-            <span
-              style={{
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#000000',
-                fontFamily: FONT_FAMILY,
-                letterSpacing: '0.02em',
-                display: 'inline-block',
-              }}
-            >
-              Menu
-            </span>
           </div>
         </div>
 
-        {/* Menu Drawer - HANYA JUDUL */}
+        {/* Menu Overlay - Sama seperti halaman Privacy */}
         <div
-          ref={menuDrawerRef}
+          ref={menuOverlayRef}
+          className="menu-overlay"
           style={{
-            position: 'fixed',
-            bottom: 0,
+            position: "fixed",
+            top: 0,
             left: 0,
-            right: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#0D3CFC',
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#0D3CFC",
             zIndex: 99,
-            display: 'none',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transform: 'translateY(-100%)',
+            display: isMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            transform: "translateY(-100%)",
             opacity: 0,
-            pointerEvents: isMenuOpen ? 'auto' : 'none',
-            padding: '40px',
-            boxSizing: 'border-box',
-            overflow: 'hidden'
+            pointerEvents: isMenuOpen ? "auto" : "none",
+            padding: "60px 80px",
+            boxSizing: "border-box",
+            overflow: "hidden",
           }}
         >
           <h1
             style={{
-              position: 'absolute',
-              top: '40px',
-              left: '40px',
-              fontSize: '48px',
+              position: "absolute",
+              top: "40px",
+              left: "40px",
+              fontSize: "48px",
               fontWeight: 700,
-              color: '#ffffff',
+              color: "#ffffff",
               fontFamily: FONT_FAMILY,
-              letterSpacing: '-0.03em',
+              letterSpacing: "-0.03em",
               margin: 0,
               padding: 0,
               lineHeight: 1,
+              opacity: 0.9,
             }}
           >
             Menuru
           </h1>
-        </div>
 
-        {/* Teks Contact besar 300px - dengan GSAP SplitText */}
-        <div style={{
-          position: 'relative',
-          top: '120px',
-          left: '40px',
-          zIndex: 10,
-          width: 'calc(100% - 80px)',
-          marginBottom: '40px'
-        }}>
-          <div 
-            ref={contactTitleRef}
+          <div
+            ref={menuItemsRef}
             style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: '300px',
-              fontWeight: '300',
-              color: '#000000',
-              textAlign: 'left',
-              letterSpacing: '-0.02em',
-              textTransform: 'none',
-              lineHeight: '1',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale'
-            }}>
-            Contact
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              width: "100%",
+              maxWidth: "600px",
+            }}
+          >
+            {menuItems.map((item, index) => (
+              <Link
+                key={index}
+                href="/"
+                style={{ textDecoration: "none" }}
+              >
+                <div
+                  className="menu-item"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    backgroundColor: "transparent",
+                    opacity: 0,
+                    transform: "translateY(30px)",
+                    transition: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 300,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {item.number}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div
+            ref={storiesRef}
+            style={{
+              position: "absolute",
+              left: "720px",  
+              top: "180px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "8px",
+              opacity: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 300,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.05em",
+              }}
+            >
+              stories
+            </span>
+          </div>
+
+          <div
+            ref={menuBoxRef}
+            style={{
+              position: "absolute",
+              right: "80px",
+              bottom: "80px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "24px",
+              border: "2px solid #D9FF81",
+              borderRadius: "12px",
+              padding: "20px 32px",
+              backgroundColor: "#D9FF81",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
+              maxWidth: "600px",
+              width: "auto",
+              minHeight: "90px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana website ini
+              </span>
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                bisa berkembang?
+              </span>
+              <span
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: "rgba(13, 60, 252, 0.7)",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Dengan dukungan komunitas
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "70px",
+                height: "70px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/10.jpg"
+                alt="Menuru"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
+          </div>
+
+          <div
+            ref={menuBox2Ref}
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "260px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana Rasa nya Masuk
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Kuliah Di Universitas
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Gunadarma
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "100px",
+                height: "100px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/10.jpg"
+                alt="Universitas Gunadarma"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
+          </div>
+
+          <div
+            ref={menuBox3Ref}
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "470px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Mengapa saya memilih
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                jurusan tersebut?
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "100px",
+                height: "100px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/15.jpg"
+                alt="Mengapa memilih jurusan"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Teks subtitle dan tombol di bawah Contact */}
-        <div style={{
-          position: 'relative',
-          top: '120px',
-          left: '40px',
-          zIndex: 10,
-          width: 'calc(100% - 80px)',
-          marginBottom: '80px'
-        }}>
-          <p
+        {/* HERO SECTION */}
+        <div
+          style={{
+            minHeight: "auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            paddingTop: "120px",
+            paddingBottom: "20px",
+          }}
+        >
+          <h1
+            ref={titleRef}
+            className="title"
             style={{
-              fontSize: '40px',
-              fontWeight: 400,
-              color: '#0D3CFC',
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#000000",
               fontFamily: FONT_FAMILY,
-              lineHeight: 1.2,
+              letterSpacing: "-0.03em",
               margin: 0,
-              padding: 0,
-              paddingBottom: '30px',
-              whiteSpace: 'pre-line',
+              padding: "10px 20px",
+              lineHeight: 1,
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
+              pointerEvents: "none",
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255,255,255,0.7)",
+              borderRadius: "12px",
             }}
           >
-            {`You can take notes, find ideas,\nand donate money to those in need`}
-          </p>
+            Menuru
+          </h1>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px' }}>
-            <Link href="/signup">
-              <div
+          <div style={{ 
+            position: "relative", 
+            zIndex: 1,
+            marginTop: "0px",
+          }}>
+            <div
+              ref={subtitleRef}
+              style={{
+                textAlign: "left",
+                position: "relative",
+                opacity: 0,
+              }}
+            >
+              <p
                 style={{
-                  display: 'inline-block',
-                  border: '2px solid #0D3CFC',
-                  borderRadius: '8px',
-                  padding: '12px 28px',
-                  cursor: 'pointer',
-                  backgroundColor: 'transparent',
+                  fontSize: "60px",
+                  fontWeight: 400,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "20px",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {`You can take notes, find ideas,\nand donate money to those in need`}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                  opacity: 0,
                 }}
               >
                 <span
                   style={{
-                    fontSize: '18px',
+                    fontSize: "18px",
                     fontWeight: 500,
-                    color: '#0D3CFC',
+                    color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    letterSpacing: '0.02em',
+                    letterSpacing: "0.02em",
                   }}
                 >
                   Let's build now
                 </span>
               </div>
-            </Link>
 
-            <Link href="/signup">
               <div
+                ref={arrowRef}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid #0D3CFC',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  cursor: 'pointer',
-                  backgroundColor: '#0D3CFC',
-                  color: '#ffffff',
-                  width: '50px',
-                  height: '50px',
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                  opacity: 0,
                 }}
               >
-                <NorthEastArrow size={24} />
+                <NorthEastArrow size={24} color="#ffffff" />
               </div>
-            </Link>
+            </div>
+
+            {/* CONTACT TITLE - 250px */}
+            <div
+              ref={contactTitleRef}
+              style={{
+                width: "100%",
+                padding: "20px 0 10px 0",
+                backgroundColor: "#ffffff",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "flex-start",
+                opacity: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "250px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  lineHeight: "0.8",
+                  display: "block",
+                  textAlign: "left",
+                  WebkitFontSmoothing: "antialiased",
+                  MozOsxFontSmoothing: "grayscale",
+                }}
+              >
+                Contact
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 01-05 Items */}
-        <div style={{
-          position: 'relative',
-          top: '150px',
-          left: '40px',
-          right: '40px',
-          zIndex: 10,
-          marginBottom: '20px'
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '30px',
-            marginLeft: '80px',
-            marginBottom: '40px',
-            maxWidth: '900px',
-          }}>
-            {/* 01 - Note */}
-            <div
-              ref={item01Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('01')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  01
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Note
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Note');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '01' && (
-                  <div
-                    ref={hoverText01Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa mencatat apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* ===== LIVE CHAT AGENT ===== */}
+        <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+        </div>
 
-            {/* 02 - Calendar */}
-            <div
-              ref={item02Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('02')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  02
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Calendar
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Calendar');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '02' && (
-                  <div
-                    ref={hoverText02Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa memikirkan jadwal apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 03 - Donation */}
-            <div
-              ref={item03Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('03')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  03
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Donation
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Donation');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '03' && (
-                  <div
-                    ref={hoverText03Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa membagikan uang apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 04 - Community */}
-            <div
-              ref={item04Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('04')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  04
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Community
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Community');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '04' && (
-                  <div
-                    ref={hoverText04Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa mencari apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 05 - Shop */}
-            <div
-              ref={item05Ref}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={() => setHoveredItem('05')}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '60px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  lineHeight: '1'
-                }}>
-                  05
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '160px',
-                  fontWeight: '300',
-                  color: '#000000',
-                  letterSpacing: '-0.02em'
-                }}>
-                  Shop
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createTicketFromItem('Shop');
-                  }}
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    backgroundColor: '#0D3CFC',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: '2px solid #0D3CFC',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000000';
-                    e.currentTarget.style.borderColor = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0D3CFC';
-                    e.currentTarget.style.borderColor = '#0D3CFC';
-                  }}
-                >
-                  Ticket
-                </button>
-                {hoveredItem === '05' && (
-                  <div
-                    ref={hoverText05Ref}
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#000000',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    / kamu bisa membeli apa yang kamu inginkan
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* FAQ Section */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginLeft: '80px',
-            marginTop: '30px',
-            maxWidth: '1100px',
-            gap: '40px',
-          }}>
-            <div style={{
-              flex: '0 0 350px',
-              position: 'sticky',
-              top: '200px',
-            }}>
-              <h2 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '50px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                letterSpacing: '-0.02em',
-                lineHeight: 1.2,
-              }}>
-                FAQ
-              </h2>
-              <p style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '50px',
-                fontWeight: '400',
-                color: '#0D3CFC',
-                margin: 0,
-                marginTop: '20px',
-                letterSpacing: '-0.01em',
-                lineHeight: 1.2,
-              }}>
-                Apakah kamu punya kesulitan?
-              </p>
-            </div>
-
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-            }}>
-              {faqData.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    borderBottom: '1px solid #e8e8e8',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div
-                    onClick={() => toggleFaq(item.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      padding: '15px 0',
-                      transition: 'all 0.3s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = '0.7';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = '1';
-                    }}
-                  >
-                    <span style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: '50px',
-                      fontWeight: '500',
-                      color: '#0D3CFC',
-                      letterSpacing: '-0.02em',
-                      lineHeight: '1.2',
-                    }}>
-                      {item.question}
-                    </span>
-                    <motion.div
-                      animate={{
-                        rotate: activeFaq === item.id ? 45 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        fontSize: '30px',
-                        fontWeight: 300,
-                        color: '#0D3CFC',
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                      }}
-                    >
-                      +
-                    </motion.div>
-                  </div>
-
-                  <AnimatePresence>
-                    {activeFaq === item.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        style={{
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <p style={{
-                          fontFamily: FONT_FAMILY,
-                          fontSize: '30px',
-                          fontWeight: '300',
-                          color: '#000000',
-                          padding: '0 0 20px 0',
-                          margin: 0,
-                          lineHeight: 1.5,
-                          letterSpacing: '-0.01em',
-                        }}>
-                          {item.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* FOOTER */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginLeft: '80px',
-            marginTop: '50px',
-            maxWidth: '1100px',
-            gap: '40px',
-            paddingTop: '40px',
-          }}>
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
-                Get in Touch
-              </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}>
-                  <span style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: '20px',
-                    fontWeight: '400',
-                    color: '#0D3CFC',
-                    letterSpacing: '-0.01em',
-                    cursor: 'pointer',
-                  }}>
-                    Contact Us
-                  </span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite',
-                      display: 'inline-block',
-                    }} />
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite 0.3s',
-                      display: 'inline-block',
-                    }} />
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0D3CFC',
-                      animation: 'blink 1s ease-in-out infinite 0.6s',
-                      display: 'inline-block',
-                    }} />
-                  </div>
-                  <Link href="/contact">
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#0D3CFC',
-                        padding: '4px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        border: '1px solid #0D3CFC',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                        e.currentTarget.style.borderColor = '#000000';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#0D3CFC';
-                        e.currentTarget.style.borderColor = '#0D3CFC';
-                      }}
-                    >
-                      <span style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#ffffff',
-                        letterSpacing: '0.02em',
-                      }}>
-                        →
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Instagram
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Live Chat
-                </span>
-              </div>
-            </div>
-
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
-                Product
-              </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Shop
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Note
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Calendar
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Blog
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Donation
-                </span>
-              </div>
-            </div>
-
-            <div style={{
-              flex: '0 0 30%',
-            }}>
-              <h3 style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '28px',
-                fontWeight: '600',
-                color: '#000000',
-                margin: 0,
-                marginBottom: '16px',
-                letterSpacing: '-0.01em',
-              }}>
-                Attention
-              </h3>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Kebijakan Privasi
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Ketentuan Kami
-                </span>
-                <span style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: '20px',
-                  fontWeight: '400',
-                  color: '#0D3CFC',
-                  letterSpacing: '-0.01em',
-                  cursor: 'pointer',
-                }}>
-                  Pusat Bantuan
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* ===== LIVE CHAT AGENT ===== */}
-          <div id="live-chat-section">
-            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
-          </div>
-
-          {/* ===== KRITIK & SARAN ===== */}
-          <FeedbackSection db={db} user={user} />
-
-          {/* Teks MENURU 400px warna biru di kanan */}
+        {/* FOOTER - Sama seperti halaman Privacy */}
+        <div
+          style={{
+            width: "100%",
+            padding: "60px 40px 40px 40px",
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Foto Kiri */}
           <div
-            ref={menuruFooterRef}
             style={{
-              marginLeft: '80px',
-              marginTop: '60px',
-              maxWidth: '1100px',
-              overflow: 'hidden',
-              paddingBottom: '40px',
-              display: 'flex',
-              justifyContent: 'flex-end',
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
             }}
           >
-            <span
+            <img
+              src="/images/p0l.jpg"
+              alt=""
               style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: '400px',
-                fontWeight: '700',
-                color: '#0D3CFC',
-                letterSpacing: '-0.02em',
-                textTransform: 'none',
-                lineHeight: '0.8',
-                display: 'block',
-                textAlign: 'right',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale',
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
               }}
-            >
-              {'MENURU'.split('').map((char, index) => (
-                <motion.span
-                  key={index}
-                  className="menuru-footer-char"
-                  style={{
-                    display: 'inline-block',
-                    opacity: 0,
-                    y: 200,
-                    scale: 0.3,
-                  }}
-                  initial={{ opacity: 0, y: 200, scale: 0.3 }}
-                  whileInView={{ 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: {
-                      duration: 1.2,
-                      delay: index * 0.04,
-                      ease: [0.16, 1, 0.3, 1],
-                    }
-                  }}
-                  viewport={{ once: true, amount: 0.3 }}
-                >
-                  {char}
-                </motion.span>
-              ))}
-            </span>
+            />
           </div>
+
+          {/* Foto Kanan */}
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {footerLinks.map((section, idx) => (
+              <div
+                key={idx}
+                style={{
+                  flex: "1",
+                  minWidth: "200px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                    textTransform: "none",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {section.links.map((link, linkIdx) => {
+                    let linkHref = "#";
+                    if (link === "Kebijakan Privasi") {
+                      linkHref = "/privacy-policy";
+                    } else if (link === "Ketentuan Kami") {
+                      linkHref = "/terms-of-service";
+                    }
+                    
+                    return (
+                      <Link key={linkIdx} href={linkHref} style={{ textDecoration: "none" }}>
+                        <span
+                          style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: "20px",
+                            fontWeight: 400,
+                            color: "#0D3CFC",
+                            letterSpacing: "-0.01em",
+                            cursor: "pointer",
+                            textTransform: "none",
+                          }}
+                        >
+                          {link}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* MENURU Text - 450px, left aligned */}
+        <div
+          ref={menuruFooterRef}
+          style={{
+            width: "100%",
+            padding: "20px 40px 80px 40px",
+            backgroundColor: "#ffffff",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "flex-start",
+            minHeight: "300px",
+          }}
+        >
+          <span
+            ref={menuruTextRef}
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "450px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              letterSpacing: "-0.02em",
+              textTransform: "none",
+              lineHeight: "0.8",
+              display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            Menuru
+          </span>
         </div>
       </div>
     </>
