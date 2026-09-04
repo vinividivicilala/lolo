@@ -158,8 +158,12 @@ const InstagramVerifiedBadge = ({ size = 14 }: { size?: number }) => {
 const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const animationDoneRef = useRef(false);
 
   useEffect(() => {
+    if (animationDoneRef.current) return;
+    animationDoneRef.current = true;
+
     const tl = gsap.timeline({
       onComplete: () => {
         if (preloaderRef.current) {
@@ -1944,7 +1948,7 @@ export default function PrivacyPolicyPage() {
           setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
         }
         if (!adminName) {
-          setAdminName(ADMIN_EMAIL);
+          setAdminName("Farid Ardiansyah");
         }
         if (!adminEmail) {
           setAdminEmail(ADMIN_EMAIL);
@@ -1953,7 +1957,7 @@ export default function PrivacyPolicyPage() {
         console.error("Error loading privacy content:", error);
         const now = new Date();
         setLastUpdate(now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
-        setAdminName(ADMIN_EMAIL);
+        setAdminName("Farid Ardiansyah");
         setAdminEmail(ADMIN_EMAIL);
       }
     };
@@ -1976,12 +1980,12 @@ export default function PrivacyPolicyPage() {
       await setDoc(docRef, {
         content: privacyContent,
         lastUpdate: dateStr,
-        adminName: user?.displayName || user?.email || ADMIN_EMAIL,
+        adminName: user?.displayName || "Farid Ardiansyah",
         adminEmail: user?.email || ADMIN_EMAIL,
         updatedAt: serverTimestamp()
       });
       setLastUpdate(dateStr);
-      setAdminName(user?.displayName || user?.email || ADMIN_EMAIL);
+      setAdminName(user?.displayName || "Farid Ardiansyah");
       setAdminEmail(user?.email || ADMIN_EMAIL);
       setIsAuthorVerified(user?.email === ADMIN_EMAIL);
       setIsEditing(false);
@@ -2454,6 +2458,16 @@ export default function PrivacyPolicyPage() {
           -ms-overflow-style: none !important;
         }
 
+        .sidebar-scroll {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+        .sidebar-scroll::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
         @media (max-width: 1024px) {
           .subtitle p {
             font-size: 48px !important;
@@ -2665,6 +2679,11 @@ export default function PrivacyPolicyPage() {
           .sidebar-scroll {
             display: none !important;
           }
+          /* Content margin di mobile */
+          .content-with-sidebar {
+            margin-left: 0 !important;
+            padding: 0 16px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -2751,6 +2770,11 @@ export default function PrivacyPolicyPage() {
           /* Sidebar hidden on mobile */
           .sidebar-scroll {
             display: none !important;
+          }
+          /* Content margin di mobile */
+          .content-with-sidebar {
+            margin-left: 0 !important;
+            padding: 0 12px !important;
           }
         }
       `}</style>
@@ -3264,7 +3288,7 @@ export default function PrivacyPolicyPage() {
         {/* HERO SECTION */}
         <div
           style={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
@@ -3272,6 +3296,7 @@ export default function PrivacyPolicyPage() {
             backgroundColor: "#ffffff",
             position: "relative",
             paddingTop: "120px",
+            paddingBottom: "20px",
           }}
         >
           <h1
@@ -3416,12 +3441,12 @@ export default function PrivacyPolicyPage() {
               )}
             </div>
 
-            {/* PRIVACY POLICY TITLE 250px */}
+            {/* PRIVACY POLICY TITLE - 250px */}
             <div
               ref={privacyTitleRef}
               style={{
                 width: "100%",
-                padding: "30px 0 0 0",
+                padding: "20px 0 10px 0",
                 backgroundColor: "#ffffff",
                 overflow: "hidden",
                 display: "flex",
@@ -3450,26 +3475,27 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR */}
+        {/* CONTENT WITH SIDEBAR - Sidebar di turunkan ke bawah */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
           margin: "0 auto",
           padding: "0 40px",
           gap: "40px",
-          marginTop: "20px",
+          marginTop: "0px",
+          position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed position */}
+          {/* SIDEBAR - KIRI - Dipindahkan ke bawah dengan margin-top besar */}
           <div
             ref={sidebarRef}
             style={{
               width: "280px",
               flexShrink: 0,
-              position: "fixed",
-              top: "50%",
-              left: "40px",
-              transform: "translateY(-50%)",
+              position: "sticky",
+              top: "120px",
+              alignSelf: "flex-start",
               paddingRight: "20px",
+              paddingTop: "40px",
               opacity: 0,
               maxHeight: "70vh",
               overflowY: "auto",
@@ -3527,16 +3553,18 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
 
-          {/* CONTENT - KANAN */}
+          {/* CONTENT - KANAN - Dinaikkan ke atas */}
           <div
             ref={contentRef}
+            className="content-with-sidebar"
             style={{
               flex: 1,
               paddingBottom: "60px",
-              marginLeft: "320px",
+              marginLeft: "0",
+              paddingTop: "0px",
             }}
           >
-            {/* Last Update dan Author */}
+            {/* Last Update dan Author - Nama Admin bukan email */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
@@ -3563,7 +3591,7 @@ export default function PrivacyPolicyPage() {
               }}>
                 <span>Author by</span>
                 <span style={{ fontWeight: 600, color: "#0D3CFC" }}>
-                  {adminName || ADMIN_EMAIL}
+                  {adminName || "Farid Ardiansyah"}
                 </span>
                 {isAuthorVerified && <InstagramVerifiedBadge size={16} />}
                 <span style={{ fontSize: "12px", color: "#999" }}>
@@ -3861,379 +3889,6 @@ export default function PrivacyPolicyPage() {
           </span>
         </div>
       </div>
-
-      <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-
-        * {
-          background-color: transparent;
-        }
-
-        .menuru-char {
-          display: inline-block;
-          will-change: transform, opacity;
-        }
-
-        .split-char-livechat {
-          display: inline-block;
-          will-change: transform, opacity, filter;
-        }
-
-        .content-section {
-          opacity: 1;
-        }
-
-        .sub-section {
-          opacity: 1;
-        }
-
-        .chat-messages-container::-webkit-scrollbar,
-        .chat-messages-container-admin::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        .chat-messages-container,
-        .chat-messages-container-admin {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-
-        .sidebar-scroll {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-        .sidebar-scroll::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-
-        @media (max-width: 1024px) {
-          .subtitle p {
-            font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
-          }
-          .menu-overlay {
-            padding: 40px 40px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 36px !important;
-          }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
-          .menu-overlay .menu-box {
-            right: 40px !important;
-            bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 140px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .menu-overlay .menu-box3 {
-            right: 40px !important;
-            top: 260px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .subtitle p {
-            font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
-          .menu-overlay {
-            padding: 30px 20px !important;
-            flex-direction: column !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 28px !important;
-          }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
-          .menu-overlay .menu-box {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
-          .menu-overlay .menu-box2 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box3 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
-          }
-          .menu-overlay {
-            padding: 20px 15px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 22px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box2 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box3 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          /* Sidebar hidden on mobile */
-          .sidebar-scroll {
-            display: none !important;
-          }
-        }
-      `}</style>
     </>
   );
 }
