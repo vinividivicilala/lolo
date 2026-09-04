@@ -2534,7 +2534,6 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   {section.links.map((link, linkIdx) => {
-                    // Tentukan link untuk Kebijakan Privasi dan Ketentuan Kami
                     let linkHref = "#";
                     if (link === "Kebijakan Privasi") {
                       linkHref = "/privacy-policy";
@@ -2565,74 +2564,86 @@ export default function HomePage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* Tombol Update - Kebijakan Privasi & Ketentuan Kami */}
+          {/* Tombol Update di samping teks Kebijakan Privasi dan Ketentuan Kami */}
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              gap: "20px",
+              alignItems: "center",
+              gap: "40px",
               marginTop: "40px",
               flexWrap: "wrap",
               position: "relative",
               zIndex: 1,
             }}
           >
-            <Link href="/privacy-policy" style={{ textDecoration: "none" }}>
+            {/* Kebijakan Privasi + Update Button */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Link href="/privacy-policy" style={{ textDecoration: "none" }}>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "20px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    letterSpacing: "-0.01em",
+                    cursor: "pointer",
+                  }}
+                >
+                  Kebijakan Privasi
+                </span>
+              </Link>
               <div
                 style={{
                   backgroundColor: "#0D3CFC",
                   color: "#ffffff",
-                  padding: "10px 24px",
-                  borderRadius: "8px",
-                  fontSize: "16px",
+                  padding: "4px 12px",
+                  borderRadius: "4px",
+                  fontSize: "12px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
                   display: "inline-block",
-                  border: "none",
                   textAlign: "center",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.8";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                  e.currentTarget.style.transform = "scale(1)";
+                  letterSpacing: "0.5px",
                 }}
               >
-                Kebijakan Privasi • Update
+                Update
               </div>
-            </Link>
-            <Link href="/terms-of-service" style={{ textDecoration: "none" }}>
+            </div>
+
+            {/* Ketentuan Kami + Update Button */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Link href="/terms-of-service" style={{ textDecoration: "none" }}>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "20px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    letterSpacing: "-0.01em",
+                    cursor: "pointer",
+                  }}
+                >
+                  Ketentuan Kami
+                </span>
+              </Link>
               <div
                 style={{
                   backgroundColor: "#0D3CFC",
                   color: "#ffffff",
-                  padding: "10px 24px",
-                  borderRadius: "8px",
-                  fontSize: "16px",
+                  padding: "4px 12px",
+                  borderRadius: "4px",
+                  fontSize: "12px",
                   fontWeight: 600,
                   fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
                   display: "inline-block",
-                  border: "none",
                   textAlign: "center",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.8";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                  e.currentTarget.style.transform = "scale(1)";
+                  letterSpacing: "0.5px",
                 }}
               >
-                Ketentuan Kami • Update
+                Update
               </div>
-            </Link>
+            </div>
           </div>
         </div>
 
