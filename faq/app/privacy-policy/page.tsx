@@ -1741,7 +1741,7 @@ export default function PrivacyPolicyPage() {
   const [adminEmail, setAdminEmail] = useState("");
   const [isAuthorVerified, setIsAuthorVerified] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
-  const [sidebarTop, setSidebarTop] = useState(0);
+  const [sidebarTop, setSidebarTop] = useState(80);
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1767,7 +1767,7 @@ export default function PrivacyPolicyPage() {
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // Default Privacy Policy Content
+  // Default Privacy Policy Content - 17 sections
   const defaultPrivacyContent = [
     {
       title: "Pendahuluan",
@@ -2175,8 +2175,9 @@ export default function PrivacyPolicyPage() {
         // Hitung posisi ideal: di bawah Privacy Policy
         let idealTop = bottom + 30;
         
-        // Jika sidebar terlalu ke bawah (melebihi viewport), geser ke atas
-        const maxTop = windowHeight * 0.75; // maksimal 75% dari viewport
+        // Batasi agar sidebar tidak mentok ke bawah layar
+        // Maksimal 75% dari viewport agar masih ada ruang
+        const maxTop = windowHeight * 0.75;
         if (idealTop > maxTop) {
           idealTop = maxTop;
         }
@@ -3532,12 +3533,12 @@ export default function PrivacyPolicyPage() {
               width: "280px",
               flexShrink: 0,
               position: "fixed",
-              top: sidebarTop + "px",
+              top: `${sidebarTop}px`,
               left: "40px",
               paddingRight: "20px",
               paddingTop: "0px",
               opacity: 0,
-              maxHeight: "70vh",
+              maxHeight: "calc(100vh - 120px)",
               overflowY: "auto",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
