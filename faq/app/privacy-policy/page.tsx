@@ -3475,7 +3475,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri dengan blur menyatu dengan background */}
+        {/* CONTENT WITH SIDEBAR - Sidebar fixed di kiri bawah */}
         <div style={{
           display: "flex",
           maxWidth: "1400px",
@@ -3485,7 +3485,7 @@ export default function PrivacyPolicyPage() {
           marginTop: "0px",
           position: "relative",
         }}>
-          {/* SIDEBAR - KIRI - Fixed dengan blur transparan menyatu dengan bg */}
+          {/* SIDEBAR - KIRI - Fixed position, turun ke bawah */}
           <div
             ref={sidebarRef}
             style={{
@@ -3495,19 +3495,13 @@ export default function PrivacyPolicyPage() {
               top: "55%",
               left: "40px",
               transform: "translateY(-50%)",
-              padding: "16px 12px 16px 16px",
+              paddingRight: "20px",
               opacity: 0,
               maxHeight: "65vh",
               overflowY: "auto",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               zIndex: 40,
-              backgroundColor: "rgba(255, 255, 255, 0.6)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              borderRadius: "16px",
-              border: "1px solid rgba(255,255,255,0.3)",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.06)",
             }}
             className="sidebar-scroll"
           >
@@ -3518,22 +3512,20 @@ export default function PrivacyPolicyPage() {
                 height: 0 !important;
               }
             `}</style>
-            <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               {privacyContent.map((section, index) => (
                 <div key={index}>
                   {/* Judul Utama */}
                   <div
                     onClick={() => scrollToSection(index)}
                     style={{
-                      padding: "5px 8px",
+                      padding: "6px 0",
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
-                      fontSize: activeSection === index ? "16px" : "13px",
+                      fontSize: activeSection === index ? "18px" : "15px",
                       fontWeight: activeSection === index ? 700 : 400,
                       color: activeSection === index ? "#0D3CFC" : "#444",
-                      transition: "all 0.2s ease",
-                      borderRadius: "6px",
-                      backgroundColor: activeSection === index ? "rgba(13,60,252,0.10)" : "transparent",
+                      transition: "color 0.2s ease, font-size 0.2s ease",
                     }}
                   >
                     {index + 1}. {section.title}
@@ -3544,15 +3536,13 @@ export default function PrivacyPolicyPage() {
                       key={`${index}-${subIdx}`}
                       onClick={() => scrollToSection(index)}
                       style={{
-                        padding: "2px 8px 2px 20px",
+                        padding: "3px 0 3px 16px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
-                        fontSize: activeSection === index ? "13px" : "11px",
+                        fontSize: activeSection === index ? "14px" : "12px",
                         fontWeight: activeSection === index ? 500 : 300,
-                        color: activeSection === index ? "#0D3CFC" : "#999",
-                        transition: "all 0.2s ease",
-                        borderRadius: "4px",
-                        backgroundColor: activeSection === index ? "rgba(13,60,252,0.06)" : "transparent",
+                        color: activeSection === index ? "#0D3CFC" : "#888",
+                        transition: "color 0.2s ease, font-size 0.2s ease",
                       }}
                     >
                       {sub.sub}
@@ -3570,7 +3560,7 @@ export default function PrivacyPolicyPage() {
             style={{
               flex: 1,
               paddingBottom: "60px",
-              marginLeft: "340px",
+              marginLeft: "320px",
               paddingTop: "0px",
             }}
           >
