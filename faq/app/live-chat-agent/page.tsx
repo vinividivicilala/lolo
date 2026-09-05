@@ -223,8 +223,9 @@ interface Ticket {
   typingUserName?: string | null;
   fromHelpCenter?: boolean;
   isBroadcastTicket?: boolean;
-  isBotTicket?: boolean;
   isAnnouncementTicket?: boolean;
+  isBotTicket?: boolean;
+  botType?: 'broadcast' | 'announcement' | 'agent';
 }
 
 interface ChatMessage {
@@ -332,37 +333,6 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
     return () => unsubscribe();
   }, [db, isMounted]);
 
-  // Create bot accounts
-  const createBotAccounts = async () => {
-    if (!db) return;
-    try {
-      // Broadcast Bot
-      await setDoc(doc(db, "users", "broadcast_bot"), {
-        displayName: "📢 Broadcast Bot",
-        email: "broadcast@menuru.com",
-        online: true,
-        photoURL: "https://ui-avatars.com/api/?name=Broadcast+Bot&background=0D3CFC&color=fff&size=128",
-        isBot: true,
-      }, { merge: true });
-
-      // Announcement Bot
-      await setDoc(doc(db, "users", "announcement_bot"), {
-        displayName: "📢 Pengumuman Bot",
-        email: "announcement@menuru.com",
-        online: true,
-        photoURL: "https://ui-avatars.com/api/?name=Pengumuman+Bot&background=0D3CFC&color=fff&size=128",
-        isBot: true,
-      }, { merge: true });
-    } catch (error) {
-      console.error("Error creating bot accounts:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!isMounted || !isAdmin) return;
-    createBotAccounts();
-  }, [isMounted, isAdmin]);
-
   // Tickets
   useEffect(() => {
     if (!db || !user || !isMounted) return;
@@ -461,7 +431,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
 
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
-    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active' && t.userId !== "broadcast_bot" && t.userId !== "announcement_bot");
+    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active' && !t.isBotTicket);
     if (hasActiveTicket) {
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
@@ -481,8 +451,8 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
         typingUserName: null,
         fromHelpCenter: false,
         isBroadcastTicket: false,
-        isBotTicket: false,
         isAnnouncementTicket: false,
+        isBotTicket: false,
       });
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -508,9 +478,8 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
     }
-    // Check if bot ticket (read-only)
-    if (selectedTicket.userId === "broadcast_bot" || selectedTicket.userId === "announcement_bot") {
-      alert("Ini adalah chat pengumuman/broadcast, tidak bisa mengirim pesan.");
+    if (selectedTicket.isBotTicket) {
+      alert("Ini adalah chat bot, tidak bisa mengirim pesan.");
       return;
     }
     try {
@@ -578,12 +547,12 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
   const sendAnnouncement = async () => {
     if (!db || !user || !announcementText.trim()) return;
     try {
-      // Create announcement ticket
+      // Buat ticket bot pengumuman
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: "announcement_bot",
-        userName: "📢 Pengumuman Bot",
+        userName: "📢 Menuru Bot - Pengumuman",
         userEmail: "announcement@menuru.com",
-        userPhoto: "https://ui-avatars.com/api/?name=Pengumuman+Bot&background=0D3CFC&color=fff&size=128",
+        userPhoto: "https://ui-avatars.com/api/?name=Pengumuman&background=0D3CFC&color=fff&size=128",
         status: "active",
         topic: "📢 Pengumuman Resmi",
         createdAt: serverTimestamp(),
@@ -592,14 +561,16 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
         typingUserId: null,
         typingUserName: null,
         fromHelpCenter: false,
-        isBotTicket: true,
+        isBroadcastTicket: false,
         isAnnouncementTicket: true,
+        isBotTicket: true,
+        botType: 'announcement',
       });
 
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: "announcement_bot",
-        senderName: "📢 Pengumuman Bot",
-        senderPhoto: "https://ui-avatars.com/api/?name=Pengumuman+Bot&background=0D3CFC&color=fff&size=128",
+        senderName: "📢 Menuru Bot - Pengumuman",
+        senderPhoto: "https://ui-avatars.com/api/?name=Pengumuman&background=0D3CFC&color=fff&size=128",
         text: announcementText.trim(),
         timestamp: serverTimestamp(),
         read: false,
@@ -608,14 +579,13 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
         isBot: true,
       });
 
-      // Also send to all active user tickets
-      const activeTickets = tickets.filter(t => t.status === 'active' || t.status === 'waiting');
-      for (const ticket of activeTickets) {
-        if (ticket.userId === "broadcast_bot" || ticket.userId === "announcement_bot") continue;
+      // Kirim ke semua user tickets
+      const userTickets = tickets.filter(t => !t.isBotTicket);
+      for (const ticket of userTickets) {
         await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
           senderId: "announcement_bot",
           senderName: "📢 Pengumuman",
-          senderPhoto: "https://ui-avatars.com/api/?name=Pengumuman+Bot&background=0D3CFC&color=fff&size=128",
+          senderPhoto: "https://ui-avatars.com/api/?name=Pengumuman&background=0D3CFC&color=fff&size=128",
           text: `📢 ${announcementText.trim()}`,
           timestamp: serverTimestamp(),
           read: false,
@@ -634,12 +604,12 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim() || selectedUsers.length === 0) return;
     try {
-      // Create broadcast ticket
+      // Buat ticket bot broadcast
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: "broadcast_bot",
-        userName: "📢 Broadcast Bot",
+        userName: "📢 Menuru Bot - Broadcast",
         userEmail: "broadcast@menuru.com",
-        userPhoto: "https://ui-avatars.com/api/?name=Broadcast+Bot&background=0D3CFC&color=fff&size=128",
+        userPhoto: "https://ui-avatars.com/api/?name=Broadcast&background=0D3CFC&color=fff&size=128",
         status: "active",
         topic: "📨 Broadcast dari Agent",
         createdAt: serverTimestamp(),
@@ -648,14 +618,16 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
         typingUserId: null,
         typingUserName: null,
         fromHelpCenter: false,
-        isBotTicket: true,
         isBroadcastTicket: true,
+        isAnnouncementTicket: false,
+        isBotTicket: true,
+        botType: 'broadcast',
       });
 
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: "broadcast_bot",
-        senderName: "📢 Broadcast Bot",
-        senderPhoto: "https://ui-avatars.com/api/?name=Broadcast+Bot&background=0D3CFC&color=fff&size=128",
+        senderName: "📢 Menuru Bot - Broadcast",
+        senderPhoto: "https://ui-avatars.com/api/?name=Broadcast&background=0D3CFC&color=fff&size=128",
         text: broadcastText.trim(),
         timestamp: serverTimestamp(),
         read: false,
@@ -664,16 +636,16 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
         isBot: true,
       });
 
-      // Send to selected users
+      // Kirim ke selected users
       for (const userId of selectedUsers) {
         const userData = allUsers.find(u => u.id === userId);
         if (!userData) continue;
-        const userTicket = tickets.find(t => t.userId === userId && (t.status === 'active' || t.status === 'waiting'));
+        const userTicket = tickets.find(t => t.userId === userId && !t.isBotTicket);
         if (userTicket) {
           await addDoc(collection(db, "livechat_tickets", userTicket.id, "messages"), {
             senderId: "broadcast_bot",
             senderName: "📢 Broadcast",
-            senderPhoto: "https://ui-avatars.com/api/?name=Broadcast+Bot&background=0D3CFC&color=fff&size=128",
+            senderPhoto: "https://ui-avatars.com/api/?name=Broadcast&background=0D3CFC&color=fff&size=128",
             text: `📨 ${broadcastText.trim()}`,
             timestamp: serverTimestamp(),
             read: false,
@@ -775,7 +747,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
 
   // USER VIEW - not admin
   if (!isAdmin) {
-    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active' && t.userId !== "broadcast_bot" && t.userId !== "announcement_bot");
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active' && !t.isBotTicket);
 
     if (tickets.length === 0 && !showStartChat) {
       return (
@@ -1059,7 +1031,9 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
               const isActive = selectedTicket?.id === ticket.id;
               const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
                                   ticket.status === 'active' ? 'Aktif' : 'Selesai';
-              const isBot = ticket.userId === "broadcast_bot" || ticket.userId === "announcement_bot";
+              const isBot = ticket.isBotTicket;
+              const isBroadcast = ticket.isBroadcastTicket;
+              const isAnnouncement = ticket.isAnnouncementTicket;
               
               return (
                 <div
@@ -1109,19 +1083,14 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                       }}>
                         {ticket.userName}
                         {isBot && <InstagramVerifiedBadge size={10} />}
-                        {ticket.isBroadcastTicket && (
-                          <span style={{ fontSize: "8px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "4px" }}>
+                        {isBroadcast && (
+                          <span style={{ fontSize: "8px", backgroundColor: "rgba(255,215,0,0.3)", color: "#ffd700", padding: "1px 6px", borderRadius: "4px" }}>
                             Broadcast
                           </span>
                         )}
-                        {ticket.isAnnouncementTicket && (
-                          <span style={{ fontSize: "8px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "4px" }}>
+                        {isAnnouncement && (
+                          <span style={{ fontSize: "8px", backgroundColor: "rgba(255,215,0,0.3)", color: "#ffd700", padding: "1px 6px", borderRadius: "4px" }}>
                             Pengumuman
-                          </span>
-                        )}
-                        {ticket.fromHelpCenter && (
-                          <span style={{ fontSize: "8px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "4px" }}>
-                            Help Center
                           </span>
                         )}
                       </div>
@@ -1211,8 +1180,19 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "15px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                    <div style={{ fontWeight: 600, fontSize: "15px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
                       {selectedTicket.userName}
+                      {selectedTicket.isBotTicket && <InstagramVerifiedBadge size={12} />}
+                      {selectedTicket.isBroadcastTicket && (
+                        <span style={{ fontSize: "9px", backgroundColor: "#f59e0b", color: "#fff", padding: "1px 8px", borderRadius: "4px" }}>
+                          Broadcast
+                        </span>
+                      )}
+                      {selectedTicket.isAnnouncementTicket && (
+                        <span style={{ fontSize: "9px", backgroundColor: "#f59e0b", color: "#fff", padding: "1px 8px", borderRadius: "4px" }}>
+                          Pengumuman
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.topic} • {generateTicketId(selectedTicket.createdAt)}
@@ -1351,7 +1331,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                     );
                   })
                 )}
-                {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+                {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && !selectedTicket.isBotTicket && (
                   <div style={{
                     alignSelf: "flex-start",
                     fontSize: "12px",
@@ -1367,8 +1347,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
               </div>
 
               {/* Input - only for non-bot tickets with active status */}
-              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && 
-               selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !selectedTicket.isBotTicket && (
                 <div style={{
                   padding: "12px 24px",
                   borderTop: "1px solid #e8e8e8",
@@ -1428,7 +1407,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                 </div>
               )}
               {/* Bot tickets - read only */}
-              {(selectedTicket.userId === "broadcast_bot" || selectedTicket.userId === "announcement_bot") && (
+              {selectedTicket.isBotTicket && (
                 <div style={{
                   padding: "12px 24px",
                   borderTop: "1px solid #e8e8e8",
@@ -1438,7 +1417,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                   color: "#999",
                   fontFamily: FONT_FAMILY,
                 }}>
-                  ⚡ Ini adalah chat pengumuman/broadcast, hanya bisa dibaca
+                  ⚡ Ini adalah chat bot, hanya bisa dibaca
                 </div>
               )}
             </>
@@ -1461,9 +1440,9 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
   }
 
   // ===== ADMIN VIEW =====
-  // Separate bot tickets and user tickets
-  const botTickets = tickets.filter(t => t.userId === "broadcast_bot" || t.userId === "announcement_bot");
-  const userTickets = tickets.filter(t => t.userId !== "broadcast_bot" && t.userId !== "announcement_bot");
+  // Pisahkan bot tickets dan user tickets
+  const botTickets = tickets.filter(t => t.isBotTicket);
+  const userTickets = tickets.filter(t => !t.isBotTicket);
   const waitingTickets = userTickets.filter(t => t.status === 'waiting');
   const activeTickets = userTickets.filter(t => t.status === 'active');
   const resolvedTickets = userTickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -2042,7 +2021,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "15px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
                       {selectedTicket.userName}
-                      {(selectedTicket.userId === "broadcast_bot" || selectedTicket.userId === "announcement_bot") && <InstagramVerifiedBadge size={12} />}
+                      {selectedTicket.isBotTicket && <InstagramVerifiedBadge size={12} />}
                       {selectedTicket.fromHelpCenter && (
                         <span style={{ fontSize: "9px", backgroundColor: "#0D3CFC", color: "#fff", padding: "1px 8px", borderRadius: "4px" }}>
                           Help Center
@@ -2071,7 +2050,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                       }}>
                         {selectedTicket.status === 'waiting' ? 'Menunggu' : selectedTicket.status === 'active' ? 'Aktif' : 'Selesai'}
                       </span>
-                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+                      {selectedTicket.typing && selectedTicket.status !== 'resolved' && !selectedTicket.isBotTicket && (
                         <span style={{ fontSize: "10px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
                           {selectedTicket.typingUserName} mengetik...
                         </span>
@@ -2082,8 +2061,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                     </div>
                   </div>
                 </div>
-                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && 
-                 selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !selectedTicket.isBotTicket && (
                   <button
                     onClick={() => resolveTicket(selectedTicket.id)}
                     style={{
@@ -2219,7 +2197,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                     );
                   })
                 )}
-                {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+                {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && !selectedTicket.isBotTicket && (
                   <div style={{
                     alignSelf: "flex-start",
                     fontSize: "12px",
@@ -2235,8 +2213,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
               </div>
 
               {/* Input */}
-              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && 
-               selectedTicket.userId !== "broadcast_bot" && selectedTicket.userId !== "announcement_bot" && (
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !selectedTicket.isBotTicket && (
                 <div style={{
                   padding: "12px 24px",
                   borderTop: "1px solid #e8e8e8",
@@ -2296,7 +2273,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                 </div>
               )}
               {/* Bot tickets - read only */}
-              {(selectedTicket.userId === "broadcast_bot" || selectedTicket.userId === "announcement_bot") && (
+              {selectedTicket.isBotTicket && (
                 <div style={{
                   padding: "12px 24px",
                   borderTop: "1px solid #e8e8e8",
@@ -2306,7 +2283,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                   color: "#999",
                   fontFamily: FONT_FAMILY,
                 }}>
-                  ⚡ Ini adalah chat pengumuman/broadcast, hanya bisa dibaca
+                  ⚡ Ini adalah chat bot, hanya bisa dibaca
                 </div>
               )}
             </>
@@ -2483,7 +2460,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                 borderRadius: "8px",
                 padding: "8px",
               }}>
-                {allUsers.filter(u => u.id !== user.uid && u.id !== "broadcast_bot" && u.id !== "announcement_bot").map((u) => (
+                {allUsers.filter(u => u.id !== user.uid && !u.isBot).map((u) => (
                   <label key={u.id} style={{
                     display: "flex",
                     alignItems: "center",
@@ -2525,7 +2502,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
                     </span>
                   </label>
                 ))}
-                {allUsers.filter(u => u.id !== user.uid && u.id !== "broadcast_bot" && u.id !== "announcement_bot").length === 0 && (
+                {allUsers.filter(u => u.id !== user.uid && !u.isBot).length === 0 && (
                   <div style={{ padding: "12px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
                     Belum ada user terdaftar
                   </div>
