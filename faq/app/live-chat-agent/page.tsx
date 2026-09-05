@@ -264,9 +264,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
       const ticketList: Ticket[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        // For user, only their own tickets
         if (!isAdmin && data.userId !== user.uid) return;
-        // For admin, include all
         ticketList.push({ id: doc.id, ...data } as Ticket);
       });
       setTickets(ticketList);
@@ -1382,7 +1380,6 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
   }
 
   // ===== ADMIN VIEW =====
-  // Admin sees all tickets including bot and broadcast
   const waitingTickets = tickets.filter(t => t.status === 'waiting' && !t.isBot && !t.isBroadcast);
   const activeTickets = tickets.filter(t => t.status === 'active' && !t.isBot && !t.isBroadcast);
   const resolvedTickets = tickets.filter(t => (t.status === 'resolved' || t.status === 'closed') && !t.isBot && !t.isBroadcast);
@@ -1576,7 +1573,7 @@ const LiveChatAgentInterface = ({ user, isAdmin, db, auth }: { user: any; isAdmi
               }
             `}</style>
 
-            {/* Bot Tickets - from announcements */}
+            {/* Bot Tickets */}
             {botTickets.length > 0 && (
               <div>
                 <div style={{
@@ -2536,6 +2533,17 @@ export default function LiveChatPage(): React.JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMain, setShowMain] = useState(false);
 
+  // Menu items moved INSIDE the component to fix ReferenceError
+  const menuItems = [
+    { name: "Community", number: "01" },
+    { name: "Blog", number: "02" },
+    { name: "Live Chat", number: "03" },
+    { name: "Live Chat Agent", number: "04" },
+    { name: "Donation", number: "05" },
+    { name: "Contact", number: "06" },
+    { name: "Note", number: "07" }
+  ];
+
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const plusIconRef = useRef<HTMLSpanElement>(null);
@@ -2583,8 +2591,12 @@ export default function LiveChatPage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
+  // --- Client-only GSAP animations ---
+  // All GSAP/ScrollTrigger code is wrapped in useEffect to prevent hydration mismatches
   useEffect(() => {
     if (!isMounted || !showMain) return;
+
+    // SplitText for "Live Chat Agent" title
     if (liveChatTitleRef.current) {
       const splitTitle = new SplitText(liveChatTitleRef.current, {
         type: "chars",
@@ -2608,11 +2620,72 @@ export default function LiveChatPage(): React.JSX.Element {
         }
       );
     }
+
+    // Menuru text animation in footer
+    const menuruElement = menuruFooterRef.current;
+    const menuruText = menuruTextRef.current;
+
+    if (menuruElement && menuruText) {
+      const split = new SplitText(menuruText, {
+        type: "chars",
+        charsClass: "menuru-char"
+      });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 100,
+        scale: 0.5,
+        rotationX: 90
+      });
+
+      ScrollTrigger.create({
+        trigger: menuruElement,
+        start: "top 85%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        },
+        onLeave: () => {
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            scale: 0.5,
+            rotationX: 90,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.in",
+            overwrite: true
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        }
+      });
+    }
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isMounted, showMain]);
 
+  // Menu drawer animation
   useEffect(() => {
     if (!menuOverlayRef.current || !isMounted) return;
 
@@ -2700,72 +2773,6 @@ export default function LiveChatPage(): React.JSX.Element {
     }
   }, [isMenuOpen, isMounted]);
 
-  useEffect(() => {
-    if (!isMounted || !showMain) return;
-
-    const menuruElement = menuruFooterRef.current;
-    const menuruText = menuruTextRef.current;
-
-    if (menuruElement && menuruText) {
-      const split = new SplitText(menuruText, {
-        type: "chars",
-        charsClass: "menuru-char"
-      });
-
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 100,
-        scale: 0.5,
-        rotationX: 90
-      });
-
-      ScrollTrigger.create({
-        trigger: menuruElement,
-        start: "top 85%",
-        onEnter: () => {
-          gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationX: 0,
-            duration: 1.2,
-            stagger: 0.03,
-            ease: "back.out(1.7)",
-            overwrite: true
-          });
-        },
-        onLeave: () => {
-          gsap.to(split.chars, {
-            opacity: 0,
-            y: 100,
-            scale: 0.5,
-            rotationX: 90,
-            duration: 0.8,
-            stagger: 0.02,
-            ease: "power2.in",
-            overwrite: true
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationX: 0,
-            duration: 1.2,
-            stagger: 0.03,
-            ease: "back.out(1.7)",
-            overwrite: true
-          });
-        }
-      });
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [isMounted, showMain]);
-
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
@@ -2793,37 +2800,37 @@ export default function LiveChatPage(): React.JSX.Element {
       duration: 0.8,
       ease: "back.out(1.7)"
     })
-      .to(textRef.current, { duration: 0.6 })
-      .to(textRef.current, {
-        opacity: 0,
-        y: -20,
-        scale: 0.9,
-        duration: 0.4,
-        ease: "power2.out",
-        onComplete: () => {
-          if (textRef.current) textRef.current.textContent = "Note";
-        }
-      })
-      .to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)"
-      })
-      .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, {
-        scale: 0.3,
-        opacity: 0,
-        duration: 0.7,
-        ease: "power2.in"
-      })
-      .to(preloaderRef.current, {
-        scale: 0.95,
-        opacity: 0.8,
-        duration: 0.3,
-        ease: "power2.inOut"
-      }, "-=0.3");
+    .to(textRef.current, { duration: 0.6 })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .to(textRef.current, { duration: 0.8 })
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
   };
 
   const toggleMenu = () => {
