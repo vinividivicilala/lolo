@@ -225,7 +225,6 @@ interface Ticket {
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
-  type?: 'agent' | 'broadcast' | 'announcement';
 }
 
 interface ChatMessage {
@@ -236,7 +235,7 @@ interface ChatMessage {
   text: string;
   timestamp: any;
   read: boolean;
-  type?: 'agent' | 'broadcast' | 'announcement';
+  type?: 'broadcast' | 'announcement';
 }
 
 // ===== LIVE CHAT AGENT COMPONENT =====
@@ -442,7 +441,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         typing: false,
         typingUserId: null,
         typingUserName: null,
-        type: 'agent',
       });
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -451,7 +449,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
         timestamp: serverTimestamp(),
         read: false,
-        type: 'agent',
       });
       setSelectedTopic("");
       setShowStartChat(false);
@@ -485,7 +482,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
-        type: 'agent',
       });
       
       await updateDoc(ticketRef, {
@@ -531,16 +527,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // Send Broadcast - dikirim sebagai pesan biasa ke semua user
+  // Send Broadcast
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim()) return;
     try {
-      // Kirim broadcast ke semua user yang memiliki ticket aktif
-      const userTickets = tickets.filter(t => t.status === 'active' || t.status === 'waiting');
-      for (const ticket of userTickets) {
+      const activeTickets = tickets.filter(t => t.status === 'active' || t.status === 'waiting');
+      for (const ticket of activeTickets) {
         await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
           senderId: "broadcast",
-          senderName: "📢 Broadcast",
+          senderName: "Broadcast",
           senderPhoto: "/images/ai.jpg",
           text: `📢 ${broadcastText.trim()}`,
           timestamp: serverTimestamp(),
@@ -559,16 +554,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // Send Announcement - dikirim sebagai pesan biasa ke semua user
+  // Send Announcement
   const sendAnnouncement = async () => {
     if (!db || !user || !announcementText.trim()) return;
     try {
-      // Kirim pengumuman ke semua user yang memiliki ticket
       const allTickets = tickets.filter(t => t.status !== 'resolved' && t.status !== 'closed');
       for (const ticket of allTickets) {
         await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
           senderId: "announcement",
-          senderName: "📢 Pengumuman",
+          senderName: "Pengumuman",
           senderPhoto: "/images/ai.jpg",
           text: `📢 ${announcementText.trim()}`,
           timestamp: serverTimestamp(),
@@ -608,14 +602,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
+  // Filter tickets with safe check
   const filteredTickets = tickets.filter(ticket => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      ticket.userName.toLowerCase().includes(query) ||
-      ticket.topic.toLowerCase().includes(query) ||
-      ticket.userEmail.toLowerCase().includes(query)
-    );
+    if (!searchQuery || !searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    const userName = (ticket.userName || '').toLowerCase();
+    const topic = (ticket.topic || '').toLowerCase();
+    const userEmail = (ticket.userEmail || '').toLowerCase();
+    return userName.includes(query) || topic.includes(query) || userEmail.includes(query);
   });
 
   const isMessageRead = (msg: ChatMessage) => {
@@ -1169,12 +1163,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     const isAnnouncement = msg.type === 'announcement';
                     const isRead = isMessageRead(msg);
                     
+                    // Broadcast atau Announcement dari system
                     if (isBroadcast || isAnnouncement) {
                       const label = isBroadcast ? "Broadcast" : "Pengumuman";
-                      const color = isBroadcast ? "#22c55e" : "#f59e0b";
-                      const bgColor = isBroadcast ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)";
-                      const borderColor = isBroadcast ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.2)";
-                      
                       return (
                         <div
                           key={idx}
@@ -1183,29 +1174,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                             maxWidth: "80%",
                             padding: "8px 16px",
                             borderRadius: "12px",
-                            backgroundColor: bgColor,
-                            color: "#000",
+                            backgroundColor: "#0D3CFC",
+                            color: "#ffffff",
                             fontSize: "13px",
                             fontFamily: FONT_FAMILY,
-                            border: `1px solid ${borderColor}`,
                           }}
                         >
                           <div style={{ 
                             fontSize: "10px", 
                             fontWeight: 600, 
-                            color: color, 
+                            color: "rgba(255,255,255,0.7)", 
                             marginBottom: "4px", 
                             fontFamily: FONT_FAMILY,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
                           }}>
                             📢 {label}
                           </div>
                           <div>{msg.text}</div>
                           <div style={{ 
                             fontSize: "9px", 
-                            color: "#999", 
+                            color: "rgba(255,255,255,0.5)", 
                             marginTop: "4px",
                             textAlign: "right",
                             fontFamily: FONT_FAMILY,
@@ -1458,25 +1445,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button
             onClick={() => setShowBroadcastModal(true)}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "5px",
-              padding: "5px 14px",
-              backgroundColor: "rgba(34,197,94,0.15)",
-              color: "#22c55e",
-              border: "1px solid rgba(34,197,94,0.2)",
+              gap: "4px",
+              padding: "6px 12px",
+              backgroundColor: "transparent",
+              color: "#0D3CFC",
+              border: "1px solid #0D3CFC",
               borderRadius: "6px",
-              fontSize: "11px",
+              fontSize: "12px",
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
               transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(34,197,94,0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(34,197,94,0.15)"}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f4ff"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
             📢 Broadcast
           </button>
@@ -1485,19 +1472,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "5px",
-              padding: "5px 14px",
-              backgroundColor: "rgba(245,158,11,0.15)",
-              color: "#f59e0b",
-              border: "1px solid rgba(245,158,11,0.2)",
+              gap: "4px",
+              padding: "6px 12px",
+              backgroundColor: "transparent",
+              color: "#0D3CFC",
+              border: "1px solid #0D3CFC",
               borderRadius: "6px",
-              fontSize: "11px",
+              fontSize: "12px",
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
               transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)"}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f4ff"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
             📢 Pengumuman
           </button>
@@ -1507,20 +1494,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              padding: "5px 12px",
-              backgroundColor: "rgba(255,255,255,0.08)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.1)",
+              padding: "6px 12px",
+              backgroundColor: "transparent",
+              color: "#ef4444",
+              border: "1px solid #ef4444",
               borderRadius: "6px",
-              fontSize: "11px",
+              fontSize: "12px",
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
               transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.3)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)"}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
-            <LogoutIcon size={13} />
+            <LogoutIcon size={14} />
             <span>Logout</span>
           </button>
         </div>
@@ -1910,10 +1897,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     
                     if (isBroadcast || isAnnouncement) {
                       const label = isBroadcast ? "Broadcast" : "Pengumuman";
-                      const color = isBroadcast ? "#22c55e" : "#f59e0b";
-                      const bgColor = isBroadcast ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)";
-                      const borderColor = isBroadcast ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.2)";
-                      
                       return (
                         <div
                           key={idx}
@@ -1922,29 +1905,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                             maxWidth: "80%",
                             padding: "8px 16px",
                             borderRadius: "12px",
-                            backgroundColor: bgColor,
-                            color: "#000",
+                            backgroundColor: "#0D3CFC",
+                            color: "#ffffff",
                             fontSize: "13px",
                             fontFamily: FONT_FAMILY,
-                            border: `1px solid ${borderColor}`,
                           }}
                         >
                           <div style={{ 
                             fontSize: "10px", 
                             fontWeight: 600, 
-                            color: color, 
+                            color: "rgba(255,255,255,0.7)", 
                             marginBottom: "4px", 
                             fontFamily: FONT_FAMILY,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
                           }}>
                             📢 {label}
                           </div>
                           <div>{msg.text}</div>
                           <div style={{ 
                             fontSize: "9px", 
-                            color: "#999", 
+                            color: "rgba(255,255,255,0.5)", 
                             marginTop: "4px",
                             textAlign: "right",
                             fontFamily: FONT_FAMILY,
@@ -2151,7 +2130,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#22c55e", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
                 📢 Kirim Broadcast
               </h3>
               <button
@@ -2186,7 +2165,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   minHeight: "80px",
                   resize: "vertical",
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#22c55e"}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
                 onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
               <div style={{ fontSize: "11px", color: "#999", marginTop: "4px", fontFamily: FONT_FAMILY }}>
@@ -2214,7 +2193,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 disabled={!broadcastText.trim()}
                 style={{
                   padding: "6px 18px",
-                  backgroundColor: broadcastText.trim() ? "#22c55e" : "#ccc",
+                  backgroundColor: broadcastText.trim() ? "#0D3CFC" : "#ccc",
                   color: "#fff",
                   border: "none",
                   borderRadius: "6px",
@@ -2255,7 +2234,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#f59e0b", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
                 📢 Kirim Pengumuman
               </h3>
               <button
@@ -2290,7 +2269,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   minHeight: "80px",
                   resize: "vertical",
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#f59e0b"}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
                 onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
               <div style={{ fontSize: "11px", color: "#999", marginTop: "4px", fontFamily: FONT_FAMILY }}>
@@ -2318,7 +2297,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 disabled={!announcementText.trim()}
                 style={{
                   padding: "6px 18px",
-                  backgroundColor: announcementText.trim() ? "#f59e0b" : "#ccc",
+                  backgroundColor: announcementText.trim() ? "#0D3CFC" : "#ccc",
                   color: "#fff",
                   border: "none",
                   borderRadius: "6px",
