@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc, setDoc, arrayUnion, arrayRemove, increment } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -127,14 +127,6 @@ const GroupIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const InfoIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 // Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram"] },
@@ -153,24 +145,25 @@ const menuItems = [
   { name: "Note", number: "07" }
 ];
 
-// ===== PULSING DOTS =====
-const PulsingDots = ({ active }: { active: boolean }) => {
+// ===== PULSING DOTS BLINKING =====
+const BlinkingDot = ({ active, color = "#22c55e" }: { active: boolean; color?: string }) => {
   if (!active) return <span style={{ color: '#999', fontSize: '10px' }}>● Offline</span>;
   return (
     <span style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
-      <span className="dot" style={{ animationDelay: '0s' }}>●</span>
-      <span className="dot" style={{ animationDelay: '0.2s' }}>●</span>
-      <span className="dot" style={{ animationDelay: '0.4s' }}>●</span>
+      <span className="blink-dot" style={{ animationDelay: '0s' }}>●</span>
+      <span className="blink-dot" style={{ animationDelay: '0.2s' }}>●</span>
+      <span className="blink-dot" style={{ animationDelay: '0.4s' }}>●</span>
       <style>{`
-        .dot {
-          animation: blink 1.4s infinite both;
-          font-size: 9px;
-          color: #22c55e;
+        .blink-dot {
+          animation: blinkWave 1.4s infinite both;
+          font-size: 8px;
+          color: ${color};
         }
-        @keyframes blink {
-          0% { opacity: 0.2; }
-          20% { opacity: 1; }
-          100% { opacity: 0.2; }
+        @keyframes blinkWave {
+          0% { opacity: 0.2; transform: scale(0.8); }
+          20% { opacity: 1; transform: scale(1.2); }
+          40% { opacity: 0.2; transform: scale(0.8); }
+          100% { opacity: 0.2; transform: scale(0.8); }
         }
       `}</style>
     </span>
@@ -278,22 +271,22 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
-  const [showStartChat, setShowStartChat] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<ChatUser[]>([]);
-  const [showUserProfile, setShowUserProfile] = useState(false);
-  const [profileUser, setProfileUser] = useState<ChatUser | null>(null);
-  const [showAddUser, setShowAddUser] = useState(false);
+  const [viewingUser, setViewingUser] = useState<ChatUser | null>(null);
+  const [bioText, setBioText] = useState("");
+  const [editingBio, setEditingBio] = useState(false);
+  const [showNewChat, setShowNewChat] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [groupName, setGroupName] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
-  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [announcementText, setAnnouncementText] = useState("");
+  const [viewingRoom, setViewingRoom] = useState<ChatRoom | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -513,8 +506,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       const docRef = await addDoc(collection(db, "chat_rooms"), roomData);
       const newRoom = { id: docRef.id, ...roomData } as ChatRoom;
       setSelectedRoom(newRoom);
-      setShowStartChat(false);
-      setSelectedUser(null);
+      setShowNewChat(false);
+      setViewingUser(null);
     } catch (error) {
       console.error("Error creating chat:", error);
     }
@@ -547,11 +540,11 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   };
 
   const sendBroadcast = async () => {
-    if (!db || !user || !broadcastText.trim()) return;
+    if (!db || !user || !broadcastText.trim() || !isAdmin) return;
     try {
       const roomData = {
         type: 'broadcast',
-        name: '📢 Broadcast',
+        name: 'Broadcast',
         participants: users.filter(u => u.id !== user.uid).map(u => u.id),
         createdAt: serverTimestamp(),
         lastMessageTime: serverTimestamp(),
@@ -563,9 +556,9 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       
       await addDoc(collection(db, "chat_rooms", docRef.id, "messages"), {
         senderId: user.uid,
-        senderName: "📢 Broadcast",
+        senderName: "Broadcast",
         senderPhoto: "/images/ai.jpg",
-        text: `📢 ${broadcastText.trim()}`,
+        text: broadcastText.trim(),
         timestamp: serverTimestamp(),
         read: false,
         readBy: [user.uid],
@@ -573,18 +566,18 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       });
       
       setBroadcastText("");
-      setShowBroadcastModal(false);
+      setShowBroadcast(false);
     } catch (error) {
       console.error("Error sending broadcast:", error);
     }
   };
 
   const sendAnnouncement = async () => {
-    if (!db || !user || !announcementText.trim()) return;
+    if (!db || !user || !announcementText.trim() || !isAdmin) return;
     try {
       const roomData = {
         type: 'announcement',
-        name: '📢 Pengumuman',
+        name: 'Pengumuman',
         participants: users.filter(u => u.id !== user.uid).map(u => u.id),
         createdAt: serverTimestamp(),
         lastMessageTime: serverTimestamp(),
@@ -596,9 +589,9 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       
       await addDoc(collection(db, "chat_rooms", docRef.id, "messages"), {
         senderId: user.uid,
-        senderName: "📢 Pengumuman",
+        senderName: "Pengumuman",
         senderPhoto: "/images/ai.jpg",
-        text: `📢 ${announcementText.trim()}`,
+        text: announcementText.trim(),
         timestamp: serverTimestamp(),
         read: false,
         readBy: [user.uid],
@@ -606,9 +599,24 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       });
       
       setAnnouncementText("");
-      setShowAnnouncementModal(false);
+      setShowAnnouncement(false);
     } catch (error) {
       console.error("Error sending announcement:", error);
+    }
+  };
+
+  const updateBio = async () => {
+    if (!db || !user || !bioText.trim()) return;
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        bio: bioText.trim()
+      });
+      setEditingBio(false);
+      // Update local user
+      setViewingUser(prev => prev ? { ...prev, bio: bioText.trim() } : null);
+    } catch (error) {
+      console.error("Error updating bio:", error);
     }
   };
 
@@ -662,8 +670,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   };
 
   const getRoomName = (room: ChatRoom) => {
-    if (room.type === 'broadcast') return '📢 Broadcast';
-    if (room.type === 'announcement') return '📢 Pengumuman';
+    if (room.type === 'broadcast') return 'Broadcast';
+    if (room.type === 'announcement') return 'Pengumuman';
     if (room.type === 'individual') {
       const otherId = room.participants.find(id => id !== user?.uid);
       const otherUser = users.find(u => u.id === otherId);
@@ -698,6 +706,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       const u = users.find(user => user.id === id);
       return u?.online;
     });
+  };
+
+  const getTotalUnread = () => {
+    return rooms.reduce((total, room) => total + (room.unreadCount || 0), 0);
   };
 
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
@@ -791,6 +803,14 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 borderRadius: "50%",
                 objectFit: "cover",
                 border: "2px solid rgba(255,255,255,0.2)",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                const currentUser = users.find(u => u.id === user.uid);
+                if (currentUser) {
+                  setViewingUser(currentUser);
+                  setBioText(currentUser.bio || "");
+                }
               }}
             />
             <div style={{ flex: 1 }}>
@@ -804,12 +824,26 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 gap: "6px",
               }}>
                 Hi, {user.displayName || user.email || "User"} 👋
+                {user.email === ADMIN_EMAIL && <InstagramVerifiedBadge size={12} />}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <PulsingDots active={agentOnline} />
-                <span style={{ fontSize: "11px", color: agentOnline ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.4)", fontFamily: FONT_FAMILY }}>
-                  {agentOnline ? "Agent Online" : "Offline"}
+                <BlinkingDot active={agentOnline} color="#ffffff" />
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
+                  {agentOnline ? "Online" : "Offline"}
                 </span>
+                {getTotalUnread() > 0 && (
+                  <span style={{
+                    backgroundColor: "#ffffff",
+                    color: "#0D3CFC",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    padding: "1px 8px",
+                    borderRadius: "12px",
+                    marginLeft: "4px",
+                  }}>
+                    {getTotalUnread()} baru
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -871,7 +905,62 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           </div>
         </div>
         
-        {/* Action Buttons */}
+        {/* Action Buttons - Only for Admin */}
+        {isAdmin && (
+          <div style={{
+            padding: "10px 20px",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setShowBroadcast(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
+                backgroundColor: "rgba(255,255,255,0.10)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.20)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)"}
+            >
+              Broadcast
+            </button>
+            <button
+              onClick={() => setShowAnnouncement(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
+                backgroundColor: "rgba(255,255,255,0.10)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.20)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)"}
+            >
+              Pengumuman
+            </button>
+          </div>
+        )}
+        
+        {/* New Chat & Group Buttons */}
         <div style={{
           padding: "10px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
@@ -881,7 +970,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           flexShrink: 0,
         }}>
           <button
-            onClick={() => setShowStartChat(true)}
+            onClick={() => setShowNewChat(true)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -923,48 +1012,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           >
             <GroupIcon size={14} />
             <span>Grup</span>
-          </button>
-          <button
-            onClick={() => setShowBroadcastModal(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "6px 14px",
-              backgroundColor: "rgba(255,255,255,0.10)",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "12px",
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.20)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)"}
-          >
-            📢 Broadcast
-          </button>
-          <button
-            onClick={() => setShowAnnouncementModal(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "6px 14px",
-              backgroundColor: "rgba(255,255,255,0.10)",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "12px",
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.20)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)"}
-          >
-            📢 Pengumuman
           </button>
         </div>
         
@@ -1011,9 +1058,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         height: "44px",
                         borderRadius: "50%",
                         objectFit: "cover",
-                        border: isBroadcast ? "2px solid #22c55e" : 
-                                isAnnouncement ? "2px solid #f59e0b" : 
-                                isGroup ? "2px solid rgba(255,255,255,0.3)" : "none",
                       }}
                     />
                     {room.type === 'individual' && (
@@ -1109,14 +1153,13 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       </div>
 
       {/* Chat Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f0f2f5", height: "100%" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#ffffff", height: "100%" }}>
         {selectedRoom ? (
           <>
-            {/* Chat Header */}
+            {/* Chat Header - Blue */}
             <div style={{
               padding: "14px 24px",
-              backgroundColor: "#ffffff",
-              borderBottom: "1px solid #e8e8e8",
+              backgroundColor: "#0D3CFC",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -1130,9 +1173,11 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       const otherId = selectedRoom.participants.find(id => id !== user?.uid);
                       const otherUser = users.find(u => u.id === otherId);
                       if (otherUser) {
-                        setProfileUser(otherUser);
-                        setShowUserProfile(true);
+                        setViewingUser(otherUser);
+                        setBioText(otherUser.bio || "");
                       }
+                    } else if (selectedRoom.type === 'group') {
+                      setViewingRoom(selectedRoom);
                     }
                   }}
                 >
@@ -1144,9 +1189,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       height: "40px",
                       borderRadius: "50%",
                       objectFit: "cover",
-                      border: selectedRoom.type === 'broadcast' ? "2px solid #22c55e" : 
-                              selectedRoom.type === 'announcement' ? "2px solid #f59e0b" : 
-                              selectedRoom.type === 'group' ? "2px solid rgba(13,60,252,0.2)" : "none",
                     }}
                   />
                 </div>
@@ -1154,20 +1196,20 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                   <div style={{ 
                     fontWeight: 600, 
                     fontSize: "15px", 
-                    color: "#0D3CFC", 
+                    color: "#ffffff", 
                     fontFamily: FONT_FAMILY,
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
                   }}>
                     {getRoomName(selectedRoom)}
-                    {selectedRoom.type === 'broadcast' && <span style={{ fontSize: "10px", color: "#22c55e", fontWeight: 400 }}>Broadcast</span>}
-                    {selectedRoom.type === 'announcement' && <span style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 400 }}>Pengumuman</span>}
-                    {selectedRoom.type === 'group' && <span style={{ fontSize: "10px", color: "#666", fontWeight: 400 }}>👥 {getRoomMemberCount(selectedRoom)} anggota</span>}
+                    {selectedRoom.type === 'broadcast' && <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>Broadcast</span>}
+                    {selectedRoom.type === 'announcement' && <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>Pengumuman</span>}
+                    {selectedRoom.type === 'group' && <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>👥 {getRoomMemberCount(selectedRoom)} anggota</span>}
                   </div>
                   <div style={{ 
                     fontSize: "11px", 
-                    color: "#666", 
+                    color: "rgba(255,255,255,0.7)", 
                     fontFamily: FONT_FAMILY,
                     display: "flex",
                     alignItems: "center",
@@ -1176,37 +1218,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                     {selectedRoom.type === 'group' && (
                       <>
                         <span>{getActiveMembers(selectedRoom).length} aktif</span>
-                        <span style={{ color: "#ddd" }}>•</span>
+                        <span style={{ color: "rgba(255,255,255,0.3)" }}>•</span>
                       </>
                     )}
                     <span>{getRoomStatus(selectedRoom)}</span>
                   </div>
                 </div>
-                {selectedRoom.type === 'individual' && (
-                  <button
-                    onClick={() => {
-                      const otherId = selectedRoom.participants.find(id => id !== user?.uid);
-                      const otherUser = users.find(u => u.id === otherId);
-                      if (otherUser) {
-                        setProfileUser(otherUser);
-                        setShowUserProfile(true);
-                      }
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#0D3CFC",
-                      cursor: "pointer",
-                      padding: "4px",
-                    }}
-                  >
-                    <InfoIcon size={20} />
-                  </button>
-                )}
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Messages - White */}
             <div 
               ref={chatContainerRef}
               style={{
@@ -1216,6 +1237,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 display: "flex",
                 flexDirection: "column",
                 gap: "6px",
+                backgroundColor: "#ffffff",
               }}
             >
               {messages.length === 0 ? (
@@ -1240,15 +1262,14 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                           maxWidth: "85%",
                           padding: "10px 20px",
                           borderRadius: "12px",
-                          backgroundColor: isBroadcast ? "rgba(34,197,94,0.10)" : "rgba(245,158,11,0.10)",
-                          color: isBroadcast ? "#065f46" : "#92400e",
+                          backgroundColor: "#f0f2f5",
+                          color: "#333",
                           fontSize: "14px",
                           fontFamily: FONT_FAMILY,
                           textAlign: "center",
-                          border: isBroadcast ? "1px solid rgba(34,197,94,0.2)" : "1px solid rgba(245,158,11,0.2)",
                         }}
                       >
-                        <div style={{ fontSize: "11px", fontWeight: 600, marginBottom: "4px" }}>
+                        <div style={{ fontSize: "11px", fontWeight: 600, marginBottom: "4px", color: "#0D3CFC" }}>
                           📢 {label}
                         </div>
                         <div>{msg.text}</div>
@@ -1280,21 +1301,14 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                             borderRadius: "50%",
                             objectFit: "cover",
                             flexShrink: 0,
+                            cursor: "pointer",
                           }}
                           onClick={() => {
                             const targetUser = users.find(u => u.name === msg.senderName || u.email === msg.senderName);
                             if (targetUser) {
-                              setProfileUser(targetUser);
-                              setShowUserProfile(true);
+                              setViewingUser(targetUser);
+                              setBioText(targetUser.bio || "");
                             }
-                          }}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            flexShrink: 0,
-                            cursor: "pointer",
                           }}
                         />
                       )}
@@ -1302,13 +1316,11 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         style={{
                           padding: "10px 16px",
                           borderRadius: "14px",
-                          backgroundColor: isMine ? "#0D3CFC" : "#ffffff",
+                          backgroundColor: isMine ? "#0D3CFC" : "#f0f2f5",
                           color: isMine ? "#ffffff" : "#000000",
                           fontSize: "14px",
                           fontFamily: FONT_FAMILY,
                           wordBreak: "break-word",
-                          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                          border: !isMine ? "1px solid #e8e8e8" : "none",
                           maxWidth: "100%",
                         }}
                       >
@@ -1324,8 +1336,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                           onClick={() => {
                             const targetUser = users.find(u => u.name === msg.senderName || u.email === msg.senderName);
                             if (targetUser) {
-                              setProfileUser(targetUser);
-                              setShowUserProfile(true);
+                              setViewingUser(targetUser);
+                              setBioText(targetUser.bio || "");
                             }
                           }}
                           >
@@ -1373,7 +1385,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Input - White */}
             <div style={{
               padding: "12px 24px",
               borderTop: "1px solid #e8e8e8",
@@ -1443,47 +1455,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             fontSize: "16px",
             fontFamily: FONT_FAMILY,
             gap: "12px",
+            backgroundColor: "#ffffff",
           }}>
             <div style={{ fontSize: "60px" }}>💬</div>
             <div>Pilih chat atau mulai percakapan baru</div>
-            <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-              <button
-                onClick={() => setShowStartChat(true)}
-                style={{
-                  padding: "8px 20px",
-                  backgroundColor: "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <UserAddIcon size={14} /> Chat Baru
-              </button>
-              <button
-                onClick={() => setShowCreateGroup(true)}
-                style={{
-                  padding: "8px 20px",
-                  backgroundColor: "transparent",
-                  color: "#0D3CFC",
-                  border: "1px solid #0D3CFC",
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <GroupIcon size={14} /> Buat Grup
-              </button>
-            </div>
           </div>
         )}
       </div>
 
-      {/* Start Chat Modal */}
-      {showStartChat && (
+      {/* View User Profile - Inline */}
+      {viewingUser && (
         <div style={{
           position: "fixed",
           top: 0,
@@ -1498,7 +1479,313 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           backdropFilter: "blur(4px)",
         }}>
           <div style={{
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
+            borderRadius: "16px",
+            padding: "32px",
+            maxWidth: "400px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            textAlign: "center",
+          }}>
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <img
+                src={getUserPhoto(viewingUser.email, viewingUser.photoURL)}
+                alt={viewingUser.name}
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "3px solid #0D3CFC",
+                }}
+              />
+              {viewingUser.online && (
+                <div style={{
+                  position: "absolute",
+                  bottom: 4,
+                  right: 4,
+                  width: "16px",
+                  height: "16px",
+                  borderRadius: "50%",
+                  backgroundColor: "#22c55e",
+                  border: "2px solid #fff",
+                }} />
+              )}
+            </div>
+            <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginTop: "16px", marginBottom: "4px" }}>
+              {viewingUser.name}
+              {viewingUser.email === ADMIN_EMAIL && <InstagramVerifiedBadge size={14} />}
+            </h3>
+            <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "4px" }}>
+              {viewingUser.email}
+            </div>
+            <div style={{ fontSize: "13px", color: viewingUser.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
+              {viewingUser.online ? 'Online' : 'Offline'}
+            </div>
+            
+            {/* Bio Section */}
+            <div style={{ marginBottom: "12px" }}>
+              {viewingUser.id === user.uid ? (
+                editingBio ? (
+                  <div>
+                    <textarea
+                      value={bioText}
+                      onChange={(e) => setBioText(e.target.value)}
+                      placeholder="Tulis bio..."
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        border: "2px solid #0D3CFC",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontFamily: FONT_FAMILY,
+                        outline: "none",
+                        minHeight: "60px",
+                        resize: "vertical",
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "8px", marginTop: "8px", justifyContent: "center" }}>
+                      <button
+                        onClick={updateBio}
+                        disabled={!bioText.trim()}
+                        style={{
+                          padding: "6px 16px",
+                          backgroundColor: bioText.trim() ? "#0D3CFC" : "#ccc",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          cursor: bioText.trim() ? "pointer" : "not-allowed",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Simpan
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingBio(false);
+                          setBioText(viewingUser.bio || "");
+                        }}
+                        style={{
+                          padding: "6px 16px",
+                          backgroundColor: "transparent",
+                          color: "#666",
+                          border: "1px solid #ccc",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: "14px", color: "#333", fontFamily: FONT_FAMILY, padding: "8px", backgroundColor: "#f8f9ff", borderRadius: "8px", minHeight: "40px" }}>
+                      {viewingUser.bio || "Belum ada bio"}
+                    </div>
+                    {viewingUser.id === user.uid && (
+                      <button
+                        onClick={() => setEditingBio(true)}
+                        style={{
+                          marginTop: "6px",
+                          padding: "4px 12px",
+                          backgroundColor: "transparent",
+                          color: "#0D3CFC",
+                          border: "1px solid #0D3CFC",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Edit Bio
+                      </button>
+                    )}
+                  </div>
+                )
+              ) : (
+                <div style={{ fontSize: "14px", color: "#333", fontFamily: FONT_FAMILY, padding: "8px", backgroundColor: "#f8f9ff", borderRadius: "8px", minHeight: "40px" }}>
+                  {viewingUser.bio || "Belum ada bio"}
+                </div>
+              )}
+            </div>
+            
+            {viewingUser.joinedAt && (
+              <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
+                Bergabung {formatDate(viewingUser.joinedAt)}
+              </div>
+            )}
+            <div style={{ marginTop: "20px", display: "flex", gap: "8px", justifyContent: "center" }}>
+              {viewingUser.id !== user.uid && (
+                <button
+                  onClick={() => {
+                    const existingRoom = rooms.find(r => 
+                      r.type === 'individual' && 
+                      r.participants.includes(viewingUser.id) && 
+                      r.participants.includes(user.uid)
+                    );
+                    if (existingRoom) {
+                      setSelectedRoom(existingRoom);
+                    } else {
+                      createIndividualChat(viewingUser.id);
+                    }
+                    setViewingUser(null);
+                  }}
+                  style={{
+                    padding: "8px 24px",
+                    backgroundColor: "#0D3CFC",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  💬 Chat
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setViewingUser(null);
+                  setEditingBio(false);
+                }}
+                style={{
+                  padding: "8px 24px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Group Members - Inline */}
+      {viewingRoom && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          backdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            borderRadius: "16px",
+            padding: "32px",
+            maxWidth: "400px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                👥 Anggota Grup ({viewingRoom.participants.length})
+              </h3>
+              <button
+                onClick={() => setViewingRoom(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            {viewingRoom.bio && (
+              <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "12px", padding: "8px", backgroundColor: "#f8f9ff", borderRadius: "8px" }}>
+                {viewingRoom.bio}
+              </div>
+            )}
+            
+            <div>
+              {viewingRoom.participants.map(id => {
+                const member = users.find(u => u.id === id);
+                if (!member) return null;
+                return (
+                  <div
+                    key={id}
+                    onClick={() => {
+                      setViewingRoom(null);
+                      setViewingUser(member);
+                      setBioText(member.bio || "");
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                      borderRadius: "6px",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f4ff"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  >
+                    <img
+                      src={getUserPhoto(member.email, member.photoURL)}
+                      alt={member.name}
+                      style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 500, fontSize: "14px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
+                        {member.name}
+                        {member.id === user.uid && <span style={{ fontSize: "10px", color: "#0D3CFC" }}>(Anda)</span>}
+                        {member.email === ADMIN_EMAIL && <InstagramVerifiedBadge size={10} />}
+                      </div>
+                      <div style={{ fontSize: "12px", color: member.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+                        {member.online ? 'Online' : 'Offline'}
+                        {member.bio && ` • ${member.bio}`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Chat Modal - Inline */}
+      {showNewChat && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          backdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
             borderRadius: "16px",
             padding: "32px",
             maxWidth: "460px",
@@ -1509,10 +1796,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                <UserAddIcon size={20} /> Chat Baru
+                Chat Baru
               </h3>
               <button
-                onClick={() => setShowStartChat(false)}
+                onClick={() => setShowNewChat(false)}
                 style={{
                   background: "none",
                   border: "none",
@@ -1538,10 +1825,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 {users.filter(u => u.id !== user.uid).map((u) => (
                   <div
                     key={u.id}
-                    onClick={() => {
-                      setSelectedUser(u);
-                      createIndividualChat(u.id);
-                    }}
+                    onClick={() => createIndividualChat(u.id)}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -1562,7 +1846,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                     <div>
                       <div style={{ fontWeight: 500, fontSize: "14px", fontFamily: FONT_FAMILY }}>{u.name}</div>
                       <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
-                        {u.online ? '🟢 Online' : '⚪ Offline'}
+                        {u.online ? 'Online' : 'Offline'}
                       </div>
                     </div>
                   </div>
@@ -1578,7 +1862,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       )}
 
-      {/* Create Group Modal */}
+      {/* Create Group Modal - Inline */}
       {showCreateGroup && (
         <div style={{
           position: "fixed",
@@ -1594,7 +1878,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           backdropFilter: "blur(4px)",
         }}>
           <div style={{
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
             borderRadius: "16px",
             padding: "32px",
             maxWidth: "460px",
@@ -1605,7 +1889,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                <GroupIcon size={20} /> Buat Grup
+                Buat Grup
               </h3>
               <button
                 onClick={() => setShowCreateGroup(false)}
@@ -1729,8 +2013,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       )}
 
-      {/* Broadcast Modal */}
-      {showBroadcastModal && (
+      {/* Broadcast Modal - Admin Only */}
+      {showBroadcast && isAdmin && (
         <div style={{
           position: "fixed",
           top: 0,
@@ -1745,7 +2029,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           backdropFilter: "blur(4px)",
         }}>
           <div style={{
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
             borderRadius: "16px",
             padding: "32px",
             maxWidth: "460px",
@@ -1754,10 +2038,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                📢 Kirim Broadcast
+                Kirim Broadcast
               </h3>
               <button
-                onClick={() => setShowBroadcastModal(false)}
+                onClick={() => setShowBroadcast(false)}
                 style={{
                   background: "none",
                   border: "none",
@@ -1797,7 +2081,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             </div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button
-                onClick={() => setShowBroadcastModal(false)}
+                onClick={() => setShowBroadcast(false)}
                 style={{
                   padding: "8px 20px",
                   backgroundColor: "transparent",
@@ -1833,8 +2117,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       )}
 
-      {/* Announcement Modal */}
-      {showAnnouncementModal && (
+      {/* Announcement Modal - Admin Only */}
+      {showAnnouncement && isAdmin && (
         <div style={{
           position: "fixed",
           top: 0,
@@ -1849,7 +2133,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           backdropFilter: "blur(4px)",
         }}>
           <div style={{
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
             borderRadius: "16px",
             padding: "32px",
             maxWidth: "460px",
@@ -1858,10 +2142,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-                📢 Kirim Pengumuman
+                Kirim Pengumuman
               </h3>
               <button
-                onClick={() => setShowAnnouncementModal(false)}
+                onClick={() => setShowAnnouncement(false)}
                 style={{
                   background: "none",
                   border: "none",
@@ -1901,7 +2185,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             </div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button
-                onClick={() => setShowAnnouncementModal(false)}
+                onClick={() => setShowAnnouncement(false)}
                 style={{
                   padding: "8px 20px",
                   backgroundColor: "transparent",
@@ -1931,124 +2215,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 }}
               >
                 Kirim Pengumuman
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* User Profile Modal */}
-      {showUserProfile && profileUser && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(0,0,0,0.5)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000,
-          backdropFilter: "blur(4px)",
-        }}>
-          <div style={{
-            backgroundColor: "#fff",
-            borderRadius: "16px",
-            padding: "32px",
-            maxWidth: "400px",
-            width: "90%",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            textAlign: "center",
-          }}>
-            <div style={{ position: "relative", display: "inline-block" }}>
-              <img
-                src={getUserPhoto(profileUser.email, profileUser.photoURL)}
-                alt={profileUser.name}
-                style={{
-                  width: "100px",
-                  height: "100px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "3px solid #0D3CFC",
-                }}
-              />
-              {profileUser.online && (
-                <div style={{
-                  position: "absolute",
-                  bottom: 4,
-                  right: 4,
-                  width: "16px",
-                  height: "16px",
-                  borderRadius: "50%",
-                  backgroundColor: "#22c55e",
-                  border: "2px solid #fff",
-                }} />
-              )}
-            </div>
-            <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginTop: "16px", marginBottom: "4px" }}>
-              {profileUser.name}
-            </h3>
-            <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "4px" }}>
-              {profileUser.email}
-            </div>
-            <div style={{ fontSize: "13px", color: profileUser.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
-              {profileUser.online ? '🟢 Online' : '⚪ Offline'}
-            </div>
-            {profileUser.bio && (
-              <div style={{ fontSize: "14px", color: "#333", fontFamily: FONT_FAMILY, marginBottom: "8px", padding: "8px", backgroundColor: "#f8f9ff", borderRadius: "8px" }}>
-                {profileUser.bio}
-              </div>
-            )}
-            {profileUser.joinedAt && (
-              <div style={{ fontSize: "12px", color: "#999", fontFamily: FONT_FAMILY }}>
-                Bergabung {formatDate(profileUser.joinedAt)}
-              </div>
-            )}
-            <div style={{ marginTop: "20px" }}>
-              <button
-                onClick={() => {
-                  const existingRoom = rooms.find(r => 
-                    r.type === 'individual' && 
-                    r.participants.includes(profileUser.id) && 
-                    r.participants.includes(user.uid)
-                  );
-                  if (existingRoom) {
-                    setSelectedRoom(existingRoom);
-                  } else {
-                    createIndividualChat(profileUser.id);
-                  }
-                  setShowUserProfile(false);
-                }}
-                style={{
-                  padding: "8px 24px",
-                  backgroundColor: "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                💬 Chat
-              </button>
-              <button
-                onClick={() => setShowUserProfile(false)}
-                style={{
-                  padding: "8px 24px",
-                  backgroundColor: "transparent",
-                  color: "#666",
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  marginLeft: "8px",
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Tutup
               </button>
             </div>
           </div>
