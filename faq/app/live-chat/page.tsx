@@ -293,6 +293,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const [selectedUserInfo, setSelectedUserInfo] = useState<User | null>(null);
   const [groupName, setGroupName] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showBroadcastList, setShowBroadcastList] = useState(false);
+  const [broadcastMessages, setBroadcastMessages] = useState<Message[]>([]);
+  const [showAnnouncementList, setShowAnnouncementList] = useState(false);
+  const [announcementMessages, setAnnouncementMessages] = useState<Message[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -312,22 +316,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const formatTimeAgo = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    
-    if (minutes < 1) return "Baru saja";
-    if (minutes < 60) return `${minutes}m`;
-    if (hours < 24) return `${hours}j`;
-    if (days < 7) return `${days}h`;
-    return formatDate(timestamp);
   };
 
   const scrollToBottom = () => {
@@ -420,7 +408,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 readBy: arrayUnion(user.uid)
               });
             }
-            // Update unread count
             await updateDoc(doc(db, "chats", selectedChat.id), {
               unreadCount: 0
             });
@@ -434,6 +421,46 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
     
     return () => unsubscribe();
   }, [db, selectedChat, isMounted]);
+
+  // Load broadcast messages for admin
+  useEffect(() => {
+    if (!db || !isAdmin || !isMounted) return;
+    const broadcastChat = chats.find(c => c.type === 'broadcast');
+    if (broadcastChat) {
+      const q = query(
+        collection(db, "chats", broadcastChat.id, "messages"),
+        orderBy("timestamp", "desc")
+      );
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const msgList: Message[] = [];
+        snapshot.forEach((doc) => {
+          msgList.push({ id: doc.id, ...doc.data() } as Message);
+        });
+        setBroadcastMessages(msgList);
+      });
+      return () => unsubscribe();
+    }
+  }, [db, isAdmin, chats, isMounted]);
+
+  // Load announcement messages for admin
+  useEffect(() => {
+    if (!db || !isAdmin || !isMounted) return;
+    const announcementChat = chats.find(c => c.type === 'announcement');
+    if (announcementChat) {
+      const q = query(
+        collection(db, "chats", announcementChat.id, "messages"),
+        orderBy("timestamp", "desc")
+      );
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const msgList: Message[] = [];
+        snapshot.forEach((doc) => {
+          msgList.push({ id: doc.id, ...doc.data() } as Message);
+        });
+        setAnnouncementMessages(msgList);
+      });
+      return () => unsubscribe();
+    }
+  }, [db, isAdmin, chats, isMounted]);
 
   // Auto-select chat
   useEffect(() => {
@@ -654,6 +681,26 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim()) return;
     try {
+      // Kirim ke broadcast chat
+      const broadcastChat = chats.find(c => c.type === 'broadcast');
+      if (broadcastChat) {
+        await addDoc(collection(db, "chats", broadcastChat.id, "messages"), {
+          senderId: user.uid,
+          senderName: AGENT_NAME,
+          senderPhoto: AGENT_PHOTO,
+          text: `📢 ${broadcastText.trim()}`,
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: []
+        });
+        await updateDoc(doc(db, "chats", broadcastChat.id), {
+          lastMessage: `📢 ${broadcastText.trim()}`,
+          lastMessageTime: serverTimestamp(),
+          unreadCount: increment(1)
+        });
+      }
+      
+      // Kirim ke semua user chat
       const userChats = chats.filter(c => c.type === 'user' || c.type === 'group');
       for (const chat of userChats) {
         await addDoc(collection(db, "chats", chat.id, "messages"), {
@@ -681,6 +728,26 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const sendAnnouncement = async () => {
     if (!db || !user || !announcementText.trim()) return;
     try {
+      // Kirim ke announcement chat
+      const announcementChat = chats.find(c => c.type === 'announcement');
+      if (announcementChat) {
+        await addDoc(collection(db, "chats", announcementChat.id, "messages"), {
+          senderId: user.uid,
+          senderName: AGENT_NAME,
+          senderPhoto: AGENT_PHOTO,
+          text: `📢 ${announcementText.trim()}`,
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: []
+        });
+        await updateDoc(doc(db, "chats", announcementChat.id), {
+          lastMessage: `📢 ${announcementText.trim()}`,
+          lastMessageTime: serverTimestamp(),
+          unreadCount: increment(1)
+        });
+      }
+      
+      // Kirim ke semua user chat
       const userChats = chats.filter(c => c.type === 'user' || c.type === 'group');
       for (const chat of userChats) {
         await addDoc(collection(db, "chats", chat.id, "messages"), {
@@ -1435,6 +1502,48 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             📢 Pengumuman
           </button>
           <button
+            onClick={() => setShowBroadcastList(!showBroadcastList)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "5px 12px",
+              backgroundColor: showBroadcastList ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.12)",
+              color: "#ffffff",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: "6px",
+              fontSize: "11px",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showBroadcastList ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.12)"}
+          >
+            📋 Broadcast
+          </button>
+          <button
+            onClick={() => setShowAnnouncementList(!showAnnouncementList)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "5px 12px",
+              backgroundColor: showAnnouncementList ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.12)",
+              color: "#ffffff",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: "6px",
+              fontSize: "11px",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showAnnouncementList ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.12)"}
+          >
+            📋 Pengumuman
+          </button>
+          <button
             onClick={handleLogout}
             style={{
               display: "flex",
@@ -1530,7 +1639,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       📢 Broadcast
                     </div>
                     <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                      Channel resmi
+                      {chat.lastMessage || "Channel resmi"}
                     </div>
                   </div>
                 </div>
@@ -1566,7 +1675,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       📢 Pengumuman
                     </div>
                     <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY }}>
-                      Channel resmi
+                      {chat.lastMessage || "Channel resmi"}
                     </div>
                   </div>
                 </div>
@@ -1649,7 +1758,8 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               );
             })}
 
-            {chats.filter(c => c.type !== 'broadcast' && c.type !== 'announcement').length === 0 && (
+            {chats.filter(c => c.type !== 'broadcast' && c.type !== 'announcement').length === 0 && 
+             chats.filter(c => c.type === 'broadcast' || c.type === 'announcement').length === 0 && (
               <div style={{ padding: "30px 20px", textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "12px", fontFamily: FONT_FAMILY }}>
                 Tidak ada chat
               </div>
@@ -1967,6 +2077,170 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
           )}
         </div>
       </div>
+
+      {/* Broadcast List Modal */}
+      {showBroadcastList && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          backdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px",
+            maxWidth: "500px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                📢 Daftar Broadcast
+              </h3>
+              <button
+                onClick={() => setShowBroadcastList(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {broadcastMessages.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#999", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                Belum ada broadcast
+              </div>
+            ) : (
+              broadcastMessages.map((msg, idx) => (
+                <div key={idx} style={{
+                  padding: "12px",
+                  borderBottom: "1px solid #e8e8e8",
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  <div style={{ fontSize: "13px", color: "#333" }}>{msg.text}</div>
+                  <div style={{ fontSize: "11px", color: "#999", marginTop: "4px" }}>
+                    {formatTime(msg.timestamp)} • {msg.readBy?.length || 0} dibaca
+                  </div>
+                </div>
+              ))
+            )}
+            <button
+              onClick={() => setShowBroadcastList(false)}
+              style={{
+                marginTop: "16px",
+                padding: "8px 24px",
+                backgroundColor: "#0D3CFC",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                width: "100%",
+              }}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Announcement List Modal */}
+      {showAnnouncementList && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          backdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px",
+            maxWidth: "500px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                📢 Daftar Pengumuman
+              </h3>
+              <button
+                onClick={() => setShowAnnouncementList(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {announcementMessages.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#999", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                Belum ada pengumuman
+              </div>
+            ) : (
+              announcementMessages.map((msg, idx) => (
+                <div key={idx} style={{
+                  padding: "12px",
+                  borderBottom: "1px solid #e8e8e8",
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  <div style={{ fontSize: "13px", color: "#333" }}>{msg.text}</div>
+                  <div style={{ fontSize: "11px", color: "#999", marginTop: "4px" }}>
+                    {formatTime(msg.timestamp)} • {msg.readBy?.length || 0} dibaca
+                  </div>
+                </div>
+              ))
+            )}
+            <button
+              onClick={() => setShowAnnouncementList(false)}
+              style={{
+                marginTop: "16px",
+                padding: "8px 24px",
+                backgroundColor: "#0D3CFC",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                width: "100%",
+              }}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add User Modal */}
       {showAddUserModal && (
@@ -2365,6 +2639,50 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 ✕
               </button>
             </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                Pilih User (opsional - kosongkan untuk semua)
+              </label>
+              <div style={{
+                maxHeight: "150px",
+                overflowY: "auto",
+                border: "1px solid #e8e8e8",
+                borderRadius: "8px",
+                padding: "8px",
+              }}>
+                {users.filter(u => u.id !== user.uid).map((u) => (
+                  <label key={u.id} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "13px",
+                    borderRadius: "4px",
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(u.id)}
+                      onChange={() => {
+                        if (selectedUsers.includes(u.id)) {
+                          setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                        } else {
+                          setSelectedUsers([...selectedUsers, u.id]);
+                        }
+                      }}
+                      style={{ accentColor: "#0D3CFC" }}
+                    />
+                    <img
+                      src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                      alt={u.email}
+                      style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    <span>{u.displayName || u.email || "User"}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             <div style={{ marginBottom: "16px" }}>
               <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
                 Pesan Broadcast
@@ -2465,6 +2783,50 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               >
                 ✕
               </button>
+            </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                Pilih User (opsional - kosongkan untuk semua)
+              </label>
+              <div style={{
+                maxHeight: "150px",
+                overflowY: "auto",
+                border: "1px solid #e8e8e8",
+                borderRadius: "8px",
+                padding: "8px",
+              }}>
+                {users.filter(u => u.id !== user.uid).map((u) => (
+                  <label key={u.id} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "13px",
+                    borderRadius: "4px",
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(u.id)}
+                      onChange={() => {
+                        if (selectedUsers.includes(u.id)) {
+                          setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                        } else {
+                          setSelectedUsers([...selectedUsers, u.id]);
+                        }
+                      }}
+                      style={{ accentColor: "#0D3CFC" }}
+                    />
+                    <img
+                      src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                      alt={u.email}
+                      style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    <span>{u.displayName || u.email || "User"}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div style={{ marginBottom: "16px" }}>
               <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
