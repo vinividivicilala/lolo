@@ -43,10 +43,6 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const AGENT_PHOTO = "/images/ai.jpg";
-const ANNOUNCEMENT_NAME = "Menuru Pengumuman";
-const ANNOUNCEMENT_PHOTO = "/images/ai.jpg";
-const BROADCAST_NAME = "Menuru Broadcast";
-const BROADCAST_PHOTO = "/images/ai.jpg";
 
 // SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
@@ -229,7 +225,7 @@ interface Ticket {
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
-  type?: 'agent' | 'announcement' | 'broadcast';
+  type?: 'agent' | 'broadcast' | 'announcement';
 }
 
 interface ChatMessage {
@@ -240,7 +236,7 @@ interface ChatMessage {
   text: string;
   timestamp: any;
   read: boolean;
-  type?: 'agent' | 'announcement' | 'broadcast';
+  type?: 'agent' | 'broadcast' | 'announcement';
 }
 
 // ===== LIVE CHAT AGENT COMPONENT =====
@@ -254,10 +250,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
-  const [announcementText, setAnnouncementText] = useState("");
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [broadcastText, setBroadcastText] = useState("");
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [announcementText, setAnnouncementText] = useState("");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -321,84 +317,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, isMounted]);
 
-  // Create Announcement ticket for user
-  const createAnnouncementTicket = async (userId: string, userName: string, userEmail: string, userPhoto?: string) => {
-    if (!db) return;
-    try {
-      const existing = tickets.find(t => t.type === 'announcement' && t.userId === userId);
-      if (existing) return existing;
-      
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: userId,
-        userName: userName,
-        userEmail: userEmail,
-        userPhoto: userPhoto || "",
-        status: "active",
-        topic: "Pengumuman Menuru",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        type: 'announcement',
-        agentId: user?.uid || "",
-        agentName: AGENT_NAME,
-      });
-      
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: "announcement",
-        senderName: ANNOUNCEMENT_NAME,
-        senderPhoto: ANNOUNCEMENT_PHOTO,
-        text: "📢 Selamat datang di Pengumuman Menuru! Anda akan menerima informasi terbaru dari kami.",
-        timestamp: serverTimestamp(),
-        read: false,
-        type: 'announcement',
-      });
-      
-      return ticketRef;
-    } catch (error) {
-      console.error("Error creating announcement ticket:", error);
-      return null;
-    }
-  };
-
-  // Create Broadcast ticket for user
-  const createBroadcastTicket = async (userId: string, userName: string, userEmail: string, userPhoto?: string) => {
-    if (!db) return;
-    try {
-      const existing = tickets.find(t => t.type === 'broadcast' && t.userId === userId);
-      if (existing) return existing;
-      
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: userId,
-        userName: userName,
-        userEmail: userEmail,
-        userPhoto: userPhoto || "",
-        status: "active",
-        topic: "Broadcast Menuru",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        type: 'broadcast',
-        agentId: user?.uid || "",
-        agentName: AGENT_NAME,
-      });
-      
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: "broadcast",
-        senderName: BROADCAST_NAME,
-        senderPhoto: BROADCAST_PHOTO,
-        text: "📢 Selamat datang di Broadcast Menuru! Anda akan menerima informasi terbaru dari kami.",
-        timestamp: serverTimestamp(),
-        read: false,
-        type: 'broadcast',
-      });
-      
-      return ticketRef;
-    } catch (error) {
-      console.error("Error creating broadcast ticket:", error);
-      return null;
-    }
-  };
-
   // Tickets
   useEffect(() => {
     if (!db || !user || !isMounted) return;
@@ -409,7 +327,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     } else {
       q = query(
         collection(db, "livechat_tickets"),
-        where("userId", "in", [user.uid]),
+        where("userId", "==", user.uid),
         orderBy("createdAt", "desc")
       );
     }
@@ -433,21 +351,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
     return () => unsubscribe();
   }, [db, user, isAdmin, selectedTicket, isMounted]);
-
-  // Auto create announcement and broadcast for user
-  useEffect(() => {
-    if (!db || !user || isAdmin || !isMounted || tickets.length === 0) return;
-    
-    const hasAnnouncement = tickets.some(t => t.type === 'announcement');
-    const hasBroadcast = tickets.some(t => t.type === 'broadcast');
-    
-    if (!hasAnnouncement) {
-      createAnnouncementTicket(user.uid, user.displayName || user.email || "User", user.email, user.photoURL);
-    }
-    if (!hasBroadcast) {
-      createBroadcastTicket(user.uid, user.displayName || user.email || "User", user.email, user.photoURL);
-    }
-  }, [tickets, user, isAdmin, isMounted]);
 
   // Messages
   useEffect(() => {
@@ -484,15 +387,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   useEffect(() => {
     if (!user || isAdmin || !isMounted || tickets.length === 0) return;
     
-    const announcementTicket = tickets.find(t => t.type === 'announcement');
-    const broadcastTicket = tickets.find(t => t.type === 'broadcast');
     const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-    
-    if (announcementTicket && !selectedTicket) {
-      setSelectedTicket(announcementTicket);
-    } else if (broadcastTicket && !selectedTicket) {
-      setSelectedTicket(broadcastTicket);
-    } else if (activeTicket && !selectedTicket) {
+    if (activeTicket) {
       setSelectedTicket(activeTicket);
     } else if (tickets.length > 0 && !selectedTicket) {
       setSelectedTicket(tickets[0]);
@@ -589,7 +485,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
-        type: selectedTicket.type || 'agent',
+        type: 'agent',
       });
       
       await updateDoc(ticketRef, {
@@ -635,45 +531,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // Send Announcement from agent
-  const sendAnnouncement = async () => {
-    if (!db || !user || !announcementText.trim()) return;
-    try {
-      // Cari semua ticket announcement
-      const announcementTickets = tickets.filter(t => t.type === 'announcement');
-      for (const ticket of announcementTickets) {
-        await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
-          senderId: "announcement",
-          senderName: ANNOUNCEMENT_NAME,
-          senderPhoto: ANNOUNCEMENT_PHOTO,
-          text: `📢 ${announcementText.trim()}`,
-          timestamp: serverTimestamp(),
-          read: false,
-          type: 'announcement',
-        });
-        await updateDoc(doc(db, "livechat_tickets", ticket.id), {
-          lastMessage: `📢 ${announcementText.trim()}`,
-          lastMessageTime: serverTimestamp(),
-        });
-      }
-      setAnnouncementText("");
-      setShowAnnouncementModal(false);
-    } catch (error) {
-      console.error("Error sending announcement:", error);
-    }
-  };
-
-  // Send Broadcast from agent
+  // Send Broadcast - dikirim sebagai pesan biasa ke semua user
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim()) return;
     try {
-      // Cari semua ticket broadcast
-      const broadcastTickets = tickets.filter(t => t.type === 'broadcast');
-      for (const ticket of broadcastTickets) {
+      // Kirim broadcast ke semua user yang memiliki ticket aktif
+      const userTickets = tickets.filter(t => t.status === 'active' || t.status === 'waiting');
+      for (const ticket of userTickets) {
         await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
           senderId: "broadcast",
-          senderName: BROADCAST_NAME,
-          senderPhoto: BROADCAST_PHOTO,
+          senderName: "📢 Broadcast",
+          senderPhoto: "/images/ai.jpg",
           text: `📢 ${broadcastText.trim()}`,
           timestamp: serverTimestamp(),
           read: false,
@@ -688,6 +556,34 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setShowBroadcastModal(false);
     } catch (error) {
       console.error("Error sending broadcast:", error);
+    }
+  };
+
+  // Send Announcement - dikirim sebagai pesan biasa ke semua user
+  const sendAnnouncement = async () => {
+    if (!db || !user || !announcementText.trim()) return;
+    try {
+      // Kirim pengumuman ke semua user yang memiliki ticket
+      const allTickets = tickets.filter(t => t.status !== 'resolved' && t.status !== 'closed');
+      for (const ticket of allTickets) {
+        await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
+          senderId: "announcement",
+          senderName: "📢 Pengumuman",
+          senderPhoto: "/images/ai.jpg",
+          text: `📢 ${announcementText.trim()}`,
+          timestamp: serverTimestamp(),
+          read: false,
+          type: 'announcement',
+        });
+        await updateDoc(doc(db, "livechat_tickets", ticket.id), {
+          lastMessage: `📢 ${announcementText.trim()}`,
+          lastMessageTime: serverTimestamp(),
+        });
+      }
+      setAnnouncementText("");
+      setShowAnnouncementModal(false);
+    } catch (error) {
+      console.error("Error sending announcement:", error);
     }
   };
 
@@ -712,11 +608,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  const filteredTickets = tickets.filter(ticket => 
-    ticket.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    ticket.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    ticket.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTickets = tickets.filter(ticket => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      ticket.userName.toLowerCase().includes(query) ||
+      ticket.topic.toLowerCase().includes(query) ||
+      ticket.userEmail.toLowerCase().includes(query)
+    );
+  });
 
   const isMessageRead = (msg: ChatMessage) => {
     if (msg.senderId === user?.uid) return true;
@@ -1060,24 +960,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           <div style={{ flex: 1, overflowY: "auto" }}>
             {filteredTickets.map((ticket) => {
               const isActive = selectedTicket?.id === ticket.id;
-              const isAnnouncement = ticket.type === 'announcement';
-              const isBroadcast = ticket.type === 'broadcast';
               const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
                                   ticket.status === 'active' ? 'Aktif' : 'Selesai';
-              
-              let icon = "";
-              let borderColor = "none";
-              let photo = "";
-              if (isAnnouncement) { 
-                icon = "📢 "; 
-                borderColor = "#f59e0b"; 
-                photo = ANNOUNCEMENT_PHOTO;
-              }
-              if (isBroadcast) { 
-                icon = "📢 "; 
-                borderColor = "#22c55e"; 
-                photo = BROADCAST_PHOTO;
-              }
               
               return (
                 <div
@@ -1103,14 +987,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <img
-                      src={isAnnouncement ? ANNOUNCEMENT_PHOTO : isBroadcast ? BROADCAST_PHOTO : getUserPhoto(ticket.userEmail, ticket.userPhoto)}
+                      src={getUserPhoto(ticket.userEmail, ticket.userPhoto)}
                       alt={ticket.userName}
                       style={{
                         width: "36px",
                         height: "36px",
                         borderRadius: "50%",
                         objectFit: "cover",
-                        border: isAnnouncement ? "2px solid #f59e0b" : isBroadcast ? "2px solid #22c55e" : "none",
                       }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -1123,9 +1006,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         alignItems: "center",
                         gap: "4px",
                       }}>
-                        {icon}{ticket.userName}
-                        {isAnnouncement && <span style={{ fontSize: "8px", color: "#f59e0b" }}>Pengumuman</span>}
-                        {isBroadcast && <span style={{ fontSize: "8px", color: "#22c55e" }}>Broadcast</span>}
+                        {ticket.userName}
                       </div>
                       <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
                         {ticket.topic}
@@ -1213,23 +1094,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <img
-                    src={selectedTicket.type === 'announcement' ? ANNOUNCEMENT_PHOTO : selectedTicket.type === 'broadcast' ? BROADCAST_PHOTO : getUserPhoto(selectedTicket.userEmail, selectedTicket.userPhoto)}
+                    src={getUserPhoto(selectedTicket.userEmail, selectedTicket.userPhoto)}
                     alt={selectedTicket.userName}
                     style={{
                       width: "34px",
                       height: "34px",
                       borderRadius: "50%",
                       objectFit: "cover",
-                      border: selectedTicket.type === 'announcement' ? "2px solid #f59e0b" : selectedTicket.type === 'broadcast' ? "2px solid #22c55e" : "none",
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
-                      {selectedTicket.type === 'announcement' && "📢 "}
-                      {selectedTicket.type === 'broadcast' && "📢 "}
+                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      {selectedTicket.type === 'announcement' && <span style={{ fontSize: "9px", color: "#f59e0b", fontWeight: 400 }}>Pengumuman</span>}
-                      {selectedTicket.type === 'broadcast' && <span style={{ fontSize: "9px", color: "#22c55e", fontWeight: 400 }}>Broadcast</span>}
                     </div>
                     <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.topic} • {generateTicketId(selectedTicket.createdAt)}
@@ -1251,7 +1127,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     {selectedTicket.status === 'waiting' ? 'Menunggu' : 
                      selectedTicket.status === 'active' ? 'Aktif' : 'Selesai'}
                   </span>
-                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && selectedTicket.type === 'agent' && (
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
@@ -1289,16 +1165,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 ) : (
                   messages.map((msg, idx) => {
                     const isMine = msg.senderId === user?.uid;
-                    const isAnnouncement = msg.type === 'announcement';
                     const isBroadcast = msg.type === 'broadcast';
+                    const isAnnouncement = msg.type === 'announcement';
                     const isRead = isMessageRead(msg);
                     
-                    if (isAnnouncement || isBroadcast) {
-                      const name = isAnnouncement ? ANNOUNCEMENT_NAME : BROADCAST_NAME;
-                      const photo = isAnnouncement ? ANNOUNCEMENT_PHOTO : BROADCAST_PHOTO;
-                      const border = isAnnouncement ? "2px solid #f59e0b" : "2px solid #22c55e";
-                      const color = isAnnouncement ? "#f59e0b" : "#22c55e";
-                      const label = isAnnouncement ? "Pengumuman" : "Broadcast";
+                    if (isBroadcast || isAnnouncement) {
+                      const label = isBroadcast ? "Broadcast" : "Pengumuman";
+                      const color = isBroadcast ? "#22c55e" : "#f59e0b";
+                      const bgColor = isBroadcast ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)";
+                      const borderColor = isBroadcast ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.2)";
                       
                       return (
                         <div
@@ -1306,59 +1181,36 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           style={{
                             alignSelf: "flex-start",
                             maxWidth: "80%",
-                            display: "flex",
-                            alignItems: "flex-end",
-                            gap: "6px",
+                            padding: "8px 16px",
+                            borderRadius: "12px",
+                            backgroundColor: bgColor,
+                            color: "#000",
+                            fontSize: "13px",
+                            fontFamily: FONT_FAMILY,
+                            border: `1px solid ${borderColor}`,
                           }}
                         >
-                          <img
-                            src={photo}
-                            alt={name}
-                            style={{
-                              width: "26px",
-                              height: "26px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                              flexShrink: 0,
-                              border: border,
-                            }}
-                          />
-                          <div
-                            style={{
-                              padding: "8px 14px",
-                              borderRadius: "12px",
-                              backgroundColor: "#ffffff",
-                              color: "#000",
-                              fontSize: "13px",
-                              fontFamily: FONT_FAMILY,
-                              wordBreak: "break-word",
-                              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                              border: "1px solid #e8e8e8",
-                              maxWidth: "100%",
-                            }}
-                          >
-                            <div style={{ 
-                              fontSize: "9px", 
-                              fontWeight: 500, 
-                              color: color, 
-                              marginBottom: "2px", 
-                              fontFamily: FONT_FAMILY,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}>
-                              📢 {name} • {label}
-                            </div>
-                            <div>{msg.text}</div>
-                            <div style={{ 
-                              fontSize: "9px", 
-                              color: "#999", 
-                              marginTop: "4px",
-                              textAlign: "right",
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              {formatTime(msg.timestamp)}
-                            </div>
+                          <div style={{ 
+                            fontSize: "10px", 
+                            fontWeight: 600, 
+                            color: color, 
+                            marginBottom: "4px", 
+                            fontFamily: FONT_FAMILY,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}>
+                            📢 {label}
+                          </div>
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "9px", 
+                            color: "#999", 
+                            marginTop: "4px",
+                            textAlign: "right",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {formatTime(msg.timestamp)}
                           </div>
                         </div>
                       );
@@ -1457,7 +1309,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 <div ref={messagesEndRef} />
               </div>
 
-              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && selectedTicket.type === 'agent' && (
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
                   padding: "10px 20px",
                   borderTop: "1px solid #e8e8e8",
@@ -1539,11 +1391,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   // ===== ADMIN VIEW =====
-  const waitingTickets = tickets.filter(t => t.status === 'waiting' && t.type === 'agent');
-  const activeTickets = tickets.filter(t => t.status === 'active' && t.type === 'agent');
-  const resolvedTickets = tickets.filter(t => (t.status === 'resolved' || t.status === 'closed') && t.type === 'agent');
-  const announcementTickets = tickets.filter(t => t.type === 'announcement');
-  const broadcastTickets = tickets.filter(t => t.type === 'broadcast');
+  const waitingTickets = tickets.filter(t => t.status === 'waiting');
+  const activeTickets = tickets.filter(t => t.status === 'active');
+  const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
@@ -1610,27 +1460,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <button
-            onClick={() => setShowAnnouncementModal(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              padding: "5px 14px",
-              backgroundColor: "rgba(245,158,11,0.15)",
-              color: "#f59e0b",
-              border: "1px solid rgba(245,158,11,0.2)",
-              borderRadius: "6px",
-              fontSize: "11px",
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)"}
-          >
-            📢 Pengumuman
-          </button>
-          <button
             onClick={() => setShowBroadcastModal(true)}
             style={{
               display: "flex",
@@ -1650,6 +1479,27 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(34,197,94,0.15)"}
           >
             📢 Broadcast
+          </button>
+          <button
+            onClick={() => setShowAnnouncementModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              padding: "5px 14px",
+              backgroundColor: "rgba(245,158,11,0.15)",
+              color: "#f59e0b",
+              border: "1px solid rgba(245,158,11,0.2)",
+              borderRadius: "6px",
+              fontSize: "11px",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.25)"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)"}
+          >
+            📢 Pengumuman
           </button>
           <button
             onClick={handleLogout}
@@ -1718,152 +1568,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
 
           <div style={{ flex: 1, overflowY: "auto" }}>
-            {/* Announcement */}
-            {announcementTickets.length > 0 && (
-              <div>
-                <div style={{
-                  padding: "4px 16px",
-                  backgroundColor: "rgba(245,158,11,0.15)",
-                  fontWeight: 600,
-                  fontSize: "9px",
-                  color: "#f59e0b",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontFamily: FONT_FAMILY,
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                  letterSpacing: "0.5px",
-                }}>
-                  📢 Pengumuman ({announcementTickets.length})
-                </div>
-                {announcementTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
-                    style={{
-                      padding: "6px 16px",
-                      cursor: "pointer",
-                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.15)" : "transparent",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedTicket?.id !== ticket.id) {
-                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedTicket?.id !== ticket.id) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <img
-                        src={ANNOUNCEMENT_PHOTO}
-                        alt="Pengumuman"
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "2px solid #f59e0b",
-                        }}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 500, fontSize: "12px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                          📢 {ticket.userName}
-                        </div>
-                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
-                          {ticket.topic}
-                        </div>
-                        {ticket.lastMessage && (
-                          <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.4)", marginTop: "1px", fontFamily: FONT_FAMILY }}>
-                            {ticket.lastMessage.substring(0, 25)}{ticket.lastMessage.length > 25 ? "..." : ""}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Broadcast */}
-            {broadcastTickets.length > 0 && (
-              <div>
-                <div style={{
-                  padding: "4px 16px",
-                  backgroundColor: "rgba(34,197,94,0.12)",
-                  fontWeight: 600,
-                  fontSize: "9px",
-                  color: "#22c55e",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontFamily: FONT_FAMILY,
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                  letterSpacing: "0.5px",
-                }}>
-                  📢 Broadcast ({broadcastTickets.length})
-                </div>
-                {broadcastTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
-                    style={{
-                      padding: "6px 16px",
-                      cursor: "pointer",
-                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.15)" : "transparent",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedTicket?.id !== ticket.id) {
-                        e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedTicket?.id !== ticket.id) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <img
-                        src={BROADCAST_PHOTO}
-                        alt="Broadcast"
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "2px solid #22c55e",
-                        }}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 500, fontSize: "12px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                          📢 {ticket.userName}
-                        </div>
-                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
-                          {ticket.topic}
-                        </div>
-                        {ticket.lastMessage && (
-                          <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.4)", marginTop: "1px", fontFamily: FONT_FAMILY }}>
-                            {ticket.lastMessage.substring(0, 25)}{ticket.lastMessage.length > 25 ? "..." : ""}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Waiting */}
             {waitingTickets.length > 0 && (
               <div>
@@ -2106,8 +1810,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               </div>
             )}
 
-            {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && 
-             announcementTickets.length === 0 && broadcastTickets.length === 0 && (
+            {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
               <div style={{ padding: "40px 20px", textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "12px", fontFamily: FONT_FAMILY }}>
                 Tidak ada chat masuk
               </div>
@@ -2130,23 +1833,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <img
-                    src={selectedTicket.type === 'announcement' ? ANNOUNCEMENT_PHOTO : selectedTicket.type === 'broadcast' ? BROADCAST_PHOTO : getUserPhoto(selectedTicket.userEmail, selectedTicket.userPhoto)}
+                    src={getUserPhoto(selectedTicket.userEmail, selectedTicket.userPhoto)}
                     alt={selectedTicket.userName}
                     style={{
                       width: "34px",
                       height: "34px",
                       borderRadius: "50%",
                       objectFit: "cover",
-                      border: selectedTicket.type === 'announcement' ? "2px solid #f59e0b" : selectedTicket.type === 'broadcast' ? "2px solid #22c55e" : "none",
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}>
-                      {selectedTicket.type === 'announcement' && "📢 "}
-                      {selectedTicket.type === 'broadcast' && "📢 "}
+                    <div style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      {selectedTicket.type === 'announcement' && <span style={{ fontSize: "9px", color: "#f59e0b", fontWeight: 400 }}>Pengumuman</span>}
-                      {selectedTicket.type === 'broadcast' && <span style={{ fontSize: "9px", color: "#22c55e", fontWeight: 400 }}>Broadcast</span>}
                     </div>
                     <div style={{ fontSize: "10px", color: "#666", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.topic} • {generateTicketId(selectedTicket.createdAt)}
@@ -2168,7 +1866,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     {selectedTicket.status === 'waiting' ? 'Menunggu' : 
                      selectedTicket.status === 'active' ? 'Aktif' : 'Selesai'}
                   </span>
-                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && selectedTicket.type === 'agent' && (
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
@@ -2206,16 +1904,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 ) : (
                   messages.map((msg, idx) => {
                     const isMine = msg.senderId === user?.uid;
-                    const isAnnouncement = msg.type === 'announcement';
                     const isBroadcast = msg.type === 'broadcast';
+                    const isAnnouncement = msg.type === 'announcement';
                     const isRead = isMessageRead(msg);
                     
-                    if (isAnnouncement || isBroadcast) {
-                      const name = isAnnouncement ? ANNOUNCEMENT_NAME : BROADCAST_NAME;
-                      const photo = isAnnouncement ? ANNOUNCEMENT_PHOTO : BROADCAST_PHOTO;
-                      const border = isAnnouncement ? "2px solid #f59e0b" : "2px solid #22c55e";
-                      const color = isAnnouncement ? "#f59e0b" : "#22c55e";
-                      const label = isAnnouncement ? "Pengumuman" : "Broadcast";
+                    if (isBroadcast || isAnnouncement) {
+                      const label = isBroadcast ? "Broadcast" : "Pengumuman";
+                      const color = isBroadcast ? "#22c55e" : "#f59e0b";
+                      const bgColor = isBroadcast ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)";
+                      const borderColor = isBroadcast ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.2)";
                       
                       return (
                         <div
@@ -2223,59 +1920,36 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           style={{
                             alignSelf: "flex-start",
                             maxWidth: "80%",
-                            display: "flex",
-                            alignItems: "flex-end",
-                            gap: "6px",
+                            padding: "8px 16px",
+                            borderRadius: "12px",
+                            backgroundColor: bgColor,
+                            color: "#000",
+                            fontSize: "13px",
+                            fontFamily: FONT_FAMILY,
+                            border: `1px solid ${borderColor}`,
                           }}
                         >
-                          <img
-                            src={photo}
-                            alt={name}
-                            style={{
-                              width: "26px",
-                              height: "26px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                              flexShrink: 0,
-                              border: border,
-                            }}
-                          />
-                          <div
-                            style={{
-                              padding: "8px 14px",
-                              borderRadius: "12px",
-                              backgroundColor: "#ffffff",
-                              color: "#000",
-                              fontSize: "13px",
-                              fontFamily: FONT_FAMILY,
-                              wordBreak: "break-word",
-                              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                              border: "1px solid #e8e8e8",
-                              maxWidth: "100%",
-                            }}
-                          >
-                            <div style={{ 
-                              fontSize: "9px", 
-                              fontWeight: 500, 
-                              color: color, 
-                              marginBottom: "2px", 
-                              fontFamily: FONT_FAMILY,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}>
-                              📢 {name} • {label}
-                            </div>
-                            <div>{msg.text}</div>
-                            <div style={{ 
-                              fontSize: "9px", 
-                              color: "#999", 
-                              marginTop: "4px",
-                              textAlign: "right",
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              {formatTime(msg.timestamp)}
-                            </div>
+                          <div style={{ 
+                            fontSize: "10px", 
+                            fontWeight: 600, 
+                            color: color, 
+                            marginBottom: "4px", 
+                            fontFamily: FONT_FAMILY,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}>
+                            📢 {label}
+                          </div>
+                          <div>{msg.text}</div>
+                          <div style={{ 
+                            fontSize: "9px", 
+                            color: "#999", 
+                            marginTop: "4px",
+                            textAlign: "right",
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {formatTime(msg.timestamp)}
                           </div>
                         </div>
                       );
@@ -2374,7 +2048,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 <div ref={messagesEndRef} />
               </div>
 
-              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && selectedTicket.type === 'agent' && (
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
                   padding: "10px 20px",
                   borderTop: "1px solid #e8e8e8",
@@ -2453,110 +2127,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         </div>
       </div>
 
-      {/* Announcement Modal */}
-      {showAnnouncementModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(0,0,0,0.5)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000,
-          backdropFilter: "blur(4px)",
-        }}>
-          <div style={{
-            backgroundColor: "#fff",
-            borderRadius: "16px",
-            padding: "28px",
-            maxWidth: "460px",
-            width: "90%",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#f59e0b", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                📢 Kirim Pengumuman
-              </h3>
-              <button
-                onClick={() => setShowAnnouncementModal(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "22px",
-                  cursor: "pointer",
-                  color: "#999",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
-                Pesan Pengumuman
-              </label>
-              <textarea
-                value={announcementText}
-                onChange={(e) => setAnnouncementText(e.target.value)}
-                placeholder="Tulis pengumuman..."
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "2px solid #e8e8e8",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: FONT_FAMILY,
-                  outline: "none",
-                  minHeight: "80px",
-                  resize: "vertical",
-                }}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#f59e0b"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
-              />
-              <div style={{ fontSize: "11px", color: "#999", marginTop: "4px", fontFamily: FONT_FAMILY }}>
-                Pesan akan dikirim ke semua user melalui akun Menuru Pengumuman
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-              <button
-                onClick={() => setShowAnnouncementModal(false)}
-                style={{
-                  padding: "6px 18px",
-                  backgroundColor: "transparent",
-                  color: "#666",
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={sendAnnouncement}
-                disabled={!announcementText.trim()}
-                style={{
-                  padding: "6px 18px",
-                  backgroundColor: announcementText.trim() ? "#f59e0b" : "#ccc",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  cursor: announcementText.trim() ? "pointer" : "not-allowed",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Kirim Pengumuman
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Broadcast Modal */}
       {showBroadcastModal && (
         <div style={{
@@ -2620,7 +2190,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
               />
               <div style={{ fontSize: "11px", color: "#999", marginTop: "4px", fontFamily: FONT_FAMILY }}>
-                Pesan akan dikirim ke semua user melalui akun Menuru Broadcast
+                Pesan akan dikirim ke semua user yang sedang aktif
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
@@ -2655,6 +2225,110 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 }}
               >
                 Kirim Broadcast
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Announcement Modal */}
+      {showAnnouncementModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          backdropFilter: "blur(4px)",
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px",
+            maxWidth: "460px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#f59e0b", fontFamily: FONT_FAMILY, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                📢 Kirim Pengumuman
+              </h3>
+              <button
+                onClick={() => setShowAnnouncementModal(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                Pesan Pengumuman
+              </label>
+              <textarea
+                value={announcementText}
+                onChange={(e) => setAnnouncementText(e.target.value)}
+                placeholder="Tulis pengumuman..."
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                  minHeight: "80px",
+                  resize: "vertical",
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#f59e0b"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+              />
+              <div style={{ fontSize: "11px", color: "#999", marginTop: "4px", fontFamily: FONT_FAMILY }}>
+                Pesan akan dikirim ke semua user
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setShowAnnouncementModal(false)}
+                style={{
+                  padding: "6px 18px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={sendAnnouncement}
+                disabled={!announcementText.trim()}
+                style={{
+                  padding: "6px 18px",
+                  backgroundColor: announcementText.trim() ? "#f59e0b" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: announcementText.trim() ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Kirim Pengumuman
               </button>
             </div>
           </div>
