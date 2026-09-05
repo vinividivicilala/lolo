@@ -137,13 +137,6 @@ const AddIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const InfoIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 // Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram"] },
@@ -415,23 +408,26 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       });
       setMessages(msgList);
       
-      // Mark as read
-      if (selectedChat.type !== 'broadcast' && selectedChat.type !== 'announcement') {
-        const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
-        if (unread.length > 0) {
-          unread.forEach(async (msg) => {
-            const msgRef = doc(db, "chats", selectedChat.id, "messages", msg.id);
-            await updateDoc(msgRef, { 
-              read: true,
-              readBy: arrayUnion(user.uid)
+      // Mark as read - wrapped in async function
+      const markAsRead = async () => {
+        if (selectedChat.type !== 'broadcast' && selectedChat.type !== 'announcement') {
+          const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
+          if (unread.length > 0) {
+            for (const msg of unread) {
+              const msgRef = doc(db, "chats", selectedChat.id, "messages", msg.id);
+              await updateDoc(msgRef, { 
+                read: true,
+                readBy: arrayUnion(user.uid)
+              });
+            }
+            // Update unread count
+            await updateDoc(doc(db, "chats", selectedChat.id), {
+              unreadCount: 0
             });
-          });
-          // Update unread count
-          await updateDoc(doc(db, "chats", selectedChat.id), {
-            unreadCount: 0
-          });
+          }
         }
-      }
+      };
+      markAsRead();
       
       setTimeout(scrollToBottom, 100);
     });
@@ -443,7 +439,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   useEffect(() => {
     if (!user || isAdmin || !isMounted || chats.length === 0) return;
     
-    // Find broadcast or announcement
     const broadcast = chats.find(c => c.type === 'broadcast');
     const announcement = chats.find(c => c.type === 'announcement');
     const activeChat = chats.find(c => c.unreadCount > 0);
@@ -659,7 +654,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim()) return;
     try {
-      // Send to all users via their individual chats
       const userChats = chats.filter(c => c.type === 'user' || c.type === 'group');
       for (const chat of userChats) {
         await addDoc(collection(db, "chats", chat.id, "messages"), {
