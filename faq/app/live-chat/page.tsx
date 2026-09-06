@@ -10,10 +10,12 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
+// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -30,7 +32,9 @@ let auth = null;
 let db = null;
 
 if (typeof window !== "undefined") {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
   auth = getAuth(app);
   db = getFirestore(app);
 }
@@ -40,58 +44,36 @@ const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const AGENT_PHOTO = "/images/ai.jpg";
 
-// SVG Icons - Clean Minimal
-const SendIcon = ({ size = 18 }: { size?: number }) => (
+// SVG Icons
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const SearchIcon = ({ size = 18 }: { size?: number }) => (
+const SouthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 17L17 7M17 17V7H7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const CheckIcon = ({ size = 14 }: { size?: number }) => (
+const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 17L7 7M7 17V7H17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const DoubleCheckIcon = ({ size = 14 }: { size?: number }) => (
+const ShieldCheck = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L7 17L2 12M22 6L11 17L7 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const UserPlus = ({ size = 18 }: { size?: number }) => (
+const ShoppingBag = ({ size = 20, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M20 8V14M17 11H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const UsersIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M23 21V19C22.735 17.112 21.664 15.465 20 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 3.5C17.669 4.466 18.735 6.112 19 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const PlusIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const XIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M6 6H18L19 18H5L6 6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -103,3218 +85,48 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const ArrowRight = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-interface Chat {
-  id: string;
-  type: 'user' | 'group' | 'broadcast' | 'announcement';
-  name: string;
-  photo?: string;
-  members?: string[];
-  adminId?: string;
-  createdAt: any;
-  lastMessage?: string;
-  lastMessageTime?: any;
-  unreadCount: number;
-  typing: { userId: string; userName: string }[];
-  bio?: string;
-  memberCount?: number;
-}
-
-interface Message {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderPhoto?: string;
-  text: string;
-  timestamp: any;
-  read: boolean;
-  readBy?: string[];
-}
-
-interface User {
-  id: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-  online: boolean;
-  lastSeen: any;
-  bio?: string;
-  status?: string;
-  joinedAt: any;
-}
-
-const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [messageText, setMessageText] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [groupName, setGroupName] = useState("");
-  const [groupBio, setGroupBio] = useState("");
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [editingChat, setEditingChat] = useState<Chat | null>(null);
-  const [showGroupPanel, setShowGroupPanel] = useState(false);
-  const [showUserProfile, setShowUserProfile] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  };
-
-  const getUserPhoto = (email?: string, photoURL?: string) => {
-    if (photoURL) return photoURL;
-    if (email) {
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(email)}&background=0D3CFC&color=fff&size=128&bold=true`;
-    }
-    return `https://ui-avatars.com/api/?name=User&background=0D3CFC&color=fff&size=128&bold=true`;
-  };
-
-  // Load users
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const userList: User[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        userList.push({ id: doc.id, ...data } as User);
-      });
-      setUsers(userList);
-    });
-    return () => unsubscribe();
-  }, [db, isMounted]);
-
-  // Load chats
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-
-    let q;
-    if (isAdmin) {
-      q = query(collection(db, "chats"), orderBy("lastMessageTime", "desc"));
-    } else {
-      q = query(
-        collection(db, "chats"),
-        where("members", "array-contains", user.uid),
-        orderBy("lastMessageTime", "desc")
-      );
-    }
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chatList: Chat[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        chatList.push({ id: doc.id, ...data } as Chat);
-      });
-      setChats(chatList);
-
-      // Update unread counts
-      const counts: Record<string, number> = {};
-      chatList.forEach(chat => {
-        if (chat.unreadCount > 0) {
-          counts[chat.id] = chat.unreadCount;
-        }
-      });
-      setUnreadCounts(counts);
-
-      if (selectedChat) {
-        const stillExists = chatList.some(c => c.id === selectedChat.id);
-        if (!stillExists) {
-          setSelectedChat(null);
-          setMessages([]);
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, [db, user, isAdmin, selectedChat, isMounted]);
-
-  // Load messages for selected chat
-  useEffect(() => {
-    if (!db || !selectedChat || !isMounted) return;
-
-    const q = query(
-      collection(db, "chats", selectedChat.id, "messages"),
-      orderBy("timestamp", "asc")
-    );
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const msgList: Message[] = [];
-      snapshot.forEach((doc) => {
-        msgList.push({ id: doc.id, ...doc.data() } as Message);
-      });
-      setMessages(msgList);
-
-      // Mark messages as read
-      if (selectedChat.type !== 'broadcast' && selectedChat.type !== 'announcement') {
-        const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
-        if (unread.length > 0) {
-          for (const msg of unread) {
-            const msgRef = doc(db, "chats", selectedChat.id, "messages", msg.id);
-            await updateDoc(msgRef, {
-              read: true,
-              readBy: arrayUnion(user.uid)
-            });
-          }
-          await updateDoc(doc(db, "chats", selectedChat.id), {
-            unreadCount: 0
-          });
-        }
-      }
-
-      setTimeout(scrollToBottom, 100);
-    });
-
-    return () => unsubscribe();
-  }, [db, selectedChat, isMounted]);
-
-  // Auto-select chat
-  useEffect(() => {
-    if (!user || !isMounted || chats.length === 0) return;
-
-    const broadcast = chats.find(c => c.type === 'broadcast');
-    const announcement = chats.find(c => c.type === 'announcement');
-    const activeChat = chats.find(c => c.unreadCount > 0);
-
-    if (broadcast && !selectedChat) {
-      setSelectedChat(broadcast);
-    } else if (announcement && !selectedChat) {
-      setSelectedChat(announcement);
-    } else if (activeChat && !selectedChat) {
-      setSelectedChat(activeChat);
-    } else if (chats.length > 0 && !selectedChat) {
-      setSelectedChat(chats[0]);
-    } else if (chats.length === 0) {
-      setSelectedChat(null);
-      setMessages([]);
-    }
-  }, [chats, user, isMounted, selectedChat]);
-
-  // Create broadcast and announcement for user
-  useEffect(() => {
-    if (!db || !user || isAdmin || !isMounted || chats.length === 0) return;
-
-    const hasBroadcast = chats.some(c => c.type === 'broadcast');
-    const hasAnnouncement = chats.some(c => c.type === 'announcement');
-
-    if (!hasBroadcast) {
-      createBroadcastChat();
-    }
-    if (!hasAnnouncement) {
-      createAnnouncementChat();
-    }
-  }, [chats, user, isAdmin, isMounted]);
-
-  const createBroadcastChat = async () => {
-    if (!db || !user) return;
-    try {
-      const existing = chats.find(c => c.type === 'broadcast');
-      if (existing) return existing;
-
-      const chatRef = await addDoc(collection(db, "chats"), {
-        type: 'broadcast',
-        name: 'Broadcast',
-        photo: AGENT_PHOTO,
-        members: [user.uid],
-        adminId: user.uid,
-        createdAt: serverTimestamp(),
-        lastMessage: "Welcome to Broadcast Channel",
-        lastMessageTime: serverTimestamp(),
-        unreadCount: 0,
-        typing: [],
-        bio: "Official broadcast channel for updates"
-      });
-
-      await addDoc(collection(db, "chats", chatRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: AGENT_NAME,
-        senderPhoto: AGENT_PHOTO,
-        text: "Welcome to Broadcast! You'll receive important updates here.",
-        timestamp: serverTimestamp(),
-        read: false,
-        readBy: []
-      });
-
-      return chatRef;
-    } catch (error) {
-      console.error("Error creating broadcast chat:", error);
-      return null;
-    }
-  };
-
-  const createAnnouncementChat = async () => {
-    if (!db || !user) return;
-    try {
-      const existing = chats.find(c => c.type === 'announcement');
-      if (existing) return existing;
-
-      const chatRef = await addDoc(collection(db, "chats"), {
-        type: 'announcement',
-        name: 'Announcements',
-        photo: AGENT_PHOTO,
-        members: [user.uid],
-        adminId: user.uid,
-        createdAt: serverTimestamp(),
-        lastMessage: "Welcome to Announcements",
-        lastMessageTime: serverTimestamp(),
-        unreadCount: 0,
-        typing: [],
-        bio: "Official announcements channel"
-      });
-
-      await addDoc(collection(db, "chats", chatRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: AGENT_NAME,
-        senderPhoto: AGENT_PHOTO,
-        text: "Welcome to Announcements! Stay tuned for important updates.",
-        timestamp: serverTimestamp(),
-        read: false,
-        readBy: []
-      });
-
-      return chatRef;
-    } catch (error) {
-      console.error("Error creating announcement chat:", error);
-      return null;
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!db || !selectedChat || !messageText.trim() || !user) return;
-
-    try {
-      const chatRef = doc(db, "chats", selectedChat.id);
-
-      await addDoc(collection(db, "chats", selectedChat.id, "messages"), {
-        senderId: user.uid,
-        senderName: isAdmin ? AGENT_NAME : (user.displayName || user.email || "User"),
-        senderPhoto: isAdmin ? AGENT_PHOTO : (user.photoURL || ""),
-        text: messageText.trim(),
-        timestamp: serverTimestamp(),
-        read: false,
-        readBy: []
-      });
-
-      await updateDoc(chatRef, {
-        lastMessage: messageText.trim(),
-        lastMessageTime: serverTimestamp(),
-        unreadCount: increment(1)
-      });
-
-      setMessageText("");
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-
-  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setMessageText(value);
-    if (!selectedChat || !user || !db) return;
-
-    const chatRef = doc(db, "chats", selectedChat.id);
-    const typingList = selectedChat.typing || [];
-    const userTyping = typingList.find(t => t.userId === user.uid);
-
-    if (value.length > 0 && !userTyping) {
-      await updateDoc(chatRef, {
-        typing: arrayUnion({ userId: user.uid, userName: user.displayName || user.email || "User" })
-      });
-    } else if (value.length === 0 && userTyping) {
-      await updateDoc(chatRef, {
-        typing: typingList.filter(t => t.userId !== user.uid)
-      });
-    }
-
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => {
-      const currentChat = chats.find(c => c.id === selectedChat.id);
-      if (currentChat) {
-        await updateDoc(chatRef, {
-          typing: (currentChat.typing || []).filter(t => t.userId !== user.uid)
-        });
-      }
-    }, 3000);
-  };
-
-  const createGroup = async () => {
-    if (!db || !user || !groupName.trim() || selectedUsers.length === 0) return;
-
-    try {
-      const members = [user.uid, ...selectedUsers];
-      await addDoc(collection(db, "chats"), {
-        type: 'group',
-        name: groupName.trim(),
-        photo: "",
-        members: members,
-        adminId: user.uid,
-        createdAt: serverTimestamp(),
-        lastMessage: `Group "${groupName.trim()}" created`,
-        lastMessageTime: serverTimestamp(),
-        unreadCount: 0,
-        typing: [],
-        bio: groupBio.trim() || "Group chat",
-        memberCount: members.length
-      });
-
-      setGroupName("");
-      setGroupBio("");
-      setSelectedUsers([]);
-      setShowCreateGroup(false);
-    } catch (error) {
-      console.error("Error creating group:", error);
-    }
-  };
-
-  const addUsersToGroup = async () => {
-    if (!db || !editingChat || selectedUsers.length === 0) return;
-
-    try {
-      const chatRef = doc(db, "chats", editingChat.id);
-      await updateDoc(chatRef, {
-        members: arrayUnion(...selectedUsers),
-        memberCount: increment(selectedUsers.length)
-      });
-
-      setSelectedUsers([]);
-      setShowGroupPanel(false);
-    } catch (error) {
-      console.error("Error adding users:", error);
-    }
-  };
-
-  const updateGroupBio = async () => {
-    if (!db || !editingChat) return;
-
-    try {
-      const chatRef = doc(db, "chats", editingChat.id);
-      await updateDoc(chatRef, {
-        bio: editingChat.bio || "Group chat"
-      });
-    } catch (error) {
-      console.error("Error updating group bio:", error);
-    }
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        online: false,
-        lastSeen: serverTimestamp()
-      });
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
-  // Filter chats
-  const filteredChats = chats.filter(chat => {
-    if (!searchQuery || !searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase().trim();
-    return (chat.name || '').toLowerCase().includes(query);
-  });
-
-  // Get typing users
-  const getTypingUsers = (chat: Chat) => {
-    if (!chat.typing || chat.typing.length === 0) return null;
-    const names = chat.typing.map(t => t.userName);
-    if (names.length === 1) return `${names[0]} is typing...`;
-    if (names.length === 2) return `${names[0]} and ${names[1]} are typing...`;
-    return `${names.length} people are typing...`;
-  };
-
-  // Get online members count
-  const getOnlineMembers = (chat: Chat) => {
-    if (!chat.members) return 0;
-    return chat.members.filter(id => {
-      const u = users.find(user => user.id === id);
-      return u && u.online;
-    }).length;
-  };
-
-  // Get user info
-  const getUserInfo = (userId: string) => {
-    return users.find(u => u.id === userId);
-  };
-
-  // Get unread count
-  const getUnreadCount = (chatId: string) => {
-    return unreadCounts[chatId] || 0;
-  };
-
-  // Open user profile
-  const openUserProfile = (userId: string) => {
-    const userInfo = getUserInfo(userId);
-    if (userInfo) {
-      setSelectedUser(userInfo);
-      setShowUserProfile(true);
-      if (panelRef.current) {
-        gsap.fromTo(panelRef.current,
-          { x: '100%', opacity: 0 },
-          { x: '0%', opacity: 1, duration: 0.4, ease: 'power3.out' }
-        );
-      }
-    }
-  };
-
-  // Open group panel
-  const openGroupPanel = (chat: Chat) => {
-    setEditingChat(chat);
-    setShowGroupPanel(true);
-    if (panelRef.current) {
-      gsap.fromTo(panelRef.current,
-        { x: '100%', opacity: 0 },
-        { x: '0%', opacity: 1, duration: 0.4, ease: 'power3.out' }
-      );
-    }
-  };
-
-  // Close panel
-  const closePanel = () => {
-    if (panelRef.current) {
-      gsap.to(panelRef.current, {
-        x: '100%',
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power3.in',
-        onComplete: () => {
-          setShowUserProfile(false);
-          setShowGroupPanel(false);
-          setSelectedUser(null);
-          setEditingChat(null);
-        }
-      });
-    } else {
-      setShowUserProfile(false);
-      setShowGroupPanel(false);
-      setSelectedUser(null);
-      setEditingChat(null);
-    }
-  };
-
-  if (!isMounted) return <div style={{ minHeight: "100px" }} />;
-
-  if (!user) {
-    return (
-      <div style={{
-        maxWidth: "1400px",
-        margin: "40px auto",
-        padding: "80px 40px",
-        textAlign: "center",
-        backgroundColor: "#f8faff",
-        borderRadius: "24px",
-        border: "1px solid rgba(13,60,252,0.08)",
-      }}>
-        <div style={{
-          fontSize: "72px",
-          marginBottom: "24px",
-          fontWeight: 300,
-          color: "#0D3CFC",
-        }}>⌘</div>
-        <h2 style={{
-          fontSize: "32px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          marginBottom: "12px",
-        }}>
-          Live Chat
-        </h2>
-        <p style={{
-          fontSize: "16px",
-          color: "#666",
-          fontFamily: FONT_FAMILY,
-          marginBottom: "32px",
-        }}>
-          Please sign in to access live chat
-        </p>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <button
-            style={{
-              padding: "12px 40px",
-              backgroundColor: "#0D3CFC",
-              color: "#fff",
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "16px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-          >
-            Sign In
-          </button>
-        </Link>
-      </div>
-    );
-  }
-
-  // User View
-  if (!isAdmin) {
-    return (
-      <div style={{
-        maxWidth: "1400px",
-        margin: "40px auto",
-        height: "680px",
-        backgroundColor: "#ffffff",
-        borderRadius: "24px",
-        border: "1px solid rgba(13,60,252,0.08)",
-        overflow: "hidden",
-        display: "flex",
-        position: "relative",
-        boxShadow: "0 4px 24px rgba(13,60,252,0.06)",
-      }}>
-        {/* Sidebar */}
-        <div style={{
-          width: "340px",
-          backgroundColor: "#0D3CFC",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-        }}>
-          {/* Header */}
-          <div style={{
-            padding: "20px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  backgroundColor: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px solid rgba(255,255,255,0.2)",
-                }}
-                onClick={() => openUserProfile(user.uid)}
-              >
-                <img
-                  src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || "User")}&background=ffffff&color=0D3CFC&size=128&bold=true`}
-                  alt={user.displayName || "User"}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontWeight: 600,
-                  fontSize: "15px",
-                  color: "#ffffff",
-                  fontFamily: FONT_FAMILY,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}>
-                  {user.displayName || user.email || "User"}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: "#22c55e",
-                    display: "inline-block",
-                  }} />
-                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
-                    Online
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  padding: "6px 14px",
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.25)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)"}
-              >
-                <LogoutIcon size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Search */}
-          <div style={{
-            padding: "12px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              backgroundColor: "rgba(255,255,255,0.1)",
-              borderRadius: "10px",
-              padding: "8px 14px",
-            }}>
-              <SearchIcon size={16} color="rgba(255,255,255,0.5)" />
-              <input
-                type="text"
-                placeholder="Search chats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontFamily: FONT_FAMILY,
-                  placeholder: "rgba(255,255,255,0.4)",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div style={{
-            padding: "10px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            display: "flex",
-            gap: "8px",
-          }}>
-            <button
-              onClick={() => setShowCreateGroup(true)}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "6px",
-                padding: "8px 12px",
-                backgroundColor: "rgba(255,255,255,0.1)",
-                color: "#ffffff",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: 500,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.18)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-            >
-              <PlusIcon size={14} />
-              New Group
-            </button>
-          </div>
-
-          {/* Chat List */}
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {filteredChats.map((chat) => {
-              const isActive = selectedChat?.id === chat.id;
-              const unread = getUnreadCount(chat.id);
-              const onlineCount = getOnlineMembers(chat);
-              const typingText = getTypingUsers(chat);
-
-              return (
-                <div
-                  key={chat.id}
-                  onClick={() => setSelectedChat(chat)}
-                  style={{
-                    padding: "12px 20px",
-                    cursor: "pointer",
-                    backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div
-                      style={{
-                        width: "42px",
-                        height: "42px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: chat.type === 'group' ? 'pointer' : 'default',
-                        flexShrink: 0,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (chat.type === 'group') {
-                          openGroupPanel(chat);
-                        }
-                      }}
-                    >
-                      <img
-                        src={chat.photo || getUserPhoto(undefined, undefined)}
-                        alt={chat.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontWeight: isActive ? 600 : 500,
-                        fontSize: "14px",
-                        color: "#ffffff",
-                        fontFamily: FONT_FAMILY,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}>
-                        {chat.name}
-                        {chat.type === 'group' && (
-                          <span style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.4)",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            ({chat.memberCount || 0})
-                          </span>
-                        )}
-                      </div>
-                      <div style={{
-                        fontSize: "12px",
-                        color: "rgba(255,255,255,0.5)",
-                        fontFamily: FONT_FAMILY,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}>
-                        {typingText || chat.lastMessage || "Start chatting..."}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                        {chat.type === 'group' && onlineCount > 0 && (
-                          <span style={{
-                            fontSize: "10px",
-                            color: "#22c55e",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            ● {onlineCount} online
-                          </span>
-                        )}
-                        {unread > 0 && (
-                          <span style={{
-                            fontSize: "10px",
-                            backgroundColor: "#ffffff",
-                            color: "#0D3CFC",
-                            padding: "1px 10px",
-                            borderRadius: "12px",
-                            fontWeight: 600,
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {unread}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredChats.length === 0 && (
-              <div style={{
-                padding: "60px 20px",
-                textAlign: "center",
-                color: "rgba(255,255,255,0.3)",
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-              }}>
-                No chats yet
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f5f7fb" }}>
-          {selectedChat ? (
-            <>
-              {/* Chat Header */}
-              <div style={{
-                padding: "16px 24px",
-                backgroundColor: "#ffffff",
-                borderBottom: "1px solid #eef0f4",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexShrink: 0,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: 1 }}>
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      overflow: "hidden",
-                      backgroundColor: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: selectedChat.type === 'group' ? 'pointer' : 'default',
-                      border: "2px solid rgba(13,60,252,0.1)",
-                    }}
-                    onClick={() => {
-                      if (selectedChat.type === 'group') {
-                        openGroupPanel(selectedChat);
-                      }
-                    }}
-                  >
-                    <img
-                      src={selectedChat.photo || getUserPhoto(undefined, undefined)}
-                      alt={selectedChat.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <div style={{
-                      fontWeight: 600,
-                      fontSize: "15px",
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      {selectedChat.name}
-                      {selectedChat.type === 'group' && (
-                        <span style={{
-                          fontSize: "12px",
-                          color: "#999",
-                          marginLeft: "8px",
-                          fontWeight: 400,
-                        }}>
-                          ({getOnlineMembers(selectedChat)} online)
-                        </span>
-                      )}
-                    </div>
-                    {selectedChat.bio && (
-                      <div style={{
-                        fontSize: "12px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {selectedChat.bio}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {selectedChat.type === 'group' && (
-                  <button
-                    onClick={() => openGroupPanel(selectedChat)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "6px 16px",
-                      backgroundColor: "#0D3CFC",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                  >
-                    <UsersIcon size={14} />
-                    Manage
-                  </button>
-                )}
-              </div>
-
-              {/* Messages */}
-              <div
-                ref={chatContainerRef}
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "20px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}
-              >
-                {messages.length === 0 ? (
-                  <div style={{
-                    textAlign: "center",
-                    color: "#999",
-                    fontSize: "14px",
-                    padding: "60px 0",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    No messages yet
-                  </div>
-                ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user?.uid;
-                    const isRead = msg.read || false;
-
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "72%",
-                          display: "flex",
-                          alignItems: "flex-end",
-                          gap: "8px",
-                        }}
-                      >
-                        {!isMine && (
-                          <div
-                            style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              backgroundColor: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                              flexShrink: 0,
-                              border: "1px solid rgba(13,60,252,0.08)",
-                            }}
-                            onClick={() => openUserProfile(msg.senderId)}
-                          >
-                            <img
-                              src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
-                              alt={msg.senderName}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div
-                          style={{
-                            padding: "10px 16px",
-                            borderRadius: "16px",
-                            backgroundColor: isMine ? "#0D3CFC" : "#ffffff",
-                            color: isMine ? "#fff" : "#1a1a2e",
-                            fontSize: "14px",
-                            fontFamily: FONT_FAMILY,
-                            wordBreak: "break-word",
-                            boxShadow: isMine ? "none" : "0 2px 8px rgba(0,0,0,0.04)",
-                            border: isMine ? "none" : "1px solid #eef0f4",
-                            maxWidth: "100%",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {!isMine && (
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 600,
-                                color: "#0D3CFC",
-                                marginBottom: "4px",
-                                fontFamily: FONT_FAMILY,
-                                cursor: "pointer",
-                              }}
-                              onClick={() => openUserProfile(msg.senderId)}
-                            >
-                              {msg.senderName}
-                            </div>
-                          )}
-                          <div>{msg.text}</div>
-                          <div style={{
-                            fontSize: "10px",
-                            color: isMine ? "rgba(255,255,255,0.5)" : "#999",
-                            marginTop: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: "4px",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {formatTime(msg.timestamp)}
-                            {isMine && (
-                              isRead ? (
-                                <DoubleCheckIcon size={12} color="rgba(255,255,255,0.5)" />
-                              ) : (
-                                <CheckIcon size={12} color="rgba(255,255,255,0.3)" />
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                {getTypingUsers(selectedChat) && (
-                  <div style={{
-                    alignSelf: "flex-start",
-                    fontSize: "12px",
-                    color: "#666",
-                    padding: "4px 12px",
-                    fontFamily: FONT_FAMILY,
-                    fontStyle: "italic",
-                  }}>
-                    {getTypingUsers(selectedChat)}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <div style={{
-                padding: "12px 24px",
-                borderTop: "1px solid #eef0f4",
-                backgroundColor: "#ffffff",
-                display: "flex",
-                gap: "12px",
-                alignItems: "center",
-                flexShrink: 0,
-              }}>
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={handleTyping}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder="Type a message..."
-                  style={{
-                    flex: 1,
-                    padding: "10px 18px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: FONT_FAMILY,
-                    backgroundColor: "#f8f9fc",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!messageText.trim()}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px 20px",
-                    backgroundColor: messageText.trim() ? "#0D3CFC" : "#eef0f4",
-                    color: messageText.trim() ? "#fff" : "#999",
-                    border: "none",
-                    borderRadius: "12px",
-                    cursor: messageText.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    transition: "all 0.2s ease",
-                    gap: "8px",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (messageText.trim()) e.currentTarget.style.transform = "scale(1.02)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (messageText.trim()) e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  <SendIcon size={16} />
-                  Send
-                </button>
-              </div>
-            </>
-          ) : (
-            <div style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              color: "#999",
-              fontSize: "15px",
-              fontFamily: FONT_FAMILY,
-              gap: "12px",
-            }}>
-              <div style={{
-                fontSize: "72px",
-                fontWeight: 300,
-                color: "#0D3CFC",
-                opacity: 0.2,
-              }}>⌘</div>
-              <div style={{ color: "#666" }}>Select a chat to start messaging</div>
-            </div>
-          )}
-        </div>
-
-        {/* Slide Panel */}
-        {(showUserProfile || showGroupPanel) && (
-          <div
-            ref={panelRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: "400px",
-              height: "100%",
-              backgroundColor: "#ffffff",
-              boxShadow: "-8px 0 40px rgba(0,0,0,0.06)",
-              zIndex: 100,
-              overflowY: "auto",
-              transform: "translateX(100%)",
-              opacity: 0,
-            }}
-          >
-            <div style={{
-              padding: "20px 24px",
-              borderBottom: "1px solid #eef0f4",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              position: "sticky",
-              top: 0,
-              backgroundColor: "#ffffff",
-              zIndex: 10,
-            }}>
-              <h3 style={{
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                margin: 0,
-              }}>
-                {showUserProfile ? 'Profile' : 'Group Settings'}
-              </h3>
-              <button
-                onClick={closePanel}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#999",
-                  padding: "4px",
-                }}
-              >
-                <XIcon size={20} />
-              </button>
-            </div>
-
-            <div style={{ padding: "24px" }}>
-              {showUserProfile && selectedUser && (
-                <div>
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                  }}>
-                    <div
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        margin: "0 auto 16px",
-                        border: "4px solid #0D3CFC",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src={selectedUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.email || "User")}&background=0D3CFC&color=fff&size=128&bold=true`}
-                        alt={selectedUser.displayName || "User"}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                    <h3 style={{
-                      fontSize: "20px",
-                      fontWeight: 600,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0 0 4px",
-                    }}>
-                      {selectedUser.displayName || selectedUser.email || "User"}
-                    </h3>
-                    <p style={{
-                      fontSize: "14px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0 0 8px",
-                    }}>
-                      {selectedUser.email}
-                    </p>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "8px",
-                    }}>
-                      <span style={{
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        backgroundColor: selectedUser.online ? "#22c55e" : "#d1d5db",
-                        display: "inline-block",
-                      }} />
-                      <span style={{
-                        fontSize: "13px",
-                        color: selectedUser.online ? "#22c55e" : "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {selectedUser.online ? "Online" : "Offline"}
-                      </span>
-                    </div>
-                    {selectedUser.bio && (
-                      <p style={{
-                        fontSize: "14px",
-                        color: "#666",
-                        fontFamily: FONT_FAMILY,
-                        margin: "0 0 8px",
-                        backgroundColor: "#f5f7fb",
-                        padding: "12px 16px",
-                        borderRadius: "8px",
-                        width: "100%",
-                      }}>
-                        {selectedUser.bio}
-                      </p>
-                    )}
-                    {selectedUser.status && (
-                      <p style={{
-                        fontSize: "13px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                        margin: "0 0 8px",
-                      }}>
-                        Status: {selectedUser.status}
-                      </p>
-                    )}
-                    <p style={{
-                      fontSize: "12px",
-                      color: "#999",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0",
-                    }}>
-                      Joined {formatDate(selectedUser.joinedAt)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {showGroupPanel && editingChat && (
-                <div>
-                  {/* Group Name */}
-                  <div style={{ marginBottom: "20px" }}>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Group Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editingChat.name}
-                      onChange={(e) => setEditingChat({ ...editingChat, name: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "2px solid #eef0f4",
-                        borderRadius: "10px",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                        outline: "none",
-                        transition: "border-color 0.2s ease",
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                    />
-                  </div>
-
-                  {/* Group Bio */}
-                  <div style={{ marginBottom: "20px" }}>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Group Description
-                    </label>
-                    <input
-                      type="text"
-                      value={editingChat.bio || ""}
-                      onChange={(e) => setEditingChat({ ...editingChat, bio: e.target.value })}
-                      onBlur={updateGroupBio}
-                      placeholder="What's this group about?"
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "2px solid #eef0f4",
-                        borderRadius: "10px",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                        outline: "none",
-                        transition: "border-color 0.2s ease",
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                    />
-                  </div>
-
-                  {/* Members */}
-                  <div style={{ marginBottom: "20px" }}>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "8px",
-                    }}>
-                      <label style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        fontFamily: FONT_FAMILY,
-                        fontWeight: 500,
-                      }}>
-                        Members ({editingChat.members?.length || 0})
-                      </label>
-                    </div>
-                    <div style={{
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      border: "1px solid #eef0f4",
-                      borderRadius: "10px",
-                      padding: "4px",
-                    }}>
-                      {editingChat.members?.map((memberId) => {
-                        const member = getUserInfo(memberId);
-                        if (!member) return null;
-                        return (
-                          <div key={memberId} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 12px",
-                            borderRadius: "8px",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            transition: "background 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                          onClick={() => {
-                            closePanel();
-                            setTimeout(() => openUserProfile(memberId), 300);
-                          }}
-                          >
-                            <div
-                              style={{
-                                width: "32px",
-                                height: "32px",
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                backgroundColor: "#fff",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <img
-                                src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                                alt={member.email}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                }}
-                              />
-                            </div>
-                            <span style={{ flex: 1 }}>
-                              {member.displayName || member.email || "User"}
-                            </span>
-                            <span style={{
-                              fontSize: "10px",
-                              color: member.online ? "#22c55e" : "#999",
-                            }}>
-                              {member.online ? "Online" : "Offline"}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Add Members */}
-                  <div>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Add Members
-                    </label>
-                    <div style={{
-                      maxHeight: "150px",
-                      overflowY: "auto",
-                      border: "1px solid #eef0f4",
-                      borderRadius: "10px",
-                      padding: "4px",
-                    }}>
-                      {users.filter(u => u.id !== user.uid && !editingChat.members?.includes(u.id)).map((u) => (
-                        <label key={u.id} style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          fontSize: "13px",
-                          transition: "background 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedUsers.includes(u.id)}
-                            onChange={() => {
-                              if (selectedUsers.includes(u.id)) {
-                                setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                              } else {
-                                setSelectedUsers([...selectedUsers, u.id]);
-                              }
-                            }}
-                            style={{
-                              accentColor: "#0D3CFC",
-                              width: "16px",
-                              height: "16px",
-                              cursor: "pointer",
-                            }}
-                          />
-                          <div
-                            style={{
-                              width: "28px",
-                              height: "28px",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              backgroundColor: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            <img
-                              src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                              alt={u.email}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </div>
-                          <span>{u.displayName || u.email || "User"}</span>
-                        </label>
-                      ))}
-                      {users.filter(u => u.id !== user.uid && !editingChat.members?.includes(u.id)).length === 0 && (
-                        <div style={{
-                          padding: "16px",
-                          textAlign: "center",
-                          color: "#999",
-                          fontSize: "13px",
-                          fontFamily: FONT_FAMILY,
-                        }}>
-                          All users are in this group
-                        </div>
-                      )}
-                    </div>
-                    {selectedUsers.length > 0 && (
-                      <button
-                        onClick={addUsersToGroup}
-                        style={{
-                          marginTop: "12px",
-                          padding: "8px 24px",
-                          backgroundColor: "#0D3CFC",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "10px",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                      >
-                        Add {selectedUsers.length} member{selectedUsers.length > 1 ? 's' : ''}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Create Group Modal */}
-        {showCreateGroup && (
-          <div style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.4)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}>
-            <div style={{
-              backgroundColor: "#fff",
-              borderRadius: "20px",
-              padding: "32px",
-              maxWidth: "480px",
-              width: "90%",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.15)",
-            }}>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "24px",
-              }}>
-                <h3 style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  margin: 0,
-                }}>
-                  Create Group
-                </h3>
-                <button
-                  onClick={() => setShowCreateGroup(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                  }}
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Group Name
-                </label>
-                <input
-                  type="text"
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  placeholder="Enter group name..."
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-              </div>
-
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={groupBio}
-                  onChange={(e) => setGroupBio(e.target.value)}
-                  placeholder="What's this group about?"
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-              </div>
-
-              <div style={{ marginBottom: "20px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Select Members
-                </label>
-                <div style={{
-                  maxHeight: "160px",
-                  overflowY: "auto",
-                  border: "1px solid #eef0f4",
-                  borderRadius: "10px",
-                  padding: "4px",
-                }}>
-                  {users.filter(u => u.id !== user.uid).map((u) => (
-                    <label key={u.id} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "13px",
-                      transition: "background 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(u.id)}
-                        onChange={() => {
-                          if (selectedUsers.includes(u.id)) {
-                            setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                          } else {
-                            setSelectedUsers([...selectedUsers, u.id]);
-                          }
-                        }}
-                        style={{
-                          accentColor: "#0D3CFC",
-                          width: "16px",
-                          height: "16px",
-                          cursor: "pointer",
-                        }}
-                      />
-                      <div
-                        style={{
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          overflow: "hidden",
-                          backgroundColor: "#fff",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <img
-                          src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                          alt={u.email}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      </div>
-                      <span>{u.displayName || u.email || "User"}</span>
-                    </label>
-                  ))}
-                  {users.filter(u => u.id !== user.uid).length === 0 && (
-                    <div style={{
-                      padding: "16px",
-                      textAlign: "center",
-                      color: "#999",
-                      fontSize: "13px",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      No other users found
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => setShowCreateGroup(false)}
-                  style={{
-                    padding: "8px 24px",
-                    backgroundColor: "transparent",
-                    color: "#666",
-                    border: "1px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={createGroup}
-                  disabled={!groupName.trim() || selectedUsers.length === 0}
-                  style={{
-                    padding: "8px 28px",
-                    backgroundColor: (groupName.trim() && selectedUsers.length > 0) ? "#0D3CFC" : "#eef0f4",
-                    color: (groupName.trim() && selectedUsers.length > 0) ? "#fff" : "#999",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    cursor: (groupName.trim() && selectedUsers.length > 0) ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (groupName.trim() && selectedUsers.length > 0) {
-                      e.currentTarget.style.transform = "scale(1.02)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (groupName.trim() && selectedUsers.length > 0) {
-                      e.currentTarget.style.transform = "scale(1)";
-                    }
-                  }}
-                >
-                  Create Group
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Admin View
-  return (
-    <div style={{
-      maxWidth: "1400px",
-      margin: "40px auto",
-      height: "680px",
-      backgroundColor: "#ffffff",
-      borderRadius: "24px",
-      border: "1px solid rgba(13,60,252,0.08)",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-      boxShadow: "0 4px 24px rgba(13,60,252,0.06)",
-    }}>
-      {/* Admin Header */}
-      <div style={{
-        padding: "14px 24px",
-        backgroundColor: "#0D3CFC",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexShrink: 0,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              backgroundColor: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid rgba(255,255,255,0.2)",
-            }}
-          >
-            <img
-              src={AGENT_PHOTO}
-              alt={AGENT_NAME}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-          <div>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}>
-              <span style={{
-                fontWeight: 600,
-                fontSize: "15px",
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-              }}>
-                {AGENT_NAME}
-              </span>
-              <span style={{
-                backgroundColor: "rgba(255,255,255,0.15)",
-                color: "#fff",
-                fontSize: "9px",
-                fontWeight: 600,
-                padding: "2px 12px",
-                borderRadius: "12px",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.5px",
-              }}>
-                Admin
-              </span>
-            </div>
-            <div style={{
-              fontSize: "11px",
-              color: "rgba(255,255,255,0.6)",
-              fontFamily: FONT_FAMILY,
-            }}>
-              {chats.length} chats • {users.length} users
-            </div>
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button
-            onClick={() => setShowCreateGroup(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "6px 16px",
-              backgroundColor: "rgba(255,255,255,0.1)",
-              color: "#ffffff",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: "8px",
-              fontSize: "12px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-          >
-            <UserPlus size={14} />
-            Group
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              padding: "6px 14px",
-              backgroundColor: "rgba(255,255,255,0.08)",
-              color: "#ffffff",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "8px",
-              fontSize: "12px",
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)"}
-          >
-            <LogoutIcon size={14} />
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
-        {/* Sidebar */}
-        <div style={{
-          width: "340px",
-          backgroundColor: "#0D3CFC",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-        }}>
-          <div style={{
-            padding: "12px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              backgroundColor: "rgba(255,255,255,0.1)",
-              borderRadius: "10px",
-              padding: "8px 14px",
-            }}>
-              <SearchIcon size={16} color="rgba(255,255,255,0.5)" />
-              <input
-                type="text"
-                placeholder="Search chats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontFamily: FONT_FAMILY,
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {filteredChats.map((chat) => {
-              const isActive = selectedChat?.id === chat.id;
-              const unread = getUnreadCount(chat.id);
-              const onlineCount = getOnlineMembers(chat);
-
-              return (
-                <div
-                  key={chat.id}
-                  onClick={() => setSelectedChat(chat)}
-                  style={{
-                    padding: "12px 20px",
-                    cursor: "pointer",
-                    backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div
-                      style={{
-                        width: "42px",
-                        height: "42px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: chat.type === 'group' ? 'pointer' : 'default',
-                        flexShrink: 0,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (chat.type === 'group') {
-                          openGroupPanel(chat);
-                        }
-                      }}
-                    >
-                      <img
-                        src={chat.photo || getUserPhoto(undefined, undefined)}
-                        alt={chat.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontWeight: isActive ? 600 : 500,
-                        fontSize: "14px",
-                        color: "#ffffff",
-                        fontFamily: FONT_FAMILY,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}>
-                        {chat.name}
-                        {chat.type === 'group' && (
-                          <span style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.4)",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            ({chat.memberCount || 0})
-                          </span>
-                        )}
-                      </div>
-                      <div style={{
-                        fontSize: "12px",
-                        color: "rgba(255,255,255,0.5)",
-                        fontFamily: FONT_FAMILY,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}>
-                        {chat.lastMessage || "Start chatting..."}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                        {chat.type === 'group' && onlineCount > 0 && (
-                          <span style={{
-                            fontSize: "10px",
-                            color: "#22c55e",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            ● {onlineCount} online
-                          </span>
-                        )}
-                        {unread > 0 && (
-                          <span style={{
-                            fontSize: "10px",
-                            backgroundColor: "#ffffff",
-                            color: "#0D3CFC",
-                            padding: "1px 10px",
-                            borderRadius: "12px",
-                            fontWeight: 600,
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {unread}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {filteredChats.length === 0 && (
-              <div style={{
-                padding: "60px 20px",
-                textAlign: "center",
-                color: "rgba(255,255,255,0.3)",
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-              }}>
-                No chats available
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f5f7fb" }}>
-          {selectedChat ? (
-            <>
-              <div style={{
-                padding: "16px 24px",
-                backgroundColor: "#ffffff",
-                borderBottom: "1px solid #eef0f4",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexShrink: 0,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: 1 }}>
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      overflow: "hidden",
-                      backgroundColor: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: selectedChat.type === 'group' ? 'pointer' : 'default',
-                      border: "2px solid rgba(13,60,252,0.1)",
-                    }}
-                    onClick={() => {
-                      if (selectedChat.type === 'group') {
-                        openGroupPanel(selectedChat);
-                      }
-                    }}
-                  >
-                    <img
-                      src={selectedChat.photo || getUserPhoto(undefined, undefined)}
-                      alt={selectedChat.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <div style={{
-                      fontWeight: 600,
-                      fontSize: "15px",
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      {selectedChat.name}
-                      {selectedChat.type === 'group' && (
-                        <span style={{
-                          fontSize: "12px",
-                          color: "#999",
-                          marginLeft: "8px",
-                          fontWeight: 400,
-                        }}>
-                          ({getOnlineMembers(selectedChat)} online)
-                        </span>
-                      )}
-                    </div>
-                    {selectedChat.bio && (
-                      <div style={{
-                        fontSize: "12px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {selectedChat.bio}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {selectedChat.type === 'group' && (
-                  <button
-                    onClick={() => openGroupPanel(selectedChat)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "6px 16px",
-                      backgroundColor: "#0D3CFC",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                  >
-                    <UsersIcon size={14} />
-                    Manage
-                  </button>
-                )}
-              </div>
-
-              <div
-                ref={chatContainerRef}
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "20px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}
-              >
-                {messages.length === 0 ? (
-                  <div style={{
-                    textAlign: "center",
-                    color: "#999",
-                    fontSize: "14px",
-                    padding: "60px 0",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    No messages yet
-                  </div>
-                ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user?.uid;
-                    const isRead = msg.read || false;
-
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "72%",
-                          display: "flex",
-                          alignItems: "flex-end",
-                          gap: "8px",
-                        }}
-                      >
-                        {!isMine && (
-                          <div
-                            style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              backgroundColor: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                              flexShrink: 0,
-                              border: "1px solid rgba(13,60,252,0.08)",
-                            }}
-                            onClick={() => openUserProfile(msg.senderId)}
-                          >
-                            <img
-                              src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
-                              alt={msg.senderName}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div
-                          style={{
-                            padding: "10px 16px",
-                            borderRadius: "16px",
-                            backgroundColor: isMine ? "#0D3CFC" : "#ffffff",
-                            color: isMine ? "#fff" : "#1a1a2e",
-                            fontSize: "14px",
-                            fontFamily: FONT_FAMILY,
-                            wordBreak: "break-word",
-                            boxShadow: isMine ? "none" : "0 2px 8px rgba(0,0,0,0.04)",
-                            border: isMine ? "none" : "1px solid #eef0f4",
-                            maxWidth: "100%",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {!isMine && (
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 600,
-                                color: "#0D3CFC",
-                                marginBottom: "4px",
-                                fontFamily: FONT_FAMILY,
-                                cursor: "pointer",
-                              }}
-                              onClick={() => openUserProfile(msg.senderId)}
-                            >
-                              {msg.senderName}
-                            </div>
-                          )}
-                          <div>{msg.text}</div>
-                          <div style={{
-                            fontSize: "10px",
-                            color: isMine ? "rgba(255,255,255,0.5)" : "#999",
-                            marginTop: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: "4px",
-                            fontFamily: FONT_FAMILY,
-                          }}>
-                            {formatTime(msg.timestamp)}
-                            {isMine && (
-                              isRead ? (
-                                <DoubleCheckIcon size={12} color="rgba(255,255,255,0.5)" />
-                              ) : (
-                                <CheckIcon size={12} color="rgba(255,255,255,0.3)" />
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                {getTypingUsers(selectedChat) && (
-                  <div style={{
-                    alignSelf: "flex-start",
-                    fontSize: "12px",
-                    color: "#666",
-                    padding: "4px 12px",
-                    fontFamily: FONT_FAMILY,
-                    fontStyle: "italic",
-                  }}>
-                    {getTypingUsers(selectedChat)}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              <div style={{
-                padding: "12px 24px",
-                borderTop: "1px solid #eef0f4",
-                backgroundColor: "#ffffff",
-                display: "flex",
-                gap: "12px",
-                alignItems: "center",
-                flexShrink: 0,
-              }}>
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={handleTyping}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder="Type a reply..."
-                  style={{
-                    flex: 1,
-                    padding: "10px 18px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: FONT_FAMILY,
-                    backgroundColor: "#f8f9fc",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!messageText.trim()}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px 20px",
-                    backgroundColor: messageText.trim() ? "#0D3CFC" : "#eef0f4",
-                    color: messageText.trim() ? "#fff" : "#999",
-                    border: "none",
-                    borderRadius: "12px",
-                    cursor: messageText.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    transition: "all 0.2s ease",
-                    gap: "8px",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (messageText.trim()) e.currentTarget.style.transform = "scale(1.02)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (messageText.trim()) e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  <SendIcon size={16} />
-                  Send
-                </button>
-              </div>
-            </>
-          ) : (
-            <div style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              color: "#999",
-              fontSize: "15px",
-              fontFamily: FONT_FAMILY,
-              gap: "12px",
-            }}>
-              <div style={{
-                fontSize: "72px",
-                fontWeight: 300,
-                color: "#0D3CFC",
-                opacity: 0.2,
-              }}>⌘</div>
-              <div style={{ color: "#666" }}>Select a chat to start messaging</div>
-            </div>
-          )}
-        </div>
-
-        {/* Slide Panel */}
-        {(showUserProfile || showGroupPanel) && (
-          <div
-            ref={panelRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: "400px",
-              height: "100%",
-              backgroundColor: "#ffffff",
-              boxShadow: "-8px 0 40px rgba(0,0,0,0.06)",
-              zIndex: 100,
-              overflowY: "auto",
-              transform: "translateX(100%)",
-              opacity: 0,
-            }}
-          >
-            <div style={{
-              padding: "20px 24px",
-              borderBottom: "1px solid #eef0f4",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              position: "sticky",
-              top: 0,
-              backgroundColor: "#ffffff",
-              zIndex: 10,
-            }}>
-              <h3 style={{
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "#0D3CFC",
-                fontFamily: FONT_FAMILY,
-                margin: 0,
-              }}>
-                {showUserProfile ? 'Profile' : 'Group Settings'}
-              </h3>
-              <button
-                onClick={closePanel}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#999",
-                  padding: "4px",
-                }}
-              >
-                <XIcon size={20} />
-              </button>
-            </div>
-
-            <div style={{ padding: "24px" }}>
-              {showUserProfile && selectedUser && (
-                <div>
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                  }}>
-                    <div
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        margin: "0 auto 16px",
-                        border: "4px solid #0D3CFC",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src={selectedUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.email || "User")}&background=0D3CFC&color=fff&size=128&bold=true`}
-                        alt={selectedUser.displayName || "User"}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                    <h3 style={{
-                      fontSize: "20px",
-                      fontWeight: 600,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0 0 4px",
-                    }}>
-                      {selectedUser.displayName || selectedUser.email || "User"}
-                    </h3>
-                    <p style={{
-                      fontSize: "14px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0 0 8px",
-                    }}>
-                      {selectedUser.email}
-                    </p>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "8px",
-                    }}>
-                      <span style={{
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        backgroundColor: selectedUser.online ? "#22c55e" : "#d1d5db",
-                        display: "inline-block",
-                      }} />
-                      <span style={{
-                        fontSize: "13px",
-                        color: selectedUser.online ? "#22c55e" : "#999",
-                        fontFamily: FONT_FAMILY,
-                      }}>
-                        {selectedUser.online ? "Online" : "Offline"}
-                      </span>
-                    </div>
-                    {selectedUser.bio && (
-                      <p style={{
-                        fontSize: "14px",
-                        color: "#666",
-                        fontFamily: FONT_FAMILY,
-                        margin: "0 0 8px",
-                        backgroundColor: "#f5f7fb",
-                        padding: "12px 16px",
-                        borderRadius: "8px",
-                        width: "100%",
-                      }}>
-                        {selectedUser.bio}
-                      </p>
-                    )}
-                    {selectedUser.status && (
-                      <p style={{
-                        fontSize: "13px",
-                        color: "#999",
-                        fontFamily: FONT_FAMILY,
-                        margin: "0 0 8px",
-                      }}>
-                        Status: {selectedUser.status}
-                      </p>
-                    )}
-                    <p style={{
-                      fontSize: "12px",
-                      color: "#999",
-                      fontFamily: FONT_FAMILY,
-                      margin: "0",
-                    }}>
-                      Joined {formatDate(selectedUser.joinedAt)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {showGroupPanel && editingChat && (
-                <div>
-                  <div style={{ marginBottom: "20px" }}>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Group Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editingChat.name}
-                      onChange={(e) => setEditingChat({ ...editingChat, name: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "2px solid #eef0f4",
-                        borderRadius: "10px",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                        outline: "none",
-                        transition: "border-color 0.2s ease",
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      value={editingChat.bio || ""}
-                      onChange={(e) => setEditingChat({ ...editingChat, bio: e.target.value })}
-                      onBlur={updateGroupBio}
-                      placeholder="What's this group about?"
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "2px solid #eef0f4",
-                        borderRadius: "10px",
-                        fontSize: "14px",
-                        fontFamily: FONT_FAMILY,
-                        outline: "none",
-                        transition: "border-color 0.2s ease",
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: "20px" }}>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "8px",
-                    }}>
-                      <label style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        fontFamily: FONT_FAMILY,
-                        fontWeight: 500,
-                      }}>
-                        Members ({editingChat.members?.length || 0})
-                      </label>
-                    </div>
-                    <div style={{
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      border: "1px solid #eef0f4",
-                      borderRadius: "10px",
-                      padding: "4px",
-                    }}>
-                      {editingChat.members?.map((memberId) => {
-                        const member = getUserInfo(memberId);
-                        if (!member) return null;
-                        return (
-                          <div key={memberId} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 12px",
-                            borderRadius: "8px",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            transition: "background 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                          onClick={() => {
-                            closePanel();
-                            setTimeout(() => openUserProfile(memberId), 300);
-                          }}
-                          >
-                            <div
-                              style={{
-                                width: "32px",
-                                height: "32px",
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                backgroundColor: "#fff",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <img
-                                src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                                alt={member.email}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                }}
-                              />
-                            </div>
-                            <span style={{ flex: 1 }}>
-                              {member.displayName || member.email || "User"}
-                            </span>
-                            <span style={{
-                              fontSize: "10px",
-                              color: member.online ? "#22c55e" : "#999",
-                            }}>
-                              {member.online ? "Online" : "Offline"}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{
-                      fontSize: "13px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      display: "block",
-                      marginBottom: "6px",
-                      fontWeight: 500,
-                    }}>
-                      Add Members
-                    </label>
-                    <div style={{
-                      maxHeight: "150px",
-                      overflowY: "auto",
-                      border: "1px solid #eef0f4",
-                      borderRadius: "10px",
-                      padding: "4px",
-                    }}>
-                      {users.filter(u => u.id !== user.uid && !editingChat.members?.includes(u.id)).map((u) => (
-                        <label key={u.id} style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          fontSize: "13px",
-                          transition: "background 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedUsers.includes(u.id)}
-                            onChange={() => {
-                              if (selectedUsers.includes(u.id)) {
-                                setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                              } else {
-                                setSelectedUsers([...selectedUsers, u.id]);
-                              }
-                            }}
-                            style={{
-                              accentColor: "#0D3CFC",
-                              width: "16px",
-                              height: "16px",
-                              cursor: "pointer",
-                            }}
-                          />
-                          <div
-                            style={{
-                              width: "28px",
-                              height: "28px",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              backgroundColor: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            <img
-                              src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                              alt={u.email}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </div>
-                          <span>{u.displayName || u.email || "User"}</span>
-                        </label>
-                      ))}
-                      {users.filter(u => u.id !== user.uid && !editingChat.members?.includes(u.id)).length === 0 && (
-                        <div style={{
-                          padding: "16px",
-                          textAlign: "center",
-                          color: "#999",
-                          fontSize: "13px",
-                          fontFamily: FONT_FAMILY,
-                        }}>
-                          All users are in this group
-                        </div>
-                      )}
-                    </div>
-                    {selectedUsers.length > 0 && (
-                      <button
-                        onClick={addUsersToGroup}
-                        style={{
-                          marginTop: "12px",
-                          padding: "8px 24px",
-                          backgroundColor: "#0D3CFC",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "10px",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                      >
-                        Add {selectedUsers.length} member{selectedUsers.length > 1 ? 's' : ''}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Create Group Modal - Admin */}
-        {showCreateGroup && (
-          <div style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.4)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}>
-            <div style={{
-              backgroundColor: "#fff",
-              borderRadius: "20px",
-              padding: "32px",
-              maxWidth: "480px",
-              width: "90%",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.15)",
-            }}>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "24px",
-              }}>
-                <h3 style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  margin: 0,
-                }}>
-                  Create Group
-                </h3>
-                <button
-                  onClick={() => setShowCreateGroup(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#999",
-                    padding: "4px",
-                  }}
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Group Name
-                </label>
-                <input
-                  type="text"
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  placeholder="Enter group name..."
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-              </div>
-
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={groupBio}
-                  onChange={(e) => setGroupBio(e.target.value)}
-                  placeholder="What's this group about?"
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: "2px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    transition: "border-color 0.2s ease",
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#eef0f4"}
-                />
-              </div>
-
-              <div style={{ marginBottom: "20px" }}>
-                <label style={{
-                  fontSize: "13px",
-                  color: "#666",
-                  fontFamily: FONT_FAMILY,
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}>
-                  Select Members
-                </label>
-                <div style={{
-                  maxHeight: "160px",
-                  overflowY: "auto",
-                  border: "1px solid #eef0f4",
-                  borderRadius: "10px",
-                  padding: "4px",
-                }}>
-                  {users.filter(u => u.id !== user.uid).map((u) => (
-                    <label key={u.id} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "13px",
-                      transition: "background 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(u.id)}
-                        onChange={() => {
-                          if (selectedUsers.includes(u.id)) {
-                            setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                          } else {
-                            setSelectedUsers([...selectedUsers, u.id]);
-                          }
-                        }}
-                        style={{
-                          accentColor: "#0D3CFC",
-                          width: "16px",
-                          height: "16px",
-                          cursor: "pointer",
-                        }}
-                      />
-                      <div
-                        style={{
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          overflow: "hidden",
-                          backgroundColor: "#fff",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <img
-                          src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64&bold=true`}
-                          alt={u.email}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      </div>
-                      <span>{u.displayName || u.email || "User"}</span>
-                    </label>
-                  ))}
-                  {users.filter(u => u.id !== user.uid).length === 0 && (
-                    <div style={{
-                      padding: "16px",
-                      textAlign: "center",
-                      color: "#999",
-                      fontSize: "13px",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      No other users found
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => setShowCreateGroup(false)}
-                  style={{
-                    padding: "8px 24px",
-                    backgroundColor: "transparent",
-                    color: "#666",
-                    border: "1px solid #eef0f4",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f7fb"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={createGroup}
-                  disabled={!groupName.trim() || selectedUsers.length === 0}
-                  style={{
-                    padding: "8px 28px",
-                    backgroundColor: (groupName.trim() && selectedUsers.length > 0) ? "#0D3CFC" : "#eef0f4",
-                    color: (groupName.trim() && selectedUsers.length > 0) ? "#fff" : "#999",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    cursor: (groupName.trim() && selectedUsers.length > 0) ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (groupName.trim() && selectedUsers.length > 0) {
-                      e.currentTarget.style.transform = "scale(1.02)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (groupName.trim() && selectedUsers.length > 0) {
-                      e.currentTarget.style.transform = "scale(1)";
-                    }
-                  }}
-                >
-                  Create Group
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Main Page
+// Footer links - Live Chat added to Get in Touch
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community"] },
+  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+];
+
+// Menu items for drawer
+const menuItems = [
+  { name: "Community", number: "01" },
+  { name: "Blog", number: "02" },
+  { name: "Live Chat", number: "03" },
+  { name: "Donation", number: "04" },
+  { name: "Contact", number: "05" },
+  { name: "Note", number: "06" }
+];
+
+// ===== MAIN PAGE =====
 export default function LiveChatPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMain, setShowMain] = useState(false);
+  
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const plusIconRef = useRef<HTMLSpanElement>(null);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
+  const menuBoxRef = useRef<HTMLDivElement>(null);
+  const menuBox2Ref = useRef<HTMLDivElement>(null);
+  const menuBox3Ref = useRef<HTMLDivElement>(null);
+  const storiesRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const liveChatTitleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -3346,6 +158,189 @@ export default function LiveChatPage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
+  useEffect(() => {
+    if (!isMounted || !showMain) return;
+    if (liveChatTitleRef.current) {
+      const splitTitle = new SplitText(liveChatTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char-livechat"
+      });
+      gsap.fromTo(splitTitle.chars,
+        { opacity: 0, y: 20, filter: 'blur(8px)' },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.04,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: liveChatTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
+        }
+      );
+    }
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [isMounted, showMain]);
+
+  useEffect(() => {
+    if (!menuOverlayRef.current || !isMounted) return;
+    
+    if (isMenuOpen) {
+      gsap.fromTo(menuOverlayRef.current,
+        { y: '-100%', opacity: 0 },
+        {
+          y: '0%',
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out',
+          onComplete: () => {
+            const items = menuOverlayRef.current?.querySelectorAll('.menu-item');
+            if (items) {
+              gsap.fromTo(items,
+                { opacity: 0, y: 30 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  stagger: 0.08,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (menuBoxRef.current) {
+              gsap.fromTo(menuBoxRef.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (storiesRef.current) {
+              gsap.fromTo(storiesRef.current,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (menuBox2Ref.current) {
+              gsap.fromTo(menuBox2Ref.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  delay: 0.2
+                }
+              );
+            }
+            if (menuBox3Ref.current) {
+              gsap.fromTo(menuBox3Ref.current,
+                { opacity: 0, scale: 0.9, x: 20 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  x: 0,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  delay: 0.3
+                }
+              );
+            }
+          }
+        }
+      );
+    } else {
+      gsap.to(menuOverlayRef.current, {
+        y: '-100%',
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power3.in'
+      });
+    }
+  }, [isMenuOpen, isMounted]);
+
+  useEffect(() => {
+    if (!isMounted || !showMain) return;
+
+    const menuruElement = menuruFooterRef.current;
+    const menuruText = menuruTextRef.current;
+    
+    if (menuruElement && menuruText) {
+      const split = new SplitText(menuruText, {
+        type: "chars",
+        charsClass: "menuru-char"
+      });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 100,
+        scale: 0.5,
+        rotationX: 90
+      });
+
+      ScrollTrigger.create({
+        trigger: menuruElement,
+        start: "top 85%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        },
+        onLeave: () => {
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            scale: 0.5,
+            rotationX: 90,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.in",
+            overwrite: true
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
+        }
+      });
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [isMounted, showMain]);
+
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
       onComplete: () => {
@@ -3354,7 +349,12 @@ export default function LiveChatPage(): React.JSX.Element {
             opacity: 0,
             duration: 0.6,
             ease: "power2.inOut",
-            onComplete: () => setShowMain(true)
+            onComplete: () => {
+              setShowMain(true);
+              setTimeout(() => {
+                ScrollTrigger.refresh();
+              }, 200);
+            }
           });
         }
       }
@@ -3376,7 +376,7 @@ export default function LiveChatPage(): React.JSX.Element {
       duration: 0.4,
       ease: "power2.out",
       onComplete: () => {
-        if (textRef.current) textRef.current.textContent = "Chat";
+        if (textRef.current) textRef.current.textContent = "Note";
       }
     })
     .to(textRef.current, {
@@ -3392,7 +392,35 @@ export default function LiveChatPage(): React.JSX.Element {
       opacity: 0,
       duration: 0.7,
       ease: "power2.in"
-    });
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
+  };
+
+  const toggleMenu = () => {
+    if (!isMenuOpen) {
+      setIsMenuOpen(true);
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 45,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    } else {
+      if (plusIconRef.current) {
+        gsap.to(plusIconRef.current, {
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.in"
+        });
+      }
+      setIsMenuOpen(false);
+    }
   };
 
   if (!isMounted || loading) {
@@ -3436,7 +464,7 @@ export default function LiveChatPage(): React.JSX.Element {
               willChange: "transform, opacity",
             }}
           >
-            Live
+            Shop
           </span>
         </div>
       </div>
@@ -3485,7 +513,7 @@ export default function LiveChatPage(): React.JSX.Element {
               willChange: "transform, opacity",
             }}
           >
-            Live
+            Shop
           </span>
         </div>
       </div>
@@ -3495,141 +523,962 @@ export default function LiveChatPage(): React.JSX.Element {
   return (
     <>
       <Head>
-        <title>Live Chat | Menuru</title>
-        <meta name="description" content="Live Chat Menuru - Chat langsung dengan agent" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <title>Live Chat | Menuru Official</title>
+        <meta name="description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content="#0D3CFC" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Menuru" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
+        <meta property="og:title" content="Live Chat | Menuru Official" />
+        <meta property="og:description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta property="og:image" content="/images/ai.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Live Chat | Menuru Official" />
+        <meta name="twitter:description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <div style={{
-        minHeight: "100vh",
-        backgroundColor: "#ffffff",
-        margin: 0,
-        padding: 0,
-        position: "relative",
-        fontFamily: FONT_FAMILY,
-        overflow: "visible",
-      }}>
-        <div style={{
-          minHeight: "auto",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          padding: "40px 40px 0 40px",
+      <div
+        style={{
+          minHeight: "100vh",
           backgroundColor: "#ffffff",
+          margin: 0,
+          padding: 0,
           position: "relative",
-          paddingTop: "40px",
-        }}>
-          <div style={{
+          fontFamily: FONT_FAMILY,
+          overflow: "visible",
+        }}
+      >
+        <div
+          style={{
+            minHeight: "auto",
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "40px",
-          }}>
-            <h1 style={{
-              fontSize: "40px",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            padding: "40px",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            paddingTop: "120px",
+          }}
+        >
+          <h1
+            ref={titleRef}
+            style={{
+              fontSize: "48px",
               fontWeight: 700,
-              color: "#0D3CFC",
+              color: "#000000",
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.03em",
               margin: 0,
+              padding: "10px 20px",
               lineHeight: 1,
-            }}>
-              Menuru
-            </h1>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <span style={{
-                fontSize: "14px",
-                color: "#666",
-                fontFamily: FONT_FAMILY,
-              }}>
+              position: "fixed",
+              top: "40px",
+              left: "40px",
+              zIndex: 15,
+              pointerEvents: "none",
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255,255,255,0.7)",
+              borderRadius: "12px",
+            }}
+          >
+            Menuru
+          </h1>
+
+          <div style={{ 
+            position: "relative", 
+            zIndex: 1,
+            marginTop: "60px",
+          }}>
+            <div
+              ref={subtitleRef}
+              style={{
+                textAlign: "left",
+                position: "relative",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "60px",
+                  fontWeight: 400,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.2,
+                  margin: 0,
+                  padding: 0,
+                  paddingBottom: "30px",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {`Chat langsung dengan agent kami\nuntuk bantuan cepat dan tepat`}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", position: "relative" }}>
+              <div
+                ref={buttonRef}
+                style={{
+                  display: "inline-block",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Mulai Chat Sekarang
+                </span>
+              </div>
+
+              <div
+                ref={arrowRef}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0D3CFC",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <NorthEastArrow size={24} color="#ffffff" />
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "60px",
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <span
+                ref={liveChatTitleRef}
+                style={{
+                  fontSize: "80px",
+                  fontWeight: 700,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                }}
+              >
+                Live Chat
+              </span>
+            </div>
+
+            <div
+              style={{
+                marginTop: "16px",
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "28px",
+                  fontWeight: 500,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 {user ? (
-                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: "#22c55e",
-                      display: "inline-block",
-                    }} />
-                    {user.displayName || user.email || "User"}
-                  </span>
+                  <>
+                    Hi, {user.displayName || user.email || "User"} 👋
+                  </>
                 ) : (
-                  "Guest"
+                  <>
+                    Silakan login untuk melanjutkan
+                    <Link href="/" style={{ textDecoration: "none", marginLeft: "12px" }}>
+                      <span
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: 600,
+                          color: "#ffffff",
+                          backgroundColor: "#0D3CFC",
+                          padding: "6px 20px",
+                          borderRadius: "8px",
+                          display: "inline-block",
+                        }}
+                      >
+                        Login
+                      </span>
+                    </Link>
+                  </>
                 )}
               </span>
-              {!user && (
-                <Link href="/" style={{ textDecoration: "none" }}>
-                  <button style={{
-                    padding: "8px 24px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                  >
-                    Sign In
-                  </button>
-                </Link>
-              )}
             </div>
-          </div>
-
-          <div style={{
-            marginBottom: "16px",
-          }}>
-            <h2 style={{
-              fontSize: "32px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              margin: 0,
-              lineHeight: 1.2,
-            }}>
-              Live Chat
-            </h2>
-            <p style={{
-              fontSize: "16px",
-              color: "#666",
-              fontFamily: FONT_FAMILY,
-              margin: "4px 0 0 0",
-            }}>
-              {user ? `Welcome back, ${user.displayName || user.email || "User"}` : "Please sign in to continue"}
-            </p>
           </div>
         </div>
 
         <div style={{ padding: "0 40px 40px 40px" }}>
-          <LiveChat user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          {/* Live Chat placeholder - removed system */}
+          <div style={{ 
+            maxWidth: "1400px", 
+            margin: "40px auto", 
+            height: "400px",
+            backgroundColor: "#f8f9ff",
+            borderRadius: "20px",
+            border: "1px solid rgba(13,60,252,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "16px",
+            textAlign: "center",
+            padding: "40px",
+          }}>
+            <div style={{ fontSize: "64px" }}>💬</div>
+            <h2 style={{ 
+              fontSize: "28px", 
+              fontWeight: 600, 
+              color: "#0D3CFC", 
+              fontFamily: FONT_FAMILY,
+              margin: 0,
+            }}>
+              Live Chat
+            </h2>
+            <p style={{ 
+              fontSize: "16px", 
+              color: "#666", 
+              fontFamily: FONT_FAMILY,
+              maxWidth: "500px",
+            }}>
+              {user ? (
+                "Fitur Live Chat sedang dalam pengembangan. Silakan cek kembali nanti!"
+              ) : (
+                "Silakan login untuk menggunakan Live Chat"
+              )}
+            </p>
+            {!user && (
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <button
+                  style={{
+                    padding: "10px 30px",
+                    backgroundColor: "#0D3CFC",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Login
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
 
-        <div style={{
-          padding: "40px 40px 80px 40px",
-          backgroundColor: "#ffffff",
-          borderTop: "1px solid rgba(0,0,0,0.04)",
-        }}>
-          <div style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            textAlign: "center",
-          }}>
-            <span style={{
-              fontSize: "14px",
-              color: "#999",
+        <div
+          style={{
+            width: "100%",
+            padding: "60px 40px 40px 40px",
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {footerLinks.map((section, idx) => (
+              <div
+                key={idx}
+                style={{
+                  flex: "1",
+                  minWidth: "200px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                    textTransform: "none",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {section.links.map((link, linkIdx) => {
+                    let linkHref = "#";
+                    let isAttention = false;
+                    if (link === "Kebijakan Privasi") {
+                      linkHref = "/privacy-policy";
+                      isAttention = true;
+                    } else if (link === "Ketentuan Kami") {
+                      linkHref = "/terms-of-service";
+                      isAttention = true;
+                    } else if (link === "Live Chat") {
+                      linkHref = "/live-chat";
+                    } else if (link === "Contact Us") {
+                      linkHref = "/contact";
+                    } else if (link === "Instagram") {
+                      linkHref = "https://instagram.com";
+                    }
+                    
+                    return (
+                      <div
+                        key={linkIdx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: "#0D3CFC",
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
+                              textTransform: "none",
+                            }}
+                          >
+                            {link}
+                          </span>
+                        </Link>
+                        {isAttention && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            Update
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          ref={menuruFooterRef}
+          style={{
+            width: "100%",
+            padding: "20px 40px 80px 40px",
+            backgroundColor: "#ffffff",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "flex-start",
+            minHeight: "300px",
+          }}
+        >
+          <span
+            ref={menuruTextRef}
+            style={{
               fontFamily: FONT_FAMILY,
-              letterSpacing: "0.5px",
-            }}>
-              © {new Date().getFullYear()} Menuru. All rights reserved.
+              fontSize: "450px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              letterSpacing: "-0.02em",
+              textTransform: "none",
+              lineHeight: "0.8",
+              display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            Menuru
+          </span>
+        </div>
+
+        <div
+          style={{
+            position: "fixed",
+            top: "40px",
+            right: "40px",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "8px",
+            padding: "16px 20px",
+            borderRadius: "16px",
+            backgroundColor: "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(20px)",
+            transition: "all 0.3s ease",
+            pointerEvents: "auto",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Link href="/shop">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <ShoppingBag size={20} color="#0D3CFC" />
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Shop</span>
+              </div>
+            </Link>
+            <Link href="/profile">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>About</span>
+              </div>
+            </Link>
+            <Link href="/signup">
+              <div style={{ display: "inline-flex", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Sign Up</span>
+              </div>
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} color="#0D3CFC" />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Fraud</span>
+            </div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0" }}>
+              <ShieldCheck size={28} color="#0D3CFC" />
+              <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY, lineHeight: 1 }}>Anti-Bot</span>
+            </div>
+            <Link href="/contact">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Get in touch</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <SouthEastArrow size={24} color="#ffffff" />
+                </div>
+              </div>
+            </Link>
+            <Link href="/pusat-bantuan">
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }}>
+                <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY }}>Pusat Bantuan</span>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                  <NorthWestArrow size={24} color="#ffffff" />
+                </div>
+              </div>
+            </Link>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer", backgroundColor: "transparent" }} onClick={toggleMenu}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+                <span ref={plusIconRef} style={{ fontSize: isMenuOpen ? "24px" : "28px", fontWeight: isMenuOpen ? 400 : 300, fontFamily: FONT_FAMILY, lineHeight: 1, display: "inline-block", transform: isMenuOpen ? "rotate(0deg)" : "rotate(0deg)" }}>
+                  {isMenuOpen ? "✕" : "+"}
+                </span>
+              </div>
+              <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "0.02em" }}>
+                {isMenuOpen ? "Close" : "Menu"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          ref={menuOverlayRef}
+          className="menu-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#0D3CFC",
+            zIndex: 99,
+            display: isMenuOpen ? "flex" : "none",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            transform: "translateY(-100%)",
+            opacity: 0,
+            pointerEvents: isMenuOpen ? "auto" : "none",
+            padding: "60px 80px",
+            boxSizing: "border-box",
+            overflow: "hidden",
+          }}
+        >
+          <h1
+            style={{
+              position: "absolute",
+              top: "40px",
+              left: "40px",
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}
+          >
+            Menuru
+          </h1>
+
+          <div
+            ref={menuItemsRef}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              width: "100%",
+              maxWidth: "600px",
+            }}
+          >
+            {menuItems.map((item, index) => (
+              <Link
+                key={index}
+                href={item.name === "Live Chat" ? "/live-chat" : "/"}
+                style={{ textDecoration: "none" }}
+              >
+                <div
+                  className="menu-item"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    backgroundColor: "transparent",
+                    opacity: 0,
+                    transform: "translateY(30px)",
+                    transition: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 300,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {item.number}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div
+            ref={storiesRef}
+            style={{
+              position: "absolute",
+              left: "720px",  
+              top: "180px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "8px",
+              opacity: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 300,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.05em",
+              }}
+            >
+              stories
             </span>
+          </div>
+
+          <div
+            ref={menuBoxRef}
+            style={{
+              position: "absolute",
+              right: "80px",
+              bottom: "80px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "24px",
+              border: "2px solid #D9FF81",
+              borderRadius: "12px",
+              padding: "20px 32px",
+              backgroundColor: "#D9FF81",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
+              maxWidth: "600px",
+              width: "auto",
+              minHeight: "90px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana website ini
+              </span>
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                bisa berkembang?
+              </span>
+              <span
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: "rgba(13, 60, 252, 0.7)",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Dengan dukungan komunitas
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "70px",
+                height: "70px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/10.jpg"
+                alt="Menuru"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
+          </div>
+
+          <div
+            ref={menuBox2Ref}
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "260px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Bagaimana Rasa nya Masuk
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Kuliah Di Universitas
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Gunadarma
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "100px",
+                height: "100px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/10.jpg"
+                alt="Universitas Gunadarma"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
+          </div>
+
+          <div
+            ref={menuBox3Ref}
+            style={{
+              position: "absolute",
+              left: "720px",
+              top: "470px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "30px",
+              border: "2px solid #C8EEFF",
+              borderRadius: "12px",
+              padding: "20px 36px",
+              backgroundColor: "#C8EEFF",
+              cursor: "pointer",
+              opacity: 0,
+              transform: "scale(0.95)",
+              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
+              maxWidth: "750px",
+              width: "auto",
+              minHeight: "100px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Mengapa saya memilih
+              </span>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                jurusan tersebut?
+              </span>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(13, 60, 252, 0.1)",
+                borderRadius: "6px",
+                padding: "4px",
+                width: "100px",
+                height: "100px",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src="/images/15.jpg"
+                alt="Mengapa memilih jurusan"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -3639,9 +1488,12 @@ export default function LiveChatPage(): React.JSX.Element {
           overflow: auto !important;
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
+          height: 100% !important;
         }
         html::-webkit-scrollbar {
           display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
         body {
           overflow: auto !important;
@@ -3650,12 +1502,319 @@ export default function LiveChatPage(): React.JSX.Element {
           margin: 0;
           padding: 0;
           background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
         }
         body::-webkit-scrollbar {
           display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
+
         * {
           background-color: transparent;
+        }
+
+        .menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+
+        .split-char-livechat {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        @media (max-width: 1024px) {
+          .subtitle p {
+            font-size: 48px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 36px !important;
+          }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 140px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .menu-overlay .menu-box3 {
+            right: 40px !important;
+            top: 260px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .subtitle p {
+            font-size: 36px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+          .menu-overlay {
+            padding: 30px 20px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box2 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box3 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .subtitle p {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box2 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box3 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
         }
       `}</style>
     </>
