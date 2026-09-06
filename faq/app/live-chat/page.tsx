@@ -23,7 +23,8 @@ import {
   setDoc, 
   writeBatch, 
   getDocs,
-  limit
+  limit,
+  deleteDoc
 } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -41,7 +42,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase (pindahkan keluar dari conditional)
+// Initialize Firebase
 const app = getApps().length === 0
   ? initializeApp(firebaseConfig)
   : getApps()[0];
@@ -105,38 +106,19 @@ const SearchIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const CheckIcon = ({ size = 14 }: { size?: number }) => (
+const MegaphoneIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2 10L22 4V20L2 14V10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 14V19C6 20.1046 6.89543 21 8 21H10C11.1046 21 12 20.1046 12 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const DoubleCheckIcon = ({ size = 14 }: { size?: number }) => (
+const BulletinIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L7 17L2 12M22 6L11 17L7 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const UserPlusIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M20 8V14M17 11H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const GroupIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M23 21V19C22.7356 17.1124 21.7405 15.3591 20.1747 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 3.12891C17.5659 3.48813 18.9993 4.29577 20.1747 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const AddUserIcon = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 4H20V20H4V4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 8H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M8 12H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M8 16H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -196,7 +178,7 @@ const menuItems = [
 // ===== INTERFACE TYPES =====
 interface Chat {
   id: string;
-  type: 'user' | 'group';
+  type: 'user' | 'group' | 'broadcast' | 'announcement';
   name: string;
   photo?: string;
   members: string[];
@@ -210,6 +192,9 @@ interface Chat {
   memberCount?: number;
   lastMessageSender?: string;
   lastMessageSenderId?: string;
+  isBroadcast?: boolean;
+  isAnnouncement?: boolean;
+  targetUsers?: string[];
 }
 
 interface Message {
@@ -235,6 +220,557 @@ interface User {
   joinedAt: any;
 }
 
+// ===== BROADCAST & ANNOUNCEMENT COMPONENT =====
+const BroadcastAnnouncement = ({ user, db, onClose }: { user: any; db: any; onClose: () => void }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState<'broadcast' | 'announcement'>('broadcast');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const userList: User[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        userList.push({ id: doc.id, ...data } as User);
+      });
+      setUsers(userList);
+    });
+    return () => unsubscribe();
+  }, [db, isMounted]);
+
+  const handleSubmit = async () => {
+    if (!db || !user || !message.trim()) return;
+    
+    if (type === 'broadcast' && selectedUsers.length === 0) {
+      alert('Pilih minimal 1 user untuk broadcast');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const adminName = user.displayName || user.email || "Admin";
+      const adminPhoto = user.photoURL || "";
+
+      if (type === 'broadcast') {
+        // Cek apakah sudah ada broadcast chat
+        const existingBroadcastQuery = query(
+          collection(db, "chats"),
+          where("isBroadcast", "==", true),
+          where("adminId", "==", user.uid)
+        );
+        const existingBroadcastSnapshot = await getDocs(existingBroadcastQuery);
+        
+        let broadcastChatId: string;
+        
+        if (!existingBroadcastSnapshot.empty) {
+          // Gunakan broadcast yang sudah ada
+          broadcastChatId = existingBroadcastSnapshot.docs[0].id;
+          
+          // Update members dengan user baru
+          const existingMembers = existingBroadcastSnapshot.docs[0].data().members || [];
+          const newMembers = [...new Set([...existingMembers, ...selectedUsers, user.uid])];
+          
+          await updateDoc(doc(db, "chats", broadcastChatId), {
+            members: newMembers,
+            memberCount: newMembers.length,
+            lastMessage: message.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: increment(1)
+          });
+        } else {
+          // Buat broadcast baru
+          const members = [user.uid, ...selectedUsers];
+          const chatRef = await addDoc(collection(db, "chats"), {
+            type: 'broadcast',
+            name: `Broadcast - ${new Date().toLocaleDateString()}`,
+            photo: "",
+            members: members,
+            adminId: user.uid,
+            createdAt: serverTimestamp(),
+            lastMessage: message.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: 0,
+            typing: [],
+            bio: "Pesan broadcast dari admin",
+            memberCount: members.length,
+            isBroadcast: true,
+            targetUsers: selectedUsers
+          });
+          broadcastChatId = chatRef.id;
+        }
+
+        // Kirim pesan ke broadcast chat
+        await addDoc(collection(db, "chats", broadcastChatId, "messages"), {
+          senderId: user.uid,
+          senderName: adminName,
+          senderPhoto: adminPhoto,
+          text: message.trim(),
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: [],
+          delivered: true
+        });
+
+        alert('Broadcast berhasil dikirim!');
+
+      } else {
+        // ANNOUNCEMENT
+        // Cek apakah sudah ada announcement chat
+        const existingAnnouncementQuery = query(
+          collection(db, "chats"),
+          where("isAnnouncement", "==", true),
+          where("adminId", "==", user.uid)
+        );
+        const existingAnnouncementSnapshot = await getDocs(existingAnnouncementQuery);
+        
+        let announcementChatId: string;
+        
+        if (!existingAnnouncementSnapshot.empty) {
+          // Gunakan announcement yang sudah ada
+          announcementChatId = existingAnnouncementSnapshot.docs[0].id;
+          
+          // Update members dengan semua user
+          const allUserIds = users.map(u => u.id);
+          const existingMembers = existingAnnouncementSnapshot.docs[0].data().members || [];
+          const newMembers = [...new Set([...existingMembers, ...allUserIds, user.uid])];
+          
+          await updateDoc(doc(db, "chats", announcementChatId), {
+            members: newMembers,
+            memberCount: newMembers.length,
+            lastMessage: message.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: increment(1)
+          });
+        } else {
+          // Buat announcement baru
+          const allUserIds = users.map(u => u.id);
+          const members = [user.uid, ...allUserIds];
+          const chatRef = await addDoc(collection(db, "chats"), {
+            type: 'announcement',
+            name: `Pengumuman - ${new Date().toLocaleDateString()}`,
+            photo: "",
+            members: members,
+            adminId: user.uid,
+            createdAt: serverTimestamp(),
+            lastMessage: message.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: 0,
+            typing: [],
+            bio: "Pengumuman dari admin",
+            memberCount: members.length,
+            isAnnouncement: true,
+            targetUsers: allUserIds
+          });
+          announcementChatId = chatRef.id;
+        }
+
+        // Kirim pesan ke announcement chat
+        await addDoc(collection(db, "chats", announcementChatId, "messages"), {
+          senderId: user.uid,
+          senderName: adminName,
+          senderPhoto: adminPhoto,
+          text: message.trim(),
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: [],
+          delivered: true
+        });
+
+        alert('Pengumuman berhasil dikirim ke semua user!');
+      }
+
+      setMessage("");
+      setSelectedUsers([]);
+      onClose();
+    } catch (error) {
+      console.error("Error sending broadcast/announcement:", error);
+      alert('Gagal mengirim. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const toggleUser = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const selectAllUsers = () => {
+    const allIds = users.filter(u => u.id !== user.uid).map(u => u.id);
+    setSelectedUsers(allIds);
+  };
+
+  const deselectAllUsers = () => {
+    setSelectedUsers([]);
+  };
+
+  if (!isMounted) return null;
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      zIndex: 1000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}>
+      <div style={{
+        backgroundColor: "#ffffff",
+        borderRadius: "16px",
+        padding: "30px",
+        maxWidth: "600px",
+        width: "100%",
+        maxHeight: "90vh",
+        overflowY: "auto",
+        fontFamily: FONT_FAMILY,
+        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+      }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}>
+          <h2 style={{
+            fontSize: "24px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            margin: 0,
+          }}>
+            Kirim Pesan
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "24px",
+              cursor: "pointer",
+              color: "#666",
+              padding: "0 8px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Type Selection */}
+        <div style={{
+          display: "flex",
+          gap: "12px",
+          marginBottom: "20px",
+        }}>
+          <button
+            onClick={() => setType('broadcast')}
+            style={{
+              flex: 1,
+              padding: "12px",
+              border: `2px solid ${type === 'broadcast' ? '#0D3CFC' : '#e0e0e0'}`,
+              borderRadius: "8px",
+              backgroundColor: type === 'broadcast' ? 'rgba(13,60,252,0.05)' : 'transparent',
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+          >
+            <MegaphoneIcon size={20} color={type === 'broadcast' ? '#0D3CFC' : '#666'} />
+            <span style={{
+              fontWeight: type === 'broadcast' ? 600 : 400,
+              color: type === 'broadcast' ? '#0D3CFC' : '#666',
+            }}>
+              Broadcast
+            </span>
+          </button>
+          <button
+            onClick={() => setType('announcement')}
+            style={{
+              flex: 1,
+              padding: "12px",
+              border: `2px solid ${type === 'announcement' ? '#0D3CFC' : '#e0e0e0'}`,
+              borderRadius: "8px",
+              backgroundColor: type === 'announcement' ? 'rgba(13,60,252,0.05)' : 'transparent',
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+          >
+            <BulletinIcon size={20} color={type === 'announcement' ? '#0D3CFC' : '#666'} />
+            <span style={{
+              fontWeight: type === 'announcement' ? 600 : 400,
+              color: type === 'announcement' ? '#0D3CFC' : '#666',
+            }}>
+              Pengumuman
+            </span>
+          </button>
+        </div>
+
+        {/* User Selection */}
+        {type === 'broadcast' && (
+          <div style={{
+            marginBottom: "16px",
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}>
+              <span style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#333",
+              }}>
+                Pilih User ({selectedUsers.length} dipilih)
+              </span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  onClick={selectAllUsers}
+                  style={{
+                    fontSize: "12px",
+                    color: "#0D3CFC",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Pilih Semua
+                </button>
+                <button
+                  onClick={deselectAllUsers}
+                  style={{
+                    fontSize: "12px",
+                    color: "#999",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Hapus Semua
+                </button>
+              </div>
+            </div>
+            <div style={{
+              maxHeight: "200px",
+              overflowY: "auto",
+              border: "1px solid #e8e8e8",
+              borderRadius: "8px",
+              padding: "8px",
+            }}>
+              {users.filter(u => u.id !== user.uid).map((u) => (
+                <label
+                  key={u.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "6px 10px",
+                    cursor: "pointer",
+                    borderRadius: "4px",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(u.id)}
+                    onChange={() => toggleUser(u.id)}
+                    style={{ accentColor: "#0D3CFC" }}
+                  />
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                      alt={u.email}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    {u.online && (
+                      <span style={{
+                        position: "absolute",
+                        bottom: "1px",
+                        right: "1px",
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        backgroundColor: "#22c55e",
+                        border: "2px solid #fff",
+                      }} />
+                    )}
+                  </div>
+                  <span style={{ fontSize: "14px", color: "#333" }}>
+                    {u.displayName || u.email || "User"}
+                  </span>
+                  <span style={{
+                    fontSize: "11px",
+                    color: u.online ? "#22c55e" : "#999",
+                    marginLeft: "auto",
+                  }}>
+                    {u.online ? "Online" : "Offline"}
+                  </span>
+                </label>
+              ))}
+              {users.filter(u => u.id !== user.uid).length === 0 && (
+                <div style={{ padding: "20px", textAlign: "center", color: "#999", fontSize: "14px" }}>
+                  Belum ada user lain
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {type === 'announcement' && (
+          <div style={{
+            marginBottom: "16px",
+            padding: "12px",
+            backgroundColor: "#f0f4ff",
+            borderRadius: "8px",
+            border: "1px solid #d0dfff",
+          }}>
+            <span style={{
+              fontSize: "14px",
+              color: "#0D3CFC",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <BulletinIcon size={18} color="#0D3CFC" />
+              Pengumuman akan dikirim ke SEMUA user
+            </span>
+          </div>
+        )}
+
+        {/* Message Input */}
+        <div style={{
+          marginBottom: "16px",
+        }}>
+          <label style={{
+            display: "block",
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "#333",
+            marginBottom: "8px",
+          }}>
+            Pesan
+          </label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={`Tulis ${type === 'broadcast' ? 'broadcast' : 'pengumuman'}...`}
+            style={{
+              width: "100%",
+              height: "100px",
+              padding: "12px",
+              border: "1px solid #e8e8e8",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontFamily: FONT_FAMILY,
+              resize: "vertical",
+              outline: "none",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+            onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !message.trim() || (type === 'broadcast' && selectedUsers.length === 0)}
+          style={{
+            width: "100%",
+            padding: "14px",
+            backgroundColor: (isSubmitting || !message.trim() || (type === 'broadcast' && selectedUsers.length === 0)) ? "#ccc" : "#0D3CFC",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: 600,
+            cursor: (isSubmitting || !message.trim() || (type === 'broadcast' && selectedUsers.length === 0)) ? "not-allowed" : "pointer",
+            fontFamily: FONT_FAMILY,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            transition: "background 0.2s",
+          }}
+        >
+          {isSubmitting ? (
+            <span>Mengirim...</span>
+          ) : (
+            <>
+              <SendIcon size={18} />
+              Kirim {type === 'broadcast' ? 'Broadcast' : 'Pengumuman'}
+            </>
+          )}
+        </button>
+
+        <div style={{
+          marginTop: "12px",
+          fontSize: "12px",
+          color: "#999",
+          textAlign: "center",
+        }}>
+          {type === 'broadcast' 
+            ? `Broadcast akan dikirim ke ${selectedUsers.length} user yang dipilih`
+            : 'Pengumuman akan dikirim ke semua user'
+          }
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -252,6 +788,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [showAddUser, setShowAddUser] = useState(false);
   const [userBio, setUserBio] = useState("");
   const [unreadMessages, setUnreadMessages] = useState<{chatId: string, senderName: string, text: string, type: string}[]>([]);
+  const [showBroadcast, setShowBroadcast] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -260,6 +798,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (user && user.email) {
+      setIsAdmin(user.email === ADMIN_EMAIL);
+    }
+  }, [user]);
 
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
@@ -359,8 +904,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return () => unsubscribe();
   }, [db, selectedChat, isMounted]);
 
-  // Mark chat as read function
-  const markChatAsRead = async (chatId: string) => {
+  // Mark chat as read function  const markChatAsRead = async (chatId: string) => {
     if (!db || !user) return;
     
     try {
@@ -717,6 +1261,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return unreadMessages.filter(u => u.chatId === chatId);
   };
 
+  // Get chat type label
+  const getChatTypeLabel = (chat: Chat) => {
+    if (chat.isBroadcast) return "📢 Broadcast";
+    if (chat.isAnnouncement) return "📋 Pengumuman";
+    if (chat.type === 'group') return "👥 Grup";
+    return "💬 Personal";
+  };
+
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
 
   if (!user) {
@@ -822,6 +1374,19 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: "15px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                 {user.displayName || user.email || "User"}
+                {isAdmin && (
+                  <span style={{
+                    fontSize: "10px",
+                    backgroundColor: "#FFD700",
+                    color: "#000",
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    marginLeft: "8px",
+                    fontWeight: 700,
+                  }}>
+                    ADMIN
+                  </span>
+                )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <BlinkingDots active={true} />
@@ -922,7 +1487,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }}
             />
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
               onClick={() => {
                 setShowNewChat(!showNewChat);
@@ -973,6 +1538,33 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               <GroupIcon size={16} />
               Grup Baru
             </button>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => setShowBroadcast(true)}
+                  style={{
+                    flex: 1,
+                    padding: "6px 12px",
+                    backgroundColor: "#FFD700",
+                    color: "#000",
+                    border: "1px solid #FFD700",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                    transition: "all 0.2s ease",
+                    fontWeight: 600,
+                  }}
+                >
+                  <MegaphoneIcon size={16} color="#000" />
+                  Broadcast
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -1154,6 +1746,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             const displayPhoto = chat.type === 'user' && otherUser ? (otherUser.photoURL || getUserPhoto(otherUser.email)) : (chat.photo || getUserPhoto());
             const isOnline = chat.type === 'user' && otherUser ? otherUser.online : false;
             const chatUnreadMessages = getUnreadMessagesForChat(chat.id);
+            const chatTypeLabel = getChatTypeLabel(chat);
             
             return (
               <div
@@ -1203,6 +1796,16 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         border: "2px solid #0D3CFC",
                       }} />
                     )}
+                    {(chat.isBroadcast || chat.isAnnouncement) && (
+                      <span style={{
+                        position: "absolute",
+                        top: "-4px",
+                        right: "-4px",
+                        fontSize: "14px",
+                      }}>
+                        {chat.isBroadcast ? "📢" : "📋"}
+                      </span>
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ 
@@ -1213,6 +1816,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
+                      flexWrap: "wrap",
                     }}>
                       {displayName}
                       {chat.type === 'group' && (
@@ -1223,6 +1827,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       {chat.type === 'group' && chat.adminId === user.uid && (
                         <span style={{ fontSize: "8px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           Admin
+                        </span>
+                      )}
+                      {(chat.isBroadcast || chat.isAnnouncement) && (
+                        <span style={{
+                          fontSize: "8px",
+                          backgroundColor: chat.isBroadcast ? "#FFD700" : "#00BFFF",
+                          color: "#000",
+                          padding: "1px 6px",
+                          borderRadius: "3px",
+                          fontWeight: 600,
+                        }}>
+                          {chat.isBroadcast ? "BROADCAST" : "PENGUMUMAN"}
                         </span>
                       )}
                     </div>
@@ -1248,7 +1864,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         lineHeight: 1.2,
                         wordBreak: "break-word",
                       }}>
-                        from {msg.senderName} {msg.type === 'group' ? 'grup' : 'personal'} : {msg.text}
+                        from {msg.senderName} {msg.type === 'group' ? 'grup' : msg.type === 'broadcast' ? 'broadcast' : msg.type === 'announcement' ? 'pengumuman' : 'personal'} : {msg.text}
                       </div>
                     ))}
                     
@@ -1344,6 +1960,16 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       border: "2px solid #0D3CFC",
                     }} />
                   )}
+                  {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && (
+                    <span style={{
+                      position: "absolute",
+                      top: "-4px",
+                      right: "-4px",
+                      fontSize: "16px",
+                    }}>
+                      {selectedChat.isBroadcast ? "📢" : "📋"}
+                    </span>
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
@@ -1360,6 +1986,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         Admin
                       </span>
                     )}
+                    {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && (
+                      <span style={{
+                        fontSize: "9px",
+                        backgroundColor: selectedChat.isBroadcast ? "#FFD700" : "#00BFFF",
+                        color: "#000",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                      }}>
+                        {selectedChat.isBroadcast ? "BROADCAST" : "PENGUMUMAN"}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                     {selectedChat.type === 'user' && getOtherParticipant(selectedChat) && (
@@ -1371,6 +2009,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     {selectedChat.type === 'group' && (
                       <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>
                         {selectedChat.memberCount || 0} anggota
+                      </span>
+                    )}
+                    {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && (
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>
+                        {selectedChat.memberCount || 0} penerima
                       </span>
                     )}
                   </div>
@@ -1438,6 +2081,24 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         Submit
                       </button>
                     </div>
+                  )}
+                  {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && isAdmin && (
+                    <button
+                      onClick={() => setShowBroadcast(true)}
+                      style={{
+                        padding: "4px 12px",
+                        backgroundColor: "#FFD700",
+                        color: "#000",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        fontWeight: 600,
+                      }}
+                    >
+                      Kirim Lagi
+                    </button>
                   )}
                 </div>
               </div>
@@ -1723,6 +2384,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         )}
       </div>
+
+      {/* Broadcast/Announcement Modal */}
+      {showBroadcast && isAdmin && (
+        <BroadcastAnnouncement
+          user={user}
+          db={db}
+          onClose={() => setShowBroadcast(false)}
+        />
+      )}
     </div>
   );
 };
@@ -2336,6 +3006,19 @@ export default function LiveChatPage(): React.JSX.Element {
                 {user ? (
                   <>
                     Hi, {user.displayName || user.email || "User"} 👋
+                    {user.email === ADMIN_EMAIL && (
+                      <span style={{
+                        fontSize: "16px",
+                        backgroundColor: "#FFD700",
+                        color: "#000",
+                        padding: "2px 12px",
+                        borderRadius: "4px",
+                        marginLeft: "12px",
+                        fontWeight: 700,
+                      }}>
+                        ADMIN
+                      </span>
+                    )}
                   </>
                 ) : (
                   <>
