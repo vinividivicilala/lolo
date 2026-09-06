@@ -268,7 +268,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeTimeout | null>(null);
   const slidePanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -365,7 +365,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       });
       setMessages(msgList);
       
-      // Mark as read
       const markAsRead = async () => {
         if (selectedChat.type !== 'broadcast' && selectedChat.type !== 'announcement') {
           const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
@@ -610,7 +609,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const sendBroadcast = async () => {
     if (!db || !user || !broadcastText.trim()) return;
     try {
-      // Kirim ke broadcast chat
       const broadcastChat = chats.find(c => c.type === 'broadcast');
       if (broadcastChat) {
         await addDoc(collection(db, "chats", broadcastChat.id, "messages"), {
@@ -629,7 +627,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         });
       }
       
-      // Kirim ke semua user chat
       const userChats = chats.filter(c => c.type === 'user' || c.type === 'group');
       for (const chat of userChats) {
         await addDoc(collection(db, "chats", chat.id, "messages"), {
@@ -657,7 +654,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
   const sendAnnouncement = async () => {
     if (!db || !user || !announcementText.trim()) return;
     try {
-      // Kirim ke announcement chat
       const announcementChat = chats.find(c => c.type === 'announcement');
       if (announcementChat) {
         await addDoc(collection(db, "chats", announcementChat.id, "messages"), {
@@ -676,7 +672,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         });
       }
       
-      // Kirim ke semua user chat
       const userChats = chats.filter(c => c.type === 'user' || c.type === 'group');
       for (const chat of userChats) {
         await addDoc(collection(db, "chats", chat.id, "messages"), {
@@ -757,7 +752,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
       setSelectedUserProfile(userInfo);
       setSlidePanelContent('profile');
       setShowSlidePanel(true);
-      // Animate slide in
       if (slidePanelRef.current) {
         gsap.fromTo(slidePanelRef.current,
           { x: '100%', opacity: 0 },
@@ -880,24 +874,42 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             borderBottom: "1px solid rgba(255,255,255,0.1)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <img
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
-                alt={user.displayName || "User"}
+              <div
                 style={{
                   width: "40px",
                   height: "40px",
                   borderRadius: "50%",
-                  objectFit: "cover",
+                  overflow: "hidden",
                   cursor: "pointer",
+                  backgroundColor: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onClick={() => openUserProfile(user.uid)}
-              />
+              >
+                <img
+                  src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                  alt={user.displayName || "User"}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                   {user.displayName || user.email || "User"}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                  <PulsingDots active={true} />
+                  <span style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: "#000000",
+                    display: "inline-block",
+                  }} />
                   <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                     Online
                   </span>
@@ -958,6 +970,34 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               />
             </div>
           </div>
+
+          {/* Tombol Add Chat dan Add Grup - User View */}
+          <div style={{
+            padding: "8px 16px",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            gap: "8px",
+          }}>
+            <button
+              onClick={() => setShowCreateGroup(true)}
+              style={{
+                flex: 1,
+                padding: "6px 12px",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                color: "#ffffff",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)"}
+            >
+              + Grup
+            </button>
+          </div>
           
           <div style={{ flex: 1, overflowY: "auto" }}>
             {filteredChats.map((chat) => {
@@ -965,11 +1005,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               const unread = getUnreadCount(chat);
               const onlineCount = getOnlineMembers(chat);
               const typingText = getTypingUsers(chat);
-              
-              let icon = "";
-              if (chat.type === 'broadcast') icon = "📢 ";
-              if (chat.type === 'announcement') icon = "📢 ";
-              if (chat.type === 'group') icon = "👥 ";
               
               return (
                 <div
@@ -984,14 +1019,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src={chat.photo || getUserPhoto(undefined, undefined)}
-                      alt={chat.name}
+                    <div
                       style={{
                         width: "40px",
                         height: "40px",
                         borderRadius: "50%",
-                        objectFit: "cover",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         cursor: chat.type === 'group' ? 'pointer' : 'default',
                       }}
                       onClick={(e) => {
@@ -1000,7 +1037,17 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                           openGroupPanel(chat);
                         }
                       }}
-                    />
+                    >
+                      <img
+                        src={chat.photo || getUserPhoto(undefined, undefined)}
+                        alt={chat.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ 
                         fontWeight: isActive ? 600 : 500, 
@@ -1011,7 +1058,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         alignItems: "center",
                         gap: "4px",
                       }}>
-                        {icon}{chat.name}
+                        {chat.name}
                         {chat.type === 'group' && (
                           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
                             ({chat.memberCount || 0})
@@ -1068,14 +1115,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 flexShrink: 0,
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
-                  <img
-                    src={selectedChat.photo || getUserPhoto(undefined, undefined)}
-                    alt={selectedChat.name}
+                  <div
                     style={{
                       width: "36px",
                       height: "36px",
                       borderRadius: "50%",
-                      objectFit: "cover",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       cursor: selectedChat.type === 'group' ? 'pointer' : 'default',
                     }}
                     onClick={() => {
@@ -1083,10 +1132,19 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         openGroupPanel(selectedChat);
                       }
                     }}
-                  />
+                  >
+                    <img
+                      src={selectedChat.photo || getUserPhoto(undefined, undefined)}
+                      alt={selectedChat.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
-                      {selectedChat.type === 'broadcast' ? "📢 " : selectedChat.type === 'announcement' ? "📢 " : ""}
                       {selectedChat.name}
                       {selectedChat.type === 'group' && (
                         <span style={{ fontSize: "11px", color: "#999", marginLeft: "6px" }}>
@@ -1150,19 +1208,30 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         }}
                       >
                         {!isMine && (
-                          <img
-                            src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
-                            alt={msg.senderName}
+                          <div
                             style={{
                               width: "28px",
                               height: "28px",
                               borderRadius: "50%",
-                              objectFit: "cover",
-                              flexShrink: 0,
+                              overflow: "hidden",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                               cursor: "pointer",
                             }}
                             onClick={() => openUserProfile(msg.senderId)}
-                          />
+                          >
+                            <img
+                              src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
+                              alt={msg.senderName}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
                         )}
                         <div
                           style={{
@@ -1354,18 +1423,30 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             <div style={{ padding: "20px" }}>
               {slidePanelContent === 'profile' && selectedUserProfile && (
                 <div style={{ textAlign: "center" }}>
-                  <img
-                    src={selectedUserProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUserProfile.email || "User")}&background=0D3CFC&color=fff&size=128`}
-                    alt={selectedUserProfile.displayName || "User"}
+                  <div
                     style={{
                       width: "100px",
                       height: "100px",
                       borderRadius: "50%",
-                      objectFit: "cover",
+                      overflow: "hidden",
                       margin: "0 auto 16px",
                       border: "3px solid #0D3CFC",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                  />
+                  >
+                    <img
+                      src={selectedUserProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUserProfile.email || "User")}&background=0D3CFC&color=fff&size=128`}
+                      alt={selectedUserProfile.displayName || "User"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                   <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: "0 0 4px" }}>
                     {selectedUserProfile.displayName || selectedUserProfile.email || "User"}
                   </h3>
@@ -1383,10 +1464,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       width: "8px",
                       height: "8px",
                       borderRadius: "50%",
-                      backgroundColor: selectedUserProfile.online ? "#22c55e" : "#999",
+                      backgroundColor: selectedUserProfile.online ? "#000000" : "#cccccc",
                       display: "inline-block",
                     }} />
-                    <span style={{ fontSize: "13px", color: selectedUserProfile.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+                    <span style={{ fontSize: "13px", color: selectedUserProfile.online ? "#000000" : "#999", fontFamily: FONT_FAMILY }}>
                       {selectedUserProfile.online ? "Online" : "Offline"}
                     </span>
                   </div>
@@ -1448,16 +1529,33 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                             fontFamily: FONT_FAMILY,
                             fontSize: "13px",
                           }}>
-                            <img
-                              src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64`}
-                              alt={member.email}
-                              style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
-                            />
+                            <div
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                backgroundColor: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <img
+                                src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                                alt={member.email}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            </div>
                             <span>{member.displayName || member.email || "User"}</span>
                             <span style={{
                               marginLeft: "auto",
                               fontSize: "10px",
-                              color: member.online ? "#22c55e" : "#999",
+                              color: member.online ? "#000000" : "#999",
                             }}>
                               {member.online ? "Online" : "Offline"}
                             </span>
@@ -1499,11 +1597,28 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                             }}
                             style={{ accentColor: "#0D3CFC" }}
                           />
-                          <img
-                            src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
-                            alt={u.email}
-                            style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
-                          />
+                          <div
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              overflow: "hidden",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <img
+                              src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                              alt={u.email}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
                           <span>{u.displayName || u.email || "User"}</span>
                         </label>
                       ))}
@@ -1538,6 +1653,170 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             </div>
           </div>
         )}
+
+        {/* Create Group Input - User View (tanpa modal) */}
+        {showCreateGroup && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}>
+            <div style={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              padding: "28px",
+              maxWidth: "460px",
+              width: "90%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                  Buat Grup
+                </h3>
+                <button
+                  onClick={() => setShowCreateGroup(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "22px",
+                    cursor: "pointer",
+                    color: "#999",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                  Nama Grup
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Masukkan nama grup..."
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "2px solid #e8e8e8",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontFamily: FONT_FAMILY,
+                    outline: "none",
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                  onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                />
+              </div>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                  Pilih Anggota
+                </label>
+                <div style={{
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                  border: "1px solid #e8e8e8",
+                  borderRadius: "8px",
+                  padding: "8px",
+                }}>
+                  {users.filter(u => u.id !== user.uid).map((u) => (
+                    <label key={u.id} style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "13px",
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(u.id)}
+                        onChange={() => {
+                          if (selectedUsers.includes(u.id)) {
+                            setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                          } else {
+                            setSelectedUsers([...selectedUsers, u.id]);
+                          }
+                        }}
+                        style={{ accentColor: "#0D3CFC" }}
+                      />
+                      <div
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          backgroundColor: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <img
+                          src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                          alt={u.email}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+                      <span>{u.displayName || u.email || "User"}</span>
+                    </label>
+                  ))}
+                  {users.filter(u => u.id !== user.uid).length === 0 && (
+                    <div style={{ padding: "12px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+                      Belum ada user terdaftar
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => setShowCreateGroup(false)}
+                  style={{
+                    padding: "6px 18px",
+                    backgroundColor: "transparent",
+                    color: "#666",
+                    border: "1px solid #ccc",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={createGroup}
+                  disabled={!groupName.trim() || selectedUsers.length === 0}
+                  style={{
+                    padding: "6px 18px",
+                    backgroundColor: (groupName.trim() && selectedUsers.length > 0) ? "#0D3CFC" : "#ccc",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    cursor: (groupName.trim() && selectedUsers.length > 0) ? "pointer" : "not-allowed",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Buat Grup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1566,17 +1845,29 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img
-            src={AGENT_PHOTO}
-            alt={AGENT_NAME}
+          <div
             style={{
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              objectFit: "cover",
+              overflow: "hidden",
+              backgroundColor: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               border: "2px solid rgba(255,255,255,0.3)",
             }}
-          />
+          >
+            <img
+              src={AGENT_PHOTO}
+              alt={AGENT_NAME}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
@@ -1682,7 +1973,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       </div>
 
-      {/* Create Group Modal */}
+      {/* Create Group - Admin View (tanpa modal) */}
       {showCreateGroup && (
         <div style={{
           position: "fixed",
@@ -1776,11 +2067,28 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       }}
                       style={{ accentColor: "#0D3CFC" }}
                     />
-                    <img
-                      src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
-                      alt={u.email}
-                      style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
-                    />
+                    <div
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <img
+                        src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                        alt={u.email}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                     <span>{u.displayName || u.email || "User"}</span>
                   </label>
                 ))}
@@ -1829,7 +2137,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       )}
 
-      {/* Broadcast Modal */}
+      {/* Broadcast Input - Admin View (tanpa modal) */}
       {showBroadcast && (
         <div style={{
           position: "fixed",
@@ -1929,7 +2237,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
         </div>
       )}
 
-      {/* Announcement Modal */}
+      {/* Announcement Input - Admin View (tanpa modal) */}
       {showAnnouncement && (
         <div style={{
           position: "fixed",
@@ -2076,11 +2384,6 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
               const unread = getUnreadCount(chat);
               const onlineCount = getOnlineMembers(chat);
               
-              let icon = "";
-              if (chat.type === 'broadcast') icon = "📢 ";
-              if (chat.type === 'announcement') icon = "📢 ";
-              if (chat.type === 'group') icon = "👥 ";
-              
               return (
                 <div
                   key={chat.id}
@@ -2094,14 +2397,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src={chat.photo || getUserPhoto(undefined, undefined)}
-                      alt={chat.name}
+                    <div
                       style={{
                         width: "36px",
                         height: "36px",
                         borderRadius: "50%",
-                        objectFit: "cover",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         cursor: chat.type === 'group' ? 'pointer' : 'default',
                       }}
                       onClick={(e) => {
@@ -2110,7 +2415,17 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                           openGroupPanel(chat);
                         }
                       }}
-                    />
+                    >
+                      <img
+                        src={chat.photo || getUserPhoto(undefined, undefined)}
+                        alt={chat.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ 
                         fontWeight: isActive ? 600 : 500, 
@@ -2121,7 +2436,7 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         alignItems: "center",
                         gap: "4px",
                       }}>
-                        {icon}{chat.name}
+                        {chat.name}
                         {chat.type === 'group' && (
                           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
                             ({chat.memberCount || 0})
@@ -2179,14 +2494,16 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                 flexShrink: 0,
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
-                  <img
-                    src={selectedChat.photo || getUserPhoto(undefined, undefined)}
-                    alt={selectedChat.name}
+                  <div
                     style={{
                       width: "36px",
                       height: "36px",
                       borderRadius: "50%",
-                      objectFit: "cover",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       cursor: selectedChat.type === 'group' ? 'pointer' : 'default',
                     }}
                     onClick={() => {
@@ -2194,10 +2511,19 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         openGroupPanel(selectedChat);
                       }
                     }}
-                  />
+                  >
+                    <img
+                      src={selectedChat.photo || getUserPhoto(undefined, undefined)}
+                      alt={selectedChat.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
-                      {selectedChat.type === 'broadcast' ? "📢 " : selectedChat.type === 'announcement' ? "📢 " : selectedChat.type === 'group' ? "👥 " : ""}
                       {selectedChat.name}
                       {selectedChat.type === 'group' && (
                         <span style={{ fontSize: "11px", color: "#999", marginLeft: "6px" }}>
@@ -2261,19 +2587,30 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                         }}
                       >
                         {!isMine && (
-                          <img
-                            src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
-                            alt={msg.senderName}
+                          <div
                             style={{
                               width: "28px",
                               height: "28px",
                               borderRadius: "50%",
-                              objectFit: "cover",
-                              flexShrink: 0,
+                              overflow: "hidden",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                               cursor: "pointer",
                             }}
                             onClick={() => openUserProfile(msg.senderId)}
-                          />
+                          >
+                            <img
+                              src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
+                              alt={msg.senderName}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
                         )}
                         <div
                           style={{
@@ -2465,18 +2802,30 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
             <div style={{ padding: "20px" }}>
               {slidePanelContent === 'profile' && selectedUserProfile && (
                 <div style={{ textAlign: "center" }}>
-                  <img
-                    src={selectedUserProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUserProfile.email || "User")}&background=0D3CFC&color=fff&size=128`}
-                    alt={selectedUserProfile.displayName || "User"}
+                  <div
                     style={{
                       width: "100px",
                       height: "100px",
                       borderRadius: "50%",
-                      objectFit: "cover",
+                      overflow: "hidden",
                       margin: "0 auto 16px",
                       border: "3px solid #0D3CFC",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                  />
+                  >
+                    <img
+                      src={selectedUserProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUserProfile.email || "User")}&background=0D3CFC&color=fff&size=128`}
+                      alt={selectedUserProfile.displayName || "User"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                   <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: "0 0 4px" }}>
                     {selectedUserProfile.displayName || selectedUserProfile.email || "User"}
                   </h3>
@@ -2494,10 +2843,10 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                       width: "8px",
                       height: "8px",
                       borderRadius: "50%",
-                      backgroundColor: selectedUserProfile.online ? "#22c55e" : "#999",
+                      backgroundColor: selectedUserProfile.online ? "#000000" : "#cccccc",
                       display: "inline-block",
                     }} />
-                    <span style={{ fontSize: "13px", color: selectedUserProfile.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+                    <span style={{ fontSize: "13px", color: selectedUserProfile.online ? "#000000" : "#999", fontFamily: FONT_FAMILY }}>
                       {selectedUserProfile.online ? "Online" : "Offline"}
                     </span>
                   </div>
@@ -2559,16 +2908,33 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                             fontFamily: FONT_FAMILY,
                             fontSize: "13px",
                           }}>
-                            <img
-                              src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64`}
-                              alt={member.email}
-                              style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
-                            />
+                            <div
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                backgroundColor: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <img
+                                src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                                alt={member.email}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            </div>
                             <span>{member.displayName || member.email || "User"}</span>
                             <span style={{
                               marginLeft: "auto",
                               fontSize: "10px",
-                              color: member.online ? "#22c55e" : "#999",
+                              color: member.online ? "#000000" : "#999",
                             }}>
                               {member.online ? "Online" : "Offline"}
                             </span>
@@ -2610,11 +2976,28 @@ const LiveChat = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db
                             }}
                             style={{ accentColor: "#0D3CFC" }}
                           />
-                          <img
-                            src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
-                            alt={u.email}
-                            style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
-                          />
+                          <div
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              overflow: "hidden",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <img
+                              src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                              alt={u.email}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
                           <span>{u.displayName || u.email || "User"}</span>
                         </label>
                       ))}
