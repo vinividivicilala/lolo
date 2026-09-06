@@ -122,6 +122,30 @@ const BulletinIcon = ({ size = 24, color = "currentColor" }: { size?: number, co
   </svg>
 );
 
+// TAMBAHKAN DEFINISI UserPlusIcon
+const UserPlusIcon = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M20 8V14M17 11H23" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+const GroupIcon = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M23 21V19C22.7356 17.1124 21.7405 15.3591 20.1747 14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 3.12891C17.5659 3.48813 18.9993 4.29577 20.1747 5.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const AddUserIcon = ({ size = 16, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 // Blinking Dots Component
 const BlinkingDots = ({ active }: { active: boolean }) => {
   return (
@@ -2100,7 +2124,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         gap: "4px",
                       }}
                     >
-                      <AddUserIcon size={14} />
+                      <AddUserIcon size={14} color="#ffffff" />
                       Add User
                     </button>
                   )}
