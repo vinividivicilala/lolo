@@ -199,6 +199,8 @@ interface Chat {
   typing: { userId: string; userName: string }[];
   bio?: string;
   memberCount?: number;
+  lastMessageSender?: string;
+  lastMessageSenderId?: string;
 }
 
 interface Message {
@@ -240,6 +242,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
   const [showAddUser, setShowAddUser] = useState(false);
   const [userBio, setUserBio] = useState("");
+  const [unreadMessages, setUnreadMessages] = useState<{chatId: string, senderName: string, text: string, type: string}[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -318,7 +321,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return () => unsubscribe();
   }, [db, user, selectedChat, isMounted]);
 
-  // Load messages for selected chat
+  // Load messages for selected chat and track unread
   useEffect(() => {
     if (!db || !selectedChat || !isMounted) return;
     
@@ -329,10 +332,27 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgList: Message[] = [];
+      const unreadList: {chatId: string, senderName: string, text: string, type: string}[] = [];
+      
       snapshot.forEach((doc) => {
-        msgList.push({ id: doc.id, ...doc.data() } as Message);
+        const data = doc.data();
+        const msg = { id: doc.id, ...data } as Message;
+        msgList.push(msg);
+        
+        // Track unread messages (not from current user and not read)
+        if (data.senderId !== user.uid && !data.read) {
+          const chat = chats.find(c => c.id === selectedChat.id);
+          unreadList.push({
+            chatId: selectedChat.id,
+            senderName: data.senderName || "User",
+            text: data.text || "",
+            type: chat?.type || 'user'
+          });
+        }
       });
+      
       setMessages(msgList);
+      setUnreadMessages(unreadList);
       
       // Mark messages as read
       const markAsRead = async () => {
@@ -348,6 +368,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           await updateDoc(doc(db, "chats", selectedChat.id), {
             unreadCount: 0
           });
+          // Clear unread messages for this chat
+          setUnreadMessages(prev => prev.filter(u => u.chatId !== selectedChat.id));
         }
       };
       markAsRead();
@@ -394,6 +416,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       await updateDoc(chatRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+        lastMessageSenderId: user.uid,
         unreadCount: increment(1)
       });
       
@@ -447,6 +471,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         createdAt: serverTimestamp(),
         lastMessage: `Grup "${groupName.trim()}" dibuat`,
         lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+        lastMessageSenderId: user.uid,
         unreadCount: 0,
         typing: [],
         bio: "",
@@ -489,6 +515,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         createdAt: serverTimestamp(),
         lastMessage: "Chat dimulai",
         lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+        lastMessageSenderId: user.uid,
         unreadCount: 0,
         typing: [],
         bio: "",
@@ -496,7 +524,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       });
       
       setShowNewChat(false);
-      setSelectedChat({ id: chatRef.id, type: 'user', name: targetUser.displayName || targetUser.email || "User", photo: targetUser.photoURL || "", members: [user.uid, targetUserId], adminId: user.uid, createdAt: serverTimestamp(), lastMessage: "Chat dimulai", lastMessageTime: serverTimestamp(), unreadCount: 0, typing: [], bio: "", memberCount: 2 });
+      setSelectedChat({ id: chatRef.id, type: 'user', name: targetUser.displayName || targetUser.email || "User", photo: targetUser.photoURL || "", members: [user.uid, targetUserId], adminId: user.uid, createdAt: serverTimestamp(), lastMessage: "Chat dimulai", lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User", lastMessageSenderId: user.uid, unreadCount: 0, typing: [], bio: "", memberCount: 2 });
     } catch (error) {
       console.error("Error creating chat:", error);
     }
@@ -606,6 +634,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     if (!msg.delivered) return "Mengirim...";
     if (msg.read) return "Dibaca";
     return "Terkirim";
+  };
+
+  // Get unread messages for display
+  const getUnreadMessagesForChat = (chatId: string) => {
+    return unreadMessages.filter(u => u.chatId === chatId);
   };
 
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
@@ -743,7 +776,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               <span>Logout</span>
             </button>
           </div>
-          {/* User Bio - bisa di ketik dan submit */}
+          {/* User Bio */}
           <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
             <input
               type="text"
@@ -780,7 +813,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         </div>
         
-        {/* Search - text color biru */}
+        {/* Search */}
         <div style={{
           padding: "10px 16px",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -867,7 +900,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         </div>
 
-        {/* Chat Baru List - No Modal */}
+        {/* Chat Baru List */}
         {showNewChat && (
           <div style={{
             padding: "10px 16px",
@@ -950,7 +983,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         )}
 
-        {/* Grup Baru - No Modal */}
+        {/* Grup Baru */}
         {showCreateGroup && (
           <div style={{
             padding: "10px 16px",
@@ -1044,7 +1077,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             const displayName = chat.type === 'user' && otherUser ? (otherUser.displayName || otherUser.email || "User") : chat.name;
             const displayPhoto = chat.type === 'user' && otherUser ? (otherUser.photoURL || getUserPhoto(otherUser.email)) : (chat.photo || getUserPhoto());
             const isOnline = chat.type === 'user' && otherUser ? otherUser.online : false;
-            const chatBio = chat.type === 'user' && otherUser ? otherUser.bio : chat.bio;
+            const chatUnreadMessages = getUnreadMessagesForChat(chat.id);
             
             return (
               <div
@@ -1123,10 +1156,25 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         {typingText}
                       </div>
                     )}
-                    {/* Last message - riwayat chat baru otomatis */}
+                    {/* Last message */}
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                       {chat.lastMessage || "Mulai chat..."}
                     </div>
+                    
+                    {/* UNREAD MESSAGES - Display below bio with 30px white text */}
+                    {chatUnreadMessages.length > 0 && chatUnreadMessages.map((msg, idx) => (
+                      <div key={idx} style={{
+                        fontSize: "30px",
+                        color: "#ffffff",
+                        fontFamily: FONT_FAMILY,
+                        fontWeight: 600,
+                        marginTop: "2px",
+                        lineHeight: 1.2,
+                      }}>
+                        from {msg.senderName} {msg.type === 'group' ? 'grup' : 'personal'} : {msg.text}
+                      </div>
+                    ))}
+                    
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", flexWrap: "wrap" }}>
                       {chat.type === 'user' ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -1318,7 +1366,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
             </div>
 
-            {/* Add User to Group - Expandable */}
+            {/* Add User to Group */}
             {showAddUser && selectedChat.type === 'group' && selectedChat.adminId === user.uid && (
               <div style={{
                 padding: "8px 20px",
@@ -1385,7 +1433,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
             )}
 
-            {/* Message Search - text color biru */}
+            {/* Message Search */}
             <div style={{
               padding: "8px 20px",
               backgroundColor: "#ffffff",
