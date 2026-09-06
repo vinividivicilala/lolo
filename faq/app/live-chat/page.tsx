@@ -106,19 +106,19 @@ const SearchIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const MegaphoneIcon = ({ size = 24 }: { size?: number }) => (
+const MegaphoneIcon = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 10L22 4V20L2 14V10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M6 14V19C6 20.1046 6.89543 21 8 21H10C11.1046 21 12 20.1046 12 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2 10L22 4V20L2 14V10Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 14V19C6 20.1046 6.89543 21 8 21H10C11.1046 21 12 20.1046 12 19V15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
-const BulletinIcon = ({ size = 24 }: { size?: number }) => (
+const BulletinIcon = ({ size = 24, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 4H20V20H4V4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M8 8H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M8 12H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M8 16H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 4H20V20H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 8H16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M8 12H14" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M8 16H12" stroke={color} strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -221,11 +221,21 @@ interface User {
 }
 
 // ===== BROADCAST & ANNOUNCEMENT COMPONENT =====
-const BroadcastAnnouncement = ({ user, db, onClose }: { user: any; db: any; onClose: () => void }) => {
+const BroadcastAnnouncement = ({ 
+  user, 
+  db, 
+  onClose,
+  initialType = 'broadcast'
+}: { 
+  user: any; 
+  db: any; 
+  onClose: () => void;
+  initialType?: 'broadcast' | 'announcement';
+}) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [message, setMessage] = useState("");
-  const [type, setType] = useState<'broadcast' | 'announcement'>('broadcast');
+  const [type, setType] = useState<'broadcast' | 'announcement'>(initialType);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -463,7 +473,7 @@ const BroadcastAnnouncement = ({ user, db, onClose }: { user: any; db: any; onCl
             color: "#0D3CFC",
             margin: 0,
           }}>
-            Kirim Pesan
+            {type === 'broadcast' ? 'Kirim Broadcast' : 'Kirim Pengumuman'}
           </h2>
           <button
             onClick={onClose}
@@ -789,6 +799,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [userBio, setUserBio] = useState("");
   const [unreadMessages, setUnreadMessages] = useState<{chatId: string, senderName: string, text: string, type: string}[]>([]);
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [broadcastType, setBroadcastType] = useState<'broadcast' | 'announcement'>('broadcast');
   const [isAdmin, setIsAdmin] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -904,7 +915,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return () => unsubscribe();
   }, [db, selectedChat, isMounted]);
 
-  // Mark chat as read function  const markChatAsRead = async (chatId: string) => {
+  // Mark chat as read function
+  const markChatAsRead = async (chatId: string) => {
     if (!db || !user) return;
     
     try {
@@ -1487,6 +1499,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }}
             />
           </div>
+          
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
               onClick={() => {
@@ -1496,9 +1509,9 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               style={{
                 flex: 1,
                 padding: "6px 12px",
-                backgroundColor: "#0D3CFC",
+                backgroundColor: "rgba(255,255,255,0.15)",
                 color: "#ffffff",
-                border: "1px solid #0D3CFC",
+                border: "1px solid rgba(255,255,255,0.2)",
                 borderRadius: "6px",
                 fontSize: "12px",
                 cursor: "pointer",
@@ -1509,8 +1522,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 gap: "4px",
                 transition: "all 0.2s ease",
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"}
             >
-              <UserPlusIcon size={16} />
+              <UserPlusIcon size={16} color="#ffffff" />
               Chat Baru
             </button>
             <button
@@ -1521,9 +1536,9 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               style={{
                 flex: 1,
                 padding: "6px 12px",
-                backgroundColor: "#0D3CFC",
+                backgroundColor: "rgba(255,255,255,0.15)",
                 color: "#ffffff",
-                border: "1px solid #0D3CFC",
+                border: "1px solid rgba(255,255,255,0.2)",
                 borderRadius: "6px",
                 fontSize: "12px",
                 cursor: "pointer",
@@ -1534,38 +1549,81 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 gap: "4px",
                 transition: "all 0.2s ease",
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"}
             >
-              <GroupIcon size={16} />
+              <GroupIcon size={16} color="#ffffff" />
               Grup Baru
             </button>
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => setShowBroadcast(true)}
-                  style={{
-                    flex: 1,
-                    padding: "6px 12px",
-                    backgroundColor: "#FFD700",
-                    color: "#000",
-                    border: "1px solid #FFD700",
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "4px",
-                    transition: "all 0.2s ease",
-                    fontWeight: 600,
-                  }}
-                >
-                  <MegaphoneIcon size={16} color="#000" />
-                  Broadcast
-                </button>
-              </>
-            )}
           </div>
+          
+          {/* TOMBOL ADMIN: BROADCAST & PENGUMUMAN - PUTIH DENGAN TEKS BIRU */}
+          {isAdmin && (
+            <div style={{ 
+              display: "flex", 
+              gap: "8px", 
+              marginTop: "4px",
+              borderTop: "1px solid rgba(255,255,255,0.15)",
+              paddingTop: "8px",
+            }}>
+              <button
+                onClick={() => {
+                  setShowBroadcast(true);
+                  setBroadcastType('broadcast');
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  backgroundColor: "#ffffff",
+                  color: "#0D3CFC",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  transition: "all 0.2s ease",
+                  fontWeight: 600,
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ffffff"}
+              >
+                <MegaphoneIcon size={16} color="#0D3CFC" />
+                Broadcast
+              </button>
+              <button
+                onClick={() => {
+                  setShowBroadcast(true);
+                  setBroadcastType('announcement');
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  backgroundColor: "#ffffff",
+                  color: "#0D3CFC",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  transition: "all 0.2s ease",
+                  fontWeight: 600,
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ffffff"}
+              >
+                <BulletinIcon size={16} color="#0D3CFC" />
+                Pengumuman
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Chat Baru List */}
@@ -2084,18 +2142,23 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   )}
                   {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && isAdmin && (
                     <button
-                      onClick={() => setShowBroadcast(true)}
+                      onClick={() => {
+                        setShowBroadcast(true);
+                        setBroadcastType(selectedChat.isBroadcast ? 'broadcast' : 'announcement');
+                      }}
                       style={{
                         padding: "4px 12px",
-                        backgroundColor: "#FFD700",
-                        color: "#000",
-                        border: "none",
+                        backgroundColor: "#ffffff",
+                        color: "#0D3CFC",
+                        border: "1px solid rgba(255,255,255,0.3)",
                         borderRadius: "6px",
                         fontSize: "11px",
                         cursor: "pointer",
                         fontFamily: FONT_FAMILY,
                         fontWeight: 600,
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ffffff"}
                     >
                       Kirim Lagi
                     </button>
@@ -2391,6 +2454,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           user={user}
           db={db}
           onClose={() => setShowBroadcast(false)}
+          initialType={broadcastType}
         />
       )}
     </div>
