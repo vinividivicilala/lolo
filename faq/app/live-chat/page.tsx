@@ -220,6 +220,419 @@ interface User {
   joinedAt: any;
 }
 
+// ===== PROFILE PAGE COMPONENT =====
+const ProfilePage = ({ 
+  user, 
+  db, 
+  onClose,
+  isGroup = false,
+  chatData = null
+}: { 
+  user: any; 
+  db: any; 
+  onClose: () => void;
+  isGroup?: boolean;
+  chatData?: any;
+}) => {
+  const [profileUser, setProfileUser] = useState<any>(null);
+  const [groupMembers, setGroupMembers] = useState<User[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!db || !isMounted) return;
+
+    if (!isGroup && user) {
+      // Load user profile
+      const userRef = doc(db, "users", user.id || user.uid);
+      const unsubscribe = onSnapshot(userRef, (doc) => {
+        if (doc.exists()) {
+          setProfileUser({ id: doc.id, ...doc.data() });
+        }
+      });
+      return () => unsubscribe();
+    } else if (isGroup && chatData) {
+      // Load group members
+      const memberIds = chatData.members || [];
+      const unsubscribes: (() => void)[] = [];
+      
+      memberIds.forEach((memberId: string) => {
+        const userRef = doc(db, "users", memberId);
+        const unsubscribe = onSnapshot(userRef, (doc) => {
+          if (doc.exists()) {
+            setGroupMembers(prev => {
+              const exists = prev.some(m => m.id === doc.id);
+              if (!exists) {
+                return [...prev, { id: doc.id, ...doc.data() }];
+              }
+              return prev.map(m => m.id === doc.id ? { id: doc.id, ...doc.data() } : m);
+            });
+          }
+        });
+        unsubscribes.push(unsubscribe);
+      });
+
+      setProfileUser(chatData);
+      return () => {
+        unsubscribes.forEach(unsub => unsub());
+      };
+    }
+  }, [db, user, isGroup, chatData, isMounted]);
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "Belum tersedia";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  if (!isMounted) return null;
+
+  return (
+    <div style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "#0D3CFC",
+      zIndex: 10,
+      padding: "20px",
+      overflowY: "auto",
+      animation: "slideIn 0.3s ease",
+    }}>
+      <style>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
+
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "20px",
+        paddingBottom: "16px",
+        borderBottom: "1px solid rgba(255,255,255,0.15)",
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#ffffff",
+            fontSize: "24px",
+            cursor: "pointer",
+            padding: "4px 8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <span>←</span>
+          <span style={{ fontSize: "16px", fontWeight: 500 }}>Kembali</span>
+        </button>
+        <h2 style={{
+          fontSize: "20px",
+          fontWeight: 700,
+          color: "#ffffff",
+          fontFamily: FONT_FAMILY,
+          margin: 0,
+          marginLeft: "8px",
+        }}>
+          {isGroup ? "Informasi Grup" : "Profil"}
+        </h2>
+      </div>
+
+      {!isGroup && profileUser ? (
+        // User Profile
+        <div style={{
+          backgroundColor: "rgba(255,255,255,0.05)",
+          borderRadius: "12px",
+          padding: "24px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                backgroundColor: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                border: "3px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              <img
+                src={profileUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileUser.displayName || profileUser.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                alt={profileUser.displayName || "User"}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+            <div>
+              <div style={{
+                fontSize: "24px",
+                fontWeight: 700,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+              }}>
+                {profileUser.displayName || profileUser.email || "User"}
+              </div>
+              <div style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.6)",
+                fontFamily: FONT_FAMILY,
+              }}>
+                {profileUser.email || "Email tidak tersedia"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                <BlinkingDots active={profileUser.online || false} />
+                <StatusText active={profileUser.online || false} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <div style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.5)",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "4px",
+            }}>
+              Bio
+            </div>
+            <div style={{
+              fontSize: "16px",
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+            }}>
+              {profileUser.bio || "Belum ada bio"}
+            </div>
+          </div>
+
+          <div style={{
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <div style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.5)",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "4px",
+            }}>
+              Bergabung
+            </div>
+            <div style={{
+              fontSize: "16px",
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+            }}>
+              {formatDate(profileUser.joinedAt)}
+            </div>
+          </div>
+        </div>
+      ) : isGroup && profileUser ? (
+        // Group Profile
+        <div style={{
+          backgroundColor: "rgba(255,255,255,0.05)",
+          borderRadius: "12px",
+          padding: "24px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                backgroundColor: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                border: "3px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              <img
+                src={profileUser.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileUser.name || "Group")}&background=ffffff&color=0D3CFC&size=128`}
+                alt={profileUser.name || "Group"}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+            <div>
+              <div style={{
+                fontSize: "24px",
+                fontWeight: 700,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+              }}>
+                {profileUser.name || "Grup"}
+              </div>
+              <div style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.6)",
+                fontFamily: FONT_FAMILY,
+              }}>
+                {profileUser.memberCount || 0} anggota
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <div style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.5)",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "4px",
+            }}>
+              Bio Grup
+            </div>
+            <div style={{
+              fontSize: "16px",
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+            }}>
+              {profileUser.bio || "Belum ada bio grup"}
+            </div>
+          </div>
+
+          <div style={{
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <div style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.5)",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px",
+            }}>
+              Anggota ({groupMembers.length})
+            </div>
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+            }}>
+              {groupMembers.map((member) => (
+                <div key={member.id} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "8px 12px",
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  borderRadius: "8px",
+                }}>
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.displayName || member.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                      alt={member.displayName || "User"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {member.displayName || member.email || "User"}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <BlinkingDots active={member.online || false} />
+                      <StatusText active={member.online || false} />
+                    </div>
+                  </div>
+                  {profileUser.adminId === member.id && (
+                    <span style={{
+                      fontSize: "10px",
+                      backgroundColor: "rgba(255,255,255,0.2)",
+                      color: "#ffffff",
+                      padding: "2px 10px",
+                      borderRadius: "4px",
+                      fontFamily: FONT_FAMILY,
+                      marginLeft: "auto",
+                    }}>
+                      Admin
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <div style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.5)",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "4px",
+            }}>
+              Dibuat
+            </div>
+            <div style={{
+              fontSize: "16px",
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+            }}>
+              {formatDate(profileUser.createdAt)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          textAlign: "center",
+          color: "rgba(255,255,255,0.5)",
+          fontFamily: FONT_FAMILY,
+          padding: "40px 0",
+        }}>
+          Loading...
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -243,6 +656,12 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [broadcastMessage, setBroadcastMessage] = useState("");
   const [announcementMessage, setAnnouncementMessage] = useState("");
   const [selectedBroadcastUsers, setSelectedBroadcastUsers] = useState<string[]>([]);
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileUser, setProfileUser] = useState<any>(null);
+  const [isGroupProfile, setIsGroupProfile] = useState(false);
+  const [profileChatData, setProfileChatData] = useState<any>(null);
+  const [displayMessages, setDisplayMessages] = useState<string[]>([]);
+  const [messageIndex, setMessageIndex] = useState(0);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -429,6 +848,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }
               return prev;
             });
+
+            // Tambahkan ke display messages untuk rolling
+            setDisplayMessages(prev => {
+              const newMsg = `${data.senderName}: ${data.text}`;
+              if (!prev.includes(newMsg)) {
+                return [...prev, newMsg];
+              }
+              return prev;
+            });
           }
         });
       });
@@ -456,6 +884,17 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       setUserBio(user.bio);
     }
   }, [user]);
+
+  // Rolling messages effect
+  useEffect(() => {
+    if (displayMessages.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setMessageIndex(prev => (prev + 1) % displayMessages.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [displayMessages]);
 
   const sendMessage = async () => {
     if (!db || !selectedChat || !messageText.trim() || !user) return;
@@ -644,6 +1083,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     if (chat.id) {
       markChatAsRead(chat.id);
     }
+    // Reset profile ketika memilih chat
+    setShowProfile(false);
   };
 
   // Send Broadcast
@@ -806,6 +1247,25 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     );
   };
 
+  // Open user profile
+  const openUserProfile = (userId: string) => {
+    const userData = users.find(u => u.id === userId);
+    if (userData) {
+      setProfileUser(userData);
+      setIsGroupProfile(false);
+      setProfileChatData(null);
+      setShowProfile(true);
+    }
+  };
+
+  // Open group profile
+  const openGroupProfile = (chat: Chat) => {
+    setProfileChatData(chat);
+    setIsGroupProfile(true);
+    setProfileUser(null);
+    setShowProfile(true);
+  };
+
   // Filter chats
   const filteredChats = chats.filter(chat => {
     if (!searchQuery || !searchQuery.trim()) return true;
@@ -867,13 +1327,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   // Get unread messages for chat
   const getUnreadMessagesForChat = (chatId: string) => {
     return unreadMessages.filter(u => u.chatId === chatId);
-  };
-
-  // Get total messages from sender in a chat
-  const getTotalMessagesFromSender = (chatId: string, senderId: string) => {
-    // Filter messages from this sender in this chat
-    const senderMessages = messages.filter(m => m.senderId === senderId);
-    return senderMessages.length;
   };
 
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
@@ -940,6 +1393,17 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       display: "flex",
       position: "relative",
     }}>
+      {/* Profile/Grup Page - Overlay */}
+      {showProfile && (
+        <ProfilePage
+          user={profileUser}
+          db={db}
+          onClose={() => setShowProfile(false)}
+          isGroup={isGroupProfile}
+          chatData={profileChatData}
+        />
+      )}
+
       {/* Sidebar - Chat List */}
       <div style={{
         width: "360px",
@@ -948,11 +1412,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         flexDirection: "column",
         flexShrink: 0,
         borderRight: "1px solid rgba(255,255,255,0.1)",
+        position: "relative",
       }}>
-        {/* User Profile Header - Tanpa teks ADMIN */}
+        {/* User Profile Header - Klik untuk buka profil */}
         <div style={{
           padding: "16px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.1)",
+          cursor: "pointer",
+        }} onClick={() => {
+          setProfileUser(user);
+          setIsGroupProfile(false);
+          setProfileChatData(null);
+          setShowProfile(true);
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div
@@ -988,7 +1459,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLogout();
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -1031,7 +1505,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }}
             />
             <button
-              onClick={updateUserBio}
+              onClick={(e) => {
+                e.stopPropagation();
+                updateUserBio();
+              }}
               style={{
                 padding: "4px 12px",
                 backgroundColor: "#0D3CFC",
@@ -1139,7 +1616,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             </button>
           </div>
           
-          {/* TOMBOL ADMIN: BROADCAST & PENGUMUMAN - Tanpa icon, tanpa emoticon */}
+          {/* TOMBOL ADMIN: BROADCAST & PENGUMUMAN */}
           {isAdmin && (
             <div style={{ 
               display: "flex", 
@@ -1488,7 +1965,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         )}
         
-        {/* Chat List - Menampilkan riwayat pesan baru */}
+        {/* Chat List - Menampilkan riwayat pesan baru dengan rolling */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           {filteredChats.map((chat) => {
             const isActive = selectedChat?.id === chat.id;
@@ -1500,6 +1977,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             const displayPhoto = chat.type === 'user' && otherUser ? (otherUser.photoURL || getUserPhoto(otherUser.email)) : (chat.photo || getUserPhoto());
             const isOnline = chat.type === 'user' && otherUser ? otherUser.online : false;
             const chatUnreadMessages = getUnreadMessagesForChat(chat.id);
+            
+            // Get all messages from this chat to count total per sender
+            const chatMessages = messages.filter(m => m.senderId !== user.uid);
+            const senderCounts: {[key: string]: {name: string, count: number, texts: string[]}} = {};
+            
+            chatMessages.forEach(m => {
+              if (!senderCounts[m.senderId]) {
+                senderCounts[m.senderId] = { name: m.senderName, count: 0, texts: [] };
+              }
+              senderCounts[m.senderId].count++;
+              senderCounts[m.senderId].texts.push(m.text);
+            });
             
             return (
               <div
@@ -1526,6 +2015,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       justifyContent: "center",
                       flexShrink: 0,
                       position: "relative",
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (chat.type === 'user' && otherUser) {
+                        openUserProfile(otherUser.id);
+                      } else if (chat.type === 'group') {
+                        openGroupProfile(chat);
+                      }
                     }}
                   >
                     <img
@@ -1559,6 +2057,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (chat.type === 'user' && otherUser) {
+                        openUserProfile(otherUser.id);
+                      } else if (chat.type === 'group') {
+                        openGroupProfile(chat);
+                      }
                     }}>
                       {displayName}
                       {chat.type === 'group' && (
@@ -1578,10 +2085,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       {chat.lastMessage || "Mulai chat..."}
                     </div>
                     
-                    {/* TAMPILKAN TOTAL PESAN DARI PENGIRIM - BUKAN PESAN TERAKHIR */}
-                    {chatUnreadMessages.length > 0 && chatUnreadMessages.map((msg, idx) => {
-                      // Hitung total pesan dari pengirim ini di chat ini
-                      const totalMsg = messages.filter(m => m.senderId === msg.senderId && m.text === msg.text).length || 1;
+                    {/* TAMPILKAN TOTAL PESAN DARI PENGIRIM DENGAN ROLLING */}
+                    {Object.keys(senderCounts).length > 0 && Object.keys(senderCounts).map((senderId, idx) => {
+                      const sender = senderCounts[senderId];
+                      const currentText = displayMessages.length > 0 
+                        ? displayMessages[messageIndex % displayMessages.length]
+                        : sender.texts[0] || "";
+                      
                       return (
                         <div key={idx} style={{
                           fontSize: "30px",
@@ -1591,8 +2101,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                           marginTop: "2px",
                           lineHeight: 1.2,
                           wordBreak: "break-word",
+                          transition: "opacity 0.5s ease",
                         }}>
-                          from {msg.senderName} {msg.type === 'group' ? 'grup' : msg.type === 'broadcast' ? 'broadcast' : msg.type === 'announcement' ? 'pengumuman' : 'personal'} ({totalMsg} pesan)
+                          from {sender.name} {chat.type === 'group' ? 'grup' : 'personal'} ({sender.count} pesan): {
+                            displayMessages.length > 0 
+                              ? displayMessages[messageIndex % displayMessages.length].split(': ')[1] || sender.texts[0] || ""
+                              : sender.texts[0] || ""
+                          }
                         </div>
                       );
                     })}
@@ -1664,6 +2179,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     justifyContent: "center",
                     flexShrink: 0,
                     position: "relative",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    if (selectedChat.type === 'user') {
+                      const other = getOtherParticipant(selectedChat);
+                      if (other) openUserProfile(other.id);
+                    } else if (selectedChat.type === 'group') {
+                      openGroupProfile(selectedChat);
+                    }
                   }}
                 >
                   <img
@@ -1690,7 +2214,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     }} />
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, cursor: "pointer" }} onClick={() => {
+                  if (selectedChat.type === 'user') {
+                    const other = getOtherParticipant(selectedChat);
+                    if (other) openUserProfile(other.id);
+                  } else if (selectedChat.type === 'group') {
+                    openGroupProfile(selectedChat);
+                  }
+                }}>
                   <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                     {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
                       ? (getOtherParticipant(selectedChat)?.displayName || getOtherParticipant(selectedChat)?.email || "User")
@@ -1796,6 +2327,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            const sender = users.find(u => u.id === msg.senderId);
+                            if (sender) openUserProfile(sender.id);
                           }}
                         >
                           <img
@@ -1830,6 +2366,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                             color: "#0D3CFC", 
                             marginBottom: "2px", 
                             fontFamily: FONT_FAMILY,
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            const sender = users.find(u => u.id === msg.senderId);
+                            if (sender) openUserProfile(sender.id);
                           }}>
                             {msg.senderName}
                           </div>
