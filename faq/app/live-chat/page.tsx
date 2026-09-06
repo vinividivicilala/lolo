@@ -88,7 +88,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
 // Footer links - Live Chat added to Get in Touch
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
   { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
 ];
 
@@ -733,25 +733,20 @@ export default function LiveChatPage(): React.JSX.Element {
         </div>
 
         <div style={{ padding: "0 40px 40px 40px" }}>
-          {/* Live Chat placeholder - removed system */}
+          {/* Live Chat placeholder - no background color, no icons/emoticons, blue text */}
           <div style={{ 
             maxWidth: "1400px", 
             margin: "40px auto", 
-            height: "400px",
-            backgroundColor: "#f8f9ff",
-            borderRadius: "20px",
-            border: "1px solid rgba(13,60,252,0.1)",
+            padding: "60px 40px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
-            gap: "16px",
+            gap: "12px",
             textAlign: "center",
-            padding: "40px",
           }}>
-            <div style={{ fontSize: "64px" }}>💬</div>
             <h2 style={{ 
-              fontSize: "28px", 
+              fontSize: "32px", 
               fontWeight: 600, 
               color: "#0D3CFC", 
               fontFamily: FONT_FAMILY,
@@ -760,10 +755,11 @@ export default function LiveChatPage(): React.JSX.Element {
               Live Chat
             </h2>
             <p style={{ 
-              fontSize: "16px", 
-              color: "#666", 
+              fontSize: "18px", 
+              color: "#0D3CFC", 
               fontFamily: FONT_FAMILY,
               maxWidth: "500px",
+              margin: 0,
             }}>
               {user ? (
                 "Fitur Live Chat sedang dalam pengembangan. Silakan cek kembali nanti!"
@@ -772,22 +768,21 @@ export default function LiveChatPage(): React.JSX.Element {
               )}
             </p>
             {!user && (
-              <Link href="/" style={{ textDecoration: "none" }}>
-                <button
+              <Link href="/" style={{ textDecoration: "none", marginTop: "8px" }}>
+                <span
                   style={{
-                    padding: "10px 30px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
                     fontSize: "16px",
                     fontWeight: 500,
-                    cursor: "pointer",
+                    color: "#ffffff",
+                    backgroundColor: "#0D3CFC",
+                    padding: "8px 24px",
+                    borderRadius: "6px",
+                    display: "inline-block",
                     fontFamily: FONT_FAMILY,
                   }}
                 >
                   Login
-                </button>
+                </span>
               </Link>
             )}
           </div>
@@ -902,6 +897,8 @@ export default function LiveChatPage(): React.JSX.Element {
                       linkHref = "/terms-of-service";
                       isAttention = true;
                     } else if (link === "Live Chat") {
+                      linkHref = "/live-chat";
+                    } else if (link === "Live Chat Agent") {
                       linkHref = "/live-chat";
                     } else if (link === "Contact Us") {
                       linkHref = "/contact";
