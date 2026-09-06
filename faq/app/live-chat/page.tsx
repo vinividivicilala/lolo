@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, arrayUnion, arrayRemove, increment } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, arrayUnion, arrayRemove, increment, getDoc, setDoc } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -41,8 +41,6 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const AGENT_NAME = "Farid Ardiansyah";
-const AGENT_PHOTO = "/images/ai.jpg";
 
 // SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
@@ -85,7 +83,49 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Footer links - Live Chat added to Get in Touch
+const SendIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SearchIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const CheckIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const DoubleCheckIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L7 17L2 12M22 6L11 17L7 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const UserPlusIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M20 8V14M17 11H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+const GroupIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M23 21V19C22.7356 17.1124 21.7405 15.3591 20.1747 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 3.12891C17.5659 3.48813 18.9993 4.29577 20.1747 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
@@ -102,10 +142,1327 @@ const menuItems = [
   { name: "Note", number: "06" }
 ];
 
+// ===== INTERFACE TYPES =====
+interface Chat {
+  id: string;
+  type: 'user' | 'group';
+  name: string;
+  photo?: string;
+  members: string[];
+  adminId?: string;
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  unreadCount: number;
+  typing: { userId: string; userName: string }[];
+  bio?: string;
+  memberCount?: number;
+}
+
+interface Message {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderPhoto?: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+  readBy?: string[];
+}
+
+interface User {
+  id: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  online: boolean;
+  lastSeen: any;
+  bio?: string;
+  joinedAt: any;
+}
+
+// ===== LIVE CHAT COMPONENT =====
+const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [messageSearchQuery, setMessageSearchQuery] = useState("");
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  const getUserPhoto = (email?: string, photoURL?: string) => {
+    if (photoURL) return photoURL;
+    if (email) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(email)}&background=0D3CFC&color=fff&size=128`;
+    }
+    return `https://ui-avatars.com/api/?name=User&background=0D3CFC&color=fff&size=128`;
+  };
+
+  // Load users
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const userList: User[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        userList.push({ id: doc.id, ...data } as User);
+      });
+      setUsers(userList);
+    });
+    return () => unsubscribe();
+  }, [db, isMounted]);
+
+  // Load chats
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    
+    const q = query(
+      collection(db, "chats"),
+      where("members", "array-contains", user.uid),
+      orderBy("lastMessageTime", "desc")
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const chatList: Chat[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        chatList.push({ id: doc.id, ...data } as Chat);
+      });
+      setChats(chatList);
+      
+      if (selectedChat) {
+        const stillExists = chatList.some(c => c.id === selectedChat.id);
+        if (!stillExists) {
+          setSelectedChat(null);
+          setMessages([]);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [db, user, selectedChat, isMounted]);
+
+  // Load messages for selected chat
+  useEffect(() => {
+    if (!db || !selectedChat || !isMounted) return;
+    
+    const q = query(
+      collection(db, "chats", selectedChat.id, "messages"),
+      orderBy("timestamp", "asc")
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgList: Message[] = [];
+      snapshot.forEach((doc) => {
+        msgList.push({ id: doc.id, ...doc.data() } as Message);
+      });
+      setMessages(msgList);
+      
+      // Mark messages as read
+      const markAsRead = async () => {
+        const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
+        if (unread.length > 0) {
+          for (const msg of unread) {
+            const msgRef = doc(db, "chats", selectedChat.id, "messages", msg.id);
+            await updateDoc(msgRef, { 
+              read: true,
+              readBy: arrayUnion(user.uid)
+            });
+          }
+          await updateDoc(doc(db, "chats", selectedChat.id), {
+            unreadCount: 0
+          });
+        }
+      };
+      markAsRead();
+      
+      setTimeout(scrollToBottom, 100);
+    });
+    
+    return () => unsubscribe();
+  }, [db, selectedChat, isMounted]);
+
+  // Auto-select first chat
+  useEffect(() => {
+    if (!user || !isMounted || chats.length === 0) return;
+    
+    if (!selectedChat || !chats.some(c => c.id === selectedChat.id)) {
+      setSelectedChat(chats[0]);
+    }
+  }, [chats, user, selectedChat, isMounted]);
+
+  const sendMessage = async () => {
+    if (!db || !selectedChat || !messageText.trim() || !user) return;
+    
+    try {
+      const chatRef = doc(db, "chats", selectedChat.id);
+      
+      await addDoc(collection(db, "chats", selectedChat.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        senderPhoto: user.photoURL || "",
+        text: messageText.trim(),
+        timestamp: serverTimestamp(),
+        read: false,
+        readBy: []
+      });
+      
+      await updateDoc(chatRef, {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        unreadCount: increment(1)
+      });
+      
+      setMessageText("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessageText(value);
+    if (!selectedChat || !user || !db) return;
+    
+    const chatRef = doc(db, "chats", selectedChat.id);
+    const typingList = selectedChat.typing || [];
+    const userTyping = typingList.find(t => t.userId === user.uid);
+    
+    if (value.length > 0 && !userTyping) {
+      await updateDoc(chatRef, {
+        typing: arrayUnion({ userId: user.uid, userName: user.displayName || user.email || "User" })
+      });
+    } else if (value.length === 0 && userTyping) {
+      await updateDoc(chatRef, {
+        typing: typingList.filter(t => t.userId !== user.uid)
+      });
+    }
+    
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      const currentChat = chats.find(c => c.id === selectedChat.id);
+      if (currentChat) {
+        await updateDoc(chatRef, {
+          typing: (currentChat.typing || []).filter(t => t.userId !== user.uid)
+        });
+      }
+    }, 3000);
+  };
+
+  const createGroup = async () => {
+    if (!db || !user || !groupName.trim() || selectedUsers.length === 0) return;
+    
+    try {
+      const members = [user.uid, ...selectedUsers];
+      await addDoc(collection(db, "chats"), {
+        type: 'group',
+        name: groupName.trim(),
+        photo: "",
+        members: members,
+        adminId: user.uid,
+        createdAt: serverTimestamp(),
+        lastMessage: `Grup "${groupName.trim()}" dibuat`,
+        lastMessageTime: serverTimestamp(),
+        unreadCount: 0,
+        typing: [],
+        bio: "Grup obrolan",
+        memberCount: members.length
+      });
+      
+      setGroupName("");
+      setSelectedUsers([]);
+      setShowCreateGroup(false);
+    } catch (error) {
+      console.error("Error creating group:", error);
+    }
+  };
+
+  const createNewChat = async (targetUserId: string) => {
+    if (!db || !user || !targetUserId) return;
+    
+    try {
+      // Check if chat already exists
+      const existingChat = chats.find(c => 
+        c.type === 'user' && 
+        c.members.includes(user.uid) && 
+        c.members.includes(targetUserId)
+      );
+      
+      if (existingChat) {
+        setSelectedChat(existingChat);
+        setShowNewChat(false);
+        return;
+      }
+      
+      const targetUser = users.find(u => u.id === targetUserId);
+      if (!targetUser) return;
+      
+      const chatRef = await addDoc(collection(db, "chats"), {
+        type: 'user',
+        name: targetUser.displayName || targetUser.email || "User",
+        photo: targetUser.photoURL || "",
+        members: [user.uid, targetUserId],
+        adminId: user.uid,
+        createdAt: serverTimestamp(),
+        lastMessage: "Chat dimulai",
+        lastMessageTime: serverTimestamp(),
+        unreadCount: 0,
+        typing: [],
+        bio: "",
+        memberCount: 2
+      });
+      
+      setShowNewChat(false);
+      setSelectedChat({ id: chatRef.id, type: 'user', name: targetUser.displayName || targetUser.email || "User", photo: targetUser.photoURL || "", members: [user.uid, targetUserId], adminId: user.uid, createdAt: serverTimestamp(), lastMessage: "Chat dimulai", lastMessageTime: serverTimestamp(), unreadCount: 0, typing: [], bio: "", memberCount: 2 });
+    } catch (error) {
+      console.error("Error creating chat:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        online: false,
+        lastSeen: serverTimestamp()
+      });
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Filter chats
+  const filteredChats = chats.filter(chat => {
+    if (!searchQuery || !searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    return (chat.name || '').toLowerCase().includes(query);
+  });
+
+  // Filter messages
+  const filteredMessages = messages.filter(msg => {
+    if (!messageSearchQuery || !messageSearchQuery.trim()) return true;
+    const query = messageSearchQuery.toLowerCase().trim();
+    return (msg.text || '').toLowerCase().includes(query);
+  });
+
+  // Get typing users
+  const getTypingUsers = (chat: Chat) => {
+    if (!chat.typing || chat.typing.length === 0) return null;
+    const names = chat.typing.map(t => t.userName).filter(name => name !== (user?.displayName || user?.email || "User"));
+    if (names.length === 0) return null;
+    if (names.length === 1) return `${names[0]} sedang mengetik...`;
+    if (names.length === 2) return `${names[0]} dan ${names[1]} sedang mengetik...`;
+    return `${names.length} orang sedang mengetik...`;
+  };
+
+  // Get online members count
+  const getOnlineMembers = (chat: Chat) => {
+    if (!chat.members) return 0;
+    return chat.members.filter(id => {
+      const u = users.find(user => user.id === id);
+      return u && u.online;
+    }).length;
+  };
+
+  // Get user info
+  const getUserInfo = (userId: string) => {
+    return users.find(u => u.id === userId);
+  };
+
+  // Get unread count
+  const getUnreadCount = (chat: Chat) => {
+    return chat.unreadCount || 0;
+  };
+
+  // Get other participant in user chat
+  const getOtherParticipant = (chat: Chat) => {
+    if (chat.type !== 'user') return null;
+    const otherId = chat.members.find(id => id !== user?.uid);
+    return otherId ? getUserInfo(otherId) : null;
+  };
+
+  if (!isMounted) return <div style={{ minHeight: "100px" }} />;
+
+  if (!user) {
+    return (
+      <div style={{ 
+        maxWidth: "1400px", 
+        margin: "40px auto", 
+        padding: "60px 40px",
+        textAlign: "center",
+        backgroundColor: "#f8f9ff",
+        borderRadius: "20px",
+        border: "1px solid rgba(13,60,252,0.1)",
+      }}>
+        <h2 style={{ 
+          fontSize: "28px", 
+          fontWeight: 600, 
+          color: "#0D3CFC", 
+          fontFamily: FONT_FAMILY,
+          marginBottom: "10px",
+        }}>
+          Live Chat
+        </h2>
+        <p style={{ 
+          fontSize: "16px", 
+          color: "#666", 
+          fontFamily: FONT_FAMILY,
+          marginBottom: "20px",
+        }}>
+          Silakan login untuk menggunakan Live Chat
+        </p>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button
+            style={{
+              padding: "10px 30px",
+              backgroundColor: "#0D3CFC",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Login
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  // USER VIEW
+  return (
+    <div style={{ 
+      maxWidth: "1400px", 
+      margin: "40px auto", 
+      height: "700px",
+      backgroundColor: "#ffffff",
+      borderRadius: "20px",
+      border: "1px solid rgba(13,60,252,0.1)",
+      overflow: "hidden",
+      display: "flex",
+      position: "relative",
+    }}>
+      {/* Sidebar - Chat List */}
+      <div style={{
+        width: "360px",
+        backgroundColor: "#0D3CFC",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+        borderRight: "1px solid rgba(255,255,255,0.1)",
+      }}>
+        {/* User Profile Header */}
+        <div style={{
+          padding: "16px 20px",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                backgroundColor: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                alt={user.displayName || "User"}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: "15px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                {user.displayName || user.email || "User"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#22c55e",
+                  display: "inline-block",
+                }} />
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
+                  Online
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "4px 10px",
+                backgroundColor: "rgba(255,255,255,0.1)",
+                color: "#fff",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "6px",
+                fontSize: "11px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.3)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
+            >
+              <LogoutIcon size={13} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+        
+        {/* Search and Actions */}
+        <div style={{
+          padding: "10px 16px",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            backgroundColor: "rgba(255,255,255,0.12)",
+            borderRadius: "8px",
+            padding: "6px 12px",
+          }}>
+            <SearchIcon size={16} color="rgba(255,255,255,0.6)" />
+            <input
+              type="text"
+              placeholder="Cari chat..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "#fff",
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => setShowNewChat(true)}
+              style={{
+                flex: 1,
+                padding: "6px 12px",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                color: "#ffffff",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "4px",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)"}
+            >
+              <UserPlusIcon size={16} />
+              Chat Baru
+            </button>
+            <button
+              onClick={() => setShowCreateGroup(true)}
+              style={{
+                flex: 1,
+                padding: "6px 12px",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                color: "#ffffff",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "4px",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)"}
+            >
+              <GroupIcon size={16} />
+              Grup Baru
+            </button>
+          </div>
+        </div>
+        
+        {/* Chat List */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {filteredChats.map((chat) => {
+            const isActive = selectedChat?.id === chat.id;
+            const unread = getUnreadCount(chat);
+            const onlineCount = getOnlineMembers(chat);
+            const typingText = getTypingUsers(chat);
+            const otherUser = chat.type === 'user' ? getOtherParticipant(chat) : null;
+            const displayName = chat.type === 'user' && otherUser ? (otherUser.displayName || otherUser.email || "User") : chat.name;
+            const displayPhoto = chat.type === 'user' && otherUser ? (otherUser.photoURL || getUserPhoto(otherUser.email)) : (chat.photo || getUserPhoto());
+            const isOnline = chat.type === 'user' && otherUser ? otherUser.online : false;
+            
+            return (
+              <div
+                key={chat.id}
+                onClick={() => setSelectedChat(chat)}
+                style={{
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                  backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={displayPhoto}
+                      alt={displayName}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    {chat.type === 'user' && isOnline && (
+                      <span style={{
+                        position: "absolute",
+                        bottom: "2px",
+                        right: "2px",
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#22c55e",
+                        border: "2px solid #0D3CFC",
+                      }} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      fontWeight: isActive ? 600 : 500, 
+                      fontSize: "13px", 
+                      color: "#ffffff", 
+                      fontFamily: FONT_FAMILY,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}>
+                      {displayName}
+                      {chat.type === 'group' && (
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                          ({chat.memberCount || 0})
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
+                      {typingText || chat.lastMessage || "Mulai chat..."}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                      {chat.type === 'group' && onlineCount > 0 && (
+                        <span style={{ fontSize: "9px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
+                          ● {onlineCount} online
+                        </span>
+                      )}
+                      {unread > 0 && (
+                        <span style={{
+                          fontSize: "9px",
+                          backgroundColor: "#ffffff",
+                          color: "#0D3CFC",
+                          padding: "1px 8px",
+                          borderRadius: "10px",
+                          fontWeight: 600,
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {unread}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {filteredChats.length === 0 && (
+            <div style={{ padding: "30px 20px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+              Tidak ada chat
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f0f2f5" }}>
+        {selectedChat ? (
+          <>
+            {/* Chat Header */}
+            <div style={{
+              padding: "12px 20px",
+              backgroundColor: "#ffffff",
+              borderBottom: "1px solid #e8e8e8",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexShrink: 0,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    src={selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
+                      ? (getOtherParticipant(selectedChat)?.photoURL || getUserPhoto(getOtherParticipant(selectedChat)?.email))
+                      : (selectedChat.photo || getUserPhoto())}
+                    alt={selectedChat.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  {selectedChat.type === 'user' && getOtherParticipant(selectedChat)?.online && (
+                    <span style={{
+                      position: "absolute",
+                      bottom: "1px",
+                      right: "1px",
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      backgroundColor: "#22c55e",
+                      border: "2px solid #ffffff",
+                    }} />
+                  )}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                    {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
+                      ? (getOtherParticipant(selectedChat)?.displayName || getOtherParticipant(selectedChat)?.email || "User")
+                      : selectedChat.name}
+                    {selectedChat.type === 'group' && (
+                      <span style={{ fontSize: "11px", color: "#999", marginLeft: "6px" }}>
+                        ({getOnlineMembers(selectedChat)} online)
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>
+                    {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
+                      ? (getOtherParticipant(selectedChat)?.online ? "Online" : "Offline")
+                      : (selectedChat.type === 'group' ? `${selectedChat.memberCount || 0} anggota` : selectedChat.bio || "")}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{
+                  padding: "4px 12px",
+                  backgroundColor: "#f0f2f5",
+                  borderRadius: "12px",
+                  fontSize: "11px",
+                  color: "#666",
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  {selectedChat.type === 'user' ? 'Pribadi' : 'Grup'}
+                </div>
+              </div>
+            </div>
+
+            {/* Message Search */}
+            <div style={{
+              padding: "8px 20px",
+              backgroundColor: "#ffffff",
+              borderBottom: "1px solid #e8e8e8",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexShrink: 0,
+            }}>
+              <SearchIcon size={14} color="#999" />
+              <input
+                type="text"
+                placeholder="Cari pesan..."
+                value={messageSearchQuery}
+                onChange={(e) => setMessageSearchQuery(e.target.value)}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "#333",
+                  fontSize: "12px",
+                  fontFamily: FONT_FAMILY,
+                }}
+              />
+            </div>
+
+            {/* Messages */}
+            <div 
+              ref={chatContainerRef}
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "16px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+              }}
+            >
+              {filteredMessages.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "40px 0", fontFamily: FONT_FAMILY }}>
+                  {messageSearchQuery ? "Tidak ada pesan yang ditemukan" : "Belum ada pesan"}
+                </div>
+              ) : (
+                filteredMessages.map((msg, idx) => {
+                  const isMine = msg.senderId === user?.uid;
+                  const isRead = msg.read || false;
+                  
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        alignSelf: isMine ? "flex-end" : "flex-start",
+                        maxWidth: "70%",
+                        display: "flex",
+                        alignItems: "flex-end",
+                        gap: "6px",
+                      }}
+                    >
+                      {!isMine && (
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            backgroundColor: "#fff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <img
+                            src={msg.senderPhoto || getUserPhoto(undefined, undefined)}
+                            alt={msg.senderName}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "12px",
+                          backgroundColor: isMine ? "#0D3CFC" : "#ffffff",
+                          color: isMine ? "#fff" : "#000",
+                          fontSize: "13px",
+                          fontFamily: FONT_FAMILY,
+                          wordBreak: "break-word",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                          border: !isMine ? "1px solid #e8e8e8" : "none",
+                          maxWidth: "100%",
+                        }}
+                      >
+                        {!isMine && (
+                          <div style={{ 
+                            fontSize: "9px", 
+                            fontWeight: 500, 
+                            color: "#0D3CFC", 
+                            marginBottom: "2px", 
+                            fontFamily: FONT_FAMILY,
+                          }}>
+                            {msg.senderName}
+                          </div>
+                        )}
+                        <div>{msg.text}</div>
+                        <div style={{ 
+                          fontSize: "9px", 
+                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                          marginTop: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-end",
+                          gap: "4px",
+                          fontFamily: FONT_FAMILY,
+                        }}>
+                          {formatTime(msg.timestamp)}
+                          {isMine && (
+                            isRead ? (
+                              <DoubleCheckIcon size={12} color="rgba(255,255,255,0.6)" />
+                            ) : (
+                              <CheckIcon size={12} color="rgba(255,255,255,0.4)" />
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              {getTypingUsers(selectedChat) && (
+                <div style={{
+                  alignSelf: "flex-start",
+                  fontSize: "12px",
+                  color: "#666",
+                  fontStyle: "italic",
+                  padding: "4px 12px",
+                  fontFamily: FONT_FAMILY,
+                }}>
+                  {getTypingUsers(selectedChat)}
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Message Input */}
+            <div style={{
+              padding: "10px 20px",
+              borderTop: "1px solid #e8e8e8",
+              backgroundColor: "#ffffff",
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
+              flexShrink: 0,
+            }}>
+              <input
+                type="text"
+                value={messageText}
+                onChange={handleTyping}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Ketik pesan..."
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  border: "1px solid #e8e8e8",
+                  borderRadius: "24px",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: FONT_FAMILY,
+                  backgroundColor: "#f8f9ff",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!messageText.trim()}
+                style={{
+                  padding: "10px 18px",
+                  backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "24px",
+                  cursor: messageText.trim() ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <SendIcon size={16} />
+                <span>Kirim</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            color: "#999",
+            fontSize: "14px",
+            fontFamily: FONT_FAMILY,
+            gap: "8px",
+          }}>
+            <div style={{ fontSize: "48px" }}>💬</div>
+            <div>Pilih chat dari daftar di kiri</div>
+          </div>
+        )}
+      </div>
+
+      {/* New Chat Modal */}
+      {showNewChat && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px",
+            maxWidth: "460px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                Chat Baru
+              </h3>
+              <button
+                onClick={() => setShowNewChat(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{
+              maxHeight: "300px",
+              overflowY: "auto",
+            }}>
+              {users.filter(u => u.id !== user.uid).map((u) => (
+                <div
+                  key={u.id}
+                  onClick={() => createNewChat(u.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    borderRadius: "8px",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f2f5"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=128`}
+                      alt={u.email}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    {u.online && (
+                      <span style={{
+                        position: "absolute",
+                        bottom: "2px",
+                        right: "2px",
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#22c55e",
+                        border: "2px solid #fff",
+                      }} />
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 500, fontSize: "14px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                      {u.displayName || u.email || "User"}
+                    </div>
+                    <div style={{ fontSize: "12px", color: u.online ? "#22c55e" : "#999", fontFamily: FONT_FAMILY }}>
+                      {u.online ? "Online" : "Offline"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {users.filter(u => u.id !== user.uid).length === 0 && (
+                <div style={{ padding: "20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY }}>
+                  Belum ada user lain
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Group Modal */}
+      {showCreateGroup && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px",
+            maxWidth: "460px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
+                Buat Grup
+              </h3>
+              <button
+                onClick={() => setShowCreateGroup(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                Nama Grup
+              </label>
+              <input
+                type="text"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                placeholder="Masukkan nama grup..."
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  border: "2px solid #e8e8e8",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+              />
+            </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, display: "block", marginBottom: "4px" }}>
+                Pilih Anggota
+              </label>
+              <div style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                border: "1px solid #e8e8e8",
+                borderRadius: "8px",
+                padding: "8px",
+              }}>
+                {users.filter(u => u.id !== user.uid).map((u) => (
+                  <label key={u.id} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "6px 8px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "13px",
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(u.id)}
+                      onChange={() => {
+                        if (selectedUsers.includes(u.id)) {
+                          setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                        } else {
+                          setSelectedUsers([...selectedUsers, u.id]);
+                        }
+                      }}
+                      style={{ accentColor: "#0D3CFC" }}
+                    />
+                    <div
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=0D3CFC&color=fff&size=64`}
+                        alt={u.email}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                    <span>{u.displayName || u.email || "User"}</span>
+                    <span style={{
+                      marginLeft: "auto",
+                      fontSize: "10px",
+                      color: u.online ? "#22c55e" : "#999",
+                    }}>
+                      {u.online ? "Online" : "Offline"}
+                    </span>
+                  </label>
+                ))}
+                {users.filter(u => u.id !== user.uid).length === 0 && (
+                  <div style={{ padding: "12px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+                    Belum ada user terdaftar
+                  </div>
+                )}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setShowCreateGroup(false)}
+                style={{
+                  padding: "6px 18px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={createGroup}
+                disabled={!groupName.trim() || selectedUsers.length === 0}
+                style={{
+                  padding: "6px 18px",
+                  backgroundColor: (groupName.trim() && selectedUsers.length > 0) ? "#0D3CFC" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: (groupName.trim() && selectedUsers.length > 0) ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Buat Grup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ===== MAIN PAGE =====
 export default function LiveChatPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -138,7 +1495,6 @@ export default function LiveChatPage(): React.JSX.Element {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
-        setIsAdmin(currentUser.email === ADMIN_EMAIL);
         try {
           const userRef = doc(db, "users", currentUser.uid);
           await updateDoc(userRef, {
@@ -524,7 +1880,7 @@ export default function LiveChatPage(): React.JSX.Element {
     <>
       <Head>
         <title>Live Chat | Menuru Official</title>
-        <meta name="description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta name="description" content="Live Chat Menuru - Chat langsung dengan teman" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -534,11 +1890,11 @@ export default function LiveChatPage(): React.JSX.Element {
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         <meta property="og:title" content="Live Chat | Menuru Official" />
-        <meta property="og:description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta property="og:description" content="Live Chat Menuru - Chat langsung dengan teman" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Live Chat | Menuru Official" />
-        <meta name="twitter:description" content="Live Chat Menuru - Chat langsung dengan agent kami" />
+        <meta name="twitter:description" content="Live Chat Menuru - Chat langsung dengan teman" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
@@ -603,18 +1959,18 @@ export default function LiveChatPage(): React.JSX.Element {
             >
               <p
                 style={{
-                  fontSize: "60px",
+                  fontSize: "48px",
                   fontWeight: 400,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1.2,
                   margin: 0,
                   padding: 0,
-                  paddingBottom: "30px",
+                  paddingBottom: "20px",
                   whiteSpace: "pre-line",
                 }}
               >
-                {`Chat langsung dengan agent kami\nuntuk bantuan cepat dan tepat`}
+                {`Chat langsung dengan teman\nuntuk obrolan seru`}
               </p>
             </div>
 
@@ -733,59 +2089,7 @@ export default function LiveChatPage(): React.JSX.Element {
         </div>
 
         <div style={{ padding: "0 40px 40px 40px" }}>
-          {/* Live Chat placeholder - no background color, no icons/emoticons, blue text */}
-          <div style={{ 
-            maxWidth: "1400px", 
-            margin: "40px auto", 
-            padding: "60px 40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            gap: "12px",
-            textAlign: "center",
-          }}>
-            <h2 style={{ 
-              fontSize: "32px", 
-              fontWeight: 600, 
-              color: "#0D3CFC", 
-              fontFamily: FONT_FAMILY,
-              margin: 0,
-            }}>
-              Live Chat
-            </h2>
-            <p style={{ 
-              fontSize: "18px", 
-              color: "#0D3CFC", 
-              fontFamily: FONT_FAMILY,
-              maxWidth: "500px",
-              margin: 0,
-            }}>
-              {user ? (
-                "Fitur Live Chat sedang dalam pengembangan. Silakan cek kembali nanti!"
-              ) : (
-                "Silakan login untuk menggunakan Live Chat"
-              )}
-            </p>
-            {!user && (
-              <Link href="/" style={{ textDecoration: "none", marginTop: "8px" }}>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#ffffff",
-                    backgroundColor: "#0D3CFC",
-                    padding: "8px 24px",
-                    borderRadius: "6px",
-                    display: "inline-block",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Login
-                </span>
-              </Link>
-            )}
-          </div>
+          <LiveChat user={user} db={db} auth={auth} />
         </div>
 
         <div
