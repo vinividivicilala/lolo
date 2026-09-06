@@ -131,23 +131,17 @@ const AddUserIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-// Blinking Dots Component - Online = BLACK, Offline = WHITE
+// Blinking Dots Component
 const BlinkingDots = ({ active }: { active: boolean }) => {
   return (
     <span style={{ display: 'inline-flex', gap: '2px', alignItems: 'center' }}>
-      <span className={`dot ${active ? 'active' : 'inactive'}`} style={{ animationDelay: '0s' }}>●</span>
-      <span className={`dot ${active ? 'active' : 'inactive'}`} style={{ animationDelay: '0.2s' }}>●</span>
-      <span className={`dot ${active ? 'active' : 'inactive'}`} style={{ animationDelay: '0.4s' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0s', color: active ? '#000000' : '#ffffff' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.2s', color: active ? '#000000' : '#ffffff' }}>●</span>
+      <span className="dot" style={{ animationDelay: '0.4s', color: active ? '#000000' : '#ffffff' }}>●</span>
       <style>{`
         .dot {
           animation: blink 1.4s infinite both;
           font-size: 8px;
-        }
-        .dot.active {
-          color: #000000 !important;
-        }
-        .dot.inactive {
-          color: #ffffff !important;
         }
         @keyframes blink {
           0% { opacity: 0.2; }
@@ -159,7 +153,7 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
   );
 };
 
-// Status Text Component - Online = BLACK text, Offline = WHITE text
+// Status Text Component
 const StatusText = ({ active }: { active: boolean }) => {
   return (
     <span style={{ 
@@ -245,7 +239,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [groupName, setGroupName] = useState("");
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
   const [showAddUser, setShowAddUser] = useState(false);
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [userBio, setUserBio] = useState("");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -372,6 +366,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       setSelectedChat(chats[0]);
     }
   }, [chats, user, selectedChat, isMounted]);
+
+  // Set user bio
+  useEffect(() => {
+    if (user && user.bio) {
+      setUserBio(user.bio);
+    }
+  }, [user]);
 
   const sendMessage = async () => {
     if (!db || !selectedChat || !messageText.trim() || !user) return;
@@ -515,11 +516,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     }
   };
 
-  const updateUserBio = async (bio: string) => {
+  const updateUserBio = async () => {
     if (!db || !user) return;
     try {
       const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { bio });
+      await updateDoc(userRef, { bio: userBio });
     } catch (error) {
       console.error("Error updating bio:", error);
     }
@@ -616,7 +617,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         margin: "40px auto", 
         padding: "60px 40px",
         textAlign: "center",
-        backgroundColor: "#f8f9ff",
+        backgroundColor: "#ffffff",
         borderRadius: "20px",
         border: "1px solid rgba(13,60,252,0.1)",
       }}>
@@ -742,13 +743,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               <span>Logout</span>
             </button>
           </div>
-          {/* User Bio */}
+          {/* User Bio - bisa di ketik dan submit */}
           <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
             <input
               type="text"
               placeholder="Tulis bio..."
-              value={user.bio || ""}
-              onChange={(e) => updateUserBio(e.target.value)}
+              value={userBio}
+              onChange={(e) => setUserBio(e.target.value)}
               style={{
                 flex: 1,
                 padding: "4px 10px",
@@ -762,7 +763,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }}
             />
             <button
-              onClick={() => updateUserBio(user.bio || "")}
+              onClick={updateUserBio}
               style={{
                 padding: "4px 12px",
                 backgroundColor: "#0D3CFC",
@@ -779,7 +780,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         </div>
         
-        {/* Search and Actions */}
+        {/* Search - text color biru */}
         <div style={{
           padding: "10px 16px",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -795,7 +796,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             borderRadius: "8px",
             padding: "6px 12px",
           }}>
-            <SearchIcon size={16} color="#ffffff" />
+            <SearchIcon size={16} color="#0D3CFC" />
             <input
               type="text"
               placeholder="Cari chat..."
@@ -806,7 +807,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                color: "#ffffff",
+                color: "#0D3CFC",
                 fontSize: "13px",
                 fontFamily: FONT_FAMILY,
               }}
@@ -1032,7 +1033,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         )}
         
-        {/* Chat List */}
+        {/* Chat List - Menampilkan riwayat chat baru otomatis */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           {filteredChats.map((chat) => {
             const isActive = selectedChat?.id === chat.id;
@@ -1111,32 +1112,33 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         </span>
                       )}
                       {chat.type === 'group' && chat.adminId === user.uid && (
-                        <span style={{ fontSize: "8px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
+                        <span style={{ fontSize: "8px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                           Admin
                         </span>
                       )}
                     </div>
                     {/* Typing indicator in chat list */}
                     {typingText && (
-                      <div style={{ fontSize: "11px", color: "#22c55e", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
+                      <div style={{ fontSize: "11px", color: "#ffffff", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
                         {typingText}
                       </div>
                     )}
-                    {/* Last message */}
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY }}>
+                    {/* Last message - riwayat chat baru otomatis */}
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
                       {chat.lastMessage || "Mulai chat..."}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                      {chat.type === 'user' && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", flexWrap: "wrap" }}>
+                      {chat.type === 'user' ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <BlinkingDots active={isOnline} />
                           <StatusText active={isOnline} />
                         </div>
-                      )}
-                      {chat.type === 'group' && onlineCount > 0 && (
-                        <span style={{ fontSize: "9px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
-                          ● {onlineCount} online
-                        </span>
+                      ) : (
+                        onlineCount > 0 && (
+                          <span style={{ fontSize: "9px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                            ● {onlineCount} online
+                          </span>
+                        )
                       )}
                       {unread > 0 && (
                         <span style={{
@@ -1229,7 +1231,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       </span>
                     )}
                     {selectedChat.type === 'group' && selectedChat.adminId === user.uid && (
-                      <span style={{ fontSize: "9px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
+                      <span style={{ fontSize: "9px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                         Admin
                       </span>
                     )}
@@ -1242,14 +1244,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       </>
                     )}
                     {selectedChat.type === 'group' && (
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>
                         {selectedChat.memberCount || 0} anggota
                       </span>
                     )}
                   </div>
                   {/* Typing indicator in header */}
                   {getTypingUsers(selectedChat) && (
-                    <div style={{ fontSize: "10px", color: "#22c55e", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
+                    <div style={{ fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
                       {getTypingUsers(selectedChat)}
                     </div>
                   )}
@@ -1383,7 +1385,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
             )}
 
-            {/* Message Search */}
+            {/* Message Search - text color biru */}
             <div style={{
               padding: "8px 20px",
               backgroundColor: "#ffffff",
@@ -1393,7 +1395,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               gap: "8px",
               flexShrink: 0,
             }}>
-              <SearchIcon size={14} color="#999" />
+              <SearchIcon size={14} color="#0D3CFC" />
               <input
                 type="text"
                 placeholder="Cari pesan..."
@@ -1404,7 +1406,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   background: "transparent",
                   border: "none",
                   outline: "none",
-                  color: "#333",
+                  color: "#0D3CFC",
                   fontSize: "12px",
                   fontFamily: FONT_FAMILY,
                 }}
