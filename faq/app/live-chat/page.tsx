@@ -5,15 +5,29 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, arrayUnion, arrayRemove, increment, getDoc, setDoc, writeBatch, getDocs } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc, 
+  addDoc, 
+  serverTimestamp, 
+  orderBy, 
+  arrayUnion, 
+  arrayRemove, 
+  increment, 
+  getDoc, 
+  setDoc, 
+  writeBatch, 
+  getDocs,
+  limit
+} from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, SplitText);
-}
 
 // Firebase Config
 const firebaseConfig = {
@@ -27,17 +41,12 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-let app = null;
-let auth = null;
-let db = null;
-
-if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
+// Initialize Firebase (pindahkan keluar dari conditional)
+const app = getApps().length === 0
+  ? initializeApp(firebaseConfig)
+  : getApps()[0];
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
@@ -350,6 +359,46 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return () => unsubscribe();
   }, [db, selectedChat, isMounted]);
 
+  // Mark chat as read function
+  const markChatAsRead = async (chatId: string) => {
+    if (!db || !user) return;
+    
+    try {
+      const q = query(
+        collection(db, "chats", chatId, "messages"),
+        where("read", "==", false),
+        where("senderId", "!=", user.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
+        return;
+      }
+      
+      const batch = writeBatch(db);
+      
+      snapshot.forEach((doc) => {
+        const msgRef = doc.ref;
+        batch.update(msgRef, {
+          read: true,
+          readBy: arrayUnion(user.uid)
+        });
+      });
+      
+      await batch.commit();
+      
+      await updateDoc(doc(db, "chats", chatId), {
+        unreadCount: 0
+      });
+      
+      setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
+    } catch (error) {
+      console.error("Error marking chat as read:", error);
+    }
+  };
+
   // Listen for new messages in all chats
   useEffect(() => {
     if (!db || !user || !isMounted || chats.length === 0) return;
@@ -366,18 +415,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         snapshot.forEach((doc) => {
           const data = doc.data();
-          // If message is from someone else and not read
           if (data.senderId !== user.uid && !data.read) {
-            // Check if chat is currently selected
             if (selectedChat?.id === chat.id) {
-              // If chat is selected, mark as read immediately
               markChatAsRead(chat.id);
               return;
             }
             
-            // Add to unreadMessages if not already exists
             setUnreadMessages(prev => {
-              const exists = prev.some(u => u.chatId === chat.id && u.text === data.text && u.senderName === data.senderName);
+              const exists = prev.some(u => 
+                u.chatId === chat.id && 
+                u.text === data.text && 
+                u.senderName === data.senderName
+              );
               if (!exists) {
                 return [...prev, {
                   chatId: chat.id,
@@ -399,50 +448,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       unsubscribes.forEach(unsub => unsub());
     };
   }, [db, user, chats, isMounted, selectedChat]);
-
-  // Mark chat as read function
-  const markChatAsRead = async (chatId: string) => {
-    if (!db || !user) return;
-    
-    try {
-      // Get all unread messages in this chat
-      const q = query(
-        collection(db, "chats", chatId, "messages"),
-        where("read", "==", false),
-        where("senderId", "!=", user.uid)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) {
-        // Still clear from unreadMessages state
-        setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
-        return;
-      }
-      
-      const batch = writeBatch(db);
-      
-      snapshot.forEach((doc) => {
-        const msgRef = doc.ref;
-        batch.update(msgRef, {
-          read: true,
-          readBy: arrayUnion(user.uid)
-        });
-      });
-      
-      await batch.commit();
-      
-      // Update unread count in chat
-      await updateDoc(doc(db, "chats", chatId), {
-        unreadCount: 0
-      });
-      
-      // Remove from unreadMessages
-      setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
-    } catch (error) {
-      console.error("Error marking chat as read:", error);
-    }
-  };
 
   // Auto-select first chat
   useEffect(() => {
@@ -1746,6 +1751,13 @@ export default function LiveChatPage(): React.JSX.Element {
   const storiesRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
+
+  // Register GSAP plugins di useEffect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+    }
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
