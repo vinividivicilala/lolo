@@ -125,6 +125,12 @@ const GroupIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+const AddUserIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 // Blinking Dots Component
 const BlinkingDots = ({ active }: { active: boolean }) => {
   return (
@@ -196,6 +202,7 @@ interface Message {
   timestamp: any;
   read: boolean;
   readBy?: string[];
+  delivered?: boolean;
 }
 
 interface User {
@@ -223,7 +230,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [showNewChat, setShowNewChat] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
-  const [showAllUsers, setShowAllUsers] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -364,7 +372,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         text: messageText.trim(),
         timestamp: serverTimestamp(),
         read: false,
-        readBy: []
+        readBy: [],
+        delivered: false
       });
       
       await updateDoc(chatRef, {
@@ -425,7 +434,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         lastMessageTime: serverTimestamp(),
         unreadCount: 0,
         typing: [],
-        bio: "Grup obrolan",
+        bio: "",
         memberCount: members.length
       });
       
@@ -475,6 +484,20 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       setSelectedChat({ id: chatRef.id, type: 'user', name: targetUser.displayName || targetUser.email || "User", photo: targetUser.photoURL || "", members: [user.uid, targetUserId], adminId: user.uid, createdAt: serverTimestamp(), lastMessage: "Chat dimulai", lastMessageTime: serverTimestamp(), unreadCount: 0, typing: [], bio: "", memberCount: 2 });
     } catch (error) {
       console.error("Error creating chat:", error);
+    }
+  };
+
+  const addUserToGroup = async (chatId: string, userId: string) => {
+    if (!db || !user) return;
+    try {
+      const chatRef = doc(db, "chats", chatId);
+      await updateDoc(chatRef, {
+        members: arrayUnion(userId),
+        memberCount: increment(1)
+      });
+      setShowAddUser(false);
+    } catch (error) {
+      console.error("Error adding user to group:", error);
     }
   };
 
@@ -560,6 +583,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     if (chat.type !== 'user') return null;
     const otherId = chat.members.find(id => id !== user?.uid);
     return otherId ? getUserInfo(otherId) : null;
+  };
+
+  // Get message status
+  const getMessageStatus = (msg: Message) => {
+    if (msg.senderId !== user?.uid) return null;
+    if (!msg.delivered) return "Mengirim...";
+    if (msg.read) return "Dibaca";
+    return "Terkirim";
   };
 
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
@@ -670,7 +701,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <BlinkingDots active={true} />
-                <span style={{ fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY }}>Online</span>
+                <span style={{ fontSize: "10px", color: "#000000", fontFamily: FONT_FAMILY }}>Online</span>
               </div>
             </div>
             <button
@@ -698,14 +729,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             </button>
           </div>
           {/* User Bio */}
-          <div style={{ marginTop: "8px" }}>
+          <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
             <input
               type="text"
               placeholder="Tulis bio..."
               value={user.bio || ""}
               onChange={(e) => updateUserBio(e.target.value)}
               style={{
-                width: "100%",
+                flex: 1,
                 padding: "4px 10px",
                 backgroundColor: "rgba(255,255,255,0.15)",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -716,6 +747,21 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 outline: "none",
               }}
             />
+            <button
+              onClick={() => updateUserBio(user.bio || "")}
+              style={{
+                padding: "4px 12px",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "11px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Submit
+            </button>
           </div>
         </div>
         
@@ -735,7 +781,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             borderRadius: "8px",
             padding: "6px 12px",
           }}>
-            <SearchIcon size={16} color="rgba(255,255,255,0.6)" />
+            <SearchIcon size={16} color="#ffffff" />
             <input
               type="text"
               placeholder="Cari chat..."
@@ -746,7 +792,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                color: "#fff",
+                color: "#ffffff",
                 fontSize: "13px",
                 fontFamily: FONT_FAMILY,
               }}
@@ -754,7 +800,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={() => setShowNewChat(!showNewChat)}
+              onClick={() => {
+                setShowNewChat(!showNewChat);
+                setShowCreateGroup(false);
+              }}
               style={{
                 flex: 1,
                 padding: "6px 12px",
@@ -776,7 +825,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               Chat Baru
             </button>
             <button
-              onClick={() => setShowCreateGroup(!showCreateGroup)}
+              onClick={() => {
+                setShowCreateGroup(!showCreateGroup);
+                setShowNewChat(false);
+              }}
               style={{
                 flex: 1,
                 padding: "6px 12px",
@@ -800,8 +852,8 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         </div>
 
-        {/* All Users and Groups List - No Modal */}
-        {(showNewChat || showCreateGroup) && (
+        {/* Chat Baru List - No Modal */}
+        {showNewChat && (
           <div style={{
             padding: "10px 16px",
             borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -809,155 +861,158 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             maxHeight: "200px",
             overflowY: "auto",
           }}>
-            {showNewChat && (
-              <div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
-                  Pilih user untuk chat
-                </div>
-                {users.filter(u => u.id !== user.uid).map((u) => (
-                  <div
-                    key={u.id}
-                    onClick={() => createNewChat(u.id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      borderRadius: "6px",
-                      transition: "background 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                  >
-                    <div
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        position: "relative",
-                      }}
-                    >
-                      <img
-                        src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
-                        alt={u.email}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                      {u.online && (
-                        <span style={{
-                          position: "absolute",
-                          bottom: "1px",
-                          right: "1px",
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          backgroundColor: "#22c55e",
-                          border: "2px solid #0D3CFC",
-                        }} />
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "12px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
-                        {u.displayName || u.email || "User"}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <BlinkingDots active={u.online} />
-                        <span style={{ fontSize: "9px", color: u.online ? "#000000" : "#ffffff", fontFamily: FONT_FAMILY }}>
-                          {u.online ? "Online" : "Offline"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {users.filter(u => u.id !== user.uid).length === 0 && (
-                  <div style={{ padding: "10px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "12px", fontFamily: FONT_FAMILY }}>
-                    Belum ada user lain
-                  </div>
-                )}
-              </div>
-            )}
-            {showCreateGroup && (
-              <div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
-                  Buat grup baru
-                </div>
-                <input
-                  type="text"
-                  placeholder="Nama grup..."
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+              Pilih user untuk chat
+            </div>
+            {users.filter(u => u.id !== user.uid).map((u) => (
+              <div
+                key={u.id}
+                onClick={() => createNewChat(u.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  borderRadius: "6px",
+                  transition: "background 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <div
                   style={{
-                    width: "100%",
-                    padding: "4px 10px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "6px",
-                    color: "#ffffff",
-                    fontSize: "12px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    marginBottom: "6px",
-                  }}
-                />
-                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY, marginBottom: "4px" }}>
-                  Pilih anggota
-                </div>
-                {users.filter(u => u.id !== user.uid).map((u) => (
-                  <label key={u.id} style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: "#fff",
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "12px",
-                    color: "#ffffff",
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(u.id)}
-                      onChange={() => {
-                        if (selectedUsers.includes(u.id)) {
-                          setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                        } else {
-                          setSelectedUsers([...selectedUsers, u.id]);
-                        }
-                      }}
-                      style={{ accentColor: "#0D3CFC" }}
-                    />
-                    <span>{u.displayName || u.email || "User"}</span>
-                  </label>
-                ))}
-                {selectedUsers.length > 0 && groupName.trim() && (
-                  <button
-                    onClick={createGroup}
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                    alt={u.email}
                     style={{
-                      marginTop: "6px",
-                      padding: "4px 16px",
-                      backgroundColor: "#0D3CFC",
-                      color: "#ffffff",
-                      border: "1px solid #0D3CFC",
-                      borderRadius: "6px",
-                      fontSize: "11px",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
-                  >
-                    Buat Grup ({selectedUsers.length})
-                  </button>
-                )}
+                  />
+                  {u.online && (
+                    <span style={{
+                      position: "absolute",
+                      bottom: "1px",
+                      right: "1px",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: "#22c55e",
+                      border: "2px solid #0D3CFC",
+                    }} />
+                  )}
+                </div>
+                <div>
+                  <div style={{ fontSize: "12px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                    {u.displayName || u.email || "User"}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <BlinkingDots active={u.online} />
+                    <span style={{ fontSize: "9px", color: u.online ? "#000000" : "#ffffff", fontFamily: FONT_FAMILY }}>
+                      {u.online ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {users.filter(u => u.id !== user.uid).length === 0 && (
+              <div style={{ padding: "10px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "12px", fontFamily: FONT_FAMILY }}>
+                Belum ada user lain
               </div>
             )}
+          </div>
+        )}
+
+        {/* Grup Baru - No Modal */}
+        {showCreateGroup && (
+          <div style={{
+            padding: "10px 16px",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            backgroundColor: "rgba(255,255,255,0.05)",
+            maxHeight: "250px",
+            overflowY: "auto",
+          }}>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+              Buat grup baru
+            </div>
+            <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+              <input
+                type="text"
+                placeholder="Nama grup..."
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "4px 10px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "6px",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                }}
+              />
+              <button
+                onClick={createGroup}
+                disabled={!groupName.trim() || selectedUsers.length === 0}
+                style={{
+                  padding: "4px 16px",
+                  backgroundColor: (groupName.trim() && selectedUsers.length > 0) ? "#0D3CFC" : "#666",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  cursor: (groupName.trim() && selectedUsers.length > 0) ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Buat
+              </button>
+            </div>
+            <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", fontFamily: FONT_FAMILY, marginBottom: "4px" }}>
+              Pilih anggota ({selectedUsers.length})
+            </div>
+            {users.filter(u => u.id !== user.uid).map((u) => (
+              <label key={u.id} style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "4px 8px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                fontSize: "12px",
+                color: "#ffffff",
+              }}>
+                <input
+                  type="checkbox"
+                  checked={selectedUsers.includes(u.id)}
+                  onChange={() => {
+                    if (selectedUsers.includes(u.id)) {
+                      setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                    } else {
+                      setSelectedUsers([...selectedUsers, u.id]);
+                    }
+                  }}
+                  style={{ accentColor: "#0D3CFC" }}
+                />
+                <span>{u.displayName || u.email || "User"}</span>
+              </label>
+            ))}
           </div>
         )}
         
@@ -1039,6 +1094,11 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                           ({chat.memberCount || 0})
                         </span>
                       )}
+                      {chat.type === 'group' && chat.adminId === user.uid && (
+                        <span style={{ fontSize: "8px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
+                          Admin
+                        </span>
+                      )}
                     </div>
                     {/* Typing indicator in chat list */}
                     {typingText && (
@@ -1083,7 +1143,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         </div>
       </div>
 
-      {/* Chat Area - Full Blue Header */}
+      {/* Chat Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f0f2f5" }}>
         {selectedChat ? (
           <>
@@ -1136,14 +1196,19 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     }} />
                   )}
                 </div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}>
                     {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
                       ? (getOtherParticipant(selectedChat)?.displayName || getOtherParticipant(selectedChat)?.email || "User")
                       : selectedChat.name}
                     {selectedChat.type === 'group' && (
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginLeft: "6px" }}>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)" }}>
                         ({getOnlineMembers(selectedChat)} online)
+                      </span>
+                    )}
+                    {selectedChat.type === 'group' && selectedChat.adminId === user.uid && (
+                      <span style={{ fontSize: "9px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
+                        Admin
                       </span>
                     )}
                   </div>
@@ -1159,28 +1224,113 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     </div>
                   )}
                 </div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  {selectedChat.type === 'group' && selectedChat.adminId === user.uid && (
+                    <button
+                      onClick={() => setShowAddUser(!showAddUser)}
+                      style={{
+                        padding: "4px 10px",
+                        backgroundColor: "rgba(255,255,255,0.15)",
+                        color: "#ffffff",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <AddUserIcon size={14} />
+                      Add User
+                    </button>
+                  )}
+                  {selectedChat.type === 'group' && (
+                    <input
+                      type="text"
+                      placeholder="Bio grup..."
+                      value={selectedChat.bio || ""}
+                      onChange={(e) => updateGroupBio(selectedChat.id, e.target.value)}
+                      style={{
+                        padding: "4px 10px",
+                        backgroundColor: "rgba(255,255,255,0.15)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "6px",
+                        color: "#ffffff",
+                        fontSize: "11px",
+                        fontFamily: FONT_FAMILY,
+                        outline: "none",
+                        maxWidth: "150px",
+                      }}
+                    />
+                  )}
+                </div>
               </div>
-              {/* Group Bio Input */}
-              {selectedChat.type === 'group' && (
-                <input
-                  type="text"
-                  placeholder="Bio grup..."
-                  value={selectedChat.bio || ""}
-                  onChange={(e) => updateGroupBio(selectedChat.id, e.target.value)}
-                  style={{
-                    padding: "4px 10px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "6px",
-                    color: "#ffffff",
-                    fontSize: "11px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    maxWidth: "150px",
-                  }}
-                />
-              )}
             </div>
+
+            {/* Add User to Group - Expandable */}
+            {showAddUser && selectedChat.type === 'group' && selectedChat.adminId === user.uid && (
+              <div style={{
+                padding: "8px 20px",
+                backgroundColor: "#ffffff",
+                borderBottom: "1px solid #e8e8e8",
+                maxHeight: "150px",
+                overflowY: "auto",
+              }}>
+                <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "4px" }}>
+                  Tambah user ke grup
+                </div>
+                {users.filter(u => u.id !== user.uid && !selectedChat.members.includes(u.id)).map((u) => (
+                  <div
+                    key={u.id}
+                    onClick={() => addUserToGroup(selectedChat.id, u.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "4px 10px",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                      transition: "background 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f0f2f5"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  >
+                    <div
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <img
+                        src={u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.email || "User")}&background=ffffff&color=0D3CFC&size=128`}
+                        alt={u.email}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+                      {u.displayName || u.email || "User"}
+                    </span>
+                  </div>
+                ))}
+                {users.filter(u => u.id !== user.uid && !selectedChat.members.includes(u.id)).length === 0 && (
+                  <div style={{ padding: "10px", textAlign: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY }}>
+                    Semua user sudah di grup
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Message Search */}
             <div style={{
@@ -1230,6 +1380,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                 filteredMessages.map((msg, idx) => {
                   const isMine = msg.senderId === user?.uid;
                   const isRead = msg.read || false;
+                  const status = getMessageStatus(msg);
                   
                   return (
                     <div
@@ -1304,12 +1455,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                           fontFamily: FONT_FAMILY,
                         }}>
                           {formatTime(msg.timestamp)}
-                          {isMine && (
-                            isRead ? (
-                              <DoubleCheckIcon size={12} color="rgba(255,255,255,0.6)" />
-                            ) : (
-                              <CheckIcon size={12} color="rgba(255,255,255,0.4)" />
-                            )
+                          {isMine && status && (
+                            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "8px" }}>
+                              {status}
+                            </span>
                           )}
                         </div>
                       </div>
