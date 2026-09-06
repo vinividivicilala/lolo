@@ -131,7 +131,7 @@ const AddUserIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-// Blinking Dots Component
+// Blinking Dots Component - Online = BLACK, Offline = WHITE
 const BlinkingDots = ({ active }: { active: boolean }) => {
   return (
     <span style={{ display: 'inline-flex', gap: '2px', alignItems: 'center' }}>
@@ -144,10 +144,10 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
           font-size: 8px;
         }
         .dot.active {
-          color: #000000;
+          color: #000000 !important;
         }
         .dot.inactive {
-          color: #ffffff;
+          color: #ffffff !important;
         }
         @keyframes blink {
           0% { opacity: 0.2; }
@@ -155,6 +155,20 @@ const BlinkingDots = ({ active }: { active: boolean }) => {
           100% { opacity: 0.2; }
         }
       `}</style>
+    </span>
+  );
+};
+
+// Status Text Component - Online = BLACK text, Offline = WHITE text
+const StatusText = ({ active }: { active: boolean }) => {
+  return (
+    <span style={{ 
+      fontSize: "10px", 
+      color: active ? "#000000" : "#ffffff", 
+      fontFamily: FONT_FAMILY,
+      fontWeight: 500,
+    }}>
+      {active ? "Online" : "Offline"}
     </span>
   );
 };
@@ -373,7 +387,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         timestamp: serverTimestamp(),
         read: false,
         readBy: [],
-        delivered: false
+        delivered: true
       });
       
       await updateDoc(chatRef, {
@@ -701,7 +715,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <BlinkingDots active={true} />
-                <span style={{ fontSize: "10px", color: "#000000", fontFamily: FONT_FAMILY }}>Online</span>
+                <StatusText active={true} />
               </div>
             </div>
             <button
@@ -922,9 +936,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <BlinkingDots active={u.online} />
-                    <span style={{ fontSize: "9px", color: u.online ? "#000000" : "#ffffff", fontFamily: FONT_FAMILY }}>
-                      {u.online ? "Online" : "Offline"}
-                    </span>
+                    <StatusText active={u.online} />
                   </div>
                 </div>
               </div>
@@ -1011,6 +1023,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   style={{ accentColor: "#0D3CFC" }}
                 />
                 <span>{u.displayName || u.email || "User"}</span>
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <BlinkingDots active={u.online} />
+                  <StatusText active={u.online} />
+                </div>
               </label>
             ))}
           </div>
@@ -1111,6 +1127,12 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       {chat.lastMessage || "Mulai chat..."}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                      {chat.type === 'user' && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <BlinkingDots active={isOnline} />
+                          <StatusText active={isOnline} />
+                        </div>
+                      )}
                       {chat.type === 'group' && onlineCount > 0 && (
                         <span style={{ fontSize: "9px", color: "#22c55e", fontFamily: FONT_FAMILY }}>
                           ● {onlineCount} online
@@ -1197,7 +1219,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                     {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
                       ? (getOtherParticipant(selectedChat)?.displayName || getOtherParticipant(selectedChat)?.email || "User")
                       : selectedChat.name}
@@ -1212,10 +1234,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
-                    {selectedChat.type === 'user' && getOtherParticipant(selectedChat) 
-                      ? (getOtherParticipant(selectedChat)?.online ? "Online" : "Offline")
-                      : (selectedChat.type === 'group' ? `${selectedChat.memberCount || 0} anggota` : selectedChat.bio || "")}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                    {selectedChat.type === 'user' && getOtherParticipant(selectedChat) && (
+                      <>
+                        <BlinkingDots active={getOtherParticipant(selectedChat)?.online || false} />
+                        <StatusText active={getOtherParticipant(selectedChat)?.online || false} />
+                      </>
+                    )}
+                    {selectedChat.type === 'group' && (
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
+                        {selectedChat.memberCount || 0} anggota
+                      </span>
+                    )}
                   </div>
                   {/* Typing indicator in header */}
                   {getTypingUsers(selectedChat) && (
@@ -1247,23 +1277,40 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     </button>
                   )}
                   {selectedChat.type === 'group' && (
-                    <input
-                      type="text"
-                      placeholder="Bio grup..."
-                      value={selectedChat.bio || ""}
-                      onChange={(e) => updateGroupBio(selectedChat.id, e.target.value)}
-                      style={{
-                        padding: "4px 10px",
-                        backgroundColor: "rgba(255,255,255,0.15)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "6px",
-                        color: "#ffffff",
-                        fontSize: "11px",
-                        fontFamily: FONT_FAMILY,
-                        outline: "none",
-                        maxWidth: "150px",
-                      }}
-                    />
+                    <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                      <input
+                        type="text"
+                        placeholder="Bio grup..."
+                        value={selectedChat.bio || ""}
+                        onChange={(e) => updateGroupBio(selectedChat.id, e.target.value)}
+                        style={{
+                          padding: "4px 10px",
+                          backgroundColor: "rgba(255,255,255,0.15)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          borderRadius: "6px",
+                          color: "#ffffff",
+                          fontSize: "11px",
+                          fontFamily: FONT_FAMILY,
+                          outline: "none",
+                          maxWidth: "120px",
+                        }}
+                      />
+                      <button
+                        onClick={() => updateGroupBio(selectedChat.id, selectedChat.bio || "")}
+                        style={{
+                          padding: "4px 10px",
+                          backgroundColor: "#0D3CFC",
+                          color: "#ffffff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "10px",
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Submit
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1322,6 +1369,10 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                     <span style={{ fontSize: "12px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
                       {u.displayName || u.email || "User"}
                     </span>
+                    <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <BlinkingDots active={u.online} />
+                      <StatusText active={u.online} />
+                    </div>
                   </div>
                 ))}
                 {users.filter(u => u.id !== user.uid && !selectedChat.members.includes(u.id)).length === 0 && (
@@ -1446,7 +1497,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         <div>{msg.text}</div>
                         <div style={{ 
                           fontSize: "9px", 
-                          color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                          color: isMine ? "rgba(255,255,255,0.7)" : "#999", 
                           marginTop: "4px",
                           display: "flex",
                           alignItems: "center",
@@ -1456,7 +1507,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         }}>
                           {formatTime(msg.timestamp)}
                           {isMine && status && (
-                            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "8px" }}>
+                            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "8px", fontWeight: 500 }}>
                               {status}
                             </span>
                           )}
