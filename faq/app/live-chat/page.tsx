@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, arrayUnion, arrayRemove, increment, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, arrayUnion, arrayRemove, increment, getDoc, setDoc, writeBatch, getDocs } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -321,7 +321,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return () => unsubscribe();
   }, [db, user, selectedChat, isMounted]);
 
-  // Load messages for selected chat and track unread
+  // Load messages for selected chat
   useEffect(() => {
     if (!db || !selectedChat || !isMounted) return;
     
@@ -332,53 +332,117 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgList: Message[] = [];
-      const unreadList: {chatId: string, senderName: string, text: string, type: string}[] = [];
       
       snapshot.forEach((doc) => {
         const data = doc.data();
         const msg = { id: doc.id, ...data } as Message;
         msgList.push(msg);
-        
-        // Track unread messages (not from current user and not read)
-        if (data.senderId !== user.uid && !data.read) {
-          const chat = chats.find(c => c.id === selectedChat.id);
-          unreadList.push({
-            chatId: selectedChat.id,
-            senderName: data.senderName || "User",
-            text: data.text || "",
-            type: chat?.type || 'user'
-          });
-        }
       });
       
       setMessages(msgList);
-      setUnreadMessages(unreadList);
       
-      // Mark messages as read
-      const markAsRead = async () => {
-        const unread = msgList.filter(m => m.senderId !== user.uid && !m.read);
-        if (unread.length > 0) {
-          for (const msg of unread) {
-            const msgRef = doc(db, "chats", selectedChat.id, "messages", msg.id);
-            await updateDoc(msgRef, { 
-              read: true,
-              readBy: arrayUnion(user.uid)
-            });
-          }
-          await updateDoc(doc(db, "chats", selectedChat.id), {
-            unreadCount: 0
-          });
-          // Clear unread messages for this chat
-          setUnreadMessages(prev => prev.filter(u => u.chatId !== selectedChat.id));
-        }
-      };
-      markAsRead();
+      // Mark messages as read when chat is selected
+      markChatAsRead(selectedChat.id);
       
       setTimeout(scrollToBottom, 100);
     });
     
     return () => unsubscribe();
   }, [db, selectedChat, isMounted]);
+
+  // Listen for new messages in all chats
+  useEffect(() => {
+    if (!db || !user || !isMounted || chats.length === 0) return;
+    
+    const unsubscribes: (() => void)[] = [];
+    
+    chats.forEach(chat => {
+      const q = query(
+        collection(db, "chats", chat.id, "messages"),
+        orderBy("timestamp", "desc"),
+        limit(1)
+      );
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          // If message is from someone else and not read
+          if (data.senderId !== user.uid && !data.read) {
+            // Check if chat is currently selected
+            if (selectedChat?.id === chat.id) {
+              // If chat is selected, mark as read immediately
+              markChatAsRead(chat.id);
+              return;
+            }
+            
+            // Add to unreadMessages if not already exists
+            setUnreadMessages(prev => {
+              const exists = prev.some(u => u.chatId === chat.id && u.text === data.text && u.senderName === data.senderName);
+              if (!exists) {
+                return [...prev, {
+                  chatId: chat.id,
+                  senderName: data.senderName || "User",
+                  text: data.text || "",
+                  type: chat.type || 'user'
+                }];
+              }
+              return prev;
+            });
+          }
+        });
+      });
+      
+      unsubscribes.push(unsubscribe);
+    });
+    
+    return () => {
+      unsubscribes.forEach(unsub => unsub());
+    };
+  }, [db, user, chats, isMounted, selectedChat]);
+
+  // Mark chat as read function
+  const markChatAsRead = async (chatId: string) => {
+    if (!db || !user) return;
+    
+    try {
+      // Get all unread messages in this chat
+      const q = query(
+        collection(db, "chats", chatId, "messages"),
+        where("read", "==", false),
+        where("senderId", "!=", user.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        // Still clear from unreadMessages state
+        setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
+        return;
+      }
+      
+      const batch = writeBatch(db);
+      
+      snapshot.forEach((doc) => {
+        const msgRef = doc.ref;
+        batch.update(msgRef, {
+          read: true,
+          readBy: arrayUnion(user.uid)
+        });
+      });
+      
+      await batch.commit();
+      
+      // Update unread count in chat
+      await updateDoc(doc(db, "chats", chatId), {
+        unreadCount: 0
+      });
+      
+      // Remove from unreadMessages
+      setUnreadMessages(prev => prev.filter(u => u.chatId !== chatId));
+    } catch (error) {
+      console.error("Error marking chat as read:", error);
+    }
+  };
 
   // Auto-select first chat
   useEffect(() => {
@@ -578,6 +642,13 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     }
   };
 
+  const handleChatSelect = (chat: Chat) => {
+    setSelectedChat(chat);
+    if (chat.id) {
+      markChatAsRead(chat.id);
+    }
+  };
+
   // Filter chats
   const filteredChats = chats.filter(chat => {
     if (!searchQuery || !searchQuery.trim()) return true;
@@ -636,7 +707,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     return "Terkirim";
   };
 
-  // Get unread messages for display
+  // Get unread messages for chat
   const getUnreadMessagesForChat = (chatId: string) => {
     return unreadMessages.filter(u => u.chatId === chatId);
   };
@@ -1082,7 +1153,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             return (
               <div
                 key={chat.id}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => handleChatSelect(chat)}
                 style={{
                   padding: "10px 16px",
                   cursor: "pointer",
@@ -1170,6 +1241,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         fontWeight: 600,
                         marginTop: "2px",
                         lineHeight: 1.2,
+                        wordBreak: "break-word",
                       }}>
                         from {msg.senderName} {msg.type === 'group' ? 'grup' : 'personal'} : {msg.text}
                       </div>
