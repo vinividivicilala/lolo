@@ -246,7 +246,6 @@ const ProfilePage = ({
     if (!db || !isMounted) return;
 
     if (!isGroup && user) {
-      // Load user profile
       const userRef = doc(db, "users", user.id || user.uid);
       const unsubscribe = onSnapshot(userRef, (doc) => {
         if (doc.exists()) {
@@ -255,7 +254,6 @@ const ProfilePage = ({
       });
       return () => unsubscribe();
     } else if (isGroup && chatData) {
-      // Load group members
       const memberIds = chatData.members || [];
       const unsubscribes: (() => void)[] = [];
       
@@ -310,7 +308,6 @@ const ProfilePage = ({
         }
       `}</style>
 
-      {/* Header */}
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -349,7 +346,6 @@ const ProfilePage = ({
       </div>
 
       {!isGroup && profileUser ? (
-        // User Profile
         <div style={{
           backgroundColor: "rgba(255,255,255,0.05)",
           borderRadius: "12px",
@@ -446,7 +442,6 @@ const ProfilePage = ({
           </div>
         </div>
       ) : isGroup && profileUser ? (
-        // Group Profile
         <div style={{
           backgroundColor: "rgba(255,255,255,0.05)",
           borderRadius: "12px",
@@ -651,17 +646,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
   const [userBio, setUserBio] = useState("");
   const [unreadMessages, setUnreadMessages] = useState<{chatId: string, senderName: string, text: string, type: string}[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showBroadcastInput, setShowBroadcastInput] = useState(false);
-  const [showAnnouncementInput, setShowAnnouncementInput] = useState(false);
-  const [broadcastMessage, setBroadcastMessage] = useState("");
-  const [announcementMessage, setAnnouncementMessage] = useState("");
-  const [selectedBroadcastUsers, setSelectedBroadcastUsers] = useState<string[]>([]);
   const [showProfile, setShowProfile] = useState(false);
   const [profileUser, setProfileUser] = useState<any>(null);
   const [isGroupProfile, setIsGroupProfile] = useState(false);
   const [profileChatData, setProfileChatData] = useState<any>(null);
-  const [displayMessages, setDisplayMessages] = useState<string[]>([]);
-  const [messageIndex, setMessageIndex] = useState(0);
+  
+  // State untuk sistem baru (seperti di foto)
+  const [showBroadcastChat, setShowBroadcastChat] = useState(false);
+  const [showAnnouncementChat, setShowAnnouncementChat] = useState(false);
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [announcementMsg, setAnnouncementMsg] = useState("");
+  const [selectedBroadcastUsers, setSelectedBroadcastUsers] = useState<string[]>([]);
+  const [showBroadcastUserSelect, setShowBroadcastUserSelect] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -848,15 +844,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               }
               return prev;
             });
-
-            // Tambahkan ke display messages untuk rolling
-            setDisplayMessages(prev => {
-              const newMsg = `${data.senderName}: ${data.text}`;
-              if (!prev.includes(newMsg)) {
-                return [...prev, newMsg];
-              }
-              return prev;
-            });
           }
         });
       });
@@ -884,17 +871,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       setUserBio(user.bio);
     }
   }, [user]);
-
-  // Rolling messages effect
-  useEffect(() => {
-    if (displayMessages.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % displayMessages.length);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [displayMessages]);
 
   const sendMessage = async () => {
     if (!db || !selectedChat || !messageText.trim() || !user) return;
@@ -1083,163 +1059,168 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
     if (chat.id) {
       markChatAsRead(chat.id);
     }
-    // Reset profile ketika memilih chat
     setShowProfile(false);
   };
 
-  // Send Broadcast
-  const sendBroadcast = async () => {
-    if (!db || !user || !broadcastMessage.trim() || selectedBroadcastUsers.length === 0) return;
+  // ===== SISTEM BROADCAST & PENGUMUMAN BARU (seperti di foto) =====
+  
+  // Kirim Broadcast (sistem baru)
+  const sendNewBroadcast = async () => {
+    if (!db || !user || !broadcastMsg.trim() || selectedBroadcastUsers.length === 0) return;
     
     try {
       const adminName = user.displayName || user.email || "Admin";
       const adminPhoto = user.photoURL || "";
-
-      // Cek apakah sudah ada broadcast chat
-      const existingBroadcastQuery = query(
-        collection(db, "chats"),
-        where("isBroadcast", "==", true),
-        where("adminId", "==", user.uid)
-      );
-      const existingBroadcastSnapshot = await getDocs(existingBroadcastQuery);
       
-      let broadcastChatId: string;
-      
-      if (!existingBroadcastSnapshot.empty) {
-        broadcastChatId = existingBroadcastSnapshot.docs[0].id;
-        const existingMembers = existingBroadcastSnapshot.docs[0].data().members || [];
-        const newMembers = [...new Set([...existingMembers, ...selectedBroadcastUsers, user.uid])];
+      // Buat chat broadcast untuk setiap user yang dipilih
+      for (const targetUserId of selectedBroadcastUsers) {
+        // Cek apakah sudah ada chat broadcast antara admin dan user ini
+        const existingChatQuery = query(
+          collection(db, "chats"),
+          where("type", "==", "broadcast"),
+          where("members", "array-contains", user.uid),
+          where("targetUsers", "array-contains", targetUserId)
+        );
+        const existingChatSnapshot = await getDocs(existingChatQuery);
         
-        await updateDoc(doc(db, "chats", broadcastChatId), {
-          members: newMembers,
-          memberCount: newMembers.length,
-          lastMessage: broadcastMessage.trim(),
-          lastMessageTime: serverTimestamp(),
-          lastMessageSender: adminName,
-          lastMessageSenderId: user.uid,
-          unreadCount: increment(1)
+        let chatId: string;
+        
+        if (!existingChatSnapshot.empty) {
+          // Gunakan chat yang sudah ada
+          chatId = existingChatSnapshot.docs[0].id;
+          
+          await updateDoc(doc(db, "chats", chatId), {
+            lastMessage: broadcastMsg.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: increment(1)
+          });
+        } else {
+          // Buat chat broadcast baru
+          const targetUser = users.find(u => u.id === targetUserId);
+          const chatRef = await addDoc(collection(db, "chats"), {
+            type: 'broadcast',
+            name: `Broadcast`,
+            photo: "",
+            members: [user.uid, targetUserId],
+            adminId: user.uid,
+            createdAt: serverTimestamp(),
+            lastMessage: broadcastMsg.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: 0,
+            typing: [],
+            bio: "Broadcast dari admin",
+            memberCount: 2,
+            isBroadcast: true,
+            targetUsers: [targetUserId]
+          });
+          chatId = chatRef.id;
+        }
+        
+        // Kirim pesan ke chat broadcast
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          senderId: user.uid,
+          senderName: adminName,
+          senderPhoto: adminPhoto,
+          text: broadcastMsg.trim(),
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: [],
+          delivered: true
         });
-      } else {
-        const members = [user.uid, ...selectedBroadcastUsers];
-        const chatRef = await addDoc(collection(db, "chats"), {
-          type: 'broadcast',
-          name: "Broadcast",
-          photo: "",
-          members: members,
-          adminId: user.uid,
-          createdAt: serverTimestamp(),
-          lastMessage: broadcastMessage.trim(),
-          lastMessageTime: serverTimestamp(),
-          lastMessageSender: adminName,
-          lastMessageSenderId: user.uid,
-          unreadCount: 0,
-          typing: [],
-          bio: "Pesan broadcast dari admin",
-          memberCount: members.length,
-          isBroadcast: true,
-          targetUsers: selectedBroadcastUsers
-        });
-        broadcastChatId = chatRef.id;
       }
-
-      await addDoc(collection(db, "chats", broadcastChatId, "messages"), {
-        senderId: user.uid,
-        senderName: adminName,
-        senderPhoto: adminPhoto,
-        text: broadcastMessage.trim(),
-        timestamp: serverTimestamp(),
-        read: false,
-        readBy: [],
-        delivered: true
-      });
-
-      setBroadcastMessage("");
+      
+      setBroadcastMsg("");
       setSelectedBroadcastUsers([]);
-      setShowBroadcastInput(false);
-      alert('Broadcast berhasil dikirim!');
+      setShowBroadcastChat(false);
+      setShowBroadcastUserSelect(false);
+      alert(`Broadcast berhasil dikirim ke ${selectedBroadcastUsers.length} user!`);
     } catch (error) {
       console.error("Error sending broadcast:", error);
       alert('Gagal mengirim broadcast.');
     }
   };
 
-  // Send Announcement
-  const sendAnnouncement = async () => {
-    if (!db || !user || !announcementMessage.trim()) return;
+  // Kirim Pengumuman (sistem baru)
+  const sendNewAnnouncement = async () => {
+    if (!db || !user || !announcementMsg.trim()) return;
     
     try {
       const adminName = user.displayName || user.email || "Admin";
       const adminPhoto = user.photoURL || "";
-      const allUserIds = users.map(u => u.id);
-
-      // Cek apakah sudah ada announcement chat
-      const existingAnnouncementQuery = query(
-        collection(db, "chats"),
-        where("isAnnouncement", "==", true),
-        where("adminId", "==", user.uid)
-      );
-      const existingAnnouncementSnapshot = await getDocs(existingAnnouncementQuery);
       
-      let announcementChatId: string;
-      
-      if (!existingAnnouncementSnapshot.empty) {
-        announcementChatId = existingAnnouncementSnapshot.docs[0].id;
-        const existingMembers = existingAnnouncementSnapshot.docs[0].data().members || [];
-        const newMembers = [...new Set([...existingMembers, ...allUserIds, user.uid])];
+      // Kirim ke semua user
+      for (const targetUser of users) {
+        if (targetUser.id === user.uid) continue; // Skip admin sendiri
         
-        await updateDoc(doc(db, "chats", announcementChatId), {
-          members: newMembers,
-          memberCount: newMembers.length,
-          lastMessage: announcementMessage.trim(),
-          lastMessageTime: serverTimestamp(),
-          lastMessageSender: adminName,
-          lastMessageSenderId: user.uid,
-          unreadCount: increment(1)
+        // Cek apakah sudah ada chat announcement antara admin dan user ini
+        const existingChatQuery = query(
+          collection(db, "chats"),
+          where("type", "==", "announcement"),
+          where("members", "array-contains", user.uid),
+          where("targetUsers", "array-contains", targetUser.id)
+        );
+        const existingChatSnapshot = await getDocs(existingChatQuery);
+        
+        let chatId: string;
+        
+        if (!existingChatSnapshot.empty) {
+          chatId = existingChatSnapshot.docs[0].id;
+          
+          await updateDoc(doc(db, "chats", chatId), {
+            lastMessage: announcementMsg.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: increment(1)
+          });
+        } else {
+          const chatRef = await addDoc(collection(db, "chats"), {
+            type: 'announcement',
+            name: `Pengumuman`,
+            photo: "",
+            members: [user.uid, targetUser.id],
+            adminId: user.uid,
+            createdAt: serverTimestamp(),
+            lastMessage: announcementMsg.trim(),
+            lastMessageTime: serverTimestamp(),
+            lastMessageSender: adminName,
+            lastMessageSenderId: user.uid,
+            unreadCount: 0,
+            typing: [],
+            bio: "Pengumuman dari admin",
+            memberCount: 2,
+            isAnnouncement: true,
+            targetUsers: [targetUser.id]
+          });
+          chatId = chatRef.id;
+        }
+        
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          senderId: user.uid,
+          senderName: adminName,
+          senderPhoto: adminPhoto,
+          text: announcementMsg.trim(),
+          timestamp: serverTimestamp(),
+          read: false,
+          readBy: [],
+          delivered: true
         });
-      } else {
-        const members = [user.uid, ...allUserIds];
-        const chatRef = await addDoc(collection(db, "chats"), {
-          type: 'announcement',
-          name: "Pengumuman",
-          photo: "",
-          members: members,
-          adminId: user.uid,
-          createdAt: serverTimestamp(),
-          lastMessage: announcementMessage.trim(),
-          lastMessageTime: serverTimestamp(),
-          lastMessageSender: adminName,
-          lastMessageSenderId: user.uid,
-          unreadCount: 0,
-          typing: [],
-          bio: "Pengumuman dari admin",
-          memberCount: members.length,
-          isAnnouncement: true,
-          targetUsers: allUserIds
-        });
-        announcementChatId = chatRef.id;
       }
-
-      await addDoc(collection(db, "chats", announcementChatId, "messages"), {
-        senderId: user.uid,
-        senderName: adminName,
-        senderPhoto: adminPhoto,
-        text: announcementMessage.trim(),
-        timestamp: serverTimestamp(),
-        read: false,
-        readBy: [],
-        delivered: true
-      });
-
-      setAnnouncementMessage("");
-      setShowAnnouncementInput(false);
-      alert('Pengumuman berhasil dikirim!');
+      
+      setAnnouncementMsg("");
+      setShowAnnouncementChat(false);
+      alert(`Pengumuman berhasil dikirim ke semua user!`);
     } catch (error) {
       console.error("Error sending announcement:", error);
       alert('Gagal mengirim pengumuman.');
     }
   };
 
-  const toggleBroadcastUser = (userId: string) => {
+  const toggleBroadcastUserSelection = (userId: string) => {
     setSelectedBroadcastUsers(prev => 
       prev.includes(userId) 
         ? prev.filter(id => id !== userId)
@@ -1414,7 +1395,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
         borderRight: "1px solid rgba(255,255,255,0.1)",
         position: "relative",
       }}>
-        {/* User Profile Header - Klik untuk buka profil */}
+        {/* User Profile Header */}
         <div style={{
           padding: "16px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -1485,7 +1466,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               <span>Logout</span>
             </button>
           </div>
-          {/* User Bio */}
           <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
             <input
               type="text"
@@ -1616,7 +1596,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             </button>
           </div>
           
-          {/* TOMBOL ADMIN: BROADCAST & PENGUMUMAN */}
+          {/* TOMBOL ADMIN: BROADCAST & PENGUMUMAN - SISTEM BARU (seperti di foto) */}
           {isAdmin && (
             <div style={{ 
               display: "flex", 
@@ -1626,11 +1606,14 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               paddingTop: "8px",
             }}>
               <button
-                onClick={() => setShowBroadcastInput(!showBroadcastInput)}
+                onClick={() => {
+                  setShowBroadcastChat(!showBroadcastChat);
+                  setShowAnnouncementChat(false);
+                }}
                 style={{
                   flex: 1,
                   padding: "8px 12px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: showBroadcastChat ? "rgba(255,255,255,0.3)" : "#ffffff",
                   color: "#0D3CFC",
                   border: "1px solid rgba(255,255,255,0.3)",
                   borderRadius: "6px",
@@ -1644,16 +1627,19 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   fontWeight: 600,
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ffffff"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showBroadcastChat ? "rgba(255,255,255,0.3)" : "#ffffff"}
               >
                 Broadcast
               </button>
               <button
-                onClick={() => setShowAnnouncementInput(!showAnnouncementInput)}
+                onClick={() => {
+                  setShowAnnouncementChat(!showAnnouncementChat);
+                  setShowBroadcastChat(false);
+                }}
                 style={{
                   flex: 1,
                   padding: "8px 12px",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: showAnnouncementChat ? "rgba(255,255,255,0.3)" : "#ffffff",
                   color: "#0D3CFC",
                   border: "1px solid rgba(255,255,255,0.3)",
                   borderRadius: "6px",
@@ -1667,56 +1653,27 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   fontWeight: 600,
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ffffff"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showAnnouncementChat ? "rgba(255,255,255,0.3)" : "#ffffff"}
               >
                 Pengumuman
               </button>
             </div>
           )}
           
-          {/* Broadcast Input */}
-          {showBroadcastInput && isAdmin && (
+          {/* Broadcast Chat Input - Sistem Baru (seperti di foto) */}
+          {showBroadcastChat && isAdmin && (
             <div style={{
               backgroundColor: "rgba(255,255,255,0.1)",
               borderRadius: "8px",
               padding: "10px",
               marginTop: "4px",
             }}>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
-                Pilih user untuk broadcast:
-              </div>
-              <div style={{
-                maxHeight: "100px",
-                overflowY: "auto",
-                marginBottom: "8px",
-              }}>
-                {users.filter(u => u.id !== user.uid).map((u) => (
-                  <label key={u.id} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "2px 4px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "11px",
-                    color: "#ffffff",
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedBroadcastUsers.includes(u.id)}
-                      onChange={() => toggleBroadcastUser(u.id)}
-                      style={{ accentColor: "#0D3CFC" }}
-                    />
-                    <span>{u.displayName || u.email || "User"}</span>
-                  </label>
-                ))}
-              </div>
-              <div style={{ display: "flex", gap: "6px" }}>
+              <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
                 <input
                   type="text"
                   placeholder="Tulis broadcast..."
-                  value={broadcastMessage}
-                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  value={broadcastMsg}
+                  onChange={(e) => setBroadcastMsg(e.target.value)}
                   style={{
                     flex: 1,
                     padding: "6px 10px",
@@ -1730,27 +1687,78 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                   }}
                 />
                 <button
-                  onClick={sendBroadcast}
-                  disabled={!broadcastMessage.trim() || selectedBroadcastUsers.length === 0}
+                  onClick={() => setShowBroadcastUserSelect(!showBroadcastUserSelect)}
                   style={{
-                    padding: "6px 14px",
-                    backgroundColor: (broadcastMessage.trim() && selectedBroadcastUsers.length > 0) ? "#0D3CFC" : "#666",
+                    padding: "6px 10px",
+                    backgroundColor: "rgba(255,255,255,0.2)",
                     color: "#ffffff",
-                    border: "none",
+                    border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "6px",
                     fontSize: "11px",
-                    cursor: (broadcastMessage.trim() && selectedBroadcastUsers.length > 0) ? "pointer" : "not-allowed",
+                    cursor: "pointer",
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  Kirim
+                  {selectedBroadcastUsers.length > 0 ? `${selectedBroadcastUsers.length} user` : "Pilih user"}
                 </button>
               </div>
+              
+              {/* Pilih User untuk Broadcast */}
+              {showBroadcastUserSelect && (
+                <div style={{
+                  maxHeight: "100px",
+                  overflowY: "auto",
+                  marginBottom: "6px",
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  borderRadius: "4px",
+                  padding: "4px",
+                }}>
+                  {users.filter(u => u.id !== user.uid).map((u) => (
+                    <label key={u.id} style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "2px 6px",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "11px",
+                      color: "#ffffff",
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedBroadcastUsers.includes(u.id)}
+                        onChange={() => toggleBroadcastUserSelection(u.id)}
+                        style={{ accentColor: "#0D3CFC" }}
+                      />
+                      <span>{u.displayName || u.email || "User"}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              <button
+                onClick={sendNewBroadcast}
+                disabled={!broadcastMsg.trim() || selectedBroadcastUsers.length === 0}
+                style={{
+                  width: "100%",
+                  padding: "6px",
+                  backgroundColor: (broadcastMsg.trim() && selectedBroadcastUsers.length > 0) ? "#0D3CFC" : "#666",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: (broadcastMsg.trim() && selectedBroadcastUsers.length > 0) ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 600,
+                }}
+              >
+                Kirim Broadcast
+              </button>
             </div>
           )}
           
-          {/* Announcement Input */}
-          {showAnnouncementInput && isAdmin && (
+          {/* Announcement Chat Input - Sistem Baru (seperti di foto) */}
+          {showAnnouncementChat && isAdmin && (
             <div style={{
               backgroundColor: "rgba(255,255,255,0.1)",
               borderRadius: "8px",
@@ -1758,43 +1766,44 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
               marginTop: "4px",
             }}>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginBottom: "6px", fontFamily: FONT_FAMILY }}>
-                Pengumuman akan dikirim ke semua user:
+                Kirim pengumuman ke semua user:
               </div>
-              <div style={{ display: "flex", gap: "6px" }}>
-                <input
-                  type="text"
-                  placeholder="Tulis pengumuman..."
-                  value={announcementMessage}
-                  onChange={(e) => setAnnouncementMessage(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "6px 10px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "6px",
-                    color: "#ffffff",
-                    fontSize: "12px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                  }}
-                />
-                <button
-                  onClick={sendAnnouncement}
-                  disabled={!announcementMessage.trim()}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: announcementMessage.trim() ? "#0D3CFC" : "#666",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "11px",
-                    cursor: announcementMessage.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Kirim
-                </button>
-              </div>
+              <input
+                type="text"
+                placeholder="Tulis pengumuman..."
+                value={announcementMsg}
+                onChange={(e) => setAnnouncementMsg(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "6px 10px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "6px",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                  marginBottom: "6px",
+                }}
+              />
+              <button
+                onClick={sendNewAnnouncement}
+                disabled={!announcementMsg.trim()}
+                style={{
+                  width: "100%",
+                  padding: "6px",
+                  backgroundColor: announcementMsg.trim() ? "#0D3CFC" : "#666",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: announcementMsg.trim() ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 600,
+                }}
+              >
+                Kirim Pengumuman
+              </button>
             </div>
           )}
         </div>
@@ -1965,7 +1974,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
           </div>
         )}
         
-        {/* Chat List - Menampilkan riwayat pesan baru dengan rolling */}
+        {/* Chat List */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           {filteredChats.map((chat) => {
             const isActive = selectedChat?.id === chat.id;
@@ -1976,19 +1985,15 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
             const displayName = chat.type === 'user' && otherUser ? (otherUser.displayName || otherUser.email || "User") : chat.name;
             const displayPhoto = chat.type === 'user' && otherUser ? (otherUser.photoURL || getUserPhoto(otherUser.email)) : (chat.photo || getUserPhoto());
             const isOnline = chat.type === 'user' && otherUser ? otherUser.online : false;
-            const chatUnreadMessages = getUnreadMessagesForChat(chat.id);
             
-            // Get all messages from this chat to count total per sender
-            const chatMessages = messages.filter(m => m.senderId !== user.uid);
-            const senderCounts: {[key: string]: {name: string, count: number, texts: string[]}} = {};
-            
-            chatMessages.forEach(m => {
-              if (!senderCounts[m.senderId]) {
-                senderCounts[m.senderId] = { name: m.senderName, count: 0, texts: [] };
-              }
-              senderCounts[m.senderId].count++;
-              senderCounts[m.senderId].texts.push(m.text);
-            });
+            // Untuk Broadcast dan Announcement, tampilkan nama pengirim
+            let senderName = "";
+            let messageText = chat.lastMessage || "";
+            if (chat.isBroadcast) {
+              senderName = chat.lastMessageSender || "Admin";
+            } else if (chat.isAnnouncement) {
+              senderName = chat.lastMessageSender || "Admin";
+            }
             
             return (
               <div
@@ -2047,6 +2052,21 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         border: "2px solid #0D3CFC",
                       }} />
                     )}
+                    {(chat.isBroadcast || chat.isAnnouncement) && (
+                      <span style={{
+                        position: "absolute",
+                        top: "-2px",
+                        right: "-2px",
+                        fontSize: "10px",
+                        backgroundColor: chat.isBroadcast ? "#FFD700" : "#00BFFF",
+                        color: "#000",
+                        padding: "1px 4px",
+                        borderRadius: "3px",
+                        fontWeight: 600,
+                      }}>
+                        {chat.isBroadcast ? "B" : "P"}
+                      </span>
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ 
@@ -2073,45 +2093,35 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                           ({chat.memberCount || 0})
                         </span>
                       )}
+                      {(chat.isBroadcast || chat.isAnnouncement) && (
+                        <span style={{
+                          fontSize: "8px",
+                          backgroundColor: chat.isBroadcast ? "#FFD700" : "#00BFFF",
+                          color: "#000",
+                          padding: "1px 6px",
+                          borderRadius: "3px",
+                          fontWeight: 600,
+                          marginLeft: "4px",
+                        }}>
+                          {chat.isBroadcast ? "BROADCAST" : "PENGUMUMAN"}
+                        </span>
+                      )}
                     </div>
-                    {/* Typing indicator in chat list */}
+                    
+                    {/* Typing indicator */}
                     {typingText && (
                       <div style={{ fontSize: "11px", color: "#ffffff", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
                         {typingText}
                       </div>
                     )}
-                    {/* Last message */}
+                    
+                    {/* Last message - tampilkan pengirim untuk broadcast/announcement */}
                     <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontFamily: FONT_FAMILY }}>
+                      {(chat.isBroadcast || chat.isAnnouncement) && senderName ? `${senderName}: ` : ""}
                       {chat.lastMessage || "Mulai chat..."}
                     </div>
                     
-                    {/* TAMPILKAN TOTAL PESAN DARI PENGIRIM DENGAN ROLLING */}
-                    {Object.keys(senderCounts).length > 0 && Object.keys(senderCounts).map((senderId, idx) => {
-                      const sender = senderCounts[senderId];
-                      const currentText = displayMessages.length > 0 
-                        ? displayMessages[messageIndex % displayMessages.length]
-                        : sender.texts[0] || "";
-                      
-                      return (
-                        <div key={idx} style={{
-                          fontSize: "30px",
-                          color: "#ffffff",
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: 600,
-                          marginTop: "2px",
-                          lineHeight: 1.2,
-                          wordBreak: "break-word",
-                          transition: "opacity 0.5s ease",
-                        }}>
-                          from {sender.name} {chat.type === 'group' ? 'grup' : 'personal'} ({sender.count} pesan): {
-                            displayMessages.length > 0 
-                              ? displayMessages[messageIndex % displayMessages.length].split(': ')[1] || sender.texts[0] || ""
-                              : sender.texts[0] || ""
-                          }
-                        </div>
-                      );
-                    })}
-                    
+                    {/* Online count */}
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", flexWrap: "wrap" }}>
                       {chat.type === 'user' ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -2156,7 +2166,7 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#f0f2f5" }}>
         {selectedChat ? (
           <>
-            {/* Chat Header - Full Blue */}
+            {/* Chat Header */}
             <div style={{
               padding: "12px 20px",
               backgroundColor: "#0D3CFC",
@@ -2213,6 +2223,21 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       border: "2px solid #0D3CFC",
                     }} />
                   )}
+                  {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && (
+                    <span style={{
+                      position: "absolute",
+                      top: "-2px",
+                      right: "-2px",
+                      fontSize: "10px",
+                      backgroundColor: selectedChat.isBroadcast ? "#FFD700" : "#00BFFF",
+                      color: "#000",
+                      padding: "1px 4px",
+                      borderRadius: "3px",
+                      fontWeight: 600,
+                    }}>
+                      {selectedChat.isBroadcast ? "B" : "P"}
+                    </span>
+                  )}
                 </div>
                 <div style={{ flex: 1, cursor: "pointer" }} onClick={() => {
                   if (selectedChat.type === 'user') {
@@ -2231,6 +2256,18 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                         ({getOnlineMembers(selectedChat)} online)
                       </span>
                     )}
+                    {(selectedChat.isBroadcast || selectedChat.isAnnouncement) && (
+                      <span style={{
+                        fontSize: "9px",
+                        backgroundColor: selectedChat.isBroadcast ? "#FFD700" : "#00BFFF",
+                        color: "#000",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                      }}>
+                        {selectedChat.isBroadcast ? "BROADCAST" : "PENGUMUMAN"}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                     {selectedChat.type === 'user' && getOtherParticipant(selectedChat) && (
@@ -2245,7 +2282,6 @@ const LiveChat = ({ user, db, auth }: { user: any; db: any; auth: any }) => {
                       </span>
                     )}
                   </div>
-                  {/* Typing indicator in header */}
                   {getTypingUsers(selectedChat) && (
                     <div style={{ fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontStyle: "italic" }}>
                       {getTypingUsers(selectedChat)}
