@@ -429,7 +429,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         };
         setBotDetections(prev => ({ ...prev, [userId]: detection }));
         
-        // Simpan ke Firestore
         const botRef = collection(db, "bot_detections");
         addDoc(botRef, {
           userId,
@@ -448,7 +447,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       snapshot.forEach((doc) => {
         const ticketData = doc.data() as Ticket;
         if (ticketData.lastMessage) {
-          const isBot = detectBot(ticketData.lastMessage, ticketData.userId, ticketData.userName);
+          detectBot(ticketData.lastMessage, ticketData.userId, ticketData.userName);
         }
       });
     });
@@ -488,7 +487,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
       });
       
-      // Filter out broadcast and announcement tickets for regular users
       const filteredTickets = isAdmin ? ticketList : ticketList.filter(t => !t.isBroadcast && !t.isAnnouncement);
       setTickets(filteredTickets);
       
@@ -513,7 +511,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       const msgList: ChatMessage[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data() as ChatMessage;
-        // Decrypt messages if encrypted
         if (data.encrypted && data.text) {
           data.text = decryptMessage(data.text);
         }
@@ -576,11 +573,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
-    const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
+    
+    const hasActiveTicket = tickets.some(t => 
+      (t.status === 'waiting' || t.status === 'active') && 
+      t.userId === user.uid &&
+      !t.isBroadcast &&
+      !t.isAnnouncement
+    );
+    
     if (hasActiveTicket) {
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
     }
+    
     try {
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
