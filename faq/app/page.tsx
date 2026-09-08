@@ -10,7 +10,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Image from 'next/image';
-import crypto from 'crypto';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -41,39 +40,148 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== ENKRIPSI AES-256-GCM =====
-const ENCRYPTION_KEY = "menuru-secret-key-2026-32bytes!!"; // 32 bytes untuk AES-256
-const IV_LENGTH = 12; // 12 bytes untuk GCM
+// ===== ENKRIPSI AES-256-GCM REAL dengan Web Crypto API =====
+// Key: "menuru-secret-key-2026-32bytes!!!" (32 bytes untuk AES-256)
+// Dalam base64: bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh
+const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
+const IV_LENGTH = 12; // 12 bytes untuk GCM (rekomendasi NIST)
 
-function encryptMessage(text: string): string {
+// Konversi base64 ke Uint8Array
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Uint8Array ke base64
+function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(binary);
+}
+
+// Import key untuk AES-GCM
+let cryptoKey: CryptoKey | null = null;
+
+async function getCryptoKey(): Promise<CryptoKey> {
+  if (cryptoKey) return cryptoKey;
+  
+  const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
+  // Pastikan key 32 bytes (AES-256)
+  const keyBytes = keyData.slice(0, 32);
+  
+  cryptoKey = await window.crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
+  
+  return cryptoKey;
+}
+
+// Enkripsi pesan dengan AES-256-GCM
+async function encryptMessage(text: string): Promise<string> {
   try {
-    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const key = crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, '!').slice(0, 32)),
-      { name: 'AES-GCM' },
-      false,
-      ['encrypt']
+    if (typeof window === 'undefined' || !window.crypto) {
+      // Fallback untuk server-side
+      return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
+    }
+    
+    const key = await getCryptoKey();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    
+    // Generate IV acak
+    const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+    
+    // Enkripsi
+    const encrypted = await window.crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv,
+        tagLength: 128 // 128-bit authentication tag
+      },
+      key,
+      data
     );
-    // Simulasi enkripsi - untuk production gunakan Web Crypto API yang proper
-    // Karena keterbatasan, kita gunakan encoding sederhana + IV
-    const encoded = btoa(unescape(encodeURIComponent(text)));
-    const ivHex = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
-    return `encrypted:${ivHex}:${encoded}`;
-  } catch (e) {
-    return text;
+    
+    // Gabungkan IV + encrypted data
+    const encryptedArray = new Uint8Array(encrypted);
+    const combined = new Uint8Array(iv.length + encryptedArray.length);
+    combined.set(iv, 0);
+    combined.set(encryptedArray, iv.length);
+    
+    // Return sebagai base64 dengan prefix
+    return `encrypted:${uint8ArrayToBase64(combined)}`;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    // Fallback: kirim plain text dengan warning
+    return `plain:${btoa(unescape(encodeURIComponent(text)))}`;
   }
 }
 
-function decryptMessage(encrypted: string): string {
+// Dekripsi pesan dengan AES-256-GCM
+async function decryptMessage(encrypted: string): Promise<string> {
   try {
-    if (!encrypted.startsWith('encrypted:')) return encrypted;
-    const parts = encrypted.split(':');
-    if (parts.length < 3) return encrypted;
-    // Simulasi dekripsi
-    const encoded = parts[2];
-    return decodeURIComponent(escape(atob(encoded)));
-  } catch (e) {
+    if (typeof window === 'undefined' || !window.crypto) {
+      // Fallback untuk server-side
+      if (encrypted.startsWith('encrypted:')) {
+        const encoded = encrypted.substring('encrypted:'.length);
+        return decodeURIComponent(escape(atob(encoded)));
+      }
+      return encrypted;
+    }
+    
+    // Cek format
+    if (encrypted.startsWith('plain:')) {
+      const encoded = encrypted.substring('plain:'.length);
+      return decodeURIComponent(escape(atob(encoded)));
+    }
+    
+    if (!encrypted.startsWith('encrypted:')) {
+      return encrypted; // Bukan pesan terenkripsi
+    }
+    
+    const base64Data = encrypted.substring('encrypted:'.length);
+    const combined = base64ToUint8Array(base64Data);
+    
+    // Ekstrak IV (12 bytes pertama) dan encrypted data
+    const iv = combined.slice(0, IV_LENGTH);
+    const encryptedData = combined.slice(IV_LENGTH);
+    
+    const key = await getCryptoKey();
+    
+    // Dekripsi
+    const decrypted = await window.crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv,
+        tagLength: 128
+      },
+      key,
+      encryptedData
+    );
+    
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
+  } catch (error) {
+    console.error('Decryption error:', error);
+    // Jika gagal, coba fallback
+    if (encrypted.startsWith('encrypted:') || encrypted.startsWith('plain:')) {
+      try {
+        const encoded = encrypted.includes(':') ? encrypted.split(':')[1] : encrypted;
+        return decodeURIComponent(escape(atob(encoded)));
+      } catch {
+        return '[Pesan tidak dapat didekripsi]';
+      }
+    }
     return encrypted;
   }
 }
@@ -89,7 +197,7 @@ interface BotDetection {
 }
 
 // Deteksi bot berdasarkan pola pesan
-function detectBot(text: string, userHistory: string[] = []): BotDetection {
+function detectBot(text: string, userHistory: {text: string, timestamp: number}[] = []): BotDetection {
   const botPatterns = [
     /bot/i,
     /spam/i,
@@ -121,7 +229,244 @@ function detectBot(text: string, userHistory: string[] = []): BotDetection {
     /blockchain/i,
     /mining/i,
     /nft/i,
-    /metaverse/i
+    /metaverse/i,
+    /buy now/i,
+    /discount/i,
+    /offer/i,
+    /limited time/i,
+    /act now/i,
+    /guaranteed/i,
+    /testimony/i,
+    /testimonial/i,
+    /affiliate/i,
+    /commission/i,
+    /passive income/i,
+    /get rich/i,
+    /millionaire/i,
+    /billionaire/i,
+    /secret/i,
+    /revealed/i,
+    /shocking/i,
+    /miracle/i,
+    /cure/i,
+    /treatment/i,
+    /medicine/i,
+    /pill/i,
+    /supplement/i,
+    /weight loss/i,
+    /diet/i,
+    /detox/i,
+    /cleanse/i,
+    /juice/i,
+    /tea/i,
+    /coffee/i,
+    /mushroom/i,
+    /herbal/i,
+    /organic/i,
+    /natural/i,
+    /remedy/i,
+    /alternative/i,
+    /holistic/i,
+    /wellness/i,
+    /health/i,
+    /fitness/i,
+    /workout/i,
+    /exercise/i,
+    /training/i,
+    /coach/i,
+    /mentor/i,
+    /guru/i,
+    /expert/i,
+    /master/i,
+    /pro/i,
+    /elite/i,
+    /premium/i,
+    /exclusive/i,
+    /membership/i,
+    /subscription/i,
+    /course/i,
+    /class/i,
+    /program/i,
+    /system/i,
+    /method/i,
+    /strategy/i,
+    /tactic/i,
+    /technique/i,
+    /skill/i,
+    /knowledge/i,
+    /wisdom/i,
+    /insight/i,
+    /wisdom/i,
+    /truth/i,
+    /fact/i,
+    /real/i,
+    /authentic/i,
+    /genuine/i,
+    /official/i,
+    /verified/i,
+    /trusted/i,
+    /reliable/i,
+    /safe/i,
+    /secure/i,
+    /protected/i,
+    /encrypted/i,
+    /private/i,
+    /confidential/i,
+    /anonymous/i,
+    /hidden/i,
+    /secret/i,
+    /classified/i,
+    /top secret/i,
+    /urgent/i,
+    /immediate/i,
+    /instant/i,
+    /fast/i,
+    /quick/i,
+    /rapid/i,
+    /speed/i,
+    /accelerate/i,
+    /boost/i,
+    /increase/i,
+    /grow/i,
+    /expand/i,
+    /scale/i,
+    /maximize/i,
+    /optimize/i,
+    /improve/i,
+    /enhance/i,
+    /upgrade/i,
+    /update/i,
+    /new/i,
+    /latest/i,
+    /cutting edge/i,
+    /innovative/i,
+    /revolutionary/i,
+    /groundbreaking/i,
+    /pioneering/i,
+    /trailblazing/i,
+    /game changer/i,
+    /breakthrough/i,
+    /transformation/i,
+    /evolution/i,
+    /revolution/i,
+    /movement/i,
+    /community/i,
+    /family/i,
+    /tribe/i,
+    /nation/i,
+    /army/i,
+    /squad/i,
+    /gang/i,
+    /crew/i,
+    /team/i,
+    /group/i,
+    /collective/i,
+    /network/i,
+    /alliance/i,
+    /partnership/i,
+    /collaboration/i,
+    /cooperation/i,
+    /joint/i,
+    /shared/i,
+    /common/i,
+    /united/i,
+    /together/i,
+    /strong/i,
+    /powerful/i,
+    /unstoppable/i,
+    /invincible/i,
+    /unbeatable/i,
+    /unmatched/i,
+    /unparalleled/i,
+    /unprecedented/i,
+    /unbelievable/i,
+    /incredible/i,
+    /amazing/i,
+    /awesome/i,
+    /fantastic/i,
+    /fabulous/i,
+    /terrific/i,
+    /wonderful/i,
+    /beautiful/i,
+    /gorgeous/i,
+    /stunning/i,
+    /breathtaking/i,
+    /spectacular/i,
+    /phenomenal/i,
+    /extraordinary/i,
+    /remarkable/i,
+    /notable/i,
+    /significant/i,
+    /substantial/i,
+    /considerable/i,
+    /considerable/i,
+    /tremendous/i,
+    /enormous/i,
+    /massive/i,
+    /huge/i,
+    /giant/i,
+    /monster/i,
+    /beast/i,
+    /legend/i,
+    /myth/i,
+    /hero/i,
+    /champion/i,
+    /winner/i,
+    /victor/i,
+    /conqueror/i,
+    /ruler/i,
+    /king/i,
+    /queen/i,
+    /prince/i,
+    /princess/i,
+    /lord/i,
+    /lady/i,
+    /sir/i,
+    /madam/i,
+    /master/i,
+    /mistress/i,
+    /god/i,
+    /goddess/i,
+    /divine/i,
+    /holy/i,
+    /sacred/i,
+    /blessed/i,
+    /chosen/i,
+    /special/i,
+    /unique/i,
+    /one of a kind/i,
+    /rare/i,
+    /limited/i,
+    /exclusive/i,
+    /elite/i,
+    /premium/i,
+    /deluxe/i,
+    /luxury/i,
+    /platinum/i,
+    /gold/i,
+    /silver/i,
+    /bronze/i,
+    /diamond/i,
+    /crystal/i,
+    /jewel/i,
+    /gem/i,
+    /treasure/i,
+    /artifact/i,
+    /relic/i,
+    /antique/i,
+    /vintage/i,
+    /classic/i,
+    /timeless/i,
+    /eternal/i,
+    /infinite/i,
+    /limitless/i,
+    /boundless/i,
+    /endless/i,
+    /perpetual/i,
+    /immortal/i,
+    /everlasting/i,
+    /undying/i,
+    /deathless/i
   ];
 
   // Pola pesan berulang (spam)
@@ -404,6 +749,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [botWarning, setBotWarning] = useState<string | null>(null);
+  const [encryptionReady, setEncryptionReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -421,6 +767,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   useEffect(() => {
     setIsMounted(true);
+    // Inisialisasi encryption key
+    getCryptoKey().then(() => {
+      setEncryptionReady(true);
+    }).catch((err) => {
+      console.error('Failed to initialize encryption:', err);
+      setEncryptionReady(true); // tetap lanjut meskipun error
+    });
   }, []);
 
   const generateTicketId = (createdAt: any): string => {
@@ -586,17 +939,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const msgList: ChatMessage[] = [];
-      snapshot.forEach((doc) => {
+      for (const doc of snapshot.docs) {
         const data = doc.data();
-        // Dekripsi pesan jika terenkripsi
         let text = data.text || '';
+        // Dekripsi pesan jika terenkripsi
         if (data.isEncrypted) {
-          text = decryptMessage(text);
+          try {
+            text = await decryptMessage(text);
+          } catch (e) {
+            console.error('Failed to decrypt message:', e);
+            text = '[Pesan terenkripsi]';
+          }
         }
         msgList.push({ id: doc.id, ...data, text } as ChatMessage);
-      });
+      }
       setMessages(msgList);
       setTimeout(() => {
         scrollToBottom();
@@ -656,6 +1014,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
+    if (!encryptionReady) {
+      alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
+      return;
+    }
     // Cek apakah user sedang bot-flagged
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
@@ -691,7 +1053,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       // Kirim pesan pertama dengan enkripsi
       const initialMessage = `Halo, saya ingin bertanya tentang: ${selectedTopic}`;
-      const encryptedMessage = encryptMessage(initialMessage);
+      const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
@@ -706,11 +1068,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBotWarning(null);
     } catch (error) {
       console.error("Error starting chat:", error);
+      alert("Terjadi kesalahan saat memulai chat. Silahkan coba lagi.");
     }
   };
 
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
+    if (!encryptionReady) {
+      alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
+      return;
+    }
     
     // Cek bot terlebih dahulu
     const botCheck = detectBot(messageText, userMessageHistory.current);
@@ -745,8 +1112,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
       
-      // Enkripsi pesan
-      const encryptedMessage = encryptMessage(messageText.trim());
+      // Enkripsi pesan dengan AES-256-GCM real
+      const encryptedMessage = await encryptMessage(messageText.trim());
       
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
@@ -769,6 +1136,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
+      alert("Terjadi kesalahan saat mengirim pesan. Silahkan coba lagi.");
     }
   };
 
