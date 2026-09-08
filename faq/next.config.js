@@ -24,8 +24,18 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Alias untuk @
     config.resolve.alias["@"] = path.resolve(__dirname);
+    
+    // Fallback untuk crypto di browser
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+      };
+    }
+    
     return config;
   },
 };
