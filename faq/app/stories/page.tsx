@@ -1,4 +1,4 @@
-'use client';
+\'use client';
 
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
@@ -1541,8 +1541,6 @@ export default function StoriesPage(): React.JSX.Element {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
-  const menuBoxRef = useRef<HTMLDivElement>(null);
-  const menuBox2Ref = useRef<HTMLDivElement>(null);
   const menuBox3Ref = useRef<HTMLDivElement>(null);
   const storiesRef = useRef<HTMLDivElement>(null);
   const featuredStoryRef = useRef<HTMLDivElement>(null);
@@ -1610,42 +1608,6 @@ export default function StoriesPage(): React.JSX.Element {
                   duration: 0.6,
                   stagger: 0.08,
                   ease: 'power3.out'
-                }
-              );
-            }
-            if (menuBoxRef.current) {
-              gsap.fromTo(menuBoxRef.current,
-                { opacity: 0, scale: 0.9, x: 20 },
-                {
-                  opacity: 1,
-                  scale: 1,
-                  x: 0,
-                  duration: 0.8,
-                  ease: 'power3.out'
-                }
-              );
-            }
-            if (storiesRef.current) {
-              gsap.fromTo(storiesRef.current,
-                { opacity: 0, y: 20 },
-                {
-                  opacity: 1,
-                  y: 0,
-                  duration: 0.8,
-                  ease: 'power3.out'
-                }
-              );
-            }
-            if (menuBox2Ref.current) {
-              gsap.fromTo(menuBox2Ref.current,
-                { opacity: 0, scale: 0.9, x: 20 },
-                {
-                  opacity: 1,
-                  scale: 1,
-                  x: 0,
-                  duration: 0.8,
-                  ease: 'power3.out',
-                  delay: 0.2
                 }
               );
             }
@@ -2163,7 +2125,7 @@ export default function StoriesPage(): React.JSX.Element {
                   letterSpacing: "-0.01em",
                 }}
               >
-                Colleges
+                colleges
               </span>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
@@ -2219,22 +2181,22 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== COLLEGES CONTENT - Foto dan Teks ===== */}
+            {/* ===== COLLEGES CONTENT - Foto ukuran normal seperti di footer, teks full biru tanpa kapital ===== */}
             <div
               style={{
                 marginTop: "30px",
                 width: "100%",
                 display: "flex",
                 flexDirection: "column",
-                gap: "20px",
+                gap: "12px",
               }}
             >
-              {/* Foto */}
+              {/* Foto - ukuran normal seperti di footer */}
               <div
                 style={{
                   width: "100%",
                   maxWidth: "1400px",
-                  borderRadius: "16px",
+                  borderRadius: "12px",
                   overflow: "hidden",
                   backgroundColor: "#f0f2f5",
                   aspectRatio: "16/9",
@@ -2243,7 +2205,7 @@ export default function StoriesPage(): React.JSX.Element {
               >
                 <img
                   src="/images/p0l.jpg"
-                  alt="Colleges"
+                  alt="colleges"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -2253,14 +2215,14 @@ export default function StoriesPage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Teks di bawah foto - SEMUA BIRU */}
+              {/* Teks di bawah foto - SEMUA BIRU, tanpa kapital */}
               <div
                 style={{
                   width: "100%",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
-                  gap: "4px",
+                  gap: "2px",
                   padding: "0 4px",
                 }}
               >
@@ -2270,15 +2232,15 @@ export default function StoriesPage(): React.JSX.Element {
                     fontWeight: 500,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
+                    letterSpacing: "0.3px",
+                    textTransform: "none",
                   }}
                 >
-                  Colleges
+                  colleges
                 </span>
                 <h2
                   style={{
-                    fontSize: "32px",
+                    fontSize: "28px",
                     fontWeight: 700,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2287,28 +2249,22 @@ export default function StoriesPage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  Bagaimana Rasa nya Masuk
-                  <br />
-                  Kuliah Di Universitas
-                  <br />
-                  Gunadarma
+                  bagaimana rasa nya masuk kuliah di universitas gunadarma
                 </h2>
                 <p
                   style={{
-                    fontSize: "16px",
+                    fontSize: "15px",
                     fontWeight: 400,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
+                    lineHeight: 1.5,
                     margin: 0,
-                    marginTop: "6px",
-                    maxWidth: "700px",
+                    marginTop: "4px",
+                    maxWidth: "650px",
                     opacity: 0.8,
                   }}
                 >
-                  Menjadi mahasiswa di Universitas Gunadarma adalah pengalaman yang tak terlupakan. 
-                  Setiap hari penuh dengan pembelajaran, tantangan, dan pertumbuhan. Dari ruang kuliah 
-                  hingga kegiatan kampus, semuanya membentuk karakter dan masa depan.
+                  menjadi mahasiswa di universitas gunadarma adalah pengalaman yang tak terlupakan, setiap hari penuh dengan pembelajaran dan pertumbuhan.
                 </p>
               </div>
             </div>
@@ -2613,7 +2569,7 @@ export default function StoriesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - HANYA menuBox3Ref, tanpa stories, menuBoxRef, menuBox2Ref */}
+        {/* Menu Overlay - HANYA menuBox3Ref */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2713,7 +2669,7 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* HANYA menuBox3Ref - tanpa stories, menuBoxRef, menuBox2Ref */}
+          {/* HANYA menuBox3Ref */}
           <div
             ref={menuBox3Ref}
             style={{
