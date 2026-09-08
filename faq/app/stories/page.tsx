@@ -2105,7 +2105,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "30px",
+                  fontSize: "45px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2128,7 +2128,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "22px",
+                  fontSize: "45px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2140,7 +2140,7 @@ export default function StoriesPage(): React.JSX.Element {
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
                   style={{
-                    fontSize: "22px",
+                    fontSize: "45px",
                     fontWeight: 500,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2205,7 +2205,7 @@ export default function StoriesPage(): React.JSX.Element {
               <div
                 style={{
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "900px",
                   borderRadius: "12px",
                   overflow: "hidden",
                   backgroundColor: "#f0f2f5",
