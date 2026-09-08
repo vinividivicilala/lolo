@@ -2218,6 +2218,100 @@ export default function StoriesPage(): React.JSX.Element {
                 </div>
               </div>
             </div>
+
+            {/* ===== COLLEGES CONTENT - Foto dan Teks ===== */}
+            <div
+              style={{
+                marginTop: "30px",
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+              }}
+            >
+              {/* Foto */}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "1400px",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  backgroundColor: "#f0f2f5",
+                  aspectRatio: "16/9",
+                  position: "relative",
+                }}
+              >
+                <img
+                  src="/images/p0l.jpg"
+                  alt="Colleges"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+              </div>
+
+              {/* Teks di bawah foto - SEMUA BIRU */}
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "4px",
+                  padding: "0 4px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Colleges
+                </span>
+                <h2
+                  style={{
+                    fontSize: "32px",
+                    fontWeight: 700,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    margin: 0,
+                    lineHeight: 1.2,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Bagaimana Rasa nya Masuk
+                  <br />
+                  Kuliah Di Universitas
+                  <br />
+                  Gunadarma
+                </h2>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.6,
+                    margin: 0,
+                    marginTop: "6px",
+                    maxWidth: "700px",
+                    opacity: 0.8,
+                  }}
+                >
+                  Menjadi mahasiswa di Universitas Gunadarma adalah pengalaman yang tak terlupakan. 
+                  Setiap hari penuh dengan pembelajaran, tantangan, dan pertumbuhan. Dari ruang kuliah 
+                  hingga kegiatan kampus, semuanya membentuk karakter dan masa depan.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2519,7 +2613,7 @@ export default function StoriesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - TANPA STORIES */}
+        {/* Menu Overlay - HANYA menuBox3Ref, tanpa stories, menuBoxRef, menuBox2Ref */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2619,222 +2713,7 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          <div
-            ref={storiesRef}
-            style={{
-              position: "absolute",
-              left: "720px",  
-              top: "180px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              gap: "8px",
-              opacity: 0,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "40px",
-                fontWeight: 300,
-                color: "#ffffff",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.05em",
-              }}
-            >
-              stories
-            </span>
-          </div>
-
-          <div
-            ref={menuBoxRef}
-            style={{
-              position: "absolute",
-              right: "80px",
-              bottom: "80px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "24px",
-              border: "2px solid #D9FF81",
-              borderRadius: "12px",
-              padding: "20px 32px",
-              backgroundColor: "#D9FF81",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
-              maxWidth: "600px",
-              width: "auto",
-              minHeight: "90px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "2px",
-                flex: 1,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Bagaimana website ini
-              </span>
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                bisa berkembang?
-              </span>
-              <span
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 400,
-                  color: "rgba(13, 60, 252, 0.7)",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Dengan dukungan komunitas
-              </span>
-            </div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "rgba(13, 60, 252, 0.1)",
-                borderRadius: "6px",
-                padding: "4px",
-                width: "70px",
-                height: "70px",
-                overflow: "hidden",
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src="/images/10.jpg"
-                alt="Menuru"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "6px",
-                }}
-              />
-            </div>
-          </div>
-
-          <div
-            ref={menuBox2Ref}
-            style={{
-              position: "absolute",
-              left: "720px",
-              top: "260px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
-              borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
-              cursor: "pointer",
-              opacity: 0,
-              transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
-              width: "auto",
-              minHeight: "100px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "4px",
-                flex: 1,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Bagaimana Rasa nya Masuk
-              </span>
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Kuliah Di Universitas
-              </span>
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 600,
-                  color: "#0D3CFC",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                }}
-              >
-                Gunadarma
-              </span>
-            </div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "rgba(13, 60, 252, 0.1)",
-                borderRadius: "6px",
-                padding: "4px",
-                width: "100px",
-                height: "100px",
-                overflow: "hidden",
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src="/images/10.jpg"
-                alt="Universitas Gunadarma"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "6px",
-                }}
-              />
-            </div>
-          </div>
-
+          {/* HANYA menuBox3Ref - tanpa stories, menuBoxRef, menuBox2Ref */}
           <div
             ref={menuBox3Ref}
             style={{
@@ -3016,55 +2895,6 @@ export default function StoriesPage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
-          .menu-overlay .menu-box {
-            right: 40px !important;
-            bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 140px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .menu-overlay .menu-box3 {
-            right: 40px !important;
-            top: 260px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -3117,70 +2947,6 @@ export default function StoriesPage(): React.JSX.Element {
             width: 100% !important;
             max-width: 100% !important;
           }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
-          .menu-overlay .menu-box {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
-          .menu-overlay .menu-box2 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box3 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -3227,42 +2993,6 @@ export default function StoriesPage(): React.JSX.Element {
           }
           .menu-overlay .menu-text {
             font-size: 22px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box2 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box3 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
           }
         }
       `}</style>
