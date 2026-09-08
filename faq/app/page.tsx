@@ -143,40 +143,27 @@ async function decryptMessage(encrypted: string): Promise<string> {
 }
 
 // ===== ANTI-BOT SYSTEM - DIRECT BAN NO SCORE =====
-// Daftar kata kunci yang akan langsung BAN PERMANEN
 const BANNED_KEYWORDS = [
-  // Bot related
   'bot', 'spam', 'scam', 'phishing', 'malware', 'ransomware',
   'keylogger', 'spyware', 'adware', 'trojan', 'worm', 'rootkit',
   'exploit', '0day', 'sql injection', 'xss', 'csrf',
-  
-  // Gambling / Judol
   'gambling', 'casino', 'lottery', 'judol', 'judionline',
   'slot', 'poker', 'baccarat', 'rolet', 'blackjack',
   'sabung ayam', 'togel', '4d', 'toto', 'magnum',
   'damacai', 'singaporepools', 'hongkongpools', 'sydneypools',
-  
-  // Adult
   'sex', 'porn', 'xxx', 'nsfw', '18+',
-  
-  // Spam/Scam
   'viagra', 'cialis', 'levitra', 'weight loss', 'diet pill',
   'fat burner', 'miracle cure', 'get rich', 'make money',
   'earn money', 'quick cash', 'free money', 'click here',
   'passive income', 'millionaire', 'billionaire',
-  
-  // Crypto/Investment
   'crypto', 'bitcoin', 'ethereum', 'investment', 'profit',
   'return', 'mining', 'nft', 'metaverse',
-  
-  // Suspicious links patterns
   'xyz', 'top', 'club', 'online', 'site', 'win', 'bid',
   'loan', 'date', 'download', 'stream', 'watch', 'free',
   'click', 'biz', 'info', 'name', 'pro', 'tech', 'store',
   'shop', 'live', 'app', 'dev', 'work', 'cloud', 'host'
 ];
 
-// Cek apakah pesan mengandung kata kunci terlarang
 function containsBannedKeyword(text: string): { banned: boolean; keyword: string } {
   const lowerText = text.toLowerCase();
   for (const keyword of BANNED_KEYWORDS) {
@@ -187,7 +174,6 @@ function containsBannedKeyword(text: string): { banned: boolean; keyword: string
   return { banned: false, keyword: '' };
 }
 
-// Cek apakah link mencurigakan
 function containsSuspiciousLink(text: string): { suspicious: boolean; link: string } {
   const linkPattern = /https?:\/\/[^\s]+/gi;
   const matches = text.match(linkPattern);
@@ -204,21 +190,19 @@ function containsSuspiciousLink(text: string): { suspicious: boolean; link: stri
   return { suspicious: false, link: '' };
 }
 
-// ===== BAN USER PERMANENTLY =====
 async function banUserPermanent(userId: string, userEmail: string, reason: string, keyword: string) {
   if (!db) return;
   try {
-    // 1. Update user document - BAN PERMANEN
     const userRef = doc(db, "users", userId);
     await setDoc(userRef, {
       banned: true,
       bannedReason: `${reason} (Keyword: ${keyword})`,
       bannedAt: serverTimestamp(),
       bannedPermanent: true,
-      canCreateTicket: false
+      canCreateTicket: false,
+      canAccessLiveChat: false
     }, { merge: true });
 
-    // 2. Log ke violations
     await addDoc(collection(db, "bot_violations"), {
       userId,
       userEmail,
@@ -229,13 +213,11 @@ async function banUserPermanent(userId: string, userEmail: string, reason: strin
       resolved: false
     });
 
-    // 3. Delete ALL tickets milik user
     const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", userId)));
     for (const ticketDoc of ticketsSnap.docs) {
       await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
     }
 
-    // 4. Hapus semua pesan di semua ticket
     for (const ticketDoc of ticketsSnap.docs) {
       const messagesSnap = await getDocs(collection(db, "livechat_tickets", ticketDoc.id, "messages"));
       for (const msgDoc of messagesSnap.docs) {
@@ -249,7 +231,6 @@ async function banUserPermanent(userId: string, userEmail: string, reason: strin
   }
 }
 
-// ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{ banned: boolean; reason: string; permanent: boolean }> {
   if (!db || !userId) return { banned: false, reason: '', permanent: false };
   try {
@@ -275,7 +256,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// SVG Icons
+// SVG Icons (sama seperti sebelumnya)
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -468,9 +449,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [isMounted, setIsMounted] = useState(false);
   const [botWarning, setBotWarning] = useState<string | null>(null);
   const [encryptionReady, setEncryptionReady] = useState(false);
-  const [isBanned, setIsBanned] = useState(false);
+  const [isBanned, setIsBanned] = useState(true); // Default true untuk loading state
   const [banReason, setBanReason] = useState("");
   const [banKeyword, setBanKeyword] = useState("");
+  const [isCheckingBan, setIsCheckingBan] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -497,17 +479,24 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // ===== CHECK BAN STATUS ON MOUNT & AUTH CHANGE =====
   useEffect(() => {
-    if (!user || !db || !isMounted) return;
+    if (!user || !db || !isMounted) {
+      setIsCheckingBan(false);
+      return;
+    }
     
     const checkBan = async () => {
+      setIsCheckingBan(true);
       const status = await checkBanStatus(user.uid);
       if (status.banned) {
         setIsBanned(true);
         setBanReason(status.reason);
         setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
-        // Set state banned
         setShowStartChat(false);
+      } else {
+        setIsBanned(false);
+        setBotWarning(null);
       }
+      setIsCheckingBan(false);
     };
     checkBan();
   }, [user, db, isMounted]);
@@ -523,6 +512,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           setIsBanned(true);
           setBanReason(status.reason);
           setShowStartChat(false);
+        } else {
+          setIsBanned(false);
         }
       }
     });
@@ -647,7 +638,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }, [db, isMounted]);
 
   useEffect(() => {
-    if (!db || !user || !isMounted) return;
+    if (!db || !user || !isMounted || isBanned) return;
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -680,10 +671,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted]);
+  }, [db, user, isAdmin, selectedTicket, isMounted, isBanned]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !isMounted) return;
+    if (!db || !selectedTicket || !isMounted || isBanned) return;
     const q = query(
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
@@ -709,19 +700,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }, 50);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket, isMounted]);
+  }, [db, selectedTicket, isMounted, isBanned]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
+    if (!db || !selectedTicket || !user || !isAdmin || !isMounted || isBanned) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted, isBanned]);
 
   useEffect(() => {
-    if (!user || isAdmin || !isMounted) return;
+    if (!user || isAdmin || !isMounted || isBanned) return;
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
@@ -732,7 +723,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted, isBanned]);
 
   // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -764,7 +755,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const startChat = async () => {
-    // ===== CHECK BAN STATUS =====
+    // ===== CEK BAN =====
     if (isBanned) {
       setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
       return;
@@ -782,6 +773,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setIsBanned(true);
       setBanReason(status.reason);
       setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
+      setShowStartChat(false);
       return;
     }
 
@@ -829,7 +821,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const sendMessage = async () => {
-    // ===== CHECK BAN STATUS =====
+    // ===== CEK BAN =====
     if (isBanned) {
       setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
       setMessageText("");
@@ -845,7 +837,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     // ===== ANTI-BOT: CEK KATA KUNCI =====
     const keywordCheck = containsBannedKeyword(messageText);
     if (keywordCheck.banned) {
-      // LANGSUNG BAN PERMANEN
       await banUserPermanent(
         user.uid,
         user.email || '',
@@ -858,15 +849,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBanKeyword(keywordCheck.keyword);
       setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung kata kunci terlarang: "${keywordCheck.keyword}"`);
       setMessageText("");
+      setShowStartChat(false);
       
-      // Hapus semua ticket
       const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
       for (const ticketDoc of ticketsSnap.docs) {
         await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
       }
       setSelectedTicket(null);
       setMessages([]);
-      setShowStartChat(false);
       
       return;
     }
@@ -874,7 +864,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     // ===== ANTI-BOT: CEK LINK MENURIGAKAN =====
     const linkCheck = containsSuspiciousLink(messageText);
     if (linkCheck.suspicious) {
-      // LANGSUNG BAN PERMANEN
       await banUserPermanent(
         user.uid,
         user.email || '',
@@ -887,6 +876,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBanKeyword(linkCheck.link);
       setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung link mencurigakan: ${linkCheck.link}`);
       setMessageText("");
+      setShowStartChat(false);
       
       const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
       for (const ticketDoc of ticketsSnap.docs) {
@@ -894,7 +884,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
       setSelectedTicket(null);
       setMessages([]);
-      setShowStartChat(false);
       
       return;
     }
@@ -989,75 +978,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== RENDER COMPONENT =====
-  if (!isMounted) {
-    return <div style={{ minHeight: "100px" }} />;
-  }
-  
-  if (!user) {
-    return (
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-        <h3 ref={liveChatTitleRef} style={{
-          fontSize: "22px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          marginBottom: "12px",
-        }}>
-          Live Chat Agent
-        </h3>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          flexWrap: "wrap",
-        }}>
-          <div style={{
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(13,60,252,0.06)",
-            borderRadius: "10px",
-            padding: "10px",
-            width: "50px",
-            height: "50px",
-          }}>
-            <LiveChatIllustration />
-          </div>
-          <div>
-            <p style={{
-              fontSize: "13px",
-              color: "#666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "6px",
-            }}>
-              Silakan login untuk menggunakan Live Chat Agent
-            </p>
-            <Link href="/" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  padding: "5px 16px",
-                  backgroundColor: "#0D3CFC",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "5px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Login
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== BANNED STATE - PERMANENT BLOCK =====
+  // ===== RENDER BANNED STATE - TIDAK ADA TOMBOL SAMA SEKALI =====
   if (isBanned) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -1065,7 +986,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           backgroundColor: "#fee2e2",
           border: "3px solid #dc2626",
           borderRadius: "12px",
-          padding: "30px 20px",
+          padding: "40px 20px",
           textAlign: "center",
           boxShadow: "0 10px 40px rgba(220, 38, 38, 0.2)"
         }}>
@@ -1167,10 +1088,190 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
+  // ===== RENDER COMPONENT =====
+  if (!isMounted || isCheckingBan) {
+    return <div style={{ minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ fontFamily: FONT_FAMILY, color: "#999" }}>Memeriksa status akun...</span>
+    </div>;
+  }
+  
+  if (!user) {
+    return (
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+        <h3 ref={liveChatTitleRef} style={{
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          marginBottom: "12px",
+        }}>
+          Live Chat Agent
+        </h3>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          flexWrap: "wrap",
+        }}>
+          <div style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(13,60,252,0.06)",
+            borderRadius: "10px",
+            padding: "10px",
+            width: "50px",
+            height: "50px",
+          }}>
+            <LiveChatIllustration />
+          </div>
+          <div>
+            <p style={{
+              fontSize: "13px",
+              color: "#666",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "6px",
+            }}>
+              Silakan login untuk menggunakan Live Chat Agent
+            </p>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  padding: "5px 16px",
+                  backgroundColor: "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Login
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // USER VIEW
   if (!isAdmin) {
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
+
+    // ===== TIDAK ADA TOMBOL SAMA SEKALI KALAU BANNED =====
+    if (isBanned) {
+      return (
+        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+          <div style={{
+            backgroundColor: "#fee2e2",
+            border: "3px solid #dc2626",
+            borderRadius: "12px",
+            padding: "40px 20px",
+            textAlign: "center",
+            boxShadow: "0 10px 40px rgba(220, 38, 38, 0.2)"
+          }}>
+            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🚫</div>
+            <h3 style={{
+              fontSize: "28px",
+              fontWeight: 700,
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "12px"
+            }}>
+              AKUN ANDA TELAH DIBANNED PERMANEN
+            </h3>
+            <div style={{
+              backgroundColor: "#fecaca",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              marginBottom: "12px",
+              display: "inline-block"
+            }}>
+              <p style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#991b1b",
+                fontFamily: FONT_FAMILY,
+                margin: 0
+              }}>
+                🚨 {banReason || 'Melanggar ketentuan layanan'}
+              </p>
+              {banKeyword && (
+                <p style={{
+                  fontSize: "12px",
+                  color: "#991b1b",
+                  fontFamily: FONT_FAMILY,
+                  margin: "4px 0 0 0",
+                  opacity: 0.8
+                }}>
+                  Keyword: "{banKeyword}"
+                </p>
+              )}
+            </div>
+            <p style={{
+              fontSize: "14px",
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px"
+            }}>
+              ❌ Anda TIDAK DAPAT membuat ticket baru
+            </p>
+            <p style={{
+              fontSize: "14px",
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px"
+            }}>
+              ❌ Anda TIDAK DAPAT mengirim pesan
+            </p>
+            <p style={{
+              fontSize: "14px",
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px"
+            }}>
+              ❌ Anda TIDAK DAPAT mengakses Live Chat
+            </p>
+            <p style={{
+              fontSize: "12px",
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              marginTop: "12px",
+              opacity: 0.7
+            }}>
+              ⏱️ Ban ini bersifat PERMANEN dan tidak dapat dibatalkan secara otomatis.
+              <br />
+              Silakan hubungi admin untuk informasi lebih lanjut.
+            </p>
+            <button
+              onClick={handleLogout}
+              style={{
+                marginTop: "20px",
+                padding: "10px 32px",
+                backgroundColor: "#dc2626",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "background 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#b91c1c"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#dc2626"}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      );
+    }
 
     if (userTickets.length === 0 && !showStartChat) {
       return (
@@ -1490,16 +1591,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <div
                     key={ticket.id}
                     onClick={() => {
-                      setSelectedTicket(ticket);
-                      setMessages([]);
+                      if (!isBanned) {
+                        setSelectedTicket(ticket);
+                        setMessages([]);
+                      }
                     }}
                     style={{
                       padding: "8px 10px",
                       borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
                       backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
-                      cursor: "pointer",
+                      cursor: isBanned ? "not-allowed" : "pointer",
                       transition: "all 0.2s ease",
                       borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      opacity: isBanned ? 0.5 : 1,
                     }}
                   >
                     <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>
@@ -1545,23 +1649,43 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               bottom: 0,
               backgroundColor: "#0D3CFC",
             }}>
-              <button
-                onClick={() => setShowStartChat(true)}
-                style={{
+              {/* ===== TOMBOL CHAT BARU - HANYA MUNCUL JIKA TIDAK BANNED ===== */}
+              {!isBanned && (
+                <button
+                  onClick={() => setShowStartChat(true)}
+                  style={{
+                    width: "100%",
+                    padding: "5px",
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  + Chat Baru
+                </button>
+              )}
+              {isBanned && (
+                <div style={{
                   width: "100%",
                   padding: "5px",
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                  color: "#fff",
-                  border: "none",
+                  backgroundColor: "rgba(220,38,38,0.3)",
+                  color: "#fca5a5",
+                  border: "1px solid #dc2626",
                   borderRadius: "5px",
                   fontSize: "11px",
                   fontWeight: 500,
-                  cursor: "pointer",
+                  textAlign: "center",
                   fontFamily: FONT_FAMILY,
-                }}
-              >
-                + Chat Baru
-              </button>
+                  cursor: "not-allowed",
+                }}>
+                  🚫 TELAH DIBANNED
+                </div>
+              )}
             </div>
           </div>
 
@@ -1614,7 +1738,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       </span>
                     </div>
                   </div>
-                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !isBanned && (
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
@@ -1723,7 +1847,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
-                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !isBanned && (
                   <div style={{
                     padding: "6px 10px",
                     borderTop: "1px solid #e8e8e8",
@@ -1777,6 +1901,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       <SendIcon size={12} />
                       <span>Kirim</span>
                     </button>
+                  </div>
+                )}
+                {isBanned && (
+                  <div style={{
+                    padding: "10px",
+                    backgroundColor: "#fee2e2",
+                    borderTop: "2px solid #dc2626",
+                    textAlign: "center",
+                    color: "#991b1b",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "12px",
+                    fontWeight: 600,
+                  }}>
+                    🚫 AKUN ANDA TELAH DIBANNED - TIDAK DAPAT MENGIRIM PESAN
                   </div>
                 )}
               </>
