@@ -1691,26 +1691,6 @@ export default function StoriesPage(): React.JSX.Element {
       );
     }
 
-    // Featured Story animation
-    if (featuredStoryRef.current) {
-      gsap.fromTo(featuredStoryRef.current,
-        { opacity: 0, y: 30, scale: 0.97 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: featuredStoryRef.current,
-            start: "top 80%",
-            end: "bottom 60%",
-            toggleActions: "play none none reverse",
-          }
-        }
-      );
-    }
-
     const menuruElement = menuruFooterRef.current;
     const menuruText = menuruTextRef.current;
     
@@ -2129,109 +2109,27 @@ export default function StoriesPage(): React.JSX.Element {
               </h1>
             </div>
 
-            {/* FEATURED STORY - Di bawah Stories besar */}
+            {/* FEATURED STORY - HANYA TEKS BIRU 30px */}
             <div
               ref={featuredStoryRef}
               style={{
-                marginTop: "40px",
+                marginTop: "30px",
                 width: "100%",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                padding: "30px 0",
-                borderTop: "2px solid rgba(13,60,252,0.1)",
+                justifyContent: "flex-start",
               }}
             >
               <span
                 style={{
-                  fontSize: "14px",
+                  fontSize: "30px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  marginBottom: "12px",
+                  letterSpacing: "-0.01em",
                 }}
               >
-                ★ Featured Story
+                Featured Story
               </span>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "30px",
-                  width: "100%",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div
-                  style={{
-                    flex: "0 0 300px",
-                    height: "200px",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    backgroundColor: "#e8ecf1",
-                  }}
-                >
-                  <img
-                    src="/images/10.jpg"
-                    alt="Featured Story"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-                <div style={{ flex: 1, minWidth: "280px" }}>
-                  <div style={{
-                    fontSize: "12px",
-                    color: "#0D3CFC",
-                    fontWeight: 500,
-                    fontFamily: FONT_FAMILY,
-                    marginBottom: "4px",
-                    letterSpacing: "0.5px",
-                  }}>
-                    15 Jan 2026
-                  </div>
-                  <h2 style={{
-                    fontSize: "32px",
-                    fontWeight: 700,
-                    color: "#000000",
-                    fontFamily: FONT_FAMILY,
-                    margin: "0 0 8px 0",
-                    lineHeight: 1.2,
-                    letterSpacing: "-0.01em",
-                  }}>
-                    Perjalanan Menuru: Dari Mimpi Menjadi Kenyataan
-                  </h2>
-                  <p style={{
-                    fontSize: "16px",
-                    color: "#666",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.6,
-                    margin: "0 0 16px 0",
-                  }}>
-                    Kisah tentang bagaimana Menuru lahir dari sebuah mimpi sederhana dan tumbuh menjadi komunitas yang solid.
-                  </p>
-                  <div style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    color: "#0D3CFC",
-                    fontWeight: 500,
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    cursor: "pointer",
-                    borderBottom: "2px solid #0D3CFC",
-                    paddingBottom: "2px",
-                  }}>
-                    Baca Selengkapnya
-                    <span style={{ fontSize: "18px" }}>→</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
