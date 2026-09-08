@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, deleteDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -40,7 +40,7 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== ENKRIPSI AES-256-GCM REAL =====
+// ===== ENKRIPSI AES-256-GCM REAL dengan Web Crypto API =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
 
@@ -65,8 +65,10 @@ let cryptoKey: CryptoKey | null = null;
 
 async function getCryptoKey(): Promise<CryptoKey> {
   if (cryptoKey) return cryptoKey;
+  
   const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
   const keyBytes = keyData.slice(0, 32);
+  
   cryptoKey = await window.crypto.subtle.importKey(
     'raw',
     keyBytes,
@@ -74,6 +76,7 @@ async function getCryptoKey(): Promise<CryptoKey> {
     false,
     ['encrypt', 'decrypt']
   );
+  
   return cryptoKey;
 }
 
@@ -82,19 +85,28 @@ async function encryptMessage(text: string): Promise<string> {
     if (typeof window === 'undefined' || !window.crypto) {
       return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
     }
+    
     const key = await getCryptoKey();
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
+    
     const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+    
     const encrypted = await window.crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv, tagLength: 128 },
+      {
+        name: 'AES-GCM',
+        iv: iv,
+        tagLength: 128
+      },
       key,
       data
     );
+    
     const encryptedArray = new Uint8Array(encrypted);
     const combined = new Uint8Array(iv.length + encryptedArray.length);
     combined.set(iv, 0);
     combined.set(encryptedArray, iv.length);
+    
     return `encrypted:${uint8ArrayToBase64(combined)}`;
   } catch (error) {
     console.error('Encryption error:', error);
@@ -111,21 +123,34 @@ async function decryptMessage(encrypted: string): Promise<string> {
       }
       return encrypted;
     }
+    
     if (encrypted.startsWith('plain:')) {
       const encoded = encrypted.substring('plain:'.length);
       return decodeURIComponent(escape(atob(encoded)));
     }
-    if (!encrypted.startsWith('encrypted:')) return encrypted;
+    
+    if (!encrypted.startsWith('encrypted:')) {
+      return encrypted;
+    }
+    
     const base64Data = encrypted.substring('encrypted:'.length);
     const combined = base64ToUint8Array(base64Data);
+    
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
+    
     const key = await getCryptoKey();
+    
     const decrypted = await window.crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: iv, tagLength: 128 },
+      {
+        name: 'AES-GCM',
+        iv: iv,
+        tagLength: 128
+      },
       key,
       encryptedData
     );
+    
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
@@ -142,113 +167,412 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ANTI-BOT SYSTEM - DIRECT BAN NO SCORE =====
-const BANNED_KEYWORDS = [
-  'bot', 'spam', 'scam', 'phishing', 'malware', 'ransomware',
-  'keylogger', 'spyware', 'adware', 'trojan', 'worm', 'rootkit',
-  'exploit', '0day', 'sql injection', 'xss', 'csrf',
-  'gambling', 'casino', 'lottery', 'judol', 'judionline',
-  'slot', 'poker', 'baccarat', 'rolet', 'blackjack',
-  'sabung ayam', 'togel', '4d', 'toto', 'magnum',
-  'damacai', 'singaporepools', 'hongkongpools', 'sydneypools',
-  'sex', 'porn', 'xxx', 'nsfw', '18+',
-  'viagra', 'cialis', 'levitra', 'weight loss', 'diet pill',
-  'fat burner', 'miracle cure', 'get rich', 'make money',
-  'earn money', 'quick cash', 'free money', 'click here',
-  'passive income', 'millionaire', 'billionaire',
-  'crypto', 'bitcoin', 'ethereum', 'investment', 'profit',
-  'return', 'mining', 'nft', 'metaverse',
+// ===== BEHAVIOR-BASED ANTI-BOT DETECTION =====
+interface BotBehavior {
+  userId: string;
+  userEmail: string;
+  userName: string;
+  violations: BotViolation[];
+  totalViolations: number;
+  isBlocked: boolean;
+  blockedAt: any;
+  blockedReason: string;
+  behaviorScore: number; // 0-100, semakin tinggi semakin mencurigakan
+  lastActivity: any;
+  warningCount: number;
+  firstViolation: any;
+  lastViolation: any;
+}
+
+interface BotViolation {
+  type: 'SPAM' | 'PHISHING' | 'JUDOL' | 'SUSPICIOUS_LINK' | 'REPEATED_MESSAGE' | 'RAPID_MESSAGING' | 'SUSPICIOUS_PATTERN' | 'MALICIOUS_CONTENT';
+  reason: string;
+  timestamp: any;
+  message: string;
+  confidence: number; // 0-100
+}
+
+// Daftar kata kunci untuk JUDOL (Judi Online)
+const JUDOL_KEYWORDS = [
+  'judi', 'slot', 'poker', 'casino', 'roulette', 'blackjack', 'baccarat',
+  'togel', 'toto', '4d', '3d', '2d', 'colok', 'macau', 'singapore',
+  'hongkong', 'sydney', 'japan', 'korea', 'china', 'taiwan',
+  'bandar', 'bookie', 'odds', 'bet', 'taruhan', 'pertaruhan',
+  'jackpot', 'progressive', 'bonus', 'deposit', 'withdraw', 'wd',
+  'live casino', 'live dealer', 'online casino', 'gambling',
+  'judol', 'slot online', 'mesin slot', 'game slot',
+  'maxwin', 'scatter', 'wild', 'bonus free spin', 'free spin',
+  'situs judi', 'agen judi', 'bo', 'bandar online',
+  'qq', 'domino', 'capsa', 'ceme', 'poker online',
+  'taruhan bola', 'sportsbook', 'sports betting',
+  'parlay', 'mix parlay', 'over under', 'handicap',
+  '1x2', 'double chance', 'correct score', 'total goals'
+];
+
+// Daftar kata kunci PHISHING
+const PHISHING_KEYWORDS = [
+  'phishing', 'scam', 'fraud', 'penipuan', 'tipu',
+  'rekening', 'transfer', 'minta uang', 'pinjam uang',
+  'kartu kredit', 'kartu atm', 'pin', 'password',
+  'otp', 'verifikasi', 'validasi', 'konfirmasi',
+  'akun bank', 'nomor rekening', 'no rek', 'rek',
+  'minta kirim', 'kirim ke', 'bayar ke', 'setor ke',
+  'investasi bodong', 'money game', 'ponzi', 'skema cepat kaya',
+  'phising', 'pishing', 'pissing', 'phisihg',
+  'email resmi', 'dari bank', 'dari pemerintah',
+  'hadiah', 'menang', 'pemenang', 'klaim hadiah',
+  'data pribadi', 'informasi pribadi', 'ktp', 'nik',
+  'kk', 'akte', 'ijazah', 'transkrip',
+  'password bank', 'm-banking', 'mobile banking',
+  'internet banking', 'i-banking', 'e-banking'
+];
+
+// Pola URL mencurigakan
+const SUSPICIOUS_DOMAINS = [
+  'bit.ly', 'tinyurl', 'shorturl', 'rb.gy', 'cutt.ly',
+  't.co', 'ow.ly', 'buff.ly', 'adf.ly', 'shorte.st',
+  'goo.gl', 'is.gd', 'v.gd', 'migre.me', 'tiny.cc',
+  'short.link', '1.ink', '2.ink', '3.ink',
   'xyz', 'top', 'club', 'online', 'site', 'win', 'bid',
   'loan', 'date', 'download', 'stream', 'watch', 'free',
   'click', 'biz', 'info', 'name', 'pro', 'tech', 'store',
   'shop', 'live', 'app', 'dev', 'work', 'cloud', 'host'
 ];
 
-function containsBannedKeyword(text: string): { banned: boolean; keyword: string } {
-  const lowerText = text.toLowerCase();
-  for (const keyword of BANNED_KEYWORDS) {
-    if (lowerText.includes(keyword.toLowerCase())) {
-      return { banned: true, keyword };
-    }
-  }
-  return { banned: false, keyword: '' };
+// Pola pesan berulang (spam)
+function detectRepeatedMessages(messages: string[]): boolean {
+  if (messages.length < 3) return false;
+  const lastThree = messages.slice(-3);
+  return lastThree.every(msg => msg === lastThree[0]);
 }
 
-function containsSuspiciousLink(text: string): { suspicious: boolean; link: string } {
-  const linkPattern = /https?:\/\/[^\s]+/gi;
-  const matches = text.match(linkPattern);
-  if (matches) {
-    for (const link of matches) {
-      const lowerLink = link.toLowerCase();
-      for (const keyword of BANNED_KEYWORDS) {
-        if (lowerLink.includes(keyword.toLowerCase())) {
-          return { suspicious: true, link };
+// Deteksi JUDOL
+function detectJudol(text: string): BotViolation | null {
+  const lowerText = text.toLowerCase();
+  for (const keyword of JUDOL_KEYWORDS) {
+    if (lowerText.includes(keyword)) {
+      return {
+        type: 'JUDOL',
+        reason: `Konten Judi Online terdeteksi: "${keyword}"`,
+        timestamp: serverTimestamp(),
+        message: text,
+        confidence: 85
+      };
+    }
+  }
+  return null;
+}
+
+// Deteksi PHISHING
+function detectPhishing(text: string): BotViolation | null {
+  const lowerText = text.toLowerCase();
+  for (const keyword of PHISHING_KEYWORDS) {
+    if (lowerText.includes(keyword)) {
+      return {
+        type: 'PHISHING',
+        reason: `Konten Phishing terdeteksi: "${keyword}"`,
+        timestamp: serverTimestamp(),
+        message: text,
+        confidence: 90
+      };
+    }
+  }
+  
+  // Deteksi permintaan data pribadi
+  const personalDataPatterns = [
+    /no.?rek/i, /nomor.?rekening/i, /rekening/i,
+    /ktp/i, /nik/i, /kk/i, /kartu.?keluarga/i,
+    /password/i, /pin/i, /otp/i,
+    /kartu.?kredit/i, /kartu.?atm/i
+  ];
+  
+  for (const pattern of personalDataPatterns) {
+    if (pattern.test(text)) {
+      return {
+        type: 'PHISHING',
+        reason: 'Permintaan data pribadi terdeteksi',
+        timestamp: serverTimestamp(),
+        message: text,
+        confidence: 95
+      };
+    }
+  }
+  
+  return null;
+}
+
+// Deteksi Link Mencurigakan
+function detectSuspiciousLinks(text: string): BotViolation | null {
+  const urlPattern = /(https?:\/\/[^\s]+)/gi;
+  const urls = text.match(urlPattern);
+  
+  if (urls) {
+    for (const url of urls) {
+      const lowerUrl = url.toLowerCase();
+      for (const domain of SUSPICIOUS_DOMAINS) {
+        if (lowerUrl.includes(domain)) {
+          return {
+            type: 'SUSPICIOUS_LINK',
+            reason: `Link mencurigakan terdeteksi: ${domain}`,
+            timestamp: serverTimestamp(),
+            message: text,
+            confidence: 80
+          };
         }
       }
-    }
-  }
-  return { suspicious: false, link: '' };
-}
-
-async function banUserPermanent(userId: string, userEmail: string, reason: string, keyword: string) {
-  if (!db) return;
-  try {
-    const userRef = doc(db, "users", userId);
-    await setDoc(userRef, {
-      banned: true,
-      bannedReason: `${reason} (Keyword: ${keyword})`,
-      bannedAt: serverTimestamp(),
-      bannedPermanent: true,
-      canCreateTicket: false,
-      canAccessLiveChat: false
-    }, { merge: true });
-
-    await addDoc(collection(db, "bot_violations"), {
-      userId,
-      userEmail,
-      reason,
-      keyword,
-      timestamp: serverTimestamp(),
-      action: 'PERMANENT_BAN',
-      resolved: false
-    });
-
-    const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", userId)));
-    for (const ticketDoc of ticketsSnap.docs) {
-      await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
-    }
-
-    for (const ticketDoc of ticketsSnap.docs) {
-      const messagesSnap = await getDocs(collection(db, "livechat_tickets", ticketDoc.id, "messages"));
-      for (const msgDoc of messagesSnap.docs) {
-        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id, "messages", msgDoc.id));
-      }
-    }
-
-    console.log(`🚫 PERMANENT BAN: ${userEmail} - ${reason} (Keyword: ${keyword})`);
-  } catch (error) {
-    console.error('Error banning user:', error);
-  }
-}
-
-async function checkBanStatus(userId: string): Promise<{ banned: boolean; reason: string; permanent: boolean }> {
-  if (!db || !userId) return { banned: false, reason: '', permanent: false };
-  try {
-    const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", userId)));
-    if (!userSnap.empty) {
-      const data = userSnap.docs[0].data();
-      if (data.banned === true || data.bannedPermanent === true) {
+      
+      // Deteksi URL yang tidak biasa
+      if (lowerUrl.match(/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/)) {
         return {
-          banned: true,
-          reason: data.bannedReason || 'Permanent Ban',
-          permanent: data.bannedPermanent || false
+          type: 'SUSPICIOUS_LINK',
+          reason: 'Link IP Address terdeteksi',
+          timestamp: serverTimestamp(),
+          message: text,
+          confidence: 70
         };
       }
     }
-    return { banned: false, reason: '', permanent: false };
+  }
+  return null;
+}
+
+// Deteksi Pola Mencurigakan
+function detectSuspiciousPattern(text: string): BotViolation | null {
+  const patterns = [
+    /(\w)\1{10,}/, // Karakter berulang
+    /[!@#$%^&*()_+]{5,}/, // Simbol berulang
+    /[0-9]{10,}/, // Angka berulang
+    /[A-Z]{8,}/ // Huruf kapital berulang
+  ];
+  
+  for (const pattern of patterns) {
+    if (pattern.test(text)) {
+      return {
+        type: 'SUSPICIOUS_PATTERN',
+        reason: 'Pola teks mencurigakan terdeteksi',
+        timestamp: serverTimestamp(),
+        message: text,
+        confidence: 60
+      };
+    }
+  }
+  return null;
+}
+
+// Deteksi Rapid Messaging (pesan cepat beruntun)
+function detectRapidMessaging(timestamps: number[], threshold: number = 5000): boolean {
+  if (timestamps.length < 5) return false;
+  const recent = timestamps.slice(-5);
+  const timeSpan = recent[recent.length - 1] - recent[0];
+  return timeSpan < threshold;
+}
+
+// Main detection function
+function detectBotBehavior(
+  text: string,
+  messageHistory: {text: string, timestamp: number}[],
+  userEmail: string
+): { violations: BotViolation[], score: number, isBlocked: boolean } {
+  const violations: BotViolation[] = [];
+  let score = 0;
+  
+  // 1. Deteksi JUDOL
+  const judolViolation = detectJudol(text);
+  if (judolViolation) {
+    violations.push(judolViolation);
+    score += 30;
+  }
+  
+  // 2. Deteksi PHISHING
+  const phishingViolation = detectPhishing(text);
+  if (phishingViolation) {
+    violations.push(phishingViolation);
+    score += 35;
+  }
+  
+  // 3. Deteksi Link Mencurigakan
+  const linkViolation = detectSuspiciousLinks(text);
+  if (linkViolation) {
+    violations.push(linkViolation);
+    score += 20;
+  }
+  
+  // 4. Deteksi Pola Mencurigakan
+  const patternViolation = detectSuspiciousPattern(text);
+  if (patternViolation) {
+    violations.push(patternViolation);
+    score += 15;
+  }
+  
+  // 5. Deteksi Pesan Berulang
+  const recentMessages = messageHistory.slice(-5).map(m => m.text);
+  if (detectRepeatedMessages(recentMessages)) {
+    violations.push({
+      type: 'REPEATED_MESSAGE',
+      reason: 'Pesan berulang terdeteksi (spam)',
+      timestamp: serverTimestamp(),
+      message: text,
+      confidence: 75
+    });
+    score += 20;
+  }
+  
+  // 6. Deteksi Rapid Messaging
+  const timestamps = messageHistory.map(m => m.timestamp);
+  if (detectRapidMessaging(timestamps)) {
+    violations.push({
+      type: 'RAPID_MESSAGING',
+      reason: 'Pengiriman pesan terlalu cepat (bot)',
+      timestamp: serverTimestamp(),
+      message: text,
+      confidence: 65
+    });
+    score += 15;
+  }
+  
+  // 7. Deteksi Malicious Content
+  const maliciousPatterns = [
+    /<script/i, /javascript:/i, /onclick/i, /onload/i,
+    /eval\(/i, /document\./i, /window\./i, /alert\(/i,
+    /prompt\(/i, /confirm\(/i, /function/i, /var /i,
+    /const /i, /let /i, /=>/i, /===/i, /!==/i
+  ];
+  
+  for (const pattern of maliciousPatterns) {
+    if (pattern.test(text)) {
+      violations.push({
+        type: 'MALICIOUS_CONTENT',
+        reason: 'Konten berbahaya terdeteksi',
+        timestamp: serverTimestamp(),
+        message: text,
+        confidence: 100
+      });
+      score += 40;
+      break;
+    }
+  }
+  
+  // Cek apakah user sudah pernah dilaporkan
+  const isBlocked = score >= 50 || violations.length >= 2;
+  
+  return { violations, score, isBlocked };
+}
+
+// ===== SIMPAN BOT VIOLATION KE FIREBASE =====
+async function saveBotViolation(
+  userId: string,
+  userEmail: string,
+  userName: string,
+  violations: BotViolation[],
+  score: number,
+  isBlocked: boolean
+) {
+  if (!db) return;
+  
+  try {
+    const botRef = doc(db, "bot_blocks", userId);
+    const botDoc = await getDoc(botRef);
+    let botData: BotBehavior;
+    
+    if (botDoc.exists()) {
+      botData = botDoc.data() as BotBehavior;
+      // Tambah violations baru
+      botData.violations.push(...violations);
+      botData.totalViolations += violations.length;
+      botData.behaviorScore = Math.min(100, botData.behaviorScore + score);
+      botData.lastViolation = serverTimestamp();
+      botData.lastActivity = serverTimestamp();
+      
+      if (isBlocked && !botData.isBlocked) {
+        botData.isBlocked = true;
+        botData.blockedAt = serverTimestamp();
+        botData.blockedReason = violations.map(v => v.reason).join(', ');
+      }
+      
+      // Tambah warning count
+      botData.warningCount += 1;
+      
+      await updateDoc(botRef, {
+        violations: botData.violations,
+        totalViolations: botData.totalViolations,
+        behaviorScore: botData.behaviorScore,
+        lastViolation: botData.lastViolation,
+        lastActivity: botData.lastActivity,
+        isBlocked: botData.isBlocked,
+        blockedAt: botData.blockedAt,
+        blockedReason: botData.blockedReason,
+        warningCount: botData.warningCount
+      });
+    } else {
+      // Buat baru
+      botData = {
+        userId,
+        userEmail,
+        userName,
+        violations: violations,
+        totalViolations: violations.length,
+        isBlocked: isBlocked,
+        blockedAt: isBlocked ? serverTimestamp() : null,
+        blockedReason: isBlocked ? violations.map(v => v.reason).join(', ') : '',
+        behaviorScore: Math.min(100, score),
+        lastActivity: serverTimestamp(),
+        warningCount: 1,
+        firstViolation: serverTimestamp(),
+        lastViolation: serverTimestamp()
+      };
+      
+      await setDoc(botRef, botData);
+    }
+    
+    // Jika blocked, update user status
+    if (isBlocked) {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        botBlocked: true,
+        botBlockedAt: serverTimestamp(),
+        botBlockedReason: violations.map(v => v.reason).join(', '),
+        botBehaviorScore: Math.min(100, botData.behaviorScore)
+      });
+    }
+    
+    // Simpan log violation
+    for (const violation of violations) {
+      await addDoc(collection(db, "bot_violations_log"), {
+        userId,
+        userEmail,
+        userName,
+        violation,
+        timestamp: serverTimestamp(),
+        resolved: false
+      });
+    }
+    
   } catch (error) {
-    console.error('Error checking ban status:', error);
-    return { banned: false, reason: '', permanent: false };
+    console.error("Error saving bot violation:", error);
+  }
+}
+
+// ===== CEK STATUS BOT USER =====
+async function checkBotStatus(userId: string): Promise<{ isBlocked: boolean; reason: string; score: number }> {
+  if (!db) return { isBlocked: false, reason: '', score: 0 };
+  
+  try {
+    const botRef = doc(db, "bot_blocks", userId);
+    const botDoc = await getDoc(botRef);
+    
+    if (botDoc.exists()) {
+      const data = botDoc.data() as BotBehavior;
+      return {
+        isBlocked: data.isBlocked || false,
+        reason: data.blockedReason || '',
+        score: data.behaviorScore || 0
+      };
+    }
+    
+    return { isBlocked: false, reason: '', score: 0 };
+  } catch (error) {
+    console.error("Error checking bot status:", error);
+    return { isBlocked: false, reason: '', score: 0 };
   }
 }
 
@@ -256,7 +580,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// SVG Icons (sama seperti sebelumnya)
+// SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -448,15 +772,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [botWarning, setBotWarning] = useState<string | null>(null);
+  const [isBotBlocked, setIsBotBlocked] = useState(false);
+  const [botBlockReason, setBotBlockReason] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
-  const [isBanned, setIsBanned] = useState(true); // Default true untuk loading state
-  const [banReason, setBanReason] = useState("");
-  const [banKeyword, setBanKeyword] = useState("");
-  const [isCheckingBan, setIsCheckingBan] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
+  const userMessageHistory = useRef<{text: string, timestamp: number}[]>([]);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -477,49 +800,24 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, []);
 
-  // ===== CHECK BAN STATUS ON MOUNT & AUTH CHANGE =====
+  // Cek status bot user
   useEffect(() => {
-    if (!user || !db || !isMounted) {
-      setIsCheckingBan(false);
-      return;
-    }
+    if (!user || !isMounted) return;
     
-    const checkBan = async () => {
-      setIsCheckingBan(true);
-      const status = await checkBanStatus(user.uid);
-      if (status.banned) {
-        setIsBanned(true);
-        setBanReason(status.reason);
-        setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
-        setShowStartChat(false);
+    const checkBot = async () => {
+      const status = await checkBotStatus(user.uid);
+      if (status.isBlocked) {
+        setIsBotBlocked(true);
+        setBotBlockReason(status.reason);
+        setBotWarning(`⚠️ Akun Anda telah diblokir karena aktivitas mencurigakan: ${status.reason}`);
       } else {
-        setIsBanned(false);
-        setBotWarning(null);
+        setIsBotBlocked(false);
+        setBotBlockReason("");
       }
-      setIsCheckingBan(false);
     };
-    checkBan();
-  }, [user, db, isMounted]);
-
-  // ===== CEK BAN SETIAP KALI USER BERUBAH =====
-  useEffect(() => {
-    if (!user || !db || !isMounted) return;
     
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const status = await checkBanStatus(currentUser.uid);
-        if (status.banned) {
-          setIsBanned(true);
-          setBanReason(status.reason);
-          setShowStartChat(false);
-        } else {
-          setIsBanned(false);
-        }
-      }
-    });
-    
-    return () => unsubscribe();
-  }, [auth, db, isMounted]);
+    checkBot();
+  }, [user, isMounted]);
 
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -592,7 +890,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // GSAP SplitText untuk judul Live Chat Agent
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
@@ -623,7 +920,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     };
   }, [isMounted]);
 
-  // ===== ALL useEffect HOOKS =====
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
@@ -638,7 +934,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }, [db, isMounted]);
 
   useEffect(() => {
-    if (!db || !user || !isMounted || isBanned) return;
+    if (!db || !user || !isMounted) return;
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -671,10 +967,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted, isBanned]);
+  }, [db, user, isAdmin, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !isMounted || isBanned) return;
+    if (!db || !selectedTicket || !isMounted) return;
     const q = query(
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
@@ -700,19 +996,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }, 50);
     });
     return () => unsubscribe();
-  }, [db, selectedTicket, isMounted, isBanned]);
+  }, [db, selectedTicket, isMounted]);
 
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin || !isMounted || isBanned) return;
+    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true });
     });
-  }, [messages, selectedTicket, db, user, isAdmin, isMounted, isBanned]);
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   useEffect(() => {
-    if (!user || isAdmin || !isMounted || isBanned) return;
+    if (!user || isAdmin || !isMounted) return;
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
@@ -723,14 +1019,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted, isBanned]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
-  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
-      return;
-    }
     const value = e.target.value;
     setMessageText(value);
     if (!selectedTicket || !user || !db) return;
@@ -755,34 +1046,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const startChat = async () => {
-    // ===== CEK BAN =====
-    if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
+    if (!db || !user || !selectedTopic) return;
+    
+    // CEK APAKAH USER BOT BLOCKED
+    if (isBotBlocked) {
+      setBotWarning(`⚠️ Akun Anda telah diblokir secara permanen karena: ${botBlockReason}. Anda tidak dapat membuat ticket baru.`);
       return;
     }
-
-    if (!db || !user || !selectedTopic) return;
+    
     if (!encryptionReady) {
       alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
       return;
     }
-
-    // Check ban status dari database
-    const status = await checkBanStatus(user.uid);
-    if (status.banned) {
-      setIsBanned(true);
-      setBanReason(status.reason);
-      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
-      setShowStartChat(false);
-      return;
-    }
-
+    
     const hasActiveTicket = tickets.some(t => t.userId === user.uid && (t.status === 'waiting' || t.status === 'active') && !t.isAnnouncement && !t.isBroadcast);
     if (hasActiveTicket) {
       alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
     }
-
+    
     try {
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
@@ -799,7 +1081,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isAnnouncement: false,
         isBroadcast: false
       });
-
+      
       const initialMessage = `Halo, saya ingin bertanya tentang: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
@@ -811,6 +1093,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isEncrypted: true,
         isBotDetected: false
       });
+      
       setSelectedTopic("");
       setShowStartChat(false);
       setBotWarning(null);
@@ -821,78 +1104,69 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const sendMessage = async () => {
-    // ===== CEK BAN =====
-    if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
+    if (!db || !selectedTicket || !messageText.trim() || !user) return;
+    
+    // CEK APAKAH USER BOT BLOCKED
+    if (isBotBlocked) {
+      setBotWarning(`⚠️ Akun Anda telah diblokir secara permanen. Anda tidak dapat mengirim pesan.`);
       setMessageText("");
       return;
     }
-
-    if (!db || !selectedTicket || !messageText.trim() || !user) return;
+    
     if (!encryptionReady) {
       alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
       return;
     }
-
-    // ===== ANTI-BOT: CEK KATA KUNCI =====
-    const keywordCheck = containsBannedKeyword(messageText);
-    if (keywordCheck.banned) {
-      await banUserPermanent(
+    
+    // BEHAVIOR-BASED BOT DETECTION
+    const detectionResult = detectBotBehavior(
+      messageText,
+      userMessageHistory.current,
+      user.email || ''
+    );
+    
+    // Jika terdeteksi bot
+    if (detectionResult.isBlocked || detectionResult.violations.length > 0) {
+      // Simpan pelanggaran ke Firebase
+      await saveBotViolation(
         user.uid,
         user.email || '',
-        'Mengandung kata kunci terlarang',
-        keywordCheck.keyword
+        user.displayName || 'User',
+        detectionResult.violations,
+        detectionResult.score,
+        detectionResult.isBlocked
       );
       
-      setIsBanned(true);
-      setBanReason(`Mengandung kata kunci terlarang: "${keywordCheck.keyword}"`);
-      setBanKeyword(keywordCheck.keyword);
-      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung kata kunci terlarang: "${keywordCheck.keyword}"`);
-      setMessageText("");
-      setShowStartChat(false);
-      
-      const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
-      for (const ticketDoc of ticketsSnap.docs) {
-        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
+      // Jika diblokir, update state
+      if (detectionResult.isBlocked) {
+        setIsBotBlocked(true);
+        setBotBlockReason(detectionResult.violations.map(v => v.reason).join(', '));
+        setBotWarning(`⚠️ Akun Anda telah diblokir secara permanen karena: ${detectionResult.violations.map(v => v.reason).join(', ')}`);
+        setMessageText("");
+        return;
       }
-      setSelectedTicket(null);
-      setMessages([]);
       
+      // Jika hanya warning
+      const warningMsg = detectionResult.violations.map(v => v.reason).join(', ');
+      setBotWarning(`⚠️ Peringatan: ${warningMsg}. Akun Anda akan diblokir jika terus melakukan aktivitas mencurigakan.`);
+      setMessageText("");
       return;
     }
-
-    // ===== ANTI-BOT: CEK LINK MENURIGAKAN =====
-    const linkCheck = containsSuspiciousLink(messageText);
-    if (linkCheck.suspicious) {
-      await banUserPermanent(
-        user.uid,
-        user.email || '',
-        'Mengandung link mencurigakan',
-        linkCheck.link
-      );
-      
-      setIsBanned(true);
-      setBanReason(`Mengandung link mencurigakan: ${linkCheck.link}`);
-      setBanKeyword(linkCheck.link);
-      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung link mencurigakan: ${linkCheck.link}`);
-      setMessageText("");
-      setShowStartChat(false);
-      
-      const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
-      for (const ticketDoc of ticketsSnap.docs) {
-        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
-      }
-      setSelectedTicket(null);
-      setMessages([]);
-      
-      return;
+    
+    // Update history
+    userMessageHistory.current.push({
+      text: messageText,
+      timestamp: Date.now()
+    });
+    if (userMessageHistory.current.length > 50) {
+      userMessageHistory.current = userMessageHistory.current.slice(-50);
     }
-
+    
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
       return;
     }
-
+    
     try {
       const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
       await updateDoc(ticketRef, {
@@ -913,6 +1187,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isEncrypted: true,
         isBotDetected: false
       });
+      
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -920,6 +1195,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         agentId: isAdmin ? user.uid : selectedTicket.agentId,
         agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
       });
+      
       setMessageText("");
       setBotWarning(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -978,121 +1254,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== RENDER BANNED STATE - TIDAK ADA TOMBOL SAMA SEKALI =====
-  if (isBanned) {
-    return (
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-        <div style={{
-          backgroundColor: "#fee2e2",
-          border: "3px solid #dc2626",
-          borderRadius: "12px",
-          padding: "40px 20px",
-          textAlign: "center",
-          boxShadow: "0 10px 40px rgba(220, 38, 38, 0.2)"
-        }}>
-          <div style={{ fontSize: "64px", marginBottom: "16px" }}>🚫</div>
-          <h3 style={{
-            fontSize: "28px",
-            fontWeight: 700,
-            color: "#991b1b",
-            fontFamily: FONT_FAMILY,
-            marginBottom: "12px"
-          }}>
-            AKUN ANDA TELAH DIBANNED PERMANEN
-          </h3>
-          <div style={{
-            backgroundColor: "#fecaca",
-            borderRadius: "8px",
-            padding: "12px 16px",
-            marginBottom: "12px",
-            display: "inline-block"
-          }}>
-            <p style={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              margin: 0
-            }}>
-              🚨 {banReason || 'Melanggar ketentuan layanan'}
-            </p>
-            {banKeyword && (
-              <p style={{
-                fontSize: "12px",
-                color: "#991b1b",
-                fontFamily: FONT_FAMILY,
-                margin: "4px 0 0 0",
-                opacity: 0.8
-              }}>
-                Keyword: "{banKeyword}"
-              </p>
-            )}
-          </div>
-          <p style={{
-            fontSize: "14px",
-            color: "#991b1b",
-            fontFamily: FONT_FAMILY,
-            marginBottom: "8px"
-          }}>
-            ❌ Anda TIDAK DAPAT membuat ticket baru
-          </p>
-          <p style={{
-            fontSize: "14px",
-            color: "#991b1b",
-            fontFamily: FONT_FAMILY,
-            marginBottom: "8px"
-          }}>
-            ❌ Anda TIDAK DAPAT mengirim pesan
-          </p>
-          <p style={{
-            fontSize: "14px",
-            color: "#991b1b",
-            fontFamily: FONT_FAMILY,
-            marginBottom: "8px"
-          }}>
-            ❌ Anda TIDAK DAPAT mengakses Live Chat
-          </p>
-          <p style={{
-            fontSize: "12px",
-            color: "#991b1b",
-            fontFamily: FONT_FAMILY,
-            marginTop: "12px",
-            opacity: 0.7
-          }}>
-            ⏱️ Ban ini bersifat PERMANEN dan tidak dapat dibatalkan secara otomatis.
-            <br />
-            Silakan hubungi admin untuk informasi lebih lanjut.
-          </p>
-          <button
-            onClick={handleLogout}
-            style={{
-              marginTop: "20px",
-              padding: "10px 32px",
-              backgroundColor: "#dc2626",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              transition: "background 0.2s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#b91c1c"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#dc2626"}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== RENDER COMPONENT =====
-  if (!isMounted || isCheckingBan) {
-    return <div style={{ minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ fontFamily: FONT_FAMILY, color: "#999" }}>Memeriksa status akun...</span>
-    </div>;
+  if (!isMounted) {
+    return <div style={{ minHeight: "100px" }} />;
   }
   
   if (!user) {
@@ -1163,116 +1326,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
 
-    // ===== TIDAK ADA TOMBOL SAMA SEKALI KALAU BANNED =====
-    if (isBanned) {
-      return (
-        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-          <div style={{
-            backgroundColor: "#fee2e2",
-            border: "3px solid #dc2626",
-            borderRadius: "12px",
-            padding: "40px 20px",
-            textAlign: "center",
-            boxShadow: "0 10px 40px rgba(220, 38, 38, 0.2)"
-          }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🚫</div>
-            <h3 style={{
-              fontSize: "28px",
-              fontWeight: 700,
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "12px"
-            }}>
-              AKUN ANDA TELAH DIBANNED PERMANEN
-            </h3>
-            <div style={{
-              backgroundColor: "#fecaca",
-              borderRadius: "8px",
-              padding: "12px 16px",
-              marginBottom: "12px",
-              display: "inline-block"
-            }}>
-              <p style={{
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#991b1b",
-                fontFamily: FONT_FAMILY,
-                margin: 0
-              }}>
-                🚨 {banReason || 'Melanggar ketentuan layanan'}
-              </p>
-              {banKeyword && (
-                <p style={{
-                  fontSize: "12px",
-                  color: "#991b1b",
-                  fontFamily: FONT_FAMILY,
-                  margin: "4px 0 0 0",
-                  opacity: 0.8
-                }}>
-                  Keyword: "{banKeyword}"
-                </p>
-              )}
-            </div>
-            <p style={{
-              fontSize: "14px",
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px"
-            }}>
-              ❌ Anda TIDAK DAPAT membuat ticket baru
-            </p>
-            <p style={{
-              fontSize: "14px",
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px"
-            }}>
-              ❌ Anda TIDAK DAPAT mengirim pesan
-            </p>
-            <p style={{
-              fontSize: "14px",
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px"
-            }}>
-              ❌ Anda TIDAK DAPAT mengakses Live Chat
-            </p>
-            <p style={{
-              fontSize: "12px",
-              color: "#991b1b",
-              fontFamily: FONT_FAMILY,
-              marginTop: "12px",
-              opacity: 0.7
-            }}>
-              ⏱️ Ban ini bersifat PERMANEN dan tidak dapat dibatalkan secara otomatis.
-              <br />
-              Silakan hubungi admin untuk informasi lebih lanjut.
-            </p>
-            <button
-              onClick={handleLogout}
-              style={{
-                marginTop: "20px",
-                padding: "10px 32px",
-                backgroundColor: "#dc2626",
-                color: "#fff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                transition: "background 0.2s ease",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#b91c1c"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#dc2626"}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      );
-    }
-
     if (userTickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -1309,19 +1362,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               <span>Logout</span>
             </button>
           </div>
+          
           {botWarning && (
             <div style={{
-              backgroundColor: "#fee2e2",
-              color: "#991b1b",
+              backgroundColor: isBotBlocked ? "#fee2e2" : "#fef3c7",
+              color: isBotBlocked ? "#991b1b" : "#92400e",
               padding: "8px 12px",
               borderRadius: "5px",
               fontSize: "12px",
               marginBottom: "10px",
               fontFamily: FONT_FAMILY,
+              border: isBotBlocked ? "1px solid #ef4444" : "1px solid #f59e0b",
             }}>
-              {botWarning}
+              {isBotBlocked ? '🚫' : '⚠️'} {botWarning}
             </div>
           )}
+          
           <div style={{
             display: "flex",
             alignItems: "center",
@@ -1338,29 +1394,49 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </p>
           <button
             onClick={() => setShowStartChat(true)}
+            disabled={isBotBlocked}
             style={{
               padding: "7px 18px",
-              backgroundColor: "#0D3CFC",
+              backgroundColor: isBotBlocked ? "#ccc" : "#0D3CFC",
               color: "#fff",
               border: "none",
               borderRadius: "5px",
               fontSize: "13px",
               fontWeight: 500,
-              cursor: "pointer",
+              cursor: isBotBlocked ? "not-allowed" : "pointer",
               fontFamily: FONT_FAMILY,
               display: "flex",
               alignItems: "center",
               gap: "6px",
+              opacity: isBotBlocked ? 0.5 : 1,
             }}
+            title={isBotBlocked ? "Akun Anda telah diblokir permanen" : ""}
           >
             <ChatIcon />
-            <span>Mulai Live Chat</span>
+            <span>{isBotBlocked ? "Akun Diblokir" : "Mulai Live Chat"}</span>
           </button>
+          {isBotBlocked && (
+            <div style={{
+              fontSize: "11px",
+              color: "#ef4444",
+              marginTop: "6px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              🚫 Akun Anda telah diblokir secara permanen. Hubungi admin untuk informasi lebih lanjut.
+            </div>
+          )}
         </div>
       );
     }
 
     if (showStartChat) {
+      // CEK BOT BLOCKED SEBELUM SHOW START CHAT
+      if (isBotBlocked) {
+        setShowStartChat(false);
+        setBotWarning(`⚠️ Akun Anda telah diblokir secara permanen. Anda tidak dapat membuat ticket baru.`);
+        return null;
+      }
+      
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
@@ -1396,19 +1472,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               <span>Logout</span>
             </button>
           </div>
+          
           {botWarning && (
             <div style={{
-              backgroundColor: "#fee2e2",
-              color: "#991b1b",
+              backgroundColor: "#fef3c7",
+              color: "#92400e",
               padding: "8px 12px",
               borderRadius: "5px",
               fontSize: "12px",
               marginBottom: "10px",
               fontFamily: FONT_FAMILY,
             }}>
-              {botWarning}
+              ⚠️ {botWarning}
             </div>
           )}
+          
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
               Pilih topik permasalahan Anda:
@@ -1437,20 +1515,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={startChat}
-                disabled={!selectedTopic}
+                disabled={!selectedTopic || isBotBlocked}
                 style={{
                   padding: "5px 14px",
-                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
+                  backgroundColor: (!selectedTopic || isBotBlocked) ? "#ccc" : "#0D3CFC",
                   color: "#fff",
                   border: "none",
                   borderRadius: "5px",
                   fontSize: "12px",
                   fontWeight: 500,
-                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  cursor: (!selectedTopic || isBotBlocked) ? "not-allowed" : "pointer",
                   fontFamily: FONT_FAMILY,
+                  opacity: isBotBlocked ? 0.5 : 1,
                 }}
               >
-                Mulai Chat
+                {isBotBlocked ? "Diblokir" : "Mulai Chat"}
               </button>
               <button
                 onClick={() => setShowStartChat(false)}
@@ -1521,15 +1600,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
         {botWarning && (
           <div style={{
-            backgroundColor: "#fee2e2",
-            color: "#991b1b",
+            backgroundColor: isBotBlocked ? "#fee2e2" : "#fef3c7",
+            color: isBotBlocked ? "#991b1b" : "#92400e",
             padding: "8px 12px",
             borderRadius: "5px",
             fontSize: "12px",
             marginBottom: "10px",
             fontFamily: FONT_FAMILY,
+            border: isBotBlocked ? "1px solid #ef4444" : "1px solid #f59e0b",
           }}>
-            {botWarning}
+            {isBotBlocked ? '🚫' : '⚠️'} {botWarning}
           </div>
         )}
 
@@ -1541,7 +1621,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           overflow: "hidden",
           borderRadius: "8px",
         }}>
-          {/* Left sidebar - chat list */}
           <div style={{
             width: "220px",
             backgroundColor: "#0D3CFC",
@@ -1591,7 +1670,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <div
                     key={ticket.id}
                     onClick={() => {
-                      if (!isBanned) {
+                      if (!isBotBlocked) {
                         setSelectedTicket(ticket);
                         setMessages([]);
                       }
@@ -1600,10 +1679,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       padding: "8px 10px",
                       borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
                       backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
-                      cursor: isBanned ? "not-allowed" : "pointer",
+                      cursor: isBotBlocked ? "not-allowed" : "pointer",
                       transition: "all 0.2s ease",
                       borderBottom: "1px solid rgba(255,255,255,0.06)",
-                      opacity: isBanned ? 0.5 : 1,
+                      opacity: isBotBlocked ? 0.5 : 1,
                     }}
                   >
                     <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>
@@ -1649,47 +1728,28 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               bottom: 0,
               backgroundColor: "#0D3CFC",
             }}>
-              {/* ===== TOMBOL CHAT BARU - HANYA MUNCUL JIKA TIDAK BANNED ===== */}
-              {!isBanned && (
-                <button
-                  onClick={() => setShowStartChat(true)}
-                  style={{
-                    width: "100%",
-                    padding: "5px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  + Chat Baru
-                </button>
-              )}
-              {isBanned && (
-                <div style={{
+              <button
+                onClick={() => setShowStartChat(true)}
+                disabled={isBotBlocked}
+                style={{
                   width: "100%",
                   padding: "5px",
-                  backgroundColor: "rgba(220,38,38,0.3)",
-                  color: "#fca5a5",
-                  border: "1px solid #dc2626",
+                  backgroundColor: isBotBlocked ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.15)",
+                  color: isBotBlocked ? "#999" : "#fff",
+                  border: "none",
                   borderRadius: "5px",
                   fontSize: "11px",
                   fontWeight: 500,
-                  textAlign: "center",
+                  cursor: isBotBlocked ? "not-allowed" : "pointer",
                   fontFamily: FONT_FAMILY,
-                  cursor: "not-allowed",
-                }}>
-                  🚫 TELAH DIBANNED
-                </div>
-              )}
+                }}
+                title={isBotBlocked ? "Akun Anda telah diblokir permanen" : ""}
+              >
+                {isBotBlocked ? "🚫 Diblokir" : "+ Chat Baru"}
+              </button>
             </div>
           </div>
 
-          {/* Right side - chat messages */}
           <div style={{
             flex: 1,
             backgroundColor: "#ffffff",
@@ -1738,7 +1798,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       </span>
                     </div>
                   </div>
-                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !isBanned && (
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                     <button
                       onClick={() => resolveTicket(selectedTicket.id)}
                       style={{
@@ -1847,7 +1907,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
-                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !isBanned && (
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
                     padding: "6px 10px",
                     borderTop: "1px solid #e8e8e8",
@@ -1866,8 +1926,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           sendMessage();
                         }
                       }}
-                      placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
-                      disabled={selectedTicket.status === 'waiting' || isBanned}
+                      placeholder={isBotBlocked ? "🚫 Akun diblokir" : (selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan...")}
+                      disabled={selectedTicket.status === 'waiting' || isBotBlocked}
                       style={{
                         flex: 1,
                         padding: "5px 8px",
@@ -1876,45 +1936,33 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         fontSize: "11px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
-                        backgroundColor: (selectedTicket.status === 'waiting' || isBanned) ? "#f5f5f5" : "#fff",
+                        backgroundColor: (selectedTicket.status === 'waiting' || isBotBlocked) ? "#f5f5f5" : "#fff",
+                        cursor: isBotBlocked ? "not-allowed" : "text",
                       }}
-                      onFocus={(e) => { if (selectedTicket.status !== 'waiting' && !isBanned) e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                      onFocus={(e) => { if (selectedTicket.status !== 'waiting' && !isBotBlocked) e.currentTarget.style.borderColor = "#0D3CFC"; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
                     />
                     <button
                       onClick={sendMessage}
-                      disabled={selectedTicket.status === 'waiting' || !messageText.trim() || isBanned}
+                      disabled={selectedTicket.status === 'waiting' || !messageText.trim() || isBotBlocked}
                       style={{
                         padding: "5px 10px",
-                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBanned) ? "#ccc" : "#0D3CFC",
+                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBotBlocked) ? "#ccc" : "#0D3CFC",
                         color: "#fff",
                         border: "none",
                         borderRadius: "5px",
-                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBanned) ? "not-allowed" : "pointer",
+                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBotBlocked) ? "not-allowed" : "pointer",
                         fontFamily: FONT_FAMILY,
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
                         fontSize: "11px",
+                        opacity: isBotBlocked ? 0.5 : 1,
                       }}
                     >
                       <SendIcon size={12} />
-                      <span>Kirim</span>
+                      <span>{isBotBlocked ? "Diblokir" : "Kirim"}</span>
                     </button>
-                  </div>
-                )}
-                {isBanned && (
-                  <div style={{
-                    padding: "10px",
-                    backgroundColor: "#fee2e2",
-                    borderTop: "2px solid #dc2626",
-                    textAlign: "center",
-                    color: "#991b1b",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "12px",
-                    fontWeight: 600,
-                  }}>
-                    🚫 AKUN ANDA TELAH DIBANNED - TIDAK DAPAT MENGIRIM PESAN
                   </div>
                 )}
               </>
@@ -1928,7 +1976,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 fontSize: "12px",
                 fontFamily: FONT_FAMILY,
               }}>
-                Pilih chat dari daftar di kiri
+                {isBotBlocked ? "🚫 Akun diblokir - Pilih chat dari daftar di kiri" : "Pilih chat dari daftar di kiri"}
               </div>
             )}
           </div>
@@ -2764,7 +2812,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Loading state
   if (!isMounted || loading) {
     return (
       <div
@@ -3350,6 +3397,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
+        {/* MENURU Text */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -3752,8 +3800,7 @@ export default function HomePage(): React.JSX.Element {
               >
                 Kuliah Di Universitas
               </span>
-              <span
-                style={{
+              <span                style={{
                   fontSize: "22px",
                   fontWeight: 600,
                   color: "#0D3CFC",
