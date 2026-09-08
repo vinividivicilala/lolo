@@ -10,6 +10,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Image from 'next/image';
+import CryptoJS from 'crypto-js';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -43,6 +44,46 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
+
+// AES-256-GCM Encryption
+const ENCRYPTION_KEY = "MenuruSecureKey2026!@#$";
+
+const encryptMessage = (text: string): string => {
+  try {
+    const iv = CryptoJS.lib.WordArray.random(12);
+    const encrypted = CryptoJS.AES.encrypt(text, ENCRYPTION_KEY, {
+      iv: iv,
+      mode: CryptoJS.mode.GCM,
+      padding: CryptoJS.pad.NoPadding
+    });
+    const ivHex = iv.toString(CryptoJS.enc.Hex);
+    const ciphertextHex = encrypted.ciphertext.toString(CryptoJS.enc.Hex);
+    return ivHex + ':' + ciphertextHex;
+  } catch (error) {
+    return text;
+  }
+};
+
+const decryptMessage = (encryptedText: string): string => {
+  try {
+    const parts = encryptedText.split(':');
+    if (parts.length !== 2) return encryptedText;
+    const iv = CryptoJS.enc.Hex.parse(parts[0]);
+    const ciphertext = CryptoJS.enc.Hex.parse(parts[1]);
+    const decrypted = CryptoJS.AES.decrypt(
+      { ciphertext: ciphertext } as any,
+      ENCRYPTION_KEY,
+      {
+        iv: iv,
+        mode: CryptoJS.mode.GCM,
+        padding: CryptoJS.pad.NoPadding
+      }
+    );
+    return decrypted.toString(CryptoJS.enc.Utf8) || encryptedText;
+  } catch (error) {
+    return encryptedText;
+  }
+};
 
 // SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
@@ -109,9 +150,9 @@ const menuItems = [
 
 // Footer links
 const footerLinks = [
-  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
-  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+  { title: "Get in Touch", links: [{ name: "Contact", path: "/contact" }, { name: "Instagram", path: "https://instagram.com" }, { name: "Live Chat", path: "/live-chat" }] },
+  { title: "Product", links: [{ name: "Shop", path: "/shop" }, { name: "Note", path: "/note" }, { name: "Calendar", path: "/calendar" }, { name: "Blog", path: "/blog" }, { name: "Donation", path: "/donation" }, { name: "Community", path: "/community" }, { name: "Live Chat Agent", path: "/live-chat-agent" }, { name: "Stories", path: "/stories" }] },
+  { title: "Attention", links: [{ name: "Kebijakan Privasi", path: "/privacy-policy" }, { name: "Ketentuan Kami", path: "/terms-of-service" }, { name: "Pusat Bantuan", path: "/pusat-bantuan" }] }
 ];
 
 // ===== PULSING DOTS =====
@@ -211,6 +252,8 @@ interface Ticket {
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
+  isBroadcast?: boolean;
+  isAnnouncement?: boolean;
 }
 
 interface ChatMessage {
@@ -220,6 +263,13 @@ interface ChatMessage {
   text: string;
   timestamp: any;
   read: boolean;
+  encrypted?: boolean;
+}
+
+interface BotDetection {
+  detected: boolean;
+  reason: string;
+  timestamp: any;
 }
 
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
@@ -231,6 +281,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [selectedTopic, setSelectedTopic] = useState("");
   const [agentOnline, setAgentOnline] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [botDetections, setBotDetections] = useState<{[key: string]: BotDetection}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -314,7 +365,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     </svg>
   );
 
-  // Fungsi scroll ke bawah chat - HANYA SCROLL DI DALAM CHAT
   const scrollToBottom = () => {
     if (chatMessagesContainerRef.current) {
       chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -352,6 +402,65 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     };
   }, [isMounted]);
 
+  // Bot detection monitoring
+  useEffect(() => {
+    if (!db || !isMounted) return;
+
+    const detectBot = (message: string, userId: string, userName: string) => {
+      const botPatterns = [
+        /bot/i,
+        /script/i,
+        /crawl/i,
+        /spam/i,
+        /automated/i,
+        /\d{10,}/,
+        /[\u0400-\u04FF]/,
+        /[\u0600-\u06FF]/,
+        /[\u4e00-\u9fff]/,
+      ];
+
+      const isBot = botPatterns.some(pattern => pattern.test(message));
+      
+      if (isBot) {
+        const detection: BotDetection = {
+          detected: true,
+          reason: 'Pola pesan terdeteksi sebagai bot',
+          timestamp: serverTimestamp()
+        };
+        setBotDetections(prev => ({ ...prev, [userId]: detection }));
+        
+        // Simpan ke Firestore
+        const botRef = collection(db, "bot_detections");
+        addDoc(botRef, {
+          userId,
+          userName,
+          message,
+          detection,
+          timestamp: serverTimestamp()
+        });
+        
+        return true;
+      }
+      return false;
+    };
+
+    // Monitor messages for bot patterns
+    const unsubscribe = onSnapshot(collection(db, "livechat_tickets"), (snapshot) => {
+      snapshot.forEach((doc) => {
+        const ticketData = doc.data() as Ticket;
+        if (ticketData.lastMessage) {
+          const isBot = detectBot(ticketData.lastMessage, ticketData.userId, ticketData.userName);
+          if (isBot && isAdmin) {
+            // Notify admin about bot detection
+            console.warn('Bot detected:', ticketData.userName);
+          }
+        }
+      });
+    });
+
+    return () => unsubscribe();
+  }, [db, isAdmin, isMounted]);
+
   // ===== ALL useEffect HOOKS =====
   useEffect(() => {
     if (!db || !isMounted) return;
@@ -383,9 +492,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       snapshot.forEach((doc) => {
         ticketList.push({ id: doc.id, ...doc.data() } as Ticket);
       });
-      setTickets(ticketList);
+      
+      // Filter out broadcast and announcement tickets for regular users
+      const filteredTickets = isAdmin ? ticketList : ticketList.filter(t => !t.isBroadcast && !t.isAnnouncement);
+      setTickets(filteredTickets);
+      
       if (selectedTicket) {
-        const stillExists = ticketList.some(t => t.id === selectedTicket.id);
+        const stillExists = filteredTickets.some(t => t.id === selectedTicket.id);
         if (!stillExists) {
           setSelectedTicket(null);
           setMessages([]);
@@ -404,7 +517,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgList: ChatMessage[] = [];
       snapshot.forEach((doc) => {
-        msgList.push({ id: doc.id, ...doc.data() } as ChatMessage);
+        const data = doc.data() as ChatMessage;
+        // Decrypt messages if encrypted
+        if (data.encrypted && data.text) {
+          data.text = decryptMessage(data.text);
+        }
+        msgList.push({ id: doc.id, ...data } as ChatMessage);
       });
       setMessages(msgList);
       setTimeout(() => {
@@ -481,13 +599,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         typing: false,
         typingUserId: null,
         typingUserName: null,
+        isBroadcast: false,
+        isAnnouncement: false,
       });
+      const initialMessage = `Halo, saya ingin bertanya tentang: ${selectedTopic}`;
+      const encryptedMessage = encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
-        text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
+        text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
+        encrypted: true,
       });
       setSelectedTopic("");
       setShowStartChat(false);
@@ -510,12 +633,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         typingUserName: null,
       });
       const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
+      const encryptedMessage = encryptMessage(messageText.trim());
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
         senderName: senderName,
-        text: messageText.trim(),
+        text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
+        encrypted: true,
       });
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
@@ -1098,6 +1223,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       messages.map((msg, idx) => {
                         const isMine = msg.senderId === user.uid;
                         const isAgent = !isMine && msg.senderName === AGENT_NAME;
+                        const decryptedText = msg.encrypted ? decryptMessage(msg.text) : msg.text;
                         return (
                           <div
                             key={idx}
@@ -1119,7 +1245,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                                 {isAgent && <InstagramVerifiedBadge size={9} />}
                               </div>
                             )}
-                            <div>{msg.text}</div>
+                            <div>{decryptedText}</div>
                             <div style={{ 
                               fontSize: "6px", 
                               color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
@@ -1529,6 +1655,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
+                      const decryptedText = msg.encrypted ? decryptMessage(msg.text) : msg.text;
                       return (
                         <div
                           key={idx}
@@ -1549,7 +1676,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                               {msg.senderName}
                             </div>
                           )}
-                          <div>{msg.text}</div>
+                          <div>{decryptedText}</div>
                           <div style={{ 
                             fontSize: "6px", 
                             color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
@@ -2534,12 +2661,12 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   {section.links.map((link, linkIdx) => {
-                    let linkHref = "#";
+                    let linkHref = link.path;
                     let isAttention = false;
-                    if (link === "Kebijakan Privasi") {
+                    if (link.name === "Kebijakan Privasi") {
                       linkHref = "/privacy-policy";
                       isAttention = true;
-                    } else if (link === "Ketentuan Kami") {
+                    } else if (link.name === "Ketentuan Kami") {
                       linkHref = "/terms-of-service";
                       isAttention = true;
                     }
@@ -2565,7 +2692,7 @@ export default function HomePage(): React.JSX.Element {
                               textTransform: "none",
                             }}
                           >
-                            {link}
+                            {link.name}
                           </span>
                         </Link>
                         {isAttention && (
