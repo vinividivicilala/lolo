@@ -1541,7 +1541,7 @@ export default function StoriesPage(): React.JSX.Element {
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
-  const menuBox3Ref = useRef<HTMLDivElement>(null);
+  const menuBoxRef = useRef<HTMLDivElement>(null);
   const storiesRef = useRef<HTMLDivElement>(null);
   const featuredStoryRef = useRef<HTMLDivElement>(null);
 
@@ -1611,16 +1611,26 @@ export default function StoriesPage(): React.JSX.Element {
                 }
               );
             }
-            if (menuBox3Ref.current) {
-              gsap.fromTo(menuBox3Ref.current,
+            if (menuBoxRef.current) {
+              gsap.fromTo(menuBoxRef.current,
                 { opacity: 0, scale: 0.9, x: 20 },
                 {
                   opacity: 1,
                   scale: 1,
                   x: 0,
                   duration: 0.8,
-                  ease: 'power3.out',
-                  delay: 0.3
+                  ease: 'power3.out'
+                }
+              );
+            }
+            if (storiesRef.current) {
+              gsap.fromTo(storiesRef.current,
+                { opacity: 0, y: 20 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.8,
+                  ease: 'power3.out'
                 }
               );
             }
@@ -2106,7 +2116,7 @@ export default function StoriesPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* COLLEGES - Teks biru 40px di kiri, View All 35px di kanan, dengan tombol geser */}
+            {/* COLLEGES - Teks biru 35px di kiri, View All 35px di kanan, dengan tombol geser */}
             <div
               style={{
                 marginTop: "40px",
@@ -2118,14 +2128,14 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "40px",
+                  fontSize: "35px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "-0.01em",
                 }}
               >
-                colleges
+                Colleges
               </span>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
@@ -2181,7 +2191,7 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== COLLEGES CONTENT - Foto ukuran normal seperti di footer, teks full biru tanpa kapital ===== */}
+            {/* ===== COLLEGES CONTENT - Foto 5.jpg ukuran normal seperti footer ===== */}
             <div
               style={{
                 marginTop: "30px",
@@ -2204,8 +2214,8 @@ export default function StoriesPage(): React.JSX.Element {
                 }}
               >
                 <img
-                  src="/images/p0l.jpg"
-                  alt="colleges"
+                  src="/images/5.jpg"
+                  alt="Colleges"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -2215,7 +2225,7 @@ export default function StoriesPage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Teks di bawah foto - SEMUA BIRU, tanpa kapital */}
+              {/* Teks di bawah foto - Full biru, huruf depan kapital */}
               <div
                 style={{
                   width: "100%",
@@ -2228,19 +2238,18 @@ export default function StoriesPage(): React.JSX.Element {
               >
                 <span
                   style={{
-                    fontSize: "14px",
-                    fontWeight: 500,
+                    fontSize: "35px",
+                    fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.3px",
-                    textTransform: "none",
+                    letterSpacing: "-0.01em",
                   }}
                 >
-                  colleges
+                  Colleges
                 </span>
                 <h2
                   style={{
-                    fontSize: "28px",
+                    fontSize: "45px",
                     fontWeight: 700,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2249,22 +2258,22 @@ export default function StoriesPage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  bagaimana rasa nya masuk kuliah di universitas gunadarma
+                  Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
                 </h2>
                 <p
                   style={{
-                    fontSize: "15px",
+                    fontSize: "35px",
                     fontWeight: 400,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
-                    lineHeight: 1.5,
+                    lineHeight: 1.3,
                     margin: 0,
                     marginTop: "4px",
-                    maxWidth: "650px",
+                    maxWidth: "800px",
                     opacity: 0.8,
                   }}
                 >
-                  menjadi mahasiswa di universitas gunadarma adalah pengalaman yang tak terlupakan, setiap hari penuh dengan pembelajaran dan pertumbuhan.
+                  Menjadi mahasiswa di Universitas Gunadarma adalah pengalaman yang tak terlupakan
                 </p>
               </div>
             </div>
@@ -2569,7 +2578,7 @@ export default function StoriesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Menu Overlay - HANYA menuBox3Ref */}
+        {/* Menu Overlay - HANYA menuBoxRef */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2669,41 +2678,41 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* HANYA menuBox3Ref */}
+          {/* HANYA menuBoxRef - Bagaimana website ini bisa berkembang? */}
           <div
-            ref={menuBox3Ref}
+            ref={menuBoxRef}
             style={{
               position: "absolute",
-              left: "720px",
-              top: "470px",
+              right: "80px",
+              bottom: "80px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "30px",
-              border: "2px solid #C8EEFF",
+              gap: "24px",
+              border: "2px solid #D9FF81",
               borderRadius: "12px",
-              padding: "20px 36px",
-              backgroundColor: "#C8EEFF",
+              padding: "20px 32px",
+              backgroundColor: "#D9FF81",
               cursor: "pointer",
               opacity: 0,
               transform: "scale(0.95)",
-              boxShadow: "0 4px 30px rgba(200, 238, 255, 0.3)",
-              maxWidth: "750px",
+              boxShadow: "0 4px 30px rgba(217, 255, 129, 0.3)",
+              maxWidth: "600px",
               width: "auto",
-              minHeight: "100px",
+              minHeight: "90px",
             }}
           >
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "4px",
+                gap: "2px",
                 flex: 1,
               }}
             >
               <span
                 style={{
-                  fontSize: "22px",
+                  fontSize: "20px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2711,11 +2720,11 @@ export default function StoriesPage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Mengapa saya memilih
+                Bagaimana website ini
               </span>
               <span
                 style={{
-                  fontSize: "22px",
+                  fontSize: "20px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2723,7 +2732,19 @@ export default function StoriesPage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                jurusan tersebut?
+                bisa berkembang?
+              </span>
+              <span
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: "rgba(13, 60, 252, 0.7)",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                }}
+              >
+                Dengan dukungan komunitas
               </span>
             </div>
             <div
@@ -2734,15 +2755,15 @@ export default function StoriesPage(): React.JSX.Element {
                 backgroundColor: "rgba(13, 60, 252, 0.1)",
                 borderRadius: "6px",
                 padding: "4px",
-                width: "100px",
-                height: "100px",
+                width: "70px",
+                height: "70px",
                 overflow: "hidden",
                 flexShrink: 0,
               }}
             >
               <img
-                src="/images/15.jpg"
-                alt="Mengapa memilih jurusan"
+                src="/images/10.jpg"
+                alt="Menuru"
                 style={{
                   width: "100%",
                   height: "100%",
@@ -2751,6 +2772,33 @@ export default function StoriesPage(): React.JSX.Element {
                 }}
               />
             </div>
+          </div>
+
+          {/* stories text */}
+          <div
+            ref={storiesRef}
+            style={{
+              position: "absolute",
+              left: "720px",  
+              top: "180px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "8px",
+              opacity: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 300,
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.05em",
+              }}
+            >
+              stories
+            </span>
           </div>
         </div>
       </div>
@@ -2851,6 +2899,27 @@ export default function StoriesPage(): React.JSX.Element {
           .menu-overlay .menu-text {
             font-size: 36px !important;
           }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
         }
         @media (max-width: 768px) {
           .subtitle p {
@@ -2903,6 +2972,34 @@ export default function StoriesPage(): React.JSX.Element {
             width: 100% !important;
             max-width: 100% !important;
           }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
         }
         @media (max-width: 480px) {
           .subtitle p {
@@ -2949,6 +3046,20 @@ export default function StoriesPage(): React.JSX.Element {
           }
           .menu-overlay .menu-text {
             font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
           }
         }
       `}</style>
