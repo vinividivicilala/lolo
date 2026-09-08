@@ -84,6 +84,18 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+const LeftArrow = ({ size = 30, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 18L9 12L15 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const RightArrow = ({ size = 30, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 18L15 12L9 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
@@ -2130,6 +2142,81 @@ export default function StoriesPage(): React.JSX.Element {
               >
                 Featured Story
               </span>
+            </div>
+
+            {/* COLLEGES - Teks biru 40px di kiri, View All 35px di kanan, dengan tombol geser */}
+            <div
+              style={{
+                marginTop: "40px",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "40px",
+                  fontWeight: 600,
+                  color: "#0D3CFC",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Colleges
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <span
+                  style={{
+                    fontSize: "35px",
+                    fontWeight: 500,
+                    color: "#0D3CFC",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "-0.01em",
+                    cursor: "pointer",
+                  }}
+                >
+                  View All
+                </span>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      border: "2px solid #0D3CFC",
+                      backgroundColor: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.1)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  >
+                    <LeftArrow size={24} color="#0D3CFC" />
+                  </button>
+                  <button
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      border: "2px solid #0D3CFC",
+                      backgroundColor: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(13,60,252,0.1)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  >
+                    <RightArrow size={24} color="#0D3CFC" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
