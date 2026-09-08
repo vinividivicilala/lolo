@@ -2116,7 +2116,7 @@ export default function StoriesPage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* COLLEGES - Teks biru 35px di kiri, View All 35px di kanan, dengan tombol geser */}
+            {/* COLLEGES - Teks biru 22px di kiri, View All 22px di kanan, dengan tombol geser */}
             <div
               style={{
                 marginTop: "40px",
@@ -2128,7 +2128,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "35px",
+                  fontSize: "22px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2140,7 +2140,7 @@ export default function StoriesPage(): React.JSX.Element {
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
                   style={{
-                    fontSize: "35px",
+                    fontSize: "22px",
                     fontWeight: 500,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2191,7 +2191,7 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== COLLEGES CONTENT - Foto 5.jpg ukuran normal seperti footer ===== */}
+            {/* ===== COLLEGES CONTENT - Foto 5.jpg ukuran max-width 400px ===== */}
             <div
               style={{
                 marginTop: "30px",
@@ -2201,11 +2201,11 @@ export default function StoriesPage(): React.JSX.Element {
                 gap: "12px",
               }}
             >
-              {/* Foto - ukuran normal seperti di footer */}
+              {/* Foto - max-width 400px */}
               <div
                 style={{
                   width: "100%",
-                  maxWidth: "1400px",
+                  maxWidth: "400px",
                   borderRadius: "12px",
                   overflow: "hidden",
                   backgroundColor: "#f0f2f5",
@@ -2238,7 +2238,7 @@ export default function StoriesPage(): React.JSX.Element {
               >
                 <span
                   style={{
-                    fontSize: "35px",
+                    fontSize: "22px",
                     fontWeight: 600,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2249,7 +2249,7 @@ export default function StoriesPage(): React.JSX.Element {
                 </span>
                 <h2
                   style={{
-                    fontSize: "45px",
+                    fontSize: "25px",
                     fontWeight: 700,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2262,7 +2262,7 @@ export default function StoriesPage(): React.JSX.Element {
                 </h2>
                 <p
                   style={{
-                    fontSize: "35px",
+                    fontSize: "23px",
                     fontWeight: 400,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
