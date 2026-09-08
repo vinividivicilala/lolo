@@ -5,15 +5,21 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc, 
+  serverTimestamp,
+  orderBy,
+  addDoc
+} from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, SplitText);
-}
 
 // Firebase Config
 const firebaseConfig = {
@@ -27,17 +33,12 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-let app = null;
-let auth = null;
-let db = null;
-
-if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
+// Initialize Firebase - LANGSUNG TANPA CONDITIONAL
+const app = getApps().length === 0
+  ? initializeApp(firebaseConfig)
+  : getApps()[0];
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
@@ -1505,6 +1506,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   );
 };
 
+// ===== MAIN STORIES PAGE =====
 export default function StoriesPage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1532,6 +1534,13 @@ export default function StoriesPage(): React.JSX.Element {
   const menuBox3Ref = useRef<HTMLDivElement>(null);
   const storiesRef = useRef<HTMLDivElement>(null);
   const featuredStoryRef = useRef<HTMLDivElement>(null);
+
+  // Register GSAP plugins di dalam useEffect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+    }
+  }, []);
 
   // Set mounted state
   useEffect(() => {
