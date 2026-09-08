@@ -444,22 +444,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       return false;
     };
 
-    // Monitor messages for bot patterns
     const unsubscribe = onSnapshot(collection(db, "livechat_tickets"), (snapshot) => {
       snapshot.forEach((doc) => {
         const ticketData = doc.data() as Ticket;
         if (ticketData.lastMessage) {
           const isBot = detectBot(ticketData.lastMessage, ticketData.userId, ticketData.userName);
-          if (isBot && isAdmin) {
-            // Notify admin about bot detection
-            console.warn('Bot detected:', ticketData.userName);
-          }
         }
       });
     });
 
     return () => unsubscribe();
-  }, [db, isAdmin, isMounted]);
+  }, [db, isMounted]);
 
   // ===== ALL useEffect HOOKS =====
   useEffect(() => {
@@ -615,7 +610,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTopic("");
       setShowStartChat(false);
     } catch (error) {
-      console.error("Error starting chat:", error);
+      // Error handling without console
     }
   };
 
@@ -652,7 +647,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
-      console.error("Error sending message:", error);
+      // Error handling without console
     }
   };
 
@@ -665,7 +660,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         status: "active",
       });
     } catch (error) {
-      console.error("Error taking ticket:", error);
+      // Error handling without console
     }
   };
 
@@ -680,7 +675,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         setMessages([]);
       }
     } catch (error) {
-      console.error("Error resolving ticket:", error);
+      // Error handling without console
     }
   };
 
@@ -701,7 +696,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       });
       await signOut(auth);
     } catch (error) {
-      console.error("Logout error:", error);
+      // Error handling without console
     }
   };
 
@@ -1829,7 +1824,7 @@ export default function HomePage(): React.JSX.Element {
             lastSeen: serverTimestamp(),
           });
         } catch (error) {
-          console.error("Error updating online status:", error);
+          // Error handling without console
         }
       }
     });
@@ -1844,9 +1839,7 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (videoRef.current && showMain && isMounted) {
-      videoRef.current.play().catch(error => {
-        console.log("Video autoplay failed:", error);
-      });
+      videoRef.current.play().catch(() => {});
     }
   }, [showMain, isMounted]);
 
@@ -2471,9 +2464,7 @@ export default function HomePage(): React.JSX.Element {
                   display: "block",
                   backgroundColor: "transparent",
                 }}
-                onError={(e) => {
-                  console.error("Video failed to load:", e);
-                }}
+                onError={() => {}}
               />
             </div>
           </div>
