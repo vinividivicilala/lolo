@@ -2105,7 +2105,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "30px",
+                  fontSize: "50px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2128,7 +2128,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "28px",
+                  fontSize: "50px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
