@@ -2105,7 +2105,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "45px",
+                  fontSize: "30px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2128,7 +2128,7 @@ export default function StoriesPage(): React.JSX.Element {
             >
               <span
                 style={{
-                  fontSize: "45px",
+                  fontSize: "28px",
                   fontWeight: 600,
                   color: "#0D3CFC",
                   fontFamily: FONT_FAMILY,
@@ -2140,7 +2140,7 @@ export default function StoriesPage(): React.JSX.Element {
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
                   style={{
-                    fontSize: "45px",
+                    fontSize: "28px",
                     fontWeight: 500,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2191,90 +2191,191 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== COLLEGES CONTENT - Foto 5.jpg ukuran max-width 400px ===== */}
+            {/* ===== COLLEGES CONTENT - 2 Kolom Samping ===== */}
             <div
               style={{
                 marginTop: "30px",
                 width: "100%",
                 display: "flex",
-                flexDirection: "column",
-                gap: "12px",
+                flexDirection: "row",
+                gap: "40px",
+                flexWrap: "wrap",
               }}
             >
-              {/* Foto - max-width 400px */}
+              {/* Kolom 1 - Foto 5.jpg */}
               <div
                 style={{
-                  width: "100%",
-                  maxWidth: "900px",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  backgroundColor: "#f0f2f5",
-                  aspectRatio: "16/9",
-                  position: "relative",
-                }}
-              >
-                <img
-                  src="/images/5.jpg"
-                  alt="Colleges"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              </div>
-
-              {/* Teks di bawah foto - Full biru, huruf depan kapital */}
-              <div
-                style={{
-                  width: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "2px",
-                  padding: "0 4px",
+                  gap: "12px",
+                  flex: "1",
+                  minWidth: "300px",
+                  maxWidth: "calc(50% - 20px)",
                 }}
               >
-                <span
+                {/* Foto - max-width 400px */}
+                <div
                   style={{
-                    fontSize: "22px",
-                    fontWeight: 600,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "-0.01em",
+                    width: "100%",
+                    maxWidth: "600px",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    backgroundColor: "#f0f2f5",
+                    aspectRatio: "16/9",
+                    position: "relative",
                   }}
                 >
-                  Colleges
-                </span>
-                <h2
+                  <img
+                    src="/images/5.jpg"
+                    alt="Colleges"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
+
+                {/* Teks di bawah foto - Full biru */}
+                <div
                   style={{
-                    fontSize: "25px",
-                    fontWeight: 700,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    margin: 0,
-                    lineHeight: 1.2,
-                    letterSpacing: "-0.01em",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: "2px",
+                    padding: "0 4px",
                   }}
                 >
-                  Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
-                </h2>
-                <p
+                  <span
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Colleges
+                  </span>
+                  <h2
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      margin: 0,
+                      lineHeight: 1.2,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "26px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      marginTop: "4px",
+                      maxWidth: "800px",
+                      opacity: 0.8,
+                    }}
+                  >
+                    Menjadi mahasiswa di Universitas Gunadarma adalah pengalaman yang tak terlupakan
+                  </p>
+                </div>
+              </div>
+
+              {/* Kolom 2 - Foto 10.jpg */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  flex: "1",
+                  minWidth: "300px",
+                  maxWidth: "calc(50% - 20px)",
+                }}
+              >
+                {/* Foto - max-width 400px */}
+                <div
                   style={{
-                    fontSize: "23px",
-                    fontWeight: 400,
-                    color: "#0D3CFC",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.3,
-                    margin: 0,
-                    marginTop: "4px",
-                    maxWidth: "800px",
-                    opacity: 0.8,
+                    width: "100%",
+                    maxWidth: "600px",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    backgroundColor: "#f0f2f5",
+                    aspectRatio: "16/9",
+                    position: "relative",
                   }}
                 >
-                  Menjadi mahasiswa di Universitas Gunadarma adalah pengalaman yang tak terlupakan
-                </p>
+                  <img
+                    src="/images/10.jpg"
+                    alt="Mengapa memilih jurusan"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
+
+                {/* Teks di bawah foto - Full biru */}
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: "2px",
+                    padding: "0 4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Colleges
+                  </span>
+                  <h2
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      margin: 0,
+                      lineHeight: 1.2,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Mengapa saya memilih jurusan tersebut?
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      marginTop: "4px",
+                      maxWidth: "800px",
+                      opacity: 0.8,
+                    }}
+                  >
+                    Memilih jurusan yang tepat adalah langkah penting untuk masa depan yang cerah
+                  </p>
+                </div>
               </div>
             </div>
           </div>
