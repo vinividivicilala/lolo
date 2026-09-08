@@ -2097,7 +2097,7 @@ export default function StoriesPage(): React.JSX.Element {
             <div
               ref={featuredStoryRef}
               style={{
-                marginTop: "30px",
+                marginTop: "50px",
                 width: "100%",
                 display: "flex",
                 justifyContent: "flex-start",
@@ -2119,7 +2119,7 @@ export default function StoriesPage(): React.JSX.Element {
             {/* COLLEGES - Teks biru 22px di kiri, View All 22px di kanan, dengan tombol geser */}
             <div
               style={{
-                marginTop: "40px",
+                marginTop: "50px",
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -2140,7 +2140,7 @@ export default function StoriesPage(): React.JSX.Element {
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span
                   style={{
-                    fontSize: "28px",
+                    fontSize: "50px",
                     fontWeight: 500,
                     color: "#0D3CFC",
                     fontFamily: FONT_FAMILY,
@@ -2314,7 +2314,7 @@ export default function StoriesPage(): React.JSX.Element {
                   }}
                 >
                   <img
-                    src="/images/10.jpg"
+                    src="/images/5.jpg"
                     alt="Mengapa memilih jurusan"
                     style={{
                       width: "100%",
