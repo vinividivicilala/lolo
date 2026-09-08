@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, deleteDoc, runTransaction, increment } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, setDoc, deleteDoc, runTransaction } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -126,492 +126,299 @@ async function decryptMessage(encrypted: string): Promise<string> {
       key,
       encryptedData
     );
-    return new TextDecoder().decode(decrypted);
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
   } catch (error) {
     console.error('Decryption error:', error);
-    return '[Pesan tidak dapat didekripsi]';
-  }
-}
-
-// ===== ANTI-BOT SYSTEM =====
-
-// 1. Rate Limit & Throttling
-interface RateLimit {
-  count: number;
-  firstAttempt: number;
-  lastAttempt: number;
-  windowStart: number;
-}
-
-const RATE_LIMITS = {
-  MESSAGE: { max: 10, window: 60000 }, // 10 pesan per menit
-  TICKET: { max: 3, window: 3600000 }, // 3 ticket per jam
-  NEW_USER: { max: 1, window: 600000 }, // 1 ticket per 10 menit untuk user baru
-};
-
-// 2. Strike System
-interface Strike {
-  count: number;
-  reasons: string[];
-  timestamps: number[];
-  lastStrike: number;
-}
-
-const STRIKE_CONFIG = {
-  MAX_STRIKES: 3,
-  STRIKE_DECAY: 86400000, // 24 jam
-  BAN_DURATION: 86400000 * 7, // 7 hari
-};
-
-// 3. User Session
-interface UserSession {
-  sessionId: string;
-  userId: string;
-  startTime: number;
-  lastActivity: number;
-  messageCount: number;
-  ticketCount: number;
-  ipHash: string;
-  userAgent: string;
-  isSuspicious: boolean;
-  trustScore: number;
-}
-
-// ===== ANTI-BOT FUNCTIONS =====
-
-// Generate session ID
-function generateSessionId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-}
-
-// Hash IP (simple hash untuk demo)
-function hashIP(ip: string): string {
-  let hash = 0;
-  for (let i = 0; i < ip.length; i++) {
-    hash = ((hash << 5) - hash) + ip.charCodeAt(i);
-    hash |= 0;
-  }
-  return `ip_${hash}`;
-}
-
-// Proof-of-Work (simple untuk demo)
-async function proofOfWork(challenge: string, difficulty: number = 4): Promise<string> {
-  // Simulasi PoW dengan delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return `pow_${challenge}_${Date.now()}`;
-}
-
-// Behavior Analysis
-function analyzeBehavior(messages: string[], timestamps: number[]): {
-  isSuspicious: boolean;
-  reason: string;
-  score: number;
-} {
-  let score = 0;
-  let reasons: string[] = [];
-
-  // Cek kecepatan mengetik (lebih dari 10 pesan dalam 30 detik)
-  if (messages.length >= 10) {
-    const timeDiff = timestamps[timestamps.length - 1] - timestamps[0];
-    if (timeDiff < 30000) {
-      score += 20;
-      reasons.push('Kecepatan mengirim pesan terlalu tinggi');
+    if (encrypted.startsWith('encrypted:') || encrypted.startsWith('plain:')) {
+      try {
+        const encoded = encrypted.includes(':') ? encrypted.split(':')[1] : encrypted;
+        return decodeURIComponent(escape(atob(encoded)));
+      } catch {
+        return '[Pesan tidak dapat didekripsi]';
+      }
     }
+    return encrypted;
   }
-
-  // Cek variasi panjang pesan
-  const lengths = messages.map(m => m.length);
-  const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-  const variance = lengths.reduce((a, b) => a + Math.pow(b - avgLength, 2), 0) / lengths.length;
-  if (variance < 10 && lengths.every(l => l > 5)) {
-    score += 15;
-    reasons.push('Pola panjang pesan terlalu seragam');
-  }
-
-  // Cek kosakata berulang
-  const words = messages.join(' ').toLowerCase().split(/\s+/);
-  const wordCount: Record<string, number> = {};
-  words.forEach(w => { wordCount[w] = (wordCount[w] || 0) + 1; });
-  const repeatedWords = Object.entries(wordCount).filter(([_, count]) => count > 5);
-  if (repeatedWords.length > 0) {
-    score += 10;
-    reasons.push(`Kata berulang: ${repeatedWords.map(([w]) => w).join(', ')}`);
-  }
-
-  // Cek pola karakter
-  const charPatterns = /(.)\1{4,}/;
-  if (charPatterns.test(messages.join(' '))) {
-    score += 10;
-    reasons.push('Pola karakter berulang terdeteksi');
-  }
-
-  return {
-    isSuspicious: score >= 30,
-    reason: reasons.join('; ') || 'Normal',
-    score: score
-  };
 }
 
-// Get IP (simulasi)
-function getClientIP(): string {
-  // Dalam production, dapat dari request headers
-  return '127.0.0.1';
+// ===== ANTI-BOT SUPER ADVANCED SYSTEM =====
+interface BotScore {
+  totalScore: number;
+  violations: string[];
+  lastViolation: any;
+  isBanned: boolean;
+  bannedAt: any;
+  banReason: string;
 }
 
-// ===== ANTI-BOT MANAGER CLASS =====
-class AntiBotManager {
-  private rateLimits: Map<string, RateLimit> = new Map();
-  private strikes: Map<string, Strike> = new Map();
-  private sessions: Map<string, UserSession> = new Map();
-  private bannedUsers: Set<string> = new Set();
-  private honeypotTokens: Map<string, number> = new Map();
-  private userMessageHistory: Map<string, {text: string, timestamp: number}[]> = new Map();
+interface BotDetectionResult {
+  isBot: boolean;
+  score: number;
+  reason: string;
+  details: string[];
+}
+
+// ===== MACHINE LEARNING-LIKE BOT DETECTION =====
+class BotDetector {
+  private patterns: { pattern: RegExp; weight: number; category: string }[] = [];
+  private history: { text: string; timestamp: number }[] = [];
+  private readonly MAX_HISTORY = 50;
+  private readonly BAN_THRESHOLD = 50; // Total score >= 50 = BANNED
+  private readonly TIME_WINDOW = 60000; // 1 menit
 
   constructor() {
-    // Cleanup expired sessions setiap 5 menit
-    setInterval(() => this.cleanup(), 300000);
+    // ===== LEVEL 1: HIGH WEIGHT PATTERNS (langsung banned) =====
+    this.patterns.push(
+      { pattern: /\bbot\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bscam\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bphishing\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bmalware\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bransomware\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bkeylogger\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bspyware\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\badware\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\btrojan\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bworm\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\brootkit\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bexploit\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\b0day\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bcve-\d{4}-\d{4,}\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bsql injection\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bxss\b/i, weight: 50, category: 'High Risk' },
+      { pattern: /\bcsrf\b/i, weight: 50, category: 'High Risk' }
+    );
+
+    // ===== LEVEL 2: MEDIUM WEIGHT PATTERNS =====
+    this.patterns.push(
+      { pattern: /\bgambling\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bcasino\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\blottery\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bjudol\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bjudionline\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bslot\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bpoker\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bbaccarat\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\brolet\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bblackjack\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bsabung ayam\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\btogel\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\b4d\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\btoto\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bmagnum\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bdamacai\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bsingaporepools\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bhongkongpools\b/i, weight: 30, category: 'Medium Risk' },
+      { pattern: /\bsydneypools\b/i, weight: 30, category: 'Medium Risk' }
+    );
+
+    // ===== LEVEL 3: LOW WEIGHT PATTERNS =====
+    this.patterns.push(
+      { pattern: /\bcrypto\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bbitcoin\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bethereum\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\binvestment\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bprofit\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\breturn\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bpassive income\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bget rich\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bmake money\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bearn money\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bquick cash\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bfree money\b/i, weight: 15, category: 'Low Risk' },
+      { pattern: /\bclick here\b/i, weight: 15, category: 'Low Risk' }
+    );
+
+    // ===== PATTERN DETECTION: SUSPICIOUS LINKS =====
+    this.patterns.push(
+      { pattern: /https?:\/\/[^\s]*\.(xyz|top|club|online|site|win|bid|loan|date|download|stream|watch|free|click|biz|info|name|pro|tech|store|shop|live|app|dev|work|cloud|host|net|org|com)(\/[^\s]*)?/i, weight: 35, category: 'Suspicious Link' },
+      { pattern: /https?:\/\/[^\s]*\.(ru|cn|pl|tk|ml|ga|cf)(\/[^\s]*)?/i, weight: 35, category: 'Suspicious Link' },
+      { pattern: /bit\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
+      { pattern: /tinyurl\.com\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
+      { pattern: /shorturl\.at\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
+      { pattern: /cutt\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
+      { pattern: /ow\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' }
+    );
+
+    // ===== PATTERN DETECTION: REPEATED CHARACTERS =====
+    this.patterns.push(
+      { pattern: /(.)\1{8,}/i, weight: 20, category: 'Repeated Characters' },
+      { pattern: /(..)\1{4,}/i, weight: 20, category: 'Repeated Pattern' }
+    );
+
+    // ===== PATTERN DETECTION: ALL CAPS =====
+    this.patterns.push(
+      { pattern: /^[A-Z\s!?.,]+$/, weight: 10, category: 'All Caps' }
+    );
+
+    // ===== PATTERN DETECTION: SUSPICIOUS WORDS =====
+    this.patterns.push(
+      { pattern: /\bsex\b/i, weight: 25, category: 'Adult Content' },
+      { pattern: /\bporn\b/i, weight: 25, category: 'Adult Content' },
+      { pattern: /\bxxx\b/i, weight: 25, category: 'Adult Content' },
+      { pattern: /\bnsfw\b/i, weight: 25, category: 'Adult Content' },
+      { pattern: /\b18\+\b/i, weight: 25, category: 'Adult Content' }
+    );
+
+    // ===== PATTERN DETECTION: SPAM KEYWORDS =====
+    this.patterns.push(
+      { pattern: /\b(viagra|cialis|levitra)\b/i, weight: 30, category: 'Spam' },
+      { pattern: /\b(weight loss|diet pill|fat burner)\b/i, weight: 20, category: 'Spam' },
+      { pattern: /\b(herbal|organic|natural)\s*(remedy|cure|treatment)\b/i, weight: 20, category: 'Spam' },
+      { pattern: /\b(miracle|cure|heal)\s*(cancer|disease|illness)\b/i, weight: 30, category: 'Spam' }
+    );
   }
 
-  // Generate honeypot token
-  generateHoneypotToken(): string {
-    const token = `hp_${Math.random().toString(36).substring(2, 15)}`;
-    this.honeypotTokens.set(token, Date.now() + 300000); // 5 menit expired
-    return token;
-  }
+  // ===== ANALYZE TEXT =====
+  analyze(text: string, history: { text: string; timestamp: number }[]): BotDetectionResult {
+    let totalScore = 0;
+    const details: string[] = [];
+    let reason = 'Normal';
 
-  // Verify honeypot
-  verifyHoneypot(token: string): boolean {
-    if (!this.honeypotTokens.has(token)) return false;
-    const expiry = this.honeypotTokens.get(token)!;
-    if (Date.now() > expiry) {
-      this.honeypotTokens.delete(token);
-      return false;
+    // ===== SCAN PATTERNS =====
+    for (const p of this.patterns) {
+      if (p.pattern.test(text)) {
+        totalScore += p.weight;
+        details.push(`${p.category}: ${p.pattern.source} (+${p.weight})`);
+        if (p.weight >= 50) {
+          reason = `HIGH RISK: ${p.category}`;
+        }
+      }
     }
-    this.honeypotTokens.delete(token);
-    return true;
-  }
 
-  // Check rate limit
-  checkRateLimit(key: string, type: 'MESSAGE' | 'TICKET' | 'NEW_USER'): { allowed: boolean; remaining: number; resetIn: number } {
-    const limit = RATE_LIMITS[type];
+    // ===== CHECK HISTORY FOR SPAM =====
     const now = Date.now();
+    const recentHistory = history.filter(h => (now - h.timestamp) < this.TIME_WINDOW);
+    const similarMessages = recentHistory.filter(h => h.text === text);
     
-    if (!this.rateLimits.has(key)) {
-      this.rateLimits.set(key, {
-        count: 1,
-        firstAttempt: now,
-        lastAttempt: now,
-        windowStart: now
-      });
-      return { allowed: true, remaining: limit.max - 1, resetIn: limit.window };
+    if (similarMessages.length >= 2) {
+      const score = similarMessages.length * 15;
+      totalScore += score;
+      details.push(`Spam: Pesan sama ${similarMessages.length + 1}x (+${score})`);
+      if (similarMessages.length >= 3) {
+        reason = 'SPAM DETECTED';
+        totalScore += 20;
+        details.push(`SPAM: Pesan sama ${similarMessages.length + 1}x (+20)`);
+      }
     }
 
-    const data = this.rateLimits.get(key)!;
-    
-    // Reset window jika sudah lewat
-    if (now - data.windowStart > limit.window) {
-      data.count = 1;
-      data.windowStart = now;
-      data.firstAttempt = now;
-      this.rateLimits.set(key, data);
-      return { allowed: true, remaining: limit.max - 1, resetIn: limit.window };
+    // ===== CHECK RATE LIMITING =====
+    const messageCount = recentHistory.length;
+    if (messageCount >= 5) {
+      totalScore += 10;
+      details.push(`Rate Limiting: ${messageCount} pesan dalam ${this.TIME_WINDOW/1000}s (+10)`);
+    }
+    if (messageCount >= 10) {
+      totalScore += 20;
+      details.push(`HIGH RATE: ${messageCount} pesan dalam ${this.TIME_WINDOW/1000}s (+20)`);
+      reason = 'RATE LIMIT EXCEEDED';
     }
 
-    data.count++;
-    data.lastAttempt = now;
-    this.rateLimits.set(key, data);
-
-    if (data.count > limit.max) {
-      const resetIn = limit.window - (now - data.windowStart);
-      return { allowed: false, remaining: 0, resetIn: Math.max(0, resetIn) };
+    // ===== CHECK FOR SUSPICIOUS PATTERNS COMBINATION =====
+    const suspiciousCategories = ['Suspicious Link', 'Shortened Link', 'Adult Content', 'High Risk', 'Medium Risk'];
+    const categoriesFound = details.filter(d => suspiciousCategories.some(cat => d.includes(cat)));
+    if (categoriesFound.length >= 2) {
+      totalScore += 15;
+      details.push(`Multiple Suspicious Categories: ${categoriesFound.length} (+15)`);
     }
 
-    return { 
-      allowed: true, 
-      remaining: limit.max - data.count, 
-      resetIn: limit.window - (now - data.windowStart) 
+    // ===== DETERMINE RESULT =====
+    const isBot = totalScore >= this.BAN_THRESHOLD || reason === 'HIGH RISK: High Risk' || reason === 'SPAM DETECTED';
+
+    return {
+      isBot,
+      score: totalScore,
+      reason: isBot ? `BANNED: ${reason}` : reason,
+      details
     };
   }
 
-  // Add strike
-  async addStrike(userId: string, reason: string): Promise<{ banned: boolean; strikeCount: number }> {
-    const now = Date.now();
-    
-    if (!this.strikes.has(userId)) {
-      this.strikes.set(userId, {
-        count: 1,
-        reasons: [reason],
-        timestamps: [now],
-        lastStrike: now
-      });
-      
-      // Simpan ke Firebase
-      await this.saveStrikeToFirebase(userId, reason, 1);
-      return { banned: false, strikeCount: 1 };
-    }
-
-    const data = this.strikes.get(userId)!;
-    
-    // Clean expired strikes
-    const validTimestamps = data.timestamps.filter(t => now - t < STRIKE_CONFIG.STRIKE_DECAY);
-    data.timestamps = validTimestamps;
-    data.count = validTimestamps.length + 1;
-    data.reasons.push(reason);
-    data.timestamps.push(now);
-    data.lastStrike = now;
-    
-    this.strikes.set(userId, data);
-    
-    // Simpan ke Firebase
-    await this.saveStrikeToFirebase(userId, reason, data.count);
-
-    // Cek apakah perlu auto-ban
-    if (data.count >= STRIKE_CONFIG.MAX_STRIKES) {
-      await this.banUser(userId, `Mencapai ${data.count} strikes: ${data.reasons.join(', ')}`);
-      return { banned: true, strikeCount: data.count };
-    }
-
-    return { banned: false, strikeCount: data.count };
-  }
-
-  // Save strike to Firebase
-  async saveStrikeToFirebase(userId: string, reason: string, count: number) {
-    if (!db) return;
+  // ===== CHECK IF USER IS BANNED =====
+  async isUserBanned(userId: string): Promise<{ banned: boolean; reason: string; score: number }> {
+    if (!db) return { banned: false, reason: 'No DB', score: 0 };
     try {
-      await addDoc(collection(db, "bot_strikes"), {
-        userId,
-        reason,
-        count,
-        timestamp: serverTimestamp(),
-        isResolved: false
-      });
-    } catch (error) {
-      console.error("Error saving strike:", error);
-    }
-  }
-
-  // Ban user
-  async banUser(userId: string, reason: string) {
-    if (!db) return;
-    try {
-      this.bannedUsers.add(userId);
-      
-      // Update user di Firebase
       const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        botBanned: true,
-        botBanReason: reason,
-        botBannedAt: serverTimestamp(),
-        botBanExpiry: new Date(Date.now() + STRIKE_CONFIG.BAN_DURATION),
-        botFlagged: true
-      });
-
-      // Log ban
-      await addDoc(collection(db, "bot_bans"), {
-        userId,
-        reason,
-        timestamp: serverTimestamp(),
-        expiresAt: new Date(Date.now() + STRIKE_CONFIG.BAN_DURATION),
-        isActive: true
-      });
-
-      // Update user sessions
-      this.sessions.forEach((session, key) => {
-        if (session.userId === userId) {
-          session.isSuspicious = true;
-          this.sessions.set(key, session);
-        }
-      });
-
-      console.log(`User ${userId} banned: ${reason}`);
-    } catch (error) {
-      console.error("Error banning user:", error);
-    }
-  }
-
-  // Check if user is banned
-  isUserBanned(userId: string): boolean {
-    return this.bannedUsers.has(userId);
-  }
-
-  // Check if user is banned (from Firebase)
-  async checkUserBanned(userId: string): Promise<{ banned: boolean; reason: string }> {
-    if (!db) return { banned: false, reason: '' };
-    try {
       const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", userId)));
       if (!userSnap.empty) {
         const data = userSnap.docs[0].data();
-        if (data.botBanned === true) {
-          // Cek expiry
-          if (data.botBanExpiry) {
-            const expiry = data.botBanExpiry.toDate ? data.botBanExpiry.toDate() : new Date(data.botBanExpiry);
-            if (expiry > new Date()) {
-              return { banned: true, reason: data.botBanReason || 'Banned' };
-            } else {
-              // Ban expired, unban
-              await this.unbanUser(userId);
-              return { banned: false, reason: '' };
-            }
-          }
-          return { banned: true, reason: data.botBanReason || 'Banned' };
+        if (data.botFlagged === true) {
+          return { 
+            banned: true, 
+            reason: data.botReason || 'Violation detected',
+            score: data.botScore || 0
+          };
         }
       }
-      // Cek local cache
-      if (this.bannedUsers.has(userId)) {
-        return { banned: true, reason: 'Banned' };
-      }
-      return { banned: false, reason: '' };
+      return { banned: false, reason: 'Clean', score: 0 };
     } catch (error) {
-      console.error("Error checking user ban:", error);
-      return { banned: false, reason: '' };
+      console.error('Error checking ban status:', error);
+      return { banned: false, reason: 'Error', score: 0 };
     }
-  }
-
-  // Unban user
-  async unbanUser(userId: string) {
-    if (!db) return;
-    try {
-      this.bannedUsers.delete(userId);
-      
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        botBanned: false,
-        botBanReason: null,
-        botBannedAt: null,
-        botBanExpiry: null,
-        botFlagged: false
-      });
-
-      // Update ban log
-      const bansSnap = await getDocs(query(collection(db, "bot_bans"), where("userId", "==", userId), where("isActive", "==", true)));
-      bansSnap.forEach(async (doc) => {
-        await updateDoc(doc.ref, { isActive: false });
-      });
-
-      // Reset strikes
-      this.strikes.delete(userId);
-      
-      console.log(`User ${userId} unbanned`);
-    } catch (error) {
-      console.error("Error unbanning user:", error);
-    }
-  }
-
-  // Create session
-  createSession(userId: string): string {
-    const sessionId = generateSessionId();
-    const ip = getClientIP();
-    
-    this.sessions.set(sessionId, {
-      sessionId,
-      userId,
-      startTime: Date.now(),
-      lastActivity: Date.now(),
-      messageCount: 0,
-      ticketCount: 0,
-      ipHash: hashIP(ip),
-      userAgent: navigator.userAgent || 'unknown',
-      isSuspicious: false,
-      trustScore: 100
-    });
-
-    return sessionId;
-  }
-
-  // Update session activity
-  updateSession(sessionId: string, type: 'MESSAGE' | 'TICKET') {
-    const session = this.sessions.get(sessionId);
-    if (!session) return;
-
-    session.lastActivity = Date.now();
-    if (type === 'MESSAGE') session.messageCount++;
-    if (type === 'TICKET') session.ticketCount++;
-
-    // Update trust score
-    session.trustScore = Math.max(0, session.trustScore - 1);
-    if (session.messageCount > 50) session.trustScore = Math.max(0, session.trustScore - 10);
-    if (session.ticketCount > 5) session.trustScore = Math.max(0, session.trustScore - 20);
-
-    // Check suspicious activity
-    if (session.trustScore < 50) {
-      session.isSuspicious = true;
-    }
-
-    this.sessions.set(sessionId, session);
-  }
-
-  // Get session
-  getSession(sessionId: string): UserSession | undefined {
-    return this.sessions.get(sessionId);
-  }
-
-  // Velocity detection
-  detectVelocity(messages: {text: string, timestamp: number}[]): { isSuspicious: boolean; speed: number } {
-    if (messages.length < 5) return { isSuspicious: false, speed: 0 };
-    
-    const now = Date.now();
-    const recent = messages.filter(m => now - m.timestamp < 60000); // 1 menit
-    const speed = recent.length;
-    
-    return {
-      isSuspicious: speed > 15, // Lebih dari 15 pesan per menit
-      speed
-    };
-  }
-
-  // Cleanup expired data
-  cleanup() {
-    const now = Date.now();
-    
-    // Clean sessions yang tidak aktif > 30 menit
-    this.sessions.forEach((session, key) => {
-      if (now - session.lastActivity > 1800000) {
-        this.sessions.delete(key);
-      }
-    });
-
-    // Clean expired rate limits
-    this.rateLimits.forEach((data, key) => {
-      if (now - data.lastAttempt > 3600000) {
-        this.rateLimits.delete(key);
-      }
-    });
-
-    // Clean expired honeypot tokens
-    this.honeypotTokens.forEach((expiry, key) => {
-      if (now > expiry) {
-        this.honeypotTokens.delete(key);
-      }
-    });
-  }
-
-  // Add message to history
-  addMessageHistory(userId: string, text: string) {
-    if (!this.userMessageHistory.has(userId)) {
-      this.userMessageHistory.set(userId, []);
-    }
-    const history = this.userMessageHistory.get(userId)!;
-    history.push({ text, timestamp: Date.now() });
-    // Keep only last 100 messages
-    if (history.length > 100) {
-      history.splice(0, history.length - 100);
-    }
-  }
-
-  // Get message history
-  getMessageHistory(userId: string): {text: string, timestamp: number}[] {
-    return this.userMessageHistory.get(userId) || [];
   }
 }
 
-// Initialize Anti-Bot Manager
-const antiBot = new AntiBotManager();
+// ===== GLOBAL BOT DETECTOR INSTANCE =====
+const botDetector = new BotDetector();
+
+// ===== BAN USER FUNCTION =====
+async function banUser(userId: string, userEmail: string, reason: string, score: number, details: string[]) {
+  if (!db) return;
+  try {
+    // Update user document
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      botFlagged: true,
+      botReason: `${reason} (Score: ${score})`,
+      botScore: score,
+      botDetails: details,
+      botFlaggedAt: serverTimestamp(),
+      bannedAt: serverTimestamp()
+    });
+
+    // Log to violations
+    await addDoc(collection(db, "bot_violations"), {
+      userId,
+      userEmail,
+      reason,
+      score,
+      details,
+      timestamp: serverTimestamp(),
+      resolved: false,
+      action: 'AUTO_BAN'
+    });
+
+    // Delete all active tickets
+    const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", userId)));
+    for (const ticketDoc of ticketsSnap.docs) {
+      await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
+    }
+
+    console.log(`🚫 User BANNED: ${userEmail} - ${reason} (Score: ${score})`);
+  } catch (error) {
+    console.error('Error banning user:', error);
+  }
+}
+
+// ===== UPDATE BOT SCORE =====
+async function updateBotScore(userId: string, score: number, reason: string) {
+  if (!db) return;
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      botScore: score,
+      lastViolationReason: reason,
+      lastViolationTime: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating score:', error);
+  }
+}
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// SVG Icons
+// SVG Icons (sama seperti sebelumnya)
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -780,8 +587,6 @@ interface Ticket {
   typingUserName?: string | null;
   isAnnouncement?: boolean;
   isBroadcast?: boolean;
-  isBlocked?: boolean;
-  blockReason?: string;
 }
 
 interface ChatMessage {
@@ -806,11 +611,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [isMounted, setIsMounted] = useState(false);
   const [botWarning, setBotWarning] = useState<string | null>(null);
   const [encryptionReady, setEncryptionReady] = useState(false);
-  const [sessionId, setSessionId] = useState<string>("");
-  const [rateLimitInfo, setRateLimitInfo] = useState<{ remaining: number; resetIn: number } | null>(null);
-  const [honeypotToken, setHoneypotToken] = useState<string>("");
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [blockReason, setBlockReason] = useState("");
+  const [isBanned, setIsBanned] = useState(false);
+  const [banReason, setBanReason] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -830,68 +632,26 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     setIsMounted(true);
     getCryptoKey().then(() => {
       setEncryptionReady(true);
-    }).catch(() => setEncryptionReady(true));
-    
-    // Init session
-    if (user) {
-      const sid = antiBot.createSession(user.uid);
-      setSessionId(sid);
-      const token = antiBot.generateHoneypotToken();
-      setHoneypotToken(token);
-    }
-  }, [user]);
+    }).catch((err) => {
+      console.error('Failed to initialize encryption:', err);
+      setEncryptionReady(true);
+    });
+  }, []);
 
-  // Check if user is banned
+  // ===== CHECK BAN STATUS ON MOUNT =====
   useEffect(() => {
-    if (!user || !isMounted) return;
+    if (!user || !db || !isMounted) return;
     
     const checkBan = async () => {
-      const result = await antiBot.checkUserBanned(user.uid);
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(result.reason);
-        setBotWarning(`🚫 Akun Anda telah diblokir: ${result.reason}`);
-      } else {
-        setIsBlocked(false);
-        setBlockReason("");
+      const status = await botDetector.isUserBanned(user.uid);
+      if (status.banned) {
+        setIsBanned(true);
+        setBanReason(status.reason);
+        setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${status.reason}`);
       }
     };
     checkBan();
-
-    // Real-time ban check
-    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
-        if (data.botBanned === true) {
-          setIsBlocked(true);
-          setBlockReason(data.botBanReason || 'Banned');
-          setBotWarning(`🚫 Akun Anda telah diblokir: ${data.botBanReason || 'Banned'}`);
-        } else {
-          setIsBlocked(false);
-          setBlockReason("");
-          setBotWarning(null);
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [user, isMounted]);
-
-  // Update rate limit info periodically
-  useEffect(() => {
-    if (!user || !isMounted) return;
-    
-    const interval = setInterval(() => {
-      const key = `user_${user.uid}`;
-      const result = antiBot.checkRateLimit(key, 'MESSAGE');
-      setRateLimitInfo({
-        remaining: result.remaining,
-        resetIn: Math.ceil(result.resetIn / 1000)
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [user, isMounted]);
+  }, [user, db, isMounted]);
 
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -964,202 +724,145 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== ANTI-BOT CHECK FUNCTIONS =====
-
-  // Check if message should be blocked
-  const checkMessageBlock = async (text: string): Promise<{ blocked: boolean; reason: string }> => {
-    if (!user) return { blocked: false, reason: '' };
-
-    // 1. Check if user is blocked
-    if (isBlocked) {
-      return { blocked: true, reason: `Akun diblokir: ${blockReason}` };
-    }
-
-    // 2. Check rate limit
-    const key = `user_${user.uid}`;
-    const rateResult = antiBot.checkRateLimit(key, 'MESSAGE');
-    if (!rateResult.allowed) {
-      return { 
-        blocked: true, 
-        reason: `Rate limit exceeded. Coba lagi dalam ${Math.ceil(rateResult.resetIn / 1000)} detik` 
-      };
-    }
-
-    // 3. Check message patterns
-    const patterns = [
-      /bot/i, /spam/i, /scam/i, /phishing/i, /malware/i,
-      /virus/i, /hack/i, /crack/i, /keygen/i, /serial/i,
-      /warez/i, /porn/i, /xxx/i, /gambling/i, /casino/i,
-      /lottery/i, /prize/i, /winner/i, /click here/i,
-      /free money/i, /earn money/i, /make money/i,
-      /quick cash/i, /investment/i, /crypto/i, /bitcoin/i,
-      /ethereum/i, /blockchain/i, /mining/i, /nft/i,
-      /metaverse/i
-    ];
-
-    for (const pattern of patterns) {
-      if (pattern.test(text)) {
-        // Add strike
-        const result = await antiBot.addStrike(user.uid, `Kata mencurigakan: ${pattern.source}`);
-        
-        if (result.banned) {
-          setIsBlocked(true);
-          setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-          return { 
-            blocked: true, 
-            reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-          };
+  // GSAP SplitText untuk judul Live Chat Agent
+  useEffect(() => {
+    if (!isMounted) return;
+    if (liveChatTitleRef.current) {
+      const splitTitle = new SplitText(liveChatTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char-livechat"
+      });
+      gsap.fromTo(splitTitle.chars,
+        { opacity: 0, y: 20, filter: 'blur(8px)' },
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.04,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: liveChatTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          }
         }
-        
-        return { 
-          blocked: true, 
-          reason: `⚠️ Aktivitas mencurigakan (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-        };
-      }
+      );
     }
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [isMounted]);
 
-    // 4. Check repeated characters
-    const repeatedPattern = /(.)\1{5,}/;
-    if (repeatedPattern.test(text)) {
-      const result = await antiBot.addStrike(user.uid, 'Spam karakter berulang');
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-        return { 
-          blocked: true, 
-          reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-        };
+  // ===== ALL useEffect HOOKS =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        setAgentOnline(data.online || false);
       }
-      return { 
-        blocked: true, 
-        reason: `⚠️ Spam karakter berulang (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-      };
-    }
+    });
+    return () => unsubscribe();
+  }, [db, isMounted]);
 
-    // 5. Check suspicious links
-    const suspiciousLinks = /(http|https):\/\/(?!.*(menuru|wawa44|gunadarma|instagram|youtube|twitter|facebook|linkedin|github|google|microsoft|apple|amazon|netflix|spotify)).*\.(xyz|top|club|online|site|win|bid|loan|date|download|stream|watch|free|click|biz|info|name|pro|tech|store|shop|live|app|dev|work|cloud|host|net|org|com)/i;
-    if (suspiciousLinks.test(text)) {
-      const result = await antiBot.addStrike(user.uid, 'Link mencurigakan');
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-        return { 
-          blocked: true, 
-          reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-        };
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    let q;
+    if (isAdmin) {
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
+    } else {
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+    }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!isAdmin && (data.isAnnouncement || data.isBroadcast)) {
+          if (data.userId === user.uid) {
+            ticketList.push({ id: doc.id, ...data } as Ticket);
+          }
+        } else {
+          ticketList.push({ id: doc.id, ...data } as Ticket);
+        }
+      });
+      setTickets(ticketList);
+      if (selectedTicket) {
+        const stillExists = ticketList.some(t => t.id === selectedTicket.id);
+        if (!stillExists) {
+          setSelectedTicket(null);
+          setMessages([]);
+        }
       }
-      return { 
-        blocked: true, 
-        reason: `⚠️ Link mencurigakan (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-      };
-    }
+    });
+    return () => unsubscribe();
+  }, [db, user, isAdmin, selectedTicket, isMounted]);
 
-    // 6. Check message history (spam detection)
-    const history = antiBot.getMessageHistory(user.uid);
-    const recentMessages = history.filter(h => Date.now() - h.timestamp < 300000); // 5 menit
-    const similarMessages = recentMessages.filter(h => h.text === text);
-    
-    if (similarMessages.length >= 2) {
-      const result = await antiBot.addStrike(user.uid, 'Pesan berulang (spam)');
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-        return { 
-          blocked: true, 
-          reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-        };
-      }
-      return { 
-        blocked: true, 
-        reason: `⚠️ Pesan berulang (Spam) (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-      };
-    }
-
-    // 7. Velocity detection
-    const velocity = antiBot.detectVelocity(history);
-    if (velocity.isSuspicious) {
-      const result = await antiBot.addStrike(user.uid, `Kecepatan pesan tinggi (${velocity.speed}/menit)`);
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-        return { 
-          blocked: true, 
-          reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-        };
-      }
-      return { 
-        blocked: true, 
-        reason: `⚠️ Terlalu cepat mengirim pesan (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-      };
-    }
-
-    // 8. Behavior analysis
-    const behavior = analyzeBehavior(
-      history.map(h => h.text),
-      history.map(h => h.timestamp)
+  useEffect(() => {
+    if (!db || !selectedTicket || !isMounted) return;
+    const q = query(
+      collection(db, "livechat_tickets", selectedTicket.id, "messages"),
+      orderBy("timestamp", "asc")
     );
-    if (behavior.isSuspicious) {
-      const result = await antiBot.addStrike(user.uid, `Perilaku mencurigakan: ${behavior.reason}`);
-      if (result.banned) {
-        setIsBlocked(true);
-        setBlockReason(`Auto-ban setelah ${result.strikeCount} strikes`);
-        return { 
-          blocked: true, 
-          reason: `🚫 Akun telah di-ban otomatis setelah ${result.strikeCount} pelanggaran` 
-        };
-      }
-      return { 
-        blocked: true, 
-        reason: `⚠️ Perilaku mencurigakan (Strike ${result.strikeCount}/${STRIKE_CONFIG.MAX_STRIKES})` 
-      };
-    }
-
-    return { blocked: false, reason: '' };
-  };
-
-  // Check if ticket can be created
-  const checkTicketBlock = async (): Promise<{ blocked: boolean; reason: string }> => {
-    if (!user) return { blocked: false, reason: '' };
-
-    // 1. Check if user is blocked
-    if (isBlocked) {
-      return { blocked: true, reason: `Akun diblokir: ${blockReason}` };
-    }
-
-    // 2. Check ticket rate limit
-    const key = `ticket_${user.uid}`;
-    const rateResult = antiBot.checkRateLimit(key, 'TICKET');
-    if (!rateResult.allowed) {
-      return { 
-        blocked: true, 
-        reason: `Terlalu banyak membuat ticket. Coba lagi dalam ${Math.ceil(rateResult.resetIn / 60000)} menit` 
-      };
-    }
-
-    // 3. Check new user rate limit
-    const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-    if (!userSnap.empty) {
-      const userData = userSnap.docs[0].data();
-      const createdAt = userData.createdAt?.toDate?.() || new Date();
-      const age = Date.now() - createdAt.getTime();
-      if (age < 600000) { // 10 menit
-        const newUserKey = `new_${user.uid}`;
-        const newUserRate = antiBot.checkRateLimit(newUserKey, 'NEW_USER');
-        if (!newUserRate.allowed) {
-          return { 
-            blocked: true, 
-            reason: 'User baru hanya bisa membuat 1 ticket dalam 10 menit' 
-          };
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const msgList: ChatMessage[] = [];
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        let text = data.text || '';
+        if (data.isEncrypted) {
+          try {
+            text = await decryptMessage(text);
+          } catch (e) {
+            console.error('Failed to decrypt message:', e);
+            text = '[Pesan terenkripsi]';
+          }
         }
+        msgList.push({ id: doc.id, ...data, text } as ChatMessage);
       }
+      setMessages(msgList);
+      setTimeout(() => {
+        scrollToBottom();
+      }, 50);
+    });
+    return () => unsubscribe();
+  }, [db, selectedTicket, isMounted]);
+
+  useEffect(() => {
+    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
+    const unread = messages.filter(m => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true });
+    });
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
+
+  useEffect(() => {
+    if (!user || isAdmin || !isMounted) return;
+    const userTickets = tickets.filter(t => t.userId === user.uid);
+    const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
+    if (activeTicket) {
+      setSelectedTicket(activeTicket);
+    } else if (userTickets.length > 0 && !selectedTicket) {
+      setSelectedTicket(userTickets[0]);
+    } else if (userTickets.length === 0) {
+      setSelectedTicket(null);
+      setMessages([]);
     }
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
-    return { blocked: false, reason: '' };
-  };
-
-  // ===== CHAT FUNCTIONS =====
-
+  // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isBanned) {
+      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      return;
+    }
     const value = e.target.value;
     setMessageText(value);
     if (!selectedTicket || !user || !db) return;
@@ -1184,31 +887,30 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const startChat = async () => {
+    // ===== CHECK BAN STATUS FIRST =====
+    if (isBanned) {
+      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      return;
+    }
+
     if (!db || !user || !selectedTopic) return;
     if (!encryptionReady) {
       alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
       return;
     }
 
-    // Check if user can create ticket
-    const ticketCheck = await checkTicketBlock();
-    if (ticketCheck.blocked) {
-      setBotWarning(`🚫 ${ticketCheck.reason}`);
+    // Check if user is banned from database
+    const status = await botDetector.isUserBanned(user.uid);
+    if (status.banned) {
+      setIsBanned(true);
+      setBanReason(status.reason);
+      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${status.reason}`);
       return;
     }
 
-    // Verify honeypot
-    if (!antiBot.verifyHoneypot(honeypotToken)) {
-      setBotWarning('🚫 Verifikasi keamanan gagal. Silahkan refresh halaman.');
-      return;
-    }
-
-    // Check if user is banned
-    const banCheck = await antiBot.checkUserBanned(user.uid);
-    if (banCheck.banned) {
-      setIsBlocked(true);
-      setBlockReason(banCheck.reason);
-      setBotWarning(`🚫 Akun Anda telah diblokir: ${banCheck.reason}`);
+    const hasActiveTicket = tickets.some(t => t.userId === user.uid && (t.status === 'waiting' || t.status === 'active') && !t.isAnnouncement && !t.isBroadcast);
+    if (hasActiveTicket) {
+      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
       return;
     }
 
@@ -1226,14 +928,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         typingUserId: null,
         typingUserName: null,
         isAnnouncement: false,
-        isBroadcast: false,
-        isBlocked: false,
-        blockReason: null
+        isBroadcast: false
       });
 
       const initialMessage = `Halo, saya ingin bertanya tentang: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
-      
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
@@ -1243,16 +942,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isEncrypted: true,
         isBotDetected: false
       });
-
-      // Update session
-      antiBot.updateSession(sessionId, 'TICKET');
-
       setSelectedTopic("");
       setShowStartChat(false);
       setBotWarning(null);
-      
-      // Generate new honeypot token
-      setHoneypotToken(antiBot.generateHoneypotToken());
     } catch (error) {
       console.error("Error starting chat:", error);
       alert("Terjadi kesalahan saat memulai chat. Silahkan coba lagi.");
@@ -1260,32 +952,69 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const sendMessage = async () => {
+    // ===== CHECK BAN STATUS =====
+    if (isBanned) {
+      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      setMessageText("");
+      return;
+    }
+
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     if (!encryptionReady) {
       alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
       return;
     }
 
-    // Check if message should be blocked
-    const blockCheck = await checkMessageBlock(messageText);
-    if (blockCheck.blocked) {
-      setBotWarning(blockCheck.reason);
+    // ===== ANTI-BOT DETECTION =====
+    const result = botDetector.analyze(messageText, userMessageHistory.current);
+    
+    console.log('🔍 Anti-Bot Analysis:', {
+      score: result.score,
+      isBot: result.isBot,
+      reason: result.reason,
+      details: result.details
+    });
+
+    // ===== IF BOT DETECTED =====
+    if (result.isBot) {
+      // BAN USER IMMEDIATELY
+      await banUser(
+        user.uid,
+        user.email || '',
+        result.reason,
+        result.score,
+        result.details
+      );
+      
+      setIsBanned(true);
+      setBanReason(result.reason);
+      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${result.reason} (Score: ${result.score})`);
       setMessageText("");
+      
+      // Delete all tickets
+      const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
+      for (const ticketDoc of ticketsSnap.docs) {
+        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
+      }
+      setSelectedTicket(null);
+      setMessages([]);
+      
       return;
     }
 
-    // Check if ticket is blocked
-    if (selectedTicket.isBlocked) {
-      setBotWarning(`🚫 Ticket ini telah diblokir: ${selectedTicket.blockReason}`);
-      setMessageText("");
-      return;
+    // ===== UPDATE SCORE IF SUSPICIOUS =====
+    if (result.score > 0) {
+      await updateBotScore(user.uid, result.score, result.reason);
     }
 
-    // Update session
-    antiBot.updateSession(sessionId, 'MESSAGE');
-
-    // Add to history
-    antiBot.addMessageHistory(user.uid, messageText);
+    // Update history
+    userMessageHistory.current.push({
+      text: messageText,
+      timestamp: Date.now()
+    });
+    if (userMessageHistory.current.length > botDetector['MAX_HISTORY']) {
+      userMessageHistory.current = userMessageHistory.current.slice(-botDetector['MAX_HISTORY']);
+    }
 
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
       alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
@@ -1312,7 +1041,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isEncrypted: true,
         isBotDetected: false
       });
-      
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -1320,7 +1048,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         agentId: isAdmin ? user.uid : selectedTicket.agentId,
         agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
       });
-      
       setMessageText("");
       setBotWarning(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -1358,50 +1085,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  const blockTicket = async (ticketId: string, reason: string) => {
-    if (!db || !isAdmin) return;
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        isBlocked: true,
-        blockReason: reason,
-        status: "closed"
-      });
-      if (selectedTicket?.id === ticketId) {
-        setSelectedTicket(null);
-        setMessages([]);
-      }
-    } catch (error) {
-      console.error("Error blocking ticket:", error);
-    }
-  };
-
-  const unblockTicket = async (ticketId: string) => {
-    if (!db || !isAdmin) return;
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        isBlocked: false,
-        blockReason: null,
-        status: "waiting"
-      });
-    } catch (error) {
-      console.error("Error unblocking ticket:", error);
-    }
-  };
-
-  const unbanUser = async (userId: string) => {
-    if (!db || !isAdmin) return;
-    try {
-      await antiBot.unbanUser(userId);
-      setIsBlocked(false);
-      setBlockReason("");
-      setBotWarning(null);
-      alert('✅ User berhasil di-unban');
-    } catch (error) {
-      console.error("Error unbanning user:", error);
-      alert('Gagal meng-unban user');
-    }
-  };
-
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Seseorang";
@@ -1423,7 +1106,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== RENDER =====
+  // ===== RENDER COMPONENT =====
   if (!isMounted) {
     return <div style={{ minHeight: "100px" }} />;
   }
@@ -1491,66 +1174,70 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
+  // ===== CHECK IF BANNED - SHOW BANNED STATE =====
+  if (isBanned) {
+    return (
+      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+        <div style={{
+          backgroundColor: "#fee2e2",
+          border: "2px solid #ef4444",
+          borderRadius: "8px",
+          padding: "20px",
+          textAlign: "center"
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "10px" }}>🚫</div>
+          <h3 style={{
+            fontSize: "24px",
+            fontWeight: 700,
+            color: "#991b1b",
+            fontFamily: FONT_FAMILY,
+            marginBottom: "8px"
+          }}>
+            AKUN ANDA TELAH DIBANNED
+          </h3>
+          <p style={{
+            fontSize: "14px",
+            color: "#991b1b",
+            fontFamily: FONT_FAMILY
+          }}>
+            Alasan: {banReason}
+          </p>
+          <p style={{
+            fontSize: "12px",
+            color: "#991b1b",
+            fontFamily: FONT_FAMILY,
+            marginTop: "8px"
+          }}>
+            Anda tidak dapat membuat ticket baru atau mengirim pesan.
+            <br />
+            Silakan hubungi admin untuk informasi lebih lanjut.
+          </p>
+          <button
+            onClick={handleLogout}
+            style={{
+              marginTop: "16px",
+              padding: "8px 24px",
+              backgroundColor: "#ef4444",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "14px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // USER VIEW
   if (!isAdmin) {
-    const userTickets = tickets.filter(t => t.userId === user.uid && !t.isBlocked);
+    const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
-
-    // Show blocked message if user is blocked
-    if (isBlocked) {
-      return (
-        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-            <h3 ref={liveChatTitleRef} style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              margin: 0,
-            }}>
-              Live Chat Agent
-            </h3>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "4px 12px",
-                backgroundColor: "transparent",
-                color: "#ef4444",
-                border: "1px solid #ef4444",
-                borderRadius: "5px",
-                fontSize: "12px",
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-            >
-              <LogoutIcon size={14} />
-              <span>Logout</span>
-            </button>
-          </div>
-          <div style={{
-            backgroundColor: "#fee2e2",
-            color: "#991b1b",
-            padding: "16px 20px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            fontFamily: FONT_FAMILY,
-            border: "1px solid #fecaca",
-          }}>
-            <div style={{ fontWeight: 600, marginBottom: "8px" }}>🚫 Akun Anda Diblokir</div>
-            <div>{blockReason}</div>
-            <div style={{ fontSize: "12px", marginTop: "8px", color: "#dc2626" }}>
-              Hubungi admin untuk informasi lebih lanjut.
-            </div>
-          </div>
-        </div>
-      );
-    }
 
     if (userTickets.length === 0 && !showStartChat) {
       return (
@@ -1599,16 +1286,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
             }}>
               {botWarning}
-            </div>
-          )}
-          {rateLimitInfo && (
-            <div style={{
-              fontSize: "11px",
-              color: rateLimitInfo.remaining > 3 ? "#22c55e" : "#ef4444",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
-            }}>
-              📊 Sisa pesan: {rateLimitInfo.remaining} | Reset: {rateLimitInfo.resetIn}s
             </div>
           )}
           <div style={{
@@ -1698,16 +1375,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               {botWarning}
             </div>
           )}
-          {rateLimitInfo && (
-            <div style={{
-              fontSize: "11px",
-              color: rateLimitInfo.remaining > 3 ? "#22c55e" : "#ef4444",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
-            }}>
-              📊 Sisa pesan: {rateLimitInfo.remaining} | Reset: {rateLimitInfo.resetIn}s
-            </div>
-          )}
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
               Pilih topik permasalahan Anda:
@@ -1787,15 +1454,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             Live Chat Agent
           </h3>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {rateLimitInfo && (
-              <span style={{
-                fontSize: "10px",
-                color: rateLimitInfo.remaining > 3 ? "#22c55e" : "#ef4444",
-                fontFamily: FONT_FAMILY,
-              }}>
-                📊 {rateLimitInfo.remaining}
-              </span>
-            )}
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <PulsingDots active={agentOnline} />
               <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
@@ -1849,6 +1507,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           overflow: "hidden",
           borderRadius: "8px",
         }}>
+          {/* Left sidebar - chat list */}
           <div style={{
             width: "220px",
             backgroundColor: "#0D3CFC",
@@ -1882,10 +1541,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 backgroundColor: "rgba(255,255,255,0.2)",
                 padding: "1px 6px",
                 borderRadius: "8px",
-              }}>{userTickets.length}</span>
+              }}>{tickets.filter(t => t.userId === user.uid).length}</span>
             </div>
             <div style={{ overflowY: "auto", height: "340px" }}>
-              {userTickets.map((ticket) => {
+              {tickets.filter(t => t.userId === user.uid).map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
                 const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
@@ -1930,14 +1589,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.4)" }}>
                         {ticketId}
                       </span>
-                      {ticket.isBlocked && (
-                        <span style={{ fontSize: "7px", color: "#ef4444" }}>🔒</span>
+                      {ticket.isAnnouncement && (
+                        <span style={{ fontSize: "7px", color: "#fcd34d" }}>📢</span>
+                      )}
+                      {ticket.isBroadcast && (
+                        <span style={{ fontSize: "7px", color: "#60a5fa" }}>📡</span>
                       )}
                     </div>
                   </div>
                 );
               })}
-              {userTickets.length === 0 && (
+              {tickets.filter(t => t.userId === user.uid).length === 0 && (
                 <div style={{ padding: "20px 10px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>
                   Belum ada chat
                 </div>
@@ -1952,25 +1614,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             }}>
               <button
                 onClick={() => setShowStartChat(true)}
-                disabled={isBlocked}
                 style={{
                   width: "100%",
                   padding: "5px",
-                  backgroundColor: isBlocked ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.15)",
-                  color: isBlocked ? "rgba(255,255,255,0.3)" : "#fff",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  color: "#fff",
                   border: "none",
                   borderRadius: "5px",
                   fontSize: "11px",
                   fontWeight: 500,
-                  cursor: isBlocked ? "not-allowed" : "pointer",
+                  cursor: "pointer",
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {isBlocked ? '🔒 Diblokir' : '+ Chat Baru'}
+                + Chat Baru
               </button>
             </div>
           </div>
 
+          {/* Right side - chat messages */}
           <div style={{
             flex: 1,
             backgroundColor: "#ffffff",
@@ -1985,7 +1647,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               <>
                 <div style={{
                   padding: "8px 12px",
-                  backgroundColor: selectedTicket.isBlocked ? "#ef4444" : "#0D3CFC",
+                  backgroundColor: "#0D3CFC",
                   borderBottom: "1px solid #e8e8e8",
                   display: "flex",
                   justifyContent: "space-between",
@@ -1998,8 +1660,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "5px", fontFamily: FONT_FAMILY }}>
                         {selectedTicket.topic}
                       </span>
-                      {selectedTicket.isBlocked && (
-                        <span style={{ fontSize: "10px", color: "#fca5a5", marginLeft: "5px" }}>🔒 Diblokir</span>
+                      {selectedTicket.isAnnouncement && (
+                        <span style={{ fontSize: "10px", color: "#fcd34d", marginLeft: "5px" }}>📢 Pengumuman</span>
+                      )}
+                      {selectedTicket.isBroadcast && (
+                        <span style={{ fontSize: "10px", color: "#60a5fa", marginLeft: "5px" }}>📡 Broadcast</span>
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -2016,17 +1681,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       </span>
                     </div>
                   </div>
-                  {selectedTicket.isBlocked && (
-                    <span style={{
-                      padding: "2px 10px",
-                      backgroundColor: "#dc2626",
-                      color: "#fff",
-                      borderRadius: "4px",
-                      fontSize: "9px",
-                      fontFamily: FONT_FAMILY,
-                    }}>
-                      Diblokir
-                    </span>
+                  {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "3px 8px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        fontSize: "9px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Selesaikan
+                    </button>
                   )}
                 </div>
                 <div 
@@ -2105,7 +1775,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         );
                       })
                     )}
-                    {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && !selectedTicket.isBlocked && (
+                    {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
                       <div style={{
                         alignSelf: "flex-start",
                         fontSize: "10px",
@@ -2120,7 +1790,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
-                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !selectedTicket.isBlocked && (
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                   <div style={{
                     padding: "6px 10px",
                     borderTop: "1px solid #e8e8e8",
@@ -2140,7 +1810,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         }
                       }}
                       placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
-                      disabled={selectedTicket.status === 'waiting' || isBlocked}
+                      disabled={selectedTicket.status === 'waiting' || isBanned}
                       style={{
                         flex: 1,
                         padding: "5px 8px",
@@ -2149,21 +1819,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         fontSize: "11px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
-                        backgroundColor: (selectedTicket.status === 'waiting' || isBlocked) ? "#f5f5f5" : "#fff",
+                        backgroundColor: (selectedTicket.status === 'waiting' || isBanned) ? "#f5f5f5" : "#fff",
                       }}
-                      onFocus={(e) => { if (selectedTicket.status !== 'waiting' && !isBlocked) e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                      onFocus={(e) => { if (selectedTicket.status !== 'waiting' && !isBanned) e.currentTarget.style.borderColor = "#0D3CFC"; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
                     />
                     <button
                       onClick={sendMessage}
-                      disabled={selectedTicket.status === 'waiting' || !messageText.trim() || isBlocked}
+                      disabled={selectedTicket.status === 'waiting' || !messageText.trim() || isBanned}
                       style={{
                         padding: "5px 10px",
-                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBlocked) ? "#ccc" : "#0D3CFC",
+                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBanned) ? "#ccc" : "#0D3CFC",
                         color: "#fff",
                         border: "none",
                         borderRadius: "5px",
-                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBlocked) ? "not-allowed" : "pointer",
+                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim() || isBanned) ? "not-allowed" : "pointer",
                         fontFamily: FONT_FAMILY,
                         display: "flex",
                         alignItems: "center",
@@ -2174,19 +1844,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       <SendIcon size={12} />
                       <span>Kirim</span>
                     </button>
-                  </div>
-                )}
-                {selectedTicket.isBlocked && (
-                  <div style={{
-                    padding: "10px",
-                    backgroundColor: "#fef2f2",
-                    borderTop: "1px solid #fecaca",
-                    textAlign: "center",
-                    fontSize: "12px",
-                    color: "#dc2626",
-                    fontFamily: FONT_FAMILY,
-                  }}>
-                    🔒 Ticket ini telah diblokir oleh admin
                   </div>
                 )}
               </>
@@ -2210,10 +1867,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   // ADMIN VIEW
-  const waitingTickets = tickets.filter(t => t.status === 'waiting' && !t.isBlocked);
-  const activeTickets = tickets.filter(t => t.status === 'active' && !t.isBlocked);
-  const blockedTickets = tickets.filter(t => t.isBlocked === true);
-  const resolvedTickets = tickets.filter(t => (t.status === 'resolved' || t.status === 'closed') && !t.isBlocked);
+  const waitingTickets = tickets.filter(t => t.status === 'waiting');
+  const activeTickets = tickets.filter(t => t.status === 'active');
+  const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
@@ -2369,45 +2025,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           )}
 
-          {blockedTickets.length > 0 && (
-            <div>
-              <div style={{
-                padding: "6px 10px",
-                backgroundColor: "#fee2e2",
-                fontWeight: 600,
-                fontSize: "11px",
-                color: "#991b1b",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                fontFamily: FONT_FAMILY,
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-              }}>
-                <span>🔒</span>
-                <span>Diblokir ({blockedTickets.length})</span>
-              </div>
-              {blockedTickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
-                  style={{
-                    padding: "7px 10px",
-                    borderBottom: "1px solid #e8e8e8",
-                    cursor: "pointer",
-                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(239,68,68,0.08)" : "transparent",
-                    transition: "background 0.2s ease",
-                  }}
-                >
-                  <div style={{ fontWeight: 500, fontSize: "11px", color: "#dc2626", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
-                  <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  <div style={{ fontSize: "8px", color: "#dc2626", fontFamily: FONT_FAMILY }}>🔒 {ticket.blockReason || 'Diblokir'}</div>
-                </div>
-              ))}
-            </div>
-          )}
-
           {resolvedTickets.length > 0 && (
             <div>
               <div style={{
@@ -2451,9 +2068,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </div>
           )}
 
-          {waitingTickets.length === 0 && activeTickets.length === 0 && blockedTickets.length === 0 && resolvedTickets.length === 0 && (
+          {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
             <div style={{ padding: "20px 10px", textAlign: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY }}>
-              Tidak ada chat
+              Tidak ada chat masuk
             </div>
           )}
         </div>
@@ -2472,7 +2089,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <>
               <div style={{
                 padding: "8px 12px",
-                backgroundColor: selectedTicket.isBlocked ? "#ef4444" : "#0D3CFC",
+                backgroundColor: "#0D3CFC",
                 borderBottom: "1px solid #e8e8e8",
                 display: "flex",
                 justifyContent: "space-between",
@@ -2498,70 +2115,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
                       {generateTicketId(selectedTicket.createdAt)}
                     </span>
-                    {selectedTicket.isBlocked && (
-                      <span style={{ fontSize: "9px", color: "#fca5a5", fontWeight: 600 }}>🔒 Diblokir</span>
-                    )}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "4px" }}>
-                  {selectedTicket.isBlocked ? (
-                    <button
-                      onClick={() => unblockTicket(selectedTicket.id)}
-                      style={{
-                        padding: "3px 8px",
-                        backgroundColor: "#22c55e",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontSize: "9px",
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Unblock
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          const reason = prompt('Alasan memblokir ticket:');
-                          if (reason && selectedTicket.id) {
-                            blockTicket(selectedTicket.id, reason);
-                          }
-                        }}
-                        style={{
-                          padding: "3px 8px",
-                          backgroundColor: "#ef4444",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "4px",
-                          fontSize: "9px",
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Block
-                      </button>
-                      {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                        <button
-                          onClick={() => resolveTicket(selectedTicket.id)}
-                          style={{
-                            padding: "3px 8px",
-                            backgroundColor: "#22c55e",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "4px",
-                            fontSize: "9px",
-                            cursor: "pointer",
-                            fontFamily: FONT_FAMILY,
-                          }}
-                        >
-                          Selesaikan
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
+                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
+                  <button
+                    onClick={() => resolveTicket(selectedTicket.id)}
+                    style={{
+                      padding: "3px 8px",
+                      backgroundColor: "#22c55e",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "9px",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Selesaikan
+                  </button>
+                )}
               </div>
               <div 
                 ref={chatMessagesContainerRef}
@@ -2637,7 +2209,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       );
                     })
                   )}
-                  {typingText && selectedTicket.status !== 'resolved' && !selectedTicket.isBlocked && (
+                  {typingText && selectedTicket.status !== 'resolved' && (
                     <div style={{
                       alignSelf: "flex-start",
                       fontSize: "10px",
@@ -2652,7 +2224,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   <div ref={messagesEndRef} />
                 </div>
               </div>
-              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && !selectedTicket.isBlocked && (
+              {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
                 <div style={{
                   padding: "6px 10px",
                   borderTop: "1px solid #e8e8e8",
@@ -2704,20 +2276,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     <SendIcon size={12} />
                     <span>Kirim</span>
                   </button>
-                </div>
-              )}
-              {selectedTicket.isBlocked && (
-                <div style={{
-                  padding: "10px",
-                  backgroundColor: "#fef2f2",
-                  borderTop: "1px solid #fecaca",
-                  textAlign: "center",
-                  fontSize: "12px",
-                  color: "#dc2626",
-                  fontFamily: FONT_FAMILY,
-                }}>
-                  🔒 Ticket ini telah diblokir
-                  {selectedTicket.blockReason && `: ${selectedTicket.blockReason}`}
                 </div>
               )}
             </>
@@ -3135,6 +2693,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Loading state
   if (!isMounted || loading) {
     return (
       <div
@@ -3527,6 +3086,7 @@ export default function HomePage(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
+          {/* Foto Kiri */}
           <div
             style={{
               position: "absolute",
@@ -3550,6 +3110,7 @@ export default function HomePage(): React.JSX.Element {
             />
           </div>
 
+          {/* Foto Kanan */}
           <div
             style={{
               position: "absolute",
@@ -3668,7 +3229,7 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: FONT_FAMILY,
                               fontSize: "20px",
                               fontWeight: 400,
-                              color: isStories ? "#0D3CFC" : "#0D3CFC",
+                              color: "#0D3CFC",
                               letterSpacing: "-0.01em",
                               cursor: "pointer",
                               textTransform: "none",
@@ -3720,7 +3281,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text */}
+        {/* MENURU Text - 450px, left aligned */}
         <div
           ref={menuruFooterRef}
           style={{
