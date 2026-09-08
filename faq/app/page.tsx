@@ -5,7 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, setDoc, deleteDoc, runTransaction } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, deleteDoc, setDoc } from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -142,275 +142,132 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ANTI-BOT SUPER ADVANCED SYSTEM =====
-interface BotScore {
-  totalScore: number;
-  violations: string[];
-  lastViolation: any;
-  isBanned: boolean;
-  bannedAt: any;
-  banReason: string;
-}
+// ===== ANTI-BOT SYSTEM - DIRECT BAN NO SCORE =====
+// Daftar kata kunci yang akan langsung BAN PERMANEN
+const BANNED_KEYWORDS = [
+  // Bot related
+  'bot', 'spam', 'scam', 'phishing', 'malware', 'ransomware',
+  'keylogger', 'spyware', 'adware', 'trojan', 'worm', 'rootkit',
+  'exploit', '0day', 'sql injection', 'xss', 'csrf',
+  
+  // Gambling / Judol
+  'gambling', 'casino', 'lottery', 'judol', 'judionline',
+  'slot', 'poker', 'baccarat', 'rolet', 'blackjack',
+  'sabung ayam', 'togel', '4d', 'toto', 'magnum',
+  'damacai', 'singaporepools', 'hongkongpools', 'sydneypools',
+  
+  // Adult
+  'sex', 'porn', 'xxx', 'nsfw', '18+',
+  
+  // Spam/Scam
+  'viagra', 'cialis', 'levitra', 'weight loss', 'diet pill',
+  'fat burner', 'miracle cure', 'get rich', 'make money',
+  'earn money', 'quick cash', 'free money', 'click here',
+  'passive income', 'millionaire', 'billionaire',
+  
+  // Crypto/Investment
+  'crypto', 'bitcoin', 'ethereum', 'investment', 'profit',
+  'return', 'mining', 'nft', 'metaverse',
+  
+  // Suspicious links patterns
+  'xyz', 'top', 'club', 'online', 'site', 'win', 'bid',
+  'loan', 'date', 'download', 'stream', 'watch', 'free',
+  'click', 'biz', 'info', 'name', 'pro', 'tech', 'store',
+  'shop', 'live', 'app', 'dev', 'work', 'cloud', 'host'
+];
 
-interface BotDetectionResult {
-  isBot: boolean;
-  score: number;
-  reason: string;
-  details: string[];
-}
-
-// ===== MACHINE LEARNING-LIKE BOT DETECTION =====
-class BotDetector {
-  private patterns: { pattern: RegExp; weight: number; category: string }[] = [];
-  private history: { text: string; timestamp: number }[] = [];
-  private readonly MAX_HISTORY = 50;
-  private readonly BAN_THRESHOLD = 50; // Total score >= 50 = BANNED
-  private readonly TIME_WINDOW = 60000; // 1 menit
-
-  constructor() {
-    // ===== LEVEL 1: HIGH WEIGHT PATTERNS (langsung banned) =====
-    this.patterns.push(
-      { pattern: /\bbot\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bscam\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bphishing\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bmalware\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bransomware\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bkeylogger\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bspyware\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\badware\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\btrojan\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bworm\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\brootkit\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bexploit\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\b0day\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bcve-\d{4}-\d{4,}\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bsql injection\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bxss\b/i, weight: 50, category: 'High Risk' },
-      { pattern: /\bcsrf\b/i, weight: 50, category: 'High Risk' }
-    );
-
-    // ===== LEVEL 2: MEDIUM WEIGHT PATTERNS =====
-    this.patterns.push(
-      { pattern: /\bgambling\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bcasino\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\blottery\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bjudol\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bjudionline\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bslot\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bpoker\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bbaccarat\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\brolet\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bblackjack\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bsabung ayam\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\btogel\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\b4d\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\btoto\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bmagnum\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bdamacai\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bsingaporepools\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bhongkongpools\b/i, weight: 30, category: 'Medium Risk' },
-      { pattern: /\bsydneypools\b/i, weight: 30, category: 'Medium Risk' }
-    );
-
-    // ===== LEVEL 3: LOW WEIGHT PATTERNS =====
-    this.patterns.push(
-      { pattern: /\bcrypto\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bbitcoin\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bethereum\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\binvestment\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bprofit\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\breturn\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bpassive income\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bget rich\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bmake money\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bearn money\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bquick cash\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bfree money\b/i, weight: 15, category: 'Low Risk' },
-      { pattern: /\bclick here\b/i, weight: 15, category: 'Low Risk' }
-    );
-
-    // ===== PATTERN DETECTION: SUSPICIOUS LINKS =====
-    this.patterns.push(
-      { pattern: /https?:\/\/[^\s]*\.(xyz|top|club|online|site|win|bid|loan|date|download|stream|watch|free|click|biz|info|name|pro|tech|store|shop|live|app|dev|work|cloud|host|net|org|com)(\/[^\s]*)?/i, weight: 35, category: 'Suspicious Link' },
-      { pattern: /https?:\/\/[^\s]*\.(ru|cn|pl|tk|ml|ga|cf)(\/[^\s]*)?/i, weight: 35, category: 'Suspicious Link' },
-      { pattern: /bit\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
-      { pattern: /tinyurl\.com\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
-      { pattern: /shorturl\.at\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
-      { pattern: /cutt\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' },
-      { pattern: /ow\.ly\/[a-zA-Z0-9]+/i, weight: 25, category: 'Shortened Link' }
-    );
-
-    // ===== PATTERN DETECTION: REPEATED CHARACTERS =====
-    this.patterns.push(
-      { pattern: /(.)\1{8,}/i, weight: 20, category: 'Repeated Characters' },
-      { pattern: /(..)\1{4,}/i, weight: 20, category: 'Repeated Pattern' }
-    );
-
-    // ===== PATTERN DETECTION: ALL CAPS =====
-    this.patterns.push(
-      { pattern: /^[A-Z\s!?.,]+$/, weight: 10, category: 'All Caps' }
-    );
-
-    // ===== PATTERN DETECTION: SUSPICIOUS WORDS =====
-    this.patterns.push(
-      { pattern: /\bsex\b/i, weight: 25, category: 'Adult Content' },
-      { pattern: /\bporn\b/i, weight: 25, category: 'Adult Content' },
-      { pattern: /\bxxx\b/i, weight: 25, category: 'Adult Content' },
-      { pattern: /\bnsfw\b/i, weight: 25, category: 'Adult Content' },
-      { pattern: /\b18\+\b/i, weight: 25, category: 'Adult Content' }
-    );
-
-    // ===== PATTERN DETECTION: SPAM KEYWORDS =====
-    this.patterns.push(
-      { pattern: /\b(viagra|cialis|levitra)\b/i, weight: 30, category: 'Spam' },
-      { pattern: /\b(weight loss|diet pill|fat burner)\b/i, weight: 20, category: 'Spam' },
-      { pattern: /\b(herbal|organic|natural)\s*(remedy|cure|treatment)\b/i, weight: 20, category: 'Spam' },
-      { pattern: /\b(miracle|cure|heal)\s*(cancer|disease|illness)\b/i, weight: 30, category: 'Spam' }
-    );
+// Cek apakah pesan mengandung kata kunci terlarang
+function containsBannedKeyword(text: string): { banned: boolean; keyword: string } {
+  const lowerText = text.toLowerCase();
+  for (const keyword of BANNED_KEYWORDS) {
+    if (lowerText.includes(keyword.toLowerCase())) {
+      return { banned: true, keyword };
+    }
   }
+  return { banned: false, keyword: '' };
+}
 
-  // ===== ANALYZE TEXT =====
-  analyze(text: string, history: { text: string; timestamp: number }[]): BotDetectionResult {
-    let totalScore = 0;
-    const details: string[] = [];
-    let reason = 'Normal';
-
-    // ===== SCAN PATTERNS =====
-    for (const p of this.patterns) {
-      if (p.pattern.test(text)) {
-        totalScore += p.weight;
-        details.push(`${p.category}: ${p.pattern.source} (+${p.weight})`);
-        if (p.weight >= 50) {
-          reason = `HIGH RISK: ${p.category}`;
+// Cek apakah link mencurigakan
+function containsSuspiciousLink(text: string): { suspicious: boolean; link: string } {
+  const linkPattern = /https?:\/\/[^\s]+/gi;
+  const matches = text.match(linkPattern);
+  if (matches) {
+    for (const link of matches) {
+      const lowerLink = link.toLowerCase();
+      for (const keyword of BANNED_KEYWORDS) {
+        if (lowerLink.includes(keyword.toLowerCase())) {
+          return { suspicious: true, link };
         }
       }
     }
-
-    // ===== CHECK HISTORY FOR SPAM =====
-    const now = Date.now();
-    const recentHistory = history.filter(h => (now - h.timestamp) < this.TIME_WINDOW);
-    const similarMessages = recentHistory.filter(h => h.text === text);
-    
-    if (similarMessages.length >= 2) {
-      const score = similarMessages.length * 15;
-      totalScore += score;
-      details.push(`Spam: Pesan sama ${similarMessages.length + 1}x (+${score})`);
-      if (similarMessages.length >= 3) {
-        reason = 'SPAM DETECTED';
-        totalScore += 20;
-        details.push(`SPAM: Pesan sama ${similarMessages.length + 1}x (+20)`);
-      }
-    }
-
-    // ===== CHECK RATE LIMITING =====
-    const messageCount = recentHistory.length;
-    if (messageCount >= 5) {
-      totalScore += 10;
-      details.push(`Rate Limiting: ${messageCount} pesan dalam ${this.TIME_WINDOW/1000}s (+10)`);
-    }
-    if (messageCount >= 10) {
-      totalScore += 20;
-      details.push(`HIGH RATE: ${messageCount} pesan dalam ${this.TIME_WINDOW/1000}s (+20)`);
-      reason = 'RATE LIMIT EXCEEDED';
-    }
-
-    // ===== CHECK FOR SUSPICIOUS PATTERNS COMBINATION =====
-    const suspiciousCategories = ['Suspicious Link', 'Shortened Link', 'Adult Content', 'High Risk', 'Medium Risk'];
-    const categoriesFound = details.filter(d => suspiciousCategories.some(cat => d.includes(cat)));
-    if (categoriesFound.length >= 2) {
-      totalScore += 15;
-      details.push(`Multiple Suspicious Categories: ${categoriesFound.length} (+15)`);
-    }
-
-    // ===== DETERMINE RESULT =====
-    const isBot = totalScore >= this.BAN_THRESHOLD || reason === 'HIGH RISK: High Risk' || reason === 'SPAM DETECTED';
-
-    return {
-      isBot,
-      score: totalScore,
-      reason: isBot ? `BANNED: ${reason}` : reason,
-      details
-    };
   }
-
-  // ===== CHECK IF USER IS BANNED =====
-  async isUserBanned(userId: string): Promise<{ banned: boolean; reason: string; score: number }> {
-    if (!db) return { banned: false, reason: 'No DB', score: 0 };
-    try {
-      const userRef = doc(db, "users", userId);
-      const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", userId)));
-      if (!userSnap.empty) {
-        const data = userSnap.docs[0].data();
-        if (data.botFlagged === true) {
-          return { 
-            banned: true, 
-            reason: data.botReason || 'Violation detected',
-            score: data.botScore || 0
-          };
-        }
-      }
-      return { banned: false, reason: 'Clean', score: 0 };
-    } catch (error) {
-      console.error('Error checking ban status:', error);
-      return { banned: false, reason: 'Error', score: 0 };
-    }
-  }
+  return { suspicious: false, link: '' };
 }
 
-// ===== GLOBAL BOT DETECTOR INSTANCE =====
-const botDetector = new BotDetector();
-
-// ===== BAN USER FUNCTION =====
-async function banUser(userId: string, userEmail: string, reason: string, score: number, details: string[]) {
+// ===== BAN USER PERMANENTLY =====
+async function banUserPermanent(userId: string, userEmail: string, reason: string, keyword: string) {
   if (!db) return;
   try {
-    // Update user document
+    // 1. Update user document - BAN PERMANEN
     const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      botFlagged: true,
-      botReason: `${reason} (Score: ${score})`,
-      botScore: score,
-      botDetails: details,
-      botFlaggedAt: serverTimestamp(),
-      bannedAt: serverTimestamp()
-    });
+    await setDoc(userRef, {
+      banned: true,
+      bannedReason: `${reason} (Keyword: ${keyword})`,
+      bannedAt: serverTimestamp(),
+      bannedPermanent: true,
+      canCreateTicket: false
+    }, { merge: true });
 
-    // Log to violations
+    // 2. Log ke violations
     await addDoc(collection(db, "bot_violations"), {
       userId,
       userEmail,
       reason,
-      score,
-      details,
+      keyword,
       timestamp: serverTimestamp(),
-      resolved: false,
-      action: 'AUTO_BAN'
+      action: 'PERMANENT_BAN',
+      resolved: false
     });
 
-    // Delete all active tickets
+    // 3. Delete ALL tickets milik user
     const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", userId)));
     for (const ticketDoc of ticketsSnap.docs) {
       await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
     }
 
-    console.log(`🚫 User BANNED: ${userEmail} - ${reason} (Score: ${score})`);
+    // 4. Hapus semua pesan di semua ticket
+    for (const ticketDoc of ticketsSnap.docs) {
+      const messagesSnap = await getDocs(collection(db, "livechat_tickets", ticketDoc.id, "messages"));
+      for (const msgDoc of messagesSnap.docs) {
+        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id, "messages", msgDoc.id));
+      }
+    }
+
+    console.log(`🚫 PERMANENT BAN: ${userEmail} - ${reason} (Keyword: ${keyword})`);
   } catch (error) {
     console.error('Error banning user:', error);
   }
 }
 
-// ===== UPDATE BOT SCORE =====
-async function updateBotScore(userId: string, score: number, reason: string) {
-  if (!db) return;
+// ===== CHECK BAN STATUS =====
+async function checkBanStatus(userId: string): Promise<{ banned: boolean; reason: string; permanent: boolean }> {
+  if (!db || !userId) return { banned: false, reason: '', permanent: false };
   try {
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      botScore: score,
-      lastViolationReason: reason,
-      lastViolationTime: serverTimestamp()
-    });
+    const userSnap = await getDocs(query(collection(db, "users"), where("uid", "==", userId)));
+    if (!userSnap.empty) {
+      const data = userSnap.docs[0].data();
+      if (data.banned === true || data.bannedPermanent === true) {
+        return {
+          banned: true,
+          reason: data.bannedReason || 'Permanent Ban',
+          permanent: data.bannedPermanent || false
+        };
+      }
+    }
+    return { banned: false, reason: '', permanent: false };
   } catch (error) {
-    console.error('Error updating score:', error);
+    console.error('Error checking ban status:', error);
+    return { banned: false, reason: '', permanent: false };
   }
 }
 
@@ -418,7 +275,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// SVG Icons (sama seperti sebelumnya)
+// SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -613,11 +470,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [encryptionReady, setEncryptionReady] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
   const [banReason, setBanReason] = useState("");
+  const [banKeyword, setBanKeyword] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
-  const userMessageHistory = useRef<{text: string, timestamp: number}[]>([]);
 
   const topics = [
     "Pertanyaan tentang produk",
@@ -638,20 +495,40 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, []);
 
-  // ===== CHECK BAN STATUS ON MOUNT =====
+  // ===== CHECK BAN STATUS ON MOUNT & AUTH CHANGE =====
   useEffect(() => {
     if (!user || !db || !isMounted) return;
     
     const checkBan = async () => {
-      const status = await botDetector.isUserBanned(user.uid);
+      const status = await checkBanStatus(user.uid);
       if (status.banned) {
         setIsBanned(true);
         setBanReason(status.reason);
-        setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${status.reason}`);
+        setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
+        // Set state banned
+        setShowStartChat(false);
       }
     };
     checkBan();
   }, [user, db, isMounted]);
+
+  // ===== CEK BAN SETIAP KALI USER BERUBAH =====
+  useEffect(() => {
+    if (!user || !db || !isMounted) return;
+    
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const status = await checkBanStatus(currentUser.uid);
+        if (status.banned) {
+          setIsBanned(true);
+          setBanReason(status.reason);
+          setShowStartChat(false);
+        }
+      }
+    });
+    
+    return () => unsubscribe();
+  }, [auth, db, isMounted]);
 
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -860,7 +737,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   // ===== FUNGSI =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
       return;
     }
     const value = e.target.value;
@@ -887,9 +764,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   };
 
   const startChat = async () => {
-    // ===== CHECK BAN STATUS FIRST =====
+    // ===== CHECK BAN STATUS =====
     if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
       return;
     }
 
@@ -899,12 +776,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       return;
     }
 
-    // Check if user is banned from database
-    const status = await botDetector.isUserBanned(user.uid);
+    // Check ban status dari database
+    const status = await checkBanStatus(user.uid);
     if (status.banned) {
       setIsBanned(true);
       setBanReason(status.reason);
-      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${status.reason}`);
+      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: ${status.reason}`);
       return;
     }
 
@@ -954,7 +831,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const sendMessage = async () => {
     // ===== CHECK BAN STATUS =====
     if (isBanned) {
-      setBotWarning(`🚫 ANDA TELAH DIBANNED! ${banReason}`);
+      setBotWarning(`🚫 ANDA TELAH DIBANNED PERMANEN! ${banReason}`);
       setMessageText("");
       return;
     }
@@ -965,55 +842,61 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       return;
     }
 
-    // ===== ANTI-BOT DETECTION =====
-    const result = botDetector.analyze(messageText, userMessageHistory.current);
-    
-    console.log('🔍 Anti-Bot Analysis:', {
-      score: result.score,
-      isBot: result.isBot,
-      reason: result.reason,
-      details: result.details
-    });
-
-    // ===== IF BOT DETECTED =====
-    if (result.isBot) {
-      // BAN USER IMMEDIATELY
-      await banUser(
+    // ===== ANTI-BOT: CEK KATA KUNCI =====
+    const keywordCheck = containsBannedKeyword(messageText);
+    if (keywordCheck.banned) {
+      // LANGSUNG BAN PERMANEN
+      await banUserPermanent(
         user.uid,
         user.email || '',
-        result.reason,
-        result.score,
-        result.details
+        'Mengandung kata kunci terlarang',
+        keywordCheck.keyword
       );
       
       setIsBanned(true);
-      setBanReason(result.reason);
-      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED! Alasan: ${result.reason} (Score: ${result.score})`);
+      setBanReason(`Mengandung kata kunci terlarang: "${keywordCheck.keyword}"`);
+      setBanKeyword(keywordCheck.keyword);
+      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung kata kunci terlarang: "${keywordCheck.keyword}"`);
       setMessageText("");
       
-      // Delete all tickets
+      // Hapus semua ticket
       const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
       for (const ticketDoc of ticketsSnap.docs) {
         await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
       }
       setSelectedTicket(null);
       setMessages([]);
+      setShowStartChat(false);
       
       return;
     }
 
-    // ===== UPDATE SCORE IF SUSPICIOUS =====
-    if (result.score > 0) {
-      await updateBotScore(user.uid, result.score, result.reason);
-    }
-
-    // Update history
-    userMessageHistory.current.push({
-      text: messageText,
-      timestamp: Date.now()
-    });
-    if (userMessageHistory.current.length > botDetector['MAX_HISTORY']) {
-      userMessageHistory.current = userMessageHistory.current.slice(-botDetector['MAX_HISTORY']);
+    // ===== ANTI-BOT: CEK LINK MENURIGAKAN =====
+    const linkCheck = containsSuspiciousLink(messageText);
+    if (linkCheck.suspicious) {
+      // LANGSUNG BAN PERMANEN
+      await banUserPermanent(
+        user.uid,
+        user.email || '',
+        'Mengandung link mencurigakan',
+        linkCheck.link
+      );
+      
+      setIsBanned(true);
+      setBanReason(`Mengandung link mencurigakan: ${linkCheck.link}`);
+      setBanKeyword(linkCheck.link);
+      setBotWarning(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN! Alasan: Mengandung link mencurigakan: ${linkCheck.link}`);
+      setMessageText("");
+      
+      const ticketsSnap = await getDocs(query(collection(db, "livechat_tickets"), where("userId", "==", user.uid)));
+      for (const ticketDoc of ticketsSnap.docs) {
+        await deleteDoc(doc(db, "livechat_tickets", ticketDoc.id));
+      }
+      setSelectedTicket(null);
+      setMessages([]);
+      setShowStartChat(false);
+      
+      return;
     }
 
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
@@ -1174,58 +1057,108 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     );
   }
 
-  // ===== CHECK IF BANNED - SHOW BANNED STATE =====
+  // ===== BANNED STATE - PERMANENT BLOCK =====
   if (isBanned) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{
           backgroundColor: "#fee2e2",
-          border: "2px solid #ef4444",
-          borderRadius: "8px",
-          padding: "20px",
-          textAlign: "center"
+          border: "3px solid #dc2626",
+          borderRadius: "12px",
+          padding: "30px 20px",
+          textAlign: "center",
+          boxShadow: "0 10px 40px rgba(220, 38, 38, 0.2)"
         }}>
-          <div style={{ fontSize: "48px", marginBottom: "10px" }}>🚫</div>
+          <div style={{ fontSize: "64px", marginBottom: "16px" }}>🚫</div>
           <h3 style={{
-            fontSize: "24px",
+            fontSize: "28px",
             fontWeight: 700,
+            color: "#991b1b",
+            fontFamily: FONT_FAMILY,
+            marginBottom: "12px"
+          }}>
+            AKUN ANDA TELAH DIBANNED PERMANEN
+          </h3>
+          <div style={{
+            backgroundColor: "#fecaca",
+            borderRadius: "8px",
+            padding: "12px 16px",
+            marginBottom: "12px",
+            display: "inline-block"
+          }}>
+            <p style={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#991b1b",
+              fontFamily: FONT_FAMILY,
+              margin: 0
+            }}>
+              🚨 {banReason || 'Melanggar ketentuan layanan'}
+            </p>
+            {banKeyword && (
+              <p style={{
+                fontSize: "12px",
+                color: "#991b1b",
+                fontFamily: FONT_FAMILY,
+                margin: "4px 0 0 0",
+                opacity: 0.8
+              }}>
+                Keyword: "{banKeyword}"
+              </p>
+            )}
+          </div>
+          <p style={{
+            fontSize: "14px",
             color: "#991b1b",
             fontFamily: FONT_FAMILY,
             marginBottom: "8px"
           }}>
-            AKUN ANDA TELAH DIBANNED
-          </h3>
+            ❌ Anda TIDAK DAPAT membuat ticket baru
+          </p>
           <p style={{
             fontSize: "14px",
             color: "#991b1b",
-            fontFamily: FONT_FAMILY
+            fontFamily: FONT_FAMILY,
+            marginBottom: "8px"
           }}>
-            Alasan: {banReason}
+            ❌ Anda TIDAK DAPAT mengirim pesan
+          </p>
+          <p style={{
+            fontSize: "14px",
+            color: "#991b1b",
+            fontFamily: FONT_FAMILY,
+            marginBottom: "8px"
+          }}>
+            ❌ Anda TIDAK DAPAT mengakses Live Chat
           </p>
           <p style={{
             fontSize: "12px",
             color: "#991b1b",
             fontFamily: FONT_FAMILY,
-            marginTop: "8px"
+            marginTop: "12px",
+            opacity: 0.7
           }}>
-            Anda tidak dapat membuat ticket baru atau mengirim pesan.
+            ⏱️ Ban ini bersifat PERMANEN dan tidak dapat dibatalkan secara otomatis.
             <br />
             Silakan hubungi admin untuk informasi lebih lanjut.
           </p>
           <button
             onClick={handleLogout}
             style={{
-              marginTop: "16px",
-              padding: "8px 24px",
-              backgroundColor: "#ef4444",
+              marginTop: "20px",
+              padding: "10px 32px",
+              backgroundColor: "#dc2626",
               color: "#fff",
               border: "none",
-              borderRadius: "5px",
-              fontSize: "14px",
-              fontWeight: 500,
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontWeight: 600,
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
+              transition: "background 0.2s ease",
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#b91c1c"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#dc2626"}
           >
             Logout
           </button>
@@ -3086,7 +3019,6 @@ export default function HomePage(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
-          {/* Foto Kiri */}
           <div
             style={{
               position: "absolute",
@@ -3110,7 +3042,6 @@ export default function HomePage(): React.JSX.Element {
             />
           </div>
 
-          {/* Foto Kanan */}
           <div
             style={{
               position: "absolute",
@@ -3281,7 +3212,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text - 450px, left aligned */}
         <div
           ref={menuruFooterRef}
           style={{
