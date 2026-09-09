@@ -272,14 +272,14 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: '' };
 }
 
-// ===== BAN USER PERMANEN - FIXED =====
+// ===== BAN USER PERMANEN - TIDAK HAPUS TICKET =====
 async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   
   try {
     const now = new Date().toISOString();
     
-    // 1. Simpan ke bot_blocks - TANPA serverTimestamp() di ARRAY
+    // 1. Simpan ke bot_blocks
     const botRef = doc(db, "bot_blocks", userId);
     await setDoc(botRef, {
       userId,
@@ -304,7 +304,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       lastViolation: now
     });
     
-    // 2. Update user status - PAKAI serverTimestamp() untuk field biasa
+    // 2. Update user status
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       botBlocked: true,
@@ -315,19 +315,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       canSendMessage: false
     });
     
-    // 3. HAPUS SEMUA TICKET USER
-    const ticketsSnap = await getDocs(
-      query(collection(db, "livechat_tickets"), where("userId", "==", userId))
-    );
-    
-    const batch = writeBatch(db);
-    ticketsSnap.forEach((ticketDoc) => {
-      batch.delete(ticketDoc.ref);
-    });
-    await batch.commit();
-    console.log(`🗑️ Semua ticket user ${userName} telah dihapus`);
-    
-    // 4. Simpan log - TANPA serverTimestamp() di ARRAY
+    // 3. Simpan log - TIDAK HAPUS TICKET
     await addDoc(collection(db, "bot_violations_log"), {
       userId,
       userEmail,
@@ -345,7 +333,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
     });
     
     console.log(`✅ User ${userName} (${userId}) telah dibanned permanen. Alasan: ${reason}`);
-    console.log(`🗑️ Semua ticket user telah dihapus dari database`);
+    console.log(`📌 Ticket user tetap tersimpan di database`);
   } catch (error) {
     console.error("Error banning user:", error);
   }
@@ -368,7 +356,6 @@ async function checkBanStatus(userId: string): Promise<{
   };
   
   try {
-    // CEK DI bot_blocks
     const botRef = doc(db, "bot_blocks", userId);
     const botDoc = await getDoc(botRef);
     
@@ -383,7 +370,6 @@ async function checkBanStatus(userId: string): Promise<{
       };
     }
     
-    // CEK DI users
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
     if (userDoc.exists()) {
@@ -662,7 +648,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
+          setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
           console.log('🚫 User ini BANNED dari database');
         } else {
           setIsBanned(false);
@@ -693,7 +679,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
+        setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
         return true;
       }
       return false;
@@ -817,17 +803,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, isMounted]);
 
-  // ===== QUERY TICKET DENGAN FILTER BAN =====
+  // ===== QUERY TICKET - TAMPILKAN SEMUA TERMASUK ANNOUNCEMENT & BROADCAST =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     
-    // JIKA USER BANNED, TIDAK AMBIL TICKET
-    if (isBanned) {
-      setTickets([]);
-      setSelectedTicket(null);
-      setMessages([]);
-      return;
-    }
+    // JIKA USER BANNED, TETAP TAMPILKAN TICKET (TAPI TIDAK BISA CHAT)
+    // TAPI UNTUK USER BANNED, KITA TETAP TAMPILKAN TICKET DI LIST
     
     let q;
     if (isAdmin) {
@@ -844,13 +825,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       const ticketList: Ticket[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (!isAdmin && (data.isAnnouncement || data.isBroadcast)) {
-          if (data.userId === user.uid) {
-            ticketList.push({ id: doc.id, ...data } as Ticket);
-          }
-        } else {
-          ticketList.push({ id: doc.id, ...data } as Ticket);
-        }
+        // TAMPILKAN SEMUA TICKET TERMASUK ANNOUNCEMENT & BROADCAST
+        ticketList.push({ id: doc.id, ...data } as Ticket);
       });
       setTickets(ticketList);
       if (selectedTicket) {
@@ -862,7 +838,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted, isBanned]);
+  }, [db, user, isAdmin, selectedTicket, isMounted]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
@@ -903,7 +879,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   useEffect(() => {
-    if (!user || isAdmin || !isMounted || isBanned) return;
+    if (!user || isAdmin || !isMounted) return;
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
@@ -914,7 +890,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted, isBanned]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -944,16 +920,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
     
-    // CEK BAN DARI DATABASE
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
       setShowStartChat(false);
       return;
     }
     
-    // CEK FLAG canCreateTicket
     if (!canCreateTicket) {
-      setBanMessage(`🚫 Anda tidak memiliki izin untuk membuat ticket baru.`);
+      setBanMessage(`ANDA TIDAK MEMILIKI IZIN UNTUK MEMBUAT TICKET BARU`);
       return;
     }
     
@@ -1010,21 +984,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     
-    // CEK BAN DARI DATABASE
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
       setMessageText("");
       return;
     }
     
-    // CEK FLAG canSendMessage
     if (!canSendMessage) {
-      setBanMessage(`🚫 Anda tidak memiliki izin untuk mengirim pesan.`);
+      setBanMessage(`ANDA TIDAK MEMILIKI IZIN UNTUK MENGIRIM PESAN`);
       setMessageText("");
       return;
     }
     
-    // CEK KONTEN TERLARANG
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
       await banUserPermanent(
@@ -1039,7 +1010,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${checkResult.reason}\n\nPesan yang dikirim: "${messageText}"\n\nHubungi admin untuk informasi lebih lanjut.`);
+      setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${checkResult.reason}\n\nPesan yang dikirim: "${messageText}"`);
       setMessageText("");
       
       const status = await checkBanStatus(user.uid);
@@ -1048,7 +1019,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
+        setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
       }
       
       return;
@@ -1169,7 +1140,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           color: "#666",
           fontFamily: FONT_FAMILY,
         }}>
-          🔍 Memeriksa status akun...
+          Memeriksa status akun...
         </div>
       </div>
     );
@@ -1282,53 +1253,69 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </button>
           </div>
           
+          {/* DESIGN BANNED - TANPA ICON, TANPA HOVER, TANPA BG TAMBAHAN, TEKS BIRU 50px */}
           <div style={{
-            backgroundColor: "#fee2e2",
-            color: "#991b1b",
-            padding: "16px 20px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            marginBottom: "10px",
+            color: "#0D3CFC",
+            fontSize: "50px",
+            fontWeight: 700,
             fontFamily: FONT_FAMILY,
-            border: "2px solid #ef4444",
-            whiteSpace: "pre-line",
+            lineHeight: 1.2,
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
           }}>
-            {banMessage || "🚫 AKUN ANDA TELAH DIBANNED PERMANEN!"}
+            AKUN ANDA TELAH DIBANNED PERMANEN
+          </div>
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "22px",
+            fontWeight: 400,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "6px",
+          }}>
+            ALASAN: {banReason || "AKTIVITAS MENCURIGAKAN"}
+          </div>
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "18px",
+            fontWeight: 300,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "20px",
+          }}>
+            ANDA TIDAK DAPAT MENGGUNAKAN LIVE CHAT AGENT
           </div>
           
           <div style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            marginBottom: "10px",
+            marginBottom: "16px",
           }}>
             <PulsingDots active={agentOnline} />
-            <span style={{ fontSize: "12px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
+            <span style={{ fontSize: "14px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
               {agentOnline ? "Agent Online" : "Agent Offline"}
             </span>
           </div>
           
           <div style={{
-            padding: "20px",
-            backgroundColor: "#f3f4f6",
-            borderRadius: "8px",
-            textAlign: "center",
+            color: "#0D3CFC",
+            fontSize: "16px",
+            fontWeight: 400,
             fontFamily: FONT_FAMILY,
           }}>
-            <div style={{ fontSize: "48px", marginBottom: "8px" }}>🚫</div>
-            <div style={{ fontSize: "16px", fontWeight: 600, color: "#1f2937" }}>
-              AKUN TELAH DIBANNED
-            </div>
-            <div style={{ fontSize: "13px", color: "#6b7280", marginTop: "4px" }}>
-              Anda tidak dapat menggunakan Live Chat Agent
-            </div>
-            <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
-              Alasan: {banReason || "Aktivitas mencurigakan"}
-            </div>
-            <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "4px" }}>
-              {!canCreateTicket && "❌ Tidak dapat membuat ticket baru"}
-              {!canSendMessage && " ❌ Tidak dapat mengirim pesan"}
-            </div>
+            {!canCreateTicket && "TIDAK DAPAT MEMBUAT TICKET BARU"}
+            {!canSendMessage && "  TIDAK DAPAT MENGIRIM PESAN"}
+          </div>
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "14px",
+            fontWeight: 300,
+            fontFamily: FONT_FAMILY,
+            marginTop: "20px",
+          }}>
+            HUBUNGI ADMIN UNTUK INFORMASI LEBIH LANJUT
           </div>
         </div>
       );
@@ -1376,16 +1363,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           
           {banMessage && (
             <div style={{
-              backgroundColor: "#fef3c7",
-              color: "#92400e",
-              padding: "8px 12px",
-              borderRadius: "5px",
-              fontSize: "12px",
-              marginBottom: "10px",
+              color: "#0D3CFC",
+              fontSize: "20px",
+              fontWeight: 500,
               fontFamily: FONT_FAMILY,
-              border: "1px solid #f59e0b",
+              marginBottom: "10px",
             }}>
-              ⚠️ {banMessage}
+              {banMessage}
             </div>
           )}
           
@@ -1466,15 +1450,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           
           {banMessage && (
             <div style={{
-              backgroundColor: "#fef3c7",
-              color: "#92400e",
-              padding: "8px 12px",
-              borderRadius: "5px",
-              fontSize: "12px",
-              marginBottom: "10px",
+              color: "#0D3CFC",
+              fontSize: "20px",
+              fontWeight: 500,
               fontFamily: FONT_FAMILY,
+              marginBottom: "10px",
             }}>
-              ⚠️ {banMessage}
+              {banMessage}
             </div>
           )}
           
@@ -1590,16 +1572,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
         {banMessage && (
           <div style={{
-            backgroundColor: "#fef3c7",
-            color: "#92400e",
-            padding: "8px 12px",
-            borderRadius: "5px",
-            fontSize: "12px",
-            marginBottom: "10px",
+            color: "#0D3CFC",
+            fontSize: "20px",
+            fontWeight: 500,
             fontFamily: FONT_FAMILY,
-            border: "1px solid #f59e0b",
+            marginBottom: "10px",
           }}>
-            ⚠️ {banMessage}
+            {banMessage}
           </div>
         )}
 
