@@ -272,48 +272,50 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: '' };
 }
 
-// ===== BAN USER PERMANEN - DENGAN BLOKIR DATABASE =====
+// ===== BAN USER PERMANEN - FIXED =====
 async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   
   try {
-    // 1. Simpan ke bot_blocks
+    const now = new Date().toISOString();
+    
+    // 1. Simpan ke bot_blocks - TANPA serverTimestamp() di ARRAY
     const botRef = doc(db, "bot_blocks", userId);
     await setDoc(botRef, {
       userId,
       userEmail,
       userName,
       isBlocked: true,
-      blockedAt: serverTimestamp(),
+      blockedAt: now,
       blockedReason: reason,
       blockedMessage: message,
-      canCreateTicket: false,  // ← TAMBAHKAN FLAG INI
-      canSendMessage: false,   // ← TAMBAHKAN FLAG INI
+      canCreateTicket: false,
+      canSendMessage: false,
       violations: [{
         type: 'BANNED',
         reason: reason,
-        timestamp: serverTimestamp(),
+        timestamp: now,
         message: message,
         confidence: 100
       }],
       totalViolations: 1,
       warningCount: 0,
-      firstViolation: serverTimestamp(),
-      lastViolation: serverTimestamp()
+      firstViolation: now,
+      lastViolation: now
     });
     
-    // 2. Update user status
+    // 2. Update user status - PAKAI serverTimestamp() untuk field biasa
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       botBlocked: true,
       botBlockedAt: serverTimestamp(),
       botBlockedReason: reason,
       botBlockedMessage: message,
-      canCreateTicket: false,  // ← TAMBAHKAN FLAG INI
-      canSendMessage: false    // ← TAMBAHKAN FLAG INI
+      canCreateTicket: false,
+      canSendMessage: false
     });
     
-    // 3. HAPUS SEMUA TICKET USER YANG SEDANG AKTIF
+    // 3. HAPUS SEMUA TICKET USER
     const ticketsSnap = await getDocs(
       query(collection(db, "livechat_tickets"), where("userId", "==", userId))
     );
@@ -325,7 +327,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
     await batch.commit();
     console.log(`🗑️ Semua ticket user ${userName} telah dihapus`);
     
-    // 4. Simpan log
+    // 4. Simpan log - TANPA serverTimestamp() di ARRAY
     await addDoc(collection(db, "bot_violations_log"), {
       userId,
       userEmail,
@@ -333,7 +335,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       violation: {
         type: 'BANNED',
         reason: reason,
-        timestamp: serverTimestamp(),
+        timestamp: now,
         message: message,
         confidence: 100
       },
@@ -349,7 +351,7 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
   }
 }
 
-// ===== CEK STATUS BAN - CEK FLAG DATABASE =====
+// ===== CEK STATUS BAN =====
 async function checkBanStatus(userId: string): Promise<{ 
   isBanned: boolean; 
   reason: string; 
