@@ -5,11 +5,27 @@ import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDocs, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc, 
+  addDoc, 
+  serverTimestamp, 
+  orderBy, 
+  getDocs, 
+  setDoc, 
+  getDoc, 
+  deleteDoc,
+  runTransaction,
+  writeBatch
+} from "firebase/firestore";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import Image from 'next/image';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -167,9 +183,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ANTI-BOT - DIRECT BAN (NO SCORE, NO WARNING) =====
-
-// Daftar kata kunci yang akan langsung BAN
+// ===== ANTI-BOT - DIRECT BAN =====
 const BAN_KEYWORDS = {
   JUDOL: [
     'judi', 'slot', 'poker', 'casino', 'roulette', 'blackjack', 'baccarat',
@@ -258,11 +272,12 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: '' };
 }
 
-// ===== BAN USER PERMANEN =====
+// ===== BAN USER PERMANEN - DENGAN BLOKIR DATABASE =====
 async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   
   try {
+    // 1. Simpan ke bot_blocks
     const botRef = doc(db, "bot_blocks", userId);
     await setDoc(botRef, {
       userId,
@@ -272,6 +287,8 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       blockedAt: serverTimestamp(),
       blockedReason: reason,
       blockedMessage: message,
+      canCreateTicket: false,  // ← TAMBAHKAN FLAG INI
+      canSendMessage: false,   // ← TAMBAHKAN FLAG INI
       violations: [{
         type: 'BANNED',
         reason: reason,
@@ -285,14 +302,30 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       lastViolation: serverTimestamp()
     });
     
+    // 2. Update user status
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       botBlocked: true,
       botBlockedAt: serverTimestamp(),
       botBlockedReason: reason,
-      botBlockedMessage: message
+      botBlockedMessage: message,
+      canCreateTicket: false,  // ← TAMBAHKAN FLAG INI
+      canSendMessage: false    // ← TAMBAHKAN FLAG INI
     });
     
+    // 3. HAPUS SEMUA TICKET USER YANG SEDANG AKTIF
+    const ticketsSnap = await getDocs(
+      query(collection(db, "livechat_tickets"), where("userId", "==", userId))
+    );
+    
+    const batch = writeBatch(db);
+    ticketsSnap.forEach((ticketDoc) => {
+      batch.delete(ticketDoc.ref);
+    });
+    await batch.commit();
+    console.log(`🗑️ Semua ticket user ${userName} telah dihapus`);
+    
+    // 4. Simpan log
     await addDoc(collection(db, "bot_violations_log"), {
       userId,
       userEmail,
@@ -310,16 +343,30 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
     });
     
     console.log(`✅ User ${userName} (${userId}) telah dibanned permanen. Alasan: ${reason}`);
+    console.log(`🗑️ Semua ticket user telah dihapus dari database`);
   } catch (error) {
     console.error("Error banning user:", error);
   }
 }
 
-// ===== CEK STATUS BAN - REAL TIME =====
-async function checkBanStatus(userId: string): Promise<{ isBanned: boolean; reason: string; message: string }> {
-  if (!db) return { isBanned: false, reason: '', message: '' };
+// ===== CEK STATUS BAN - CEK FLAG DATABASE =====
+async function checkBanStatus(userId: string): Promise<{ 
+  isBanned: boolean; 
+  reason: string; 
+  message: string;
+  canCreateTicket: boolean;
+  canSendMessage: boolean;
+}> {
+  if (!db) return { 
+    isBanned: false, 
+    reason: '', 
+    message: '',
+    canCreateTicket: true,
+    canSendMessage: true
+  };
   
   try {
+    // CEK DI bot_blocks
     const botRef = doc(db, "bot_blocks", userId);
     const botDoc = await getDoc(botRef);
     
@@ -328,11 +375,13 @@ async function checkBanStatus(userId: string): Promise<{ isBanned: boolean; reas
       return {
         isBanned: data.isBlocked || false,
         reason: data.blockedReason || '',
-        message: data.blockedMessage || ''
+        message: data.blockedMessage || '',
+        canCreateTicket: data.canCreateTicket !== false,
+        canSendMessage: data.canSendMessage !== false
       };
     }
     
-    // CEK JUGA DI COLLECTION USERS
+    // CEK DI users
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
     if (userDoc.exists()) {
@@ -341,15 +390,29 @@ async function checkBanStatus(userId: string): Promise<{ isBanned: boolean; reas
         return {
           isBanned: true,
           reason: userData.botBlockedReason || 'Diblokir oleh sistem',
-          message: userData.botBlockedMessage || ''
+          message: userData.botBlockedMessage || '',
+          canCreateTicket: userData.canCreateTicket !== false,
+          canSendMessage: userData.canSendMessage !== false
         };
       }
     }
     
-    return { isBanned: false, reason: '', message: '' };
+    return { 
+      isBanned: false, 
+      reason: '', 
+      message: '',
+      canCreateTicket: true,
+      canSendMessage: true
+    };
   } catch (error) {
     console.error("Error checking ban status:", error);
-    return { isBanned: false, reason: '', message: '' };
+    return { 
+      isBanned: false, 
+      reason: '', 
+      message: '',
+      canCreateTicket: true,
+      canSendMessage: true
+    };
   }
 }
 
@@ -552,7 +615,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const [isBanned, setIsBanned] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
-  const [checkingBan, setCheckingBan] = useState(true); // LOADING STATE
+  const [checkingBan, setCheckingBan] = useState(true);
+  const [canCreateTicket, setCanCreateTicket] = useState(true);
+  const [canSendMessage, setCanSendMessage] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -577,7 +642,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     });
   }, []);
 
-  // ===== CEK STATUS BAN - SETIAP KALI USER LOGIN =====
+  // ===== CEK STATUS BAN DARI DATABASE =====
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -588,16 +653,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setCheckingBan(true);
       try {
         const status = await checkBanStatus(user.uid);
-        console.log('🔍 Cek status ban untuk user:', user.uid, status);
+        console.log('🔍 Cek status ban dari database:', status);
         
         if (status.isBanned) {
           setIsBanned(true);
           setBanReason(status.reason);
+          setCanCreateTicket(status.canCreateTicket);
+          setCanSendMessage(status.canSendMessage);
           setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
-          console.log('🚫 User ini BANNED:', status.reason);
+          console.log('🚫 User ini BANNED dari database');
         } else {
           setIsBanned(false);
           setBanReason("");
+          setCanCreateTicket(true);
+          setCanSendMessage(true);
           setBanMessage(null);
           console.log('✅ User ini AMAN (tidak banned)');
         }
@@ -611,7 +680,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     checkBan();
   }, [user, isMounted]);
 
-  // ===== CEK BAN SETIAP KALI USER MAU CHAT =====
+  // ===== CEK BAN SEBELUM AKSI =====
   const checkBanBeforeAction = async (): Promise<boolean> => {
     if (!user) return true;
     
@@ -620,10 +689,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       if (status.isBanned) {
         setIsBanned(true);
         setBanReason(status.reason);
+        setCanCreateTicket(status.canCreateTicket);
+        setCanSendMessage(status.canSendMessage);
         setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
-        return true; // BANNED
+        return true;
       }
-      return false; // AMAN
+      return false;
     } catch (error) {
       console.error('Error checking ban before action:', error);
       return false;
@@ -744,8 +815,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, isMounted]);
 
+  // ===== QUERY TICKET DENGAN FILTER BAN =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
+    
+    // JIKA USER BANNED, TIDAK AMBIL TICKET
+    if (isBanned) {
+      setTickets([]);
+      setSelectedTicket(null);
+      setMessages([]);
+      return;
+    }
+    
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -756,6 +837,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         orderBy("createdAt", "desc")
       );
     }
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const ticketList: Ticket[] = [];
       snapshot.forEach((doc) => {
@@ -778,7 +860,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted]);
+  }, [db, user, isAdmin, selectedTicket, isMounted, isBanned]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
@@ -819,7 +901,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   useEffect(() => {
-    if (!user || isAdmin || !isMounted) return;
+    if (!user || isAdmin || !isMounted || isBanned) return;
     const userTickets = tickets.filter(t => t.userId === user.uid);
     const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
     if (activeTicket) {
@@ -830,12 +912,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setSelectedTicket(null);
       setMessages([]);
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted, isBanned]);
 
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
-    if (!selectedTicket || !user || !db) return;
+    if (!selectedTicket || !user || !db || isBanned) return;
     const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
     if (value.length > 0) {
       await updateDoc(ticketRef, {
@@ -856,14 +938,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }, 2000);
   };
 
-  // ===== START CHAT - CEK BAN =====
+  // ===== START CHAT - CEK BAN & FLAG DATABASE =====
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
     
-    // CEK BAN SEBELUM MEMBUAT TICKET
+    // CEK BAN DARI DATABASE
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
       setShowStartChat(false);
+      return;
+    }
+    
+    // CEK FLAG canCreateTicket
+    if (!canCreateTicket) {
+      setBanMessage(`🚫 Anda tidak memiliki izin untuk membuat ticket baru.`);
       return;
     }
     
@@ -916,18 +1004,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== SEND MESSAGE - CEK BAN =====
+  // ===== SEND MESSAGE - CEK BAN & FLAG DATABASE =====
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     
-    // CEK BAN SEBELUM MENGIRIM PESAN
+    // CEK BAN DARI DATABASE
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
       setMessageText("");
       return;
     }
     
-    // CEK KONTEN TERLARANG - LANGSUNG BAN
+    // CEK FLAG canSendMessage
+    if (!canSendMessage) {
+      setBanMessage(`🚫 Anda tidak memiliki izin untuk mengirim pesan.`);
+      setMessageText("");
+      return;
+    }
+    
+    // CEK KONTEN TERLARANG
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
       await banUserPermanent(
@@ -940,14 +1035,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       
       setIsBanned(true);
       setBanReason(checkResult.reason);
+      setCanCreateTicket(false);
+      setCanSendMessage(false);
       setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${checkResult.reason}\n\nPesan yang dikirim: "${messageText}"\n\nHubungi admin untuk informasi lebih lanjut.`);
       setMessageText("");
       
-      // CEK ULANG STATUS
       const status = await checkBanStatus(user.uid);
       if (status.isBanned) {
         setIsBanned(true);
         setBanReason(status.reason);
+        setCanCreateTicket(status.canCreateTicket);
+        setCanSendMessage(status.canSendMessage);
         setBanMessage(`🚫 AKUN ANDA TELAH DIBANNED PERMANEN!\n\nAlasan: ${status.reason}\n\nHubungi admin untuk informasi lebih lanjut.`);
       }
       
@@ -1144,9 +1242,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // USER VIEW
   if (!isAdmin) {
-    const userTickets = tickets.filter(t => t.userId === user.uid);
-    const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
-
     // ===== USER BANNED - TAMPILKAN PESAN BAN =====
     if (isBanned) {
       return (
@@ -1212,7 +1307,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
           
           <div style={{
-            padding: "16px",
+            padding: "20px",
             backgroundColor: "#f3f4f6",
             borderRadius: "8px",
             textAlign: "center",
@@ -1228,12 +1323,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
               Alasan: {banReason || "Aktivitas mencurigakan"}
             </div>
+            <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "4px" }}>
+              {!canCreateTicket && "❌ Tidak dapat membuat ticket baru"}
+              {!canSendMessage && " ❌ Tidak dapat mengirim pesan"}
+            </div>
           </div>
         </div>
       );
     }
 
-    // ===== USER TIDAK BANNED - TAMPILKAN NORMAL =====
+    const userTickets = tickets.filter(t => t.userId === user.uid);
+    const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
+
     if (userTickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
