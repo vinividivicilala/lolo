@@ -409,6 +409,34 @@ const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number, colo
   </svg>
 );
 
+const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5"/>
+    <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number, color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5"/>
+    <path d="M12 8V12" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="12" cy="16" r="1" fill={color}/>
+  </svg>
+);
+
 // Footer links
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -447,6 +475,7 @@ interface ChatMessage {
   read: boolean;
   isEncrypted?: boolean;
   isBotDetected?: boolean;
+  deliveryStatus?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
 const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
@@ -818,7 +847,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         timestamp: serverTimestamp(),
         read: false,
         isEncrypted: true,
-        isBotDetected: false
+        isBotDetected: false,
+        deliveryStatus: "sent"
       });
       
       setSelectedTopic("");
@@ -902,7 +932,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         timestamp: serverTimestamp(),
         read: false,
         isEncrypted: true,
-        isBotDetected: false
+        isBotDetected: false,
+        deliveryStatus: "sent"
       });
       
       await updateDoc(ticketRef, {
@@ -954,6 +985,46 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Someone";
     return `${name} is typing...`;
+  };
+
+  // ===== RENDER DELIVERY STATUS =====
+  const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
+    if (!isMine) return null;
+    
+    let label = "Sent";
+    let icon = <CheckIcon size={11} color="rgba(255,255,255,0.7)" />;
+    
+    if (msg.read) {
+      label = "Read";
+      icon = <DoubleCheckIcon size={11} color="#60a5fa" />;
+    } else if (msg.deliveryStatus === 'delivered') {
+      label = "Delivered";
+      icon = <DoubleCheckIcon size={11} color="rgba(255,255,255,0.7)" />;
+    } else if (msg.deliveryStatus === 'sending') {
+      label = "Sending";
+      icon = <ClockIcon size={11} color="rgba(255,255,255,0.7)" />;
+    } else if (msg.deliveryStatus === 'failed') {
+      label = "Failed";
+      icon = <ErrorIcon size={11} color="#ef4444" />;
+    } else {
+      label = "Sent";
+      icon = <CheckIcon size={11} color="rgba(255,255,255,0.7)" />;
+    }
+    
+    return (
+      <span style={{ 
+        display: "inline-flex", 
+        alignItems: "center", 
+        gap: "3px",
+        fontSize: "10px",
+        color: msg.deliveryStatus === 'failed' ? "#ef4444" : "rgba(255,255,255,0.7)",
+        fontFamily: FONT_FAMILY,
+        fontWeight: 500,
+      }}>
+        {label}
+        {icon}
+      </span>
+    );
   };
 
   const handleLogout = async () => {
@@ -1701,7 +1772,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     ) : (
                       messages.map((msg, idx) => {
                         const isMine = msg.senderId === user.uid;
-                        const isUnread = !isMine && !msg.read;
                         return (
                           <div
                             key={idx}
@@ -1710,21 +1780,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                               maxWidth: "70%",
                             }}
                           >
-                            {isUnread && (
-                              <div style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "#fff",
-                                backgroundColor: "#ef4444",
-                                display: "inline-block",
-                                padding: "3px 10px",
-                                borderRadius: "6px",
-                                marginBottom: "4px",
-                                fontFamily: FONT_FAMILY,
-                              }}>
-                                New message
-                              </div>
-                            )}
                             <div
                               style={{
                                 padding: "12px 16px",
@@ -1743,12 +1798,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                               )}
                               <div>{msg.text}</div>
                               <div style={{ 
-                                fontSize: "10px", 
-                                color: isMine ? "rgba(255,255,255,0.7)" : "#999", 
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                gap: "6px",
                                 marginTop: "5px",
-                                textAlign: "right",
                               }}>
-                                {formatTime(msg.timestamp)}
+                                {renderDeliveryStatus(msg, isMine)}
+                                <span style={{ 
+                                  fontSize: "10px", 
+                                  color: isMine ? "rgba(255,255,255,0.7)" : "#999",
+                                }}>
+                                  {formatTime(msg.timestamp)}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -2210,7 +2272,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
-                      const isUnread = !isMine && !msg.read;
                       return (
                         <div
                           key={idx}
@@ -2219,21 +2280,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                             maxWidth: "70%",
                           }}
                         >
-                          {isUnread && (
-                            <div style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              color: "#fff",
-                              backgroundColor: "#ef4444",
-                              display: "inline-block",
-                              padding: "3px 10px",
-                              borderRadius: "6px",
-                              marginBottom: "4px",
-                              fontFamily: FONT_FAMILY,
-                            }}>
-                              New message
-                            </div>
-                          )}
                           <div
                             style={{
                               padding: "12px 16px",
@@ -2252,12 +2298,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                             )}
                             <div>{msg.text}</div>
                             <div style={{ 
-                              fontSize: "10px", 
-                              color: isMine ? "rgba(255,255,255,0.7)" : "#999", 
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              gap: "6px",
                               marginTop: "5px",
-                              textAlign: "right",
                             }}>
-                              {formatTime(msg.timestamp)}
+                              {renderDeliveryStatus(msg, isMine)}
+                              <span style={{ 
+                                fontSize: "10px", 
+                                color: isMine ? "rgba(255,255,255,0.7)" : "#999",
+                              }}>
+                                {formatTime(msg.timestamp)}
+                              </span>
                             </div>
                           </div>
                         </div>
