@@ -640,7 +640,7 @@ const LiveChatAgent = ({
     }
   };
 
-  // ===== REALTIME ONLINE AGENTS (all admins) =====
+  // ===== REALTIME ONLINE AGENTS & USERS =====
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1094,7 +1094,7 @@ const LiveChatAgent = ({
     );
   };
 
-  // ===== RENDER ONLINE USERS PANEL =====
+  // ===== RENDER ONLINE PANEL =====
   const renderOnlinePanel = () => {
     const list = isAdmin ? onlineUsers : onlineAgents;
     const title = isAdmin ? "Online Users" : "Online Agents";
@@ -1241,7 +1241,9 @@ const LiveChatAgent = ({
   };
 
   // ===== RENDER PREVIEW MESSAGES (3 last messages) =====
-  const renderTicketPreview = (ticketId: string) => {
+  // forUser=true → teks biru (untuk akun user biasa)
+  // forUser=false → agent biru, user abu (untuk akun admin)
+  const renderTicketPreview = (ticketId: string, forUser: boolean = false) => {
     const previews = ticketPreviews[ticketId] || [];
     if (previews.length === 0) return null;
 
@@ -1255,7 +1257,7 @@ const LiveChatAgent = ({
             key={i}
             style={{
               fontSize: "11px",
-              color: p.isFromAgent ? "#0D3CFC" : "#555",
+              color: forUser ? "#0D3CFC" : p.isFromAgent ? "#0D3CFC" : "#555",
               fontStyle: "italic",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -1269,7 +1271,7 @@ const LiveChatAgent = ({
             <span
               style={{
                 fontWeight: 600,
-                color: p.isFromAgent ? "#0D3CFC" : "#888",
+                color: forUser ? "#0D3CFC" : p.isFromAgent ? "#0D3CFC" : "#888",
                 flexShrink: 0,
               }}
             >
@@ -2044,7 +2046,7 @@ const LiveChatAgent = ({
                 )}
               </>
             ) : (
-              // USER SIDE: ONLY THEIR OWN TICKETS
+              // USER SIDE: ONLY THEIR OWN TICKETS (preview text color = BLUE)
               <>
                 {tickets
                   .filter((t) => t.userId === user.uid)
@@ -2098,7 +2100,7 @@ const LiveChatAgent = ({
                         >
                           {ticket.topic}
                         </div>
-                        {renderTicketPreview(ticket.id)}
+                        {renderTicketPreview(ticket.id, true)}
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
                           <span
                             style={{
