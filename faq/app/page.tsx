@@ -468,11 +468,12 @@ const menuItems = [
   { name: "Note", number: "07" }
 ];
 
-// Footer links — "Live Chat Agent" dihapus dari Get in Touch (karena double dengan Product)
+// Footer links — Get in Touch tanpa Live Chat Agent (double dengan Product)
+// Attention ditambahkan: Syarat dan Ketentuan Berlaku, Tentang Kami, Terms of Use
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
-  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan", "Syarat dan Ketentuan Berlaku", "Tentang Kami", "Terms of Use"] }
 ];
 
 // ===== PULSING DOTS =====
@@ -2371,12 +2372,89 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   );
 };
 
+// ===== MENTAL SLUG PAGES (EN & ID) =====
+type SlugPage = 'home' | 'terms-id' | 'terms-en' | 'about-id' | 'about-en' | 'privacy-id' | 'privacy-en';
+
+const SLUG_CONTENT: Record<Exclude<SlugPage, 'home'>, { title: string; subtitle: string; body: string; backLabel: string }> = {
+  'terms-id': {
+    title: 'Syarat dan Ketentuan',
+    subtitle: 'Syarat dan Ketentuan Berlaku',
+    body: `Dengan mengakses dan menggunakan platform Menuru, Anda dianggap telah membaca, memahami, dan menyetujui seluruh syarat dan ketentuan yang berlaku. Platform ini disediakan untuk keperluan komunitas, catatan, donasi, dan interaksi sosial yang positif.
+
+Anda dilarang menggunakan platform ini untuk aktivitas ilegal, perjudian, phishing, penyebaran malware, atau tindakan yang merugikan pihak lain. Kami berhak menangguhkan atau menghapus akun yang melanggar ketentuan tanpa pemberitahuan terlebih dahulu.
+
+Seluruh konten yang Anda unggah tetap menjadi tanggung jawab Anda. Menuru tidak bertanggung jawab atas kerugian yang timbul akibat penyalahgunaan platform oleh pengguna lain.
+
+Ketentuan ini dapat berubah sewaktu-waktu. Perubahan akan diumumkan melalui halaman ini.`,
+    backLabel: 'Kembali ke Beranda',
+  },
+  'terms-en': {
+    title: 'Terms of Use',
+    subtitle: 'Terms and Conditions Apply',
+    body: `By accessing and using the Menuru platform, you are deemed to have read, understood, and agreed to all applicable terms and conditions. This platform is provided for community, note-taking, donation, and positive social interaction purposes.
+
+You are prohibited from using this platform for illegal activities, gambling, phishing, malware distribution, or any actions that harm others. We reserve the right to suspend or delete accounts that violate these terms without prior notice.
+
+All content you upload remains your responsibility. Menuru is not liable for any losses arising from misuse of the platform by other users.
+
+These terms may change at any time. Changes will be announced on this page.`,
+    backLabel: 'Back to Home',
+  },
+  'about-id': {
+    title: 'Tentang Kami',
+    subtitle: 'Tentang Menuru',
+    body: `Menuru adalah platform yang lahir dari semangat "Love Yourself" — sebuah ruang digital untuk mencatat ide, berbagi cerita, berdonasi, dan membangun komunitas yang saling mendukung.
+
+Kami percaya bahwa setiap orang berhak memiliki ruang aman untuk mengekspresikan diri, menemukan inspirasi, dan membantu sesama. Menuru hadir sebagai jembatan antara kreativitas, kepedulian, dan kolaborasi.
+
+Visi kami: menjadi platform komunitas yang humanis, aman, dan bermanfaat bagi banyak orang.
+Misi kami: menyediakan fitur catatan, donasi, live chat, dan blog yang mudah diakses serta bebas dari konten berbahaya.`,
+    backLabel: 'Kembali ke Beranda',
+  },
+  'about-en': {
+    title: 'About Us',
+    subtitle: 'About Menuru',
+    body: `Menuru is a platform born from the spirit of "Love Yourself" — a digital space to take notes, share stories, donate, and build a supportive community.
+
+We believe everyone deserves a safe space to express themselves, find inspiration, and help others. Menuru exists as a bridge between creativity, care, and collaboration.
+
+Our vision: to become a humane, safe, and beneficial community platform for many.
+Our mission: to provide note-taking, donation, live chat, and blog features that are easily accessible and free from harmful content.`,
+    backLabel: 'Back to Home',
+  },
+  'privacy-id': {
+    title: 'Kebijakan Privasi',
+    subtitle: 'Privasi Anda Prioritas Kami',
+    body: `Menuru menghargai privasi setiap pengguna. Kami hanya mengumpulkan data yang diperlukan untuk menjalankan layanan, seperti nama, email, dan aktivitas dasar di platform.
+
+Data Anda tidak akan dijual atau dibagikan kepada pihak ketiga tanpa izin, kecuali diwajibkan oleh hukum. Kami menggunakan enkripsi AES-256-GCM untuk melindungi pesan live chat Anda.
+
+Anda berhak meminta penghapusan data akun Anda kapan saja dengan menghubungi admin melalui fitur Contact atau Live Chat.
+
+Dengan menggunakan platform ini, Anda menyetujui praktik privasi yang dijelaskan di halaman ini.`,
+    backLabel: 'Kembali ke Beranda',
+  },
+  'privacy-en': {
+    title: 'Privacy Policy',
+    subtitle: 'Your Privacy Is Our Priority',
+    body: `Menuru respects the privacy of every user. We only collect data necessary to run the service, such as name, email, and basic activity on the platform.
+
+Your data will not be sold or shared with third parties without permission, unless required by law. We use AES-256-GCM encryption to protect your live chat messages.
+
+You have the right to request deletion of your account data at any time by contacting the admin via the Contact or Live Chat feature.
+
+By using this platform, you agree to the privacy practices described on this page.`,
+    backLabel: 'Back to Home',
+  },
+};
+
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [currentSlug, setCurrentSlug] = useState<SlugPage>('home');
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -2414,7 +2492,7 @@ export default function HomePage(): React.JSX.Element {
   }, [isMounted, loading]);
 
   useEffect(() => {
-    if (!showMain || !isMounted) return;
+    if (!showMain || !isMounted || currentSlug !== 'home') return;
 
     const menuruElement = menuruFooterRef.current;
     const menuruText = menuruTextRef.current;
@@ -2477,7 +2555,7 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showMain, isMounted]);
+  }, [showMain, isMounted, currentSlug]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -2537,6 +2615,12 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.3,
       ease: "power2.inOut"
     }, "-=0.3");
+  };
+
+  // ===== SLUG NAVIGATION =====
+  const navigateToSlug = (slug: SlugPage) => {
+    setCurrentSlug(slug);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (!isMounted || loading) {
@@ -2633,6 +2717,83 @@ export default function HomePage(): React.JSX.Element {
           </span>
         </div>
       </div>
+    );
+  }
+
+  // ===== SLUG PAGE RENDER =====
+  if (currentSlug !== 'home') {
+    const content = SLUG_CONTENT[currentSlug];
+    return (
+      <>
+        <Head>
+          <title>{content.title} | Menuru Official</title>
+          <meta name="description" content={content.subtitle} />
+        </Head>
+        <div
+          style={{
+            minHeight: "100vh",
+            backgroundColor: "#ffffff",
+            fontFamily: FONT_FAMILY,
+            padding: "120px 40px 80px 40px",
+          }}
+        >
+          <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+            <button
+              onClick={() => navigateToSlug('home')}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 18px",
+                backgroundColor: "transparent",
+                color: "#0D3CFC",
+                border: "2px solid #0D3CFC",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                marginBottom: "40px",
+              }}
+            >
+              ← {content.backLabel}
+            </button>
+            <div style={{
+              color: "#0D3CFC",
+              fontSize: "18px",
+              fontWeight: 400,
+              fontFamily: FONT_FAMILY,
+              marginBottom: "8px",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}>
+              {content.subtitle}
+            </div>
+            <h1 style={{
+              fontSize: "64px",
+              fontWeight: 700,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.1,
+              margin: 0,
+              marginBottom: "40px",
+            }}>
+              {content.title}
+            </h1>
+            <div style={{
+              fontSize: "18px",
+              fontWeight: 400,
+              color: "#333333",
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.8,
+              whiteSpace: "pre-line",
+            }}>
+              {content.body}
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -2777,6 +2938,8 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   {section.links.map((link, linkIdx) => {
+                    // ===== MENTAL SLUG ROUTING =====
+                    let onClickHandler: (() => void) | null = null;
                     let linkHref = "#";
                     let isAttention = false;
                     let isStories = false;
@@ -2790,10 +2953,19 @@ export default function HomePage(): React.JSX.Element {
                     } else if (link === "Pusat Bantuan") {
                       linkHref = "/pusat-bantuan";
                     } else if (link === "Kebijakan Privasi") {
-                      linkHref = "/privacy-policy";
+                      onClickHandler = () => navigateToSlug('privacy-id');
                       isAttention = true;
                     } else if (link === "Ketentuan Kami") {
-                      linkHref = "/terms-of-service";
+                      onClickHandler = () => navigateToSlug('terms-id');
+                      isAttention = true;
+                    } else if (link === "Syarat dan Ketentuan Berlaku") {
+                      onClickHandler = () => navigateToSlug('terms-id');
+                      isAttention = true;
+                    } else if (link === "Tentang Kami") {
+                      onClickHandler = () => navigateToSlug('about-id');
+                      isAttention = true;
+                    } else if (link === "Terms of Use") {
+                      onClickHandler = () => navigateToSlug('terms-en');
                       isAttention = true;
                     } else if (link === "Stories") {
                       linkHref = "/stories";
@@ -2823,8 +2995,9 @@ export default function HomePage(): React.JSX.Element {
                           gap: "10px",
                         }}
                       >
-                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                        {onClickHandler ? (
                           <span
+                            onClick={onClickHandler}
                             style={{
                               fontFamily: FONT_FAMILY,
                               fontSize: "20px",
@@ -2837,7 +3010,23 @@ export default function HomePage(): React.JSX.Element {
                           >
                             {link}
                           </span>
-                        </Link>
+                        ) : (
+                          <Link href={linkHref} style={{ textDecoration: "none" }}>
+                            <span
+                              style={{
+                                fontFamily: FONT_FAMILY,
+                                fontSize: "20px",
+                                fontWeight: 400,
+                                color: "#0D3CFC",
+                                letterSpacing: "-0.01em",
+                                cursor: "pointer",
+                                textTransform: "none",
+                              }}
+                            >
+                              {link}
+                            </span>
+                          </Link>
+                        )}
                         {isAttention && (
                           <span
                             style={{
@@ -2881,15 +3070,16 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text */}
+        {/* MENURU Text + Copyright */}
         <div
           ref={menuruFooterRef}
           style={{
             width: "100%",
-            padding: "20px 40px 80px 40px",
+            padding: "20px 40px 40px 40px",
             backgroundColor: "#ffffff",
             overflow: "hidden",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "flex-start",
             minHeight: "300px",
           }}
@@ -2912,6 +3102,20 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </span>
+          <div
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "14px",
+              fontWeight: 400,
+              color: "#0D3CFC",
+              letterSpacing: "0.05em",
+              marginTop: "20px",
+              textAlign: "left",
+              opacity: 0.8,
+            }}
+          >
+            2024 - 2026
+          </div>
         </div>
       </div>
 
