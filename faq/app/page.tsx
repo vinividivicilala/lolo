@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import { 
@@ -177,7 +176,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
         const encoded = encrypted.includes(':') ? encrypted.split(':')[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
       } catch {
-        return '[Pesan tidak dapat didekripsi]';
+        return '[Message cannot be decrypted]';
       }
     }
     return encrypted;
@@ -228,7 +227,7 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   
   for (const keyword of BAN_KEYWORDS.JUDOL) {
     if (lowerText.includes(keyword)) {
-      return { isBanned: true, reason: `Judi Online (${keyword})` };
+      return { isBanned: true, reason: `Online Gambling (${keyword})` };
     }
   }
   
@@ -240,24 +239,24 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   
   for (const keyword of BAN_KEYWORDS.MALICIOUS) {
     if (lowerText.includes(keyword)) {
-      return { isBanned: true, reason: `Konten Berbahaya (${keyword})` };
+      return { isBanned: true, reason: `Malicious Content (${keyword})` };
     }
   }
   
   for (const keyword of BAN_KEYWORDS.SUSPICIOUS_LINKS) {
     if (lowerText.includes(keyword)) {
-      return { isBanned: true, reason: `Link Mencurigakan (${keyword})` };
+      return { isBanned: true, reason: `Suspicious Link (${keyword})` };
     }
   }
   
   const ipPattern = /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/;
   if (ipPattern.test(lowerText)) {
-    return { isBanned: true, reason: 'IP Address mencurigakan' };
+    return { isBanned: true, reason: 'Suspicious IP Address' };
   }
   
   const repeatedNumber = /[0-9]{10,}/;
   if (repeatedNumber.test(lowerText)) {
-    return { isBanned: true, reason: 'Nomor mencurigakan (rekening/telepon)' };
+    return { isBanned: true, reason: 'Suspicious Number (bank account/phone)' };
   }
   
   const transferPatterns = [
@@ -266,7 +265,7 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   ];
   for (const pattern of transferPatterns) {
     if (pattern.test(lowerText)) {
-      return { isBanned: true, reason: 'Permintaan transfer/pembayaran' };
+      return { isBanned: true, reason: 'Transfer/Payment Request' };
     }
   }
   
@@ -330,8 +329,8 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
       isBan: true
     });
     
-    console.log(`✅ User ${userName} (${userId}) telah dibanned permanen. Alasan: ${reason}`);
-    console.log(`📌 Ticket user tetap tersimpan di database`);
+    console.log(`✅ User ${userName} (${userId}) has been permanently banned. Reason: ${reason}`);
+    console.log(`📌 User ticket remains stored in database`);
   } catch (error) {
     console.error("Error banning user:", error);
   }
@@ -375,7 +374,7 @@ async function checkBanStatus(userId: string): Promise<{
       if (userData.botBlocked === true) {
         return {
           isBanned: true,
-          reason: userData.botBlockedReason || 'Diblokir oleh sistem',
+          reason: userData.botBlockedReason || 'Blocked by system',
           message: userData.botBlockedMessage || '',
           canCreateTicket: userData.canCreateTicket !== false,
           canSendMessage: userData.canSendMessage !== false
@@ -406,7 +405,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// ===== SVG Icons =====
+// SVG Icons
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -447,157 +446,34 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// ===== TRANSLATIONS =====
-type Lang = 'id' | 'en';
+// Feature data
+const featuresData = [
+  { name: "Community" },
+  { name: "Blog" },
+  { name: "Live Chat" },
+  { name: "Live Chat Agent" },
+  { name: "Donation" },
+  { name: "Contact" },
+  { name: "Note" }
+];
 
-const T: Record<Lang, Record<string, string>> = {
-  id: {
-    'footer.getInTouch': 'Hubungi Kami',
-    'footer.product': 'Produk',
-    'footer.attention': 'Perhatian',
-    'link.contact': 'Kontak',
-    'link.instagram': 'Instagram',
-    'link.liveChat': 'Live Chat',
-    'link.shop': 'Toko',
-    'link.note': 'Catatan',
-    'link.calendar': 'Kalender',
-    'link.blog': 'Blog',
-    'link.donation': 'Donasi',
-    'link.community': 'Komunitas',
-    'link.liveChatAgent': 'Agen Live Chat',
-    'link.stories': 'Cerita',
-    'link.privacy': 'Kebijakan Privasi',
-    'link.terms': 'Ketentuan Kami',
-    'link.help': 'Pusat Bantuan',
-    'link.termsCondition': 'Syarat dan Ketentuan Berlaku',
-    'link.about': 'Tentang Kami',
-    'link.termsOfUse': 'Ketentuan Penggunaan',
-    'badge.update': 'Pembaruan',
-    'badge.new': 'Baru',
-    'chat.title': 'Agen Live Chat',
-    'chat.loginPrompt': 'Silakan login untuk menggunakan Agen Live Chat',
-    'chat.login': 'Masuk',
-    'chat.agentOnline': 'Agen Online',
-    'chat.agentOffline': 'Agen Offline',
-    'chat.online': 'Online',
-    'chat.offline': 'Offline',
-    'chat.needHelp': 'Butuh bantuan? Chat langsung dengan agen kami.',
-    'chat.startChat': 'Mulai Live Chat',
-    'chat.history': 'Riwayat Chat',
-    'chat.noChat': 'Belum ada chat',
-    'chat.newChat': '+ Chat Baru',
-    'chat.pickTopic': 'Pilih topik permasalahan Anda:',
-    'chat.selectTopic': '-- Pilih topik --',
-    'chat.start': 'Mulai Chat',
-    'chat.cancel': 'Batal',
-    'chat.waiting': 'Menunggu',
-    'chat.active': 'Aktif',
-    'chat.resolved': 'Selesai',
-    'chat.finish': 'Selesaikan',
-    'chat.typing': 'sedang mengetik...',
-    'chat.typeMessage': 'Ketik pesan...',
-    'chat.waitingAgent': 'Menunggu agen...',
-    'chat.send': 'Kirim',
-    'chat.noMessage': 'Belum ada pesan',
-    'chat.pickChat': 'Pilih chat dari daftar di kiri',
-    'chat.checkingAccount': 'Memeriksa status akun...',
-    'chat.banned': 'AKUN ANDA TELAH DIBANNED PERMANEN',
-    'chat.reason': 'ALASAN',
-    'chat.cannotUse': 'ANDA TIDAK DAPAT MENGGUNAKAN AGEN LIVE CHAT',
-    'chat.noNewTicket': 'TIDAK DAPAT MEMBUAT TIKET BARU',
-    'chat.noSendMessage': 'TIDAK DAPAT MENGIRIM PESAN',
-    'chat.contactAdmin': 'HUBUNGI ADMIN UNTUK INFORMASI LEBIH LANJUT',
-    'chat.logout': 'Keluar',
-    'chat.noIncoming': 'Tidak ada chat masuk',
-    'chat.waitingHeader': 'Menunggu',
-    'chat.activeHeader': 'Aktif',
-    'chat.resolvedHeader': 'Selesai',
-    'chat.typeReply': 'Ketik balasan...',
-    'chat.agent': 'Agen',
-    'topic.product': 'Pertanyaan tentang produk',
-    'topic.technical': 'Bantuan teknis',
-    'topic.account': 'Permasalahan akun',
-    'topic.donation': 'Donasi',
-    'topic.partnership': 'Kerjasama',
-    'topic.other': 'Lainnya',
-    'misc.language': 'Bahasa',
-    'misc.copyright': '2024 - 2026',
-  },
-  en: {
-    'footer.getInTouch': 'Get in Touch',
-    'footer.product': 'Product',
-    'footer.attention': 'Attention',
-    'link.contact': 'Contact',
-    'link.instagram': 'Instagram',
-    'link.liveChat': 'Live Chat',
-    'link.shop': 'Shop',
-    'link.note': 'Note',
-    'link.calendar': 'Calendar',
-    'link.blog': 'Blog',
-    'link.donation': 'Donation',
-    'link.community': 'Community',
-    'link.liveChatAgent': 'Live Chat Agent',
-    'link.stories': 'Stories',
-    'link.privacy': 'Privacy Policy',
-    'link.terms': 'Our Terms',
-    'link.help': 'Help Center',
-    'link.termsCondition': 'Terms and Conditions Apply',
-    'link.about': 'About Us',
-    'link.termsOfUse': 'Terms of Use',
-    'badge.update': 'Update',
-    'badge.new': 'New',
-    'chat.title': 'Live Chat Agent',
-    'chat.loginPrompt': 'Please login to use Live Chat Agent',
-    'chat.login': 'Login',
-    'chat.agentOnline': 'Agent Online',
-    'chat.agentOffline': 'Agent Offline',
-    'chat.online': 'Online',
-    'chat.offline': 'Offline',
-    'chat.needHelp': 'Need help? Chat directly with our agent.',
-    'chat.startChat': 'Start Live Chat',
-    'chat.history': 'Chat History',
-    'chat.noChat': 'No chats yet',
-    'chat.newChat': '+ New Chat',
-    'chat.pickTopic': 'Select your issue topic:',
-    'chat.selectTopic': '-- Select topic --',
-    'chat.start': 'Start Chat',
-    'chat.cancel': 'Cancel',
-    'chat.waiting': 'Waiting',
-    'chat.active': 'Active',
-    'chat.resolved': 'Resolved',
-    'chat.finish': 'Resolve',
-    'chat.typing': 'is typing...',
-    'chat.typeMessage': 'Type a message...',
-    'chat.waitingAgent': 'Waiting for agent...',
-    'chat.send': 'Send',
-    'chat.noMessage': 'No messages yet',
-    'chat.pickChat': 'Select a chat from the list on the left',
-    'chat.checkingAccount': 'Checking account status...',
-    'chat.banned': 'YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED',
-    'chat.reason': 'REASON',
-    'chat.cannotUse': 'YOU CANNOT USE LIVE CHAT AGENT',
-    'chat.noNewTicket': 'CANNOT CREATE NEW TICKET',
-    'chat.noSendMessage': 'CANNOT SEND MESSAGE',
-    'chat.contactAdmin': 'CONTACT ADMIN FOR MORE INFORMATION',
-    'chat.logout': 'Logout',
-    'chat.noIncoming': 'No incoming chats',
-    'chat.waitingHeader': 'Waiting',
-    'chat.activeHeader': 'Active',
-    'chat.resolvedHeader': 'Resolved',
-    'chat.typeReply': 'Type a reply...',
-    'chat.agent': 'Agent',
-    'topic.product': 'Product inquiry',
-    'topic.technical': 'Technical support',
-    'topic.account': 'Account issue',
-    'topic.donation': 'Donation',
-    'topic.partnership': 'Partnership',
-    'topic.other': 'Other',
-    'misc.language': 'Language',
-    'misc.copyright': '2024 - 2026',
-  },
-};
+// Menu items for drawer
+const menuItems = [
+  { name: "Community", number: "01" },
+  { name: "Blog", number: "02" },
+  { name: "Live Chat", number: "03" },
+  { name: "Live Chat Agent", number: "04" },
+  { name: "Donation", number: "05" },
+  { name: "Contact", number: "06" },
+  { name: "Note", number: "07" }
+];
 
-const TOPIC_KEYS = ['topic.product', 'topic.technical', 'topic.account', 'topic.donation', 'topic.partnership', 'topic.other'];
+// Footer links — English only, with new items in Attention
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
+  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] }
+];
 
 // ===== PULSING DOTS =====
 const PulsingDots = ({ active }: { active: boolean }) => {
@@ -711,7 +587,7 @@ interface ChatMessage {
   isBotDetected?: boolean;
 }
 
-const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boolean; db: any; auth: any; t: (key: string) => string }) => {
+const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -732,7 +608,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
 
-  const topicKeys = TOPIC_KEYS;
+  const topics = [
+    "Product Inquiry",
+    "Technical Support",
+    "Account Issues",
+    "Donation",
+    "Partnership",
+    "Other"
+  ];
 
   useEffect(() => {
     setIsMounted(true);
@@ -754,18 +637,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
       setCheckingBan(true);
       try {
         const status = await checkBanStatus(user.uid);
+        console.log('🔍 Checking ban status from database:', status);
+        
         if (status.isBanned) {
           setIsBanned(true);
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
+          setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
+          console.log('🚫 This user is BANNED from database');
         } else {
           setIsBanned(false);
           setBanReason("");
           setCanCreateTicket(true);
           setCanSendMessage(true);
           setBanMessage(null);
+          console.log('✅ This user is SAFE (not banned)');
         }
       } catch (error) {
         console.error('Error checking ban:', error);
@@ -787,7 +674,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
+        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         return true;
       }
       return false;
@@ -959,7 +846,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
             text = await decryptMessage(text);
           } catch (e) {
             console.error('Failed to decrypt message:', e);
-            text = '[Pesan terenkripsi]';
+            text = '[Encrypted message]';
           }
         }
         msgList.push({ id: doc.id, ...data, text } as ChatMessage);
@@ -1029,30 +916,29 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
     }
     
     if (!canCreateTicket) {
-      setBanMessage(t('chat.noNewTicket'));
+      setBanMessage(`YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET`);
       return;
     }
     
     if (!encryptionReady) {
-      alert("Encryption is initializing, please wait.");
+      alert("Encryption is being initialized, please wait a moment.");
       return;
     }
     
     const hasActiveTicket = tickets.some(t => t.userId === user.uid && (t.status === 'waiting' || t.status === 'active') && !t.isAnnouncement && !t.isBroadcast);
     if (hasActiveTicket) {
-      alert(t('chat.needHelp'));
+      alert("You still have an active chat with an agent. Please wait until it is finished.");
       return;
     }
     
     try {
-      const topicLabel = t(selectedTopic);
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
         userName: user.displayName || user.email || "User",
         userEmail: user.email,
         userPhoto: user.photoURL || "",
         status: "waiting",
-        topic: topicLabel,
+        topic: selectedTopic,
         createdAt: serverTimestamp(),
         unreadCount: 0,
         typing: false,
@@ -1062,7 +948,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
         isBroadcast: false
       });
       
-      const initialMessage = `Halo, saya ingin bertanya tentang: ${topicLabel}`;
+      const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -1093,7 +979,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
     }
     
     if (!canSendMessage) {
-      setBanMessage(t('chat.noSendMessage'));
+      setBanMessage(`YOU DO NOT HAVE PERMISSION TO SEND MESSAGES`);
       setMessageText("");
       return;
     }
@@ -1112,7 +998,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${checkResult.reason}`);
+      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       
       const status = await checkBanStatus(user.uid);
@@ -1121,14 +1007,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
+        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
       }
       
       return;
     }
     
     if (!encryptionReady) {
-      alert("Encryption is initializing, please wait.");
+      alert("Encryption is being initialized, please wait a moment.");
       return;
     }
     
@@ -1205,8 +1091,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
 
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
-    const name = ticket.typingUserName || "Seseorang";
-    return `${name} ${t('chat.typing')}`;
+    const name = ticket.typingUserName || "Someone";
+    return `${name} is typing...`;
   };
 
   const handleLogout = async () => {
@@ -1227,11 +1113,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
   if (checkingBan) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
-          {t('chat.title')}
+        <h3 style={{
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Live Chat Agent
         </h3>
-        <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>
-          {t('chat.checkingAccount')}
+        <div style={{
+          padding: "20px",
+          textAlign: "center",
+          color: "#666",
+          fontFamily: FONT_FAMILY,
+        }}>
+          Checking account status...
         </div>
       </div>
     );
@@ -1244,20 +1140,58 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
   if (!user) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-        <h3 ref={liveChatTitleRef} style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
-          {t('chat.title')}
+        <h3 ref={liveChatTitleRef} style={{
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          marginBottom: "12px",
+        }}>
+          Live Chat Agent
         </h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-          <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(13,60,252,0.06)", borderRadius: "10px", padding: "10px", width: "50px", height: "50px" }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          flexWrap: "wrap",
+        }}>
+          <div style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(13,60,252,0.06)",
+            borderRadius: "10px",
+            padding: "10px",
+            width: "50px",
+            height: "50px",
+          }}>
             <LiveChatIllustration />
           </div>
           <div>
-            <p style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
-              {t('chat.loginPrompt')}
+            <p style={{
+              fontSize: "13px",
+              color: "#666",
+              fontFamily: FONT_FAMILY,
+              marginBottom: "6px",
+            }}>
+              Please login to use Live Chat Agent
             </p>
             <Link href="/" style={{ textDecoration: "none" }}>
-              <button style={{ padding: "5px 16px", backgroundColor: "#0D3CFC", color: "#fff", border: "none", borderRadius: "5px", fontSize: "12px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                {t('chat.login')}
+              <button
+                style={{
+                  padding: "5px 16px",
+                  backgroundColor: "#0D3CFC",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Login
               </button>
             </Link>
           </div>
@@ -1271,71 +1205,191 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-            <h3 ref={liveChatTitleRef} style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-              {t('chat.title')}
+            <h3 ref={liveChatTitleRef} style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              margin: 0,
+            }}>
+              Live Chat Agent
             </h3>
-            <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 12px", backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "5px", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, transition: "all 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 12px",
+                backgroundColor: "transparent",
+                color: "#ef4444",
+                border: "1px solid #ef4444",
+                borderRadius: "5px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
               <LogoutIcon size={14} />
-              <span>{t('chat.logout')}</span>
+              <span>Logout</span>
             </button>
           </div>
-          <div style={{ color: "#0D3CFC", fontSize: "50px", fontWeight: 700, fontFamily: FONT_FAMILY, lineHeight: 1.2, marginBottom: "12px", letterSpacing: "-0.02em" }}>
-            {t('chat.banned')}
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "50px",
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1.2,
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
+          }}>
+            YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
           </div>
-          <div style={{ color: "#0D3CFC", fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
-            {t('chat.reason')}: {banReason || "AKTIVITAS MENCURIGAKAN"}
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "22px",
+            fontWeight: 400,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "6px",
+          }}>
+            REASON: {banReason || "SUSPICIOUS ACTIVITY"}
           </div>
-          <div style={{ color: "#0D3CFC", fontSize: "18px", fontWeight: 300, fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
-            {t('chat.cannotUse')}
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "18px",
+            fontWeight: 300,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "20px",
+          }}>
+            YOU CANNOT USE LIVE CHAT AGENT
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+          
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "16px",
+          }}>
             <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "14px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? t('chat.agentOnline') : t('chat.agentOffline')}
+              {agentOnline ? "Agent Online" : "Agent Offline"}
             </span>
           </div>
-          <div style={{ color: "#0D3CFC", fontSize: "16px", fontWeight: 400, fontFamily: FONT_FAMILY }}>
-            {!canCreateTicket && t('chat.noNewTicket')}
-            {!canSendMessage && `  ${t('chat.noSendMessage')}`}
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "16px",
+            fontWeight: 400,
+            fontFamily: FONT_FAMILY,
+          }}>
+            {!canCreateTicket && "CANNOT CREATE NEW TICKET"}
+            {!canSendMessage && "  CANNOT SEND MESSAGES"}
           </div>
-          <div style={{ color: "#0D3CFC", fontSize: "14px", fontWeight: 300, fontFamily: FONT_FAMILY, marginTop: "20px" }}>
-            {t('chat.contactAdmin')}
+          
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "14px",
+            fontWeight: 300,
+            fontFamily: FONT_FAMILY,
+            marginTop: "20px",
+          }}>
+            CONTACT ADMIN FOR FURTHER INFORMATION
           </div>
         </div>
       );
     }
 
     const userTickets = tickets.filter(t => t.userId === user.uid);
+    const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
 
     if (userTickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-            <h3 ref={liveChatTitleRef} style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-              {t('chat.title')}
+            <h3 ref={liveChatTitleRef} style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              margin: 0,
+            }}>
+              Live Chat Agent
             </h3>
-            <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 12px", backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "5px", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, transition: "all 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 12px",
+                backgroundColor: "transparent",
+                color: "#ef4444",
+                border: "1px solid #ef4444",
+                borderRadius: "5px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
               <LogoutIcon size={14} />
-              <span>{t('chat.logout')}</span>
+              <span>Logout</span>
             </button>
           </div>
+          
           {banMessage && (
-            <div style={{ color: "#0D3CFC", fontSize: "20px", fontWeight: 500, fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
+            <div style={{
+              color: "#0D3CFC",
+              fontSize: "20px",
+              fontWeight: 500,
+              fontFamily: FONT_FAMILY,
+              marginBottom: "10px",
+            }}>
               {banMessage}
             </div>
           )}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+          
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "10px",
+          }}>
             <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "12px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? t('chat.agentOnline') : t('chat.agentOffline')}
+              {agentOnline ? "Agent Online" : "Agent Offline"}
             </span>
           </div>
           <p style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
-            {t('chat.needHelp')}
+            Need help? Chat directly with our agent.
           </p>
-          <button onClick={() => setShowStartChat(true)} style={{ padding: "7px 18px", backgroundColor: "#0D3CFC", color: "#fff", border: "none", borderRadius: "5px", fontSize: "13px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}>
+          <button
+            onClick={() => setShowStartChat(true)}
+            style={{
+              padding: "7px 18px",
+              backgroundColor: "#0D3CFC",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "13px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
             <ChatIcon />
-            <span>{t('chat.startChat')}</span>
+            <span>Start Live Chat</span>
           </button>
         </div>
       );
@@ -1345,35 +1399,109 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-            <h3 ref={liveChatTitleRef} style={{ fontSize: "22px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-              {t('chat.title')}
+            <h3 ref={liveChatTitleRef} style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              margin: 0,
+            }}>
+              Live Chat Agent
             </h3>
-            <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 12px", backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "5px", fontSize: "12px", cursor: "pointer", fontFamily: FONT_FAMILY, transition: "all 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 12px",
+                backgroundColor: "transparent",
+                color: "#ef4444",
+                border: "1px solid #ef4444",
+                borderRadius: "5px",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
               <LogoutIcon size={14} />
-              <span>{t('chat.logout')}</span>
+              <span>Logout</span>
             </button>
           </div>
+          
           {banMessage && (
-            <div style={{ color: "#0D3CFC", fontSize: "20px", fontWeight: 500, fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
+            <div style={{
+              color: "#0D3CFC",
+              fontSize: "20px",
+              fontWeight: 500,
+              fontFamily: FONT_FAMILY,
+              marginBottom: "10px",
+            }}>
               {banMessage}
             </div>
           )}
+          
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-              {t('chat.pickTopic')}
+              Select your issue topic:
             </div>
-            <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "7px 10px", border: "2px solid #0D3CFC", borderRadius: "5px", fontSize: "13px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: "#fff", marginBottom: "10px", color: "#0D3CFC" }}>
-              <option value="">{t('chat.selectTopic')}</option>
-              {topicKeys.map((key) => (
-                <option key={key} value={key}>{t(key)}</option>
+            <select
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "7px 10px",
+                border: "2px solid #0D3CFC",
+                borderRadius: "5px",
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                backgroundColor: "#fff",
+                marginBottom: "10px",
+                color: "#0D3CFC",
+              }}
+            >
+              <option value="">-- Select topic --</option>
+              {topics.map((t) => (
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={startChat} disabled={!selectedTopic} style={{ padding: "5px 14px", backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "5px", fontSize: "12px", fontWeight: 500, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>
-                {t('chat.start')}
+              <button
+                onClick={startChat}
+                disabled={!selectedTopic}
+                style={{
+                  padding: "5px 14px",
+                  backgroundColor: selectedTopic ? "#0D3CFC" : "#ccc",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Start Chat
               </button>
-              <button onClick={() => setShowStartChat(false)} style={{ padding: "5px 14px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "5px", fontSize: "12px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                {t('chat.cancel')}
+              <button
+                onClick={() => setShowStartChat(false)}
+                style={{
+                  padding: "5px 14px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1px solid #ccc",
+                  borderRadius: "5px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -1384,104 +1512,310 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-          <h3 ref={liveChatTitleRef} style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>
-            {t('chat.title')}
+          <h3 ref={liveChatTitleRef} style={{
+            fontSize: "20px",
+            fontWeight: 600,
+            color: "#0D3CFC",
+            fontFamily: FONT_FAMILY,
+            margin: 0,
+          }}>
+            Live Chat Agent
           </h3>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <PulsingDots active={agentOnline} />
               <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-                {agentOnline ? t('chat.online') : t('chat.offline')}
+                {agentOnline ? "Online" : "Offline"}
               </span>
             </div>
-            <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontFamily: FONT_FAMILY, transition: "all 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "4px 10px",
+                backgroundColor: "transparent",
+                color: "#ef4444",
+                border: "1px solid #ef4444",
+                borderRadius: "4px",
+                fontSize: "11px",
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
               <LogoutIcon size={13} />
-              <span>{t('chat.logout')}</span>
+              <span>Logout</span>
             </button>
           </div>
         </div>
+
         {banMessage && (
-          <div style={{ color: "#0D3CFC", fontSize: "20px", fontWeight: 500, fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
+          <div style={{
+            color: "#0D3CFC",
+            fontSize: "20px",
+            fontWeight: 500,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "10px",
+          }}>
             {banMessage}
           </div>
         )}
-        <div style={{ display: "flex", gap: "12px", height: "450px", width: "100%", overflow: "hidden", borderRadius: "8px" }}>
-          <div style={{ width: "220px", backgroundColor: "#0D3CFC", borderRadius: "8px", padding: "10px 0", overflowY: "auto", flexShrink: 0, color: "#fff", fontFamily: FONT_FAMILY, height: "450px" }}>
-            <div style={{ padding: "0 10px 8px 10px", borderBottom: "1px solid rgba(255,255,255,0.15)", fontWeight: 600, fontSize: "11px", display: "flex", alignItems: "center", gap: "5px", color: "#fff", position: "sticky", top: 0, backgroundColor: "#0D3CFC", zIndex: 1 }}>
+
+        <div style={{ 
+          display: "flex", 
+          gap: "12px", 
+          height: "450px",
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: "8px",
+        }}>
+          <div style={{
+            width: "220px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "8px",
+            padding: "10px 0",
+            overflowY: "auto",
+            flexShrink: 0,
+            color: "#fff",
+            fontFamily: FONT_FAMILY,
+            height: "450px",
+          }}>
+            <div style={{
+              padding: "0 10px 8px 10px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              fontWeight: 600,
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              color: "#fff",
+              position: "sticky",
+              top: 0,
+              backgroundColor: "#0D3CFC",
+              zIndex: 1,
+            }}>
               <ChatIconSmall />
-              <span>{t('chat.history')}</span>
-              <span style={{ marginLeft: "auto", fontSize: "9px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "8px" }}>{tickets.filter(t => t.userId === user.uid).length}</span>
+              <span>Chat History</span>
+              <span style={{
+                marginLeft: "auto",
+                fontSize: "9px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                padding: "1px 6px",
+                borderRadius: "8px",
+              }}>{tickets.filter(t => t.userId === user.uid).length}</span>
             </div>
             <div style={{ overflowY: "auto", height: "340px" }}>
               {tickets.filter(t => t.userId === user.uid).map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
-                const statusLabel = ticket.status === 'waiting' ? t('chat.waiting') : ticket.status === 'active' ? t('chat.active') : t('chat.resolved');
-                const statusColor = ticket.status === 'waiting' ? '#fef3c7' : ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
-                const statusTextColor = ticket.status === 'waiting' ? '#92400e' : ticket.status === 'active' ? '#065f46' : '#6b7280';
+                const statusLabel = ticket.status === 'waiting' ? 'Waiting' :
+                                    ticket.status === 'active' ? 'Active' : 'Resolved';
+                const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
+                                    ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
+                const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
+                                        ticket.status === 'active' ? '#065f46' : '#6b7280';
                 return (
-                  <div key={ticket.id} onClick={() => { setSelectedTicket(ticket); setMessages([]); }} style={{ padding: "8px 10px", borderLeft: isActive ? "3px solid #fff" : "3px solid transparent", backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent", cursor: "pointer", transition: "all 0.2s ease", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>{ticket.userName}</div>
-                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>{ticket.topic}</div>
+                  <div
+                    key={ticket.id}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setMessages([]);
+                    }}
+                    style={{
+                      padding: "8px 10px",
+                      borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                      backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, fontSize: "12px", color: "#fff" }}>
+                      {ticket.userName}
+                    </div>
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>
+                      {ticket.topic}
+                    </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
-                      <span style={{ fontSize: "8px", backgroundColor: statusColor, color: statusTextColor, padding: "1px 6px", borderRadius: "8px", fontWeight: 500 }}>{statusLabel}</span>
-                      <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.4)" }}>{ticketId}</span>
-                      {ticket.isAnnouncement && (<span style={{ fontSize: "7px", color: "#fcd34d" }}>📢</span>)}
-                      {ticket.isBroadcast && (<span style={{ fontSize: "7px", color: "#60a5fa" }}>📡</span>)}
+                      <span style={{
+                        fontSize: "8px",
+                        backgroundColor: statusColor,
+                        color: statusTextColor,
+                        padding: "1px 6px",
+                        borderRadius: "8px",
+                        fontWeight: 500,
+                      }}>
+                        {statusLabel}
+                      </span>
+                      <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.4)" }}>
+                        {ticketId}
+                      </span>
+                      {ticket.isAnnouncement && (
+                        <span style={{ fontSize: "7px", color: "#fcd34d" }}>📢</span>
+                      )}
+                      {ticket.isBroadcast && (
+                        <span style={{ fontSize: "7px", color: "#60a5fa" }}>📡</span>
+                      )}
                     </div>
                   </div>
                 );
               })}
               {tickets.filter(t => t.userId === user.uid).length === 0 && (
                 <div style={{ padding: "20px 10px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>
-                  {t('chat.noChat')}
+                  No chats yet
                 </div>
               )}
             </div>
-            <div style={{ padding: "8px 10px", borderTop: "1px solid rgba(255,255,255,0.1)", position: "sticky", bottom: 0, backgroundColor: "#0D3CFC" }}>
-              <button onClick={() => setShowStartChat(true)} style={{ width: "100%", padding: "5px", backgroundColor: "rgba(255,255,255,0.15)", color: "#fff", border: "none", borderRadius: "5px", fontSize: "11px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                {t('chat.newChat')}
+            <div style={{ 
+              padding: "8px 10px", 
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: "#0D3CFC",
+            }}>
+              <button
+                onClick={() => setShowStartChat(true)}
+                style={{
+                  width: "100%",
+                  padding: "5px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                + New Chat
               </button>
             </div>
           </div>
-          <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "8px", border: "1px solid #e8e8e8", display: "flex", flexDirection: "column", overflow: "hidden", height: "450px" }}>
+
+          <div style={{
+            flex: 1,
+            backgroundColor: "#ffffff",
+            borderRadius: "8px",
+            border: "1px solid #e8e8e8",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            height: "450px",
+          }}>
             {selectedTicket ? (
               <>
-                <div style={{ padding: "8px 12px", backgroundColor: "#0D3CFC", borderBottom: "1px solid #e8e8e8", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+                <div style={{
+                  padding: "8px 12px",
+                  backgroundColor: "#0D3CFC",
+                  borderBottom: "1px solid #e8e8e8",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexShrink: 0,
+                }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "5px", fontFamily: FONT_FAMILY }}>{selectedTicket.topic}</span>
+                      <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "5px", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.topic}
+                      </span>
+                      {selectedTicket.isAnnouncement && (
+                        <span style={{ fontSize: "10px", color: "#fcd34d", marginLeft: "5px" }}>📢 Announcement</span>
+                      )}
+                      {selectedTicket.isBroadcast && (
+                        <span style={{ fontSize: "10px", color: "#60a5fa", marginLeft: "5px" }}>📡 Broadcast</span>
+                      )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                       <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.status === 'waiting' ? t('chat.waiting') : t('chat.active')}
+                        {selectedTicket.status === 'waiting' ? 'Waiting' : 'Active'}
                       </span>
                       {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                         <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                          {selectedTicket.typingUserName} {t('chat.typing')}
+                          {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
-                      <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>{generateTicketId(selectedTicket.createdAt)}</span>
+                      <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
+                        {generateTicketId(selectedTicket.createdAt)}
+                      </span>
                     </div>
                   </div>
                   {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                    <button onClick={() => resolveTicket(selectedTicket.id)} style={{ padding: "3px 8px", backgroundColor: "#22c55e", color: "#fff", border: "none", borderRadius: "4px", fontSize: "9px", cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                      {t('chat.finish')}
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "3px 8px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        fontSize: "9px",
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Resolve
                     </button>
                   )}
                 </div>
-                <div ref={chatMessagesContainerRef} style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: "4px", minHeight: 0, scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                  <style>{`.chat-messages-container::-webkit-scrollbar { display: none; }`}</style>
-                  <div className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: "4px", minHeight: 0, scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                <div 
+                  ref={chatMessagesContainerRef}
+                  style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}
+                >
+                  <style>{`
+                    .chat-messages-container::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+                  <div className="chat-messages-container" style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    minHeight: 0,
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}>
                     {messages.length === 0 ? (
-                      <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>{t('chat.noMessage')}</div>
+                      <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                        No messages yet
+                      </div>
                     ) : (
                       messages.map((msg, idx) => {
                         const isMine = msg.senderId === user.uid;
                         const isAgent = !isMine && msg.senderName === AGENT_NAME;
                         return (
-                          <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%", padding: "5px 8px", borderRadius: "6px", backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8", color: isMine ? "#fff" : "#000", fontSize: "11px", fontFamily: FONT_FAMILY, wordBreak: "break-word" }}>
+                          <div
+                            key={idx}
+                            style={{
+                              alignSelf: isMine ? "flex-end" : "flex-start",
+                              maxWidth: "75%",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                              color: isMine ? "#fff" : "#000",
+                              fontSize: "11px",
+                              fontFamily: FONT_FAMILY,
+                              wordBreak: "break-word",
+                            }}
+                          >
                             {!isMine && (
                               <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", display: "flex", alignItems: "center", gap: "3px" }}>
                                 {msg.senderName}
@@ -1492,7 +1826,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
                               {msg.isEncrypted ? '🔒 ' : ''}{msg.text}
                               {msg.isBotDetected && <span style={{ fontSize: "8px", color: "#ef4444", marginLeft: "4px" }}>⚠️</span>}
                             </div>
-                            <div style={{ fontSize: "6px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "2px", textAlign: "right" }}>
+                            <div style={{ 
+                              fontSize: "6px", 
+                              color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                              marginTop: "2px",
+                              textAlign: "right",
+                            }}>
                               {formatTime(msg.timestamp)}
                               {msg.isEncrypted && <span style={{ marginLeft: "4px" }}>🔐</span>}
                             </div>
@@ -1501,23 +1840,89 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
                       })
                     )}
                     {getTypingText(selectedTicket) && selectedTicket.status !== 'resolved' && (
-                      <div style={{ alignSelf: "flex-start", fontSize: "10px", color: "#666", fontStyle: "italic", padding: "2px 5px", fontFamily: FONT_FAMILY }}>{getTypingText(selectedTicket)}</div>
+                      <div style={{
+                        alignSelf: "flex-start",
+                        fontSize: "10px",
+                        color: "#666",
+                        fontStyle: "italic",
+                        padding: "2px 5px",
+                        fontFamily: FONT_FAMILY,
+                      }}>
+                        {getTypingText(selectedTicket)}
+                      </div>
                     )}
                     <div ref={messagesEndRef} />
                   </div>
                 </div>
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                  <div style={{ padding: "6px 10px", borderTop: "1px solid #e8e8e8", display: "flex", gap: "5px", backgroundColor: "#fff", flexShrink: 0 }}>
-                    <input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={selectedTicket.status === 'waiting' ? t('chat.waitingAgent') : t('chat.typeMessage')} disabled={selectedTicket.status === 'waiting'} style={{ flex: 1, padding: "5px 8px", border: "1px solid #e8e8e8", borderRadius: "5px", fontSize: "11px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff" }} onFocus={(e) => { if (selectedTicket.status !== 'waiting') e.currentTarget.style.borderColor = "#0D3CFC"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }} />
-                    <button onClick={sendMessage} disabled={selectedTicket.status === 'waiting' || !messageText.trim()} style={{ padding: "5px 10px", backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC", color: "#fff", border: "none", borderRadius: "5px", cursor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px", fontSize: "11px" }}>
+                  <div style={{
+                    padding: "6px 10px",
+                    borderTop: "1px solid #e8e8e8",
+                    display: "flex",
+                    gap: "5px",
+                    backgroundColor: "#fff",
+                    flexShrink: 0,
+                  }}>
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder={selectedTicket.status === 'waiting' ? "Waiting for agent..." : "Type a message..."}
+                      disabled={selectedTicket.status === 'waiting'}
+                      style={{
+                        flex: 1,
+                        padding: "5px 8px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "5px",
+                        fontSize: "11px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                        backgroundColor: selectedTicket.status === 'waiting' ? "#f5f5f5" : "#fff",
+                      }}
+                      onFocus={(e) => { if (selectedTicket.status !== 'waiting') e.currentTarget.style.borderColor = "#0D3CFC"; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={selectedTicket.status === 'waiting' || !messageText.trim()}
+                      style={{
+                        padding: "5px 10px",
+                        backgroundColor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "#ccc" : "#0D3CFC",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: (selectedTicket.status === 'waiting' || !messageText.trim()) ? "not-allowed" : "pointer",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        fontSize: "11px",
+                      }}
+                    >
                       <SendIcon size={12} />
-                      <span>{t('chat.send')}</span>
+                      <span>Send</span>
                     </button>
                   </div>
                 )}
               </>
             ) : (
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY }}>{t('chat.pickChat')}</div>
+              <div style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "12px",
+                fontFamily: FONT_FAMILY,
+              }}>
+                Select a chat from the list on the left
+              </div>
             )}
           </div>
         </div>
@@ -1525,6 +1930,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
     );
   }
 
+  // ADMIN VIEW
   const waitingTickets = tickets.filter(t => t.status === 'waiting');
   const activeTickets = tickets.filter(t => t.status === 'active');
   const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
@@ -1533,65 +1939,190 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
   return (
     <div style={{ marginTop: "40px", paddingTop: "30px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <h3 ref={liveChatTitleRef} style={{ fontSize: "20px", fontWeight: 600, color: "#0D3CFC", fontFamily: FONT_FAMILY, margin: 0 }}>{t('chat.title')}</h3>
+        <h3 ref={liveChatTitleRef} style={{
+          fontSize: "20px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          margin: 0,
+        }}>
+          Live Chat Agent
+        </h3>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <PulsingDots active={agentOnline} />
-            <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>{agentOnline ? t('chat.online') : t('chat.offline')}</span>
+            <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
+              {agentOnline ? "Online" : "Offline"}
+            </span>
           </div>
           <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>•</span>
-          <span style={{ fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{AGENT_NAME}</span>
-          <span style={{ backgroundColor: "#d1fae5", color: "#065f46", fontSize: "8px", fontWeight: 600, padding: "1px 6px", borderRadius: "8px", fontFamily: FONT_FAMILY }}>{t('chat.agent')}</span>
+          <span style={{ fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>
+            {AGENT_NAME}
+          </span>
+          <span style={{
+            backgroundColor: "#d1fae5",
+            color: "#065f46",
+            fontSize: "8px",
+            fontWeight: 600,
+            padding: "1px 6px",
+            borderRadius: "8px",
+            fontFamily: FONT_FAMILY,
+          }}>
+            Agent
+          </span>
           <InstagramVerifiedBadge size={11} />
-          <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontFamily: FONT_FAMILY, transition: "all 0.2s ease", marginLeft: "4px" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "4px 10px",
+              backgroundColor: "transparent",
+              color: "#ef4444",
+              border: "1px solid #ef4444",
+              borderRadius: "4px",
+              fontSize: "11px",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all 0.2s ease",
+              marginLeft: "4px",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fef2f2"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+          >
             <LogoutIcon size={13} />
-            <span>{t('chat.logout')}</span>
+            <span>Logout</span>
           </button>
         </div>
       </div>
+
       <div style={{ display: "flex", gap: "12px", height: "450px" }}>
-        <div style={{ width: "220px", backgroundColor: "#f9f9f9", borderRadius: "8px", border: "1px solid #e8e8e8", overflowY: "auto", flexShrink: 0, height: "450px" }}>
+        <div style={{
+          width: "220px",
+          backgroundColor: "#f9f9f9",
+          borderRadius: "8px",
+          border: "1px solid #e8e8e8",
+          overflowY: "auto",
+          flexShrink: 0,
+          height: "450px",
+        }}>
           {waitingTickets.length > 0 && (
             <div>
-              <div style={{ padding: "6px 10px", backgroundColor: "#fef3c7", fontWeight: 600, fontSize: "11px", color: "#92400e", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY, position: "sticky", top: 0, zIndex: 1 }}>
+              <div style={{
+                padding: "6px 10px",
+                backgroundColor: "#fef3c7",
+                fontWeight: 600,
+                fontSize: "11px",
+                color: "#92400e",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+              }}>
                 <WaitingIcon />
-                <span>{t('chat.waitingHeader')} ({waitingTickets.length})</span>
+                <span>Waiting ({waitingTickets.length})</span>
               </div>
               {waitingTickets.map((ticket) => (
-                <div key={ticket.id} onClick={() => { setSelectedTicket(ticket); takeTicket(ticket.id); }} style={{ padding: "7px 10px", borderBottom: "1px solid #e8e8e8", cursor: "pointer", backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent", transition: "background 0.2s ease" }}>
+                <div
+                  key={ticket.id}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    takeTicket(ticket.id);
+                  }}
+                  style={{
+                    padding: "7px 10px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} {t('chat.typing')}</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} is typing...</div>}
                 </div>
               ))}
             </div>
           )}
+
           {activeTickets.length > 0 && (
             <div>
-              <div style={{ padding: "6px 10px", backgroundColor: "#d1fae5", fontWeight: 600, fontSize: "11px", color: "#065f46", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY, position: "sticky", top: 0, zIndex: 1 }}>
+              <div style={{
+                padding: "6px 10px",
+                backgroundColor: "#d1fae5",
+                fontWeight: 600,
+                fontSize: "11px",
+                color: "#065f46",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+              }}>
                 <ActiveIcon />
-                <span>{t('chat.activeHeader')} ({activeTickets.length})</span>
+                <span>Active ({activeTickets.length})</span>
               </div>
               {activeTickets.map((ticket) => (
-                <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} style={{ padding: "7px 10px", borderBottom: "1px solid #e8e8e8", cursor: "pointer", backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent", transition: "background 0.2s ease" }}>
+                <div
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{
+                    padding: "7px 10px",
+                    borderBottom: "1px solid #e8e8e8",
+                    cursor: "pointer",
+                    backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} {t('chat.typing')}</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} is typing...</div>}
                   {ticket.lastMessage && <div style={{ fontSize: "8px", color: "#999", marginTop: "2px", fontFamily: FONT_FAMILY }}>{ticket.lastMessage.substring(0, 25)}{ticket.lastMessage.length > 25 ? "..." : ""}</div>}
                 </div>
               ))}
             </div>
           )}
+
           {resolvedTickets.length > 0 && (
             <div>
-              <div style={{ padding: "6px 10px", backgroundColor: "#e5e7eb", fontWeight: 600, fontSize: "11px", color: "#6b7280", display: "flex", alignItems: "center", gap: "4px", fontFamily: FONT_FAMILY, position: "sticky", top: 0, zIndex: 1 }}>
+              <div style={{
+                padding: "6px 10px",
+                backgroundColor: "#e5e7eb",
+                fontWeight: 600,
+                fontSize: "11px",
+                color: "#6b7280",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontFamily: FONT_FAMILY,
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+              }}>
                 <ResolvedIcon />
-                <span>{t('chat.resolvedHeader')} ({resolvedTickets.length})</span>
+                <span>Resolved ({resolvedTickets.length})</span>
               </div>
               {resolvedTickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 return (
-                  <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} style={{ padding: "7px 10px", borderBottom: "1px solid #e8e8e8", cursor: "pointer", backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent", transition: "background 0.2s ease", opacity: 0.7 }}>
+                  <div
+                    key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
+                    style={{
+                      padding: "7px 10px",
+                      borderBottom: "1px solid #e8e8e8",
+                      cursor: "pointer",
+                      backgroundColor: selectedTicket?.id === ticket.id ? "rgba(13,60,252,0.08)" : "transparent",
+                      transition: "background 0.2s ease",
+                      opacity: 0.7,
+                    }}
+                  >
                     <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                     <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
                     <div style={{ fontSize: "8px", color: "#6b7280", fontFamily: FONT_FAMILY }}>{ticketId}</div>
@@ -1600,51 +2131,141 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
               })}
             </div>
           )}
+
           {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
-            <div style={{ padding: "20px 10px", textAlign: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY }}>{t('chat.noIncoming')}</div>
+            <div style={{ padding: "20px 10px", textAlign: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY }}>
+              No incoming chats
+            </div>
           )}
         </div>
-        <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "8px", border: "1px solid #e8e8e8", display: "flex", flexDirection: "column", overflow: "hidden", height: "450px" }}>
+
+        <div style={{
+          flex: 1,
+          backgroundColor: "#ffffff",
+          borderRadius: "8px",
+          border: "1px solid #e8e8e8",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          height: "450px",
+        }}>
           {selectedTicket ? (
             <>
-              <div style={{ padding: "8px 12px", backgroundColor: "#0D3CFC", borderBottom: "1px solid #e8e8e8", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+              <div style={{
+                padding: "8px 12px",
+                backgroundColor: "#0D3CFC",
+                borderBottom: "1px solid #e8e8e8",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexShrink: 0,
+              }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff", fontFamily: FONT_FAMILY }}>
                     {selectedTicket.userName}
-                    <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "5px", fontFamily: FONT_FAMILY }}>{selectedTicket.topic}</span>
+                    <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.7)", marginLeft: "5px", fontFamily: FONT_FAMILY }}>
+                      {selectedTicket.topic}
+                    </span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                      {selectedTicket.status === 'waiting' ? t('chat.waiting') : t('chat.active')}
+                      {selectedTicket.status === 'waiting' ? 'Waiting' : 'Active'}
                     </span>
                     {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
-                      <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{selectedTicket.typingUserName} {t('chat.typing')}</span>
+                      <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
+                        {selectedTicket.typingUserName} is typing...
+                      </span>
                     )}
-                    <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>{generateTicketId(selectedTicket.createdAt)}</span>
+                    <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
+                      {generateTicketId(selectedTicket.createdAt)}
+                    </span>
                   </div>
                 </div>
                 {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                  <button onClick={() => resolveTicket(selectedTicket.id)} style={{ padding: "3px 8px", backgroundColor: "#22c55e", color: "#fff", border: "none", borderRadius: "4px", fontSize: "9px", cursor: "pointer", fontFamily: FONT_FAMILY }}>{t('chat.finish')}</button>
+                  <button
+                    onClick={() => resolveTicket(selectedTicket.id)}
+                    style={{
+                      padding: "3px 8px",
+                      backgroundColor: "#22c55e",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "9px",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Resolve
+                  </button>
                 )}
               </div>
-              <div ref={chatMessagesContainerRef} style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: "4px", minHeight: 0, scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                <style>{`.chat-messages-container-admin::-webkit-scrollbar { display: none; }`}</style>
-                <div className="chat-messages-container-admin" style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: "4px", minHeight: 0, scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              <div 
+                ref={chatMessagesContainerRef}
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
+                <style>{`
+                  .chat-messages-container-admin::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+                <div className="chat-messages-container-admin" style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  minHeight: 0,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}>
                   {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>{t('chat.noMessage')}</div>
+                    <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
+                      No messages yet
+                    </div>
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
                       return (
-                        <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%", padding: "5px 8px", borderRadius: "6px", backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8", color: isMine ? "#fff" : "#000", fontSize: "11px", fontFamily: FONT_FAMILY, wordBreak: "break-word" }}>
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "75%",
+                            padding: "5px 8px",
+                            borderRadius: "6px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#e8e8e8",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "11px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                          }}
+                        >
                           {!isMine && (
-                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>{msg.senderName}</div>
+                            <div style={{ fontSize: "8px", fontWeight: 500, color: "#0D3CFC", marginBottom: "2px", fontFamily: FONT_FAMILY }}>
+                              {msg.senderName}
+                            </div>
                           )}
                           <div>
                             {msg.isEncrypted ? '🔒 ' : ''}{msg.text}
                             {msg.isBotDetected && <span style={{ fontSize: "8px", color: "#ef4444", marginLeft: "4px" }}>⚠️</span>}
                           </div>
-                          <div style={{ fontSize: "6px", color: isMine ? "rgba(255,255,255,0.6)" : "#999", marginTop: "2px", textAlign: "right" }}>
+                          <div style={{ 
+                            fontSize: "6px", 
+                            color: isMine ? "rgba(255,255,255,0.6)" : "#999", 
+                            marginTop: "2px",
+                            textAlign: "right",
+                          }}>
                             {formatTime(msg.timestamp)}
                             {msg.isEncrypted && <span style={{ marginLeft: "4px" }}>🔐</span>}
                           </div>
@@ -1653,23 +2274,87 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
                     })
                   )}
                   {typingText && selectedTicket.status !== 'resolved' && (
-                    <div style={{ alignSelf: "flex-start", fontSize: "10px", color: "#666", fontStyle: "italic", padding: "2px 5px", fontFamily: FONT_FAMILY }}>{typingText}</div>
+                    <div style={{
+                      alignSelf: "flex-start",
+                      fontSize: "10px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "2px 5px",
+                      fontFamily: FONT_FAMILY,
+                    }}>
+                      {typingText}
+                    </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
               </div>
               {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                <div style={{ padding: "6px 10px", borderTop: "1px solid #e8e8e8", display: "flex", gap: "5px", backgroundColor: "#fff", flexShrink: 0 }}>
-                  <input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={t('chat.typeReply')} style={{ flex: 1, padding: "5px 8px", border: "1px solid #e8e8e8", borderRadius: "5px", fontSize: "11px", outline: "none", fontFamily: FONT_FAMILY }} onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"} onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"} />
-                  <button onClick={sendMessage} disabled={!messageText.trim()} style={{ padding: "5px 10px", backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "5px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px", fontSize: "11px" }}>
+                <div style={{
+                  padding: "6px 10px",
+                  borderTop: "1px solid #e8e8e8",
+                  display: "flex",
+                  gap: "5px",
+                  backgroundColor: "#fff",
+                  flexShrink: 0,
+                }}>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={handleTyping}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && messageText.trim()) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Type a reply..."
+                    style={{
+                      flex: 1,
+                      padding: "5px 8px",
+                      border: "1px solid #e8e8e8",
+                      borderRadius: "5px",
+                      fontSize: "11px",
+                      outline: "none",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0D3CFC"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#e8e8e8"}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!messageText.trim()}
+                    style={{
+                      padding: "5px 10px",
+                      backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: messageText.trim() ? "pointer" : "not-allowed",
+                      fontFamily: FONT_FAMILY,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "11px",
+                    }}
+                  >
                     <SendIcon size={12} />
-                    <span>{t('chat.send')}</span>
+                    <span>Send</span>
                   </button>
                 </div>
               )}
             </>
           ) : (
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY }}>{t('chat.pickChat')}</div>
+            <div style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#999",
+              fontSize: "12px",
+              fontFamily: FONT_FAMILY,
+            }}>
+              Select a chat from the list on the left
+            </div>
           )}
         </div>
       </div>
@@ -1677,41 +2362,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boo
   );
 };
 
-// ===== HOME PAGE CONTENT (pakai useSearchParams) =====
-function HomePageContent(): React.JSX.Element {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
+export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [lang, setLang] = useState<Lang>('id');
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
 
-  const t = (key: string): string => {
-    return T[lang][key] || key;
-  };
-
   useEffect(() => {
     setIsMounted(true);
-    const urlLang = searchParams?.get('lang');
-    if (urlLang === 'en' || urlLang === 'id') {
-      setLang(urlLang);
-    }
-  }, [searchParams]);
-
-  const switchLang = (newLang: Lang) => {
-    setLang(newLang);
-    const params = new URLSearchParams(window.location.search);
-    params.set('lang', newLang);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  };
+  }, []);
 
   useEffect(() => {
     if (!auth || !isMounted) return;
@@ -1762,13 +2427,40 @@ function HomePageContent(): React.JSX.Element {
         trigger: menuruElement,
         start: "top 85%",
         onEnter: () => {
-          gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true });
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
         },
         onLeave: () => {
-          gsap.to(split.chars, { opacity: 0, y: 100, scale: 0.5, rotationX: 90, duration: 0.8, stagger: 0.02, ease: "power2.in", overwrite: true });
+          gsap.to(split.chars, {
+            opacity: 0,
+            y: 100,
+            scale: 0.5,
+            rotationX: 90,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: "power2.in",
+            overwrite: true
+          });
         },
         onEnterBack: () => {
-          gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true });
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.2,
+            stagger: 0.03,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
         }
       });
     }
@@ -1799,21 +2491,88 @@ function HomePageContent(): React.JSX.Element {
 
     gsap.set(textRef.current, { y: 100, opacity: 0 });
 
-    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)"
+    })
     .to(textRef.current, { duration: 0.6 })
-    .to(textRef.current, { opacity: 0, y: -20, scale: 0.9, duration: 0.4, ease: "power2.out", onComplete: () => { if (textRef.current) textRef.current.textContent = "Note"; } })
-    .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
+    .to(textRef.current, {
+      opacity: 0,
+      y: -20,
+      scale: 0.9,
+      duration: 0.4,
+      ease: "power2.out",
+      onComplete: () => {
+        if (textRef.current) textRef.current.textContent = "Note";
+      }
+    })
+    .to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
     .to(textRef.current, { duration: 0.8 })
-    .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
-    .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
+    .to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in"
+    })
+    .to(preloaderRef.current, {
+      scale: 0.95,
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power2.inOut"
+    }, "-=0.3");
   };
 
   if (!isMounted || loading) {
     return (
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
-          <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block", willChange: "transform, opacity" }}>Shop</span>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
         </div>
       </div>
     );
@@ -1821,51 +2580,57 @@ function HomePageContent(): React.JSX.Element {
 
   if (!showMain) {
     return (
-      <div ref={preloaderRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
+      <div
+        ref={preloaderRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
-          <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block", willChange: "transform, opacity" }}>Shop</span>
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Menuru
+          </span>
+          <span
+            ref={textRef}
+            style={{
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
+            }}
+          >
+            Shop
+          </span>
         </div>
       </div>
     );
   }
 
-  const footerLinks = [
-    { title: t('footer.getInTouch'), links: ['link.contact', 'link.instagram', 'link.liveChat'] },
-    { title: t('footer.product'), links: ['link.shop', 'link.note', 'link.calendar', 'link.blog', 'link.donation', 'link.community', 'link.liveChatAgent', 'link.stories'] },
-    { title: t('footer.attention'), links: ['link.privacy', 'link.terms', 'link.help', 'link.termsCondition', 'link.about', 'link.termsOfUse'] }
-  ];
-
-  const getLinkHref = (key: string): string => {
-    switch (key) {
-      case 'link.contact': return '/contact';
-      case 'link.liveChat': return '/live-chat';
-      case 'link.liveChatAgent': return '/live-chat-agent';
-      case 'link.help': return '/pusat-bantuan';
-      case 'link.privacy': return '/privacy-policy';
-      case 'link.terms': return '/terms-of-service';
-      case 'link.stories': return '/stories';
-      case 'link.shop': return '/shop';
-      case 'link.note': return '/note';
-      case 'link.calendar': return '/calendar';
-      case 'link.blog': return '/blog';
-      case 'link.donation': return '/donation';
-      case 'link.community': return '/community';
-      case 'link.instagram': return 'https://instagram.com/menuru';
-      case 'link.about': return '/profile';
-      case 'link.termsOfUse': return '/terms-of-use';
-      case 'link.termsCondition': return '/terms-of-service';
-      default: return '#';
-    }
-  };
-
-  const badgeUpdateKeys = ['link.privacy', 'link.terms', 'link.termsCondition', 'link.about', 'link.termsOfUse'];
-  const badgeNewKeys = ['link.stories'];
-
   return (
     <>
       <Head>
-        <title>{lang === 'id' ? 'Menuru Official | Beranda' : 'Menuru Official | Home'}</title>
+        <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
@@ -1886,45 +2651,223 @@ function HomePageContent(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <div style={{ minHeight: "100vh", backgroundColor: "#ffffff", margin: 0, padding: 0, position: "relative", fontFamily: FONT_FAMILY, overflow: "visible" }}>
-        {/* LANGUAGE SWITCH BUTTONS */}
-        <div style={{ position: "fixed", top: "24px", right: "24px", zIndex: 200, display: "flex", gap: "6px", padding: "6px", borderRadius: "10px", backgroundColor: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", border: "1px solid rgba(13,60,252,0.1)" }}>
-          <button onClick={() => switchLang('id')} style={{ padding: "6px 14px", borderRadius: "6px", border: "none", fontSize: "12px", fontWeight: 600, fontFamily: FONT_FAMILY, cursor: "pointer", backgroundColor: lang === 'id' ? '#0D3CFC' : 'transparent', color: lang === 'id' ? '#fff' : '#0D3CFC', transition: "all 0.2s ease" }}>ID</button>
-          <button onClick={() => switchLang('en')} style={{ padding: "6px 14px", borderRadius: "6px", border: "none", fontSize: "12px", fontWeight: 600, fontFamily: FONT_FAMILY, cursor: "pointer", backgroundColor: lang === 'en' ? '#0D3CFC' : 'transparent', color: lang === 'en' ? '#fff' : '#0D3CFC', transition: "all 0.2s ease" }}>EN</button>
-        </div>
-
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#ffffff",
+          margin: 0,
+          padding: 0,
+          position: "relative",
+          fontFamily: FONT_FAMILY,
+          overflow: "visible",
+        }}
+      >
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} t={t} />
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
         {/* FOOTER */}
-        <div style={{ width: "100%", padding: "60px 40px 40px 40px", backgroundColor: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.05)", marginTop: "20px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+        <div
+          style={{
+            width: "100%",
+            padding: "60px 40px 40px 40px",
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
-          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", maxWidth: "1400px", margin: "0 auto", gap: "40px", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
             {footerLinks.map((section, idx) => (
-              <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-                <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 600, color: "#000000", margin: 0, marginBottom: "16px", letterSpacing: "-0.01em", textTransform: "none" }}>{section.title}</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {section.links.map((linkKey, linkIdx) => {
-                    const href = getLinkHref(linkKey);
-                    const isUpdate = badgeUpdateKeys.includes(linkKey);
-                    const isNew = badgeNewKeys.includes(linkKey);
+              <div
+                key={idx}
+                style={{
+                  flex: "1",
+                  minWidth: "200px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                    textTransform: "none",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {section.links.map((link, linkIdx) => {
+                    let linkHref = "#";
+                    let isAttention = false;
+                    let isStories = false;
+                    
+                    if (link === "Contact") {
+                      linkHref = "/contact";
+                    } else if (link === "Live Chat") {
+                      linkHref = "/live-chat";
+                    } else if (link === "Live Chat Agent") {
+                      linkHref = "/live-chat-agent";
+                    } else if (link === "Help Center") {
+                      linkHref = "/help-center";
+                    } else if (link === "Privacy Policy") {
+                      linkHref = "/privacy-policy";
+                      isAttention = true;
+                    } else if (link === "Terms & Conditions") {
+                      linkHref = "/terms-conditions";
+                      isAttention = true;
+                    } else if (link === "About Us") {
+                      linkHref = "/about-us";
+                      isAttention = true;
+                    } else if (link === "Terms of Use") {
+                      linkHref = "/terms-of-use";
+                      isAttention = true;
+                    } else if (link === "Stories") {
+                      linkHref = "/stories";
+                      isStories = true;
+                    } else if (link === "Shop") {
+                      linkHref = "/shop";
+                    } else if (link === "Note") {
+                      linkHref = "/note";
+                    } else if (link === "Calendar") {
+                      linkHref = "/calendar";
+                    } else if (link === "Blog") {
+                      linkHref = "/blog";
+                    } else if (link === "Donation") {
+                      linkHref = "/donation";
+                    } else if (link === "Community") {
+                      linkHref = "/community";
+                    } else if (link === "Instagram") {
+                      linkHref = "https://instagram.com/menuru";
+                    }
+                    
                     return (
-                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <Link href={href} style={{ textDecoration: "none" }}>
-                          <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: "#0D3CFC", letterSpacing: "-0.01em", cursor: "pointer", textTransform: "none" }}>{t(linkKey)}</span>
+                      <div
+                        key={linkIdx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: "#0D3CFC",
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
+                              textTransform: "none",
+                            }}
+                          >
+                            {link}
+                          </span>
                         </Link>
-                        {isUpdate && (
-                          <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY, letterSpacing: "0.3px", display: "inline-block" }}>{t('badge.update')}</span>
+                        {isAttention && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            Updated
+                          </span>
                         )}
-                        {isNew && (
-                          <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY, letterSpacing: "0.3px", display: "inline-block" }}>{t('badge.new')}</span>
+                        {isStories && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            New
+                          </span>
                         )}
                       </div>
                     );
@@ -1933,42 +2876,438 @@ function HomePageContent(): React.JSX.Element {
               </div>
             ))}
           </div>
+
+          {/* Terms & Conditions Notice */}
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "40px auto 0 auto",
+              paddingTop: "20px",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#666",
+                margin: 0,
+                textAlign: "center",
+                letterSpacing: "0.01em",
+              }}
+            >
+              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+            </p>
+          </div>
         </div>
 
         {/* MENURU Text + Copyright */}
-        <div ref={menuruFooterRef} style={{ width: "100%", padding: "20px 40px 40px 40px", backgroundColor: "#ffffff", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "flex-start", minHeight: "300px" }}>
-          <span ref={menuruTextRef} style={{ fontFamily: FONT_FAMILY, fontSize: "450px", fontWeight: 700, color: "#0D3CFC", letterSpacing: "-0.02em", textTransform: "none", lineHeight: "0.8", display: "block", textAlign: "left", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}>Menuru</span>
-          <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: "#0D3CFC", letterSpacing: "0.05em", marginTop: "20px", textAlign: "left", opacity: 0.8 }}>{t('misc.copyright')}</div>
+        <div
+          ref={menuruFooterRef}
+          style={{
+            width: "100%",
+            padding: "20px 40px 80px 40px",
+            backgroundColor: "#ffffff",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            minHeight: "300px",
+          }}
+        >
+          <span
+            ref={menuruTextRef}
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "450px",
+              fontWeight: 700,
+              color: "#0D3CFC",
+              letterSpacing: "-0.02em",
+              textTransform: "none",
+              lineHeight: "0.8",
+              display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            Menuru
+          </span>
+
+          {/* Copyright */}
+          <div
+            style={{
+              marginTop: "30px",
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-start",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "16px",
+                fontWeight: 400,
+                color: "#0D3CFC",
+                letterSpacing: "0.01em",
+                opacity: 0.8,
+              }}
+            >
+              2024 - 2026 Menuru. All rights reserved.
+            </span>
+          </div>
         </div>
       </div>
 
       <style jsx global>{`
-        html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
-        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-        body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
-        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-        * { background-color: transparent; }
-        .menuru-char { display: inline-block; will-change: transform, opacity; }
-        .split-char-livechat { display: inline-block; will-change: transform, opacity, filter; }
-        .chat-messages-container::-webkit-scrollbar, .chat-messages-container-admin::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-        .chat-messages-container, .chat-messages-container-admin { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
+        * {
+          background-color: transparent;
+        }
+
+        .menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+
+        .split-char-livechat {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
+
+        .chat-messages-container::-webkit-scrollbar,
+        .chat-messages-container-admin::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .chat-messages-container,
+        .chat-messages-container-admin {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        @media (max-width: 1024px) {
+          .subtitle p {
+            font-size: 48px !important;
+          }
+          .title {
+            font-size: 36px !important;
+          }
+          .cta-button {
+            padding: 10px 22px !important;
+          }
+          .cta-button span {
+            font-size: 16px !important;
+          }
+          .arrow-box {
+            width: 44px !important;
+            height: 44px !important;
+            padding: 8px !important;
+          }
+          .get-in-touch {
+            padding: 6px 12px !important;
+          }
+          .get-in-touch span {
+            font-size: 14px !important;
+          }
+          .pusat-bantuan {
+            padding: 6px 12px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 14px !important;
+          }
+          .menu-button {
+            padding: 6px 12px !important;
+          }
+          .menu-button span {
+            font-size: 14px !important;
+          }
+          .menu-overlay {
+            padding: 40px 40px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 36px !important;
+          }
+          .menu-overlay .stories {
+            right: 40px !important;
+            top: 80px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 30px !important;
+          }
+          .menu-overlay .menu-box {
+            right: 40px !important;
+            bottom: 40px !important;
+            max-width: 450px !important;
+            padding: 16px 24px !important;
+            min-height: 70px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 17px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box2 {
+            right: 40px !important;
+            top: 140px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+          .menu-overlay .menu-box3 {
+            right: 40px !important;
+            top: 260px !important;
+            max-width: 550px !important;
+            padding: 14px 20px !important;
+            min-height: 80px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 18px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 75px !important;
+            height: 75px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .subtitle p {
+            font-size: 36px !important;
+          }
+          .title {
+            font-size: 28px !important;
+          }
+          .cta-button {
+            padding: 8px 18px !important;
+          }
+          .cta-button span {
+            font-size: 14px !important;
+          }
+          .arrow-box {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 6px !important;
+          }
+          .arrow-box svg {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .get-in-touch {
+            padding: 4px 10px !important;
+          }
+          .get-in-touch span {
+            font-size: 12px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 10px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 12px !important;
+          }
+          .menu-button {
+            padding: 4px 10px !important;
+          }
+          .menu-button span {
+            font-size: 12px !important;
+          }
+          .menu-overlay {
+            padding: 30px 20px !important;
+            flex-direction: column !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 28px !important;
+          }
+          .menu-overlay .menu-items {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .menu-overlay .stories {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 10px !important;
+            align-items: flex-start !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 24px !important;
+          }
+          .menu-overlay .menu-box {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin-top: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 14px 20px !important;
+            min-height: 60px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 50px !important;
+            height: 50px !important;
+          }
+          .menu-overlay .menu-box2 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+          .menu-overlay .menu-box3 {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            margin-top: 15px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            flex-wrap: wrap !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 16px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .subtitle p {
+            font-size: 24px !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+          .cta-button {
+            padding: 6px 14px !important;
+          }
+          .cta-button span {
+            font-size: 12px !important;
+          }
+          .arrow-box {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 4px !important;
+          }
+          .arrow-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .get-in-touch {
+            padding: 4px 8px !important;
+          }
+          .get-in-touch span {
+            font-size: 10px !important;
+          }
+          .pusat-bantuan {
+            padding: 4px 8px !important;
+          }
+          .pusat-bantuan span {
+            font-size: 10px !important;
+          }
+          .menu-button {
+            padding: 4px 8px !important;
+          }
+          .menu-button span {
+            font-size: 10px !important;
+          }
+          .menu-overlay {
+            padding: 20px 15px !important;
+          }
+          .menu-overlay .menu-text {
+            font-size: 22px !important;
+          }
+          .menu-overlay .stories span {
+            font-size: 20px !important;
+          }
+          .menu-overlay .menu-box span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .menu-overlay .menu-box {
+            padding: 10px 14px !important;
+            min-height: 50px !important;
+          }
+          .menu-overlay .menu-box2 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box2 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box2 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+          .menu-overlay .menu-box3 span {
+            font-size: 14px !important;
+          }
+          .menu-overlay .menu-box3 img {
+            width: 45px !important;
+            height: 45px !important;
+          }
+          .menu-overlay .menu-box3 {
+            padding: 8px 12px !important;
+            min-height: 40px !important;
+          }
+        }
       `}</style>
     </>
-  );
-}
-
-// ===== DEFAULT EXPORT: bungkus dengan Suspense =====
-export default function HomePage(): React.JSX.Element {
-  return (
-    <Suspense fallback={
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
-          <span style={{ fontSize: "50px", fontWeight: 600, color: "#000000", fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block" }}>Shop</span>
-        </div>
-      </div>
-    }>
-      <HomePageContent />
-    </Suspense>
   );
 }
