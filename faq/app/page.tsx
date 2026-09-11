@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import { 
@@ -405,7 +406,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 
-// SVG Icons
+// ===== SVG Icons =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 7L17 17M17 7V17H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -446,35 +447,163 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Feature data
-const featuresData = [
-  { name: "Community" },
-  { name: "Blog" },
-  { name: "Live Chat" },
-  { name: "Live Chat Agent" },
-  { name: "Donation" },
-  { name: "Contact" },
-  { name: "Note" }
-];
+// ===== TRANSLATIONS =====
+type Lang = 'id' | 'en';
 
-// Menu items for drawer
-const menuItems = [
-  { name: "Community", number: "01" },
-  { name: "Blog", number: "02" },
-  { name: "Live Chat", number: "03" },
-  { name: "Live Chat Agent", number: "04" },
-  { name: "Donation", number: "05" },
-  { name: "Contact", number: "06" },
-  { name: "Note", number: "07" }
-];
+const T: Record<Lang, Record<string, string>> = {
+  id: {
+    // Footer sections
+    'footer.getInTouch': 'Hubungi Kami',
+    'footer.product': 'Produk',
+    'footer.attention': 'Perhatian',
+    // Footer links
+    'link.contact': 'Kontak',
+    'link.instagram': 'Instagram',
+    'link.liveChat': 'Live Chat',
+    'link.shop': 'Toko',
+    'link.note': 'Catatan',
+    'link.calendar': 'Kalender',
+    'link.blog': 'Blog',
+    'link.donation': 'Donasi',
+    'link.community': 'Komunitas',
+    'link.liveChatAgent': 'Agen Live Chat',
+    'link.stories': 'Cerita',
+    'link.privacy': 'Kebijakan Privasi',
+    'link.terms': 'Ketentuan Kami',
+    'link.help': 'Pusat Bantuan',
+    'link.termsCondition': 'Syarat dan Ketentuan Berlaku',
+    'link.about': 'Tentang Kami',
+    'link.termsOfUse': 'Ketentuan Penggunaan',
+    // Badges
+    'badge.update': 'Pembaruan',
+    'badge.new': 'Baru',
+    // Live Chat Agent
+    'chat.title': 'Agen Live Chat',
+    'chat.loginPrompt': 'Silakan login untuk menggunakan Agen Live Chat',
+    'chat.login': 'Masuk',
+    'chat.agentOnline': 'Agen Online',
+    'chat.agentOffline': 'Agen Offline',
+    'chat.online': 'Online',
+    'chat.offline': 'Offline',
+    'chat.needHelp': 'Butuh bantuan? Chat langsung dengan agen kami.',
+    'chat.startChat': 'Mulai Live Chat',
+    'chat.history': 'Riwayat Chat',
+    'chat.noChat': 'Belum ada chat',
+    'chat.newChat': '+ Chat Baru',
+    'chat.pickTopic': 'Pilih topik permasalahan Anda:',
+    'chat.selectTopic': '-- Pilih topik --',
+    'chat.start': 'Mulai Chat',
+    'chat.cancel': 'Batal',
+    'chat.waiting': 'Menunggu',
+    'chat.active': 'Aktif',
+    'chat.resolved': 'Selesai',
+    'chat.finish': 'Selesaikan',
+    'chat.typing': 'sedang mengetik...',
+    'chat.typeMessage': 'Ketik pesan...',
+    'chat.waitingAgent': 'Menunggu agen...',
+    'chat.send': 'Kirim',
+    'chat.noMessage': 'Belum ada pesan',
+    'chat.pickChat': 'Pilih chat dari daftar di kiri',
+    'chat.checkingAccount': 'Memeriksa status akun...',
+    'chat.banned': 'AKUN ANDA TELAH DIBANNED PERMANEN',
+    'chat.reason': 'ALASAN',
+    'chat.cannotUse': 'ANDA TIDAK DAPAT MENGGUNAKAN AGEN LIVE CHAT',
+    'chat.noNewTicket': 'TIDAK DAPAT MEMBUAT TIKET BARU',
+    'chat.noSendMessage': 'TIDAK DAPAT MENGIRIM PESAN',
+    'chat.contactAdmin': 'HUBUNGI ADMIN UNTUK INFORMASI LEBIH LANJUT',
+    'chat.logout': 'Keluar',
+    'chat.noIncoming': 'Tidak ada chat masuk',
+    'chat.waitingHeader': 'Menunggu',
+    'chat.activeHeader': 'Aktif',
+    'chat.resolvedHeader': 'Selesai',
+    'chat.typeReply': 'Ketik balasan...',
+    'chat.agent': 'Agen',
+    // Topics
+    'topic.product': 'Pertanyaan tentang produk',
+    'topic.technical': 'Bantuan teknis',
+    'topic.account': 'Permasalahan akun',
+    'topic.donation': 'Donasi',
+    'topic.partnership': 'Kerjasama',
+    'topic.other': 'Lainnya',
+    // Misc
+    'misc.language': 'Bahasa',
+    'misc.copyright': '2024 - 2026',
+  },
+  en: {
+    'footer.getInTouch': 'Get in Touch',
+    'footer.product': 'Product',
+    'footer.attention': 'Attention',
+    'link.contact': 'Contact',
+    'link.instagram': 'Instagram',
+    'link.liveChat': 'Live Chat',
+    'link.shop': 'Shop',
+    'link.note': 'Note',
+    'link.calendar': 'Calendar',
+    'link.blog': 'Blog',
+    'link.donation': 'Donation',
+    'link.community': 'Community',
+    'link.liveChatAgent': 'Live Chat Agent',
+    'link.stories': 'Stories',
+    'link.privacy': 'Privacy Policy',
+    'link.terms': 'Our Terms',
+    'link.help': 'Help Center',
+    'link.termsCondition': 'Terms and Conditions Apply',
+    'link.about': 'About Us',
+    'link.termsOfUse': 'Terms of Use',
+    'badge.update': 'Update',
+    'badge.new': 'New',
+    'chat.title': 'Live Chat Agent',
+    'chat.loginPrompt': 'Please login to use Live Chat Agent',
+    'chat.login': 'Login',
+    'chat.agentOnline': 'Agent Online',
+    'chat.agentOffline': 'Agent Offline',
+    'chat.online': 'Online',
+    'chat.offline': 'Offline',
+    'chat.needHelp': 'Need help? Chat directly with our agent.',
+    'chat.startChat': 'Start Live Chat',
+    'chat.history': 'Chat History',
+    'chat.noChat': 'No chats yet',
+    'chat.newChat': '+ New Chat',
+    'chat.pickTopic': 'Select your issue topic:',
+    'chat.selectTopic': '-- Select topic --',
+    'chat.start': 'Start Chat',
+    'chat.cancel': 'Cancel',
+    'chat.waiting': 'Waiting',
+    'chat.active': 'Active',
+    'chat.resolved': 'Resolved',
+    'chat.finish': 'Resolve',
+    'chat.typing': 'is typing...',
+    'chat.typeMessage': 'Type a message...',
+    'chat.waitingAgent': 'Waiting for agent...',
+    'chat.send': 'Send',
+    'chat.noMessage': 'No messages yet',
+    'chat.pickChat': 'Select a chat from the list on the left',
+    'chat.checkingAccount': 'Checking account status...',
+    'chat.banned': 'YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED',
+    'chat.reason': 'REASON',
+    'chat.cannotUse': 'YOU CANNOT USE LIVE CHAT AGENT',
+    'chat.noNewTicket': 'CANNOT CREATE NEW TICKET',
+    'chat.noSendMessage': 'CANNOT SEND MESSAGE',
+    'chat.contactAdmin': 'CONTACT ADMIN FOR MORE INFORMATION',
+    'chat.logout': 'Logout',
+    'chat.noIncoming': 'No incoming chats',
+    'chat.waitingHeader': 'Waiting',
+    'chat.activeHeader': 'Active',
+    'chat.resolvedHeader': 'Resolved',
+    'chat.typeReply': 'Type a reply...',
+    'chat.agent': 'Agent',
+    'topic.product': 'Product inquiry',
+    'topic.technical': 'Technical support',
+    'topic.account': 'Account issue',
+    'topic.donation': 'Donation',
+    'topic.partnership': 'Partnership',
+    'topic.other': 'Other',
+    'misc.language': 'Language',
+    'misc.copyright': '2024 - 2026',
+  },
+};
 
-// Footer links — Get in Touch tanpa Live Chat Agent (double dengan Product)
-// Attention ditambahkan: Syarat dan Ketentuan Berlaku, Tentang Kami, Terms of Use
-const footerLinks = [
-  { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
-  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan", "Syarat dan Ketentuan Berlaku", "Tentang Kami", "Terms of Use"] }
-];
+const TOPIC_KEYS = ['topic.product', 'topic.technical', 'topic.account', 'topic.donation', 'topic.partnership', 'topic.other'];
 
 // ===== PULSING DOTS =====
 const PulsingDots = ({ active }: { active: boolean }) => {
@@ -588,7 +717,7 @@ interface ChatMessage {
   isBotDetected?: boolean;
 }
 
-const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolean; db: any; auth: any }) => {
+const LiveChatAgent = ({ user, isAdmin, db, auth, t }: { user: any; isAdmin: boolean; db: any; auth: any; t: (key: string) => string }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -609,14 +738,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLDivElement>(null);
 
-  const topics = [
-    "Pertanyaan tentang produk",
-    "Bantuan teknis",
-    "Permasalahan akun",
-    "Donasi",
-    "Kerjasama",
-    "Lainnya"
-  ];
+  // Topics dari translation keys
+  const topicKeys = TOPIC_KEYS;
 
   useEffect(() => {
     setIsMounted(true);
@@ -646,7 +769,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
+          setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
           console.log('🚫 User ini BANNED dari database');
         } else {
           setIsBanned(false);
@@ -677,7 +800,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
+        setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
         return true;
       }
       return false;
@@ -801,7 +924,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     return () => unsubscribe();
   }, [db, isMounted]);
 
-  // ===== QUERY TICKET - TAMPILKAN SEMUA TERMASUK ANNOUNCEMENT & BROADCAST =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     
@@ -910,7 +1032,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }, 2000);
   };
 
-  // ===== START CHAT - CEK BAN & FLAG DATABASE =====
   const startChat = async () => {
     if (!db || !user || !selectedTopic) return;
     
@@ -921,29 +1042,30 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
     
     if (!canCreateTicket) {
-      setBanMessage(`ANDA TIDAK MEMILIKI IZIN UNTUK MEMBUAT TICKET BARU`);
+      setBanMessage(t('chat.noNewTicket'));
       return;
     }
     
     if (!encryptionReady) {
-      alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
+      alert("Encryption is initializing, please wait.");
       return;
     }
     
     const hasActiveTicket = tickets.some(t => t.userId === user.uid && (t.status === 'waiting' || t.status === 'active') && !t.isAnnouncement && !t.isBroadcast);
     if (hasActiveTicket) {
-      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+      alert(t('chat.needHelp'));
       return;
     }
     
     try {
+      const topicLabel = t(selectedTopic);
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
         userName: user.displayName || user.email || "User",
         userEmail: user.email,
         userPhoto: user.photoURL || "",
         status: "waiting",
-        topic: selectedTopic,
+        topic: topicLabel,
         createdAt: serverTimestamp(),
         unreadCount: 0,
         typing: false,
@@ -953,7 +1075,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         isBroadcast: false
       });
       
-      const initialMessage = `Halo, saya ingin bertanya tentang: ${selectedTopic}`;
+      const initialMessage = `Halo, saya ingin bertanya tentang: ${topicLabel}`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -970,11 +1092,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBanMessage(null);
     } catch (error) {
       console.error("Error starting chat:", error);
-      alert("Terjadi kesalahan saat memulai chat. Silahkan coba lagi.");
+      alert("An error occurred while starting the chat. Please try again.");
     }
   };
 
-  // ===== SEND MESSAGE - CEK BAN & FLAG DATABASE =====
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     
@@ -985,7 +1106,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
     
     if (!canSendMessage) {
-      setBanMessage(`ANDA TIDAK MEMILIKI IZIN UNTUK MENGIRIM PESAN`);
+      setBanMessage(t('chat.noSendMessage'));
       setMessageText("");
       return;
     }
@@ -1004,7 +1125,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${checkResult.reason}\n\nPesan yang dikirim: "${messageText}"`);
+      setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${checkResult.reason}`);
       setMessageText("");
       
       const status = await checkBanStatus(user.uid);
@@ -1013,19 +1134,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(`AKUN ANDA TELAH DIBANNED PERMANEN\n\nAlasan: ${status.reason}`);
+        setBanMessage(`${t('chat.banned')}\n\n${t('chat.reason')}: ${status.reason}`);
       }
       
       return;
     }
     
     if (!encryptionReady) {
-      alert("Enkripsi sedang diinisialisasi, silahkan tunggu sebentar.");
+      alert("Encryption is initializing, please wait.");
       return;
     }
     
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
-      alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
+      alert("This chat is finished. Please create a new ticket.");
       return;
     }
     
@@ -1063,7 +1184,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Terjadi kesalahan saat mengirim pesan. Silahkan coba lagi.");
+      alert("An error occurred while sending the message. Please try again.");
     }
   };
 
@@ -1098,7 +1219,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Seseorang";
-    return `${name} sedang mengetik...`;
+    return `${name} ${t('chat.typing')}`;
   };
 
   const handleLogout = async () => {
@@ -1116,7 +1237,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     }
   };
 
-  // ===== LOADING STATE =====
   if (checkingBan) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -1126,7 +1246,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           color: "#0D3CFC",
           fontFamily: FONT_FAMILY,
         }}>
-          Live Chat Agent
+          {t('chat.title')}
         </h3>
         <div style={{
           padding: "20px",
@@ -1134,7 +1254,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           color: "#666",
           fontFamily: FONT_FAMILY,
         }}>
-          Memeriksa status akun...
+          {t('chat.checkingAccount')}
         </div>
       </div>
     );
@@ -1154,7 +1274,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           fontFamily: FONT_FAMILY,
           marginBottom: "12px",
         }}>
-          Live Chat Agent
+          {t('chat.title')}
         </h3>
         <div style={{
           display: "flex",
@@ -1182,7 +1302,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
               marginBottom: "6px",
             }}>
-              Silakan login untuk menggunakan Live Chat Agent
+              {t('chat.loginPrompt')}
             </p>
             <Link href="/" style={{ textDecoration: "none" }}>
               <button
@@ -1198,7 +1318,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Login
+                {t('chat.login')}
               </button>
             </Link>
           </div>
@@ -1209,7 +1329,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   // USER VIEW
   if (!isAdmin) {
-    // ===== USER BANNED - TAMPILKAN PESAN BAN =====
     if (isBanned) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -1221,7 +1340,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
               margin: 0,
             }}>
-              Live Chat Agent
+              {t('chat.title')}
             </h3>
             <button
               onClick={handleLogout}
@@ -1243,7 +1362,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
               <LogoutIcon size={14} />
-              <span>Logout</span>
+              <span>{t('chat.logout')}</span>
             </button>
           </div>
           
@@ -1256,7 +1375,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             marginBottom: "12px",
             letterSpacing: "-0.02em",
           }}>
-            AKUN ANDA TELAH DIBANNED PERMANEN
+            {t('chat.banned')}
           </div>
           
           <div style={{
@@ -1266,7 +1385,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontFamily: FONT_FAMILY,
             marginBottom: "6px",
           }}>
-            ALASAN: {banReason || "AKTIVITAS MENCURIGAKAN"}
+            {t('chat.reason')}: {banReason || "AKTIVITAS MENCURIGAKAN"}
           </div>
           
           <div style={{
@@ -1276,7 +1395,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontFamily: FONT_FAMILY,
             marginBottom: "20px",
           }}>
-            ANDA TIDAK DAPAT MENGGUNAKAN LIVE CHAT AGENT
+            {t('chat.cannotUse')}
           </div>
           
           <div style={{
@@ -1287,7 +1406,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           }}>
             <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "14px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? "Agent Online" : "Agent Offline"}
+              {agentOnline ? t('chat.agentOnline') : t('chat.agentOffline')}
             </span>
           </div>
           
@@ -1297,8 +1416,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontWeight: 400,
             fontFamily: FONT_FAMILY,
           }}>
-            {!canCreateTicket && "TIDAK DAPAT MEMBUAT TICKET BARU"}
-            {!canSendMessage && "  TIDAK DAPAT MENGIRIM PESAN"}
+            {!canCreateTicket && t('chat.noNewTicket')}
+            {!canSendMessage && `  ${t('chat.noSendMessage')}`}
           </div>
           
           <div style={{
@@ -1308,14 +1427,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontFamily: FONT_FAMILY,
             marginTop: "20px",
           }}>
-            HUBUNGI ADMIN UNTUK INFORMASI LEBIH LANJUT
+            {t('chat.contactAdmin')}
           </div>
         </div>
       );
     }
 
     const userTickets = tickets.filter(t => t.userId === user.uid);
-    const activeTicket = userTickets.find(t => t.status === 'waiting' || t.status === 'active');
 
     if (userTickets.length === 0 && !showStartChat) {
       return (
@@ -1328,7 +1446,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
               margin: 0,
             }}>
-              Live Chat Agent
+              {t('chat.title')}
             </h3>
             <button
               onClick={handleLogout}
@@ -1350,7 +1468,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
               <LogoutIcon size={14} />
-              <span>Logout</span>
+              <span>{t('chat.logout')}</span>
             </button>
           </div>
           
@@ -1374,11 +1492,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           }}>
             <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "12px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? "Agent Online" : "Agent Offline"}
+              {agentOnline ? t('chat.agentOnline') : t('chat.agentOffline')}
             </span>
           </div>
           <p style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
-            Butuh bantuan? Chat langsung dengan agent kami.
+            {t('chat.needHelp')}
           </p>
           <button
             onClick={() => setShowStartChat(true)}
@@ -1398,7 +1516,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             }}
           >
             <ChatIcon />
-            <span>Mulai Live Chat</span>
+            <span>{t('chat.startChat')}</span>
           </button>
         </div>
       );
@@ -1415,7 +1533,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
               margin: 0,
             }}>
-              Live Chat Agent
+              {t('chat.title')}
             </h3>
             <button
               onClick={handleLogout}
@@ -1437,7 +1555,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
               <LogoutIcon size={14} />
-              <span>Logout</span>
+              <span>{t('chat.logout')}</span>
             </button>
           </div>
           
@@ -1455,7 +1573,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-              Pilih topik permasalahan Anda:
+              {t('chat.pickTopic')}
             </div>
             <select
               value={selectedTopic}
@@ -1473,9 +1591,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 color: "#0D3CFC",
               }}
             >
-              <option value="">-- Pilih topik --</option>
-              {topics.map((t) => (
-                <option key={t} value={t}>{t}</option>
+              <option value="">{t('chat.selectTopic')}</option>
+              {topicKeys.map((key) => (
+                <option key={key} value={key}>{t(key)}</option>
               ))}
             </select>
             <div style={{ display: "flex", gap: "8px" }}>
@@ -1494,7 +1612,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Mulai Chat
+                {t('chat.start')}
               </button>
               <button
                 onClick={() => setShowStartChat(false)}
@@ -1510,7 +1628,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Batal
+                {t('chat.cancel')}
               </button>
             </div>
           </div>
@@ -1529,13 +1647,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             fontFamily: FONT_FAMILY,
             margin: 0,
           }}>
-            Live Chat Agent
+            {t('chat.title')}
           </h3>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <PulsingDots active={agentOnline} />
               <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-                {agentOnline ? "Online" : "Offline"}
+                {agentOnline ? t('chat.online') : t('chat.offline')}
               </span>
             </div>
             <button
@@ -1558,7 +1676,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
               <LogoutIcon size={13} />
-              <span>Logout</span>
+              <span>{t('chat.logout')}</span>
             </button>
           </div>
         </div>
@@ -1609,7 +1727,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               zIndex: 1,
             }}>
               <ChatIconSmall />
-              <span>Riwayat Chat</span>
+              <span>{t('chat.history')}</span>
               <span style={{
                 marginLeft: "auto",
                 fontSize: "9px",
@@ -1622,8 +1740,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               {tickets.filter(t => t.userId === user.uid).map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
-                const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
-                                    ticket.status === 'active' ? 'Aktif' : 'Selesai';
+                const statusLabel = ticket.status === 'waiting' ? t('chat.waiting') :
+                                    ticket.status === 'active' ? t('chat.active') : t('chat.resolved');
                 const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
                                     ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
                 const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
@@ -1676,7 +1794,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               })}
               {tickets.filter(t => t.userId === user.uid).length === 0 && (
                 <div style={{ padding: "20px 10px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>
-                  Belum ada chat
+                  {t('chat.noChat')}
                 </div>
               )}
             </div>
@@ -1702,7 +1820,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                + Chat Baru
+                {t('chat.newChat')}
               </button>
             </div>
           </div>
@@ -1735,19 +1853,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         {selectedTicket.topic}
                       </span>
                       {selectedTicket.isAnnouncement && (
-                        <span style={{ fontSize: "10px", color: "#fcd34d", marginLeft: "5px" }}>📢 Pengumuman</span>
+                        <span style={{ fontSize: "10px", color: "#fcd34d", marginLeft: "5px" }}>📢 {t('badge.update')}</span>
                       )}
                       {selectedTicket.isBroadcast && (
-                        <span style={{ fontSize: "10px", color: "#60a5fa", marginLeft: "5px" }}>📡 Broadcast</span>
+                        <span style={{ fontSize: "10px", color: "#60a5fa", marginLeft: "5px" }}>📡 {t('badge.new')}</span>
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                       <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                        {selectedTicket.status === 'waiting' ? t('chat.waiting') : t('chat.active')}
                       </span>
                       {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                         <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                          {selectedTicket.typingUserName} mengetik...
+                          {selectedTicket.typingUserName} {t('chat.typing')}
                         </span>
                       )}
                       <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
@@ -1769,7 +1887,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Selesaikan
+                      {t('chat.finish')}
                     </button>
                   )}
                 </div>
@@ -1805,7 +1923,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   }}>
                     {messages.length === 0 ? (
                       <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                        Belum ada pesan
+                        {t('chat.noMessage')}
                       </div>
                     ) : (
                       messages.map((msg, idx) => {
@@ -1883,7 +2001,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           sendMessage();
                         }
                       }}
-                      placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
+                      placeholder={selectedTicket.status === 'waiting' ? t('chat.waitingAgent') : t('chat.typeMessage')}
                       disabled={selectedTicket.status === 'waiting'}
                       style={{
                         flex: 1,
@@ -1916,7 +2034,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       }}
                     >
                       <SendIcon size={12} />
-                      <span>Kirim</span>
+                      <span>{t('chat.send')}</span>
                     </button>
                   </div>
                 )}
@@ -1931,7 +2049,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 fontSize: "12px",
                 fontFamily: FONT_FAMILY,
               }}>
-                Pilih chat dari daftar di kiri
+                {t('chat.pickChat')}
               </div>
             )}
           </div>
@@ -1956,13 +2074,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           fontFamily: FONT_FAMILY,
           margin: 0,
         }}>
-          Live Chat Agent
+          {t('chat.title')}
         </h3>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <PulsingDots active={agentOnline} />
             <span style={{ fontSize: "11px", color: agentOnline ? "#0D3CFC" : "#999", fontFamily: FONT_FAMILY }}>
-              {agentOnline ? "Online" : "Offline"}
+              {agentOnline ? t('chat.online') : t('chat.offline')}
             </span>
           </div>
           <span style={{ fontSize: "11px", color: "#999", fontFamily: FONT_FAMILY }}>•</span>
@@ -1978,7 +2096,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             borderRadius: "8px",
             fontFamily: FONT_FAMILY,
           }}>
-            Agent
+            {t('chat.agent')}
           </span>
           <InstagramVerifiedBadge size={11} />
           <button
@@ -2002,7 +2120,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
             <LogoutIcon size={13} />
-            <span>Logout</span>
+            <span>{t('chat.logout')}</span>
           </button>
         </div>
       </div>
@@ -2034,7 +2152,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <WaitingIcon />
-                <span>Menunggu ({waitingTickets.length})</span>
+                <span>{t('chat.waitingHeader')} ({waitingTickets.length})</span>
               </div>
               {waitingTickets.map((ticket) => (
                 <div
@@ -2053,7 +2171,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} {t('chat.typing')}</div>}
                 </div>
               ))}
             </div>
@@ -2076,7 +2194,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <ActiveIcon />
-                <span>Aktif ({activeTickets.length})</span>
+                <span>{t('chat.activeHeader')} ({activeTickets.length})</span>
               </div>
               {activeTickets.map((ticket) => (
                 <div
@@ -2092,7 +2210,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} {t('chat.typing')}</div>}
                   {ticket.lastMessage && <div style={{ fontSize: "8px", color: "#999", marginTop: "2px", fontFamily: FONT_FAMILY }}>{ticket.lastMessage.substring(0, 25)}{ticket.lastMessage.length > 25 ? "..." : ""}</div>}
                 </div>
               ))}
@@ -2116,7 +2234,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <ResolvedIcon />
-                <span>Selesai ({resolvedTickets.length})</span>
+                <span>{t('chat.resolvedHeader')} ({resolvedTickets.length})</span>
               </div>
               {resolvedTickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
@@ -2144,7 +2262,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
           {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
             <div style={{ padding: "20px 10px", textAlign: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY }}>
-              Tidak ada chat masuk
+              {t('chat.noIncoming')}
             </div>
           )}
         </div>
@@ -2179,11 +2297,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                      {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                      {selectedTicket.status === 'waiting' ? t('chat.waiting') : t('chat.active')}
                     </span>
                     {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                       <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.typingUserName} mengetik...
+                        {selectedTicket.typingUserName} {t('chat.typing')}
                       </span>
                     )}
                     <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
@@ -2205,7 +2323,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    Selesaikan
+                    {t('chat.finish')}
                   </button>
                 )}
               </div>
@@ -2241,7 +2359,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 }}>
                   {messages.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                      Belum ada pesan
+                      {t('chat.noMessage')}
                     </div>
                   ) : (
                     messages.map((msg, idx) => {
@@ -2317,7 +2435,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         sendMessage();
                       }
                     }}
-                    placeholder="Ketik balasan..."
+                    placeholder={t('chat.typeReply')}
                     style={{
                       flex: 1,
                       padding: "5px 8px",
@@ -2348,7 +2466,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     }}
                   >
                     <SendIcon size={12} />
-                    <span>Kirim</span>
+                    <span>{t('chat.send')}</span>
                   </button>
                 </div>
               )}
@@ -2363,7 +2481,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
             }}>
-              Pilih chat dari daftar di kiri
+              {t('chat.pickChat')}
             </div>
           )}
         </div>
@@ -2372,98 +2490,43 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   );
 };
 
-// ===== MENTAL SLUG PAGES (EN & ID) =====
-type SlugPage = 'home' | 'terms-id' | 'terms-en' | 'about-id' | 'about-en' | 'privacy-id' | 'privacy-en';
-
-const SLUG_CONTENT: Record<Exclude<SlugPage, 'home'>, { title: string; subtitle: string; body: string; backLabel: string }> = {
-  'terms-id': {
-    title: 'Syarat dan Ketentuan',
-    subtitle: 'Syarat dan Ketentuan Berlaku',
-    body: `Dengan mengakses dan menggunakan platform Menuru, Anda dianggap telah membaca, memahami, dan menyetujui seluruh syarat dan ketentuan yang berlaku. Platform ini disediakan untuk keperluan komunitas, catatan, donasi, dan interaksi sosial yang positif.
-
-Anda dilarang menggunakan platform ini untuk aktivitas ilegal, perjudian, phishing, penyebaran malware, atau tindakan yang merugikan pihak lain. Kami berhak menangguhkan atau menghapus akun yang melanggar ketentuan tanpa pemberitahuan terlebih dahulu.
-
-Seluruh konten yang Anda unggah tetap menjadi tanggung jawab Anda. Menuru tidak bertanggung jawab atas kerugian yang timbul akibat penyalahgunaan platform oleh pengguna lain.
-
-Ketentuan ini dapat berubah sewaktu-waktu. Perubahan akan diumumkan melalui halaman ini.`,
-    backLabel: 'Kembali ke Beranda',
-  },
-  'terms-en': {
-    title: 'Terms of Use',
-    subtitle: 'Terms and Conditions Apply',
-    body: `By accessing and using the Menuru platform, you are deemed to have read, understood, and agreed to all applicable terms and conditions. This platform is provided for community, note-taking, donation, and positive social interaction purposes.
-
-You are prohibited from using this platform for illegal activities, gambling, phishing, malware distribution, or any actions that harm others. We reserve the right to suspend or delete accounts that violate these terms without prior notice.
-
-All content you upload remains your responsibility. Menuru is not liable for any losses arising from misuse of the platform by other users.
-
-These terms may change at any time. Changes will be announced on this page.`,
-    backLabel: 'Back to Home',
-  },
-  'about-id': {
-    title: 'Tentang Kami',
-    subtitle: 'Tentang Menuru',
-    body: `Menuru adalah platform yang lahir dari semangat "Love Yourself" — sebuah ruang digital untuk mencatat ide, berbagi cerita, berdonasi, dan membangun komunitas yang saling mendukung.
-
-Kami percaya bahwa setiap orang berhak memiliki ruang aman untuk mengekspresikan diri, menemukan inspirasi, dan membantu sesama. Menuru hadir sebagai jembatan antara kreativitas, kepedulian, dan kolaborasi.
-
-Visi kami: menjadi platform komunitas yang humanis, aman, dan bermanfaat bagi banyak orang.
-Misi kami: menyediakan fitur catatan, donasi, live chat, dan blog yang mudah diakses serta bebas dari konten berbahaya.`,
-    backLabel: 'Kembali ke Beranda',
-  },
-  'about-en': {
-    title: 'About Us',
-    subtitle: 'About Menuru',
-    body: `Menuru is a platform born from the spirit of "Love Yourself" — a digital space to take notes, share stories, donate, and build a supportive community.
-
-We believe everyone deserves a safe space to express themselves, find inspiration, and help others. Menuru exists as a bridge between creativity, care, and collaboration.
-
-Our vision: to become a humane, safe, and beneficial community platform for many.
-Our mission: to provide note-taking, donation, live chat, and blog features that are easily accessible and free from harmful content.`,
-    backLabel: 'Back to Home',
-  },
-  'privacy-id': {
-    title: 'Kebijakan Privasi',
-    subtitle: 'Privasi Anda Prioritas Kami',
-    body: `Menuru menghargai privasi setiap pengguna. Kami hanya mengumpulkan data yang diperlukan untuk menjalankan layanan, seperti nama, email, dan aktivitas dasar di platform.
-
-Data Anda tidak akan dijual atau dibagikan kepada pihak ketiga tanpa izin, kecuali diwajibkan oleh hukum. Kami menggunakan enkripsi AES-256-GCM untuk melindungi pesan live chat Anda.
-
-Anda berhak meminta penghapusan data akun Anda kapan saja dengan menghubungi admin melalui fitur Contact atau Live Chat.
-
-Dengan menggunakan platform ini, Anda menyetujui praktik privasi yang dijelaskan di halaman ini.`,
-    backLabel: 'Kembali ke Beranda',
-  },
-  'privacy-en': {
-    title: 'Privacy Policy',
-    subtitle: 'Your Privacy Is Our Priority',
-    body: `Menuru respects the privacy of every user. We only collect data necessary to run the service, such as name, email, and basic activity on the platform.
-
-Your data will not be sold or shared with third parties without permission, unless required by law. We use AES-256-GCM encryption to protect your live chat messages.
-
-You have the right to request deletion of your account data at any time by contacting the admin via the Contact or Live Chat feature.
-
-By using this platform, you agree to the privacy practices described on this page.`,
-    backLabel: 'Back to Home',
-  },
-};
-
 export default function HomePage(): React.JSX.Element {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [currentSlug, setCurrentSlug] = useState<SlugPage>('home');
+  const [lang, setLang] = useState<Lang>('id');
   
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
 
+  // ===== TRANSLATION FUNCTION =====
+  const t = (key: string): string => {
+    return T[lang][key] || key;
+  };
+
+  // ===== INIT: baca ?lang= dari URL =====
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    const urlLang = searchParams?.get('lang');
+    if (urlLang === 'en' || urlLang === 'id') {
+      setLang(urlLang);
+    }
+  }, [searchParams]);
+
+  // ===== SWITCH LANGUAGE + UPDATE SLUG URL =====
+  const switchLang = (newLang: Lang) => {
+    setLang(newLang);
+    const params = new URLSearchParams(window.location.search);
+    params.set('lang', newLang);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   useEffect(() => {
     if (!auth || !isMounted) return;
@@ -2492,7 +2555,7 @@ export default function HomePage(): React.JSX.Element {
   }, [isMounted, loading]);
 
   useEffect(() => {
-    if (!showMain || !isMounted || currentSlug !== 'home') return;
+    if (!showMain || !isMounted) return;
 
     const menuruElement = menuruFooterRef.current;
     const menuruText = menuruTextRef.current;
@@ -2555,7 +2618,7 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [showMain, isMounted, currentSlug]);
+  }, [showMain, isMounted]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -2615,12 +2678,6 @@ export default function HomePage(): React.JSX.Element {
       duration: 0.3,
       ease: "power2.inOut"
     }, "-=0.3");
-  };
-
-  // ===== SLUG NAVIGATION =====
-  const navigateToSlug = (slug: SlugPage) => {
-    setCurrentSlug(slug);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (!isMounted || loading) {
@@ -2720,87 +2777,50 @@ export default function HomePage(): React.JSX.Element {
     );
   }
 
-  // ===== SLUG PAGE RENDER =====
-  if (currentSlug !== 'home') {
-    const content = SLUG_CONTENT[currentSlug];
-    return (
-      <>
-        <Head>
-          <title>{content.title} | Menuru Official</title>
-          <meta name="description" content={content.subtitle} />
-        </Head>
-        <div
-          style={{
-            minHeight: "100vh",
-            backgroundColor: "#ffffff",
-            fontFamily: FONT_FAMILY,
-            padding: "120px 40px 80px 40px",
-          }}
-        >
-          <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-            <button
-              onClick={() => navigateToSlug('home')}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 18px",
-                backgroundColor: "transparent",
-                color: "#0D3CFC",
-                border: "2px solid #0D3CFC",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                marginBottom: "40px",
-              }}
-            >
-              ← {content.backLabel}
-            </button>
-            <div style={{
-              color: "#0D3CFC",
-              fontSize: "18px",
-              fontWeight: 400,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "8px",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-            }}>
-              {content.subtitle}
-            </div>
-            <h1 style={{
-              fontSize: "64px",
-              fontWeight: 700,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              margin: 0,
-              marginBottom: "40px",
-            }}>
-              {content.title}
-            </h1>
-            <div style={{
-              fontSize: "18px",
-              fontWeight: 400,
-              color: "#333333",
-              fontFamily: FONT_FAMILY,
-              lineHeight: 1.8,
-              whiteSpace: "pre-line",
-            }}>
-              {content.body}
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
+  // ===== FOOTER LINKS per bahasa =====
+  const footerLinks = lang === 'id'
+    ? [
+        { title: t('footer.getInTouch'), links: ['link.contact', 'link.instagram', 'link.liveChat'] },
+        { title: t('footer.product'), links: ['link.shop', 'link.note', 'link.calendar', 'link.blog', 'link.donation', 'link.community', 'link.liveChatAgent', 'link.stories'] },
+        { title: t('footer.attention'), links: ['link.privacy', 'link.terms', 'link.help', 'link.termsCondition', 'link.about', 'link.termsOfUse'] }
+      ]
+    : [
+        { title: t('footer.getInTouch'), links: ['link.contact', 'link.instagram', 'link.liveChat'] },
+        { title: t('footer.product'), links: ['link.shop', 'link.note', 'link.calendar', 'link.blog', 'link.donation', 'link.community', 'link.liveChatAgent', 'link.stories'] },
+        { title: t('footer.attention'), links: ['link.privacy', 'link.terms', 'link.help', 'link.termsCondition', 'link.about', 'link.termsOfUse'] }
+      ];
+
+  // ===== LINK ROUTING MAP =====
+  const getLinkHref = (key: string): string => {
+    switch (key) {
+      case 'link.contact': return '/contact';
+      case 'link.liveChat': return '/live-chat';
+      case 'link.liveChatAgent': return '/live-chat-agent';
+      case 'link.help': return '/pusat-bantuan';
+      case 'link.privacy': return '/privacy-policy';
+      case 'link.terms': return '/terms-of-service';
+      case 'link.stories': return '/stories';
+      case 'link.shop': return '/shop';
+      case 'link.note': return '/note';
+      case 'link.calendar': return '/calendar';
+      case 'link.blog': return '/blog';
+      case 'link.donation': return '/donation';
+      case 'link.community': return '/community';
+      case 'link.instagram': return 'https://instagram.com/menuru';
+      case 'link.about': return '/profile';
+      case 'link.termsOfUse': return '/terms-of-use';
+      case 'link.termsCondition': return '/terms-of-service';
+      default: return '#';
+    }
+  };
+
+  const badgeUpdateKeys = ['link.privacy', 'link.terms', 'link.termsCondition', 'link.about', 'link.termsOfUse'];
+  const badgeNewKeys = ['link.stories'];
 
   return (
     <>
       <Head>
-        <title>Menuru Official | Home</title>
+        <title>{lang === 'id' ? 'Menuru Official | Beranda' : 'Menuru Official | Home'}</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
@@ -2832,9 +2852,62 @@ export default function HomePage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* LIVE CHAT AGENT - tetap ada */}
+        {/* LANGUAGE SWITCH BUTTONS */}
+        <div
+          style={{
+            position: "fixed",
+            top: "24px",
+            right: "24px",
+            zIndex: 200,
+            display: "flex",
+            gap: "6px",
+            padding: "6px",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            border: "1px solid rgba(13,60,252,0.1)",
+          }}
+        >
+          <button
+            onClick={() => switchLang('id')}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "6px",
+              border: "none",
+              fontSize: "12px",
+              fontWeight: 600,
+              fontFamily: FONT_FAMILY,
+              cursor: "pointer",
+              backgroundColor: lang === 'id' ? '#0D3CFC' : 'transparent',
+              color: lang === 'id' ? '#fff' : '#0D3CFC',
+              transition: "all 0.2s ease",
+            }}
+          >
+            ID
+          </button>
+          <button
+            onClick={() => switchLang('en')}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "6px",
+              border: "none",
+              fontSize: "12px",
+              fontWeight: 600,
+              fontFamily: FONT_FAMILY,
+              cursor: "pointer",
+              backgroundColor: lang === 'en' ? '#0D3CFC' : 'transparent',
+              color: lang === 'en' ? '#fff' : '#0D3CFC',
+              transition: "all 0.2s ease",
+            }}
+          >
+            EN
+          </button>
+        </div>
+
+        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} t={t} />
         </div>
 
         {/* FOOTER */}
@@ -2937,54 +3010,10 @@ export default function HomePage(): React.JSX.Element {
                     gap: "8px",
                   }}
                 >
-                  {section.links.map((link, linkIdx) => {
-                    // ===== MENTAL SLUG ROUTING =====
-                    let onClickHandler: (() => void) | null = null;
-                    let linkHref = "#";
-                    let isAttention = false;
-                    let isStories = false;
-                    
-                    if (link === "Contact") {
-                      linkHref = "/contact";
-                    } else if (link === "Live Chat") {
-                      linkHref = "/live-chat";
-                    } else if (link === "Live Chat Agent") {
-                      linkHref = "/live-chat-agent";
-                    } else if (link === "Pusat Bantuan") {
-                      linkHref = "/pusat-bantuan";
-                    } else if (link === "Kebijakan Privasi") {
-                      onClickHandler = () => navigateToSlug('privacy-id');
-                      isAttention = true;
-                    } else if (link === "Ketentuan Kami") {
-                      onClickHandler = () => navigateToSlug('terms-id');
-                      isAttention = true;
-                    } else if (link === "Syarat dan Ketentuan Berlaku") {
-                      onClickHandler = () => navigateToSlug('terms-id');
-                      isAttention = true;
-                    } else if (link === "Tentang Kami") {
-                      onClickHandler = () => navigateToSlug('about-id');
-                      isAttention = true;
-                    } else if (link === "Terms of Use") {
-                      onClickHandler = () => navigateToSlug('terms-en');
-                      isAttention = true;
-                    } else if (link === "Stories") {
-                      linkHref = "/stories";
-                      isStories = true;
-                    } else if (link === "Shop") {
-                      linkHref = "/shop";
-                    } else if (link === "Note") {
-                      linkHref = "/note";
-                    } else if (link === "Calendar") {
-                      linkHref = "/calendar";
-                    } else if (link === "Blog") {
-                      linkHref = "/blog";
-                    } else if (link === "Donation") {
-                      linkHref = "/donation";
-                    } else if (link === "Community") {
-                      linkHref = "/community";
-                    } else if (link === "Instagram") {
-                      linkHref = "https://instagram.com/menuru";
-                    }
+                  {section.links.map((linkKey, linkIdx) => {
+                    const href = getLinkHref(linkKey);
+                    const isUpdate = badgeUpdateKeys.includes(linkKey);
+                    const isNew = badgeNewKeys.includes(linkKey);
                     
                     return (
                       <div
@@ -2995,9 +3024,8 @@ export default function HomePage(): React.JSX.Element {
                           gap: "10px",
                         }}
                       >
-                        {onClickHandler ? (
+                        <Link href={href} style={{ textDecoration: "none" }}>
                           <span
-                            onClick={onClickHandler}
                             style={{
                               fontFamily: FONT_FAMILY,
                               fontSize: "20px",
@@ -3008,26 +3036,10 @@ export default function HomePage(): React.JSX.Element {
                               textTransform: "none",
                             }}
                           >
-                            {link}
+                            {t(linkKey)}
                           </span>
-                        ) : (
-                          <Link href={linkHref} style={{ textDecoration: "none" }}>
-                            <span
-                              style={{
-                                fontFamily: FONT_FAMILY,
-                                fontSize: "20px",
-                                fontWeight: 400,
-                                color: "#0D3CFC",
-                                letterSpacing: "-0.01em",
-                                cursor: "pointer",
-                                textTransform: "none",
-                              }}
-                            >
-                              {link}
-                            </span>
-                          </Link>
-                        )}
-                        {isAttention && (
+                        </Link>
+                        {isUpdate && (
                           <span
                             style={{
                               backgroundColor: "#0D3CFC",
@@ -3041,10 +3053,10 @@ export default function HomePage(): React.JSX.Element {
                               display: "inline-block",
                             }}
                           >
-                            Update
+                            {t('badge.update')}
                           </span>
                         )}
-                        {isStories && (
+                        {isNew && (
                           <span
                             style={{
                               backgroundColor: "#0D3CFC",
@@ -3058,7 +3070,7 @@ export default function HomePage(): React.JSX.Element {
                               display: "inline-block",
                             }}
                           >
-                            New
+                            {t('badge.new')}
                           </span>
                         )}
                       </div>
@@ -3114,7 +3126,7 @@ export default function HomePage(): React.JSX.Element {
               opacity: 0.8,
             }}
           >
-            2024 - 2026
+            {t('misc.copyright')}
           </div>
         </div>
       </div>
@@ -3174,295 +3186,84 @@ export default function HomePage(): React.JSX.Element {
         }
 
         @media (max-width: 1024px) {
-          .subtitle p {
-            font-size: 48px !important;
-          }
-          .title {
-            font-size: 36px !important;
-          }
-          .cta-button {
-            padding: 10px 22px !important;
-          }
-          .cta-button span {
-            font-size: 16px !important;
-          }
-          .arrow-box {
-            width: 44px !important;
-            height: 44px !important;
-            padding: 8px !important;
-          }
-          .get-in-touch {
-            padding: 6px 12px !important;
-          }
-          .get-in-touch span {
-            font-size: 14px !important;
-          }
-          .pusat-bantuan {
-            padding: 6px 12px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 14px !important;
-          }
-          .menu-button {
-            padding: 6px 12px !important;
-          }
-          .menu-button span {
-            font-size: 14px !important;
-          }
-          .menu-overlay {
-            padding: 40px 40px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 36px !important;
-          }
-          .menu-overlay .stories {
-            right: 40px !important;
-            top: 80px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 30px !important;
-          }
-          .menu-overlay .menu-box {
-            right: 40px !important;
-            bottom: 40px !important;
-            max-width: 450px !important;
-            padding: 16px 24px !important;
-            min-height: 70px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 17px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box2 {
-            right: 40px !important;
-            top: 140px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
-          .menu-overlay .menu-box3 {
-            right: 40px !important;
-            top: 260px !important;
-            max-width: 550px !important;
-            padding: 14px 20px !important;
-            min-height: 80px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 18px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 75px !important;
-            height: 75px !important;
-          }
+          .subtitle p { font-size: 48px !important; }
+          .title { font-size: 36px !important; }
+          .cta-button { padding: 10px 22px !important; }
+          .cta-button span { font-size: 16px !important; }
+          .arrow-box { width: 44px !important; height: 44px !important; padding: 8px !important; }
+          .get-in-touch { padding: 6px 12px !important; }
+          .get-in-touch span { font-size: 14px !important; }
+          .pusat-bantuan { padding: 6px 12px !important; }
+          .pusat-bantuan span { font-size: 14px !important; }
+          .menu-button { padding: 6px 12px !important; }
+          .menu-button span { font-size: 14px !important; }
+          .menu-overlay { padding: 40px 40px !important; }
+          .menu-overlay .menu-text { font-size: 36px !important; }
+          .menu-overlay .stories { right: 40px !important; top: 80px !important; }
+          .menu-overlay .stories span { font-size: 30px !important; }
+          .menu-overlay .menu-box { right: 40px !important; bottom: 40px !important; max-width: 450px !important; padding: 16px 24px !important; min-height: 70px !important; }
+          .menu-overlay .menu-box span { font-size: 17px !important; }
+          .menu-overlay .menu-box img { width: 55px !important; height: 55px !important; }
+          .menu-overlay .menu-box2 { right: 40px !important; top: 140px !important; max-width: 550px !important; padding: 14px 20px !important; min-height: 80px !important; }
+          .menu-overlay .menu-box2 span { font-size: 18px !important; }
+          .menu-overlay .menu-box2 img { width: 75px !important; height: 75px !important; }
+          .menu-overlay .menu-box3 { right: 40px !important; top: 260px !important; max-width: 550px !important; padding: 14px 20px !important; min-height: 80px !important; }
+          .menu-overlay .menu-box3 span { font-size: 18px !important; }
+          .menu-overlay .menu-box3 img { width: 75px !important; height: 75px !important; }
         }
         @media (max-width: 768px) {
-          .subtitle p {
-            font-size: 36px !important;
-          }
-          .title {
-            font-size: 28px !important;
-          }
-          .cta-button {
-            padding: 8px 18px !important;
-          }
-          .cta-button span {
-            font-size: 14px !important;
-          }
-          .arrow-box {
-            width: 38px !important;
-            height: 38px !important;
-            padding: 6px !important;
-          }
-          .arrow-box svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-          .get-in-touch {
-            padding: 4px 10px !important;
-          }
-          .get-in-touch span {
-            font-size: 12px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 10px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 12px !important;
-          }
-          .menu-button {
-            padding: 4px 10px !important;
-          }
-          .menu-button span {
-            font-size: 12px !important;
-          }
-          .menu-overlay {
-            padding: 30px 20px !important;
-            flex-direction: column !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 28px !important;
-          }
-          .menu-overlay .menu-items {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .menu-overlay .stories {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 10px !important;
-            align-items: flex-start !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 24px !important;
-          }
-          .menu-overlay .menu-box {
-            position: relative !important;
-            right: auto !important;
-            bottom: auto !important;
-            margin-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 14px 20px !important;
-            min-height: 60px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 50px !important;
-            height: 50px !important;
-          }
-          .menu-overlay .menu-box2 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
-          .menu-overlay .menu-box3 {
-            position: relative !important;
-            right: auto !important;
-            top: auto !important;
-            margin-top: 15px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            padding: 12px 16px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 16px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 55px !important;
-            height: 55px !important;
-          }
+          .subtitle p { font-size: 36px !important; }
+          .title { font-size: 28px !important; }
+          .cta-button { padding: 8px 18px !important; }
+          .cta-button span { font-size: 14px !important; }
+          .arrow-box { width: 38px !important; height: 38px !important; padding: 6px !important; }
+          .arrow-box svg { width: 18px !important; height: 18px !important; }
+          .get-in-touch { padding: 4px 10px !important; }
+          .get-in-touch span { font-size: 12px !important; }
+          .pusat-bantuan { padding: 4px 10px !important; }
+          .pusat-bantuan span { font-size: 12px !important; }
+          .menu-button { padding: 4px 10px !important; }
+          .menu-button span { font-size: 12px !important; }
+          .menu-overlay { padding: 30px 20px !important; flex-direction: column !important; }
+          .menu-overlay .menu-text { font-size: 28px !important; }
+          .menu-overlay .menu-items { width: 100% !important; max-width: 100% !important; }
+          .menu-overlay .stories { position: relative !important; right: auto !important; top: auto !important; margin-top: 10px !important; align-items: flex-start !important; }
+          .menu-overlay .stories span { font-size: 24px !important; }
+          .menu-overlay .menu-box { position: relative !important; right: auto !important; bottom: auto !important; margin-top: 20px !important; max-width: 100% !important; width: 100% !important; flex-wrap: wrap !important; padding: 14px 20px !important; min-height: 60px !important; }
+          .menu-overlay .menu-box span { font-size: 16px !important; }
+          .menu-overlay .menu-box img { width: 50px !important; height: 50px !important; }
+          .menu-overlay .menu-box2 { position: relative !important; right: auto !important; top: auto !important; margin-top: 15px !important; max-width: 100% !important; width: 100% !important; flex-wrap: wrap !important; padding: 12px 16px !important; min-height: 50px !important; }
+          .menu-overlay .menu-box2 span { font-size: 16px !important; }
+          .menu-overlay .menu-box2 img { width: 55px !important; height: 55px !important; }
+          .menu-overlay .menu-box3 { position: relative !important; right: auto !important; top: auto !important; margin-top: 15px !important; max-width: 100% !important; width: 100% !important; flex-wrap: wrap !important; padding: 12px 16px !important; min-height: 50px !important; }
+          .menu-overlay .menu-box3 span { font-size: 16px !important; }
+          .menu-overlay .menu-box3 img { width: 55px !important; height: 55px !important; }
         }
         @media (max-width: 480px) {
-          .subtitle p {
-            font-size: 24px !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-          .cta-button {
-            padding: 6px 14px !important;
-          }
-          .cta-button span {
-            font-size: 12px !important;
-          }
-          .arrow-box {
-            width: 32px !important;
-            height: 32px !important;
-            padding: 4px !important;
-          }
-          .arrow-box svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .get-in-touch {
-            padding: 4px 8px !important;
-          }
-          .get-in-touch span {
-            font-size: 10px !important;
-          }
-          .pusat-bantuan {
-            padding: 4px 8px !important;
-          }
-          .pusat-bantuan span {
-            font-size: 10px !important;
-          }
-          .menu-button {
-            padding: 4px 8px !important;
-          }
-          .menu-button span {
-            font-size: 10px !important;
-          }
-          .menu-overlay {
-            padding: 20px 15px !important;
-          }
-          .menu-overlay .menu-text {
-            font-size: 22px !important;
-          }
-          .menu-overlay .stories span {
-            font-size: 20px !important;
-          }
-          .menu-overlay .menu-box span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box img {
-            width: 40px !important;
-            height: 40px !important;
-          }
-          .menu-overlay .menu-box {
-            padding: 10px 14px !important;
-            min-height: 50px !important;
-          }
-          .menu-overlay .menu-box2 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box2 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box2 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
-          .menu-overlay .menu-box3 span {
-            font-size: 14px !important;
-          }
-          .menu-overlay .menu-box3 img {
-            width: 45px !important;
-            height: 45px !important;
-          }
-          .menu-overlay .menu-box3 {
-            padding: 8px 12px !important;
-            min-height: 40px !important;
-          }
+          .subtitle p { font-size: 24px !important; }
+          .title { font-size: 22px !important; }
+          .cta-button { padding: 6px 14px !important; }
+          .cta-button span { font-size: 12px !important; }
+          .arrow-box { width: 32px !important; height: 32px !important; padding: 4px !important; }
+          .arrow-box svg { width: 14px !important; height: 14px !important; }
+          .get-in-touch { padding: 4px 8px !important; }
+          .get-in-touch span { font-size: 10px !important; }
+          .pusat-bantuan { padding: 4px 8px !important; }
+          .pusat-bantuan span { font-size: 10px !important; }
+          .menu-button { padding: 4px 8px !important; }
+          .menu-button span { font-size: 10px !important; }
+          .menu-overlay { padding: 20px 15px !important; }
+          .menu-overlay .menu-text { font-size: 22px !important; }
+          .menu-overlay .stories span { font-size: 20px !important; }
+          .menu-overlay .menu-box span { font-size: 14px !important; }
+          .menu-overlay .menu-box img { width: 40px !important; height: 40px !important; }
+          .menu-overlay .menu-box { padding: 10px 14px !important; min-height: 50px !important; }
+          .menu-overlay .menu-box2 span { font-size: 14px !important; }
+          .menu-overlay .menu-box2 img { width: 45px !important; height: 45px !important; }
+          .menu-overlay .menu-box2 { padding: 8px 12px !important; min-height: 40px !important; }
+          .menu-overlay .menu-box3 span { font-size: 14px !important; }
+          .menu-overlay .menu-box3 img { width: 45px !important; height: 45px !important; }
+          .menu-overlay .menu-box3 { padding: 8px 12px !important; min-height: 40px !important; }
         }
       `}</style>
     </>
