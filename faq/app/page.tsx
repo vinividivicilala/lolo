@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -426,6 +426,13 @@ const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color
   </svg>
 );
 
+const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="11" cy="11" r="8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: number }) => (
   <span
     style={{
@@ -442,7 +449,19 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Stories"] },
+  {
+    title: "Product",
+    links: [
+      "Shop",
+      "Note",
+      "Calendar",
+      "Blog",
+      "Donation",
+      "Community",
+      "Live Chat Agent",
+      "Stories",
+    ],
+  },
   { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] },
 ];
 
@@ -531,6 +550,9 @@ const LiveChatAgent = ({
   // Realtime preview per ticket (up to 3 last messages)
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
@@ -849,6 +871,25 @@ const LiveChatAgent = ({
     }
   };
 
+  // ===== SEARCH FILTER LOGIC =====
+  const filterTicketsBySearch = (list: Ticket[]) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((ticket) => {
+      // Match by ticket metadata
+      if (ticket.userName?.toLowerCase().includes(q)) return true;
+      if (ticket.userEmail?.toLowerCase().includes(q)) return true;
+      if (ticket.topic?.toLowerCase().includes(q)) return true;
+      if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
+      // Match by message previews
+      const previews = ticketPreviews[ticket.id] || [];
+      for (const p of previews) {
+        if (p.text.toLowerCase().includes(q)) return true;
+      }
+      return false;
+    });
+  };
+
   // ===== TYPING HANDLER =====
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -1056,7 +1097,7 @@ const LiveChatAgent = ({
     }
   };
 
-  // ===== RENDER DELIVERY STATUS (ALL TEXT WHITE) =====
+  // ===== RENDER DELIVERY STATUS =====
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
     if (!isMine) return null;
     let label = "Sent";
@@ -1248,8 +1289,6 @@ const LiveChatAgent = ({
     // previews[0] = newest, so reverse to show oldest first
     const ordered = [...previews].reverse();
 
-    // For USER (non-admin): all text WHITE
-    // For ADMIN: agent blue, user gray
     const userTextColor = "#ffffff";
     const agentTextColor = isAdmin ? "#0D3CFC" : "#ffffff";
     const labelUserColor = isAdmin ? "#888" : "#ffffff";
@@ -1287,6 +1326,251 @@ const LiveChatAgent = ({
             </span>
           </div>
         ))}
+      </div>
+    );
+  };
+
+  // ===== SEARCH BAR COMPONENT =====
+  const renderSearchBar = () => {
+    const isDark = !isAdmin; // user side = blue background
+    const bgColor = isDark ? "rgba(255,255,255,0.15)" : "#ffffff";
+    const textColor = isDark ? "#ffffff" : "#000";
+    const placeholderColor = isDark ? "rgba(255,255,255,0.6)" : "#999";
+    const iconColor = isDark ? "#ffffff" : "#666";
+    const borderColor = isDark ? "rgba(255,255,255,0.25)" : "#e8e8e8";
+
+    return (
+      <div style={{ padding: "10px 14px", borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e8e8e8" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 12px",
+            backgroundColor: bgColor,
+            border: `1px solid ${borderColor}`,
+            borderRadius: "8px",
+          }}
+        >
+          <SearchIcon size={14} color={iconColor} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search chats or messages..."
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: textColor,
+              fontSize: "12px",
+              fontFamily: FONT_FAMILY,
+              padding: 0,
+            }}
+            onFocus={(e) => (e.currentTarget.parentElement!.style.borderColor = "#0D3CFC")}
+            onBlur={(e) =>
+              (e.currentTarget.parentElement!.style.borderColor = borderColor)
+            }
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: textColor,
+                cursor: "pointer",
+                fontSize: "14px",
+                padding: 0,
+                lineHeight: 1,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ===== ANNOUNCEMENT & BROADCAST SECTION (ADMIN ONLY) =====
+  const renderAnnouncementBroadcastSection = () => {
+    if (!isAdmin) return null;
+
+    const announcementTickets = tickets.filter((t) => t.isAnnouncement && !t.isBroadcast);
+    const broadcastTickets = tickets.filter((t) => t.isBroadcast);
+
+    if (announcementTickets.length === 0 && broadcastTickets.length === 0) return null;
+
+    return (
+      <div style={{ marginBottom: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* ANNOUNCEMENT CARD */}
+          {announcementTickets.length > 0 && (
+            <div
+              style={{
+                flex: "1 1 300px",
+                backgroundColor: "#0D3CFC",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Announcement
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    padding: "2px 10px",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontWeight: 600,
+                  }}
+                >
+                  {announcementTickets.length} active
+                </div>
+              </div>
+              {announcementTickets.slice(0, 3).map((t) => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
+                  style={{
+                    padding: "8px 0",
+                    borderTop: "1px solid rgba(255,255,255,0.15)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      marginBottom: "3px",
+                    }}
+                  >
+                    {t.userName}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.85)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t.topic}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* BROADCAST CARD */}
+          {broadcastTickets.length > 0 && (
+            <div
+              style={{
+                flex: "1 1 300px",
+                backgroundColor: "#0D3CFC",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                color: "#ffffff",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Broadcasting
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    padding: "2px 10px",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontWeight: 600,
+                  }}
+                >
+                  {broadcastTickets.length} active
+                </div>
+              </div>
+              {broadcastTickets.slice(0, 3).map((t) => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
+                  style={{
+                    padding: "8px 0",
+                    borderTop: "1px solid rgba(255,255,255,0.15)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      marginBottom: "3px",
+                    }}
+                  >
+                    {t.userName}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.85)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t.topic}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -1519,7 +1803,6 @@ const LiveChatAgent = ({
           </button>
         </div>
 
-        {/* ONLINE AGENTS PANEL */}
         <div style={{ marginBottom: "20px" }}>
           <div
             style={{
@@ -1710,11 +1993,16 @@ const LiveChatAgent = ({
   }
 
   // ===== MAIN CHAT LAYOUT (USER & ADMIN) =====
-  const waitingTickets = tickets.filter((t) => t.status === "waiting");
-  const activeTickets = tickets.filter((t) => t.status === "active");
-  const resolvedTickets = tickets.filter(
+  const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
+  const activeTicketsRaw = tickets.filter((t) => t.status === "active");
+  const resolvedTicketsRaw = tickets.filter(
     (t) => t.status === "resolved" || t.status === "closed"
   );
+
+  const waitingTickets = filterTicketsBySearch(waitingTicketsRaw);
+  const activeTickets = filterTicketsBySearch(activeTicketsRaw);
+  const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
+
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   return (
@@ -1785,6 +2073,9 @@ const LiveChatAgent = ({
         </div>
       </div>
 
+      {/* ANNOUNCEMENT & BROADCAST (ADMIN ONLY) */}
+      {renderAnnouncementBroadcastSection()}
+
       {/* CHAT AREA */}
       <div
         style={{
@@ -1847,6 +2138,9 @@ const LiveChatAgent = ({
                 : tickets.filter((t) => t.userId === user.uid).length}
             </span>
           </div>
+
+          {/* Search Bar */}
+          {renderSearchBar()}
 
           {/* List */}
           <div style={{ overflowY: "auto", flex: 1 }}>
@@ -2045,114 +2339,117 @@ const LiveChatAgent = ({
                   </div>
                 )}
 
-                {tickets.length === 0 && (
-                  <div
-                    style={{
-                      padding: "30px 16px",
-                      textAlign: "center",
-                      color: "#999",
-                      fontSize: "13px",
-                    }}
-                  >
-                    No incoming chats
-                  </div>
-                )}
+                {waitingTickets.length === 0 &&
+                  activeTickets.length === 0 &&
+                  resolvedTickets.length === 0 && (
+                    <div
+                      style={{
+                        padding: "30px 16px",
+                        textAlign: "center",
+                        color: "#999",
+                        fontSize: "13px",
+                      }}
+                    >
+                      {searchQuery ? "No results found" : "No incoming chats"}
+                    </div>
+                  )}
               </>
             ) : (
               // USER SIDE: ONLY THEIR OWN TICKETS — ALL TEXT WHITE
               <>
-                {tickets
-                  .filter((t) => t.userId === user.uid)
-                  .map((ticket) => {
-                    const ticketId = generateTicketId(ticket.createdAt);
-                    const isActive = selectedTicket?.id === ticket.id;
-                    const statusLabel =
-                      ticket.status === "waiting"
-                        ? "Waiting"
-                        : ticket.status === "active"
-                        ? "Active"
-                        : "Resolved";
-                    return (
+                {filterTicketsBySearch(
+                  tickets.filter((t) => t.userId === user.uid)
+                ).map((ticket) => {
+                  const ticketId = generateTicketId(ticket.createdAt);
+                  const isActive = selectedTicket?.id === ticket.id;
+                  const statusLabel =
+                    ticket.status === "waiting"
+                      ? "Waiting"
+                      : ticket.status === "active"
+                      ? "Active"
+                      : "Resolved";
+                  return (
+                    <div
+                      key={ticket.id}
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setMessages([]);
+                      }}
+                      style={{
+                        padding: "14px 16px",
+                        borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
+                        backgroundColor: isActive
+                          ? "rgba(255,255,255,0.12)"
+                          : "transparent",
+                        cursor: "pointer",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
                       <div
-                        key={ticket.id}
-                        onClick={() => {
-                          setSelectedTicket(ticket);
-                          setMessages([]);
-                        }}
                         style={{
-                          padding: "14px 16px",
-                          borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
-                          backgroundColor: isActive
-                            ? "rgba(255,255,255,0.12)"
-                            : "transparent",
-                          cursor: "pointer",
-                          borderBottom: "1px solid rgba(255,255,255,0.06)",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "4px",
                         }}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "4px",
-                          }}
-                        >
-                          <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
-                            {ticket.userName}
-                          </div>
-                          <span style={{ fontSize: "10px", color: "#fff" }}>
-                            {ticketMsgCounts[ticket.id] || 0} msgs
-                          </span>
+                        <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
+                          {ticket.userName}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#fff",
-                            marginBottom: "6px",
-                          }}
-                        >
-                          {ticket.topic}
-                        </div>
-                        {renderTicketPreview(ticket.id)}
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            marginTop: "6px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              backgroundColor:
-                                ticket.status === "waiting"
-                                  ? "#fef3c7"
-                                  : ticket.status === "active"
-                                  ? "#d1fae5"
-                                  : "#e5e7eb",
-                              color:
-                                ticket.status === "waiting"
-                                  ? "#92400e"
-                                  : ticket.status === "active"
-                                  ? "#065f46"
-                                  : "#6b7280",
-                              padding: "2px 8px",
-                              borderRadius: "8px",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {statusLabel}
-                          </span>
-                          <span style={{ fontSize: "9px", color: "#fff" }}>
-                            {ticketId}
-                          </span>
-                        </div>
+                        <span style={{ fontSize: "10px", color: "#fff" }}>
+                          {ticketMsgCounts[ticket.id] || 0} msgs
+                        </span>
                       </div>
-                    );
-                  })}
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#fff",
+                          marginBottom: "6px",
+                        }}
+                      >
+                        {ticket.topic}
+                      </div>
+                      {renderTicketPreview(ticket.id)}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "6px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            backgroundColor:
+                              ticket.status === "waiting"
+                                ? "#fef3c7"
+                                : ticket.status === "active"
+                                ? "#d1fae5"
+                                : "#e5e7eb",
+                            color:
+                              ticket.status === "waiting"
+                                ? "#92400e"
+                                : ticket.status === "active"
+                                ? "#065f46"
+                                : "#6b7280",
+                            padding: "2px 8px",
+                            borderRadius: "8px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {statusLabel}
+                        </span>
+                        <span style={{ fontSize: "9px", color: "#fff" }}>
+                          {ticketId}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
 
-                {tickets.filter((t) => t.userId === user.uid).length === 0 && (
+                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
+                  .length === 0 && (
                   <div
                     style={{
                       padding: "30px 16px",
@@ -2161,7 +2458,7 @@ const LiveChatAgent = ({
                       fontSize: "13px",
                     }}
                   >
-                    No chats yet
+                    {searchQuery ? "No results found" : "No chats yet"}
                   </div>
                 )}
               </>
