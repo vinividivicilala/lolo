@@ -1056,24 +1056,24 @@ const LiveChatAgent = ({
     }
   };
 
-  // ===== RENDER DELIVERY STATUS =====
+  // ===== RENDER DELIVERY STATUS (ALL TEXT WHITE) =====
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
     if (!isMine) return null;
     let label = "Sent";
-    let icon = <CheckIcon size={11} color="rgba(255,255,255,0.7)" />;
+    let icon = <CheckIcon size={11} color="#ffffff" />;
 
     if (msg.read) {
       label = "Read";
-      icon = <DoubleCheckIcon size={11} color="#60a5fa" />;
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
     } else if (msg.deliveryStatus === "delivered") {
       label = "Delivered";
-      icon = <DoubleCheckIcon size={11} color="rgba(255,255,255,0.7)" />;
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
     } else if (msg.deliveryStatus === "sending") {
       label = "Sending";
-      icon = <ClockIcon size={11} color="rgba(255,255,255,0.7)" />;
+      icon = <ClockIcon size={11} color="#ffffff" />;
     } else if (msg.deliveryStatus === "failed") {
       label = "Failed";
-      icon = <ErrorIcon size={11} color="#ef4444" />;
+      icon = <ErrorIcon size={11} color="#ffffff" />;
     }
 
     return (
@@ -1083,7 +1083,7 @@ const LiveChatAgent = ({
           alignItems: "center",
           gap: "3px",
           fontSize: "10px",
-          color: msg.deliveryStatus === "failed" ? "#ef4444" : "rgba(255,255,255,0.7)",
+          color: "#ffffff",
           fontFamily: FONT_FAMILY,
           fontWeight: 500,
         }}
@@ -1240,15 +1240,20 @@ const LiveChatAgent = ({
     );
   };
 
-  // ===== RENDER PREVIEW MESSAGES (3 last messages) =====
-  // forUser=true → teks biru (untuk akun user biasa)
-  // forUser=false → agent biru, user abu (untuk akun admin)
-  const renderTicketPreview = (ticketId: string, forUser: boolean = false) => {
+  // ===== RENDER PREVIEW (ALL WHITE FOR USER, NORMAL FOR ADMIN) =====
+  const renderTicketPreview = (ticketId: string) => {
     const previews = ticketPreviews[ticketId] || [];
     if (previews.length === 0) return null;
 
-    // previews[0] = paling baru, tampilkan urut dari lama ke baru
+    // previews[0] = newest, so reverse to show oldest first
     const ordered = [...previews].reverse();
+
+    // For USER (non-admin): all text WHITE
+    // For ADMIN: agent blue, user gray
+    const userTextColor = "#ffffff";
+    const agentTextColor = isAdmin ? "#0D3CFC" : "#ffffff";
+    const labelUserColor = isAdmin ? "#888" : "#ffffff";
+    const labelAgentColor = isAdmin ? "#0D3CFC" : "#ffffff";
 
     return (
       <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
@@ -1257,7 +1262,7 @@ const LiveChatAgent = ({
             key={i}
             style={{
               fontSize: "11px",
-              color: forUser ? "#0D3CFC" : p.isFromAgent ? "#0D3CFC" : "#555",
+              color: p.isFromAgent ? agentTextColor : userTextColor,
               fontStyle: "italic",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -1271,7 +1276,7 @@ const LiveChatAgent = ({
             <span
               style={{
                 fontWeight: 600,
-                color: forUser ? "#0D3CFC" : p.isFromAgent ? "#0D3CFC" : "#888",
+                color: p.isFromAgent ? labelAgentColor : labelUserColor,
                 flexShrink: 0,
               }}
             >
@@ -1737,7 +1742,15 @@ const LiveChatAgent = ({
         >
           Live Chat Agent
         </h3>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "10px",
+            paddingTop: "10px",
+          }}
+        >
           <span
             style={{
               fontSize: "16px",
@@ -2046,7 +2059,7 @@ const LiveChatAgent = ({
                 )}
               </>
             ) : (
-              // USER SIDE: ONLY THEIR OWN TICKETS (preview text color = BLUE)
+              // USER SIDE: ONLY THEIR OWN TICKETS — ALL TEXT WHITE
               <>
                 {tickets
                   .filter((t) => t.userId === user.uid)
@@ -2087,21 +2100,28 @@ const LiveChatAgent = ({
                           <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
                             {ticket.userName}
                           </div>
-                          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>
+                          <span style={{ fontSize: "10px", color: "#fff" }}>
                             {ticketMsgCounts[ticket.id] || 0} msgs
                           </span>
                         </div>
                         <div
                           style={{
                             fontSize: "12px",
-                            color: "rgba(255,255,255,0.75)",
+                            color: "#fff",
                             marginBottom: "6px",
                           }}
                         >
                           {ticket.topic}
                         </div>
-                        {renderTicketPreview(ticket.id, true)}
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
+                        {renderTicketPreview(ticket.id)}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            marginTop: "6px",
+                          }}
+                        >
                           <span
                             style={{
                               fontSize: "10px",
@@ -2124,7 +2144,7 @@ const LiveChatAgent = ({
                           >
                             {statusLabel}
                           </span>
-                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)" }}>
+                          <span style={{ fontSize: "9px", color: "#fff" }}>
                             {ticketId}
                           </span>
                         </div>
@@ -2137,7 +2157,7 @@ const LiveChatAgent = ({
                     style={{
                       padding: "30px 16px",
                       textAlign: "center",
-                      color: "rgba(255,255,255,0.5)",
+                      color: "#fff",
                       fontSize: "13px",
                     }}
                   >
@@ -2386,7 +2406,7 @@ const LiveChatAgent = ({
                             <span
                               style={{
                                 fontSize: "10px",
-                                color: isMine ? "rgba(255,255,255,0.7)" : "#999",
+                                color: isMine ? "#ffffff" : "#999",
                               }}
                             >
                               {formatTime(msg.timestamp)}
