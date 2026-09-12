@@ -409,7 +409,7 @@ interface LastMessagePreview {
 
 // ===== TOUR STEP INTERFACE =====
 interface TourStep {
-  target: string; // data-tour attribute
+  target: string;
   title: string;
   content: string;
   position?: "top" | "bottom" | "left" | "right";
@@ -432,6 +432,7 @@ const OnboardingTour = ({
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [arrowPos, setArrowPos] = useState<"top" | "bottom" | "left" | "right">("bottom");
 
   const step = steps[currentStep];
 
@@ -445,26 +446,52 @@ const OnboardingTour = ({
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
 
-        // Compute tooltip position
+        // Compute tooltip position with arrow
         const tooltipWidth = 340;
-        const tooltipHeight = 180;
-        const gap = 16;
+        const tooltipHeight = 200;
+        const arrowSize = 14;
+        const gap = 14;
         let top = 0;
         let left = 0;
+        let arrow: "top" | "bottom" | "left" | "right" = "bottom";
 
-        const pos = step.position || "bottom";
+        // Determine best position based on available space
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const spaceRight = window.innerWidth - rect.right;
+        const spaceLeft = rect.left;
+
+        let pos = step.position || "bottom";
+        // Auto-flip if not enough space
+        if (pos === "bottom" && spaceBelow < tooltipHeight + gap) {
+          pos = spaceAbove > spaceBelow ? "top" : "bottom";
+        }
+        if (pos === "top" && spaceAbove < tooltipHeight + gap) {
+          pos = spaceBelow > spaceAbove ? "bottom" : "top";
+        }
+        if (pos === "right" && spaceRight < tooltipWidth + gap) {
+          pos = spaceLeft > spaceRight ? "left" : "right";
+        }
+        if (pos === "left" && spaceLeft < tooltipWidth + gap) {
+          pos = spaceRight > spaceLeft ? "right" : "left";
+        }
+
         if (pos === "bottom") {
-          top = rect.bottom + gap;
+          top = rect.bottom + gap + arrowSize;
           left = rect.left + rect.width / 2 - tooltipWidth / 2;
+          arrow = "top";
         } else if (pos === "top") {
-          top = rect.top - tooltipHeight - gap;
+          top = rect.top - tooltipHeight - gap - arrowSize;
           left = rect.left + rect.width / 2 - tooltipWidth / 2;
+          arrow = "bottom";
         } else if (pos === "left") {
           top = rect.top + rect.height / 2 - tooltipHeight / 2;
-          left = rect.left - tooltipWidth - gap;
+          left = rect.left - tooltipWidth - gap - arrowSize;
+          arrow = "right";
         } else if (pos === "right") {
           top = rect.top + rect.height / 2 - tooltipHeight / 2;
-          left = rect.right + gap;
+          left = rect.right + gap + arrowSize;
+          arrow = "left";
         }
 
         // Clamp to viewport
@@ -479,6 +506,7 @@ const OnboardingTour = ({
         }
 
         setTooltipPos({ top, left });
+        setArrowPos(arrow);
       } else {
         setTargetRect(null);
       }
@@ -490,7 +518,7 @@ const OnboardingTour = ({
     if (el) {
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    const timeout = setTimeout(updateRect, 400); // after scroll
+    const timeout = setTimeout(updateRect, 400);
 
     window.addEventListener("resize", updateRect);
     window.addEventListener("scroll", updateRect, true);
@@ -519,6 +547,77 @@ const OnboardingTour = ({
     onComplete();
   };
 
+  // ===== ARROW RENDER (lengkungan penunjuk ke area target) =====
+  const renderArrow = () => {
+    const arrowSize = 14;
+    // Arrow color sama dengan bg tooltip (biru)
+    const baseStyle: React.CSSProperties = {
+      position: "absolute",
+      width: 0,
+      height: 0,
+      borderStyle: "solid",
+      pointerEvents: "none",
+    };
+
+    if (arrowPos === "top") {
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            top: -arrowSize,
+            left: "50%",
+            marginLeft: -arrowSize,
+            borderWidth: `0 ${arrowSize}px ${arrowSize}px ${arrowSize}px`,
+            borderColor: `transparent transparent #0D3CFC transparent`,
+          }}
+        />
+      );
+    }
+    if (arrowPos === "bottom") {
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            bottom: -arrowSize,
+            left: "50%",
+            marginLeft: -arrowSize,
+            borderWidth: `${arrowSize}px ${arrowSize}px 0 ${arrowSize}px`,
+            borderColor: `#0D3CFC transparent transparent transparent`,
+          }}
+        />
+      );
+    }
+    if (arrowPos === "left") {
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            left: -arrowSize,
+            top: "50%",
+            marginTop: -arrowSize,
+            borderWidth: `${arrowSize}px ${arrowSize}px ${arrowSize}px 0`,
+            borderColor: `transparent #0D3CFC transparent transparent`,
+          }}
+        />
+      );
+    }
+    if (arrowPos === "right") {
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            right: -arrowSize,
+            top: "50%",
+            marginTop: -arrowSize,
+            borderWidth: `${arrowSize}px 0 ${arrowSize}px ${arrowSize}px`,
+            borderColor: `transparent transparent transparent #0D3CFC`,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       {/* OVERLAY */}
@@ -543,7 +642,7 @@ const OnboardingTour = ({
             width: targetRect.width + 12,
             height: targetRect.height + 12,
             borderRadius: "12px",
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6), 0 0 0 3px #0D3CFC, 0 0 30px rgba(13,60,252,0.6)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6), 0 0 0 3px #0D3CFC",
             zIndex: 9999,
             pointerEvents: "none",
             transition: "all 0.3s ease",
@@ -551,22 +650,26 @@ const OnboardingTour = ({
         />
       )}
 
-      {/* TOOLTIP */}
+      {/* TOOLTIP — BG BIRU FULL, TEKS PUTIH, TANPA SHADOW, TANPA BORDER WARNA */}
       <div
         style={{
           position: "fixed",
           top: tooltipPos.top,
           left: tooltipPos.left,
           width: "340px",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#0D3CFC",
           borderRadius: "14px",
-          padding: "20px 22px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          padding: "22px 24px",
           zIndex: 10000,
           fontFamily: FONT_FAMILY,
-          border: "2px solid #0D3CFC",
+          boxShadow: "none",
+          border: "none",
+          transition: "all 0.3s ease",
         }}
       >
+        {/* ARROW PENUNJUK */}
+        {renderArrow()}
+
         {/* Step indicator */}
         <div
           style={{
@@ -580,9 +683,10 @@ const OnboardingTour = ({
             style={{
               fontSize: "11px",
               fontWeight: 700,
-              color: "#0D3CFC",
+              color: "#ffffff",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
+              opacity: 0.9,
             }}
           >
             Step {currentStep + 1} of {steps.length}
@@ -592,12 +696,13 @@ const OnboardingTour = ({
             style={{
               background: "transparent",
               border: "none",
-              color: "#999",
+              color: "#ffffff",
               cursor: "pointer",
-              fontSize: "16px",
+              fontSize: "18px",
               fontFamily: FONT_FAMILY,
               padding: 0,
               lineHeight: 1,
+              opacity: 0.9,
             }}
             aria-label="Skip tour"
           >
@@ -607,9 +712,9 @@ const OnboardingTour = ({
 
         <h4
           style={{
-            fontSize: "17px",
+            fontSize: "18px",
             fontWeight: 700,
-            color: "#0D3CFC",
+            color: "#ffffff",
             margin: 0,
             marginBottom: "8px",
           }}
@@ -620,10 +725,11 @@ const OnboardingTour = ({
           style={{
             fontSize: "13px",
             fontWeight: 400,
-            color: "#555",
+            color: "#ffffff",
             margin: 0,
-            marginBottom: "16px",
+            marginBottom: "18px",
             lineHeight: 1.5,
+            opacity: 0.95,
           }}
         >
           {step.content}
@@ -644,8 +750,8 @@ const OnboardingTour = ({
             style={{
               padding: "7px 14px",
               backgroundColor: "transparent",
-              color: currentStep === 0 ? "#ccc" : "#0D3CFC",
-              border: currentStep === 0 ? "1px solid #eee" : "1px solid #0D3CFC",
+              color: currentStep === 0 ? "rgba(255,255,255,0.4)" : "#ffffff",
+              border: currentStep === 0 ? "1px solid rgba(255,255,255,0.2)" : "1px solid #ffffff",
               borderRadius: "8px",
               fontSize: "12px",
               fontWeight: 600,
@@ -660,13 +766,14 @@ const OnboardingTour = ({
             style={{
               padding: "7px 14px",
               backgroundColor: "transparent",
-              color: "#999",
+              color: "#ffffff",
               border: "none",
               borderRadius: "8px",
               fontSize: "12px",
               fontWeight: 500,
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
+              opacity: 0.8,
             }}
           >
             Skip Tour
@@ -675,8 +782,8 @@ const OnboardingTour = ({
             onClick={handleNext}
             style={{
               padding: "7px 18px",
-              backgroundColor: "#0D3CFC",
-              color: "#ffffff",
+              backgroundColor: "#ffffff",
+              color: "#0D3CFC",
               border: "none",
               borderRadius: "8px",
               fontSize: "12px",
@@ -689,7 +796,7 @@ const OnboardingTour = ({
             }}
           >
             {currentStep === steps.length - 1 ? "Finish" : "Next"}
-            <ArrowRight size={14} color="#ffffff" />
+            <ArrowRight size={14} color="#0D3CFC" />
           </button>
         </div>
 
@@ -709,7 +816,8 @@ const OnboardingTour = ({
                 width: i === currentStep ? "18px" : "6px",
                 height: "6px",
                 borderRadius: "3px",
-                backgroundColor: i === currentStep ? "#0D3CFC" : "#ddd",
+                backgroundColor:
+                  i === currentStep ? "#ffffff" : "rgba(255,255,255,0.35)",
                 transition: "all 0.3s ease",
               }}
             />
@@ -832,12 +940,10 @@ const LiveChatAgent = ({
   // ===== AUTO START TOUR =====
   useEffect(() => {
     if (!isMounted) return;
-    // Only auto-start for non-admin users
     if (isAdmin) return;
     try {
       const completed = localStorage.getItem(TOUR_STORAGE_KEY);
       if (!completed) {
-        // Delay so the page renders first
         const t = setTimeout(() => {
           setTourStep(0);
           setShowTour(true);
@@ -1610,8 +1716,6 @@ const LiveChatAgent = ({
               fontFamily: FONT_FAMILY,
               padding: 0,
             }}
-            onFocus={(e) => (e.currentTarget.parentElement!.style.borderColor = "#0D3CFC")}
-            onBlur={(e) => (e.currentTarget.parentElement!.style.borderColor = borderColor)}
           />
           {searchQuery && (
             <button
@@ -1964,17 +2068,6 @@ const LiveChatAgent = ({
           }}
         >
           REASON: {banReason || "SUSPICIOUS ACTIVITY"}
-        </div>
-        <div
-          style={{
-            color: "#0D3CFC",
-            fontSize: "18px",
-            fontWeight: 300,
-            fontFamily: FONT_FAMILY,
-            marginBottom: "20px",
-          }}
-        >
-          YOU CANNOT USE LIVE CHAT AGENT
         </div>
       </div>
     );
@@ -3008,8 +3101,6 @@ const LiveChatAgent = ({
                               ? "#f5f5f5"
                               : "#fff",
                         }}
-                        onFocus={(e) => (e.currentTarget.style.borderColor = "#0D3CFC")}
-                        onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e8e8")}
                       />
                       <button
                         onClick={sendMessage}
@@ -3187,11 +3278,8 @@ export default function HomePage(): React.JSX.Element {
           position: "fixed",
           top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 9999, fontFamily: FONT_FAMILY,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
