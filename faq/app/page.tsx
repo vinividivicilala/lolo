@@ -420,6 +420,7 @@ interface TourStep {
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" font 450px warna biru full
 // Animasi Text Fall with Real Physics using GSAP Physics2DPlugin
+// Setelah jatuh, huruf tetap berada di background & terus bergerak
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -435,58 +436,76 @@ const PhysicsMenuruTitle = () => {
     });
 
     const chars = split.chars;
+    const containerHeight = containerRef.current.offsetHeight;
+    const targetY = containerHeight - 200; // posisi dasar lantai
 
-    // Set initial state: semua huruf di atas viewport, posisi x tidak beraturan
-    gsap.set(chars, {
-      y: -800,
-      x: (i) => (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200,
-      rotation: () => (Math.random() - 0.5) * 60,
-      opacity: 1,
-      force3D: true,
+    // Set initial state: huruf di atas viewport, posisi acak
+    chars.forEach((char, i) => {
+      gsap.set(char, {
+        y: -900 - i * 30,
+        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
+        rotation: (Math.random() - 0.5) * 90,
+        opacity: 1,
+        force3D: true,
+      });
     });
 
-    // Physics fall animation
+    // Physics fall animation — setiap huruf jatuh dengan physics2D
     chars.forEach((char, i) => {
-      const delay = i * 0.06 + Math.random() * 0.15;
-      const vx = (Math.random() - 0.5) * 200;
-      const vy = 600 + Math.random() * 400;
-      const gravity = 1200 + Math.random() * 400;
+      const delay = i * 0.08 + Math.random() * 0.2;
+      const targetX = (i - chars.length / 2) * 65 + (Math.random() - 0.5) * 220;
+      const targetRotation = (Math.random() - 0.5) * 50;
 
+      // 1. Vertical fall with physics2D (jatuh dari atas)
       gsap.to(char, {
         delay,
         duration: 2.2,
         physics2D: {
-          velocity: vy,
-          angle: 90 + (Math.random() - 0.5) * 30,
-          gravity: gravity,
+          velocity: 700 + Math.random() * 500,
+          angle: 88 + (Math.random() - 0.5) * 20,
+          gravity: 1400 + Math.random() * 400,
         },
-        rotation: () => (Math.random() - 0.5) * 40,
         ease: "none",
-        onStart: () => {
-          gsap.set(char, { x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200 });
-        },
       });
 
-      // Horizontal drift with physics feel
+      // 2. Horizontal drift (gerak ke samping saat jatuh)
       gsap.to(char, {
-        delay: delay + 0.1,
+        delay: delay + 0.05,
         duration: 2.2,
-        x: `+=${vx}`,
-        ease: "none",
-        onComplete: () => {
-          // Small settle bounce
-          gsap.to(char, {
-            y: "+=8",
-            duration: 0.15,
-            yoyo: true,
-            repeat: 1,
-            ease: "power1.inOut",
-          });
-        },
+        x: targetX,
+        ease: "power1.out",
+      });
+
+      // 3. Rotation (berputar saat jatuh)
+      gsap.to(char, {
+        delay: delay + 0.05,
+        duration: 2.2,
+        rotation: targetRotation,
+        ease: "power1.out",
+      });
+
+      // 4. Setelah jatuh, lanjut bergerak (settle motion) — bounce halus
+      gsap.to(char, {
+        delay: delay + 2.1,
+        duration: 0.6,
+        y: targetY + (Math.random() - 0.5) * 40,
+        rotation: targetRotation + (Math.random() - 0.5) * 15,
+        ease: "power2.out",
+      });
+
+      // 5. Micro-movement setelah settle (huruf terus bergerak halus seperti mengambang)
+      gsap.to(char, {
+        delay: delay + 2.7,
+        duration: 2.5 + Math.random() * 1.5,
+        y: `+=${(Math.random() - 0.5) * 25}`,
+        x: `+=${(Math.random() - 0.5) * 20}`,
+        rotation: `+=${(Math.random() - 0.5) * 10}`,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
       });
     });
 
-    // Cleanup
     return () => {
       if (split) split.revert();
     };
@@ -497,15 +516,14 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        minHeight: "520px",
+        height: "620px",
         overflow: "hidden",
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
-        paddingTop: "40px",
-        paddingBottom: "20px",
+        paddingTop: "20px",
       }}
     >
       <div
@@ -521,6 +539,7 @@ const PhysicsMenuruTitle = () => {
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
+          position: "relative",
         }}
       >
         Menuru
@@ -3689,6 +3708,7 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform, opacity;
           color: #0D3CFC !important;
           transform-origin: center center;
+          opacity: 1 !important;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
