@@ -419,13 +419,12 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" 450px warna biru full
-// Huruf jatuh dari atas, batas jatuh = TEPAT DI ATAS judul "Live Chat Agent"
-// Semua huruf berhenti dengan jarak aman dari judul (tidak tabrakan)
-// Posisi akhir tiap huruf ACak random tersebar tidak rata di area atas judul
+// Huruf jatuh dari atas, berhenti di dalam container (di area atas judul Live Chat Agent)
+// Posisi akhir acak random, tidak menempel semua, dan DIAM setelah jatuh
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(800);
+  const [containerHeight, setContainerHeight] = useState(600);
 
   // Measure container height on mount & resize
   useEffect(() => {
@@ -453,13 +452,15 @@ const PhysicsMenuruTitle = () => {
 
     const chars = split.chars;
 
-    // Zona jatuh huruf: dari atas container sampai BATAS AMAN di atas judul
-    // Misal: container 800px, judul Live Chat Agent ada di y = 800 (bawah container)
-    // Huruf harus berhenti di y = 500–650 (di atas judul, ada jarak)
-    const upperLimit = 480; // huruf tidak boleh lebih tinggi dari ini (biar tidak numpuk atas)
-    const lowerLimit = containerHeight - 180; // huruf tidak boleh lebih rendah dari ini (jaga jarak dari judul)
+    // ===== BATAS JATUH HURUF (dalam koordinat container) =====
+    // Container tinggi 600px. Huruf harus berhenti di dalam container
+    // dengan jarak aman dari bawah (yang di bawahnya ada judul Live Chat Agent)
+    const topMargin = 20;                                  // jarak dari atas container
+    const bottomMargin = 100;                              // jarak dari bawah container (jaga jarak dari judul)
+    const upperLimit = topMargin;                          // batas atas jatuh
+    const lowerLimit = containerHeight - bottomMargin;     // batas bawah jatuh
 
-    // Set initial state: huruf di atas container (di luar viewport), posisi acak
+    // Set initial state: huruf di atas container, opacity 1
     chars.forEach((char, i) => {
       gsap.set(char, {
         y: -900 - i * 60,
@@ -470,28 +471,21 @@ const PhysicsMenuruTitle = () => {
       });
     });
 
-    // Timeline utama untuk dramatisir slow motion
-    const tl = gsap.timeline({
-      delay: 0.3,
-      defaults: { ease: "power1.in" },
-    });
-
-    // Physics fall animation — slow motion dramatis
+    // Animasi jatuh per huruf — physics2D + horizontal drift + rotation
+    // Setelah jatuh, langsung set posisi absolut ke targetY (dalam container)
     chars.forEach((char, i) => {
       const delay = i * 0.18 + Math.random() * 0.3;
       const fallDuration = 3.2 + Math.random() * 1.2;
 
-      // Target X & rotation akhir yang tidak beraturan
+      // Target akhir per huruf (acak dalam rentang batas)
       const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
+      const targetY = upperLimit + Math.random() * (lowerLimit - upperLimit); // acak antara 20 - 500 (jika container 600)
       const targetRotation = (Math.random() - 0.5) * 90;
 
-      // Target Y akhir: RANDOM di antara upperLimit & lowerLimit
-      // → huruf tersebar acak di area atas judul Live Chat Agent
-      const targetY = upperLimit + Math.random() * (lowerLimit - upperLimit);
-
+      // Timeline per huruf
       const charTl = gsap.timeline({ delay });
 
-      // 1. VERTICAL FALL — physics2D dengan gravity untuk efek jatuh dramatis (slow motion)
+      // 1. VERTICAL FALL — physics2D slow motion (gravity rendah, velocity rendah)
       charTl.to(
         char,
         {
@@ -506,7 +500,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 2. HORIZONTAL DRIFT — gerak ke samping selama jatuh
+      // 2. HORIZONTAL DRIFT — gerak ke samping
       charTl.to(
         char,
         {
@@ -517,7 +511,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 3. ROTATION — berputar selama jatuh (slow rotation)
+      // 3. ROTATION — berputar
       charTl.to(
         char,
         {
@@ -528,47 +522,42 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 4. SETTLE — huruf "mendarat" tepat di targetY (di area atas judul, tidak tabrakan)
-      charTl.to(
+      // 4. SETTLE — paksa huruf berhenti di targetY (dalam container)
+      //    Pakai `y: targetY` dan `x: targetX` final → pastikan TIDAK keluar container
+      charTl.set(
         char,
         {
-          duration: 0.8,
           y: targetY,
-          rotation: targetRotation,
           x: targetX,
-          ease: "power3.out",
+          rotation: targetRotation,
+          physics2D: { velocity: 0 }, // hentikan physics
         },
-        fallDuration - 0.2
+        fallDuration
       );
-
-      // 5. Tidak ada micro-movement — huruf DIAM setelah mendarat
     });
 
     return () => {
-      tl.kill();
       if (split) split.revert();
     };
   }, [containerHeight]);
 
   return (
+    // Container dengan tinggi tetap 600px
+    // Huruf jatuh dan berhenti DI DALAM container ini
+    // overflow: hidden → huruf tidak bisa keluar container
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: "750px", // Tinggi container — huruf berhenti di area atas judul Live Chat Agent
-        overflow: "visible",
+        height: "600px", // tinggi tetap — cukup untuk jatuh tapi tidak melewati judul
+        overflow: "hidden", // KRUSIAL: huruf tidak bisa keluar container
         position: "relative",
         backgroundColor: "#ffffff",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        // Padding bawah: memberi jarak agar huruf tidak menyentuh judul Live Chat Agent
-        paddingBottom: "80px",
       }}
     >
       {/* 
         textRef absolute di tengah-atas container
-        Huruf jatuh & berhenti di area atas judul Live Chat Agent
+        Huruf akan jatuh dari atas container dan berhenti di dalamnya
       */}
       <div
         ref={textRef}
