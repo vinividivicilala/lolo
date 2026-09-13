@@ -419,8 +419,9 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" 450px warna biru full
-// Huruf jatuh dari atas, berhenti di dalam container (di area atas judul Live Chat Agent)
-// Posisi akhir acak random, tidak menempel semua, dan DIAM setelah jatuh
+// Huruf jatuh dari atas, menempel di bg utama (transparan, menyatu dengan halaman)
+// Huruf tetap terlihat setelah jatuh & DIAM
+// overflow: visible agar tidak ada efek terpotong
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -452,15 +453,15 @@ const PhysicsMenuruTitle = () => {
 
     const chars = split.chars;
 
-    // ===== BATAS JATUH HURUF (dalam koordinat container) =====
-    // Container tinggi 600px. Huruf harus berhenti di dalam container
-    // dengan jarak aman dari bawah (yang di bawahnya ada judul Live Chat Agent)
-    const topMargin = 20;                                  // jarak dari atas container
-    const bottomMargin = 100;                              // jarak dari bawah container (jaga jarak dari judul)
-    const upperLimit = topMargin;                          // batas atas jatuh
-    const lowerLimit = containerHeight - bottomMargin;     // batas bawah jatuh
+    // ===== BATAS JATUH HURUF =====
+    // Huruf jatuh & berhenti di dalam area container
+    // Container tinggi 600px, jarak aman 100px dari bawah (jaga jarak dari judul Live Chat Agent)
+    const topMargin = 20;
+    const bottomMargin = 100;
+    const upperLimit = topMargin;
+    const lowerLimit = containerHeight - bottomMargin;
 
-    // Set initial state: huruf di atas container, opacity 1
+    // Set initial state: huruf di atas container (opacity 1, terlihat)
     chars.forEach((char, i) => {
       gsap.set(char, {
         y: -900 - i * 60,
@@ -471,21 +472,18 @@ const PhysicsMenuruTitle = () => {
       });
     });
 
-    // Animasi jatuh per huruf — physics2D + horizontal drift + rotation
-    // Setelah jatuh, langsung set posisi absolut ke targetY (dalam container)
+    // Animasi jatuh per huruf
     chars.forEach((char, i) => {
       const delay = i * 0.18 + Math.random() * 0.3;
       const fallDuration = 3.2 + Math.random() * 1.2;
 
-      // Target akhir per huruf (acak dalam rentang batas)
       const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
-      const targetY = upperLimit + Math.random() * (lowerLimit - upperLimit); // acak antara 20 - 500 (jika container 600)
+      const targetY = upperLimit + Math.random() * (lowerLimit - upperLimit);
       const targetRotation = (Math.random() - 0.5) * 90;
 
-      // Timeline per huruf
       const charTl = gsap.timeline({ delay });
 
-      // 1. VERTICAL FALL — physics2D slow motion (gravity rendah, velocity rendah)
+      // 1. VERTICAL FALL — physics2D slow motion
       charTl.to(
         char,
         {
@@ -500,7 +498,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 2. HORIZONTAL DRIFT — gerak ke samping
+      // 2. HORIZONTAL DRIFT
       charTl.to(
         char,
         {
@@ -511,7 +509,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 3. ROTATION — berputar
+      // 3. ROTATION
       charTl.to(
         char,
         {
@@ -522,15 +520,14 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 4. SETTLE — paksa huruf berhenti di targetY (dalam container)
-      //    Pakai `y: targetY` dan `x: targetX` final → pastikan TIDAK keluar container
+      // 4. SETTLE — kunci posisi huruf
       charTl.set(
         char,
         {
           y: targetY,
           x: targetX,
           rotation: targetRotation,
-          physics2D: { velocity: 0 }, // hentikan physics
+          physics2D: { velocity: 0 },
         },
         fallDuration
       );
@@ -542,22 +539,22 @@ const PhysicsMenuruTitle = () => {
   }, [containerHeight]);
 
   return (
-    // Container dengan tinggi tetap 600px
-    // Huruf jatuh dan berhenti DI DALAM container ini
-    // overflow: hidden → huruf tidak bisa keluar container
+    // Container: overflow visible agar huruf tidak terpotong & menyatu ke bg utama
+    // backgroundColor transparent agar nempel di bg utama (putih dari parent)
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: "600px", // tinggi tetap — cukup untuk jatuh tapi tidak melewati judul
-        overflow: "hidden", // KRUSIAL: huruf tidak bisa keluar container
+        height: "600px",
+        overflow: "visible",        // PENTING: tidak memotong huruf
         position: "relative",
-        backgroundColor: "#ffffff",
+        backgroundColor: "transparent", // Transparan → huruf nempel di bg utama
+        pointerEvents: "none",      // Biar tidak menghalangi klik
       }}
     >
       {/* 
         textRef absolute di tengah-atas container
-        Huruf akan jatuh dari atas container dan berhenti di dalamnya
+        Huruf jatuh dari atas container dan berhenti di area yang sudah dibatasi
       */}
       <div
         ref={textRef}
