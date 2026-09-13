@@ -419,15 +419,13 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" 450px warna biru full
-// Huruf jatuh dari atas, berhenti di AREA ATAS container (di atas judul Live Chat Agent)
-// Posisi akhir huruf TIDAK RATA — tersebar acak random di area tersebut
-// Ada jarak aman di bagian bawah container supaya tidak tabrak judul Live Chat Agent
+// Huruf jatuh dari atas, berhenti TEPAT DI BAWAH judul "Live Chat Agent"
+// Huruf TIDAK terlalu jauh antar huruf (rapat), TIDAK menabrak judul
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(700);
+  const [containerHeight, setContainerHeight] = useState(600);
 
-  // Measure container height
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -451,42 +449,45 @@ const PhysicsMenuruTitle = () => {
     });
 
     const chars = split.chars;
-    const containerWidth = containerRef.current.offsetWidth;
 
-    // ===== AREA JATUH HURUF =====
-    // Huruf berhenti di area ini, TIDAK melewati batas bawah (safety zone)
-    // Safety zone = 180px dari bawah container, supaya tidak tabrak judul Live Chat Agent
-    const safetyZone = 180;
-    const floorMinY = containerHeight * 0.55; // area atas (55% tinggi container)
-    const floorMaxY = containerHeight - safetyZone; // area bawah aman
+    // ===== POSISI AKHIR HURUF =====
+    // Huruf jatuh dan berhenti di area bawah container
+    // Tapi tidak terlalu jauh antar huruf (rapat, ±5px gap)
+    // Dan tetap ada jarak aman dengan judul Live Chat Agent (di bawah container)
+    const baseCharWidth = 240; // perkiraan lebar rata-rata per huruf "Menuru" 450px
+    const spacing = 5; // gap kecil antar huruf (rapat)
+    const totalWidth = (baseCharWidth + spacing) * chars.length;
+    const startX = -totalWidth / 2 + baseCharWidth / 2;
+
+    // Posisi Y akhir: di bagian bawah container, sekitar 75% tinggi
+    const floorY = containerHeight * 0.72;
 
     // Set initial state: huruf di atas container, posisi acak
     chars.forEach((char, i) => {
       gsap.set(char, {
         y: -900 - i * 60,
-        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
-        rotation: (Math.random() - 0.5) * 120,
+        x: startX + i * (baseCharWidth + spacing), // posisi sejajar, rapat
+        rotation: (Math.random() - 0.5) * 30, // rotasi ringan saja
         opacity: 1,
         force3D: true,
       });
     });
 
-    // Timeline utama slow motion
     const tl = gsap.timeline({
       delay: 0.3,
       defaults: { ease: "power1.in" },
     });
 
     chars.forEach((char, i) => {
-      const delay = i * 0.18 + Math.random() * 0.3;
-      const fallDuration = 3.2 + Math.random() * 1.2;
+      const delay = i * 0.15 + Math.random() * 0.2;
+      const fallDuration = 3 + Math.random() * 1;
 
-      // Posisi X akhir acak (horizontal)
-      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
-      // Rotasi akhir acak
-      const targetRotation = (Math.random() - 0.5) * 90;
-      // Posisi Y akhir: acak di antara floorMinY dan floorMaxY (tidak rata)
-      const targetY = floorMinY + Math.random() * (floorMaxY - floorMinY);
+      // Posisi X akhir: huruf tetap RAPAT (spacing kecil ± 5px)
+      const targetX = startX + i * (baseCharWidth + spacing) + (Math.random() - 0.5) * 15;
+      // Rotasi akhir: ringan saja (maks ±20°)
+      const targetRotation = (Math.random() - 0.5) * 40;
+      // Posisi Y akhir: sedikit variasi tapi tetap dekat floorY (tidak terlalu jauh)
+      const targetY = floorY + (Math.random() - 0.5) * 60;
 
       const charTl = gsap.timeline({ delay });
 
@@ -497,7 +498,7 @@ const PhysicsMenuruTitle = () => {
           duration: fallDuration,
           physics2D: {
             velocity: 500 + Math.random() * 300,
-            angle: 90 + (Math.random() - 0.5) * 25,
+            angle: 90 + (Math.random() - 0.5) * 20,
             gravity: 900 + Math.random() * 400,
           },
           ease: "none",
@@ -505,7 +506,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 2. Horizontal drift
+      // 2. Horizontal drift (kecil saja, huruf tetap rapat)
       charTl.to(
         char,
         {
@@ -516,7 +517,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 3. Rotation
+      // 3. Rotation ringan
       charTl.to(
         char,
         {
@@ -527,7 +528,7 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 4. Settle — huruf mendarat tepat di targetY (posisi akhir acak)
+      // 4. Settle — huruf mendarat tepat di targetY (rapat, tidak menabrak judul)
       charTl.to(
         char,
         {
@@ -552,7 +553,7 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "700px", // container untuk area jatuh huruf
+        height: "600px",
         overflow: "visible",
         position: "relative",
         backgroundColor: "#ffffff",
@@ -3514,17 +3515,16 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
-        {/* ===== LIVE CHAT AGENT (DIBERI MARGIN-TOP AGAR TIDAK TABRAKAN) ===== */}
+        {/* ===== LIVE CHAT AGENT ===== */}
         <div
           style={{
             padding: "0 40px",
             maxWidth: "1600px",
             margin: "0 auto",
             width: "100%",
-            marginTop: "40px", // jarak tambahan dari area jatuh huruf
           }}
         >
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
