@@ -419,15 +419,30 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" font 450px warna biru full
-// Animasi Text Fall with Real Physics using GSAP Physics2DPlugin
-// Setelah jatuh, huruf tetap berada di background & terus bergerak
+// Animasi: huruf jatuh dari atas, setelah sampai bawah huruf TETAP MENEMPEL ke background
+// Huruf tetap bergerak mengikuti physics sampai benar-benar berhenti
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(600);
+
+  // Measure container height on mount & resize
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const updateHeight = () => {
+      if (containerRef.current) {
+        setContainerHeight(containerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || !textRef.current) return;
+    if (containerHeight === 0) return;
 
     // Split text into chars
     const split = new SplitText(textRef.current, {
@@ -436,88 +451,94 @@ const PhysicsMenuruTitle = () => {
     });
 
     const chars = split.chars;
-    const containerHeight = containerRef.current.offsetHeight;
-    const targetY = containerHeight - 200; // posisi dasar lantai
 
-    // Set initial state: huruf di atas viewport, posisi acak
+    // Get container dimensions
+    const containerWidth = containerRef.current.offsetWidth;
+    // Target Y: huruf berhenti di bagian bawah container (menempel ke bg)
+    const floorY = containerHeight - 180;
+
+    // Set initial state: huruf di atas viewport (di luar container), posisi acak
     chars.forEach((char, i) => {
       gsap.set(char, {
-        y: -900 - i * 30,
+        y: -1200 - i * 40,
         x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
         rotation: (Math.random() - 0.5) * 90,
-        opacity: 1,
+        opacity: 1, // Tetap terlihat
         force3D: true,
       });
     });
 
-    // Physics fall animation — setiap huruf jatuh dengan physics2D
+    // Physics fall animation — huruf jatuh & terus bergerak sampai berhenti
     chars.forEach((char, i) => {
-      const delay = i * 0.08 + Math.random() * 0.2;
-      const targetX = (i - chars.length / 2) * 65 + (Math.random() - 0.5) * 220;
-      const targetRotation = (Math.random() - 0.5) * 50;
+      const delay = i * 0.1 + Math.random() * 0.2;
 
-      // 1. Vertical fall with physics2D (jatuh dari atas)
+      // Target X & rotation yang tidak beraturan
+      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 240;
+      const targetRotation = (Math.random() - 0.5) * 60;
+      const targetY = floorY + (Math.random() - 0.5) * 60;
+
+      // 1. VERTICAL FALL — huruf jatuh pakai physics2D sampai mentok di bawah
       gsap.to(char, {
         delay,
-        duration: 2.2,
+        duration: 2.4,
         physics2D: {
-          velocity: 700 + Math.random() * 500,
-          angle: 88 + (Math.random() - 0.5) * 20,
-          gravity: 1400 + Math.random() * 400,
+          velocity: 800 + Math.random() * 500, // kecepatan jatuh
+          angle: 90 + (Math.random() - 0.5) * 20, // hampir vertikal
+          gravity: 1600 + Math.random() * 500, // gravitasi
         },
         ease: "none",
       });
 
-      // 2. Horizontal drift (gerak ke samping saat jatuh)
+      // 2. HORIZONTAL DRIFT — huruf bergerak ke samping selama jatuh
       gsap.to(char, {
         delay: delay + 0.05,
-        duration: 2.2,
+        duration: 2.4,
         x: targetX,
-        ease: "power1.out",
-      });
-
-      // 3. Rotation (berputar saat jatuh)
-      gsap.to(char, {
-        delay: delay + 0.05,
-        duration: 2.2,
-        rotation: targetRotation,
-        ease: "power1.out",
-      });
-
-      // 4. Setelah jatuh, lanjut bergerak (settle motion) — bounce halus
-      gsap.to(char, {
-        delay: delay + 2.1,
-        duration: 0.6,
-        y: targetY + (Math.random() - 0.5) * 40,
-        rotation: targetRotation + (Math.random() - 0.5) * 15,
         ease: "power2.out",
       });
 
-      // 5. Micro-movement setelah settle (huruf terus bergerak halus seperti mengambang)
+      // 3. ROTATION — huruf berputar selama jatuh
       gsap.to(char, {
-        delay: delay + 2.7,
-        duration: 2.5 + Math.random() * 1.5,
-        y: `+=${(Math.random() - 0.5) * 25}`,
-        x: `+=${(Math.random() - 0.5) * 20}`,
-        rotation: `+=${(Math.random() - 0.5) * 10}`,
+        delay: delay + 0.05,
+        duration: 2.4,
+        rotation: targetRotation,
+        ease: "power2.out",
+      });
+
+      // 4. SETTLE — setelah jatuh, huruf "mendarat" di posisi akhir (menempel bg)
+      gsap.to(char, {
+        delay: delay + 2.3,
+        duration: 0.5,
+        y: targetY,
+        rotation: targetRotation + (Math.random() - 0.5) * 10,
+        ease: "power2.out",
+      });
+
+      // 5. MICRO-MOVEMENT — huruf terus bergerak halus (seperti angin) TANPA menghilang
+      gsap.to(char, {
+        delay: delay + 2.8,
+        duration: 3 + Math.random() * 2,
+        y: `+=${(Math.random() - 0.5) * 30}`,
+        x: `+=${(Math.random() - 0.5) * 25}`,
+        rotation: `+=${(Math.random() - 0.5) * 12}`,
         ease: "sine.inOut",
         yoyo: true,
-        repeat: -1,
+        repeat: -1, // Loop terus menerus — huruf tetap hidup di background
       });
     });
 
     return () => {
       if (split) split.revert();
     };
-  }, []);
+  }, [containerHeight]);
 
   return (
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: "620px",
-        overflow: "hidden",
+        height: "700px",
+        overflow: "visible", // PENTING: jangan hidden, biar huruf tetap keliatan
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
@@ -526,6 +547,10 @@ const PhysicsMenuruTitle = () => {
         paddingTop: "20px",
       }}
     >
+      {/* 
+        textRef diposisikan absolute agar huruf bisa jatuh 
+        dari atas container sampai bawah & tetap di dalam container (menempel bg)
+      */}
       <div
         ref={textRef}
         style={{
@@ -539,7 +564,11 @@ const PhysicsMenuruTitle = () => {
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
-          position: "relative",
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none",
         }}
       >
         Menuru
@@ -3709,6 +3738,7 @@ export default function HomePage(): React.JSX.Element {
           color: #0D3CFC !important;
           transform-origin: center center;
           opacity: 1 !important;
+          visibility: visible !important;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
