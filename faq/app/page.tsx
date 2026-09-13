@@ -417,117 +417,168 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== PHYSICS FALLING TEXT COMPONENT =====
-const PhysicsFallingText = ({ text = "Menuru" }: { text?: string }) => {
+// ===== PHYSICS MENURU TITLE COMPONENT =====
+// Teks "Menuru" 450px warna biru full
+// Huruf jatuh dari atas, berhenti di area di ATAS judul "Live Chat Agent"
+// Setelah jatuh, huruf settle di posisi acak random tanpa menimpa judul
+const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isReady, setIsReady] = useState(false);
-  const charsRef = useRef<HTMLSpanElement[]>([]);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(650);
 
+  // Measure container height on mount & resize
   useEffect(() => {
-    setIsReady(true);
+    if (typeof window === "undefined") return;
+    const updateHeight = () => {
+      if (containerRef.current) {
+        setContainerHeight(containerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
   useEffect(() => {
-    if (!isReady) return;
-    if (!containerRef.current) return;
+    if (typeof window === "undefined") return;
+    if (!containerRef.current || !textRef.current) return;
+    if (containerHeight === 0) return;
 
-    const container = containerRef.current;
-    const chars = container.querySelectorAll<HTMLSpanElement>(".falling-char");
-    if (!chars.length) return;
-
-    // Reset initial positions
-    gsap.set(chars, {
-      x: 0,
-      y: 0,
-      opacity: 0,
-      rotation: 0,
+    const split = new SplitText(textRef.current, {
+      type: "chars",
+      charsClass: "physics-char",
     });
 
-    // Animate each char with Physics2D — jatuh dari atas, acak posisi
+    const chars = split.chars;
+    const containerWidth = containerRef.current.offsetWidth;
+
+    // ===== AREA JATUH =====
+    // Batas bawah area jatuh = 80px di atas dasar container
+    // Container diposisikan dengan margin-bottom agar TIDAK menimpa judul Live Chat Agent
+    const fallBottomLimit = containerHeight - 80;
+
     chars.forEach((char, i) => {
-      const angle = -90 + (Math.random() - 0.5) * 60; // sudut jatuh acak sekitar -90°
-      const velocity = 350 + Math.random() * 400; // kecepatan jatuh
-      const gravity = 900;
-      const startX = (Math.random() - 0.5) * 200; // posisi awal X acak
-      const startY = -window.innerHeight * 0.6; // mulai dari atas layar
-
       gsap.set(char, {
+        y: -900 - i * 60,
+        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
+        rotation: (Math.random() - 0.5) * 120,
         opacity: 1,
-        x: startX,
-        y: startY,
-        rotation: (Math.random() - 0.5) * 90,
+        force3D: true,
       });
+    });
 
-      gsap.to(char, {
-        duration: 2.4 + Math.random() * 0.8,
-        physics2D: {
-          velocity: velocity,
-          angle: angle,
-          gravity: gravity,
+    chars.forEach((char, i) => {
+      const delay = i * 0.18 + Math.random() * 0.3;
+      const fallDuration = 3.2 + Math.random() * 1.2;
+
+      // ===== POSISI X AKHIR =====
+      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
+      const targetRotation = (Math.random() - 0.5) * 90;
+
+      // ===== POSISI Y AKHIR (ACAK) =====
+      // Huruf berhenti di area antara 60px sampai fallBottomLimit
+      // Sehingga tidak semua huruf rata dan tidak menimpa judul di bawahnya
+      const topBoundary = 80; // margin atas
+      const bottomBoundary = fallBottomLimit - 80; // margin bawah (jaga jarak dari judul)
+      const randomY = topBoundary + Math.random() * (bottomBoundary - topBoundary);
+
+      const charTl = gsap.timeline({ delay });
+
+      // 1. VERTICAL FALL pakai physics2D
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          physics2D: {
+            velocity: 500 + Math.random() * 300,
+            angle: 90 + (Math.random() - 0.5) * 25,
+            gravity: 900 + Math.random() * 400,
+          },
+          ease: "none",
         },
-        x: 0,
-        y: 0,
-        rotation: 0,
-        ease: "none",
-        delay: i * 0.08,
-      });
+        0
+      );
+
+      // 2. HORIZONTAL DRIFT
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          x: targetX,
+          ease: "power1.inOut",
+        },
+        0
+      );
+
+      // 3. ROTATION
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          rotation: targetRotation,
+          ease: "power1.inOut",
+        },
+        0
+      );
+
+      // 4. SETTLE di posisi acak (Y random, X random, rotation random)
+      charTl.to(
+        char,
+        {
+          duration: 0.9,
+          y: randomY,
+          x: targetX + (Math.random() - 0.5) * 30,
+          rotation: targetRotation + (Math.random() - 0.5) * 15,
+          ease: "power3.out",
+        },
+        fallDuration - 0.2
+      );
+
+      // Tidak ada repeat — huruf diam setelah settle
     });
 
     return () => {
-      gsap.killTweensOf(chars);
+      if (split) split.revert();
     };
-  }, [isReady, text]);
-
-  // Render tiap huruf dalam span terpisah
-  const chars = text.split("");
+  }, [containerHeight]);
 
   return (
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: "500px",
+        height: "650px", // tinggi area jatuh
+        marginBottom: "80px", // jarak aman ke Live Chat Agent di bawahnya
+        overflow: "visible",
         position: "relative",
-        overflow: "hidden",
+        backgroundColor: "#ffffff",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        paddingLeft: "40px",
-        backgroundColor: "transparent",
+        alignItems: "flex-start",
+        justifyContent: "center",
       }}
     >
-      <h1
+      <div
+        ref={textRef}
         style={{
           fontFamily: FONT_FAMILY,
           fontSize: "450px",
           fontWeight: 700,
           color: "#0D3CFC",
-          letterSpacing: "-0.02em",
-          lineHeight: "0.85",
-          margin: 0,
-          padding: 0,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          whiteSpace: "nowrap",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          textAlign: "center",
           userSelect: "none",
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none",
         }}
       >
-        {chars.map((char, i) => (
-          <span
-            key={i}
-            className="falling-char"
-            style={{
-              display: "inline-block",
-              willChange: "transform, opacity",
-              transformOrigin: "center center",
-              paddingRight: i < chars.length - 1 ? "0.02em" : 0, // jarak antar huruf
-            }}
-          >
-            {char}
-          </span>
-        ))}
-      </h1>
+        Menuru
+      </div>
     </div>
   );
 };
@@ -1982,7 +2033,7 @@ const LiveChatAgent = ({
 
   if (checkingBan) {
     return (
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <h3
           style={{
             fontSize: "80px",
@@ -2021,7 +2072,7 @@ const LiveChatAgent = ({
           currentStep={tourStep}
           setCurrentStep={setTourStep}
         />
-        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+        <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <h3
             ref={liveChatTitleRef}
             data-tour="livechat-title"
@@ -2090,7 +2141,7 @@ const LiveChatAgent = ({
 
   if (!isAdmin && isBanned) {
     return (
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -2172,7 +2223,7 @@ const LiveChatAgent = ({
           currentStep={tourStep}
           setCurrentStep={setTourStep}
         />
-        <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+        <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <div
             style={{
               display: "flex",
@@ -2313,7 +2364,7 @@ const LiveChatAgent = ({
 
   if (!isAdmin && showStartChat) {
     return (
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -2441,7 +2492,8 @@ const LiveChatAgent = ({
         currentStep={tourStep}
         setCurrentStep={setTourStep}
       />
-      <div style={{ marginTop: "40px", paddingTop: "30px" }}>
+      {/* marginTop 80px untuk turunkan judul Live Chat Agent ke bawah — jaga jarak dari huruf Menuru */}
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -3459,13 +3511,10 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS FALLING TEXT "Menuru" ===== */}
-        <PhysicsFallingText text="Menuru" />
+        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        <PhysicsMenuruTitle />
 
-        {/* SPACER agar tidak menabrak Live Chat Agent */}
-        <div style={{ height: "40px", width: "100%" }} />
-
-        {/* LIVE CHAT AGENT */}
+        {/* LIVE CHAT AGENT — marginTop 80px ditambah di dalam komponen */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
@@ -3690,9 +3739,13 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity, filter;
         }
-        .falling-char {
+        .physics-char {
           display: inline-block;
           will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: center center;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
