@@ -418,13 +418,14 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
-// Teks "Menuru" font 450px warna biru full
-// Animasi: huruf jatuh dari atas, setelah sampai bawah huruf TETAP MENEMPEL ke background
-// Huruf tetap bergerak mengikuti physics sampai benar-benar berhenti
+// Teks "Menuru" 450px warna biru full
+// Huruf jatuh dari atas ke bawah dengan physics (slow motion dramatis)
+// Setelah jatuh, huruf DIAM di posisi akhir (tidak bergerak lagi)
+// Posisi akhir huruf TIDAK rata — tersebar acak
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(600);
+  const [containerHeight, setContainerHeight] = useState(800);
 
   // Measure container height on mount & resize
   useEffect(() => {
@@ -452,82 +453,98 @@ const PhysicsMenuruTitle = () => {
 
     const chars = split.chars;
 
-    // Get container dimensions
-    const containerWidth = containerRef.current.offsetWidth;
-    // Target Y: huruf berhenti di bagian bawah container (menempel ke bg)
-    const floorY = containerHeight - 180;
-
-    // Set initial state: huruf di atas viewport (di luar container), posisi acak
+    // Set initial state: huruf di atas container (di luar viewport), posisi acak
+    // Huruf tetap terlihat (opacity 1) — akan jatuh dramatis ke bawah
     chars.forEach((char, i) => {
       gsap.set(char, {
-        y: -1200 - i * 40,
+        y: -900 - i * 60, // posisi awal di atas
         x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
-        rotation: (Math.random() - 0.5) * 90,
-        opacity: 1, // Tetap terlihat
+        rotation: (Math.random() - 0.5) * 120, // rotasi acak
+        opacity: 1,
         force3D: true,
       });
     });
 
-    // Physics fall animation — huruf jatuh & terus bergerak sampai berhenti
+    // Timeline utama untuk dramatisir slow motion
+    const tl = gsap.timeline({
+      delay: 0.3,
+      defaults: { ease: "power1.in" }, // mulai lambat, makin cepat (gravity feel)
+    });
+
+    // Physics fall animation — slow motion dramatis
     chars.forEach((char, i) => {
-      const delay = i * 0.1 + Math.random() * 0.2;
+      const delay = i * 0.18 + Math.random() * 0.3; // delay antar huruf lebih besar
+      const fallDuration = 3.2 + Math.random() * 1.2; // durasi jatuh lebih lama (slow motion)
+      
+      // Target X & rotation akhir yang tidak beraturan
+      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
+      const targetRotation = (Math.random() - 0.5) * 90; // rotasi akhir acak ±45°
+      
+      // Posisi Y akhir: TIDAK RATA — tiap huruf beda ketinggian
+      // floorY diukur dari containerHeight, tapi tiap huruf beda offset
+      const baseY = containerHeight - 220; // posisi dasar bawah container
+      const targetY = baseY + (Math.random() - 0.5) * 200; // variasi ±100px → tidak rata
 
-      // Target X & rotation yang tidak beraturan
-      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 240;
-      const targetRotation = (Math.random() - 0.5) * 60;
-      const targetY = floorY + (Math.random() - 0.5) * 60;
+      // Timeline per huruf (dengan slow motion feel)
+      const charTl = gsap.timeline({ delay });
 
-      // 1. VERTICAL FALL — huruf jatuh pakai physics2D sampai mentok di bawah
-      gsap.to(char, {
-        delay,
-        duration: 2.4,
-        physics2D: {
-          velocity: 800 + Math.random() * 500, // kecepatan jatuh
-          angle: 90 + (Math.random() - 0.5) * 20, // hampir vertikal
-          gravity: 1600 + Math.random() * 500, // gravitasi
+      // 1. VERTICAL FALL — physics2D dengan gravity untuk efek jatuh dramatis
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          physics2D: {
+            velocity: 500 + Math.random() * 300, // velocity sedang (slow motion)
+            angle: 90 + (Math.random() - 0.5) * 25,
+            gravity: 900 + Math.random() * 400, // gravity lebih rendah → slow motion
+          },
+          ease: "none",
         },
-        ease: "none",
-      });
+        0
+      );
 
-      // 2. HORIZONTAL DRIFT — huruf bergerak ke samping selama jatuh
-      gsap.to(char, {
-        delay: delay + 0.05,
-        duration: 2.4,
-        x: targetX,
-        ease: "power2.out",
-      });
+      // 2. HORIZONTAL DRIFT — gerak ke samping selama jatuh
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          x: targetX,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-      // 3. ROTATION — huruf berputar selama jatuh
-      gsap.to(char, {
-        delay: delay + 0.05,
-        duration: 2.4,
-        rotation: targetRotation,
-        ease: "power2.out",
-      });
+      // 3. ROTATION — berputar selama jatuh (slow rotation)
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          rotation: targetRotation,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-      // 4. SETTLE — setelah jatuh, huruf "mendarat" di posisi akhir (menempel bg)
-      gsap.to(char, {
-        delay: delay + 2.3,
-        duration: 0.5,
-        y: targetY,
-        rotation: targetRotation + (Math.random() - 0.5) * 10,
-        ease: "power2.out",
-      });
+      // 4. SETTLE — setelah jatuh, huruf "mendarat" tepat di targetY
+      //    Ini memastikan huruf benar-benar berhenti (tidak floating)
+      charTl.to(
+        char,
+        {
+          duration: 0.8,
+          y: targetY,
+          rotation: targetRotation,
+          x: targetX,
+          ease: "power3.out", // mendarat halus
+        },
+        fallDuration - 0.2
+      );
 
-      // 5. MICRO-MOVEMENT — huruf terus bergerak halus (seperti angin) TANPA menghilang
-      gsap.to(char, {
-        delay: delay + 2.8,
-        duration: 3 + Math.random() * 2,
-        y: `+=${(Math.random() - 0.5) * 30}`,
-        x: `+=${(Math.random() - 0.5) * 25}`,
-        rotation: `+=${(Math.random() - 0.5) * 12}`,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1, // Loop terus menerus — huruf tetap hidup di background
-      });
+      // 5. Tidak ada micro-movement — huruf DIAM setelah mendarat
+      //    (tidak ada repeat: -1 atau yoyo)
     });
 
     return () => {
+      tl.kill();
       if (split) split.revert();
     };
   }, [containerHeight]);
@@ -537,19 +554,19 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "700px",
-        overflow: "visible", // PENTING: jangan hidden, biar huruf tetap keliatan
+        height: "800px", // container tinggi agar huruf jatuh ke bawah
+        overflow: "visible", // PENTING: biar huruf tidak terpotong
         position: "relative",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#ffffff", // bg utama
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
-        paddingTop: "20px",
       }}
     >
       {/* 
-        textRef diposisikan absolute agar huruf bisa jatuh 
-        dari atas container sampai bawah & tetap di dalam container (menempel bg)
+        textRef absolute di tengah-atas container
+        Huruf jatuh dari atas container ke bawah container
+        Karena container bg putih = bg utama, huruf "nempel" dengan bg
       */}
       <div
         ref={textRef}
