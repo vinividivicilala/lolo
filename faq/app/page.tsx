@@ -24,12 +24,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
-// Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -51,7 +49,6 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== ENCRYPTION AES-256-GCM =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
 
@@ -157,7 +154,6 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ANTI-BOT KEYWORDS =====
 const BAN_KEYWORDS = {
   JUDOL: [
     "judi", "slot", "poker", "casino", "roulette", "blackjack", "baccarat",
@@ -224,7 +220,6 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: "" };
 }
 
-// ===== BAN USER PERMANENT =====
 async function banUserPermanent(
   userId: string,
   userEmail: string,
@@ -257,7 +252,6 @@ async function banUserPermanent(
   }
 }
 
-// ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{
   isBanned: boolean; reason: string; message: string;
   canCreateTicket: boolean; canSendMessage: boolean;
@@ -300,7 +294,6 @@ const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 
-// ===== SVG ICONS =====
 const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -349,7 +342,6 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   {
@@ -359,7 +351,6 @@ const footerLinks = [
   { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] },
 ];
 
-// ===== INTERFACES =====
 interface Ticket {
   id: string;
   userId: string;
@@ -407,7 +398,6 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
-// ===== TOUR STEP INTERFACE =====
 interface TourStep {
   target: string;
   title: string;
@@ -417,9 +407,8 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
-// Teks "Menuru" 450px biru
-// Huruf jatuh, terpentok di batas bawah (atas judul Live Chat Agent), kiri & kanan
-// Huruf BERDIRI KOKOH di atas lantai (tidak tenggelam)
+// Huruf jatuh, TERPENTOK di kiri/kanan/lantai, dan tetap TEGAK (tidak tidur)
+// Rotasi hanya kecil (goyang halus), bukan berputar bebas
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -454,62 +443,56 @@ const PhysicsMenuruTitle = () => {
     const containerW = dimensions.width;
     const containerH = dimensions.height;
 
-    // ====== BATAS AREA JATUH ======
-    // Lantai: 30px dari dasar container (di atas judul Live Chat Agent)
-    const floorY = containerH - 30;
-    const leftBound = -containerW / 2 + 80;
-    const rightBound = containerW / 2 - 80;
+    // ==== BATAS AREA ====
+    const floorY = containerH - 30; // lantai: 30px dari dasar container
+    const leftBound = -containerW / 2 + 100;
+    const rightBound = containerW / 2 - 100;
 
-    // PENTING: Ambil tinggi masing-masing huruf dari bounding rect
-    // Huruf akan di-set agar SISI BAWAH huruf menyentuh lantai (bukan pusat)
-    const charHeights = chars.map((c: any) => {
-      const rect = c.getBoundingClientRect();
-      return rect.height || 300; // fallback 300
+    // Ambil tinggi/lebar huruf — pakai offsetHeight & offsetWidth (TIDAK terpengaruh rotation)
+    const charMetrics = chars.map((c: any) => {
+      const w = c.offsetWidth || 200;
+      const h = c.offsetHeight || 300;
+      return { w, h, halfH: h / 2, halfW: w / 2 };
     });
 
-    // Set posisi awal: huruf di atas viewport
+    // Set posisi awal di atas container
     chars.forEach((char, i) => {
       gsap.set(char, {
         y: -900 - i * 60,
         x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200,
-        rotation: (Math.random() - 0.5) * 100,
+        rotation: 0,
         opacity: 1,
         force3D: true,
       });
     });
 
-    // Simulasi physics per huruf
     chars.forEach((char, i) => {
-      const startDelay = i * 0.12 + Math.random() * 0.2;
-      const vx0 = (Math.random() - 0.5) * 400;
-      const gravity = 1400 + Math.random() * 600;
-      const restitution = 0.35;
-      const friction = 0.85;
+      const startDelay = i * 0.12 + Math.random() * 0.15;
+      const gravity = 1500 + Math.random() * 400;
+      const restitution = 0.3; // pantul
+      const friction = 0.8;
+      const m = charMetrics[i];
 
-      const startX = (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200;
-      const startY = -900 - i * 60;
-
-      let x = startX;
-      let y = startY;
-      let vx = vx0;
+      // Posisi awal
+      let x = (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200;
+      let y = -900 - i * 60;
+      // Kecepatan awal horizontal (kiri/kanan) — moderat
+      let vx = (Math.random() - 0.5) * 250;
       let vy = 0;
-      let rotation = (Math.random() - 0.5) * 100;
-      let rotV = (Math.random() - 0.5) * 400;
+      // ROTASI hanya kecil (maks ±12°) — huruf tetap TEGAK
+      let rotation = 0;
+      let rotV = (Math.random() - 0.5) * 60; // kecil, hanya goyang
 
-      // Ketinggian huruf ini (untuk hitung lantai efektif)
-      // Huruf memiliki transform-origin center, jadi "bawah" huruf = y + halfHeight
-      const charH = charHeights[i];
-      const halfH = charH / 2;
+      // Lantai efektif: dasar huruf menyentuh lantai
+      // rotation = 0, jadi offset cukup halfH
+      const effectiveFloorY = floorY - m.halfH;
 
-      // Lantai efektif = floorY - halfH
-      // Agar HURUF BERDIRI (bukan tenggelam): pusat huruf berhenti di floorY - halfH
-      const effectiveFloorY = floorY - halfH;
+      // Batas horizontal (dengan lebar huruf)
+      const effectiveLeftBound = leftBound + m.halfW;
+      const effectiveRightBound = rightBound - m.halfW;
 
-      const duration = 4.5;
-      const fps = 60;
-      const totalFrames = duration * fps;
-      const dt = 1 / fps;
-
+      const totalFrames = 300; // ~5 detik @ 60fps
+      const dt = 1 / 60;
       const positions: { x: number; y: number; rotation: number }[] = [];
 
       for (let frame = 0; frame < totalFrames; frame++) {
@@ -519,44 +502,58 @@ const PhysicsMenuruTitle = () => {
         y += vy * dt;
         rotation += rotV * dt;
 
-        // Tabrakan dengan lantai efektif (bawah huruf mentok lantai)
+        // ==== TABRAKAN LANTAI ====
         if (y >= effectiveFloorY) {
           y = effectiveFloorY;
-          vy = -vy * restitution;
+          if (Math.abs(vy) > 100) {
+            vy = -vy * restitution; // pantul kalau masih cepat
+          } else {
+            vy = 0; // berhenti kalau sudah lambat
+          }
           vx *= friction;
           rotV *= friction;
-
-          // Jika kecepatan kecil, hentikan (settle)
-          if (Math.abs(vy) < 30) {
-            vy = 0;
-          }
         }
 
-        // Tabrakan dengan batas kiri
-        if (x <= leftBound) {
-          x = leftBound;
+        // ==== TABRAKAN DINDING KIRI ====
+        if (x <= effectiveLeftBound) {
+          x = effectiveLeftBound;
           vx = -vx * restitution;
-          rotV = -rotV * restitution;
+          rotV = -rotV * restitution * 0.5;
         }
 
-        // Tabrakan dengan batas kanan
-        if (x >= rightBound) {
-          x = rightBound;
+        // ==== TABRAKAN DINDING KANAN ====
+        if (x >= effectiveRightBound) {
+          x = effectiveRightBound;
           vx = -vx * restitution;
-          rotV = -rotV * restitution;
+          rotV = -rotV * restitution * 0.5;
+        }
+
+        // ==== BATASI ROTASI MAKSIMAL ±12° ====
+        // Supaya huruf tetap TEGAK, hanya goyang halus
+        const maxRotDeg = 12;
+        const maxRotRad = (maxRotDeg * Math.PI) / 180;
+        if (rotation > maxRotRad) {
+          rotation = maxRotRad;
+          rotV = -Math.abs(rotV) * 0.5;
+        } else if (rotation < -maxRotRad) {
+          rotation = -maxRotRad;
+          rotV = Math.abs(rotV) * 0.5;
         }
 
         positions.push({ x, y, rotation });
 
-        // Settle — semua velocity kecil, berhenti
+        // ==== SETTLE — berhenti total ====
         if (
-          Math.abs(vy) < 5 &&
-          Math.abs(vx) < 5 &&
-          Math.abs(rotV) < 10 &&
+          Math.abs(vy) < 10 &&
+          Math.abs(vx) < 10 &&
+          Math.abs(rotV) < 5 &&
           y >= effectiveFloorY - 1
         ) {
+          // Force rotation ke 0 (huruf tegak sempurna saat settle)
+          // Tapi tetap simpan sedikit rotation agar natural
+          const finalRot = rotation; // biarkan sedikit miring (goyang)
           for (let k = frame; k < totalFrames; k++) {
-            positions.push({ x, y, rotation });
+            positions.push({ x, y, rotation: finalRot });
           }
           break;
         }
@@ -1141,17 +1138,13 @@ const LiveChatAgent = ({
         }, 1500);
         return () => clearTimeout(t);
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   }, [isMounted, isAdmin]);
 
   const completeTour = () => {
     try {
       localStorage.setItem(TOUR_STORAGE_KEY, "true");
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
     setShowTour(false);
     setTourStep(0);
   };
@@ -3331,7 +3324,6 @@ const LiveChatAgent = ({
   );
 };
 
-// ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -3553,7 +3545,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
@@ -3704,7 +3696,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text + Copyright */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -3785,7 +3776,7 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity;
           color: #0D3CFC !important;
-          transform-origin: center center;
+          transform-origin: center bottom !important;
           opacity: 1 !important;
           visibility: visible !important;
         }
