@@ -418,138 +418,116 @@ interface TourStep {
 }
 
 // ===== PHYSICS FALLING TEXT COMPONENT =====
-const PhysicsFallingText = () => {
+const PhysicsFallingText = ({ text = "Menuru" }: { text?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const charsRef = useRef<HTMLSpanElement[]>([]);
 
   useEffect(() => {
-    if (!containerRef.current || !textRef.current) return;
-    if (typeof window === "undefined") return;
-
     setIsReady(true);
+  }, []);
 
-    // Split text into chars
-    const split = new SplitText(textRef.current, {
-      type: "chars",
-      charsClass: "menuru-fall-char",
-    });
+  useEffect(() => {
+    if (!isReady) return;
+    if (!containerRef.current) return;
 
-    const chars = split.chars;
-    const containerRect = containerRef.current.getBoundingClientRect();
+    const container = containerRef.current;
+    const chars = container.querySelectorAll<HTMLSpanElement>(".falling-char");
+    if (!chars.length) return;
 
-    // Set initial position: above the container, random x offset, random rotation
+    // Reset initial positions
     gsap.set(chars, {
-      position: "absolute",
-      top: -200,
-      left: (i) => {
-        // Distribute horizontally with slight randomness
-        const baseX = (i / chars.length) * (containerRect.width - 200) + 50;
-        const randomOffset = (Math.random() - 0.5) * 60;
-        return baseX + randomOffset;
-      },
-      rotation: () => (Math.random() - 0.5) * 45,
-      scale: () => 0.8 + Math.random() * 0.3,
+      x: 0,
+      y: 0,
       opacity: 0,
-      transformOrigin: "50% 50%",
+      rotation: 0,
     });
 
-    // Physics drop animation using GSAP Physics2DPlugin
-    // Each char falls with realistic gravity, slight horizontal velocity,
-    // and settles at its final position without overlapping neighbors.
-    const totalDuration = 3.5;
-
+    // Animate each char with Physics2D — jatuh dari atas, acak posisi
     chars.forEach((char, i) => {
-      const charEl = char as HTMLElement;
-      const finalLeft = charEl.offsetLeft || (i / chars.length) * (containerRect.width - 200) + 50;
-      const finalTop = 60; // resting Y position inside container
+      const angle = -90 + (Math.random() - 0.5) * 60; // sudut jatuh acak sekitar -90°
+      const velocity = 350 + Math.random() * 400; // kecepatan jatuh
+      const gravity = 900;
+      const startX = (Math.random() - 0.5) * 200; // posisi awal X acak
+      const startY = -window.innerHeight * 0.6; // mulai dari atas layar
 
-      // Random physics parameters
-      const gravity = 1600 + Math.random() * 600; // px/s^2
-      const velocityX = (Math.random() - 0.5) * 300; // px/s
-      const velocityY = -100 - Math.random() * 150; // initial upward bounce
-      const rotationSpeed = (Math.random() - 0.5) * 720;
-      const delay = i * 0.06 + Math.random() * 0.15;
-
-      gsap.to(charEl, {
+      gsap.set(char, {
         opacity: 1,
-        duration: 0.2,
-        delay,
+        x: startX,
+        y: startY,
+        rotation: (Math.random() - 0.5) * 90,
       });
 
-      gsap.to(charEl, {
+      gsap.to(char, {
+        duration: 2.4 + Math.random() * 0.8,
         physics2D: {
-          velocity: velocityX,
-          angle: 90,
+          velocity: velocity,
+          angle: angle,
           gravity: gravity,
         },
-        rotation: `+=${rotationSpeed}`,
-        duration: totalDuration,
-        delay,
+        x: 0,
+        y: 0,
+        rotation: 0,
         ease: "none",
-      });
-
-      // Settle animation: after physics, place chars at final positions with slight rotation
-      gsap.to(charEl, {
-        top: finalTop + (Math.random() - 0.5) * 20,
-        left: finalLeft + (Math.random() - 0.5) * 12,
-        rotation: (Math.random() - 0.5) * 20,
-        scale: 1,
-        duration: 0.8,
-        delay: delay + totalDuration * 0.7,
-        ease: "power2.out",
+        delay: i * 0.08,
       });
     });
 
     return () => {
-      split.revert();
+      gsap.killTweensOf(chars);
     };
-  }, []);
+  }, [isReady, text]);
+
+  // Render tiap huruf dalam span terpisah
+  const chars = text.split("");
 
   return (
     <div
       ref={containerRef}
       style={{
-        position: "relative",
         width: "100%",
         height: "500px",
-        backgroundColor: "transparent",
+        position: "relative",
         overflow: "hidden",
-        marginBottom: "60px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
+        paddingLeft: "40px",
+        backgroundColor: "transparent",
       }}
     >
-      <div
-        ref={textRef}
+      <h1
         style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
+          fontFamily: FONT_FAMILY,
+          fontSize: "450px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.02em",
+          lineHeight: "0.85",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          whiteSpace: "nowrap",
           userSelect: "none",
         }}
       >
-        <span
-          style={{
-            display: "inline-block",
-            fontFamily: FONT_FAMILY,
-            fontSize: "450px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            letterSpacing: "-0.02em",
-            lineHeight: 0.85,
-            whiteSpace: "nowrap",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          Menuru
-        </span>
-      </div>
+        {chars.map((char, i) => (
+          <span
+            key={i}
+            className="falling-char"
+            style={{
+              display: "inline-block",
+              willChange: "transform, opacity",
+              transformOrigin: "center center",
+              paddingRight: i < chars.length - 1 ? "0.02em" : 0, // jarak antar huruf
+            }}
+          >
+            {char}
+          </span>
+        ))}
+      </h1>
     </div>
   );
 };
@@ -3269,6 +3247,8 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const menuruFooterRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -3298,6 +3278,41 @@ export default function HomePage(): React.JSX.Element {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
+
+  useEffect(() => {
+    if (!showMain || !isMounted) return;
+    const menuruElement = menuruFooterRef.current;
+    const menuruText = menuruTextRef.current;
+    if (menuruElement && menuruText) {
+      const split = new SplitText(menuruText, { type: "chars", charsClass: "menuru-char" });
+      gsap.set(split.chars, { opacity: 0, y: 100, scale: 0.5, rotationX: 90 });
+      ScrollTrigger.create({
+        trigger: menuruElement,
+        start: "top 85%",
+        onEnter: () => {
+          gsap.to(split.chars, {
+            opacity: 1, y: 0, scale: 1, rotationX: 0,
+            duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true,
+          });
+        },
+        onLeave: () => {
+          gsap.to(split.chars, {
+            opacity: 0, y: 100, scale: 0.5, rotationX: 90,
+            duration: 0.8, stagger: 0.02, ease: "power2.in", overwrite: true,
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(split.chars, {
+            opacity: 1, y: 0, scale: 1, rotationX: 0,
+            duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true,
+          });
+        },
+      });
+    }
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, [showMain, isMounted]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -3444,11 +3459,11 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS FALLING TEXT "MENURU" ===== */}
-        {/* Teks jatuh dari atas dengan fisika realistis */}
-        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-          <PhysicsFallingText />
-        </div>
+        {/* ===== PHYSICS FALLING TEXT "Menuru" ===== */}
+        <PhysicsFallingText text="Menuru" />
+
+        {/* SPACER agar tidak menabrak Live Chat Agent */}
+        <div style={{ height: "40px", width: "100%" }} />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
@@ -3598,22 +3613,45 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* MENURU Text + Copyright */}
         <div
+          ref={menuruFooterRef}
           style={{
             width: "100%", padding: "20px 40px 80px 40px",
-            backgroundColor: "#ffffff",
-            display: "flex", justifyContent: "flex-start",
+            backgroundColor: "#ffffff", overflow: "hidden",
+            display: "flex", flexDirection: "column",
+            justifyContent: "flex-start", minHeight: "300px",
           }}
         >
           <span
+            ref={menuruTextRef}
             style={{
-              fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400,
-              color: "#0D3CFC", letterSpacing: "0.01em", opacity: 0.8,
+              fontFamily: FONT_FAMILY, fontSize: "450px",
+              fontWeight: 700, color: "#0D3CFC",
+              letterSpacing: "-0.02em", textTransform: "none",
+              lineHeight: "0.8", display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
             }}
           >
-            2024 - 2026 Menuru. All rights reserved.
+            Menuru
           </span>
+          <div
+            style={{
+              marginTop: "30px", width: "100%",
+              display: "flex", justifyContent: "flex-start",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400,
+                color: "#0D3CFC", letterSpacing: "0.01em", opacity: 0.8,
+              }}
+            >
+              2024 - 2026 Menuru. All rights reserved.
+            </span>
+          </div>
         </div>
       </div>
 
@@ -3648,19 +3686,13 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity;
         }
-        .menuru-fall-char {
-          display: inline-block;
-          will-change: transform, opacity;
-          font-family: ${FONT_FAMILY};
-          font-size: 450px;
-          font-weight: 700;
-          color: #0D3CFC;
-          letter-spacing: -0.02em;
-          line-height: 0.85;
-        }
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+        .falling-char {
+          display: inline-block;
+          will-change: transform, opacity;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
